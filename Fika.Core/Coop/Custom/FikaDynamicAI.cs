@@ -107,9 +107,14 @@ namespace Fika.Core.Coop.Custom
             {
                 if (player == null)
                 {
+                    notInRange++;
                     continue;
                 }
-
+                if (!player.HealthController.IsAlive)
+                {
+                    notInRange++;
+                    continue;
+                }
                 float distance = Vector3.SqrMagnitude(bot.Position - player.Position);
                 float range = FikaPlugin.DynamicAIRange.Value;
                 if (distance > range * range)
