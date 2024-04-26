@@ -56,7 +56,7 @@ namespace Fika.Core.Coop.GameMode
         public bool forceStart = false;
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
-        
+
         //WildSpawnType for sptUsec and sptBear
         const int sptUsecValue = 47;
         const int sptBearValue = 48;
@@ -321,6 +321,7 @@ namespace Fika.Core.Coop.GameMode
                         botOwner?.Dispose();
 
                         Bots.Remove(botkey);
+                        coopHandler.Players.Remove(bot.ProfileId);
 #if DEBUG
                         Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
 #endif
