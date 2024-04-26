@@ -117,6 +117,8 @@ namespace Fika.Core
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
         // Performance
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
+
+        public static ConfigEntry<bool> DespawnFurthest { get; set; }
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
@@ -283,27 +285,29 @@ namespace Fika.Core
 
             // Performance | Max Bots
 
-            EnforcedSpawnLimits = Config.Bind("Performance | Max Bots", "Enforced Spawn Limits", false, new ConfigDescription("Enforces spawn limits when spawning bots, making sure to not go over the vanilla limits. This mainly takes affect when using spawn mods or anything that modifies the bot limits.", tags: new ConfigurationManagerAttributes() { Order = 12 }));
+            EnforcedSpawnLimits = Config.Bind("Performance | Max Bots", "Enforced Spawn Limits", false, new ConfigDescription("Enforces spawn limits when spawning bots, making sure to not go over the vanilla limits. This mainly takes affect when using spawn mods or anything that modifies the bot limits.", tags: new ConfigurationManagerAttributes() { Order = 13 }));
 
-            MaxBotsFactory = Config.Bind("Performance | Max Bots", "Max Bots Factory", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Factory. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 11 }));
+            DespawnFurthest = Config.Bind("Performance | Max Bots", "Despawn Furthest", false, new ConfigDescription("When enforcing spawn limits, should the furthest bot be de-spawned instead of blocking the spawn. This will make for a much more active raid, and is helpful on lower-end PCs with a low Max Bots count.", tags: new ConfigurationManagerAttributes() { Order = 12 }));
 
-            MaxBotsCustoms = Config.Bind("Performance | Max Bots", "Max Bots Customs", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Customs. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 10 }));
+            MaxBotsFactory = Config.Bind("Performance | Max Bots", "Max Bots Factory", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Factory. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 11 }));
 
-            MaxBotsInterchange = Config.Bind("Performance | Max Bots", "Max Bots Interchange", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Interchange. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 8 }));
+            MaxBotsCustoms = Config.Bind("Performance | Max Bots", "Max Bots Customs", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Customs. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 10 }));
 
-            MaxBotsReserve = Config.Bind("Performance | Max Bots", "Max Bots Reserve", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Reserve. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 7 }));
+            MaxBotsInterchange = Config.Bind("Performance | Max Bots", "Max Bots Interchange", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Interchange. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 8 }));
 
-            MaxBotsWoods = Config.Bind("Performance | Max Bots", "Max Bots Woods", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Woods. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 6 }));
+            MaxBotsReserve = Config.Bind("Performance | Max Bots", "Max Bots Reserve", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Reserve. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 7 }));
 
-            MaxBotsShoreline = Config.Bind("Performance | Max Bots", "Max Bots Shoreline", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Shoreline. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 5 }));
+            MaxBotsWoods = Config.Bind("Performance | Max Bots", "Max Bots Woods", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Woods. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 6 }));
 
-            MaxBotsStreets = Config.Bind("Performance | Max Bots", "Max Bots Streets", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Streets of Tarkov. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 4 }));
+            MaxBotsShoreline = Config.Bind("Performance | Max Bots", "Max Bots Shoreline", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Shoreline. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 5 }));
 
-            MaxBotsGroundZero = Config.Bind("Performance | Max Bots", "Max Bots Ground Zero", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Ground Zero. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 3 }));
+            MaxBotsStreets = Config.Bind("Performance | Max Bots", "Max Bots Streets", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Streets of Tarkov. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            MaxBotsLabs = Config.Bind("Performance | Max Bots", "Max Bots Labs", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Labs. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 2 }));
+            MaxBotsGroundZero = Config.Bind("Performance | Max Bots", "Max Bots Ground Zero", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Ground Zero. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 3 }));
 
-            MaxBotsLighthouse = Config.Bind("Performance | Max Bots", "Max Bots Lighthouse", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Lighthouse. Useful if you have a weaker PC. Set to 0 to disable.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 1 }));
+            MaxBotsLabs = Config.Bind("Performance | Max Bots", "Max Bots Labs", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Labs. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 2 }));
+
+            MaxBotsLighthouse = Config.Bind("Performance | Max Bots", "Max Bots Lighthouse", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Lighthouse. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Network
 
