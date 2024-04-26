@@ -1,0 +1,127 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Build.props" />
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <!-- targets -->
+  <PropertyGroup>
+    <Configurations>Debug;Release;GoldMaster</Configurations>
+    <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- hide files in vs2022 -->
+    <None Remove="Bundles\Files\newmatchmakerui.bundle" />
+    <None Remove="Bundles\Files\playerui.bundle" />
+    <None Remove="Bundles\Files\senditemmenu.bundle" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- embedded resources -->
+    <EmbeddedResource Include="Bundles\Files\newmatchmakerui.bundle" />
+    <EmbeddedResource Include="Bundles\Files\playerui.bundle" />
+    <None Remove="Bundles\Files\ping.bundle" />
+    <EmbeddedResource Include="Bundles\Files\ping.bundle" />
+    <EmbeddedResource Include="Bundles\Files\senditemmenu.bundle" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="UnityEngine.Modules" Version="2019.4.39" IncludeAssets="compile" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- These are used by .github/workflows/dotnet-build.yml and when building from non-Windows OS -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="aki-custom">
+        <HintPath>..\References\aki-custom.dll</HintPath>
+	    <Private>False</Private>
+    </Reference>
+    <Reference Include="aki-singleplayer">
+        <HintPath>..\References\aki-singleplayer.dll</HintPath>
+	    <Private>False</Private>
+    </Reference>
+    <Reference Include="Aki.Common">
+        <HintPath>..\References\Aki.Common.dll</HintPath>
+	    <Private>False</Private>
+    </Reference>
+    <Reference Include="Aki.Reflection">
+        <HintPath>..\References\Aki.Reflection.dll</HintPath>
+	    <Private>False</Private>
+    </Reference>
+    <Reference Include="AnimationSystem.Types">
+        <HintPath>..\References\AnimationSystem.Types.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+        <HintPath>..\References\Assembly-CSharp.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="bsg.componentace.compression.libs.zlib">
+        <HintPath>..\References\bsg.componentace.compression.libs.zlib.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="bsg.console.core">
+      <HintPath>..\References\bsg.console.core.dll</HintPath>
+    </Reference>
+    <Reference Include="Comfort">
+        <HintPath>..\References\Comfort.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="Comfort.Unity">
+        <HintPath>..\References\Comfort.Unity.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="CommonExtensions">
+        <HintPath>..\References\CommonExtensions.dll</HintPath>
+	    <Private>False</Private>
+    </Reference>
+    <Reference Include="DissonanceVoip">
+        <HintPath>..\References\DissonanceVoip.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="ItemComponent.Types">
+        <HintPath>..\References\ItemComponent.Types.dll</HintPath>
+        <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+        <HintPath>..\References\Newtonsoft.Json.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+        <HintPath>..\References\Sirenix.Serialization.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime">
+        <HintPath>..\References\Unity.Postprocessing.Runtime.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+        <HintPath>..\References\Unity.TextMeshPro.dll</HintPath>
+	    <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+        <HintPath>..\References\UnityEngine.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\References\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+        <HintPath>..\References\UnityEngine.UI.dll</HintPath>
+        <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
+    <Exec Command="call ../Properties/build/postbuild-core.bat &quot;$(TargetPath)&quot; &quot;$(ProjectDir)&quot;" />
+    <Exec Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' " Command="call ../Properties/build/goldmaster-core.bat" />
+  </Target>
+  
+</Project>

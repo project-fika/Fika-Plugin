@@ -1,0 +1,33 @@
+
+<Project>
+
+  <!-- csharp version -->
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- assembly signing -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' ">
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+    <AssemblyOriginatorKeyFile>../Properties/signing/public.snk</AssemblyOriginatorKeyFile>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+
+  <!-- assembly versioning -->
+  <PropertyGroup>
+    <AssemblyVersion>0.9.*</AssemblyVersion>
+    <Deterministic>false</Deterministic>
+    <NoWarn>$(NoWarn);CS7035</NoWarn>
+  </PropertyGroup>
+
+  <!-- use author info from AssemblyInfo.cs -->
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Properties/AssemblyInfo.cs" />
+  </ItemGroup>
+
+</Project>
