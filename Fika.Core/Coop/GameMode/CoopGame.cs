@@ -56,7 +56,8 @@ namespace Fika.Core.Coop.GameMode
         public bool forceStart = false;
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
-
+        
+        //WildSpawnType for sptUsec and sptBear
         const int sptUsecValue = 47;
         const int sptBearValue = 48;
 
