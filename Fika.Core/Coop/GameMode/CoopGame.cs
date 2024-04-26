@@ -57,6 +57,9 @@ namespace Fika.Core.Coop.GameMode
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
 
+        const int sptUsecValue = 47;
+        const int sptBearValue = 48;
+
         public ISession BackEndSession { get => PatchConstants.BackEndSession; }
 
         BotsController IBotGame.BotsController
@@ -203,20 +206,135 @@ namespace Fika.Core.Coop.GameMode
 
         public Dictionary<string, Player> Bots { get; set; } = [];
 
+        private string GetFurthestBot(Dictionary<string, Player> bots, CoopHandler coopHandler, out float furthestDistance)
+        {
+            string furthestBot = string.Empty;
+            furthestDistance = 0f;
+
+            List<CoopPlayer> humanPlayers = new List<CoopPlayer>();
+
+            //Grab all players
+            foreach (CoopPlayer player in coopHandler.Players.Values)
+            {
+                if ((player.IsYourPlayer || player is ObservedCoopPlayer) && player.HealthController.IsAlive)
+                {
+                    humanPlayers.Add(player);
+                }
+            }
+
+            foreach (var kvp in Bots)
+            {
+                if (kvp.Value == null || kvp.Value == null || kvp.Value.Position == null)
+                {
+#if DEBUG
+                    Logger.LogWarning("Bot is null, skipping");
+#endif
+                    continue;
+                }
+                var coopBot = (CoopBot)kvp.Value;
+                if (coopBot != null && coopBot.isStarted == false)
+                {
+#if DEBUG
+                    Logger.LogWarning("Bot is not started, skipping");
+#endif
+                    continue;
+                }
+                WildSpawnType role = kvp.Value.Profile.Info.Settings.Role;
+                if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
+                {
+                    //We skip all the bots that are not sptUsec, sptBear or assault. That means we never remove bosses, bossfollowers, and raiders
+                    continue;
+                }
+
+                float tempDistance = float.PositiveInfinity;
+                foreach (Player player in humanPlayers)
+                {
+                    float distance = Vector3.SqrMagnitude(kvp.Value.Position - player.Position);
+                    if (distance < tempDistance) //Get the closest distance to any player. so we dont despawn bots in a players face.
+                    {
+                        tempDistance = distance;
+                    }
+                }
+                if (tempDistance > furthestDistance) //We still want the furthest bot.
+                {
+                    furthestDistance = tempDistance;
+                    furthestBot = kvp.Key;
+                }
+            }
+
+            return furthestBot;
+        }
+        
         private async Task<LocalPlayer> CreatePhysicalBot(Profile profile, Vector3 position)
         {
+#if DEBUG
+            Logger.LogWarning($"Creating bot {profile.Info.Settings.Role} at {position}");
+#endif
             if (MatchmakerAcceptPatches.IsClient)
             {
                 return null;
             }
 
-            if (FikaPlugin.EnforcedSpawnLimits.Value && (botsController_0.AliveAndLoadingBotsCount >= botsController_0.BotSpawner.MaxBots))
+            if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled. Current: {botsController_0.AliveAndLoadingBotsCount}, Max: {botsController_0.BotSpawner.MaxBots}");
-                return null;
+                Logger.LogDebug($"{nameof(CreatePhysicalBot)}:Unable to find {nameof(CoopHandler)}");
+                await Task.Delay(5000);
+            }
+            WildSpawnType role = profile.Info.Settings.Role;
+            bool isSpecial = false;
+            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
+            {
+#if DEBUG
+                Logger.LogWarning($"Bot {profile.Info.Settings.Role} is a special bot.");
+#endif
+                isSpecial = true;
             }
 
-            Logger.LogDebug($"CreatePhysicalBot: {profile.ProfileId}");
+            if (FikaPlugin.EnforcedSpawnLimits.Value && botsController_0.AliveAndLoadingBotsCount >= botsController_0.BotSpawner.MaxBots)
+            {
+                if (FikaPlugin.DespawnFurthest.Value)
+                {
+                    try
+                    {
+                        var botkey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
+
+                        if (furthestDistance < FikaPlugin.DynamicAIRange.Value * FikaPlugin.DynamicAIRange.Value && !isSpecial) //Square it because we use sqrMagnitude for distance calculation
+                        {
+                            Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled and furthest bot is inside DynamicAI range. Current: {botsController_0.AliveAndLoadingBotsCount}, Max: {botsController_0.BotSpawner.MaxBots}");
+                            return null;
+                        }
+
+                        var bot = Bots[botkey];
+
+#if DEBUG
+                        //sqrt is slow, but this is just for debugging anyway.
+                        Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
+#endif
+
+                        var botGame = Singleton<IBotGame>.Instance;
+                        var botOwner = bot.AIData.BotOwner;
+
+                        BotsController.Bots.Remove(botOwner);
+                        bot.HealthController.DiedEvent -= botOwner.method_6; //Unsubscribe from the event to prevent errors.
+                        BotUnspawn(botOwner);
+                        botOwner?.Dispose();
+
+                        Bots.Remove(botkey);
+#if DEBUG
+                        Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
+#endif
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError($"Error while despawning bot: {ex.Message}");
+                    }
+                }
+                else if (!isSpecial)
+                {
+                    Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled. Current: {botsController_0.AliveAndLoadingBotsCount}, Max: {botsController_0.BotSpawner.MaxBots}");
+                    return null;
+                }
+            }
 
             LocalPlayer localPlayer;
             if (!Status.IsRunned())
@@ -245,6 +363,9 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
+#if DEBUG
+                    Logger.LogInfo($"Bot {profile.Info.Settings.Role.ToString()} created at {position} SUCCESSFULLY!");
+#endif
                     Bots.Add(localPlayer.ProfileId, localPlayer);
                 }
 
@@ -268,11 +389,7 @@ namespace Fika.Core.Coop.GameMode
                         }
                     }
                 }
-                if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                {
-                    Logger.LogDebug($"{nameof(CreatePhysicalBot)}:Unable to find {nameof(CoopHandler)}");
-                    await Task.Delay(5000);
-                }
+
                 coopHandler.Players.Add(profile.Id, (CoopPlayer)localPlayer);
 
                 if (Singleton<GameWorld>.Instance != null)
