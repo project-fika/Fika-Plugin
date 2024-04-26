@@ -32,6 +32,6 @@ This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/lic
 **Project** | **License**
 ----------- | -----------------------------------------------------------------------
 Aki.Modules | [NCSA](https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/LICENSE.md)
-SIT         | [None](./LICENSE_SIT.md)
+SIT         | [None](./LICENSE-SIT.md)
 Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE)
 LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt)
