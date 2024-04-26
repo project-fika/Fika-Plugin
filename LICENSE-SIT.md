@@ -1,5 +1,35 @@
-## No license
+# NCSA Open Source License  
 
-> - None of my own work is Licensed. This is solely a just for fun project. I don't care what you do with it.
+Copyright (c) 2023 Stay in Tarkov. All rights reserved.  
 
-Source: see StayInTarkov.Client commit [9de30d8](https://github.com/stayintarkov/StayInTarkov.Client/blob/9de30d8bab1a4cd5e8bb7bcf5d32539098e97aa6/README.md) README.md
+Developed by:   
+* Paulov-t - Original Stay In Tarkov (SIT) Code
+* Stay in Tarkov team
+* Merijn Hendriks - SPT-AKI Libraries
+* SPT-AKI Dev Team - SPT-AKI Libraries (credits given through-out code files)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy  
+of this software and associated documentation files (the "Software"), to deal  
+with the Software without restriction, including without limitation the rights  
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
+copies of the Software, and to permit persons to whom the Software is  
+furnished to do so, subject to the following conditions:  
+
+* Redistributions of source code must retain the above copyright notice,  
+this list of conditions and the following disclaimers.  
+
+* Redistributions in binary form must reproduce the above copyright notice,  
+this list of conditions and the following disclaimers in the documentation  
+and/or other materials provided with the distribution.  
+
+* Neither the names of Paulov-t, Merijn Hendriks, SPT-AKI, nor the names of  
+its contributors may be used to endorse or promote products derived from  
+this Software without specific prior written permission.  
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL  
+THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES  
+OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,  
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR  
+OTHER DEALINGS WITH THE SOFTWARE.
