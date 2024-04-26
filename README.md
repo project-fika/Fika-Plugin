@@ -2,6 +2,14 @@
 
 Client-side changes to make multiplayer work.
 
+## State of the project
+
+There are few bugs left. The goal now is to look back and refactor old code to make it better, as a lot of it is not efficient or easy to read.
+
+## Contributing
+
+You are free to fork, improve and send PRs to improve the project. Please try to make your code coherent for the other developers.
+
 ## Requirements
 
 - [Visual Studio Code](https://code.visualstudio.com/)
@@ -13,8 +21,10 @@ Client-side changes to make multiplayer work.
 
 **Tool**   | **Action**
 ---------- | ------------------------------
-Powershell | `dotnet build`
+PowerShell | `dotnet build`
 VSCode     | `Terminal > Run Build Task...`
+
+You have to create a `References` folder and populate it with the required dependencies from your game installation for the project to build.
 
 ### GoldMaster
 
@@ -32,6 +42,6 @@ This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/lic
 **Project** | **License**
 ----------- | -----------------------------------------------------------------------
 Aki.Modules | [NCSA](https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/LICENSE.md)
-SIT         | [None](./LICENSE-SIT.md)
-Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE)
-LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt)
+SIT         | [None](./LICENSE-SIT.md) (Fika is based on mentioned commit)
+Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE) (for UPnP implementation)
+LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt) (for P2P UDP implementation)
