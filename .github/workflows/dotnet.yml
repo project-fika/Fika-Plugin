@@ -1,0 +1,40 @@
+name: .NET Test
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**/*.md'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        token: ${{ secrets.FIKA_GITMODULES }}
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install dependencies
+      run: dotnet restore --configfile Nuget.config
+
+    - name: Build
+      run: dotnet build --nologo --no-restore --configuration Debug
+
+    - name: Test
+      run: dotnet test --nologo --no-restore --no-build --blame-hang-timeout 1min
+  
