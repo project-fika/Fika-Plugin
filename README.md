@@ -15,6 +15,15 @@ You are free to fork, improve and send PRs to improve the project. Please try to
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [.NET SDK 8.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
+## Setup
+
+- Fika developer: `git submodule update --init --recursive`
+- Collaborator:
+  1. Copy-paste the contents of `EscapeFromTarkov_Data/Managed/` into
+    `References/`
+  2. Copy-paste from Aki.Modules `project/Shared/Hollowed/hollowed.dll` into
+    `References/`
+
 ## Build
 
 ### Debug / Release
