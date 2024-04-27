@@ -247,7 +247,7 @@ namespace Fika.Core.Coop.GameMode
 
             foreach (var kvp in Bots)
             {
-                if( IsInvalidBot(kvp) )
+                if( IsInvalidBotForDespawning(kvp) )
                 {
                     continue;
                 }
