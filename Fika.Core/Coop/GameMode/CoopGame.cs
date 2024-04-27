@@ -207,11 +207,8 @@ namespace Fika.Core.Coop.GameMode
 
         public Dictionary<string, Player> Bots { get; set; } = [];
 
-        private string GetFurthestBot(Dictionary<string, Player> bots, CoopHandler coopHandler, out float furthestDistance)
+        private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
         {
-            string furthestBot = string.Empty;
-            furthestDistance = 0f;
-
             List<CoopPlayer> humanPlayers = new List<CoopPlayer>();
 
             //Grab all players
@@ -222,6 +219,26 @@ namespace Fika.Core.Coop.GameMode
                     humanPlayers.Add(player);
                 }
             }
+            return humanPlayers;
+        }
+        private float GetDistanceFromPlayers(Vector3 position, List<CoopPlayer> humanPlayers)
+        {
+            float distance = float.PositiveInfinity;
+            foreach (Player player in humanPlayers)
+            {
+                float tempDistance = Vector3.SqrMagnitude(position - player.Position);
+                if (tempDistance < distance) //Get the closest distance to any player. so we dont despawn bots in a players face.
+                {
+                    distance = tempDistance;
+                }
+            }
+            return distance;
+        }
+        private string GetFurthestBot(Dictionary<string, Player> bots, CoopHandler coopHandler, out float furthestDistance)
+        {
+            string furthestBot = string.Empty;
+            furthestDistance = 0f;
+            var humanPlayers = GetPlayers(coopHandler);
 
             foreach (var kvp in Bots)
             {
@@ -247,15 +264,8 @@ namespace Fika.Core.Coop.GameMode
                     continue;
                 }
 
-                float tempDistance = float.PositiveInfinity;
-                foreach (Player player in humanPlayers)
-                {
-                    float distance = Vector3.SqrMagnitude(kvp.Value.Position - player.Position);
-                    if (distance < tempDistance) //Get the closest distance to any player. so we dont despawn bots in a players face.
-                    {
-                        tempDistance = distance;
-                    }
-                }
+                float tempDistance = GetDistanceFromPlayers(kvp.Value.Position, humanPlayers);
+
                 if (tempDistance > furthestDistance) //We still want the furthest bot.
                 {
                     furthestDistance = tempDistance;
@@ -265,7 +275,7 @@ namespace Fika.Core.Coop.GameMode
 
             return furthestBot;
         }
-        
+
         private async Task<LocalPlayer> CreatePhysicalBot(Profile profile, Vector3 position)
         {
 #if DEBUG
@@ -299,9 +309,15 @@ namespace Fika.Core.Coop.GameMode
                     {
                         var botkey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
 
+                        if (furthestDistance > GetDistanceFromPlayers(position, GetPlayers(coopHandler)))
+                        {
+                            Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached, and it's further away from players than the furthest despawnable bot. Current: {botsController_0.AliveAndLoadingBotsCount}, Max: {botsController_0.BotSpawner.MaxBots}");
+                            return null;
+                        }
+
                         if (furthestDistance < FikaPlugin.DynamicAIRange.Value * FikaPlugin.DynamicAIRange.Value && !isSpecial) //Square it because we use sqrMagnitude for distance calculation
                         {
-                            Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled and furthest bot is inside DynamicAI range. Current: {botsController_0.AliveAndLoadingBotsCount}, Max: {botsController_0.BotSpawner.MaxBots}");
+                            Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled and furthest despawnable bot is inside DynamicAI range. Current: {botsController_0.AliveAndLoadingBotsCount}, Max: {botsController_0.BotSpawner.MaxBots}");
                             return null;
                         }
 
