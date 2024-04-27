@@ -247,29 +247,8 @@ namespace Fika.Core.Coop.GameMode
 
             foreach (var kvp in Bots)
             {
-                if (kvp.Value == null || kvp.Value == null || kvp.Value.Position == null)
+                if( IsInvalidBot(kvp) )
                 {
-#if DEBUG
-                    Logger.LogWarning("Bot is null, skipping");
-#endif
-                    continue;
-                }
-
-                CoopBot coopBot = (CoopBot)kvp.Value;
-
-                if (coopBot != null && coopBot.isStarted == false)
-                {
-#if DEBUG
-                    Logger.LogWarning("Bot is not started, skipping");
-#endif
-                    continue;
-                }
-
-                WildSpawnType role = kvp.Value.Profile.Info.Settings.Role;
-
-                if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
-                {
-                    // We skip all the bots that are not sptUsec, sptBear or assault. That means we never remove bosses, bossfollowers, and raiders
                     continue;
                 }
 
@@ -283,6 +262,37 @@ namespace Fika.Core.Coop.GameMode
             }
 
             return furthestBot;
+        }
+
+        private bool IsInvalidBot(KeyValuePair<string, Player> kvp)
+        {
+            if (kvp.Value == null || kvp.Value == null || kvp.Value.Position == null)
+            {
+#if DEBUG
+                Logger.LogWarning("Bot is null, skipping");
+#endif
+                return true;
+            }
+
+            CoopBot coopBot = (CoopBot)kvp.Value;
+
+            if (coopBot != null && coopBot.isStarted == false)
+            {
+#if DEBUG
+                Logger.LogWarning("Bot is not started, skipping");
+#endif
+                return true;
+            }
+
+            WildSpawnType role = kvp.Value.Profile.Info.Settings.Role;
+
+            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
+            {
+                // We skip all the bots that are not sptUsec, sptBear or assault. That means we never remove bosses, bossfollowers, and raiders
+                return true;
+            }
+
+            return false;
         }
 
         private async Task<LocalPlayer> CreatePhysicalBot(Profile profile, Vector3 position)
@@ -414,7 +424,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 return false;
             }
-            
+
             if (furthestDistance > GetDistanceFromPlayers(position, GetPlayers(coopHandler)))
             {
 #if DEBUG
