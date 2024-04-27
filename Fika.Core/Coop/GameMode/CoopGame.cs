@@ -229,7 +229,7 @@ namespace Fika.Core.Coop.GameMode
             foreach (Player player in humanPlayers)
             {
                 float tempDistance = Vector3.SqrMagnitude(position - player.Position);
-                
+
                 if (tempDistance < distance) // Get the closest distance to any player. so we dont despawn bots in a players face.
                 {
                     distance = tempDistance;
@@ -410,47 +410,48 @@ namespace Fika.Core.Coop.GameMode
         {
             String botkey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
 
-            if (botkey != string.Empty)
+            if (botkey == string.Empty)
             {
-                if (furthestDistance > GetDistanceFromPlayers(position, GetPlayers(coopHandler)))
-                {
-#if DEBUG
-                    Logger.LogWarning($"We're not despawning anything. The furthest bot is closer than the one we wanted to spawn.");
-#endif
-                    return false;
-                }
-
-                //Dont despawn inside of dynamic AI range
-                if (furthestDistance < FikaPlugin.DynamicAIRange.Value * FikaPlugin.DynamicAIRange.Value) //Square it because we use sqrMagnitude for distance calculation
-                {
-#if DEBUG
-                    Logger.LogWarning($"We're not despawning anything. Furthest despawnable bot is inside DynamicAI range.");
-#endif
-                    return false;
-                }
-
-                var bot = Bots[botkey];
-
-#if DEBUG
-                Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
-#endif
-
-                IBotGame botGame = Singleton<IBotGame>.Instance;
-                BotOwner botOwner = bot.AIData.BotOwner;
-
-                BotsController.Bots.Remove(botOwner);
-                bot.HealthController.DiedEvent -= botOwner.method_6; // Unsubscribe from the event to prevent errors.
-                BotUnspawn(botOwner);
-                botOwner?.Dispose();
-
-                Bots.Remove(botkey);
-                coopHandler.Players.Remove(bot.ProfileId);
-#if DEBUG
-                Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
-#endif  
-                return true;
+                return false;
             }
-            return false;
+            
+            if (furthestDistance > GetDistanceFromPlayers(position, GetPlayers(coopHandler)))
+            {
+#if DEBUG
+                Logger.LogWarning($"We're not despawning anything. The furthest bot is closer than the one we wanted to spawn.");
+#endif
+                return false;
+            }
+
+            //Dont despawn inside of dynamic AI range
+            if (furthestDistance < FikaPlugin.DynamicAIRange.Value * FikaPlugin.DynamicAIRange.Value) //Square it because we use sqrMagnitude for distance calculation
+            {
+#if DEBUG
+                Logger.LogWarning($"We're not despawning anything. Furthest despawnable bot is inside DynamicAI range.");
+#endif
+                return false;
+            }
+
+            var bot = Bots[botkey];
+
+#if DEBUG
+            Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
+#endif
+
+            IBotGame botGame = Singleton<IBotGame>.Instance;
+            BotOwner botOwner = bot.AIData.BotOwner;
+
+            BotsController.Bots.Remove(botOwner);
+            bot.HealthController.DiedEvent -= botOwner.method_6; // Unsubscribe from the event to prevent errors.
+            BotUnspawn(botOwner);
+            botOwner?.Dispose();
+
+            Bots.Remove(botkey);
+            coopHandler.Players.Remove(bot.ProfileId);
+#if DEBUG
+            Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
+#endif
+            return true;
         }
 
         /// <summary>
