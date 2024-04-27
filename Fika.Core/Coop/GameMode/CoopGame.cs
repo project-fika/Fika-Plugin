@@ -264,7 +264,7 @@ namespace Fika.Core.Coop.GameMode
             return furthestBot;
         }
 
-        private bool IsInvalidBot(KeyValuePair<string, Player> kvp)
+        private bool IsInvalidBotForDespawning(KeyValuePair<string, Player> kvp)
         {
             if (kvp.Value == null || kvp.Value == null || kvp.Value.Position == null)
             {
