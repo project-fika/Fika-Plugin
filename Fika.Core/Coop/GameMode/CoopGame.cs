@@ -238,7 +238,7 @@ namespace Fika.Core.Coop.GameMode
         {
             string furthestBot = string.Empty;
             furthestDistance = 0f;
-            var humanPlayers = GetPlayers(coopHandler);
+            List<CoopPlayer> humanPlayers = GetPlayers(coopHandler);
 
             foreach (var kvp in Bots)
             {
@@ -249,7 +249,7 @@ namespace Fika.Core.Coop.GameMode
 #endif
                     continue;
                 }
-                var coopBot = (CoopBot)kvp.Value;
+                CoopBot coopBot = (CoopBot)kvp.Value;
                 if (coopBot != null && coopBot.isStarted == false)
                 {
 #if DEBUG
@@ -307,7 +307,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     try
                     {
-                        var botkey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
+                        String botkey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
 
                         if (furthestDistance > GetDistanceFromPlayers(position, GetPlayers(coopHandler)))
                         {
@@ -321,15 +321,15 @@ namespace Fika.Core.Coop.GameMode
                             return null;
                         }
 
-                        var bot = Bots[botkey];
+                        bool botExists = Bots.TryGetValue(botkey, out Player bot);
 
 #if DEBUG
                         //sqrt is slow, but this is just for debugging anyway.
                         Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
 #endif
 
-                        var botGame = Singleton<IBotGame>.Instance;
-                        var botOwner = bot.AIData.BotOwner;
+                        IBotGame botGame = Singleton<IBotGame>.Instance;
+                        BotOwner botOwner = bot.AIData.BotOwner;
 
                         BotsController.Bots.Remove(botOwner);
                         bot.HealthController.DiedEvent -= botOwner.method_6; //Unsubscribe from the event to prevent errors.
