@@ -177,6 +177,9 @@ namespace Fika.Core
             new Minefield_method_2_Patch().Enable();
             new BotCacher().Enable();
             new InventoryScrollPatch().Enable();
+#if GOLDMASTER
+            new TOSPatch().Enable();
+#endif
 
             DisableSPTPatches();
             EnableOverridePatches();
