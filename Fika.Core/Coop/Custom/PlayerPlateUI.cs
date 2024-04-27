@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// Controller for the Players Name Plate. <br/>
 /// Created by: ssh_
 /// </summary>
-public class FikaPlayerPlateUI : MonoBehaviour
+public class PlayerPlateUI : MonoBehaviour
 {
     [SerializeField]
     public GameObject ScreenSpaceNamePlate;
