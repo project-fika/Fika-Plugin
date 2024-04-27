@@ -245,19 +245,19 @@ namespace Fika.Core.Coop.GameMode
 
             List<CoopPlayer> humanPlayers = GetPlayers(coopHandler);
 
-            foreach (var kvp in Bots)
+            foreach (var botKeyValuePair in Bots)
             {
-                if( IsInvalidBotForDespawning(kvp) )
+                if( IsInvalidBotForDespawning(botKeyValuePair) )
                 {
                     continue;
                 }
 
-                float tempDistance = GetDistanceFromPlayers(kvp.Value.Position, humanPlayers);
+                float tempDistance = GetDistanceFromPlayers(botKeyValuePair.Value.Position, humanPlayers);
 
                 if (tempDistance > furthestDistance) // We still want the furthest bot.
                 {
                     furthestDistance = tempDistance;
-                    furthestBot = kvp.Key;
+                    furthestBot = botKeyValuePair.Key;
                 }
             }
 
@@ -418,9 +418,9 @@ namespace Fika.Core.Coop.GameMode
 
         private bool TryDespawnFurthest(Profile profile, Vector3 position, CoopHandler coopHandler)
         {
-            String botkey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
+            String botKey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
 
-            if (botkey == string.Empty)
+            if (botKey == string.Empty)
             {
                 return false;
             }
@@ -442,7 +442,7 @@ namespace Fika.Core.Coop.GameMode
                 return false;
             }
 
-            var bot = Bots[botkey];
+            Player bot = Bots[botKey];
 
 #if DEBUG
             Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
@@ -456,7 +456,7 @@ namespace Fika.Core.Coop.GameMode
             BotUnspawn(botOwner);
             botOwner?.Dispose();
 
-            Bots.Remove(botkey);
+            Bots.Remove(botKey);
             coopHandler.Players.Remove(bot.ProfileId);
 #if DEBUG
             Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
