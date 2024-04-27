@@ -770,6 +770,15 @@ namespace Fika.Core.Coop.Players
                 Speaker.OnPhraseTold -= OnPhraseTold;
                 Speaker.OnDestroy();
             }
+
+            // Try to mitigate infinite firing loop further
+            if (HandsController is CoopObservedFirearmController firearmController)
+            {
+                if (firearmController.WeaponSoundPlayer != null && firearmController.WeaponSoundPlayer.enabled)
+                {
+                    firearmController.WeaponSoundPlayer.enabled = false;
+                }
+            }
         }
 
         protected override async void Start()
