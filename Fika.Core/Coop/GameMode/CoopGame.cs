@@ -225,9 +225,11 @@ namespace Fika.Core.Coop.GameMode
         private float GetDistanceFromPlayers(Vector3 position, List<CoopPlayer> humanPlayers)
         {
             float distance = float.PositiveInfinity;
+
             foreach (Player player in humanPlayers)
             {
                 float tempDistance = Vector3.SqrMagnitude(position - player.Position);
+                
                 if (tempDistance < distance) // Get the closest distance to any player. so we dont despawn bots in a players face.
                 {
                     distance = tempDistance;
@@ -235,11 +237,12 @@ namespace Fika.Core.Coop.GameMode
             }
             return distance;
         }
-        
+
         private string GetFurthestBot(Dictionary<string, Player> bots, CoopHandler coopHandler, out float furthestDistance)
         {
             string furthestBot = string.Empty;
             furthestDistance = 0f;
+
             List<CoopPlayer> humanPlayers = GetPlayers(coopHandler);
 
             foreach (var kvp in Bots)
@@ -251,7 +254,9 @@ namespace Fika.Core.Coop.GameMode
 #endif
                     continue;
                 }
+
                 CoopBot coopBot = (CoopBot)kvp.Value;
+
                 if (coopBot != null && coopBot.isStarted == false)
                 {
 #if DEBUG
@@ -259,7 +264,9 @@ namespace Fika.Core.Coop.GameMode
 #endif
                     continue;
                 }
+
                 WildSpawnType role = kvp.Value.Profile.Info.Settings.Role;
+
                 if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
                 {
                     // We skip all the bots that are not sptUsec, sptBear or assault. That means we never remove bosses, bossfollowers, and raiders
@@ -307,6 +314,7 @@ namespace Fika.Core.Coop.GameMode
             if (FikaPlugin.EnforcedSpawnLimits.Value && botsController_0.AliveAndLoadingBotsCount >= botsController_0.BotSpawner.MaxBots)
             {
                 bool despawned = false;
+
                 if (FikaPlugin.DespawnFurthest.Value)
                 {
                     despawned = TryDespawnFurthest(profile, position, coopHandler);
@@ -323,6 +331,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             LocalPlayer localPlayer;
+
             if (!Status.IsRunned())
             {
                 localPlayer = null;
@@ -342,6 +351,7 @@ namespace Fika.Core.Coop.GameMode
                    () => 1f, GClass1446.Default);
 
                 localPlayer.Location = Location_0.Id;
+
                 if (Bots.ContainsKey(localPlayer.ProfileId))
                 {
                     Destroy(localPlayer);
