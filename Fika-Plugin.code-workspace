@@ -49,5 +49,8 @@
 				}
 			}
 		]
+	},
+	"settings": {
+		"window.title": "Fika.Plugin"
 	}
 }
