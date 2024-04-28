@@ -52,5 +52,10 @@
 	},
 	"settings": {
 		"window.title": "Fika.Plugin"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-dotnettools.csharp"
+		]
 	}
 }
