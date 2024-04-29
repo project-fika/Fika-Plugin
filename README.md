@@ -4,11 +4,13 @@ Client-side changes to make multiplayer work.
 
 ## State of the project
 
-There are few bugs left. The goal now is to look back and refactor old code to make it better, as a lot of it is not efficient or easy to read.
+There are few bugs left. The goal now is to look back and refactor old code to
+make it better, as a lot of it is not efficient or easy to read.
 
 ## Contributing
 
-You are free to fork, improve and send PRs to improve the project. Please try to make your code coherent for the other developers.
+You are free to fork, improve and send PRs to improve the project. Please try
+to make your code coherent for the other developers.
 
 ## Requirements
 
@@ -24,7 +26,8 @@ You are free to fork, improve and send PRs to improve the project. Please try to
 PowerShell | `dotnet build`
 VSCode     | `Terminal > Run Build Task...`
 
-You have to create a `References` folder and populate it with the required dependencies from your game installation for the project to build.
+You have to create a `References` folder and populate it with the required
+dependencies from your game installation for the project to build.
 
 ### GoldMaster
 
