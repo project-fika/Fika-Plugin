@@ -1,23 +1,28 @@
-# Fika - Bepinex plugin
+
+# THIS IS A DEV BUILD ONLY FOR SPT 3.8.1.
+
+If you want to play with SPT 3.8.0, please head to [this link to download the mod files.](https://discord.com/channels/1202292159366037545/1224454502531469373)
+
+## Fika - Bepinex plugin
 
 Client-side changes to make multiplayer work.
 
-## State of the project
+### State of the project
 
 There are few bugs left. The goal now is to look back and refactor old code to make it better, as a lot of it is not efficient or easy to read.
 
-## Contributing
+### Contributing
 
 You are free to fork, improve and send PRs to improve the project. Please try to make your code coherent for the other developers.
 
-## Requirements
+### Requirements
 
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [.NET SDK 8.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
-## Build
+### Build
 
-### Debug / Release
+#### Debug / Release
 
 **Tool**   | **Action**
 ---------- | ------------------------------
@@ -26,18 +31,18 @@ VSCode     | `Terminal > Run Build Task...`
 
 You have to create a `References` folder and populate it with the required dependencies from your game installation for the project to build.
 
-### GoldMaster
+#### GoldMaster
 
 1. Have no certificates yet? > `Properties/signing/generate.bat`
 2. `dotnet build --configuration GoldMaster`
 
-## Licenses
+### Licenses
 
 <img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.png" alt="cc by-nc-sa" width="196" height="62" style="float:right">
 
 This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en).
 
-### Dependencies
+#### Dependencies
 
 **Project** | **License**
 ----------- | -----------------------------------------------------------------------
