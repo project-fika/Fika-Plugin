@@ -243,7 +243,7 @@ namespace Fika.Core.Coop.Components
                     // A host needs to wait for the team to extract or die!
                     if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
                     {
-                        NotificationManagerClass.DisplayWarningNotification("HOSTING: You cannot exit the game until all clients have extracted or died.");
+                        NotificationManagerClass.DisplayWarningNotification("HOSTING: You cannot exit the game until all clients have disconnected.");
                         RequestQuitGame = false;
                         return;
                     }

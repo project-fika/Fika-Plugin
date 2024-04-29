@@ -1349,9 +1349,12 @@ namespace Fika.Core.Coop.GameMode
                 exitStatus = ExitStatus.Killed;
             }
 
-            if (GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
+            if (!ExtractedPlayers.Contains(myPlayer.ProfileId))
             {
-                exitStatus = ExitStatus.MissingInAction;
+                if (GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
+                {
+                    exitStatus = ExitStatus.MissingInAction;
+                } 
             }
 
             if (MatchmakerAcceptPatches.IsServer)
