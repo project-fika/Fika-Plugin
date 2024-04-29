@@ -53,9 +53,8 @@ namespace Fika.Core.UI.Patches
 
                 dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
                 {
-                    var body = new AvailableReceiversRequest(itemContext.Item.Id).ToJson();
-                    var json = RequestHandler.PostJson($"/fika/senditem/availablereceivers", body);
-                    var availableUsers = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                    var body = new AvailableReceiversRequest(itemContext.Item.Id);
+                    var availableUsers = FikaRequestHandler.AvailableReceivers(body);
 
                     // convert availableUsers.Keys
                     List<TMP_Dropdown.OptionData> optionDatas = [];

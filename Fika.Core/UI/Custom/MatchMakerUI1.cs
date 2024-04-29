@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Fika.Core.Networking.Http;
 
 namespace Fika.Core.UI.Custom
 {
@@ -134,8 +135,7 @@ namespace Fika.Core.UI.Custom
         private void ManualRefresh()
         {
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-            string data = RequestHandler.PostJson("/fika/location/raids", RaidSettings.ToJson());
-            Matches = JsonConvert.DeserializeObject<LobbyEntry[]>(data);
+            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
             _lastRefreshed = Time.time;
 

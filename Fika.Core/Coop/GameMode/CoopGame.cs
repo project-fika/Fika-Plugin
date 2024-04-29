@@ -24,7 +24,7 @@ using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.Matchmaker;
-using Fika.Core.Coop.Models;
+using Fika.Core.Networking.Http.Models;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
@@ -39,6 +39,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
+using Fika.Core.Networking.Http;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -488,8 +489,8 @@ namespace Fika.Core.Coop.GameMode
 
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    string statusBody = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME).ToJson();
-                    RequestHandler.PutJson("/fika/update/setstatus", statusBody);
+                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
+                    await FikaRequestHandler.UpdateSetStatus(status);
                 }
 
                 Singleton<FikaServer>.Instance.ReadyClients++;
@@ -507,8 +508,8 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    string statusBody = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME).ToJson();
-                    RequestHandler.PutJson("/fika/update/setstatus", statusBody);
+                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
+                    await FikaRequestHandler.UpdateSetStatus(status);
 
                     do
                     {
@@ -565,19 +566,19 @@ namespace Fika.Core.Coop.GameMode
             base.vmethod_1(timeBeforeDeploy);
         }
 
-        private Task SendOrReceiveSpawnPoint()
+        private async Task SendOrReceiveSpawnPoint()
         {
             if (MatchmakerAcceptPatches.IsServer)
             {
                 UpdateSpawnPointRequest body = new UpdateSpawnPointRequest(spawnPoint.Id);
                 Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}");
-                RequestHandler.PutJson("/fika/update/spawnpoint", body.ToJson());
+                await FikaRequestHandler.UpdateSpawnPoint(body);
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
-                string body = new SpawnPointRequest().ToJson();
-                string json = RequestHandler.PostJson($"/fika/raid/spawnpoint", body);
-                string name = JsonConvert.DeserializeObject<SpawnPointResponse>(json).SpawnPoint;
+                SpawnPointRequest body = new SpawnPointRequest();
+                SpawnPointResponse response = await FikaRequestHandler.RaidSpawnPoint(body);
+                string name = response.SpawnPoint;
 
                 Logger.LogInfo($"Retrieved Spawn Point '{name}' from server");
 
@@ -590,8 +591,6 @@ namespace Fika.Core.Coop.GameMode
                     }
                 }
             }
-
-            return Task.CompletedTask;
         }
 
         GClass2928 spawnPoints = null;
@@ -663,8 +662,8 @@ namespace Fika.Core.Coop.GameMode
 
             coopHandler.Players.Add(profile.Id, (CoopPlayer)myPlayer);
 
-            string body = new PlayerSpawnRequest(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId()).ToJson();
-            RequestHandler.PutJson("/fika/update/playerspawn", body);
+            PlayerSpawnRequest body = new PlayerSpawnRequest(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId());
+            await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             myPlayer.SpawnPoint = spawnPoint;
 
@@ -878,12 +877,11 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        private Task SetStatus(LocalPlayer myPlayer, LobbyEntry.ELobbyStatus status)
+        private async Task SetStatus(LocalPlayer myPlayer, LobbyEntry.ELobbyStatus status)
         {
-            string statusBody = new SetStatusModel(myPlayer.ProfileId, status).ToJson();
-            RequestHandler.PutJson("/fika/update/setstatus", statusBody);
+            SetStatusModel statusBody = new SetStatusModel(myPlayer.ProfileId, status);
+            await FikaRequestHandler.UpdateSetStatus(statusBody);
             Logger.LogInfo("Setting game status to: " + status.ToString());
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -1369,8 +1367,8 @@ namespace Fika.Core.Coop.GameMode
 
             wavesSpawnScenario_0?.Stop();
 
-            string body = new PlayerLeftRequest(myPlayer.ProfileId).ToJson();
-            RequestHandler.PutJson("/fika/raid/leave", body);
+            PlayerLeftRequest body = new PlayerLeftRequest(myPlayer.ProfileId);
+            FikaRequestHandler.RaidLeave(body);
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
@@ -1449,8 +1447,8 @@ namespace Fika.Core.Coop.GameMode
             string exitName = null;
             float delay = 0f;
 
-            string body = new PlayerLeftRequest(profileId).ToJson();
-            RequestHandler.PutJson("/fika/raid/leave", body);
+            PlayerLeftRequest body = new PlayerLeftRequest(profileId);
+            FikaRequestHandler.RaidLeave(body);
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {

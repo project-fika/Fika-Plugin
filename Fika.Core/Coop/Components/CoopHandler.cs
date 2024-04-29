@@ -9,7 +9,7 @@ using LiteNetLib.Utils;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
-using Fika.Core.Coop.Models;
+using Fika.Core.Networking.Http.Models;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using System;
@@ -142,6 +142,9 @@ namespace Fika.Core.Coop.Components
             {
                 yield return new WaitForSeconds(30);
                 RequestHandler.PutJson("/fika/update/ping", serialized);
+                
+                // TODO: replace with
+                // await FikaRequestHandler.UpdatePing();
             }
         }
 
@@ -153,6 +156,9 @@ namespace Fika.Core.Coop.Components
             {
                 Task.Delay(30000, loopToken.Token).GetAwaiter().GetResult();
                 RequestHandler.PutJson("/fika/update/ping", serialized);
+
+                // TODO: replace with
+                // await FikaRequestHandler.UpdatePing();
             }
         }
 

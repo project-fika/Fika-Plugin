@@ -12,7 +12,7 @@ using LiteNetLib.Utils;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
-using Fika.Core.Coop.Models;
+using Fika.Core.Networking.Http.Models;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
@@ -27,6 +27,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Fika.Core.Networking.Http;
 
 namespace Fika.Core.Networking
 {
@@ -150,8 +151,8 @@ namespace Fika.Core.Networking
             NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
-            string body = new SetHostRequest(MyExternalIP, Port).ToJson();
-            RequestHandler.PostJson("/fika/update/sethost", body);
+            SetHostRequest body = new SetHostRequest(MyExternalIP, Port)
+            FikaRequestHandler.UpdateSetHost(body);
 
             Singleton<FikaServer>.Create(this);
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));

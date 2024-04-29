@@ -1,17 +1,21 @@
 using Fika.Core.Coop.Components;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Coop.Models
+namespace Fika.Core.Networking.Http.Models
 {
     [DataContract]
-    public struct PingRequest
+    public struct UpdateSpawnPointRequest
     {
         [DataMember(Name = "serverId")]
         public string ServerId;
 
-        public PingRequest()
+        [DataMember(Name = "name")]
+        public string Name;
+
+        public UpdateSpawnPointRequest(string name)
         {
             ServerId = CoopHandler.GetServerId();
+            Name = name;
         }
     }
 }

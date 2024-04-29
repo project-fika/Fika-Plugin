@@ -1,15 +1,15 @@
 using Fika.Core.Coop.Components;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Coop.Models
+namespace Fika.Core.Networking.Http.Models
 {
     [DataContract]
-    public struct SpawnPointRequest
+    public struct GetHostRequest
     {
         [DataMember(Name = "serverId")]
         public string ServerId;
 
-        public SpawnPointRequest()
+        public GetHostRequest()
         {
             ServerId = CoopHandler.GetServerId();
         }
