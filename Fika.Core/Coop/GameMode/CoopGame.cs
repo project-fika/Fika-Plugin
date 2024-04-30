@@ -714,6 +714,8 @@ namespace Fika.Core.Coop.GameMode
                             ForceStart = true
                         };
 
+                        FikaPlugin.Instance.FikaLogger.LogWarning("Force start was used!");
+
                         NetDataWriter writer = new();
                         writer.Reset();
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
