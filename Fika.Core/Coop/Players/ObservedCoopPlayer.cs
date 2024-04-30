@@ -21,12 +21,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
-using static UnityEngine.SendMouseEvents;
 
 namespace Fika.Core.Coop.Players
 {
     /// <summary>
-    /// Observed players are any other players in the world for a client, including bots. They are all being handled by the server that moves them through packets.
+    /// Observed players are any other players in the world for a client, including bots.
+    /// They are all being handled by the server that moves them through packets.
+    /// As a host this is only other clients.
     /// </summary>
     public class ObservedCoopPlayer : CoopPlayer
     {

@@ -409,8 +409,11 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = localPlayer.Profile }, localPlayer.HealthController.IsAlive, true, localPlayer.Transform.position);
-
+            
+            FikaServer server = Singleton<FikaServer>.Instance;
+            int netId = server.PopNetId();
+            (localPlayer as CoopPlayer).netId = netId;
+            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = localPlayer.Profile }, localPlayer.HealthController.IsAlive, true, localPlayer.Transform.position, netId);
             Singleton<FikaServer>.Instance?.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
 
             return localPlayer;
@@ -651,7 +654,7 @@ namespace Fika.Core.Coop.GameMode
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
                 GClass549.Config.CharacterController.ClientPlayerMode, () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
-                () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), questController);
+                () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), 0, questController);
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
@@ -728,7 +731,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position);
+            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).netId);
 
             if (MatchmakerAcceptPatches.IsServer)
             {

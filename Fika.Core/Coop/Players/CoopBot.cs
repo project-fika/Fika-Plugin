@@ -25,7 +25,7 @@ using static Fika.Core.Networking.FikaSerialization;
 namespace Fika.Core.Coop.Players
 {
     /// <summary>
-    /// Used to simulate bots for the host
+    /// Used to simulate bots for the host.
     /// </summary>
     public class CoopBot : CoopPlayer
     {

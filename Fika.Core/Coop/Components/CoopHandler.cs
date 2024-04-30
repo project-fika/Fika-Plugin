@@ -45,12 +45,13 @@ namespace Fika.Core.Coop.Components
         private Thread loopThread;
         private CancellationTokenSource loopToken;
 
-        public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI)
+        public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId)
         {
             public Profile Profile { get; set; } = profile;
             public Vector3 Position { get; set; } = position;
             public bool IsAlive { get; set; } = isAlive;
             public bool IsAI { get; set; } = isAI;
+            public int NetId { get; set; } = netId;
         }
 
         public bool RunAsyncTasks { get; set; } = true;
@@ -368,7 +369,7 @@ namespace Fika.Core.Coop.Components
                 }
             });
 
-            LocalPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI);
+            LocalPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
 
             if (!spawnObject.IsAlive)
             {
@@ -425,7 +426,7 @@ namespace Fika.Core.Coop.Components
             }
         }
 
-        public void QueueProfile(Profile profile, Vector3 position, bool isAlive = true, bool isAI = false)
+        public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
         {
             if (Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == profile.ProfileId))
                 return;
@@ -438,7 +439,7 @@ namespace Fika.Core.Coop.Components
 
             queuedProfileIds.Add(profile.ProfileId);
             Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
-            spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI));
+            spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId));
         }
 
         public WorldInteractiveObject GetInteractiveObject(string objectId, out WorldInteractiveObject worldInteractiveObject)
@@ -450,7 +451,7 @@ namespace Fika.Core.Coop.Components
             return null;
         }
 
-        private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI)
+        private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
             LocalPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(
                 playerId,
@@ -474,6 +475,7 @@ namespace Fika.Core.Coop.Components
             if (otherPlayer == null)
                 return null;
 
+            ((CoopPlayer)otherPlayer).netId = netId;
             if (!isAI)
                 HumanPlayers++;
 

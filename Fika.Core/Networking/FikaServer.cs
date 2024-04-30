@@ -27,6 +27,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Sirenix.Serialization;
 
 namespace Fika.Core.Networking
 {
@@ -53,9 +54,13 @@ namespace Fika.Core.Networking
         public bool hasHadPeer = false;
         private ManualLogSource serverLogger;
         public bool ServerReady = false;
+        private int _currentNetId;
 
         public async void Start()
         {
+            // Start at 1 to avoid having 0 and making us think it's working when it's not
+            _currentNetId = 1;
+
             NetDebug.Logger = this;
             serverLogger = new("Fika Server");
 
@@ -158,15 +163,34 @@ namespace Fika.Core.Networking
             ServerReady = true;
         }
 
+        public int PopNetId()
+        {
+            int netId = _currentNetId;
+            _currentNetId++;
+
+            return netId;
+        }
+
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
         {
+            int netId = PopNetId();
+            packet.netId = netId;
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
-                CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.IsAlive, packet.IsAI);
+                CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
             }
 
             _dataWriter.Reset();
             SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
+
+            AssignNetIdPacket assignNetIdPacket = new()
+            {
+                NetId = netId
+            };
+
+            _dataWriter.Reset();
+            packetProcessor.WriteNetSerializable(_dataWriter, ref assignNetIdPacket);
+            peer.Send(_dataWriter, DeliveryMethod.ReliableUnordered);
         }
 
         private void OnBorderZonePacketReceived(BorderZonePacket packet, NetPeer peer)
@@ -423,7 +447,8 @@ namespace Fika.Core.Networking
                         },
                         IsAlive = player.HealthController.IsAlive,
                         IsAI = player is CoopBot,
-                        Position = player.Transform.position
+                        Position = player.Transform.position,
+                        netId = player.netId
                     };
                     _dataWriter.Reset();
                     SendDataToPeer(peer, _dataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
@@ -442,7 +467,7 @@ namespace Fika.Core.Networking
                 serverLogger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
-                    CoopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.IsAlive);
+                    CoopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.netId, packet.IsAlive);
                     PlayersMissing.Remove(packet.ProfileId);
                 }
             }

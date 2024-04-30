@@ -80,6 +80,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializable<AssignNetIdPacket, NetPeer>(OnAssignNetIdPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -115,11 +116,16 @@ namespace Fika.Core.Networking
             ClientReady = true;
         }
 
+        private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet, NetPeer peer)
+        {
+            MyPlayer.netId = packet.NetId;
+        }
+
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
         {
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
-                CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.IsAlive, packet.IsAI);
+                CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
             }
         }
 
@@ -454,7 +460,7 @@ namespace Fika.Core.Networking
                 clientLogger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
-                    CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.IsAlive, packet.IsAI);
+                    CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
                 }
             }
             else if (packet.IsRequest)
@@ -469,7 +475,8 @@ namespace Fika.Core.Networking
                     },
                     IsAlive = MyPlayer.ActiveHealthController.IsAlive,
                     IsAI = MyPlayer.IsAI,
-                    Position = MyPlayer.Transform.position
+                    Position = MyPlayer.Transform.position,
+                    netId = MyPlayer.netId
                 };
                 DataWriter.Reset();
                 SendData(DataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);

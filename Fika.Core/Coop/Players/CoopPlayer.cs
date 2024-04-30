@@ -27,6 +27,9 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Coop.Players
 {
+    /// <summary>
+    /// CoopPlayer is the LocalPlayer there can only be one CoopPlayer in every game and that is yourself.
+    /// </summary>
     public class CoopPlayer : LocalPlayer
     {
         public PacketReceiver PacketReceiver;
@@ -39,6 +42,7 @@ namespace Fika.Core.Coop.Players
         public RagdollPacket RagdollPacket = default;
         public bool hasGround = false;
         public Transform RaycastCameraTransform;
+        public int netId;
 
         public static async Task<LocalPlayer> Create(
             int playerId,
@@ -55,6 +59,7 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode,
             Func<float> getSensitivity, Func<float> getAimingSensitivity,
             GInterface99 filter,
+            int netId,
             AbstractQuestControllerClass questController = null,
             AbstractAchievementControllerClass achievementsController = null)
         {
@@ -74,7 +79,7 @@ namespace Fika.Core.Coop.Players
                     isThirdPerson: false);
 
             player.IsYourPlayer = true;
-
+            player.netId = netId;
             CoopClientInventoryController inventoryController = new(player, profile, true);
 
             if (questController == null)
