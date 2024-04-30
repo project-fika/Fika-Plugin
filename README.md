@@ -47,11 +47,11 @@ dependencies from your game installation for the project to build.
 
 This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en).
 
-### Dependencies
+### Credits
 
 **Project** | **License**
 ----------- | -----------------------------------------------------------------------
 Aki.Modules | [NCSA](https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/LICENSE.md)
-SIT         | [NCSA](./LICENSE-SIT.md) (`SIT.Client master:9de30d8`)
+SIT         | [NCSA](./LICENSE-SIT.md) (`Forked from SIT.Client master:9de30d8`)
 Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE) (for UPnP implementation)
 LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt) (for P2P UDP implementation)
