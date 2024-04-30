@@ -1,19 +1,18 @@
-﻿using Aki.Common.Http;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.UI;
-using HarmonyLib;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
-using Newtonsoft.Json;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Fika.Core.Networking.Http;
 
 namespace Fika.Core.UI.Custom
 {
@@ -144,7 +143,7 @@ namespace Fika.Core.UI.Custom
 
         private void JoinMatch(string profileId, string serverId)
         {
-            if (MatchmakerAcceptPatches.JoinMatch(RaidSettings, profileId, serverId, out Coop.Models.CreateMatch result, out string errorMessage))
+            if (MatchmakerAcceptPatches.JoinMatch(RaidSettings, profileId, serverId, out CreateMatch result, out string errorMessage))
             {
                 MatchmakerAcceptPatches.SetGroupId(result.ServerId);
                 MatchmakerAcceptPatches.SetTimestamp(result.Timestamp);

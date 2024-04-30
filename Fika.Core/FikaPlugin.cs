@@ -1,5 +1,4 @@
-﻿using Aki.Common.Http;
-using Aki.Custom.Airdrops.Patches;
+﻿using Aki.Custom.Airdrops.Patches;
 using Aki.Custom.BTR.Patches;
 using Aki.Custom.Patches;
 using Aki.SinglePlayer.Patches.MainMenu;
@@ -27,7 +26,6 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;

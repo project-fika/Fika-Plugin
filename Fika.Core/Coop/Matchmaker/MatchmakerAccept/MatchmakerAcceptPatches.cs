@@ -1,9 +1,7 @@
-﻿using Aki.Common.Http;
-using EFT;
+﻿using EFT;
 using EFT.UI.Matchmaker;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Reflection;

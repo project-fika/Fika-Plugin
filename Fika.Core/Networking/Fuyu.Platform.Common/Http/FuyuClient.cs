@@ -2,12 +2,12 @@
     - Using Aki zlib (de-)compression
 */
 
+using Aki.Common.Utils;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Aki.Common.Utils;
 
 namespace Fuyu.Platform.Common.Http
 {

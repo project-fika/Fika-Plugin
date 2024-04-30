@@ -1,13 +1,12 @@
-﻿using Aki.Common.Http;
-using Aki.Reflection.Patching;
+﻿using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
-using HarmonyLib;
 using Fika.Core.Bundles;
+using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
-using Newtonsoft.Json;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

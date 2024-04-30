@@ -2,9 +2,9 @@
 
 using Comfort.Common;
 using EFT;
-using JetBrains.Annotations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using JetBrains.Annotations;
 using System.IO;
 using static EFT.Player;
 

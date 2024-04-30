@@ -1,13 +1,13 @@
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using Aki.Common.Http;
 using EFT;
-using Fuyu.Platform.Common.Http;
-using Newtonsoft.Json;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
+using Fuyu.Platform.Common.Http;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Networking.Http
 {
@@ -63,7 +63,7 @@ namespace Fika.Core.Networking.Http
 
         private static byte[] PutJson<T>(string path, T o)
         {
-            return Task.Run(() =>  PutJsonAsync<T>(path, o)).Result;
+            return Task.Run(() => PutJsonAsync<T>(path, o)).Result;
         }
 
         public static BotDifficulties GetBotDifficulties()

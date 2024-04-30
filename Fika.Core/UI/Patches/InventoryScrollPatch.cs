@@ -24,7 +24,7 @@ namespace Fika.Core.UI.Patches
                 else
                 {
                     ____stashScroll.scrollSensitivity = 63;
-                } 
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 ﻿using Aki.Common.Http;
 using Aki.Reflection.Patching;
-using HarmonyLib;
 using Fika.Core.Coop.Matchmaker;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
