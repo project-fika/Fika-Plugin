@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
+using static UnityEngine.SendMouseEvents;
 
 namespace Fika.Core.Coop.Players
 {
@@ -326,6 +327,7 @@ namespace Fika.Core.Coop.Players
         {
             if (!IsObservedAI)
             {
+                ShotReactions(damageInfo, bodyPartType);
                 return null;
             }
 
@@ -399,6 +401,7 @@ namespace Fika.Core.Coop.Players
             }
             else
             {
+                ShotReactions(damageInfo, bodyPartType);
                 return null;
             }
         }
