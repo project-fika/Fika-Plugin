@@ -3,20 +3,20 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
-    public struct DamagePacket(string profileId) : INetSerializable
+    public struct DamagePacket(int netId) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public ApplyShotPacket DamageInfo;
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             DamageInfo = ApplyShotPacket.Deserialize(reader);
         }
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             ApplyShotPacket.Serialize(writer, DamageInfo);
         }
     }

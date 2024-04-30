@@ -4,6 +4,7 @@ using EFT.CameraControl;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Players;
 using Fika.Core.UI;
 using TMPro;
 using UnityEngine;
@@ -127,7 +128,7 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (quitState == CoopHandler.EQuitState.YouHaveExtracted && !extracted)
             {
-                if (coopGame.ExtractedPlayers.Contains(_player.ProfileId))
+                if (coopGame.ExtractedPlayers.Contains(((CoopPlayer)_player).NetId))
                 {
                     extracted = true;
                     ShowExtractMessage();

@@ -33,9 +33,9 @@ namespace Fika.Core.Coop.Components
         /// <summary>
         /// ProfileId to Player instance
         /// </summary>
-        public Dictionary<string, CoopPlayer> Players { get; } = new();
+        public Dictionary<int, CoopPlayer> Players { get; } = new();
         public int HumanPlayers = 1;
-        public List<string> ExtractedPlayers { get; set; } = [];
+        public List<int> ExtractedPlayers { get; set; } = [];
         ManualLogSource Logger { get; set; }
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
@@ -219,7 +219,7 @@ namespace Fika.Core.Coop.Components
             }
 
             // Extractions
-            if (coopGame.ExtractedPlayers.Contains(MyPlayer.ProfileId))
+            if (coopGame.ExtractedPlayers.Contains(MyPlayer.NetId))
             {
                 quitState = EQuitState.YouHaveExtracted;
             }
@@ -312,7 +312,7 @@ namespace Fika.Core.Coop.Components
             if (Players.Count > 0)
             {
                 requestPacket.HasCharacters = true;
-                requestPacket.Characters = [.. Players.Keys, .. queuedProfileIds];
+                requestPacket.Characters = [.. Players.Values.Select(p => p.ProfileId), .. queuedProfileIds];
             }
 
             NetDataWriter writer = Singleton<FikaClient>.Instance.DataWriter;
@@ -475,13 +475,13 @@ namespace Fika.Core.Coop.Components
             if (otherPlayer == null)
                 return null;
 
-            ((CoopPlayer)otherPlayer).netId = netId;
+            ((CoopPlayer)otherPlayer).NetId = netId;
             if (!isAI)
                 HumanPlayers++;
 
-            if (!Players.ContainsKey(profile.ProfileId))
+            if (!Players.ContainsKey(netId))
             {
-                Players.Add(profile.ProfileId, (CoopPlayer)otherPlayer);
+                Players.Add(netId, (CoopPlayer)otherPlayer);
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))

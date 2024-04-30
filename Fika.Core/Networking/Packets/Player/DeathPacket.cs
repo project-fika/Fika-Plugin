@@ -3,16 +3,16 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
-    public struct DeathPacket(string profileId) : INetSerializable
+    public struct DeathPacket(int netId) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public RagdollPacket RagdollPacket;
         public bool HasInventory = false;
         public EquipmentClass Equipment;
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             RagdollPacket = RagdollPacket.Deserialize(reader);
             HasInventory = reader.GetBool();
             if (HasInventory)
@@ -23,7 +23,7 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             RagdollPacket.Serialize(writer, RagdollPacket);
             writer.Put(HasInventory);
             if (HasInventory)

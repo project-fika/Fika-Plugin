@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Fika.Core.Coop.Players;
 
 namespace Fika.Core.Coop.BTR
 {
@@ -138,7 +139,7 @@ namespace Fika.Core.Coop.BTR
             {
                 BTRDataPacket = btrDataPacket,
                 HasBotProfileId = true,
-                BotProfileId = btrBotShooter.ProfileId
+                BotNetId = ((CoopPlayer)btrBotShooter.GetPlayer).NetId
             };
 
             writer.Reset();
@@ -383,7 +384,7 @@ namespace Fika.Core.Coop.BTR
 
             GenericPacket responsePacket = new(EPackageType.TraderServiceNotification)
             {
-                ProfileId = gameWorld.MainPlayer.ProfileId,
+                NetId = ((CoopPlayer)gameWorld.MainPlayer).NetId,
                 TraderServiceType = serviceType
             };
 
@@ -417,7 +418,7 @@ namespace Fika.Core.Coop.BTR
 
             GenericPacket responsePacket = new(EPackageType.TraderServiceNotification)
             {
-                ProfileId = gameWorld.MainPlayer.ProfileId,
+                NetId = ((CoopPlayer)gameWorld.MainPlayer).NetId,
                 TraderServiceType = packet.TraderServiceType
             };
 

@@ -396,8 +396,6 @@ namespace Fika.Core.Coop.GameMode
                     }
                 }
 
-                coopHandler.Players.Add(profile.Id, (CoopPlayer)localPlayer);
-
                 if (Singleton<GameWorld>.Instance != null)
                 {
                     if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == localPlayer.ProfileId))
@@ -412,7 +410,9 @@ namespace Fika.Core.Coop.GameMode
             
             FikaServer server = Singleton<FikaServer>.Instance;
             int netId = server.PopNetId();
-            (localPlayer as CoopPlayer).netId = netId;
+            CoopPlayer coopPlayer = (CoopPlayer)localPlayer;
+            coopPlayer.NetId = netId;
+            coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
             SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = localPlayer.Profile }, localPlayer.HealthController.IsAlive, true, localPlayer.Transform.position, netId);
             Singleton<FikaServer>.Instance?.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
 
@@ -460,7 +460,8 @@ namespace Fika.Core.Coop.GameMode
             botOwner?.Dispose();
 
             Bots.Remove(botKey);
-            coopHandler.Players.Remove(bot.ProfileId);
+            CoopPlayer coopPlayer = (CoopPlayer)bot;
+            coopHandler.Players.Remove(coopPlayer.NetId);
 #if DEBUG
             Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
 #endif
@@ -664,7 +665,8 @@ namespace Fika.Core.Coop.GameMode
                 await Task.Delay(5000);
             }
 
-            coopHandler.Players.Add(profile.Id, (CoopPlayer)myPlayer);
+            CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
+            coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
             string body = new PlayerSpawnRequest(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId()).ToJson();
             RequestHandler.PutJson("/fika/update/playerspawn", body);
@@ -731,7 +733,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).netId);
+            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
             if (MatchmakerAcceptPatches.IsServer)
             {
@@ -1205,7 +1207,7 @@ namespace Fika.Core.Coop.GameMode
             GameUi.TimerPanel.SetTime(GClass1296.UtcNow, Profile_0.Info.Side, GameTimer.SessionSeconds(), points);
         }
 
-        public List<string> ExtractedPlayers { get; } = [];
+        public List<int> ExtractedPlayers { get; } = [];
 
         /// <summary>
         /// When the local player successfully extracts, enable freecam, notify other players about the extract
@@ -1239,7 +1241,7 @@ namespace Fika.Core.Coop.GameMode
 
             GenericPacket genericPacket = new()
             {
-                ProfileId = player.ProfileId,
+                NetId = ((CoopPlayer)player).NetId,
                 PacketType = EPackageType.ClientExtract
             };
 
@@ -1262,9 +1264,10 @@ namespace Fika.Core.Coop.GameMode
 
             CoopHandler coopHandler = CoopHandler.GetCoopHandler();
 
-            ExtractedPlayers.Add(player.ProfileId);
-            coopHandler.ExtractedPlayers.Add(player.ProfileId);
-            coopHandler.Players.Remove(player.ProfileId);
+            CoopPlayer coopPlayer = (CoopPlayer)player;
+            ExtractedPlayers.Add(coopPlayer.NetId);
+            coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
+            coopHandler.Players.Remove(coopPlayer.NetId);
 
             preloaderUI.StartBlackScreenShow(2f, 2f, () => { preloaderUI.FadeBlackScreen(2f, -2f); });
 
@@ -1354,7 +1357,7 @@ namespace Fika.Core.Coop.GameMode
                 exitStatus = ExitStatus.Killed;
             }
 
-            if (!ExtractedPlayers.Contains(myPlayer.ProfileId))
+            if (!ExtractedPlayers.Contains(myPlayer.NetId))
             {
                 if (GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
                 {

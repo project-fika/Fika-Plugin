@@ -797,8 +797,8 @@ namespace Fika.Core.Coop.Players
                 PacketSender = gameObject.AddComponent<ObservedPacketSender>();
                 GenericPacket genericPacket = new(EPackageType.LoadBot)
                 {
-                    ProfileId = ProfileId,
-                    BotProfileId = ProfileId
+                    NetId = NetId,
+                    BotNetId = NetId
                 };
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);

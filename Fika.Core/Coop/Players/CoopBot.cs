@@ -346,17 +346,17 @@ namespace Fika.Core.Coop.Players
                     FikaServer server = Singleton<FikaServer>.Instance;
                     GenericPacket packet = new(EPackageType.DisposeBot)
                     {
-                        ProfileId = MainPlayer.ProfileId,
-                        BotProfileId = ProfileId
+                        NetId = MainPlayer.NetId,
+                        BotNetId = NetId
                     };
                     server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 }
             }
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (!coopHandler.Players.Remove(ProfileId))
+                if (!coopHandler.Players.Remove(NetId))
                 {
-                    FikaPlugin.Instance.FikaLogger.LogWarning("Unable to remove " + ProfileId + " from CoopHandler.Players when Destroying");
+                    FikaPlugin.Instance.FikaLogger.LogWarning("Unable to remove " + NetId + " from CoopHandler.Players when Destroying");
                 }
             }
             base.OnDestroy();

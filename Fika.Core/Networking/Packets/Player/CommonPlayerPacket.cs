@@ -3,9 +3,9 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
-    public struct CommonPlayerPacket(string profileId) : INetSerializable
+    public struct CommonPlayerPacket(int netId) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public EPhraseTrigger Phrase = EPhraseTrigger.PhraseNone;
         public int PhraseIndex;
         public bool HasWorldInteractionPacket = false;
@@ -29,7 +29,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             Phrase = (EPhraseTrigger)reader.GetInt();
             if (Phrase != EPhraseTrigger.PhraseNone)
                 PhraseIndex = reader.GetInt();
@@ -64,7 +64,7 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             writer.Put((int)Phrase);
             if (Phrase != EPhraseTrigger.PhraseNone)
                 writer.Put(PhraseIndex);

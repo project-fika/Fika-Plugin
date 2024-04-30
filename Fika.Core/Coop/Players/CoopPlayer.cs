@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.Players
         public RagdollPacket RagdollPacket = default;
         public bool hasGround = false;
         public Transform RaycastCameraTransform;
-        public int netId;
+        public int NetId;
 
         public static async Task<LocalPlayer> Create(
             int playerId,
@@ -79,7 +79,7 @@ namespace Fika.Core.Coop.Players
                     isThirdPerson: false);
 
             player.IsYourPlayer = true;
-            player.netId = netId;
+            player.NetId = netId;
             CoopClientInventoryController inventoryController = new(player, profile, true);
 
             if (questController == null)
@@ -145,7 +145,7 @@ namespace Fika.Core.Coop.Players
             base.BtrInteraction(btr, placeId, interaction);
             if (MatchmakerAcceptPatches.IsClient)
             {
-                BTRInteractionPacket packet = new(ProfileId)
+                BTRInteractionPacket packet = new(NetId)
                 {
                     HasInteractPacket = true,
                     InteractPacket = btr.GetInteractWithBtrPacket(placeId, interaction)
@@ -163,7 +163,7 @@ namespace Fika.Core.Coop.Players
                     bool success = coopHandler.serverBTR.HostInteraction(this, interactPacket);
                     if (success)
                     {
-                        BTRInteractionPacket packet = new(ProfileId)
+                        BTRInteractionPacket packet = new(NetId)
                         {
                             HasInteractPacket = true,
                             InteractPacket = interactPacket
@@ -557,7 +557,7 @@ namespace Fika.Core.Coop.Players
                 SetupDogTag();
             }
 
-            return new(ProfileId)
+            return new(NetId)
             {
                 Packet = packet,
                 KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
@@ -823,7 +823,7 @@ namespace Fika.Core.Coop.Players
 
                     GenericPacket genericPacket = new()
                     {
-                        ProfileId = ProfileId,
+                        NetId = NetId,
                         PacketType = EPackageType.Ping,
                         PingLocation = hitPoint,
                         PingType = pingType,
