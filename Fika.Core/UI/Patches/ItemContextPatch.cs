@@ -1,13 +1,12 @@
-﻿using Aki.Common.Http;
-using Aki.Reflection.Patching;
+﻿using Aki.Reflection.Patching;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
-using HarmonyLib;
 using Fika.Core.Bundles;
+using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
-using Newtonsoft.Json;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -53,9 +52,8 @@ namespace Fika.Core.UI.Patches
 
                 dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
                 {
-                    var body = new AvailableReceiversRequest(itemContext.Item.Id).ToJson();
-                    var json = RequestHandler.PostJson($"/fika/senditem/availablereceivers", body);
-                    var availableUsers = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+                    var body = new AvailableReceiversRequest(itemContext.Item.Id);
+                    var availableUsers = FikaRequestHandler.AvailableReceivers(body);
 
                     // convert availableUsers.Keys
                     List<TMP_Dropdown.OptionData> optionDatas = [];

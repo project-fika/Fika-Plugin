@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Custom
     {
         private ObservedCoopPlayer currentPlayer;
         private CoopPlayer mainPlayer;
-        private FikaPlayerPlateUI playerPlate;
+        private PlayerPlateUI playerPlate;
         private float screenScale = 1f;
 
         protected void Awake()
@@ -159,7 +159,7 @@ namespace Fika.Core.Coop.Custom
             {
                 GameObject uiPrefab = InternalBundleLoader.Instance.GetAssetBundle("playerui").LoadAsset<GameObject>("PlayerFriendlyUI");
                 GameObject uiGameObj = Instantiate(uiPrefab);
-                playerPlate = uiGameObj.GetComponent<FikaPlayerPlateUI>();
+                playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
                 playerPlate.SetNameText(currentPlayer.Profile.Info.MainProfileNickname);
                 if (FikaPlugin.UsePlateFactionSide.Value)
                 {

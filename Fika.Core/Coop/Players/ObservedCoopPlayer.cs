@@ -8,13 +8,13 @@ using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
-using HarmonyLib;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Networking;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -769,6 +769,15 @@ namespace Fika.Core.Coop.Players
                 Speaker.Shut();
                 Speaker.OnPhraseTold -= OnPhraseTold;
                 Speaker.OnDestroy();
+            }
+
+            // Try to mitigate infinite firing loop further
+            if (HandsController is CoopObservedFirearmController firearmController)
+            {
+                if (firearmController.WeaponSoundPlayer != null && firearmController.WeaponSoundPlayer.enabled)
+                {
+                    firearmController.WeaponSoundPlayer.enabled = false;
+                }
             }
         }
 

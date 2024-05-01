@@ -3,9 +3,9 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
-using JetBrains.Annotations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using JetBrains.Annotations;
 using System.IO;
 
 namespace Fika.Core.Coop.ClientClasses
