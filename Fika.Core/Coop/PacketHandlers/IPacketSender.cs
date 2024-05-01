@@ -1,7 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using LiteNetLib.Utils;
 using Fika.Core.Networking;
+using LiteNetLib.Utils;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.PacketHandlers

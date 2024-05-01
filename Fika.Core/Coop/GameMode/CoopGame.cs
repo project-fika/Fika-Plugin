@@ -17,9 +17,6 @@ using EFT.UI;
 using EFT.UI.BattleTimer;
 using EFT.UI.Screens;
 using EFT.Weather;
-using HarmonyLib;
-using JsonType;
-using LiteNetLib.Utils;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.FreeCamera;
@@ -31,6 +28,9 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
+using HarmonyLib;
+using JsonType;
+using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
@@ -247,7 +247,7 @@ namespace Fika.Core.Coop.GameMode
 
             foreach (var botKeyValuePair in Bots)
             {
-                if( IsInvalidBotForDespawning(botKeyValuePair) )
+                if (IsInvalidBotForDespawning(botKeyValuePair))
                 {
                     continue;
                 }
@@ -407,7 +407,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            
+
             FikaServer server = Singleton<FikaServer>.Instance;
             int netId = server.PopNetId();
             CoopPlayer coopPlayer = (CoopPlayer)localPlayer;
@@ -1362,7 +1362,7 @@ namespace Fika.Core.Coop.GameMode
                 if (GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
                 {
                     exitStatus = ExitStatus.MissingInAction;
-                } 
+                }
             }
 
             if (MatchmakerAcceptPatches.IsServer)

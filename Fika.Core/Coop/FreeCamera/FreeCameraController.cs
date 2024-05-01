@@ -6,6 +6,9 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.UI;
+using Koenigz.PerfectCulling;
+using Koenigz.PerfectCulling.EFT;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -39,11 +42,12 @@ namespace Fika.Core.Coop.FreeCamera
         private bool deathFadeEnabled;
         private float DeadTime = 0f;
         private DisablerCullingObjectBase[] allCullingObjects;
+        private List<PerfectCullingBakeGroup> previouslyActiveBakeGroups;
 
         protected void Awake()
         {
             CameraParent = new GameObject("CameraParent");
-            var FCamera = CameraParent.GetOrAddComponent<Camera>();
+            Camera FCamera = CameraParent.GetOrAddComponent<Camera>();
             FCamera.enabled = false;
         }
 
@@ -74,6 +78,7 @@ namespace Fika.Core.Coop.FreeCamera
             deathFade.enabled = true;
 
             allCullingObjects = FindObjectsOfType<DisablerCullingObjectBase>();
+            previouslyActiveBakeGroups = [];
         }
 
         protected void Update()
@@ -319,6 +324,30 @@ namespace Fika.Core.Coop.FreeCamera
                 cullingObject.SetComponentsEnabled(true);
             }
             FikaPlugin.Instance.FikaLogger.LogDebug($"Enabled {count} Culling Triggers.");
+
+            PerfectCullingAdaptiveGrid perfectCullingAdaptiveGrid = FindObjectOfType<PerfectCullingAdaptiveGrid>();
+            if (perfectCullingAdaptiveGrid != null)
+            {
+                if (perfectCullingAdaptiveGrid.RuntimeGroupMapping.Count > 0)
+                {
+                    foreach (PerfectCullingCrossSceneGroup sceneGroup in perfectCullingAdaptiveGrid.RuntimeGroupMapping)
+                    {
+                        foreach (PerfectCullingBakeGroup bakeGroup in sceneGroup.bakeGroups)
+                        {
+                            if (!bakeGroup.IsEnabled)
+                            {
+                                bakeGroup.IsEnabled = true;
+                            }
+                            else
+                            {
+                                previouslyActiveBakeGroups.Add(bakeGroup);
+                            }
+                        }
+
+                        sceneGroup.enabled = false;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -327,7 +356,6 @@ namespace Fika.Core.Coop.FreeCamera
         /// <param name="localPlayer"></param>
         private void SetPlayerToFirstPersonMode(Player localPlayer)
         {
-
             // re-enable _gamePlayerOwner
             _gamePlayerOwner.enabled = true;
             _freeCamScript.SetActive(false);
@@ -346,6 +374,32 @@ namespace Fika.Core.Coop.FreeCamera
                 cullingObject.SetComponentsEnabled(false);
             }
             FikaPlugin.Instance.FikaLogger.LogDebug($"Disabled {count} Culling Triggers.");
+
+            PerfectCullingAdaptiveGrid perfectCullingAdaptiveGrid = FindObjectOfType<PerfectCullingAdaptiveGrid>();
+            if (perfectCullingAdaptiveGrid != null)
+            {
+                if (perfectCullingAdaptiveGrid.RuntimeGroupMapping.Count > 0)
+                {
+                    foreach (PerfectCullingCrossSceneGroup sceneGroup in perfectCullingAdaptiveGrid.RuntimeGroupMapping)
+                    {
+                        sceneGroup.enabled = true;
+
+                        foreach (PerfectCullingBakeGroup bakeGroup in sceneGroup.bakeGroups)
+                        {
+                            if (bakeGroup.IsEnabled && !previouslyActiveBakeGroups.Contains(bakeGroup))
+                            {
+                                bakeGroup.IsEnabled = false;
+                            }
+                            else
+                            {
+                                previouslyActiveBakeGroups.Remove(bakeGroup);
+                            }
+                        }
+
+                        previouslyActiveBakeGroups.Clear();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -355,7 +409,7 @@ namespace Fika.Core.Coop.FreeCamera
         private Player GetLocalPlayerFromWorld()
         {
             // If the GameWorld instance is null or has no RegisteredPlayers, it most likely means we're not in a raid
-            var gameWorld = Singleton<GameWorld>.Instance;
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null || gameWorld.MainPlayer == null)
             {
                 return null;

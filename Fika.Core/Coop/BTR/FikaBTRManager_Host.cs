@@ -7,11 +7,12 @@ using EFT;
 using EFT.GlobalEvents;
 using EFT.InventoryLogic;
 using EFT.Vehicle;
+using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Players;
+using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using Fika.Core.Coop.GameMode;
-using Fika.Core.Networking;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,7 +21,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using Fika.Core.Coop.Players;
 
 namespace Fika.Core.Coop.BTR
 {

@@ -7,8 +7,6 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.UI;
-using LiteNetLib;
-using LiteNetLib.Utils;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
@@ -17,6 +15,8 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets.GameWorld;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using Open.Nat;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using Sirenix.Serialization;
 
 namespace Fika.Core.Networking
 {

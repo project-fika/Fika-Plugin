@@ -1,8 +1,8 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using EFT;
-using LiteNetLib.Utils;
 using Fika.Core.Coop.Factories;
+using LiteNetLib.Utils;
 using UnityEngine;
 
 namespace Fika.Core.Networking

@@ -2,10 +2,10 @@
 using Comfort.Common;
 using EFT;
 using EFT.UI;
-using HarmonyLib;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.UI.Models;
+using HarmonyLib;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
