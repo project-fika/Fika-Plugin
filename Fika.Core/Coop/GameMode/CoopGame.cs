@@ -433,10 +433,10 @@ namespace Fika.Core.Coop.GameMode
             }
 
             //Dont despawn inside of dynamic AI range
-            if (furthestDistance < FikaPlugin.DynamicAIRange.Value * FikaPlugin.DynamicAIRange.Value) //Square it because we use sqrMagnitude for distance calculation
+            if (furthestDistance < FikaPlugin.DespawnMinimumDistance.Value * FikaPlugin.DespawnMinimumDistance.Value) //Square it because we use sqrMagnitude for distance calculation
             {
 #if DEBUG
-                Logger.LogWarning($"We're not despawning anything. Furthest despawnable bot is inside DynamicAI range.");
+                Logger.LogWarning($"We're not despawning anything. Furthest despawnable bot is inside minimum despawn range.");
 #endif
                 return false;
             }
