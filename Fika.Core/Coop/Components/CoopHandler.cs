@@ -9,6 +9,8 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
