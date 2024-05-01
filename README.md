@@ -5,7 +5,7 @@ Client-side changes to make multiplayer work.
 ## /!\ **NOTICE** /!\
 
 If you somehow ended up here while you just want to play a stable release,
-please download the release from the discord [here](https://discord.com/channels/1202292159366037545/1224454502531469373).
+please download the release from the discord [here](https://discord.gg/project-fika).
 
 If you're interested to contribute, then you're at the right place!
 
