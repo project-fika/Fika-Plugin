@@ -125,7 +125,6 @@ namespace Fika.Core.Networking
             else if (FikaPlugin.ForceIP.Value != "")
             {
                 MyExternalIP = FikaPlugin.ForceIP.Value;
-                NotificationManagerClass.DisplayMessageNotification($"Force IP enabled and set to: {MyExternalIP}", iconType: EFT.Communications.ENotificationIconType.Alert);
             }
             else
             {
