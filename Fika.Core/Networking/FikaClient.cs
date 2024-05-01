@@ -1,6 +1,5 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.Common.Http;
 using Aki.Custom.Airdrops;
 using BepInEx.Logging;
 using Comfort.Common;
@@ -13,10 +12,11 @@ using EFT.Weather;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
-using Fika.Core.Coop.Models;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
 using HarmonyLib;
 using LiteNetLib;
@@ -95,9 +95,8 @@ namespace Fika.Core.Networking
 
             _netClient.Start();
 
-            string body = new GetHostRequest().ToJson();
-            string json = RequestHandler.PostJson($"/fika/raid/gethost", body);
-            GetHostResponse result = JsonConvert.DeserializeObject<GetHostResponse>(json);
+            GetHostRequest body = new GetHostRequest();
+            GetHostResponse result = FikaRequestHandler.GetHost(body);
 
             IP = result.Ip;
             Port = result.Port;

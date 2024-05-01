@@ -7,7 +7,6 @@ using EFT.InventoryLogic;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
-using Fika.Core.Coop.Models;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -16,7 +15,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -42,8 +40,8 @@ namespace Fika.Core.Coop.Components
         public List<string> queuedProfileIds = [];
         private Queue<SpawnObject> spawnQueue = new(50);
 
-        private Thread loopThread;
-        private CancellationTokenSource loopToken;
+        //private Thread loopThread;
+        //private CancellationTokenSource loopToken;
 
         public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId)
         {
@@ -60,6 +58,8 @@ namespace Fika.Core.Coop.Components
         internal FikaBTRManager_Host serverBTR = null;
 
         internal static GameObject CoopHandlerParent;
+
+        private Coroutine PingRoutine;
 
         #endregion
 
@@ -113,10 +113,10 @@ namespace Fika.Core.Coop.Components
         {
             if (MatchmakerAcceptPatches.IsServer)
             {
-                //StartCoroutine(PingServer());
-                loopToken = new();
+                PingRoutine = StartCoroutine(PingServer());
+                /*loopToken = new();
                 loopThread = new Thread(PingServers);
-                loopThread.Start();
+                loopThread.Start();*/
             }
 
             Logger.LogDebug("CoopHandler::Start");
@@ -137,12 +137,21 @@ namespace Fika.Core.Coop.Components
 
         private IEnumerator PingServer()
         {
-            string serialized = new PingRequest().ToJson();
+            //string serialized = new PingRequest().ToJson();
+            PingRequest pingRequest = new();
 
             while (true)
             {
                 yield return new WaitForSeconds(30);
-                RequestHandler.PutJson("/fika/update/ping", serialized);
+                //RequestHandler.PutJson("/fika/update/ping", serialized);
+                Task pingTask = FikaRequestHandler.UpdatePing(pingRequest);
+                while (!pingTask.IsCompleted)
+                {
+                    yield return null;
+                }
+
+                // TODO: replace with
+                // await FikaRequestHandler.UpdatePing();
             }
         }
 
@@ -152,8 +161,11 @@ namespace Fika.Core.Coop.Components
 
             while (RunAsyncTasks)
             {
-                Task.Delay(30000, loopToken.Token).GetAwaiter().GetResult();
+                //Task.Delay(30000, loopToken.Token).GetAwaiter().GetResult();
                 RequestHandler.PutJson("/fika/update/ping", serialized);
+
+                // TODO: replace with
+                // await FikaRequestHandler.UpdatePing();
             }
         }
 
@@ -162,12 +174,12 @@ namespace Fika.Core.Coop.Components
             Players.Clear();
 
             RunAsyncTasks = false;
-            loopToken?.Cancel();
+            /*loopToken?.Cancel();
             loopToken?.Dispose();
-            loopThread?.Join();
+            loopThread?.Join();*/
 
             StopCoroutine(ProcessSpawnQueue());
-            StopCoroutine(PingServer());
+            StopCoroutine(PingRoutine);
         }
 
         public bool RequestQuitGame { get; set; }

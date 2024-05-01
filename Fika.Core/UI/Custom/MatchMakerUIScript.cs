@@ -1,9 +1,10 @@
-﻿using Aki.Common.Http;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -134,8 +135,7 @@ namespace Fika.Core.UI.Custom
         private void ManualRefresh()
         {
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-            string data = RequestHandler.PostJson("/fika/location/raids", RaidSettings.ToJson());
-            Matches = JsonConvert.DeserializeObject<LobbyEntry[]>(data);
+            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
             _lastRefreshed = Time.time;
 
@@ -144,7 +144,7 @@ namespace Fika.Core.UI.Custom
 
         private void JoinMatch(string profileId, string serverId)
         {
-            if (MatchmakerAcceptPatches.JoinMatch(RaidSettings, profileId, serverId, out Coop.Models.CreateMatch result, out string errorMessage))
+            if (MatchmakerAcceptPatches.JoinMatch(RaidSettings, profileId, serverId, out CreateMatch result, out string errorMessage))
             {
                 MatchmakerAcceptPatches.SetGroupId(result.ServerId);
                 MatchmakerAcceptPatches.SetTimestamp(result.Timestamp);

@@ -1,5 +1,4 @@
-﻿using Aki.Common.Http;
-using Aki.Custom.Airdrops.Patches;
+﻿using Aki.Custom.Airdrops.Patches;
 using Aki.Custom.BTR.Patches;
 using Aki.Custom.Patches;
 using Aki.SinglePlayer.Patches.MainMenu;
@@ -23,10 +22,10 @@ using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.World;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
+using Fika.Core.Networking.Http;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -209,16 +208,13 @@ namespace Fika.Core
                 new ItemContextPatch().Enable();
             }
 
-            string difficulties = RequestHandler.GetJson("/singleplayer/settings/bot/difficulties/");
-            BotDifficulties = JsonConvert.DeserializeObject<BotDifficulties>(difficulties, new JsonSerializerSettings());
-
+            BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
         }
 
         private void GetClientConfig()
         {
-            string json = RequestHandler.GetJson("/fika/client/config");
-            ClientConfigModel clientConfig = JsonConvert.DeserializeObject<ClientConfigModel>(json);
+            ClientConfigModel clientConfig = FikaRequestHandler.GetClientConfig();
 
             UseBTR = clientConfig.UseBTR;
             FriendlyFire = clientConfig.FriendlyFire;
