@@ -231,7 +231,7 @@ namespace Fika.Core.Coop.FreeCamera
         {
             if (FikaPlugin.ShowExtractMessage.Value)
             {
-                extractText = FikaUIUtils.CreateOverlayText("Press 'F8' to extract");
+                extractText = FikaUIUtils.CreateOverlayText($"Press '{FikaPlugin.ExtractKey.Value.MainKey}' to extract");
             }
         }
 

@@ -248,7 +248,7 @@ namespace Fika.Core.Coop.Components
         {
             EQuitState quitState = GetQuitState();
 
-            if (Input.GetKeyDown(KeyCode.F8) && quitState != EQuitState.NONE && !RequestQuitGame)
+            if (Input.GetKeyDown(FikaPlugin.ExtractKey.Value.MainKey) && quitState != EQuitState.NONE && !RequestQuitGame)
             {
                 RequestQuitGame = true;
 
