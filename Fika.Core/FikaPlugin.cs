@@ -94,8 +94,10 @@ namespace Fika.Core
         };
 
         #region config values
+
         // Hidden
         public static ConfigEntry<bool> AcceptedTOS { get; set; }
+
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
@@ -103,6 +105,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+
         // Coop | Custom
         public static ConfigEntry<bool> UseNamePlates { get; set; }
         public static ConfigEntry<bool> UseHealthNumber { get; set; }
@@ -114,17 +117,19 @@ namespace Fika.Core
         public static ConfigEntry<float> PingSize { get; set; }
         public static ConfigEntry<int> PingTime { get; set; }
         public static ConfigEntry<bool> PlayPingAnimation { get; set; }
+
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
+
         // Performance
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
-
         public static ConfigEntry<bool> DespawnFurthest { get; set; }
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
         public static ConfigEntry<bool> CullPlayers { get; set; }
         public static ConfigEntry<float> CullingRange { get; set; }
+
         // Bot Limits            
         public static ConfigEntry<int> MaxBotsFactory { get; set; }
         public static ConfigEntry<int> MaxBotsCustoms { get; set; }
@@ -136,6 +141,7 @@ namespace Fika.Core
         public static ConfigEntry<int> MaxBotsShoreline { get; set; }
         public static ConfigEntry<int> MaxBotsLabs { get; set; }
         public static ConfigEntry<int> MaxBotsLighthouse { get; set; }
+
         // Network
         public static ConfigEntry<bool> NativeSockets { get; set; }
         public static ConfigEntry<string> ForceIP { get; set; }
@@ -143,6 +149,7 @@ namespace Fika.Core
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
+
         // Gameplay
         public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
         public static ConfigEntry<float> ArmpitDamageMultiplier { get; set; }
