@@ -51,7 +51,7 @@ public static class PingFactory
         {
             image = GetComponentInChildren<Image>();
             image.color = Color.clear;
-            Destroy(gameObject, 3f);
+            Destroy(gameObject, FikaPlugin.PingTime.Value);
         }
 
         private void Update()

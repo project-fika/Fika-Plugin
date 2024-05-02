@@ -112,6 +112,7 @@ namespace Fika.Core
         public static ConfigEntry<KeyboardShortcut> PingButton { get; set; }
         public static ConfigEntry<Color> PingColor { get; set; }
         public static ConfigEntry<float> PingSize { get; set; }
+        public static ConfigEntry<int> PingTime { get; set; }
         public static ConfigEntry<bool> PlayPingAnimation { get; set; }
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
@@ -248,21 +249,23 @@ namespace Fika.Core
 
             // Coop | Custom
 
-            UseNamePlates = Config.Bind("Coop | Custom", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            UseNamePlates = Config.Bind("Coop | Custom", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-            UseHealthNumber = Config.Bind("Coop | Custom", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            UseHealthNumber = Config.Bind("Coop | Custom", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-            UsePlateFactionSide = Config.Bind("Coop | Custom", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            UsePlateFactionSide = Config.Bind("Coop | Custom", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            NamePlateScale = Config.Bind("Coop | Custom", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 6 }));
+            NamePlateScale = Config.Bind("Coop | Custom", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 7 }));
 
-            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 2 }));
+            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 3 }));
+
+            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 2 }));
 
             PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
