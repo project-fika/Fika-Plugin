@@ -116,7 +116,7 @@ namespace Fika.Core.Coop.FreeCamera
                 ToggleCamera();
             }
 
-            if (FikaPlugin.FreeCamButton.Value.IsDown())
+            if (FikaPlugin.FreeCamButton.Value.IsPressed())
             {
                 if (!FikaPlugin.Instance.AllowFreeCam)
                 {

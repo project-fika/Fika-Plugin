@@ -128,7 +128,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     Server?.SendDataToAll(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            if (Input.GetKey(FikaPlugin.PingButton.Value.MainKey) && player.IsYourPlayer && player.HealthController.IsAlive && FikaPlugin.UsePingSystem.Value)
+            if (FikaPlugin.PingButton.Value.IsPressed() && player.IsYourPlayer && player.HealthController.IsAlive && FikaPlugin.UsePingSystem.Value)
             {
                 player?.Ping();
             }
