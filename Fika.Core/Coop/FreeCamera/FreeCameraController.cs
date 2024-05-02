@@ -9,6 +9,7 @@ using Fika.Core.UI;
 using Koenigz.PerfectCulling;
 using Koenigz.PerfectCulling.EFT;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -116,7 +117,7 @@ namespace Fika.Core.Coop.FreeCamera
                 ToggleCamera();
             }
 
-            if (FikaPlugin.FreeCamButton.Value.IsPressed())
+            if (FikaPlugin.FreeCamButton.Value.IsDown())
             {
                 if (!FikaPlugin.Instance.AllowFreeCam)
                 {
@@ -231,7 +232,13 @@ namespace Fika.Core.Coop.FreeCamera
         {
             if (FikaPlugin.ShowExtractMessage.Value)
             {
-                extractText = FikaUIUtils.CreateOverlayText($"Press '{FikaPlugin.ExtractKey.Value.MainKey}' to extract");
+                string text = FikaPlugin.ExtractKey.Value.MainKey.ToString();
+                if (FikaPlugin.ExtractKey.Value.Modifiers.Count() > 0)
+                {
+                    string modifiers = string.Join("+", FikaPlugin.ExtractKey.Value.Modifiers);
+                    text = modifiers + "+" + text;
+                }
+                extractText = FikaUIUtils.CreateOverlayText($"Press '{text}' to extract");
             }
         }
 

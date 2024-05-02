@@ -184,7 +184,7 @@ namespace Fika.Core.Coop.Components
             StopCoroutine(PingRoutine);
         }
 
-        public bool RequestQuitGame { get; set; }
+        private bool requestQuitGame = false;
 
         /// <summary>
         /// The state your character or game is in to Quit.
@@ -248,9 +248,9 @@ namespace Fika.Core.Coop.Components
         {
             EQuitState quitState = GetQuitState();
 
-            if (FikaPlugin.ExtractKey.Value.IsPressed() && quitState != EQuitState.NONE && !RequestQuitGame)
+            if (FikaPlugin.ExtractKey.Value.IsDown() && quitState != EQuitState.NONE && !requestQuitGame)
             {
-                RequestQuitGame = true;
+                requestQuitGame = true;
 
                 // If you are the server / host
                 if (MatchmakerAcceptPatches.IsServer)
@@ -259,13 +259,13 @@ namespace Fika.Core.Coop.Components
                     if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
                     {
                         NotificationManagerClass.DisplayWarningNotification("HOSTING: You cannot exit the game until all clients have disconnected.");
-                        RequestQuitGame = false;
+                        requestQuitGame = false;
                         return;
                     }
                     else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0 && Singleton<FikaServer>.Instance.timeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5) && Singleton<FikaServer>.Instance.hasHadPeer)
                     {
                         NotificationManagerClass.DisplayWarningNotification($"HOSTING: Please wait at least 5 seconds after the last peer disconnected before quitting.");
-                        RequestQuitGame = false;
+                        requestQuitGame = false;
                         return;
                     }
                     else
