@@ -1,22 +1,22 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.Common.Http;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.UI;
-using LiteNetLib;
-using LiteNetLib.Utils;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
-using Fika.Core.Coop.Models;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using Open.Nat;
 using System;
 using System.Collections.Generic;
@@ -150,8 +150,8 @@ namespace Fika.Core.Networking
             NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
-            string body = new SetHostRequest(MyExternalIP, Port).ToJson();
-            RequestHandler.PostJson("/fika/update/sethost", body);
+            SetHostRequest body = new(MyExternalIP, Port);
+            FikaRequestHandler.UpdateSetHost(body);
 
             Singleton<FikaServer>.Create(this);
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));

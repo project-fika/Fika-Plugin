@@ -42,7 +42,7 @@ namespace Fika.Core.Console
                             player.Teleport(myPosition.Original.position + myPosition.Original.forward * 2);
                         }
                     }
-                    ConsoleScreen.Log($"Teleported {count} AI to host."); 
+                    ConsoleScreen.Log($"Teleported {count} AI to host.");
                 }
                 else
                 {

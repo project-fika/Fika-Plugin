@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Coop.Models
+namespace Fika.Core.Networking.Http.Models
 {
     [DataContract]
     public struct SpawnPointResponse

@@ -1,8 +1,7 @@
-﻿using Aki.Common.Http;
-using EFT;
+﻿using EFT;
 using EFT.UI.Matchmaker;
-using Fika.Core.Coop.Models;
-using Newtonsoft.Json;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -86,8 +85,7 @@ namespace Fika.Core.Coop.Matchmaker
             }
 
             var body = new MatchJoinRequest(serverId, profileId);
-            var json = RequestHandler.PostJson("/fika/raid/join", body.ToJson());
-            result = JsonConvert.DeserializeObject<CreateMatch>(json);
+            result = FikaRequestHandler.RaidJoin(body);
 
             if (result.GameVersion != FikaPlugin.EFTVersionMajor)
             {
@@ -109,15 +107,12 @@ namespace Fika.Core.Coop.Matchmaker
         {
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             var body = new CreateMatch(profileId, hostUsername, timestamp, raidSettings, HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
-            string text = RequestHandler.PostJson("/fika/raid/create", body.ToJson());
 
-            if (!string.IsNullOrEmpty(text))
-            {
-                SetGroupId(profileId);
-                SetTimestamp(timestamp);
-                MatchingType = EMatchmakerType.GroupLeader;
-                return;
-            }
+            FikaRequestHandler.RaidCreate(body);
+
+            SetGroupId(profileId);
+            SetTimestamp(timestamp);
+            MatchingType = EMatchmakerType.GroupLeader;
         }
     }
 }
