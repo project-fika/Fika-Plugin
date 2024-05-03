@@ -496,7 +496,7 @@ namespace Fika.Core.Coop.Players
                 HasWorldInteractionPacket = true,
                 WorldInteractionPacket = new()
                 {
-                    InteractiveId = interactiveObject.Id,
+                    InteractiveId = interactiveObject.Id.GetHashCode(),
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
                     ItemId = (interactionResult is GClass2964 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
@@ -521,7 +521,7 @@ namespace Fika.Core.Coop.Players
                 HasWorldInteractionPacket = true,
                 WorldInteractionPacket = new()
                 {
-                    InteractiveId = door.Id,
+                    InteractiveId = door.Id.GetHashCode(),
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Execute,
                     ItemId = (interactionResult is GClass2964 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
@@ -675,7 +675,7 @@ namespace Fika.Core.Coop.Players
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (coopHandler.GetInteractiveObject(packet.InteractiveId, out WorldInteractiveObject worldInteractiveObject))
+                if (coopHandler.WorldInteractiveHandler.InteractiveObjects.TryGetValue(packet.InteractiveId, out WorldInteractiveObject worldInteractiveObject))
                 {
                     if (worldInteractiveObject.isActiveAndEnabled)
                     {
@@ -951,7 +951,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    if (coopHandler.GetInteractiveObject(packet.ContainerInteractionPacket.InteractiveId, out WorldInteractiveObject lootableContainer) as LootableContainer)
+                    if (coopHandler.WorldInteractiveHandler.InteractiveObjects.TryGetValue(packet.ContainerInteractionPacket.InteractiveId, out WorldInteractiveObject interactiveObject) && interactiveObject is LootableContainer lootableContainer)
                     {
                         if (lootableContainer.isActiveAndEnabled)
                         {
@@ -1422,7 +1422,7 @@ namespace Fika.Core.Coop.Players
                     HasContainerInteractionPacket = true,
                     ContainerInteractionPacket = new()
                     {
-                        InteractiveId = container.Id,
+                        InteractiveId = container.Id.GetHashCode(),
                         InteractionType = EInteractionType.Close
                     }
                 });
