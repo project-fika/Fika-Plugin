@@ -33,9 +33,9 @@ namespace Fika.Core.Coop.Components
         /// <summary>
         /// ProfileId to Player instance
         /// </summary>
-        public Dictionary<string, CoopPlayer> Players { get; } = new();
+        public Dictionary<int, CoopPlayer> Players { get; } = new();
         public int HumanPlayers = 1;
-        public List<string> ExtractedPlayers { get; set; } = [];
+        public List<int> ExtractedPlayers { get; set; } = [];
         ManualLogSource Logger { get; set; }
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
@@ -45,12 +45,13 @@ namespace Fika.Core.Coop.Components
         //private Thread loopThread;
         //private CancellationTokenSource loopToken;
 
-        public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI)
+        public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId)
         {
             public Profile Profile { get; set; } = profile;
             public Vector3 Position { get; set; } = position;
             public bool IsAlive { get; set; } = isAlive;
             public bool IsAI { get; set; } = isAI;
+            public int NetId { get; set; } = netId;
         }
 
         public bool RunAsyncTasks { get; set; } = true;
@@ -183,7 +184,7 @@ namespace Fika.Core.Coop.Components
             StopCoroutine(PingRoutine);
         }
 
-        public bool RequestQuitGame { get; set; }
+        private bool requestQuitGame = false;
 
         /// <summary>
         /// The state your character or game is in to Quit.
@@ -232,7 +233,7 @@ namespace Fika.Core.Coop.Components
             }
 
             // Extractions
-            if (coopGame.ExtractedPlayers.Contains(MyPlayer.ProfileId))
+            if (coopGame.ExtractedPlayers.Contains(MyPlayer.NetId))
             {
                 quitState = EQuitState.YouHaveExtracted;
             }
@@ -247,9 +248,9 @@ namespace Fika.Core.Coop.Components
         {
             EQuitState quitState = GetQuitState();
 
-            if (Input.GetKeyDown(KeyCode.F8) && quitState != EQuitState.NONE && !RequestQuitGame)
+            if (FikaPlugin.ExtractKey.Value.IsDown() && quitState != EQuitState.NONE && !requestQuitGame)
             {
-                RequestQuitGame = true;
+                requestQuitGame = true;
 
                 // If you are the server / host
                 if (MatchmakerAcceptPatches.IsServer)
@@ -258,13 +259,13 @@ namespace Fika.Core.Coop.Components
                     if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
                     {
                         NotificationManagerClass.DisplayWarningNotification("HOSTING: You cannot exit the game until all clients have disconnected.");
-                        RequestQuitGame = false;
+                        requestQuitGame = false;
                         return;
                     }
                     else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0 && Singleton<FikaServer>.Instance.timeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5) && Singleton<FikaServer>.Instance.hasHadPeer)
                     {
                         NotificationManagerClass.DisplayWarningNotification($"HOSTING: Please wait at least 5 seconds after the last peer disconnected before quitting.");
-                        RequestQuitGame = false;
+                        requestQuitGame = false;
                         return;
                     }
                     else
@@ -325,7 +326,7 @@ namespace Fika.Core.Coop.Components
             if (Players.Count > 0)
             {
                 requestPacket.HasCharacters = true;
-                requestPacket.Characters = [.. Players.Keys, .. queuedProfileIds];
+                requestPacket.Characters = [.. Players.Values.Select(p => p.ProfileId), .. queuedProfileIds];
             }
 
             NetDataWriter writer = Singleton<FikaClient>.Instance.DataWriter;
@@ -382,7 +383,7 @@ namespace Fika.Core.Coop.Components
                 }
             });
 
-            LocalPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI);
+            LocalPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
 
             if (!spawnObject.IsAlive)
             {
@@ -439,7 +440,7 @@ namespace Fika.Core.Coop.Components
             }
         }
 
-        public void QueueProfile(Profile profile, Vector3 position, bool isAlive = true, bool isAI = false)
+        public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
         {
             if (Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == profile.ProfileId))
                 return;
@@ -452,7 +453,7 @@ namespace Fika.Core.Coop.Components
 
             queuedProfileIds.Add(profile.ProfileId);
             Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
-            spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI));
+            spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId));
         }
 
         public WorldInteractiveObject GetInteractiveObject(string objectId, out WorldInteractiveObject worldInteractiveObject)
@@ -464,7 +465,7 @@ namespace Fika.Core.Coop.Components
             return null;
         }
 
-        private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI)
+        private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
             LocalPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(
                 playerId,
@@ -488,12 +489,13 @@ namespace Fika.Core.Coop.Components
             if (otherPlayer == null)
                 return null;
 
+            ((CoopPlayer)otherPlayer).NetId = netId;
             if (!isAI)
                 HumanPlayers++;
 
-            if (!Players.ContainsKey(profile.ProfileId))
+            if (!Players.ContainsKey(netId))
             {
-                Players.Add(profile.ProfileId, (CoopPlayer)otherPlayer);
+                Players.Add(netId, (CoopPlayer)otherPlayer);
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))

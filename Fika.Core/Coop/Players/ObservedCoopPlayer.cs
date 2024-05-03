@@ -25,7 +25,9 @@ using static Fika.Core.Networking.FikaSerialization;
 namespace Fika.Core.Coop.Players
 {
     /// <summary>
-    /// Observed players are any other players in the world for a client, including bots. They are all being handled by the server that moves them through packets.
+    /// Observed players are any other players in the world for a client, including bots.
+    /// They are all being handled by the server that moves them through packets.
+    /// As a host this is only other clients.
     /// </summary>
     public class ObservedCoopPlayer : CoopPlayer
     {
@@ -326,6 +328,7 @@ namespace Fika.Core.Coop.Players
         {
             if (!IsObservedAI)
             {
+                ShotReactions(damageInfo, bodyPartType);
                 return null;
             }
 
@@ -399,6 +402,7 @@ namespace Fika.Core.Coop.Players
             }
             else
             {
+                ShotReactions(damageInfo, bodyPartType);
                 return null;
             }
         }
@@ -793,8 +797,8 @@ namespace Fika.Core.Coop.Players
                 PacketSender = gameObject.AddComponent<ObservedPacketSender>();
                 GenericPacket genericPacket = new(EPackageType.LoadBot)
                 {
-                    ProfileId = ProfileId,
-                    BotProfileId = ProfileId
+                    NetId = NetId,
+                    BotNetId = NetId
                 };
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);

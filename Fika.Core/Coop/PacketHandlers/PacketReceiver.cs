@@ -43,14 +43,14 @@ namespace Fika.Core.Coop.PacketHandlers
                 Client = Singleton<FikaClient>.Instance;
             }
 
-            LastState = new(player.ProfileId, player.Position, player.Rotation, player.HeadRotation,
+            LastState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation,
                             player.LastDirection, player.CurrentManagedState.Name, player.MovementContext.Tilt,
                             player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
                             player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
                             player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled, player.MovementContext.IsGrounded,
                             false, 0, Vector3.zero);
 
-            NewState = new(player.ProfileId, player.Position, player.Rotation, player.HeadRotation,
+            NewState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation,
                             player.LastDirection, player.CurrentManagedState.Name, player.MovementContext.Tilt,
                             player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
                             player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,

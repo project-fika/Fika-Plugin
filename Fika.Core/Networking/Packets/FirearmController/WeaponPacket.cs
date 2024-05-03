@@ -6,9 +6,9 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
-    public struct WeaponPacket(string profileId) : INetSerializable
+    public struct WeaponPacket(int netId) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public bool HasShotInfo = false;
         public ShotInfoPacket ShotInfoPacket;
         public bool ChangeFireMode = false;
@@ -57,7 +57,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             HasShotInfo = reader.GetBool();
             if (HasShotInfo)
                 ShotInfoPacket = ShotInfoPacket.Deserialize(reader);
@@ -127,7 +127,7 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             writer.Put(HasShotInfo);
             if (HasShotInfo)
                 ShotInfoPacket.Serialize(writer, ShotInfoPacket);

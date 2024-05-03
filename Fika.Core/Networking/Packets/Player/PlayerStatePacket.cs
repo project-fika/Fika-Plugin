@@ -4,12 +4,12 @@ using static BaseBallistic;
 
 namespace Fika.Core.Networking
 {
-    public struct PlayerStatePacket(string profileId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
+    public struct PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
         EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed,
         bool isProne, float poseLevel, bool isSprinting, GClass681.GStruct35 stamina, int blindfire,
         float weaponOverlap, bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, Vector3 surfaceNormal) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public Vector3 Position = position;
         public Vector2 Rotation = rotation;
         public Vector3 HeadRotation = headRotation;
@@ -33,7 +33,7 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             writer.Put(Position);
             writer.Put(Rotation);
             writer.Put(HeadRotation);
@@ -62,7 +62,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             Position = reader.GetVector3();
             Rotation = reader.GetVector2();
             HeadRotation = reader.GetVector3();

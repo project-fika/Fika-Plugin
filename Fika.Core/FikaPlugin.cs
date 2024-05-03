@@ -94,8 +94,10 @@ namespace Fika.Core
         };
 
         #region config values
+
         // Hidden
         public static ConfigEntry<bool> AcceptedTOS { get; set; }
+
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
@@ -113,22 +115,28 @@ namespace Fika.Core
         public static ConfigEntry<float> OpacityInADS { get; set; }
         public static ConfigEntry<float> MaxDistanceToShow { get; set; }
         public static ConfigEntry<float> MinimumOpacity { get; set; }
-        public static ConfigEntry<float> DistanceScaleMax { get; set; }
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
         // Coop | Custom
+        public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
         public static ConfigEntry<bool> UsePingSystem { get; set; }
         public static ConfigEntry<KeyboardShortcut> PingButton { get; set; }
         public static ConfigEntry<Color> PingColor { get; set; }
         public static ConfigEntry<float> PingSize { get; set; }
+        public static ConfigEntry<int> PingTime { get; set; }
         public static ConfigEntry<bool> PlayPingAnimation { get; set; }
+
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
+
         // Performance
+        public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
+        public static ConfigEntry<bool> DespawnFurthest { get; set; }
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
         public static ConfigEntry<bool> CullPlayers { get; set; }
         public static ConfigEntry<float> CullingRange { get; set; }
+        
         // Performance | Bot Limits            
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
         public static ConfigEntry<bool> DespawnFurthest { get; set; }
@@ -143,6 +151,7 @@ namespace Fika.Core
         public static ConfigEntry<int> MaxBotsShoreline { get; set; }
         public static ConfigEntry<int> MaxBotsLabs { get; set; }
         public static ConfigEntry<int> MaxBotsLighthouse { get; set; }
+
         // Network
         public static ConfigEntry<bool> NativeSockets { get; set; }
         public static ConfigEntry<string> ForceIP { get; set; }
@@ -150,6 +159,7 @@ namespace Fika.Core
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
+
         // Gameplay
         public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
         public static ConfigEntry<float> ArmpitDamageMultiplier { get; set; }
@@ -242,15 +252,17 @@ namespace Fika.Core
 
             // Coop
 
-            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 1 }));
+            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 2 }));
+
+            ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Coop | NamePlates Custom
 
@@ -279,11 +291,15 @@ namespace Fika.Core
             // Coop | Custom
             UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 2 }));
+            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+
+            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 3 }));
+
+            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 2 }));
 
             PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 

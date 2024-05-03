@@ -3,15 +3,15 @@ using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
-    public struct BTRInteractionPacket(string profileId) : INetSerializable
+    public struct BTRInteractionPacket(int netId) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public bool HasInteractPacket = false;
         public PlayerInteractPacket InteractPacket;
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             HasInteractPacket = reader.GetBool();
             if (HasInteractPacket)
             {
@@ -28,7 +28,7 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             writer.Put(HasInteractPacket);
             if (HasInteractPacket)
             {

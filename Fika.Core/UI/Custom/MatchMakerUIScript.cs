@@ -7,6 +7,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
 using HarmonyLib;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;

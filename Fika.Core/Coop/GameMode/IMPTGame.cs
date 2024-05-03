@@ -5,7 +5,7 @@ namespace Fika.Core.Coop.GameMode
 {
     public interface IFikaGame
     {
-        public List<string> ExtractedPlayers { get; }
+        public List<int> ExtractedPlayers { get; }
 
         ExitStatus MyExitStatus { get; set; }
 

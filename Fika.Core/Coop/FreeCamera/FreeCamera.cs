@@ -258,7 +258,7 @@ namespace Fika.Core.Coop.FreeCamera
 
                 Player player = Singleton<GameWorld>.Instance.MainPlayer;
 
-                if (!coopHandler.ExtractedPlayers.Contains(player.ProfileId) && player.HealthController.IsAlive)
+                if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
                 {
                     player?.Teleport(transform.position);
                 }
