@@ -719,7 +719,7 @@ namespace Fika.Core.Networking
 
         public struct WorldInteractionPacket
         {
-            public int InteractiveId;
+            public string InteractiveId;
             public EInteractionType InteractionType;
             public EInteractionStage InteractionStage;
             public string ItemId;
@@ -728,7 +728,7 @@ namespace Fika.Core.Networking
             {
                 WorldInteractionPacket packet = new()
                 {
-                    InteractiveId = reader.GetInt(),
+                    InteractiveId = reader.GetString(),
                     InteractionType = (EInteractionType)reader.GetByte(),
                     InteractionStage = (EInteractionStage)reader.GetByte(),
                 };
@@ -750,13 +750,13 @@ namespace Fika.Core.Networking
 
         public struct ContainerInteractionPacket
         {
-            public int InteractiveId;
+            public string InteractiveId;
             public EInteractionType InteractionType;
 
             public static ContainerInteractionPacket Deserialize(NetDataReader reader)
             {
                 ContainerInteractionPacket packet = new();
-                packet.InteractiveId = reader.GetInt();
+                packet.InteractiveId = reader.GetString();
                 packet.InteractionType = (EInteractionType)reader.GetInt();
                 return packet;
             }

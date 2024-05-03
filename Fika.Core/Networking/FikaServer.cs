@@ -53,11 +53,13 @@ namespace Fika.Core.Networking
         public bool hasHadPeer = false;
         private ManualLogSource serverLogger;
         public bool ServerReady = false;
-        // Start at 1 to avoid having 0 and making us think it's working when it's not
-        private int _currentNetId = 1;
+        private int _currentNetId;
 
         public async void Start()
         {
+            // Start at 1 to avoid having 0 and making us think it's working when it's not
+            _currentNetId = 1;
+
             NetDebug.Logger = this;
             serverLogger = new("Fika Server");
 

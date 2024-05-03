@@ -6,7 +6,6 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Handlers;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
@@ -29,8 +28,7 @@ namespace Fika.Core.Coop.Components
     public class CoopHandler : MonoBehaviour
     {
         #region Fields/Properties        
-        public WorldInteractiveHandler WorldInteractiveHandler { get; } = new WorldInteractiveHandler();
-
+        public Dictionary<string, WorldInteractiveObject> ListOfInteractiveObjects { get; private set; } = [];
         public string ServerId { get; set; } = null;
         /// <summary>
         /// ProfileId to Player instance
@@ -135,7 +133,7 @@ namespace Fika.Core.Coop.Components
             WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
             foreach (WorldInteractiveObject interactiveObject in interactiveObjects)
             {
-                WorldInteractiveHandler.RegisterWorldInteractive(interactiveObject);
+                ListOfInteractiveObjects.Add(interactiveObject.Id, interactiveObject);
             }
         }
 
@@ -456,6 +454,15 @@ namespace Fika.Core.Coop.Components
             queuedProfileIds.Add(profile.ProfileId);
             Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
             spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId));
+        }
+
+        public WorldInteractiveObject GetInteractiveObject(string objectId, out WorldInteractiveObject worldInteractiveObject)
+        {
+            if (ListOfInteractiveObjects.TryGetValue(objectId, out worldInteractiveObject))
+            {
+                return worldInteractiveObject;
+            }
+            return null;
         }
 
         private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)

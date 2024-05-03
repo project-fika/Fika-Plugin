@@ -186,7 +186,7 @@ namespace Aki.Custom.Airdrops
                     if (!string.IsNullOrEmpty(ContainerId))
                     {
                         AirdropBox.Container.Id = ContainerId;
-                        coopHandler.WorldInteractiveHandler.RegisterWorldInteractive(AirdropBox.Container);
+                        coopHandler.ListOfInteractiveObjects.Add(ContainerId, AirdropBox.Container);
                         Logger.LogInfo($"Adding AirdropBox {AirdropBox.Container.Id} to interactive objects.");
                     }
                     else
@@ -285,17 +285,14 @@ namespace Aki.Custom.Airdrops
 
             if (AirdropBox.Container != null && CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                var hash = AirdropBox.Container.Id.GetHashCode();
-                var interactiveHandler = coopHandler.WorldInteractiveHandler;
-                if (interactiveHandler.InteractiveObjects.ContainsKey(hash))
+                if (coopHandler.GetInteractiveObject(AirdropBox.Container.Id, out _))
                 {
                     Logger.LogInfo("Existing crate already exists, setting value to " + ContainerCount);
                     AirdropBox.Container.Id = AirdropBox.Container.Id + $"_{ContainerCount}";
                     ContainerCount++;
                 }
-
-                hash = interactiveHandler.RegisterWorldInteractive(AirdropBox.Container);
-                Logger.LogInfo($"Adding AirdropBox {AirdropBox.Container.Id} with hash '{hash}' to interactive objects.");
+                coopHandler.ListOfInteractiveObjects.Add(AirdropBox.Container.Id, AirdropBox.Container);
+                Logger.LogInfo($"Adding AirdropBox {AirdropBox.Container.Id} to interactive objects.");
             }
 
             // Get the lootData. Send to clients.
