@@ -27,6 +27,9 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Coop.Players
 {
+    /// <summary>
+    /// CoopPlayer is the LocalPlayer there can only be one CoopPlayer in every game and that is yourself.
+    /// </summary>
     public class CoopPlayer : LocalPlayer
     {
         public PacketReceiver PacketReceiver;
@@ -39,6 +42,8 @@ namespace Fika.Core.Coop.Players
         public RagdollPacket RagdollPacket = default;
         public bool hasGround = false;
         public Transform RaycastCameraTransform;
+        public int NetId;
+        public bool IsObservedAI = false;
 
         public static async Task<LocalPlayer> Create(
             int playerId,
@@ -55,6 +60,7 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode,
             Func<float> getSensitivity, Func<float> getAimingSensitivity,
             GInterface99 filter,
+            int netId,
             AbstractQuestControllerClass questController = null,
             AbstractAchievementControllerClass achievementsController = null)
         {
@@ -74,7 +80,7 @@ namespace Fika.Core.Coop.Players
                     isThirdPerson: false);
 
             player.IsYourPlayer = true;
-
+            player.NetId = netId;
             CoopClientInventoryController inventoryController = new(player, profile, true);
 
             if (questController == null)
@@ -140,7 +146,7 @@ namespace Fika.Core.Coop.Players
             base.BtrInteraction(btr, placeId, interaction);
             if (MatchmakerAcceptPatches.IsClient)
             {
-                BTRInteractionPacket packet = new(ProfileId)
+                BTRInteractionPacket packet = new(NetId)
                 {
                     HasInteractPacket = true,
                     InteractPacket = btr.GetInteractWithBtrPacket(placeId, interaction)
@@ -158,7 +164,7 @@ namespace Fika.Core.Coop.Players
                     bool success = coopHandler.serverBTR.HostInteraction(this, interactPacket);
                     if (success)
                     {
-                        BTRInteractionPacket packet = new(ProfileId)
+                        BTRInteractionPacket packet = new(NetId)
                         {
                             HasInteractPacket = true,
                             InteractPacket = interactPacket
@@ -194,11 +200,6 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
-                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
-                {
-                    return;
-                }
-
                 if (colliderType == EBodyPartColliderType.HeadCommon)
                 {
                     damageInfo.Damage *= FikaPlugin.HeadDamageMultiplier.Value;
@@ -215,15 +216,12 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
-            if (IsYourPlayer)
+            if (damageInfo.Player != null & damageInfo.Player.iPlayer is CoopBot)
             {
-                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
-                {
-                    return null;
-                }
+                return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
-            return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+            return null;            
         }
 
         public override void Proceed(bool withNetwork, Callback<GInterface125> callback, bool scheduled = true)
@@ -552,7 +550,7 @@ namespace Fika.Core.Coop.Players
                 SetupDogTag();
             }
 
-            return new(ProfileId)
+            return new(NetId)
             {
                 Packet = packet,
                 KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
@@ -818,7 +816,7 @@ namespace Fika.Core.Coop.Players
 
                     GenericPacket genericPacket = new()
                     {
-                        ProfileId = ProfileId,
+                        NetId = NetId,
                         PacketType = EPackageType.Ping,
                         PingLocation = hitPoint,
                         PingType = pingType,
@@ -1262,6 +1260,7 @@ namespace Fika.Core.Coop.Players
                 DamageType = packet.DamageInfo.DamageType,
                 BodyPartColliderType = packet.DamageInfo.ColliderType,
                 HitPoint = packet.DamageInfo.Point,
+                HitNormal = packet.DamageInfo.HitNormal,
                 Direction = packet.DamageInfo.Direction,
                 PenetrationPower = packet.DamageInfo.PenetrationPower,
                 BlockedBy = packet.DamageInfo.BlockedBy,
@@ -1276,6 +1275,13 @@ namespace Fika.Core.Coop.Players
                 if (player != null)
                 {
                     damageInfo.Player = player;
+                    if (IsYourPlayer)
+                    {
+                        if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
+                        {
+                            return;
+                        } 
+                    }
                 }
 
                 if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.DamageInfo.ProfileId).HandsController.Item is Weapon weapon)

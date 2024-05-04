@@ -4,9 +4,9 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
-    public struct HealthSyncPacket(string profileId) : INetSerializable
+    public struct HealthSyncPacket(int netId) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public GStruct346 Packet;
         public string KillerId;
         public string KillerWeaponId;
@@ -15,7 +15,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             GStruct346 packet = new()
             {
                 SyncType = (GStruct346.ESyncType)reader.GetInt()
@@ -262,7 +262,7 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             GStruct346.GStruct365 packet = Packet.Data;
             writer.Put((int)Packet.SyncType);
             switch (Packet.SyncType)

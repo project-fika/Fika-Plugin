@@ -3,9 +3,9 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
-    public struct InventoryPacket(string profileId) : INetSerializable
+    public struct InventoryPacket(int netId) : INetSerializable
     {
-        public string ProfileId = profileId;
+        public int NetId = netId;
         public bool HasItemControllerExecutePacket = false;
         public ItemControllerExecutePacket ItemControllerExecutePacket;
         public bool HasSearchPacket = false;
@@ -13,7 +13,7 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(ProfileId);
+            writer.Put(NetId);
             writer.Put(HasItemControllerExecutePacket);
             if (HasItemControllerExecutePacket)
                 ItemControllerExecutePacket.Serialize(writer, ItemControllerExecutePacket);
@@ -24,7 +24,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
             HasItemControllerExecutePacket = reader.GetBool();
             if (HasItemControllerExecutePacket)
                 ItemControllerExecutePacket = ItemControllerExecutePacket.Deserialize(reader);

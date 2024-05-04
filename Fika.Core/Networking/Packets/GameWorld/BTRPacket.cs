@@ -8,7 +8,7 @@ namespace Fika.Core.Networking
     {
         public BTRDataPacket BTRDataPacket;
         public bool HasBotProfileId = false;
-        public string BotProfileId;
+        public int BotNetId;
         public bool HasShot = false;
         public Vector3 ShotPosition;
         public Vector3 ShotDirection;
@@ -18,7 +18,7 @@ namespace Fika.Core.Networking
             BTRDataPacket = BTRDataPacketUtils.Deserialize(reader);
             HasBotProfileId = reader.GetBool();
             if (HasBotProfileId)
-                BotProfileId = reader.GetString();
+                BotNetId = reader.GetInt();
             HasShot = reader.GetBool();
             if (HasShot)
             {
@@ -32,7 +32,7 @@ namespace Fika.Core.Networking
             BTRDataPacketUtils.Serialize(writer, BTRDataPacket);
             writer.Put(HasBotProfileId);
             if (HasBotProfileId)
-                writer.Put(BotProfileId);
+                writer.Put(BotNetId);
             writer.Put(HasShot);
             if (HasShot)
             {

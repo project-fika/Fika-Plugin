@@ -50,7 +50,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
-            PlayerStatePacket playerStatePacket = new(player.ProfileId, player.Position, player.Rotation, player.HeadRotation,
+            PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation,
                             player.LastDirection, player.CurrentManagedState.Name, player.MovementContext.SmoothedTilt,
                             player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
                             player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 for (int i = 0; i < firearmPackets; i++)
                 {
                     WeaponPacket firearmPacket = FirearmPackets.Dequeue();
-                    firearmPacket.ProfileId = player.ProfileId;
+                    firearmPacket.NetId = player.NetId;
 
                     Writer?.Reset();
                     Server?.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
@@ -86,7 +86,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 for (int i = 0; i < healthPackets; i++)
                 {
                     DamagePacket healthPacket = HealthPackets.Dequeue();
-                    healthPacket.ProfileId = player.ProfileId;
+                    healthPacket.NetId = player.NetId;
 
                     Writer?.Reset();
                     Server?.SendDataToAll(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 for (int i = 0; i < inventoryPackets; i++)
                 {
                     InventoryPacket inventoryPacket = InventoryPackets.Dequeue();
-                    inventoryPacket.ProfileId = player.ProfileId;
+                    inventoryPacket.NetId = player.NetId;
 
                     Writer?.Reset();
                     Server?.SendDataToAll(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
@@ -110,7 +110,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 for (int i = 0; i < commonPlayerPackets; i++)
                 {
                     CommonPlayerPacket commonPlayerPacket = CommonPlayerPackets.Dequeue();
-                    commonPlayerPacket.ProfileId = player.ProfileId;
+                    commonPlayerPacket.NetId = player.NetId;
 
                     Writer?.Reset();
                     Server?.SendDataToAll(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
@@ -122,13 +122,13 @@ namespace Fika.Core.Coop.PacketHandlers
                 for (int i = 0; i < healthSyncPackets; i++)
                 {
                     HealthSyncPacket healthSyncPacket = HealthSyncPackets.Dequeue();
-                    healthSyncPacket.ProfileId = player.ProfileId;
+                    healthSyncPacket.NetId = player.NetId;
 
                     Writer?.Reset();
                     Server?.SendDataToAll(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            if (Input.GetKey(FikaPlugin.PingButton.Value.MainKey) && player.IsYourPlayer && player.HealthController.IsAlive && FikaPlugin.UsePingSystem.Value)
+            if (FikaPlugin.PingButton.Value.IsPressed() && player.IsYourPlayer && player.HealthController.IsAlive && FikaPlugin.UsePingSystem.Value)
             {
                 player?.Ping();
             }
@@ -167,7 +167,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
                     GenericPacket packet = new()
                     {
-                        ProfileId = player.ProfileId,
+                        NetId = player.NetId,
                         PacketType = EPackageType.TrainSync,
                         DepartureTime = time
                     };

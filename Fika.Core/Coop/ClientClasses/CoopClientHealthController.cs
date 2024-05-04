@@ -37,14 +37,14 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (!isBot)
             {
-                coopPlayer?.PacketSender?.HealthSyncPackets.Enqueue(new(coopPlayer.ProfileId)
+                coopPlayer?.PacketSender?.HealthSyncPackets.Enqueue(new(coopPlayer.NetId)
                 {
                     Packet = packet
                 });
             }
             else
             {
-                coopBot?.PacketSender?.HealthSyncPackets.Enqueue(new(coopBot.ProfileId)
+                coopBot?.PacketSender?.HealthSyncPackets.Enqueue(new(coopBot.NetId)
                 {
                     Packet = packet
                 });

@@ -8,6 +8,7 @@ using EFT.GlobalEvents;
 using EFT.InventoryLogic;
 using EFT.Vehicle;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib;
@@ -138,7 +139,7 @@ namespace Fika.Core.Coop.BTR
             {
                 BTRDataPacket = btrDataPacket,
                 HasBotProfileId = true,
-                BotProfileId = btrBotShooter.ProfileId
+                BotNetId = ((CoopPlayer)btrBotShooter.GetPlayer).NetId
             };
 
             writer.Reset();
@@ -383,7 +384,7 @@ namespace Fika.Core.Coop.BTR
 
             GenericPacket responsePacket = new(EPackageType.TraderServiceNotification)
             {
-                ProfileId = gameWorld.MainPlayer.ProfileId,
+                NetId = ((CoopPlayer)gameWorld.MainPlayer).NetId,
                 TraderServiceType = serviceType
             };
 
@@ -417,7 +418,7 @@ namespace Fika.Core.Coop.BTR
 
             GenericPacket responsePacket = new(EPackageType.TraderServiceNotification)
             {
-                ProfileId = gameWorld.MainPlayer.ProfileId,
+                NetId = ((CoopPlayer)gameWorld.MainPlayer).NetId,
                 TraderServiceType = packet.TraderServiceType
             };
 

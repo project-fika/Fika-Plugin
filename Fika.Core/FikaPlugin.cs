@@ -94,14 +94,18 @@ namespace Fika.Core
         };
 
         #region config values
+
         // Hidden
         public static ConfigEntry<bool> AcceptedTOS { get; set; }
+
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
         public static ConfigEntry<bool> ShowExtractMessage { get; set; }
         public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
+        public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+
         // Coop | Custom
         public static ConfigEntry<bool> UseNamePlates { get; set; }
         public static ConfigEntry<bool> UseHealthNumber { get; set; }
@@ -111,9 +115,12 @@ namespace Fika.Core
         public static ConfigEntry<KeyboardShortcut> PingButton { get; set; }
         public static ConfigEntry<Color> PingColor { get; set; }
         public static ConfigEntry<float> PingSize { get; set; }
+        public static ConfigEntry<int> PingTime { get; set; }
         public static ConfigEntry<bool> PlayPingAnimation { get; set; }
+
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
+
         // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
@@ -134,6 +141,7 @@ namespace Fika.Core
         public static ConfigEntry<int> MaxBotsShoreline { get; set; }
         public static ConfigEntry<int> MaxBotsLabs { get; set; }
         public static ConfigEntry<int> MaxBotsLighthouse { get; set; }
+
         // Network
         public static ConfigEntry<bool> NativeSockets { get; set; }
         public static ConfigEntry<string> ForceIP { get; set; }
@@ -141,6 +149,8 @@ namespace Fika.Core
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
+        public static ConfigEntry<int> ConnectionTimeout { get; set; }
+
         // Gameplay
         public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
         public static ConfigEntry<float> ArmpitDamageMultiplier { get; set; }
@@ -233,33 +243,37 @@ namespace Fika.Core
 
             // Coop
 
-            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 1 }));
+            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 2 }));
+
+            ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Coop | Custom
 
-            UseNamePlates = Config.Bind("Coop | Custom", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            UseNamePlates = Config.Bind("Coop | Custom", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-            UseHealthNumber = Config.Bind("Coop | Custom", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            UseHealthNumber = Config.Bind("Coop | Custom", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-            UsePlateFactionSide = Config.Bind("Coop | Custom", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            UsePlateFactionSide = Config.Bind("Coop | Custom", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            NamePlateScale = Config.Bind("Coop | Custom", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 6 }));
+            NamePlateScale = Config.Bind("Coop | Custom", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 7 }));
 
-            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 2 }));
+            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 3 }));
+
+            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 2 }));
 
             PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
@@ -309,17 +323,19 @@ namespace Fika.Core
 
             // Network
 
-            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 3 }));
+            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+            ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15, new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Gameplay
 

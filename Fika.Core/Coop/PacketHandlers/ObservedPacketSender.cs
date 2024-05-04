@@ -53,7 +53,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     for (int i = 0; i < healthPackets; i++)
                     {
                         DamagePacket healthPacket = HealthPackets.Dequeue();
-                        healthPacket.ProfileId = player.ProfileId;
+                        healthPacket.NetId = player.NetId;
 
                         Writer.Reset();
                         Server.SendDataToAll(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
@@ -65,7 +65,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     for (int i = 0; i < healthPackets; i++)
                     {
                         DamagePacket healthPacket = HealthPackets.Dequeue();
-                        healthPacket.ProfileId = player.ProfileId;
+                        healthPacket.NetId = player.NetId;
 
                         Writer.Reset();
                         Client.SendData(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
