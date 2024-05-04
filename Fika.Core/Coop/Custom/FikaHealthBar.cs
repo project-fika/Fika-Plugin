@@ -43,29 +43,31 @@ namespace Fika.Core.Coop.Custom
                     playerPlate.gameObject.SetActive(true);
                 }
                 UpdateScreenSpacePosition();
-                float currentHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
-                float maxHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
-                if (FikaPlugin.UseHealthNumber.Value)
-                {
-                    if (!playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
+                if (!FikaPlugin.HideHealthBar.Value) {
+                    float currentHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
+                    float maxHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
+                    if (FikaPlugin.UseHealthNumber.Value)
                     {
-                        playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
-                        playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
+                        if (!playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
+                        {
+                            playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
+                            playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
+                        }
+                        int healthNumberPercentage = (int)Math.Round((currentHealth / maxHealth) * 100);
+                        playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
                     }
-                    int healthNumberPercentage = (int)Math.Round((currentHealth / maxHealth) * 100);
-                    playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
-                }
-                else
-                {
-                    if (!playerPlate.healthBarBackgroundScreen.gameObject.active)
+                    else
                     {
-                        playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
-                        playerPlate.healthBarBackgroundScreen.gameObject.SetActive(true);
-                    }
+                        if (!playerPlate.healthBarBackgroundScreen.gameObject.active)
+                        {
+                            playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
+                            playerPlate.healthBarBackgroundScreen.gameObject.SetActive(true);
+                        }
 
-                    float normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
-                    playerPlate.healthBarScreen.fillAmount = normalizedHealth;
-                    UpdateHealthBarColor(normalizedHealth);
+                        float normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
+                        playerPlate.healthBarScreen.fillAmount = normalizedHealth;
+                        UpdateHealthBarColor(normalizedHealth);
+                    }
                 }
                 if (!currentPlayer.HealthController.IsAlive)
                 {
@@ -80,20 +82,43 @@ namespace Fika.Core.Coop.Custom
 
         private void UpdateScreenSpacePosition()
         {
+            Camera camera = CameraClass.Instance.Camera;
+            
+            float opacityMultiplier = 1f;
             if (mainPlayer.HealthController.IsAlive && mainPlayer.ProceduralWeaponAnimation.IsAiming)
             {
+                // Scope scaling and positioning
                 if (mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic)
                 {
-                    playerPlate.ScalarObjectScreen.active = false;
-                    return;
+                    if (FikaPlugin.HideNamePlateInOptic.Value) {
+                        playerPlate.ScalarObjectScreen.active = false;
+                        return;
+                    }
                 }
+                // Opacity in ADS
+                opacityMultiplier = FikaPlugin.OpacityInADS.Value;
             }
-            else if (playerPlate.ScalarObjectScreen.active == false)
+
+            float sqrDistance = (camera.transform.position - currentPlayer.Position).sqrMagnitude;
+            float maxDistanceToShow = Mathf.Pow(FikaPlugin.MaxDistanceToShow.Value, 2);
+            if (sqrDistance > maxDistanceToShow)
+            {
+                // Disable the nameplate if the player is too far away
+                playerPlate.ScalarObjectScreen.active = false;
+                return;
+            }
+            
+            if (playerPlate.ScalarObjectScreen.active == false)
             {
                 playerPlate.ScalarObjectScreen.active = true;
             }
 
-            Camera camera = CameraClass.Instance.Camera;
+            float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
+            Vector3 position;
+
+            position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), currentPlayer.PlayerBones.Neck.position.z);
+
+            Vector3 screenPoint = camera.WorldToScreenPoint(position);
 
             if (CameraClass.Instance.SSAA != null && CameraClass.Instance.SSAA.isActiveAndEnabled)
             {
@@ -102,55 +127,62 @@ namespace Fika.Core.Coop.Custom
                 screenScale = outputWidth / inputWidth;
             }
 
-            float distance = Vector3.Distance(CameraClass.Instance.Camera.transform.position, currentPlayer.Position) / 25;
-            distance = Mathf.Clamp(distance, 0.6f, 1f);
-            Vector3 position;
-
-            position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * distance), currentPlayer.PlayerBones.Neck.position.z);
-
-            Vector3 screenPoint = camera.WorldToScreenPoint(position);
-
             if (screenPoint.z > 0)
             {
                 playerPlate.ScalarObjectScreen.transform.position = screenScale < 1 ? screenPoint : screenPoint * screenScale;
-                playerPlate.ScalarObjectScreen.transform.localScale = (Vector3.one / distance) * FikaPlugin.NamePlateScale.Value;
 
-                float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
-
-                #region Alpha Control for Health Bars. This code is ugly so its getting regioned so I can hide my shame.
-                if (distanceToCenter < 200)
+                // Less opaque when not looking at the player
+                float distFromCenterMultiplier = 1f;
+                if (FikaPlugin.DecreaseOpacityNotLookingAt.Value)
                 {
-                    playerPlate.playerNameScreen.color = new Color(playerPlate.playerNameScreen.color.r, playerPlate.playerNameScreen.color.g, playerPlate.playerNameScreen.color.b, Mathf.Max(0.1f, distanceToCenter / 200));
-                    playerPlate.healthBarScreen.color = new Color(playerPlate.healthBarScreen.color.r, playerPlate.healthBarScreen.color.g, playerPlate.healthBarScreen.color.b, Mathf.Max(0.1f, distanceToCenter / 200));
-                    playerPlate.healthBarBackgroundScreen.color = new Color(playerPlate.healthBarBackgroundScreen.color.r, playerPlate.healthBarBackgroundScreen.color.g, playerPlate.healthBarBackgroundScreen.color.b, Mathf.Clamp(Mathf.Max(0.1f, distanceToCenter / 200), 0f, 0.4392157f));
-                    playerPlate.healthNumberBackgroundScreen.color = new Color(playerPlate.healthNumberBackgroundScreen.color.r, playerPlate.healthNumberBackgroundScreen.color.g, playerPlate.healthNumberBackgroundScreen.color.b, Mathf.Clamp(Mathf.Max(0.1f, distanceToCenter / 200), 0f, 0.4392157f));
-                    playerPlate.healthNumberScreen.color = new Color(playerPlate.healthNumberScreen.color.r, playerPlate.healthNumberScreen.color.g, playerPlate.healthNumberScreen.color.b, Mathf.Max(0.1f, distanceToCenter / 200));
-                    playerPlate.usecPlateScreen.color = new Color(playerPlate.usecPlateScreen.color.r, playerPlate.usecPlateScreen.color.g, playerPlate.usecPlateScreen.color.b, Mathf.Max(0.1f, distanceToCenter / 200));
-                    playerPlate.bearPlateScreen.color = new Color(playerPlate.bearPlateScreen.color.r, playerPlate.bearPlateScreen.color.g, playerPlate.bearPlateScreen.color.b, Mathf.Max(0.1f, distanceToCenter / 200));
+                    Vector3 screenCenter = new Vector3(Screen.width / 2, Screen.height / 2, 0);
+                    float sqrDistFromCenter = (screenCenter - screenPoint).sqrMagnitude;
+                    float maxSqrDistFromCenter = Mathf.Pow(Mathf.Min(Screen.width, Screen.height) / 2, 2);
+                    distFromCenterMultiplier = Mathf.Clamp01(1 - (sqrDistFromCenter / maxSqrDistFromCenter));
+                }
 
-                }
-                else
+                float alpha = 1f;
+                float namePlateScaleMult = FikaPlugin.NamePlateScale.Value;
+                float lerpValue = (sqrDistance - maxDistanceToShow / 2) / (maxDistanceToShow / 2);
+                alpha = Mathf.Lerp(alpha, 0, lerpValue);
+                namePlateScaleMult = Mathf.Lerp(1f, 0.5f, lerpValue);
+                namePlateScaleMult = Mathf.Clamp(namePlateScaleMult * FikaPlugin.NamePlateScale.Value, FikaPlugin.MinimumNamePlateScale.Value * FikaPlugin.NamePlateScale.Value, FikaPlugin.NamePlateScale.Value);
+
+                // Setting the nameplate scale
+                playerPlate.ScalarObjectScreen.transform.localScale = (Vector3.one / processedDistance) * namePlateScaleMult;
+
+                // Setting the overall nameplate alpha
+                alpha *= opacityMultiplier;
+                alpha *= distFromCenterMultiplier;
+                alpha = Mathf.Max(FikaPlugin.MinimumOpacity.Value, alpha);
+
+                float backgroundOpacity = Mathf.Clamp(alpha, 0f, 0.44f);
+
+                float healthAlphaMultiplier = 1f;
+                if (FikaPlugin.HideHealthBar.Value)
                 {
-                    playerPlate.playerNameScreen.color = new Color(playerPlate.playerNameScreen.color.r, playerPlate.playerNameScreen.color.g, playerPlate.playerNameScreen.color.b, 1);
-                    playerPlate.healthBarScreen.color = new Color(playerPlate.healthBarScreen.color.r, playerPlate.healthBarScreen.color.g, playerPlate.healthBarScreen.color.b, 1);
-                    playerPlate.healthBarBackgroundScreen.color = new Color(playerPlate.healthBarBackgroundScreen.color.r, playerPlate.healthBarBackgroundScreen.color.g, playerPlate.healthBarBackgroundScreen.color.b, 1);
-                    playerPlate.healthNumberBackgroundScreen.color = new Color(playerPlate.healthNumberBackgroundScreen.color.r, playerPlate.healthNumberBackgroundScreen.color.g, playerPlate.healthNumberBackgroundScreen.color.b, 1);
-                    playerPlate.healthNumberScreen.color = new Color(playerPlate.healthNumberScreen.color.r, playerPlate.healthNumberScreen.color.g, playerPlate.healthNumberScreen.color.b, 1);
-                    playerPlate.usecPlateScreen.color = new Color(playerPlate.usecPlateScreen.color.r, playerPlate.usecPlateScreen.color.g, playerPlate.usecPlateScreen.color.b, 1);
-                    playerPlate.bearPlateScreen.color = new Color(playerPlate.bearPlateScreen.color.r, playerPlate.bearPlateScreen.color.g, playerPlate.bearPlateScreen.color.b, 1);
+                    healthAlphaMultiplier = 0;
                 }
+
+                UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, alpha);
+                UpdateColorImage(playerPlate.healthBarScreen, alpha * healthAlphaMultiplier);
+                UpdateColorTextMeshProUGUI(playerPlate.healthNumberScreen, alpha * healthAlphaMultiplier);
+                UpdateColorImage(playerPlate.healthBarBackgroundScreen, backgroundOpacity * healthAlphaMultiplier);
+                UpdateColorImage(playerPlate.healthNumberBackgroundScreen, backgroundOpacity * healthAlphaMultiplier);
+                UpdateColorImage(playerPlate.usecPlateScreen, alpha);
+                UpdateColorImage(playerPlate.bearPlateScreen, alpha);
             }
             else
             {
-                playerPlate.playerNameScreen.color = new Color(playerPlate.playerNameScreen.color.r, playerPlate.playerNameScreen.color.g, playerPlate.playerNameScreen.color.b, 0);
-                playerPlate.healthBarScreen.color = new Color(playerPlate.healthBarScreen.color.r, playerPlate.healthBarScreen.color.g, playerPlate.healthBarScreen.color.b, 0);
-                playerPlate.healthBarBackgroundScreen.color = new Color(playerPlate.healthBarBackgroundScreen.color.r, playerPlate.healthBarBackgroundScreen.color.g, playerPlate.healthBarBackgroundScreen.color.b, 0);
-                playerPlate.healthNumberBackgroundScreen.color = new Color(playerPlate.healthNumberBackgroundScreen.color.r, playerPlate.healthNumberBackgroundScreen.color.g, playerPlate.healthNumberBackgroundScreen.color.b, 0);
-                playerPlate.healthNumberScreen.color = new Color(playerPlate.healthNumberScreen.color.r, playerPlate.healthNumberScreen.color.g, playerPlate.healthNumberScreen.color.b, 0);
-                playerPlate.usecPlateScreen.color = new Color(playerPlate.usecPlateScreen.color.r, playerPlate.usecPlateScreen.color.g, playerPlate.usecPlateScreen.color.b, 0);
-                playerPlate.bearPlateScreen.color = new Color(playerPlate.bearPlateScreen.color.r, playerPlate.bearPlateScreen.color.g, playerPlate.bearPlateScreen.color.b, 0);
+                // Hide the nameplate if the player is behind the camera
+                UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, 0);
+                UpdateColorImage(playerPlate.healthBarScreen, 0);
+                UpdateColorTextMeshProUGUI(playerPlate.healthNumberScreen, 0);
+                UpdateColorImage(playerPlate.healthBarBackgroundScreen, 0);
+                UpdateColorImage(playerPlate.healthNumberBackgroundScreen, 0);
+                UpdateColorImage(playerPlate.usecPlateScreen, 0);
+                UpdateColorImage(playerPlate.bearPlateScreen, 0);
             }
-            #endregion
         }
 
         private void CreateHealthBar()
@@ -171,6 +203,13 @@ namespace Fika.Core.Coop.Custom
                     {
                         playerPlate.bearPlateScreen.gameObject.SetActive(true);
                     }
+                }
+                if (FikaPlugin.HideHealthBar.Value)
+                {
+                    playerPlate.healthBarScreen.gameObject.SetActive(false);
+                    playerPlate.healthNumberScreen.gameObject.SetActive(false);
+                    playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
+                    playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
                 }
                 if (FikaPlugin.DevelopersList.ContainsKey(currentPlayer.Profile.Nickname.ToLower()))
                 {
@@ -198,6 +237,26 @@ namespace Fika.Core.Coop.Custom
             Color color = Color.Lerp(Color.red, Color.green, normalizedHealth);
             color.a = playerPlate.healthBarScreen.color.a; // Keep the alpha value unchanged
             playerPlate.healthBarScreen.color = color;
+        }
+
+        private void UpdateColorImage(UnityEngine.UI.Image screenObject, float alpha) 
+        {
+            if (screenObject.gameObject.activeInHierarchy)
+            {
+                var color = screenObject.color;
+                color.a = alpha;
+                screenObject.color = color;
+            }
+        }
+        
+        private void UpdateColorTextMeshProUGUI(TMPro.TextMeshProUGUI screenObject, float alpha)
+        {
+            if (screenObject.gameObject.activeInHierarchy)
+            {
+                var color = screenObject.color;
+                color.a = alpha;
+                screenObject.color = color;
+            }
         }
 
         private void OnDestroy()

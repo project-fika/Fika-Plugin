@@ -106,11 +106,20 @@ namespace Fika.Core
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
 
-        // Coop | Custom
+        // Coop | NamePlates
         public static ConfigEntry<bool> UseNamePlates { get; set; }
+        public static ConfigEntry<bool> HideHealthBar { get; set; }
         public static ConfigEntry<bool> UseHealthNumber { get; set; }
         public static ConfigEntry<bool> UsePlateFactionSide { get; set; }
+        public static ConfigEntry<bool> HideNamePlateInOptic { get; set; }
+        public static ConfigEntry<bool> DecreaseOpacityNotLookingAt { get; set; }
         public static ConfigEntry<float> NamePlateScale { get; set; }
+        public static ConfigEntry<float> OpacityInADS { get; set; }
+        public static ConfigEntry<float> MaxDistanceToShow { get; set; }
+        public static ConfigEntry<float> MinimumOpacity { get; set; }
+        public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
+
+        // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
         public static ConfigEntry<KeyboardShortcut> PingButton { get; set; }
         public static ConfigEntry<Color> PingColor { get; set; }
@@ -121,7 +130,7 @@ namespace Fika.Core
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
 
-        // Performance
+        // Performance            
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
         public static ConfigEntry<bool> DespawnFurthest { get; set; }
         public static ConfigEntry<bool> DynamicAI { get; set; }
@@ -130,7 +139,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> CullPlayers { get; set; }
         public static ConfigEntry<float> CullingRange { get; set; }
 
-        // Bot Limits            
+        // Bot Limits
         public static ConfigEntry<int> MaxBotsFactory { get; set; }
         public static ConfigEntry<int> MaxBotsCustoms { get; set; }
         public static ConfigEntry<int> MaxBotsInterchange { get; set; }
@@ -253,16 +262,32 @@ namespace Fika.Core
             FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 2 }));
 
             ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+           
+            // Coop | NamePlates
 
+            UseNamePlates = Config.Bind("Coop | NamePlates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+            
+            HideHealthBar = Config.Bind("Coop | NamePlates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            
+            UseHealthNumber = Config.Bind("Coop | NamePlates", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            
+            UsePlateFactionSide = Config.Bind("Coop | NamePlates", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            
+            HideNamePlateInOptic = Config.Bind("Coop | NamePlates", "Hide Name Plate in Optic", true, new ConfigDescription("Hides the name plate when viewing through PiP scopes since it's kinda janky.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            
+            DecreaseOpacityNotLookingAt = Config.Bind("Coop | NamePlates", "Decrease Opacity In Peripheral", true, new ConfigDescription("Decreases the opacity of the name plates when not looking at a player.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+
+            NamePlateScale = Config.Bind("Coop | NamePlates", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
+            
+            OpacityInADS = Config.Bind("Coop | NamePlates", "Opacity in ADS", 0.75f, new ConfigDescription("The opacity of the name plates when aiming down sights.", new AcceptableValueRange<float>(0.1f, 1f), new ConfigurationManagerAttributes() { Order = 3 }));
+            
+            MaxDistanceToShow = Config.Bind("Coop | NamePlates", "Max Distance to Show", 500f, new ConfigDescription("The maximum distance at which name plates will become invisible, starts to fade at half the input value.", new AcceptableValueRange<float>(10f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
+            
+            MinimumOpacity = Config.Bind("Coop | NamePlates", "Minimum Opacity", 0.1f, new ConfigDescription("The minimum opacity of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+
+            MinimumNamePlateScale = Config.Bind("Coop | NamePlates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
+            
             // Coop | Custom
-
-            UseNamePlates = Config.Bind("Coop | Custom", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
-
-            UseHealthNumber = Config.Bind("Coop | Custom", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
-
-            UsePlateFactionSide = Config.Bind("Coop | Custom", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
-
-            NamePlateScale = Config.Bind("Coop | Custom", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 7 }));
 
             UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
