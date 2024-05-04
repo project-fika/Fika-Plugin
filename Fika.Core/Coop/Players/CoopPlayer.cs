@@ -43,6 +43,7 @@ namespace Fika.Core.Coop.Players
         public bool hasGround = false;
         public Transform RaycastCameraTransform;
         public int NetId;
+        public bool IsObservedAI = false;
 
         public static async Task<LocalPlayer> Create(
             int playerId,
@@ -199,11 +200,6 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
-                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
-                {
-                    return;
-                }
-
                 if (colliderType == EBodyPartColliderType.HeadCommon)
                 {
                     damageInfo.Damage *= FikaPlugin.HeadDamageMultiplier.Value;
@@ -220,15 +216,12 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
-            if (IsYourPlayer)
+            if (damageInfo.Player != null & damageInfo.Player.iPlayer is CoopBot)
             {
-                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
-                {
-                    return null;
-                }
+                return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
-            return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+            return null;            
         }
 
         public override void Proceed(bool withNetwork, Callback<GInterface125> callback, bool scheduled = true)
@@ -1267,6 +1260,7 @@ namespace Fika.Core.Coop.Players
                 DamageType = packet.DamageInfo.DamageType,
                 BodyPartColliderType = packet.DamageInfo.ColliderType,
                 HitPoint = packet.DamageInfo.Point,
+                HitNormal = packet.DamageInfo.HitNormal,
                 Direction = packet.DamageInfo.Direction,
                 PenetrationPower = packet.DamageInfo.PenetrationPower,
                 BlockedBy = packet.DamageInfo.BlockedBy,
@@ -1281,6 +1275,13 @@ namespace Fika.Core.Coop.Players
                 if (player != null)
                 {
                     damageInfo.Player = player;
+                    if (IsYourPlayer)
+                    {
+                        if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
+                        {
+                            return;
+                        } 
+                    }
                 }
 
                 if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.DamageInfo.ProfileId).HandsController.Item is Weapon weapon)
