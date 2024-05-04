@@ -181,7 +181,10 @@ namespace Fika.Core.Coop.Components
             loopThread?.Join();*/
 
             StopCoroutine(ProcessSpawnQueue());
-            StopCoroutine(PingRoutine);
+            if (PingRoutine != null)
+            {
+                StopCoroutine(PingRoutine); 
+            }
         }
 
         private bool requestQuitGame = false;
