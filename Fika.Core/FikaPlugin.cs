@@ -130,16 +130,17 @@ namespace Fika.Core
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
 
-        // Performance            
-        public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
-        public static ConfigEntry<bool> DespawnFurthest { get; set; }
+        // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
         public static ConfigEntry<bool> CullPlayers { get; set; }
         public static ConfigEntry<float> CullingRange { get; set; }
 
-        // Bot Limits
+        // Performance | Bot Limits            
+        public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
+        public static ConfigEntry<bool> DespawnFurthest { get; set; }
+        public static ConfigEntry<float> DespawnMinimumDistance { get; set; }
         public static ConfigEntry<int> MaxBotsFactory { get; set; }
         public static ConfigEntry<int> MaxBotsCustoms { get; set; }
         public static ConfigEntry<int> MaxBotsInterchange { get; set; }
@@ -158,6 +159,7 @@ namespace Fika.Core
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
+        public static ConfigEntry<int> ConnectionTimeout { get; set; }
 
         // Gameplay
         public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
@@ -319,9 +321,11 @@ namespace Fika.Core
 
             // Performance | Max Bots
 
-            EnforcedSpawnLimits = Config.Bind("Performance | Max Bots", "Enforced Spawn Limits", false, new ConfigDescription("Enforces spawn limits when spawning bots, making sure to not go over the vanilla limits. This mainly takes affect when using spawn mods or anything that modifies the bot limits. Will not block spawns of special bots like bosses.", tags: new ConfigurationManagerAttributes() { Order = 13 }));
+            EnforcedSpawnLimits = Config.Bind("Performance | Max Bots", "Enforced Spawn Limits", false, new ConfigDescription("Enforces spawn limits when spawning bots, making sure to not go over the vanilla limits. This mainly takes affect when using spawn mods or anything that modifies the bot limits. Will not block spawns of special bots like bosses.", tags: new ConfigurationManagerAttributes() { Order = 14 }));
 
-            DespawnFurthest = Config.Bind("Performance | Max Bots", "Despawn Furthest", false, new ConfigDescription("When enforcing spawn limits, should the furthest bot be de-spawned instead of blocking the spawn. This will make for a much more active raid on a lower Max Bots count. Helpful for weaker PCs. Will only despawn pmcs and scavs. If you don't run a dynamic spawn mod, this will however quickly exhaust the spawns on the map, making the raid very dead instead.", tags: new ConfigurationManagerAttributes() { Order = 12 }));
+            DespawnFurthest = Config.Bind("Performance | Max Bots", "Despawn Furthest", false, new ConfigDescription("When enforcing spawn limits, should the furthest bot be de-spawned instead of blocking the spawn. This will make for a much more active raid on a lower Max Bots count. Helpful for weaker PCs. Will only despawn pmcs and scavs. If you don't run a dynamic spawn mod, this will however quickly exhaust the spawns on the map, making the raid very dead instead.", tags: new ConfigurationManagerAttributes() { Order = 13 }));
+
+            DespawnMinimumDistance = Config.Bind("Performance | Max Bots", "Despawn Minimum Distance", 200.0f, new ConfigDescription("Don't despawn bots within this distance.", new AcceptableValueRange<float>(50f, 750f), new ConfigurationManagerAttributes() { Order = 12 }));
 
             MaxBotsFactory = Config.Bind("Performance | Max Bots", "Max Bots Factory", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Factory. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 11 }));
 
@@ -345,17 +349,19 @@ namespace Fika.Core
 
             // Network
 
-            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 3 }));
+            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+            ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15, new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Gameplay
 

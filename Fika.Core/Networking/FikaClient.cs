@@ -21,7 +21,6 @@ using Fika.Core.Networking.Packets.GameWorld;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,7 +87,7 @@ namespace Fika.Core.Networking
                 UpdateTime = 15,
                 NatPunchEnabled = false,
                 IPv6Enabled = false,
-                DisconnectTimeout = 15000,
+                DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true
             };

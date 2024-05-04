@@ -88,7 +88,7 @@ namespace Fika.Core.Networking
                 UpdateTime = 15,
                 AutoRecycle = true,
                 IPv6Enabled = false,
-                DisconnectTimeout = 15000,
+                DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true
             };

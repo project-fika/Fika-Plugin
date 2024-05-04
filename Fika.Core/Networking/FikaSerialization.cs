@@ -644,6 +644,7 @@ namespace Fika.Core.Networking
             public float Absorbed;
             public Vector3 Direction = Vector3.zero;
             public Vector3 Point = Vector3.zero;
+            public Vector3 HitNormal = Vector3.zero;
             public float PenetrationPower = 0f;
             public string BlockedBy;
             public string DeflectedBy;
@@ -664,6 +665,7 @@ namespace Fika.Core.Networking
                     Absorbed = reader.GetFloat(),
                     Direction = reader.GetVector3(),
                     Point = reader.GetVector3(),
+                    HitNormal = reader.GetVector3(),
                     PenetrationPower = reader.GetFloat(),
                     BlockedBy = reader.GetString(),
                     DeflectedBy = reader.GetString(),
@@ -684,6 +686,7 @@ namespace Fika.Core.Networking
                 writer.Put(packet.Absorbed);
                 writer.Put(packet.Direction);
                 writer.Put(packet.Point);
+                writer.Put(packet.HitNormal);
                 writer.Put(packet.PenetrationPower);
                 writer.Put(packet.BlockedBy);
                 writer.Put(packet.DeflectedBy);
