@@ -40,7 +40,6 @@ namespace Fika.Core.Coop.Players
         {
             get => HealthController as GClass2417;
         }
-        public bool IsObservedAI = false;
         private readonly GClass2156 ObservedVaultingParameters = new();
         public override bool CanBeSnapped => false;
         public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
@@ -163,7 +162,10 @@ namespace Fika.Core.Coop.Players
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
-            player.AIData = new AIData(null, player);
+            player.AIData = new AIData(null, player)
+            {
+                IsAI = aiControl
+            };
             player.AggressorFound = false;
             player._animators[0].enabled = true;
             player._armsUpdateQueue = EUpdateQueue.Update;
@@ -326,7 +328,7 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
-            if (!IsObservedAI)
+            if (!IsAI)
             {
                 ShotReactions(damageInfo, bodyPartType);
                 return null;
@@ -647,7 +649,7 @@ namespace Fika.Core.Coop.Players
 
             if (FikaPlugin.ShowNotifications.Value)
             {
-                if (!IsObservedAI)
+                if (!IsAI)
                 {
                     if (damageType != EDamageType.Undefined)
                     {
@@ -658,7 +660,7 @@ namespace Fika.Core.Coop.Players
                         NotificationManagerClass.DisplayWarningNotification($"Group member '{Profile.Nickname}' has died");
                     }
                 }
-                if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
+                if (IsBoss(Profile.Info.Settings.Role, out string name) && IsAI && LastAggressor != null)
                 {
                     if (LastAggressor is CoopPlayer aggressor)
                     {
@@ -787,12 +789,7 @@ namespace Fika.Core.Coop.Players
 
         protected override async void Start()
         {
-            if (gameObject.name.StartsWith("Bot_"))
-            {
-                IsObservedAI = true;
-            }
-
-            if (IsObservedAI)
+            if (IsAI)
             {
                 PacketSender = gameObject.AddComponent<ObservedPacketSender>();
                 GenericPacket genericPacket = new(EPackageType.LoadBot)
@@ -824,7 +821,7 @@ namespace Fika.Core.Coop.Players
 
             PacketReceiver = gameObject.AddComponent<PacketReceiver>();
 
-            if (!IsObservedAI)
+            if (!IsAI)
             {
                 Profile.Info.GroupId = "Fika";
 

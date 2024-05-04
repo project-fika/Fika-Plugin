@@ -199,7 +199,7 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
-                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
+                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsAI)
                 {
                     return;
                 }
@@ -222,7 +222,7 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
-                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
+                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player is not null && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsAI)
                 {
                     return null;
                 }
