@@ -8,16 +8,16 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		GoldMaster|Any CPU = GoldMaster|Any CPU
 		Release|Any CPU = Release|Any CPU
+		GoldMaster|Any CPU = GoldMaster|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{79F0E889-A195-42B4-8656-4F35685BBB80}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{79F0E889-A195-42B4-8656-4F35685BBB80}.Debug|Any CPU.Build.0 = Release|Any CPU
-		{79F0E889-A195-42B4-8656-4F35685BBB80}.GoldMaster|Any CPU.ActiveCfg = GoldMaster|Any CPU
-		{79F0E889-A195-42B4-8656-4F35685BBB80}.GoldMaster|Any CPU.Build.0 = GoldMaster|Any CPU
+		{79F0E889-A195-42B4-8656-4F35685BBB80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79F0E889-A195-42B4-8656-4F35685BBB80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79F0E889-A195-42B4-8656-4F35685BBB80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79F0E889-A195-42B4-8656-4F35685BBB80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79F0E889-A195-42B4-8656-4F35685BBB80}.GoldMaster|Any CPU.ActiveCfg = GoldMaster|Any CPU
+		{79F0E889-A195-42B4-8656-4F35685BBB80}.GoldMaster|Any CPU.Build.0 = GoldMaster|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
