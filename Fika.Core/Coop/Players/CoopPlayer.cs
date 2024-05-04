@@ -200,6 +200,14 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
+                if (damageInfo.Player != null)
+                {
+                    CoopPlayer player = (CoopPlayer)damageInfo.Player.iPlayer;
+                    if (!player.IsObservedAI && !FikaPlugin.Instance.FriendlyFire)
+                    {
+                        return;
+                    }
+                }
                 if (colliderType == EBodyPartColliderType.HeadCommon)
                 {
                     damageInfo.Damage *= FikaPlugin.HeadDamageMultiplier.Value;
