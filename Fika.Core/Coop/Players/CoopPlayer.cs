@@ -228,7 +228,7 @@ namespace Fika.Core.Coop.Players
                 return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
-            return null;            
+            return null;
         }
 
         public override void Proceed(bool withNetwork, Callback<GInterface125> callback, bool scheduled = true)
@@ -1287,7 +1287,7 @@ namespace Fika.Core.Coop.Players
                         if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
                         {
                             return;
-                        } 
+                        }
                     }
                 }
 
