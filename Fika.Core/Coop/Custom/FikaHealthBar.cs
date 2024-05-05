@@ -22,7 +22,6 @@ namespace Fika.Core.Coop.Custom
         private CoopPlayer mainPlayer;
         private PlayerPlateUI playerPlate;
         private float screenScale = 1f;
-        private int layerMask;
         private int frameCounter = 0;
         private readonly int throttleInterval = 60; // throttle to 1 update per 60 frames
 
