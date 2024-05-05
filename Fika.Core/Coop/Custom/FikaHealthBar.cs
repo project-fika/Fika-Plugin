@@ -84,6 +84,13 @@ namespace Fika.Core.Coop.Custom
 
         private void UpdateScreenSpacePosition()
         {
+            // Check if we should occlude the name plate
+            if (FikaPlugin.OccludeNamePlates.Value && !currentPlayer.IsVisible)
+            {
+                playerPlate.ScalarObjectScreen.active = false;
+                return;
+            }
+
             float opacityMultiplier = 1f;
 
             ProceduralWeaponAnimation proceduralWeaponAnimation = mainPlayer.ProceduralWeaponAnimation;
