@@ -202,8 +202,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (damageInfo.Player != null)
                 {
-                    CoopPlayer player = (CoopPlayer)damageInfo.Player.iPlayer;
-                    if (!player.IsObservedAI && !FikaPlugin.Instance.FriendlyFire)
+                    if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
                     {
                         return;
                     }
