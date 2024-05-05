@@ -1374,8 +1374,15 @@ namespace Fika.Core.Coop.GameMode
 
             wavesSpawnScenario_0?.Stop();
 
-            PlayerLeftRequest body = new PlayerLeftRequest(myPlayer.ProfileId);
-            FikaRequestHandler.RaidLeave(body);
+            try
+            {
+                PlayerLeftRequest body = new(myPlayer.ProfileId);
+                FikaRequestHandler.RaidLeave(body);
+            }
+            catch (Exception)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("Unable to send RaidLeave request to server.");
+            }
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
