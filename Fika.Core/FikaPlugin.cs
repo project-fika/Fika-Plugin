@@ -108,7 +108,6 @@ namespace Fika.Core
 
         // Coop | NamePlates
         public static ConfigEntry<bool> UseNamePlates { get; set; }
-        public static ConfigEntry<bool> OccludeNamePlates { get; set; }
         public static ConfigEntry<bool> HideHealthBar { get; set; }
         public static ConfigEntry<bool> UseHealthNumber { get; set; }
         public static ConfigEntry<bool> UsePlateFactionSide { get; set; }
@@ -268,9 +267,7 @@ namespace Fika.Core
 
             // Coop | NamePlates
 
-            UseNamePlates = Config.Bind("Coop | NamePlates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
-
-            OccludeNamePlates = Config.Bind("Coop | NamePlates", "Occlude Name Plates", false, new ConfigDescription("Hides name plates for players that are not visible.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+            UseNamePlates = Config.Bind("Coop | NamePlates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
             HideHealthBar = Config.Bind("Coop | NamePlates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 

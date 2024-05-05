@@ -22,6 +22,9 @@ namespace Fika.Core.Coop.Custom
         private CoopPlayer mainPlayer;
         private PlayerPlateUI playerPlate;
         private float screenScale = 1f;
+        private int layerMask;
+        private int frameCounter = 0;
+        private readonly int throttleInterval = 60; // throttle to 1 update per 60 frames
 
         protected void Awake()
         {
@@ -34,17 +37,24 @@ namespace Fika.Core.Coop.Custom
         {
             if (currentPlayer != null)
             {
-                if (!FikaPlugin.UseNamePlates.Value)
+                bool throttleUpdate = IsThrottleUpdate();
+                if (throttleUpdate)
                 {
-                    playerPlate.gameObject.SetActive(false);
-                    return;
+                    // Handling the visibility of elements
+                    if (!FikaPlugin.UseNamePlates.Value)
+                    {
+                        playerPlate.gameObject.SetActive(false);
+                        return;
+                    }
+                    else if (playerPlate.gameObject.active == false)
+                    {
+                        playerPlate.gameObject.SetActive(true);
+                    }
+                    SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
+                    SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
                 }
-                else if (playerPlate.gameObject.active == false)
-                {
-                    playerPlate.gameObject.SetActive(true);
-                }
-                UpdateScreenSpacePosition();
-                if (!FikaPlugin.HideHealthBar.Value)
+                // Updating the health bar
+                if (playerPlate.healthBarScreen.gameObject.activeSelf)
                 {
                     float currentHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
                     float maxHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
@@ -71,6 +81,9 @@ namespace Fika.Core.Coop.Custom
                         UpdateHealthBarColor(normalizedHealth);
                     }
                 }
+                // Finally, update the screen space position
+                UpdateScreenSpacePosition(throttleUpdate);
+                // Destroy if this player is dead
                 if (!currentPlayer.HealthController.IsAlive)
                 {
                     Destroy(this);
@@ -82,17 +95,10 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        private void UpdateScreenSpacePosition()
+        private void UpdateScreenSpacePosition(bool throttleUpdate)
         {
-            // Check if we should occlude the name plate
-            if (FikaPlugin.OccludeNamePlates.Value && !currentPlayer.IsVisible)
-            {
-                playerPlate.ScalarObjectScreen.active = false;
-                return;
-            }
-
+            // ADS opacity handling
             float opacityMultiplier = 1f;
-
             ProceduralWeaponAnimation proceduralWeaponAnimation = mainPlayer.ProceduralWeaponAnimation;
             if (mainPlayer.HealthController.IsAlive && proceduralWeaponAnimation.IsAiming)
             {
@@ -106,7 +112,9 @@ namespace Fika.Core.Coop.Custom
             CameraClass cameraInstance = CameraClass.Instance;
             Camera camera = cameraInstance.Camera;
 
-            float sqrDistance = (camera.transform.position - currentPlayer.Position).sqrMagnitude;
+            // Distance check
+            Vector3 direction = camera.transform.position - currentPlayer.Position;
+            float sqrDistance = direction.sqrMagnitude;
             float maxDistanceToShow = FikaPlugin.MaxDistanceToShow.Value * FikaPlugin.MaxDistanceToShow.Value;
             if (sqrDistance > maxDistanceToShow)
             {
@@ -114,6 +122,7 @@ namespace Fika.Core.Coop.Custom
                 return;
             }
 
+            // If we're here, we can show the name plate
             playerPlate.ScalarObjectScreen.active = true;
 
             float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
@@ -189,24 +198,6 @@ namespace Fika.Core.Coop.Custom
                 GameObject uiGameObj = Instantiate(uiPrefab);
                 playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
                 playerPlate.SetNameText(currentPlayer.Profile.Info.MainProfileNickname);
-                if (FikaPlugin.UsePlateFactionSide.Value)
-                {
-                    if (currentPlayer.Profile.Side == EPlayerSide.Usec)
-                    {
-                        playerPlate.usecPlateScreen.gameObject.SetActive(true);
-                    }
-                    else if (currentPlayer.Profile.Side == EPlayerSide.Bear)
-                    {
-                        playerPlate.bearPlateScreen.gameObject.SetActive(true);
-                    }
-                }
-                if (FikaPlugin.HideHealthBar.Value)
-                {
-                    playerPlate.healthBarScreen.gameObject.SetActive(false);
-                    playerPlate.healthNumberScreen.gameObject.SetActive(false);
-                    playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
-                    playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
-                }
                 if (FikaPlugin.DevelopersList.ContainsKey(currentPlayer.Profile.Nickname.ToLower()))
                 {
                     playerPlate.playerNameScreen.color = new Color(0, 0.6091f, 1, 1);
@@ -225,6 +216,9 @@ namespace Fika.Core.Coop.Custom
                     playerPlate.usecPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[2].IconSprite;
                     playerPlate.usecPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
                 }
+                // Start the plates both disabled, the visibility will be set in the update loop
+                playerPlate.usecPlateScreen.gameObject.SetActive(false);
+                playerPlate.bearPlateScreen.gameObject.SetActive(false);
             }
         }
 
@@ -235,7 +229,7 @@ namespace Fika.Core.Coop.Custom
             playerPlate.healthBarScreen.color = color;
         }
 
-        private void UpdateColorImage(UnityEngine.UI.Image screenObject, float alpha)
+        private void UpdateColorImage(Image screenObject, float alpha)
         {
             if (screenObject.gameObject.activeInHierarchy)
             {
@@ -253,6 +247,39 @@ namespace Fika.Core.Coop.Custom
                 color.a = alpha;
                 screenObject.color = color;
             }
+        }
+
+        private void SetPlayerPlateHealthVisibility(bool hidden)
+        {
+            playerPlate.healthNumberScreen.gameObject.SetActive(!hidden && FikaPlugin.UseHealthNumber.Value);
+            playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(!hidden && FikaPlugin.UseHealthNumber.Value);
+            playerPlate.healthBarScreen.gameObject.SetActive(!hidden && !FikaPlugin.UseHealthNumber.Value);
+            playerPlate.healthBarBackgroundScreen.gameObject.SetActive(!hidden && !FikaPlugin.UseHealthNumber.Value);
+        }
+
+
+        private void SetPlayerPlateFactionVisibility(bool visible)
+        {
+            if (currentPlayer.Profile.Side == EPlayerSide.Usec)
+            {
+                playerPlate.usecPlateScreen.gameObject.SetActive(visible);
+            }
+            else if (currentPlayer.Profile.Side == EPlayerSide.Bear)
+            {
+                playerPlate.bearPlateScreen.gameObject.SetActive(visible);
+            }
+        }
+
+        private bool IsThrottleUpdate()
+        {
+            // For throttling updates to various elements
+            frameCounter++;
+            bool throttleUpdate = frameCounter >= throttleInterval;
+            if (throttleUpdate)
+            {
+                frameCounter = 0;
+            }
+            return throttleUpdate;
         }
 
         private void OnDestroy()
