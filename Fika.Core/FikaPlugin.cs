@@ -106,7 +106,7 @@ namespace Fika.Core
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
 
-        // Coop | NamePlates
+        // Coop | Name Plates
         public static ConfigEntry<bool> UseNamePlates { get; set; }
         public static ConfigEntry<bool> HideHealthBar { get; set; }
         public static ConfigEntry<bool> UseHealthNumber { get; set; }
@@ -265,29 +265,29 @@ namespace Fika.Core
 
             ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
-            // Coop | NamePlates
+            // Coop | Name Plates
 
-            UseNamePlates = Config.Bind("Coop | NamePlates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+            UseNamePlates = Config.Bind("Coop | Name Plates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-            HideHealthBar = Config.Bind("Coop | NamePlates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            HideHealthBar = Config.Bind("Coop | Name Plates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-            UseHealthNumber = Config.Bind("Coop | NamePlates", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            UseHealthNumber = Config.Bind("Coop | Name Plates", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            UsePlateFactionSide = Config.Bind("Coop | NamePlates", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            UsePlateFactionSide = Config.Bind("Coop | Name Plates", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            HideNamePlateInOptic = Config.Bind("Coop | NamePlates", "Hide Name Plate in Optic", true, new ConfigDescription("Hides the name plate when viewing through PiP scopes since it's kinda janky.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            HideNamePlateInOptic = Config.Bind("Coop | Name Plates", "Hide Name Plate in Optic", true, new ConfigDescription("Hides the name plate when viewing through PiP scopes since it's kinda janky.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            DecreaseOpacityNotLookingAt = Config.Bind("Coop | NamePlates", "Decrease Opacity In Peripheral", true, new ConfigDescription("Decreases the opacity of the name plates when not looking at a player.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            DecreaseOpacityNotLookingAt = Config.Bind("Coop | Name Plates", "Decrease Opacity In Peripheral", true, new ConfigDescription("Decreases the opacity of the name plates when not looking at a player.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            NamePlateScale = Config.Bind("Coop | NamePlates", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
+            NamePlateScale = Config.Bind("Coop | Name Plates", "Name Plate Scale", 0.22f, new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            OpacityInADS = Config.Bind("Coop | NamePlates", "Opacity in ADS", 0.75f, new ConfigDescription("The opacity of the name plates when aiming down sights.", new AcceptableValueRange<float>(0.1f, 1f), new ConfigurationManagerAttributes() { Order = 3 }));
+            OpacityInADS = Config.Bind("Coop | Name Plates", "Opacity in ADS", 0.75f, new ConfigDescription("The opacity of the name plates when aiming down sights.", new AcceptableValueRange<float>(0.1f, 1f), new ConfigurationManagerAttributes() { Order = 3 }));
 
-            MaxDistanceToShow = Config.Bind("Coop | NamePlates", "Max Distance to Show", 500f, new ConfigDescription("The maximum distance at which name plates will become invisible, starts to fade at half the input value.", new AcceptableValueRange<float>(10f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
+            MaxDistanceToShow = Config.Bind("Coop | Name Plates", "Max Distance to Show", 500f, new ConfigDescription("The maximum distance at which name plates will become invisible, starts to fade at half the input value.", new AcceptableValueRange<float>(10f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
 
-            MinimumOpacity = Config.Bind("Coop | NamePlates", "Minimum Opacity", 0.1f, new ConfigDescription("The minimum opacity of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+            MinimumOpacity = Config.Bind("Coop | Name Plates", "Minimum Opacity", 0.1f, new ConfigDescription("The minimum opacity of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
 
-            MinimumNamePlateScale = Config.Bind("Coop | NamePlates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
+            MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Custom
 
