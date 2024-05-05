@@ -27,6 +27,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 namespace Fika.Core.Networking
 {
@@ -80,6 +81,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket, NetPeer>(OnAssignNetIdPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SyncNetIdPacket, NetPeer>(OnSyncNetIdPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -114,6 +116,21 @@ namespace Fika.Core.Networking
             ClientReady = true;
         }
 
+        private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet, NetPeer peer)
+        {
+            Dictionary<int, CoopPlayer> newPlayers = Players;
+            if (Players[packet.NetId].ProfileId != packet.ProfileId)
+            {
+                FikaPlugin.Instance.FikaLogger.LogWarning($"{packet.ProfileId} had the wrong NetId: {Players[packet.NetId].NetId}, should be {packet.NetId}");
+                for (int i = 0; i < Players.Count; i++)
+                {
+                    KeyValuePair<int, CoopPlayer> playerToReorganize = Players.Where(x => x.Value.ProfileId == packet.ProfileId).First();
+                    Players.Remove(playerToReorganize.Key);
+                    Players[packet.NetId] = playerToReorganize.Value;
+                }
+            }
+        }
+
         private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet, NetPeer peer)
         {
             MyPlayer.NetId = packet.NetId;
@@ -130,6 +147,7 @@ namespace Fika.Core.Networking
 
             if (i == -1)
             {
+                FikaPlugin.Instance.FikaLogger.LogError("Could not find own player among players list");
                 return;
             }
 

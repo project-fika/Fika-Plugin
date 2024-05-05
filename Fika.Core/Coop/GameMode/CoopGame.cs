@@ -482,87 +482,89 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="timeBeforeDeploy">Time in seconds to count down</param>
         private async void DeployScreen(float timeBeforeDeploy)
         {
-            if (MatchmakerAcceptPatches.IsServer && MatchmakerAcceptPatches.HostExpectedNumberOfPlayers <= 1)
+            if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
+                if (MatchmakerAcceptPatches.IsServer && MatchmakerAcceptPatches.HostExpectedNumberOfPlayers <= 1)
+                {
+                    if (fikaStartButton != null)
+                    {
+                        Destroy(fikaStartButton);
+                    }
+
+                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
+                    await FikaRequestHandler.UpdateSetStatus(status);
+
+                    Singleton<FikaServer>.Instance.ReadyClients++;
+                    base.vmethod_1(timeBeforeDeploy);
+                    return;
+                }
+
+                NetDataWriter writer = new();
+                forceStart = false;
+
+                MatchmakerAcceptPatches.GClass3163.ChangeStatus("Waiting for other players to finish loading...");
+
+                fikaStartButton?.SetActive(true);
+
+                if (MatchmakerAcceptPatches.IsServer)
+                {
+                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
+                    await FikaRequestHandler.UpdateSetStatus(status);
+
+                    do
+                    {
+                        await Task.Delay(100);
+                    } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+
+                    FikaServer server = Singleton<FikaServer>.Instance;
+                    server.ReadyClients++;
+                    InformationPacket packet = new()
+                    {
+                        NumberOfPlayers = server.NetServer.ConnectedPeersCount,
+                        ReadyPlayers = server.ReadyClients
+                    };
+                    writer.Reset();
+                    server.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+                    do
+                    {
+                        await Task.Delay(250);
+                    } while (Singleton<FikaServer>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+
+                    foreach (CoopPlayer player in coopHandler.Players.Values)
+                    {
+                        SyncNetIdPacket syncPacket = new(player.ProfileId, player.NetId);
+
+                        writer.Reset();
+                        Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                    }
+                }
+                else if (MatchmakerAcceptPatches.IsClient)
+                {
+                    do
+                    {
+                        await Task.Delay(100);
+                    } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+
+                    FikaClient client = Singleton<FikaClient>.Instance;
+                    InformationPacket packet = new(true)
+                    {
+                        ReadyPlayers = 1
+                    };
+                    writer.Reset();
+                    client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+                    do
+                    {
+                        await Task.Delay(250);
+                    } while (Singleton<FikaClient>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+                }
+
                 if (fikaStartButton != null)
                 {
                     Destroy(fikaStartButton);
-                }
-
-                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                {
-                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    await FikaRequestHandler.UpdateSetStatus(status);
-                }
-
-                Singleton<FikaServer>.Instance.ReadyClients++;
-                base.vmethod_1(timeBeforeDeploy);
-                return;
-            }
-
-            forceStart = false;
-
-            MatchmakerAcceptPatches.GClass3163.ChangeStatus("Waiting for other players to finish loading...");
-
-            fikaStartButton?.SetActive(true);
-
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                {
-                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    await FikaRequestHandler.UpdateSetStatus(status);
-
-                    do
-                    {
-                        await Task.Delay(100);
-                    } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
-                }
-
-                FikaServer server = Singleton<FikaServer>.Instance;
-                server.ReadyClients++;
-                InformationPacket packet = new()
-                {
-                    NumberOfPlayers = server.NetServer.ConnectedPeersCount,
-                    ReadyPlayers = server.ReadyClients
-                };
-                NetDataWriter writer = new();
-                writer.Reset();
-                server.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-
-                do
-                {
-                    await Task.Delay(250);
-                } while (Singleton<FikaServer>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
-            }
-            else if (MatchmakerAcceptPatches.IsClient)
-            {
-                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                {
-                    do
-                    {
-                        await Task.Delay(100);
-                    } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
-                }
-
-                FikaClient client = Singleton<FikaClient>.Instance;
-                InformationPacket packet = new(true)
-                {
-                    ReadyPlayers = 1
-                };
-                NetDataWriter writer = new();
-                writer.Reset();
-                client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-
-                do
-                {
-                    await Task.Delay(250);
-                } while (Singleton<FikaClient>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
-            }
-
-            if (fikaStartButton != null)
-            {
-                Destroy(fikaStartButton);
+                }               
+                
             }
 
             base.vmethod_1(timeBeforeDeploy);
