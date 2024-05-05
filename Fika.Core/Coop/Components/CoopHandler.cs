@@ -183,7 +183,7 @@ namespace Fika.Core.Coop.Components
             StopCoroutine(ProcessSpawnQueue());
             if (PingRoutine != null)
             {
-                StopCoroutine(PingRoutine); 
+                StopCoroutine(PingRoutine);
             }
         }
 
