@@ -119,20 +119,28 @@ namespace Fika.Core.Networking
         private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet, NetPeer peer)
         {
             Dictionary<int, CoopPlayer> newPlayers = Players;
-            if (Players[packet.NetId].ProfileId != packet.ProfileId)
+            if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"{packet.ProfileId} had the wrong NetId: {Players[packet.NetId].NetId}, should be {packet.NetId}");
-                for (int i = 0; i < Players.Count; i++)
+                if (player.ProfileId != packet.ProfileId)
                 {
-                    KeyValuePair<int, CoopPlayer> playerToReorganize = Players.Where(x => x.Value.ProfileId == packet.ProfileId).First();
-                    Players.Remove(playerToReorganize.Key);
-                    Players[packet.NetId] = playerToReorganize.Value;
-                }
+                    FikaPlugin.Instance.FikaLogger.LogWarning($"OnSyncNetIdPacketReceived: {packet.ProfileId} had the wrong NetId: {Players[packet.NetId].NetId}, should be {packet.NetId}");
+                    for (int i = 0; i < Players.Count; i++)
+                    {
+                        KeyValuePair<int, CoopPlayer> playerToReorganize = Players.Where(x => x.Value.ProfileId == packet.ProfileId).First();
+                        Players.Remove(playerToReorganize.Key);
+                        Players[packet.NetId] = playerToReorganize.Value;
+                    }
+                } 
+            }
+            else
+            {
+                FikaPlugin.Instance.FikaLogger.LogError($"OnSyncNetIdPacketReceived: Could not find NetId {packet.NetId} in player list!");
             }
         }
 
         private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet, NetPeer peer)
         {
+            FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Assigned NetId {packet.NetId} to my own client.");
             MyPlayer.NetId = packet.NetId;
             int i = -1;
             foreach (var player in Players)
@@ -147,7 +155,7 @@ namespace Fika.Core.Networking
 
             if (i == -1)
             {
-                FikaPlugin.Instance.FikaLogger.LogError("Could not find own player among players list");
+                FikaPlugin.Instance.FikaLogger.LogError("OnAssignNetIdPacketReceived: Could not find own player among players list");
                 return;
             }
 
