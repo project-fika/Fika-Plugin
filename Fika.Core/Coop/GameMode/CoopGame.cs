@@ -308,7 +308,7 @@ namespace Fika.Core.Coop.GameMode
 
             WildSpawnType role = profile.Info.Settings.Role;
             bool isSpecial = false;
-            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
+            if ((int)role != FikaPlugin.sptUsecValue && (int)role != FikaPlugin.sptBearValue && role != EFT.WildSpawnType.assault)
             {
 #if DEBUG
                 Logger.LogWarning($"Bot {profile.Info.Settings.Role} is a special bot.");
