@@ -27,7 +27,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 
 namespace Fika.Core.Networking
 {
@@ -56,7 +55,7 @@ namespace Fika.Core.Networking
         private ManualLogSource clientLogger;
         public bool ClientReady = false;
 
-        public void Start()
+        protected void Start()
         {
             clientLogger = new("Fika Client");
 
@@ -96,7 +95,7 @@ namespace Fika.Core.Networking
 
             _netClient.Start();
 
-            GetHostRequest body = new GetHostRequest();
+            GetHostRequest body = new(CoopHandler.GetServerId());
             GetHostResponse result = FikaRequestHandler.GetHost(body);
 
             IP = result.Ip;
@@ -130,7 +129,7 @@ namespace Fika.Core.Networking
                         Players.Remove(playerToReorganize.Key);
                         Players[packet.NetId] = playerToReorganize.Value;
                     }
-                } 
+                }
             }
             else
             {

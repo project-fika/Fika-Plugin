@@ -3,6 +3,7 @@ using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
@@ -141,8 +142,48 @@ namespace Fika.Core.UI.Custom
             RefreshUI();
         }
 
-        private void JoinMatch(string profileId, string serverId)
+        private IEnumerator JoinMatch(string profileId, string serverId, Button button)
         {
+            button.enabled = false;
+
+            NotificationManagerClass.DisplayMessageNotification("Connecting to server...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+
+            FikaPingingClient pingingClient = new(serverId);
+            if (pingingClient.Init())
+            {
+                int attempts = 0;
+                bool success = false;
+
+                do
+                {
+                    attempts++;
+                    if (pingingClient.PingEndPoint())
+                    {
+                        pingingClient.NetClient.PollEvents();
+                        success = pingingClient.Received;
+                    }
+                    yield return new WaitForFixedUpdate();
+                } while (attempts < 5 && !success);
+
+                if (!success)
+                {
+                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                    "ERROR CONNECTING",
+                    "Unable to connect to the server. Make sure that all ports are open and that all settings are configured correctly.",
+                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                    button.enabled = true;
+                    yield break;
+                }
+            }
+            else
+            {
+                ConsoleScreen.Log("ERROR");
+            }
+
+            pingingClient.NetClient?.Stop();
+            pingingClient = null;
+
             if (MatchmakerAcceptPatches.JoinMatch(RaidSettings, profileId, serverId, out CreateMatch result, out string errorMessage))
             {
                 MatchmakerAcceptPatches.SetGroupId(result.ServerId);
@@ -211,7 +252,7 @@ namespace Fika.Core.UI.Custom
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                    JoinMatch(ProfileId, server.name);
+                    StartCoroutine(JoinMatch(ProfileId, server.name, button));
                 });
 
                 TooltipTextGetter tooltipTextGetter;
