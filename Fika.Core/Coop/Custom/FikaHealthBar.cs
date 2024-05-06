@@ -195,6 +195,8 @@ namespace Fika.Core.Coop.Custom
             currentPlayer.HealthController.HealthChangedEvent += HealthController_HealthChangedEvent;
             currentPlayer.HealthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
             currentPlayer.HealthController.BodyPartRestoredEvent += HealthController_BodyPartRestoredEvent;
+
+            UpdateHealth();
         }
 
         private void HealthController_BodyPartRestoredEvent(EBodyPart arg1, EFT.HealthSystem.ValueStruct arg2)
@@ -217,32 +219,29 @@ namespace Fika.Core.Coop.Custom
         /// </summary>
         private void UpdateHealth()
         {
-            if (playerPlate.healthBarScreen.gameObject.activeSelf)
+            float currentHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
+            float maxHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
+            if (FikaPlugin.UseHealthNumber.Value)
             {
-                float currentHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
-                float maxHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
-                if (FikaPlugin.UseHealthNumber.Value)
+                if (!playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
                 {
-                    if (!playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
-                    {
-                        playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
-                        playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
-                    }
-                    int healthNumberPercentage = (int)Math.Round((currentHealth / maxHealth) * 100);
-                    playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
+                    playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
+                    playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
                 }
-                else
+                int healthNumberPercentage = (int)Math.Round((currentHealth / maxHealth) * 100);
+                playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
+            }
+            else
+            {
+                if (!playerPlate.healthBarBackgroundScreen.gameObject.activeSelf)
                 {
-                    if (!playerPlate.healthBarBackgroundScreen.gameObject.active)
-                    {
-                        playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
-                        playerPlate.healthBarBackgroundScreen.gameObject.SetActive(true);
-                    }
+                    playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
+                    playerPlate.healthBarBackgroundScreen.gameObject.SetActive(true);
+                }
 
-                    float normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
-                    playerPlate.healthBarScreen.fillAmount = normalizedHealth;
-                    UpdateHealthBarColor(normalizedHealth);
-                }
+                float normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
+                playerPlate.healthBarScreen.fillAmount = normalizedHealth;
+                UpdateHealthBarColor(normalizedHealth);
             }
         }
 
