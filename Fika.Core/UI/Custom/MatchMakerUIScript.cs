@@ -163,7 +163,7 @@ namespace Fika.Core.UI.Custom
                         success = pingingClient.Received;
                     }
                     yield return new WaitForSeconds(0.1f);
-                } while (!success && attempts < 30);
+                } while (!success && attempts < 50);
 
                 if (!success)
                 {
