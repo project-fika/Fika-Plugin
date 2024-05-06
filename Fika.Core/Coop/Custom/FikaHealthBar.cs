@@ -257,7 +257,7 @@ namespace Fika.Core.Coop.Custom
         {
             if (screenObject.gameObject.activeInHierarchy)
             {
-                var color = screenObject.color;
+                Color color = screenObject.color;
                 color.a = alpha;
                 screenObject.color = color;
             }
@@ -267,7 +267,7 @@ namespace Fika.Core.Coop.Custom
         {
             if (screenObject.gameObject.activeInHierarchy)
             {
-                var color = screenObject.color;
+                Color color = screenObject.color;
                 color.a = alpha;
                 screenObject.color = color;
             }
