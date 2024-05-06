@@ -563,8 +563,8 @@ namespace Fika.Core.Coop.GameMode
                 if (fikaStartButton != null)
                 {
                     Destroy(fikaStartButton);
-                }               
-                
+                }
+
             }
 
             base.vmethod_1(timeBeforeDeploy);

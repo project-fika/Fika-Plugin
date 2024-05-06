@@ -1,10 +1,8 @@
 ﻿using BepInEx.Logging;
-using EFT.UI;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using System;
 using System.Net;
 using System.Net.Sockets;
 
