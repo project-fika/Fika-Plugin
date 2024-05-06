@@ -493,8 +493,11 @@ namespace Fika.Core.Coop.Components
                 return null;
 
             ((CoopPlayer)otherPlayer).NetId = netId;
+            Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
             if (!isAI)
+            {
                 HumanPlayers++;
+            }
 
             if (!Players.ContainsKey(netId))
             {
@@ -507,7 +510,9 @@ namespace Fika.Core.Coop.Components
             foreach (CoopPlayer player in Players.Values)
             {
                 if (player is not ObservedCoopPlayer)
+                {
                     continue;
+                }
 
                 Collider playerCollider = otherPlayer.GetCharacterControllerCommon().GetCollider();
                 Collider otherCollider = player.GetCharacterControllerCommon().GetCollider();
