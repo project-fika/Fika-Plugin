@@ -133,6 +133,13 @@ namespace Fika.Core.Networking
             else
             {
                 FikaPlugin.Instance.FikaLogger.LogError($"OnSyncNetIdPacketReceived: Could not find NetId {packet.NetId} in player list!");
+                string allPlayers = "";
+                foreach (KeyValuePair<int, CoopPlayer> kvp in CoopHandler.Players)
+                {
+                    string toAdd = $"Key: {kvp.Key}, Nickname: {kvp.Value.Profile.Nickname}, NetId: {kvp.Value.NetId}";
+                    allPlayers = string.Join(", ", allPlayers + toAdd);
+                }
+                FikaPlugin.Instance.FikaLogger.LogError(allPlayers);
             }
         }
 
