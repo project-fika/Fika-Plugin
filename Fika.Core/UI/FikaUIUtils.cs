@@ -10,22 +10,22 @@ namespace Fika.Core.UI
     {
         public static TextMeshProUGUI CreateOverlayText(string overlayText)
         {
-            var obj = GameObject.Find("/Preloader UI/Preloader UI/Watermark");
-            var labelObj = GameObject.Find("/Preloader UI/Preloader UI/Watermark/Label");
+            GameObject obj = GameObject.Find("/Preloader UI/Preloader UI/Watermark");
+            GameObject labelObj = GameObject.Find("/Preloader UI/Preloader UI/Watermark/Label");
 
             if (labelObj != null)
             {
                 Object.Destroy(labelObj);
             }
 
-            var watermarkText = obj.GetComponent<ClientWatermark>();
+            ClientWatermark watermarkText = obj.GetComponent<ClientWatermark>();
             if (watermarkText != null)
             {
                 Object.Destroy(watermarkText);
             }
 
             obj.active = true;
-            var text = obj.AddComponent<TextMeshProUGUI>();
+            TextMeshProUGUI text = obj.AddComponent<TextMeshProUGUI>();
             text.horizontalAlignment = HorizontalAlignmentOptions.Center;
             text.verticalAlignment = VerticalAlignmentOptions.Bottom;
             text.margin = new Vector4(0, 0, 0, -350);

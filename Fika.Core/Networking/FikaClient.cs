@@ -52,12 +52,11 @@ namespace Fika.Core.Networking
         public string IP { get; private set; }
         public int Port { get; private set; }
         public bool SpawnPointsReceived { get; private set; } = false;
-        private ManualLogSource clientLogger;
+        private readonly ManualLogSource clientLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         public bool ClientReady = false;
 
-        public void Start()
+        protected void Start()
         {
-            clientLogger = new("Fika Client");
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
@@ -80,6 +79,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket, NetPeer>(OnAssignNetIdPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SyncNetIdPacket, NetPeer>(OnSyncNetIdPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -94,7 +94,7 @@ namespace Fika.Core.Networking
 
             _netClient.Start();
 
-            GetHostRequest body = new GetHostRequest();
+            GetHostRequest body = new(CoopHandler.GetServerId());
             GetHostResponse result = FikaRequestHandler.GetHost(body);
 
             IP = result.Ip;
@@ -114,8 +114,38 @@ namespace Fika.Core.Networking
             ClientReady = true;
         }
 
+        private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet, NetPeer peer)
+        {
+            Dictionary<int, CoopPlayer> newPlayers = Players;
+            if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            {
+                if (player.ProfileId != packet.ProfileId)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogWarning($"OnSyncNetIdPacketReceived: {packet.ProfileId} had the wrong NetId: {Players[packet.NetId].NetId}, should be {packet.NetId}");
+                    for (int i = 0; i < Players.Count; i++)
+                    {
+                        KeyValuePair<int, CoopPlayer> playerToReorganize = Players.Where(x => x.Value.ProfileId == packet.ProfileId).First();
+                        Players.Remove(playerToReorganize.Key);
+                        Players[packet.NetId] = playerToReorganize.Value;
+                    }
+                }
+            }
+            else
+            {
+                FikaPlugin.Instance.FikaLogger.LogError($"OnSyncNetIdPacketReceived: Could not find NetId {packet.NetId} in player list!");
+                string allPlayers = "";
+                foreach (KeyValuePair<int, CoopPlayer> kvp in CoopHandler.Players)
+                {
+                    string toAdd = $"Key: {kvp.Key}, Nickname: {kvp.Value.Profile.Nickname}, NetId: {kvp.Value.NetId}";
+                    allPlayers = string.Join(", ", allPlayers + toAdd);
+                }
+                FikaPlugin.Instance.FikaLogger.LogError(allPlayers);
+            }
+        }
+
         private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet, NetPeer peer)
         {
+            FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Assigned NetId {packet.NetId} to my own client.");
             MyPlayer.NetId = packet.NetId;
             int i = -1;
             foreach (var player in Players)
@@ -130,6 +160,7 @@ namespace Fika.Core.Networking
 
             if (i == -1)
             {
+                FikaPlugin.Instance.FikaLogger.LogError("OnAssignNetIdPacketReceived: Could not find own player among players list");
                 return;
             }
 

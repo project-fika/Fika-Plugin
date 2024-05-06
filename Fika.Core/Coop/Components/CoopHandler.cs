@@ -183,7 +183,7 @@ namespace Fika.Core.Coop.Components
             StopCoroutine(ProcessSpawnQueue());
             if (PingRoutine != null)
             {
-                StopCoroutine(PingRoutine); 
+                StopCoroutine(PingRoutine);
             }
         }
 
@@ -493,12 +493,19 @@ namespace Fika.Core.Coop.Components
                 return null;
 
             ((CoopPlayer)otherPlayer).NetId = netId;
+            Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
             if (!isAI)
+            {
                 HumanPlayers++;
+            }
 
             if (!Players.ContainsKey(netId))
             {
                 Players.Add(netId, (CoopPlayer)otherPlayer);
+            }
+            else
+            {
+                Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))
@@ -507,7 +514,9 @@ namespace Fika.Core.Coop.Components
             foreach (CoopPlayer player in Players.Values)
             {
                 if (player is not ObservedCoopPlayer)
+                {
                     continue;
+                }
 
                 Collider playerCollider = otherPlayer.GetCharacterControllerCommon().GetCollider();
                 Collider otherCollider = player.GetCharacterControllerCommon().GetCollider();

@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.BTR
             Type btrControllerType = typeof(BTRControllerClass);
             _updateTaxiPriceMethod = AccessTools.GetDeclaredMethods(btrControllerType).Single(IsUpdateTaxiPriceMethod);
             client = Singleton<FikaClient>.Instance;
-            btrLogger = new("BTR Client");
+            btrLogger = BepInEx.Logging.Logger.CreateLogSource("BTR Client");
         }
 
         private void Awake()

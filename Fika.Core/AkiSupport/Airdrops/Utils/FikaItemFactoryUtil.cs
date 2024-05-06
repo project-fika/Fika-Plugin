@@ -19,7 +19,7 @@ namespace Aki.Custom.Airdrops.Utils
         public FikaItemFactoryUtil()
         {
             itemFactory = Singleton<ItemFactory>.Instance;
-            logSource = new("ItemFactoryUtil");
+            logSource = Logger.CreateLogSource("ItemFactoryUtil");
         }
 
         public void BuildContainer(LootableContainer container, FikaAirdropConfigModel config, string dropType)

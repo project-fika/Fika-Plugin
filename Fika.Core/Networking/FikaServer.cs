@@ -34,7 +34,7 @@ namespace Fika.Core.Networking
     {
         private NetManager _netServer;
         public NetPacketProcessor packetProcessor = new();
-        private NetDataWriter _dataWriter = new();
+        private readonly NetDataWriter _dataWriter = new();
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         public Dictionary<int, CoopPlayer> Players => CoopHandler.Players;
         public List<string> PlayersMissing = [];
@@ -51,7 +51,7 @@ namespace Fika.Core.Networking
         }
         public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
         public bool hasHadPeer = false;
-        private ManualLogSource serverLogger;
+        private readonly ManualLogSource serverLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
         public bool ServerReady = false;
         private int _currentNetId;
 
@@ -61,7 +61,6 @@ namespace Fika.Core.Networking
             _currentNetId = 1;
 
             NetDebug.Logger = this;
-            serverLogger = new("Fika Server");
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
@@ -85,6 +84,7 @@ namespace Fika.Core.Networking
             _netServer = new NetManager(this)
             {
                 BroadcastReceiveEnabled = true,
+                UnconnectedMessagesEnabled = true,
                 UpdateTime = 15,
                 AutoRecycle = true,
                 IPv6Enabled = false,
@@ -606,6 +606,27 @@ namespace Fika.Core.Networking
                 NetDataWriter resp = new();
                 resp.Put(1);
                 _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+            }
+            else
+            {
+                if (reader.TryGetString(out string data))
+                {
+                    if (data == "fika.hello")
+                    {
+                        NetDataWriter resp = new();
+                        resp.Put(data);
+                        _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                        serverLogger.LogInfo("PingingRequest: Correct ping query, sending response");
+                    }
+                    else
+                    {
+                        serverLogger.LogError("PingingRequest: Data was not as expected");
+                    }
+                }
+                else
+                {
+                    serverLogger.LogError("PingingRequest: Could not parse string");
+                }
             }
         }
 

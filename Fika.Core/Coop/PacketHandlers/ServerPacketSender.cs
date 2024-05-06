@@ -13,6 +13,7 @@ using LiteNetLib.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Coop.PacketHandlers
@@ -34,7 +35,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private void Awake()
         {
-            logger = new("ServerPacketSender");
+            logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
             player = GetComponent<CoopPlayer>();
         }
 
@@ -128,7 +129,11 @@ namespace Fika.Core.Coop.PacketHandlers
                     Server?.SendDataToAll(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            if (FikaPlugin.PingButton.Value.IsPressed() && player.IsYourPlayer && player.HealthController.IsAlive && FikaPlugin.UsePingSystem.Value)
+            if (Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
+                && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey)
+                && player.IsYourPlayer
+                && player.HealthController.IsAlive
+                && FikaPlugin.UsePingSystem.Value)
             {
                 player?.Ping();
             }

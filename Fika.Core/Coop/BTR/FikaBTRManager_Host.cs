@@ -71,7 +71,7 @@ namespace Fika.Core.Coop.BTR
             Type btrControllerType = typeof(BTRControllerClass);
             _updateTaxiPriceMethod = AccessTools.GetDeclaredMethods(btrControllerType).Single(IsUpdateTaxiPriceMethod);
             server = Singleton<FikaServer>.Instance;
-            btrLogger = new("BTR Host");
+            btrLogger = BepInEx.Logging.Logger.CreateLogSource("BTR Host");
         }
 
         public bool CanPlayerEnter(IPlayer player)

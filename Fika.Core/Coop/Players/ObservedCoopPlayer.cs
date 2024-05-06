@@ -889,7 +889,7 @@ namespace Fika.Core.Coop.Players
             {
                 IsObservedAI = true;
             }
-            
+
             PacketSender = gameObject.AddComponent<ObservedPacketSender>();
 
             if (IsObservedAI)
