@@ -162,8 +162,8 @@ namespace Fika.Core.UI.Custom
                         pingingClient.NetClient.PollEvents();
                         success = pingingClient.Received;
                     }
-                    yield return new WaitForFixedUpdate();
-                } while (!success && attempts < 5);
+                    yield return new WaitForSeconds(0.1f);
+                } while (!success && attempts < 30);
 
                 if (!success)
                 {
