@@ -176,7 +176,17 @@ namespace Fika.Core.Coop.Players
                 isStarted = true;
             }
 
-            if (FikaPlugin.DynamicAI.Value)
+            WildSpawnType botType = Profile.Info.Settings.Role;
+
+            if ((botType == (WildSpawnType)FikaPlugin.sptUsecValue || botType == (WildSpawnType)FikaPlugin.sptBearValue) && FikaPlugin.DynamicAIPMC.Value)
+            {
+                dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
+            }
+            else if (botType == WildSpawnType.assault && FikaPlugin.DynamicAIScav.Value)
+            {
+                dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
+            }
+            else if (FikaPlugin.DynamicAIRest.Value)
             {
                 dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
             }

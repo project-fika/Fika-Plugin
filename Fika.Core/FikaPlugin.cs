@@ -68,6 +68,10 @@ namespace Fika.Core
 
         public string Locale { get; private set; } = "en";
 
+        //WildSpawnType for sptUsec and sptBear
+        public const int sptUsecValue = 47;
+        public const int sptBearValue = 48;
+
         public static Dictionary<string, string> RespectedPlayersList = new()
         {
             { "samswat",      "godfather of modern SPT modding ~ SSH"                                                       },
@@ -131,7 +135,9 @@ namespace Fika.Core
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
 
         // Performance
-        public static ConfigEntry<bool> DynamicAI { get; set; }
+        public static ConfigEntry<bool> DynamicAIPMC { get; set; }
+        public static ConfigEntry<bool> DynamicAIScav { get; set; }
+        public static ConfigEntry<bool> DynamicAIRest { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
         public static ConfigEntry<bool> CullPlayers { get; set; }
@@ -309,7 +315,11 @@ namespace Fika.Core
 
             // Performance
 
-            DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            DynamicAIPMC = Config.Bind("Performance", "Dynamic AI PMC", false, new ConfigDescription("Use the dynamic AI system, disabling PMC AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+
+            DynamicAIScav = Config.Bind("Performance", "Dynamic AI SCAV", false, new ConfigDescription("Use the dynamic AI system, disabling SCAV AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+
+            DynamicAIRest = Config.Bind("Performance", "Dynamic AI REST", false, new ConfigDescription("Use the dynamic AI system, disabling AI that arent Scavs or PMCs when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
             DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(50f, 750f), new ConfigurationManagerAttributes() { Order = 4 }));
 

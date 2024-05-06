@@ -56,10 +56,6 @@ namespace Fika.Core.Coop.GameMode
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
 
-        //WildSpawnType for sptUsec and sptBear
-        const int sptUsecValue = 47;
-        const int sptBearValue = 48;
-
         public ISession BackEndSession { get => PatchConstants.BackEndSession; }
 
         BotsController IBotGame.BotsController
@@ -285,7 +281,7 @@ namespace Fika.Core.Coop.GameMode
 
             WildSpawnType role = kvp.Value.Profile.Info.Settings.Role;
 
-            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
+            if ((int)role != FikaPlugin.sptUsecValue && (int)role != FikaPlugin.sptBearValue && role != EFT.WildSpawnType.assault)
             {
                 // We skip all the bots that are not sptUsec, sptBear or assault. That means we never remove bosses, bossfollowers, and raiders
                 return true;
