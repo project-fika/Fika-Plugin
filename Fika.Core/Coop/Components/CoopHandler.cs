@@ -503,6 +503,10 @@ namespace Fika.Core.Coop.Components
             {
                 Players.Add(netId, (CoopPlayer)otherPlayer);
             }
+            else
+            {
+                Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
+            }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))
                 Singleton<GameWorld>.Instance.RegisteredPlayers.Add(otherPlayer);
