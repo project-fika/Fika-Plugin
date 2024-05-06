@@ -654,7 +654,7 @@ namespace Fika.Core.Coop.GameMode
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
                 GClass549.Config.CharacterController.ClientPlayerMode, () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
-                () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), 0, questController);
+                () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
