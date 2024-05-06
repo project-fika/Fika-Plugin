@@ -52,34 +52,6 @@ namespace Fika.Core.Coop.Custom
                     SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
                     SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
                 }
-                // Updating the health bar
-                if (playerPlate.healthBarScreen.gameObject.activeSelf)
-                {
-                    float currentHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
-                    float maxHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
-                    if (FikaPlugin.UseHealthNumber.Value)
-                    {
-                        if (!playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
-                        {
-                            playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
-                            playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
-                        }
-                        int healthNumberPercentage = (int)Math.Round((currentHealth / maxHealth) * 100);
-                        playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
-                    }
-                    else
-                    {
-                        if (!playerPlate.healthBarBackgroundScreen.gameObject.active)
-                        {
-                            playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
-                            playerPlate.healthBarBackgroundScreen.gameObject.SetActive(true);
-                        }
-
-                        float normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
-                        playerPlate.healthBarScreen.fillAmount = normalizedHealth;
-                        UpdateHealthBarColor(normalizedHealth);
-                    }
-                }
                 // Finally, update the screen space position
                 UpdateScreenSpacePosition(throttleUpdate);
                 // Destroy if this player is dead
@@ -219,6 +191,59 @@ namespace Fika.Core.Coop.Custom
                 playerPlate.usecPlateScreen.gameObject.SetActive(false);
                 playerPlate.bearPlateScreen.gameObject.SetActive(false);
             }
+
+            currentPlayer.HealthController.HealthChangedEvent += HealthController_HealthChangedEvent;
+            currentPlayer.HealthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
+            currentPlayer.HealthController.BodyPartRestoredEvent += HealthController_BodyPartRestoredEvent;
+        }
+
+        private void HealthController_BodyPartRestoredEvent(EBodyPart arg1, EFT.HealthSystem.ValueStruct arg2)
+        {
+            UpdateHealth();
+        }
+
+        private void HealthController_BodyPartDestroyedEvent(EBodyPart arg1, EDamageType arg2)
+        {
+            UpdateHealth();
+        }
+
+        private void HealthController_HealthChangedEvent(EBodyPart arg1, float arg2, DamageInfo arg3)
+        {
+            UpdateHealth();
+        }
+
+        /// <summary>
+        /// Updates the health on the HealthBar, this is invoked from events on the healthcontroller
+        /// </summary>
+        private void UpdateHealth()
+        {
+            if (playerPlate.healthBarScreen.gameObject.activeSelf)
+            {
+                float currentHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
+                float maxHealth = currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
+                if (FikaPlugin.UseHealthNumber.Value)
+                {
+                    if (!playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
+                    {
+                        playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
+                        playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
+                    }
+                    int healthNumberPercentage = (int)Math.Round((currentHealth / maxHealth) * 100);
+                    playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
+                }
+                else
+                {
+                    if (!playerPlate.healthBarBackgroundScreen.gameObject.active)
+                    {
+                        playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
+                        playerPlate.healthBarBackgroundScreen.gameObject.SetActive(true);
+                    }
+
+                    float normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
+                    playerPlate.healthBarScreen.fillAmount = normalizedHealth;
+                    UpdateHealthBarColor(normalizedHealth);
+                }
+            }
         }
 
         private void UpdateHealthBarColor(float normalizedHealth)
@@ -283,6 +308,9 @@ namespace Fika.Core.Coop.Custom
 
         private void OnDestroy()
         {
+            currentPlayer.HealthController.HealthChangedEvent -= HealthController_HealthChangedEvent;
+            currentPlayer.HealthController.BodyPartDestroyedEvent -= HealthController_BodyPartDestroyedEvent;
+            currentPlayer.HealthController.BodyPartRestoredEvent -= HealthController_BodyPartRestoredEvent;
             playerPlate.gameObject.SetActive(false);
             Destroy(this);
         }
