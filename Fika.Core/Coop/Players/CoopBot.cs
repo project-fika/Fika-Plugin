@@ -178,13 +178,21 @@ namespace Fika.Core.Coop.Players
 
             WildSpawnType botType = Profile.Info.Settings.Role;
 
-            if ((botType == (WildSpawnType)FikaPlugin.sptUsecValue || botType == (WildSpawnType)FikaPlugin.sptBearValue) && FikaPlugin.DynamicAIPMC.Value)
+            if (botType == (WildSpawnType)FikaPlugin.sptUsecValue || botType == (WildSpawnType)FikaPlugin.sptBearValue)
             {
-                dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
+                if (FikaPlugin.DynamicAIPMC.Value)
+                {
+                    dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
+                }
+                return;
             }
-            else if (botType == WildSpawnType.assault && FikaPlugin.DynamicAIScav.Value)
+            else if (botType == WildSpawnType.assault)
             {
-                dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
+                if (FikaPlugin.DynamicAIScav.Value)
+                {
+                    dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
+                }
+                return;
             }
             else if (FikaPlugin.DynamicAIRest.Value)
             {
