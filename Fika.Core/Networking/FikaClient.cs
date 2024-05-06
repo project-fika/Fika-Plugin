@@ -52,12 +52,11 @@ namespace Fika.Core.Networking
         public string IP { get; private set; }
         public int Port { get; private set; }
         public bool SpawnPointsReceived { get; private set; } = false;
-        private ManualLogSource clientLogger;
+        private readonly ManualLogSource clientLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         public bool ClientReady = false;
 
         protected void Start()
         {
-            clientLogger = new("Fika Client");
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);

@@ -11,7 +11,7 @@ namespace Fika.Core.Networking
     internal class FikaPingingClient(string serverId) : INetEventListener
     {
         public NetManager NetClient;
-        private readonly ManualLogSource _logger = new("Pinging Client");
+        private readonly ManualLogSource _logger = Logger.CreateLogSource("Fika.PingingClient");
         private readonly string serverId = serverId;
         private IPEndPoint remoteEndPoint;
         public bool Received = false;
@@ -58,8 +58,7 @@ namespace Fika.Core.Networking
             NetDataWriter writer = new();
             writer.Put("fika.hello");
 
-            bool success = NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
-            return success;
+            return NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
         }
 
         public void OnConnectionRequest(ConnectionRequest request)
@@ -84,7 +83,12 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
+            if (Received)
+            {
+                return;
+            }
             _logger.LogInfo("Received response from server, parsing...");
+
             if (reader.TryGetString(out string result))
             {
                 if (result == "fika.hello")

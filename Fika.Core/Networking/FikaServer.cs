@@ -51,7 +51,7 @@ namespace Fika.Core.Networking
         }
         public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
         public bool hasHadPeer = false;
-        private readonly ManualLogSource serverLogger = new("Fika Server");
+        private readonly ManualLogSource serverLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
         public bool ServerReady = false;
         private int _currentNetId;
 

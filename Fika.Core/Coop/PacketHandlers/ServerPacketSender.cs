@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private void Awake()
         {
-            logger = new("ServerPacketSender");
+            logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
             player = GetComponent<CoopPlayer>();
         }
 
