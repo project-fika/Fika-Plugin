@@ -443,13 +443,19 @@ namespace Fika.Core.Coop.GameMode
 #endif
                 return false;
             }
-
             Player bot = Bots[botKey];
-
 #if DEBUG
             Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
 #endif
+            DespawnBot(coopHandler, bot);
+#if DEBUG
+            Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
+#endif
+            return true;
+        }
 
+        private void DespawnBot(CoopHandler coopHandler, Player bot)
+        {
             IBotGame botGame = Singleton<IBotGame>.Instance;
             BotOwner botOwner = bot.AIData.BotOwner;
 
@@ -458,13 +464,9 @@ namespace Fika.Core.Coop.GameMode
             BotUnspawn(botOwner);
             botOwner?.Dispose();
 
-            Bots.Remove(botKey);
             CoopPlayer coopPlayer = (CoopPlayer)bot;
             coopHandler.Players.Remove(coopPlayer.NetId);
-#if DEBUG
-            Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
-#endif
-            return true;
+            Bots.Remove(bot.ProfileId);
         }
 
         /// <summary>
