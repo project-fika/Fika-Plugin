@@ -144,7 +144,10 @@ namespace Fika.Core.UI.Custom
 
         private IEnumerator JoinMatch(string profileId, string serverId, Button button)
         {
-            button.enabled = false;
+            if (button != null)
+            {
+                button.enabled = false; 
+            }
 
             NotificationManagerClass.DisplayMessageNotification("Connecting to server...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
@@ -172,7 +175,10 @@ namespace Fika.Core.UI.Custom
                     "Unable to connect to the server. Make sure that all ports are open and that all settings are configured correctly.",
                     ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
-                    button.enabled = true;
+                    if (button != null)
+                    {
+                        button.enabled = true; 
+                    }
                     yield break;
                 }
             }
