@@ -108,7 +108,7 @@ namespace Fika.Core.Networking.Http
 
         public static void RaidLeave(PlayerLeftRequest data)
         {
-            PutJson("/fika/update/playerspawn", data);
+            PutJson("/fika/raid/leave", data);
         }
 
         public static CreateMatch RaidJoin(MatchJoinRequest data)
