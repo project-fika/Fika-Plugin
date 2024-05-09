@@ -11,6 +11,7 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -104,6 +105,28 @@ namespace Fika.Core.UI.Custom
             fikaMatchMakerUi.StartButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+                if (FikaPlugin.ForceIP.Value != "")
+                {
+                    if (!IPAddress.TryParse(FikaPlugin.ForceIP.Value, out _))
+                    {
+                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                    "ERROR FORCING IP",
+                    $"'{FikaPlugin.ForceIP.Value}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
+                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                        return;
+                    }
+                }
+                if (FikaPlugin.ForceBindIP.Value != "")
+                {
+                    if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
+                    {
+                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                    "ERROR BINDING",
+                    $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
+                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                        return;
+                    }
+                }
                 MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
                 MatchmakerAcceptPatches.CreateMatch(MatchmakerAcceptPatches.Profile.ProfileId, MatchmakerAcceptPatches.PMCName, RaidSettings);
                 AcceptButton.OnClick.Invoke();
