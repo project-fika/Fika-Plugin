@@ -2,10 +2,6 @@
 
 using Comfort.Common;
 using Diz.LanguageExtensions;
-
-
-// © 2024 Lacyway All Rights Reserved
-
 using EFT;
 using EFT.InventoryLogic;
 

@@ -1052,9 +1052,8 @@ namespace Fika.Core.Coop.Players
         public virtual void HandleInventoryPacket(in InventoryPacket packet)
         {
             if (packet.HasItemControllerExecutePacket)
-            {
-                var inventory = _inventoryController;
-                if (inventory != null)
+            {                
+                if (_inventoryController != null)
                 {
                     using MemoryStream memoryStream = new(packet.ItemControllerExecutePacket.OperationBytes);
                     using BinaryReader binaryReader = new(memoryStream);
@@ -1132,7 +1131,8 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            if (packet.HasSearchPacket)
+            // Currently unused
+            /*if (packet.HasSearchPacket)
             {
                 if (!packet.SearchPacket.IsStop)
                 {
@@ -1150,7 +1150,7 @@ namespace Fika.Core.Coop.Players
                         _inventoryController.ExecuteStop(operation);
                     }
                 }
-            }
+            }*/
         }
 
         public virtual void HandleWeaponPacket(in WeaponPacket packet)
@@ -1388,7 +1388,9 @@ namespace Fika.Core.Coop.Players
         {
             Item item = Inventory.Equipment.FindItem(itemId);
             if (item != null)
+            {
                 return item;
+            }
 
             GStruct416<Item> itemResult = FindItemById(itemId);
             if (itemResult.Error != null)
@@ -1417,7 +1419,9 @@ namespace Fika.Core.Coop.Players
             internal void RunOperation(IResult result)
             {
                 if (!result.Succeed)
-                    Debug.Log($"Error in operation: {result.Error}");
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error}");
+                }
             }
         }
 
