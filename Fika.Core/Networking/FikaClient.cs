@@ -18,6 +18,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
+using Fika.Core.Networking.Packets.Player;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -27,6 +28,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using static UnityEngine.UIElements.StyleVariableResolver;
 
 namespace Fika.Core.Networking
 {
@@ -80,6 +82,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket, NetPeer>(OnAssignNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket, NetPeer>(OnSyncNetIdPacketReceived);
+            packetProcessor.SubscribeNetSerializable<OperationCallbackPacket, NetPeer>(OnOperationCallbackPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -112,6 +115,24 @@ namespace Fika.Core.Networking
             Singleton<FikaClient>.Create(this);
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
             ClientReady = true;
+        }
+
+        private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet, NetPeer peer)
+        {
+            if (Players.TryGetValue(packet.NetId, out CoopPlayer player) && player.IsYourPlayer)
+            {
+                if (player.OperationCallbacks.TryGetValue(packet.CallbackId, out Callback<EOperationStatus> callback))
+                {
+                    callback(new Result<EOperationStatus>(EOperationStatus.Failed)
+                    {
+                        Error = "CRITICAL ERROR DURING PROCESSING OF PACKET"
+                    });
+                }
+                else
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError($"OnOperationCallbackPacketReceived: Could not find CallbackId {packet.CallbackId}!");
+                }
+            }
         }
 
         private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet, NetPeer peer)

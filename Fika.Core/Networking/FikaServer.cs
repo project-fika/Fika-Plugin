@@ -140,7 +140,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            if (FikaPlugin.ForceBindIP.Value != "")
+            if (FikaPlugin.ForceBindIP.Value != "Disabled")
             {
                 _netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
             }
@@ -489,8 +489,8 @@ namespace Fika.Core.Networking
                 playerToApply?.PacketReceiver?.InventoryPackets?.Enqueue(packet);
             }
 
-            _dataWriter.Reset();
-            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);
+            /*_dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);*/
         }
 
         private void OnDamagePacketReceived(DamagePacket packet, NetPeer peer)
