@@ -26,7 +26,10 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
+using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Net;
 using System.Text;
 using UnityEngine;
 
@@ -156,6 +159,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> NativeSockets { get; set; }
         public static ConfigEntry<string> ForceIP { get; set; }
         public static ConfigEntry<string> ForceBindIP { get; set; }
+        public static ConfigEntry<string> ForceBindIP2 { get; set; }
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
@@ -353,7 +357,7 @@ namespace Fika.Core
 
             ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "",new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN. Leave empty to disable.",new AcceptableValueList<string>(GetLocalIPAddress()), new ConfigurationManagerAttributes() { Order = 5 }));
 
             AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 4 }));
 
@@ -368,6 +372,21 @@ namespace Fika.Core
             HeadDamageMultiplier = Config.Bind("Gameplay", "Head Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the head collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
             ArmpitDamageMultiplier = Config.Bind("Gameplay", "Armpit Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the armpits collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+        }
+
+        private string[] GetLocalIPAddress()
+        {
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            List<string> ips = [];
+            ips.Add("Disabled");
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    ips.Add(ip.ToString());
+                }
+            }
+            return [.. ips];
         }
 
         private void DisableSPTPatches()

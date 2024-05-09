@@ -132,7 +132,7 @@ namespace Fika.Core.UI.Custom
                         return;
                     }
                 }
-                if (FikaPlugin.ForceBindIP.Value != "")
+                if (FikaPlugin.ForceBindIP.Value != "Disabled")
                 {
                     if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
                     {
