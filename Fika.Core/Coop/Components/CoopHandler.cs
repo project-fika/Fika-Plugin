@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.Components
         public Dictionary<int, CoopPlayer> Players { get; } = new();
         public int HumanPlayers = 1;
         public List<int> ExtractedPlayers { get; set; } = [];
-        ManualLogSource Logger { get; set; }
+        ManualLogSource Logger;
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
         public List<string> queuedProfileIds = [];
@@ -105,7 +105,6 @@ namespace Fika.Core.Coop.Components
             // ----------------------------------------------------
             // Create a BepInEx Logger for CoopHandler
             Logger = BepInEx.Logging.Logger.CreateLogSource("CoopHandler");
-            Logger.LogDebug("CoopHandler::Awake");
         }
 
         /// <summary>
@@ -116,12 +115,7 @@ namespace Fika.Core.Coop.Components
             if (MatchmakerAcceptPatches.IsServer)
             {
                 PingRoutine = StartCoroutine(PingServer());
-                /*loopToken = new();
-                loopThread = new Thread(PingServers);
-                loopThread.Start();*/
             }
-
-            Logger.LogDebug("CoopHandler::Start");
 
             if (MatchmakerAcceptPatches.IsClient)
             {
@@ -151,23 +145,6 @@ namespace Fika.Core.Coop.Components
                 {
                     yield return null;
                 }
-
-                // TODO: replace with
-                // await FikaRequestHandler.UpdatePing();
-            }
-        }
-
-        private void PingServers()
-        {
-            string serialized = new PingRequest().ToJson();
-
-            while (RunAsyncTasks)
-            {
-                //Task.Delay(30000, loopToken.Token).GetAwaiter().GetResult();
-                RequestHandler.PutJson("/fika/update/ping", serialized);
-
-                // TODO: replace with
-                // await FikaRequestHandler.UpdatePing();
             }
         }
 
@@ -176,9 +153,6 @@ namespace Fika.Core.Coop.Components
             Players.Clear();
 
             RunAsyncTasks = false;
-            /*loopToken?.Cancel();
-            loopToken?.Dispose();
-            loopThread?.Join();*/
 
             StopCoroutine(ProcessSpawnQueue());
             if (PingRoutine != null)
