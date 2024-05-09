@@ -589,6 +589,7 @@ namespace Fika.Core.Networking
         public void OnPeerConnected(NetPeer peer)
         {
             NotificationManagerClass.DisplayMessageNotification($"Peer connected to server on port {peer.Port}.", iconType: EFT.Communications.ENotificationIconType.Friend);
+            serverLogger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
 
             hasHadPeer = true;
         }
