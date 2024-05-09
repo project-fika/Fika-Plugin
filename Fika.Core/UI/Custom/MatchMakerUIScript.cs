@@ -12,6 +12,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -107,11 +108,26 @@ namespace Fika.Core.UI.Custom
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                 if (FikaPlugin.ForceIP.Value != "")
                 {
-                    if (!IPAddress.TryParse(FikaPlugin.ForceIP.Value, out _))
+                    // We need to handle DNS entries as well
+                    string ip = FikaPlugin.ForceIP.Value;
+                    try
+                    {
+                        IPAddress[] dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
+                        if (dnsAddress.Length > 0)
+                        {
+                            ip = dnsAddress[0].ToString();
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+
+                    if (!IPAddress.TryParse(ip, out _))
                     {
                         Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
                     "ERROR FORCING IP",
-                    $"'{FikaPlugin.ForceIP.Value}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
+                    $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
                     ErrorScreen.EButtonType.OkButton, 10f, null, null);
                         return;
                     }
