@@ -1,6 +1,10 @@
 # Fika - Bepinex plugin
 
-<img src="https://img.shields.io/discord/1202292159366037545?style=for-the-badge&logo=discord&label=Fika%20Discord"> <img alt="GitHub Downloads (all assets, latest release)" src="https://img.shields.io/github/downloads/project-fika/Fika-Plugin/latest/total?style=for-the-badge&logo=github"> <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/project-fika/Fika-Plugin?style=for-the-badge&logo=github"> <img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/project-fika/Fika-Plugin?style=for-the-badge&logo=github">
+[![Discord](https://img.shields.io/discord/1202292159366037545?style=plastic&logo=discord&logoColor=FFFFFF&label=Fika%20Discord)](https://discord.gg/project-fika)
+[![Downloads](https://img.shields.io/github/downloads/project-fika/Fika-Plugin/latest/total?style=plastic&logo=github)](https://github.com/project-fika/Fika-Plugin/releases/latest)
+![Size](https://img.shields.io/github/languages/code-size/project-fika/Fika-Plugin?style=plastic&logo=github)
+![Issues](https://img.shields.io/github/issues/project-fika/Fika-Plugin?style=plastic&logo=github)
+[![License](https://img.shields.io/badge/CC--BY--NC--SA--4.0-blue?style=plastic&logo=creativecommons&logoColor=FFFFFF&label=License)](https://github.com/project-fika/Fika-Plugin/blob/main/LICENSE.md)
 
 Client-side changes to make multiplayer work.
 
@@ -47,7 +51,7 @@ dependencies from your game installation for the project to build.
 
 ## Licenses
 
-<img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by-nc-sa.png" alt="cc by-nc-sa" width="196" height="62" style="float:right">
+[<img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/svg/by-nc-sa.svg" alt="cc by-nc-sa" width="180" height="63" align="right">](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en)
 
 This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en).
 
