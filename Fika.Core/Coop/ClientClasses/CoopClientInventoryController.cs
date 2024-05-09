@@ -48,6 +48,12 @@ namespace Fika.Core.Coop.ClientClasses
                         }
                     }
 
+                    // TODO: Check for glass increments
+                    if (operation is GClass2870)
+                    {
+                        return;
+                    }
+
                     InventoryPacket packet = new()
                     {
                         HasItemControllerExecutePacket = true
@@ -83,6 +89,12 @@ namespace Fika.Core.Coop.ClientClasses
                     }
                 }
 
+                if (operation is GClass2870)
+                {
+                    base.Execute(operation, callback);
+                    return;
+                }
+
                 InventoryPacket packet = new()
                 {
                     HasItemControllerExecutePacket = true
@@ -94,6 +106,7 @@ namespace Fika.Core.Coop.ClientClasses
                     callback = callback,
                     inventoryController = this
                 };
+
                 clientOperationManager.callback ??= new Callback(ClientPlayer.Control0.Class1400.class1400_0.method_0);
                 uint operationNum = AddOperationCallback(operation, new Callback<EOperationStatus>(clientOperationManager.HandleResult));
 
@@ -153,7 +166,6 @@ namespace Fika.Core.Coop.ClientClasses
 
             public void HandleResult(Result<EOperationStatus> result)
             {
-                ConsoleScreen.Log("Running OperationManager::HandleResult");
                 ClientInventoryCallbackManager callbackManager = new()
                 {
                     clientOperationManager = this,
@@ -196,14 +208,14 @@ namespace Fika.Core.Coop.ClientClasses
 
             public void HandleResult(IResult executeResult)
             {
-                ConsoleScreen.Log("Running CallbackManager::HandleResult");
                 if (!executeResult.Succeed)
                 {
                     FikaPlugin.Instance.FikaLogger.LogError($"{clientOperationManager.inventoryController.ID} - Client operation critical failure: {clientOperationManager.inventoryController.ID} - {clientOperationManager.operation}\r\nError: {executeResult.Error}");
                 }
+
                 clientOperationManager.operation.Dispose();
                 clientOperationManager.callback.Invoke(result);
-                return;
+
                 /*clientOperationManager.localOperationStatus = EOperationStatus.Finished;
                 EOperationStatus? serverOperationStatus = clientOperationManager.serverOperationStatus;
                 EOperationStatus? eoperationStatus = clientOperationManager.localOperationStatus;
