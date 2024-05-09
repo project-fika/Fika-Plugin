@@ -5,7 +5,6 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
-using Fika.Core.Extensions;
 using Fika.Core.Networking;
 using JetBrains.Annotations;
 using System.IO;
@@ -70,7 +69,7 @@ namespace Fika.Core.Coop.ClientClasses
                     return;
                 }
                 operationManager.operation.Dispose();
-                operationManager.callback?.Fail($"Can't execute {operationManager.operation}", 1);                
+                operationManager.callback?.Fail($"Can't execute {operationManager.operation}", 1);
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {

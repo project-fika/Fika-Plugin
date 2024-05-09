@@ -1,5 +1,4 @@
-﻿using Aki.Common.Http;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;

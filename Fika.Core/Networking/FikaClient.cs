@@ -28,7 +28,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using static UnityEngine.UIElements.StyleVariableResolver;
 
 namespace Fika.Core.Networking
 {

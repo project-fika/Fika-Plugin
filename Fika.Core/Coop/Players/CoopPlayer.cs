@@ -1071,7 +1071,7 @@ namespace Fika.Core.Coop.Players
                                 OperationCallbacks.Remove(packet.ItemControllerExecutePacket.CallbackId);
                                 if (!result.Failed)
                                 {
-                                    callback(new Result<EOperationStatus>(EOperationStatus.Started)); 
+                                    callback(new Result<EOperationStatus>(EOperationStatus.Started));
                                 }
                                 else
                                 {

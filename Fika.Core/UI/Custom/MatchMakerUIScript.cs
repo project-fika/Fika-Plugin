@@ -12,7 +12,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -185,7 +184,7 @@ namespace Fika.Core.UI.Custom
         {
             if (button != null)
             {
-                button.enabled = false; 
+                button.enabled = false;
             }
 
             NotificationManagerClass.DisplayMessageNotification("Connecting to server...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
@@ -216,7 +215,7 @@ namespace Fika.Core.UI.Custom
 
                     if (button != null)
                     {
-                        button.enabled = true; 
+                        button.enabled = true;
                     }
                     yield break;
                 }
