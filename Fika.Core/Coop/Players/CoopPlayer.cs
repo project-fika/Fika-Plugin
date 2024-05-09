@@ -1080,12 +1080,12 @@ namespace Fika.Core.Coop.Players
                                         Error = result.Error.ToString(),
                                     });
                                 }
-                                return;
                             }
                             else
                             {
                                 FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId {packet.ItemControllerExecutePacket.CallbackId}!");
                             }
+                            return;
                         }
 
                         InventoryOperationHandler opHandler = new()
@@ -1158,7 +1158,7 @@ namespace Fika.Core.Coop.Players
                     }
                     catch (Exception exception)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogError(exception);
+                        FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
                         if (MatchmakerAcceptPatches.IsServer)
                         {
                             OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, false);
