@@ -5,7 +5,7 @@ using EFT.UI;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.UI
+namespace Fika.Core.UI.Patches
 {
     /// <summary>
     /// Created by: Lacyway
