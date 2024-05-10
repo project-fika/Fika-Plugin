@@ -835,7 +835,7 @@ namespace Fika.Core.Coop.GameMode
 
                     if (client.ServerConnection == null && connectionAttempts == 5)
                     {
-                        Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the server. Make sure ports are forwarded and/or UPnP is enabled and supported.");
+                        Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. Make sure ports are forwarded and/or UPnP is enabled and supported.");
                     }
                 }
 

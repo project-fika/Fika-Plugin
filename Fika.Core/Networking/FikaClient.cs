@@ -101,7 +101,7 @@ namespace Fika.Core.Networking
 
             if (string.IsNullOrEmpty(IP))
             {
-                Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the server. IP and/or Port was empty when requesting data!");
+                Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
             }
             else
             {
