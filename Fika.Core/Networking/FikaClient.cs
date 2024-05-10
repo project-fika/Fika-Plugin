@@ -201,6 +201,7 @@ namespace Fika.Core.Networking
             WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState && x.DoorState != EDoorState.Interacting).ToArray();
             for (int i = 0; i < packet.InteractiveObjectAmount; i++)
             {
+                // TODO: this is totally wrong logic, to fix
                 interactiveObjects[i].SetFromStatusInfo(packet.InteractiveObjects[i]);
             }
 
@@ -214,6 +215,7 @@ namespace Fika.Core.Networking
             LampController[]lights = LocationScene.GetAllObjects<LampController>(true).ToArray();
             for (int i = 0; i < packet.LightAmount; i++)
             {
+                // TODO: this is totally wrong logic, to fix
                 lights[i].Switch(packet.Lights[i].LampState);
             }
 
