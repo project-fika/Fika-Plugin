@@ -137,6 +137,12 @@ namespace Fika.Core.Networking
 
         private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet, NetPeer peer)
         {
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                FikaPlugin.Instance.FikaLogger.LogInfo($"OnSyncNetIdPacketReceived: Client is reconnecting, ignore Sync.");
+                return;
+            }
+
             Dictionary<int, CoopPlayer> newPlayers = Players;
             if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
@@ -166,6 +172,12 @@ namespace Fika.Core.Networking
 
         private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet, NetPeer peer)
         {
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Client is reconnecting, ignore assignment.");
+                return;
+            }
+
             FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Assigned NetId {packet.NetId} to my own client.");
             MyPlayer.NetId = packet.NetId;
             int i = -1;
@@ -196,36 +208,36 @@ namespace Fika.Core.Networking
             MatchmakerAcceptPatches.IsReconnect = true;
             MatchmakerAcceptPatches.ReconnectPacket = packet;
 
-            // // TODO: turn into Coroutine for server/client
-            // // doors/keycard doors/trunks
-            // WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
-            // for (int i = 0; i < packet.InteractiveObjectAmount; i++)
-            // {
-            //     WorldInteractiveObject.GStruct385 packetInteractiveObject = packet.InteractiveObjects[i];
-            //     // find interactive object with id
-            //     WorldInteractiveObject interactiveObject = interactiveObjects.FirstOrDefault(x => x.Id == packetInteractiveObject.Id);
-            //     interactiveObject?.SetFromStatusInfo(packetInteractiveObject);
-            // }
+            // TODO: turn into Coroutine for server/client
+            // doors/keycard doors/trunks
+            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
+            for (int i = 0; i < packet.InteractiveObjectAmount; i++)
+            {
+                WorldInteractiveObject.GStruct385 packetInteractiveObject = packet.InteractiveObjects[i];
+                // find interactive object with id
+                WorldInteractiveObject interactiveObject = interactiveObjects.FirstOrDefault(x => x.Id == packetInteractiveObject.Id);
+                interactiveObject?.SetFromStatusInfo(packetInteractiveObject);
+            }
 
-            // // Windows
-            // for (int i = 0; i < packet.WindowBreakerAmount; i++)
-            // {
-            //     gameWorld.method_20(packet.Windows[i].Id.GetHashCode(), packet.Windows[i].FirstHitPosition.Value);
-            // }
+            // Windows
+            for (int i = 0; i < packet.WindowBreakerAmount; i++)
+            {
+                gameWorld.method_20(packet.Windows[i].Id.GetHashCode(), packet.Windows[i].FirstHitPosition.Value);
+            }
 
-            // // lights
-            // LampController[] clientLights = LocationScene.GetAllObjects<LampController>(true).ToArray();
-            // for (int i = 0; i < packet.LightAmount; i++)
-            // {
-            //     LampController lampController = packet.Lights[i];
-            //     LampController clientLightToChange = clientLights.FirstOrDefault(x => x.NetId == lampController.NetId);
-            //     clientLightToChange?.Switch(lampController.LampState);                
-            // }
+            // lights
+            LampController[] clientLights = LocationScene.GetAllObjects<LampController>(true).ToArray();
+            for (int i = 0; i < packet.LightAmount; i++)
+            {
+                LampController lampController = packet.Lights[i];
+                LampController clientLightToChange = clientLights.FirstOrDefault(x => x.NetId == lampController.NetId);
+                clientLightToChange?.Switch(lampController.LampState);                
+            }
 
-            // // TODO: smokes
-            // // serialize - World.method_8
-            // // deserialize - ClientWorld.method_28
-            // // GStruct34 for packet
+            // TODO: smokes
+            // serialize - World.method_8
+            // deserialize - ClientWorld.method_28
+            // GStruct34 for packet
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)

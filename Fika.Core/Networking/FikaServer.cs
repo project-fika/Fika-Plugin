@@ -173,11 +173,10 @@ namespace Fika.Core.Networking
 
         private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
         {
-            serverLogger.LogError($"Player Wanting to reconnect {packet.NetId}");
+            serverLogger.LogError($"Player Wanting to reconnect {packet.ProfileId}");
+            CoopPlayer playerToUse = Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
 
-            var player = Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply);
-
-            if (!player)
+            if (playerToUse == null)
             {
                 serverLogger.LogError($"Player was not found");
             }
@@ -187,8 +186,7 @@ namespace Fika.Core.Networking
             WindowBreaker[] windows = Singleton<GameWorld>.Instance?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
             LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
 
-            ReconnectResponsePacket responsePacket = new(packet.NetId, playerToApply.Transform.position, playerToApply.Transform.rotation, playerToApply.IsInPronePose, interactiveObjects, windows, lights);
-            _dataWriter.Reset();
+            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, playerToUse.Transform.rotation, playerToUse.IsInPronePose, interactiveObjects, windows, lights);
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
 
