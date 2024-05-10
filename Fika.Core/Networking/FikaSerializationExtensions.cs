@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
@@ -238,6 +239,55 @@ namespace Fika.Core.Networking
             using BinaryReader binaryReader = new(memoryStream);
 
             return GClass1524.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+        }
+
+        public static void PutInteractiveObjectState(this NetDataWriter writer, WorldInteractiveObject worldInteractiveObject)
+        {
+            writer.Put(worldInteractiveObject.Id);
+            writer.Put((byte) worldInteractiveObject.DoorState);
+            writer.Put(Mathf.FloorToInt(worldInteractiveObject.CurrentAngle));
+            writer.Put(worldInteractiveObject as Door is Door door ? door.IsBroken: false);
+        }
+
+        public static WorldInteractiveObject.GStruct385 GetInteractiveObjectState(this NetDataReader reader)
+        {
+            return new()
+            {
+                Id = reader.GetString(),
+                State = reader.GetByte(),
+                Angle = reader.GetInt(),
+                IsBroken = reader.GetBool()
+            };
+        }
+
+        public static void PutWindowBreakerState(this NetDataWriter writer, WindowBreaker windowBreaker)
+        {
+            writer.Put(windowBreaker.Id);
+            writer.Put(windowBreaker.FirstHitPosition.Value);
+        }
+
+        public static WindowBreaker GetWindowBreakerState(this NetDataReader reader)
+        {
+            return new()
+            {
+                Id = reader.GetString(),
+                FirstHitPosition = reader.GetVector3(),                
+            };
+        }
+
+        public static void PutLightState(this NetDataWriter writer, LampController windowBreaker)
+        {
+            writer.Put(windowBreaker.NetId);
+            writer.Put((byte) windowBreaker.LampState);
+        }
+
+        public static LampController GetLightState(this NetDataReader reader)
+        {
+            return new()
+            {
+                NetId = reader.GetInt(),
+                LampState = (Turnable.EState) reader.GetByte()
+            };
         }
     }
 }
