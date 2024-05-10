@@ -1077,7 +1077,7 @@ namespace Fika.Core.Coop.Players
                                 {
                                     callback(new Result<EOperationStatus>(EOperationStatus.Failed)
                                     {
-                                        Error = result.Error.ToString(),
+                                        Error = result.Error.ToString()
                                     });
                                 }
                             }
