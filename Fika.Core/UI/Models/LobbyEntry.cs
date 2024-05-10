@@ -43,7 +43,8 @@ namespace Fika.Core.UI.Models
         {
             LOADING = 0,
             IN_GAME = 1,
-            COMPLETE = 2
+            COMPLETE = 2,
+            REJOIN = 3
         }
     }
 }
