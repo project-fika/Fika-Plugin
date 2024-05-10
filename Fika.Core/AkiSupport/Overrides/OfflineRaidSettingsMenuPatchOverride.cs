@@ -21,7 +21,7 @@ namespace Fika.Core.AkiSupport.Overrides
 
         [PatchPostfix]
         private static void PatchPostfix(RaidSettingsWindow __instance, UiElementBlocker ____coopModeBlocker, List<CanvasGroup> ____weatherCanvasGroups,
-            UpdatableToggle ____randomTimeToggle, UpdatableToggle ____randomWeatherToggle)
+            UpdatableToggle ____randomTimeToggle, UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups)
         {
             // Always disable the Coop Mode checkbox
             ____coopModeBlocker.SetBlock(true, "Co-op is always enabled in Fika");
@@ -29,6 +29,11 @@ namespace Fika.Core.AkiSupport.Overrides
             if (____weatherCanvasGroups != null)
             {
                 weatherCanvasGroups = ____weatherCanvasGroups;
+            }
+
+            foreach (CanvasGroup canvasGroup in ____waterAndFoodCanvasGroups)
+            {
+                canvasGroup.SetUnlockStatus(true, true);
             }
 
             instance = __instance;

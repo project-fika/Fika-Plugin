@@ -103,16 +103,14 @@ namespace Fika.Core.Coop.LocalGame
 
             await Task.Delay(1000);
 
+            StartHandler startHandler = new(__instance, session.Profile, session.ProfileOfPet, ____raidSettings.SelectedLocation, timeHasComeScreenController);
+
             CoopGame localGame = CoopGame.Create(____inputTree, profile, ____localGameDateTime,
                 session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance,
                 MonoBehaviourSingleton<CommonUI>.Instance, MonoBehaviourSingleton<PreloaderUI>.Instance,
                 MonoBehaviourSingleton<GameUI>.Instance, ____raidSettings.SelectedLocation, timeAndWeather,
-                ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>((r) =>
-                {
-                    typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_46))
-                    .Invoke(__instance, [session.Profile.Id, session.ProfileOfPet, ____raidSettings.SelectedLocation, r, timeHasComeScreenController]);
-
-                }), ____fixedDeltaTime, EUpdateQueue.Update, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit)
+                ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
+                ____fixedDeltaTime, EUpdateQueue.Update, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit), ____raidSettings
             );
             Singleton<AbstractGame>.Create(localGame);
             FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(localGame));
@@ -126,20 +124,35 @@ namespace Fika.Core.Coop.LocalGame
                 timeHasComeScreenController.ChangeStatus("Created Coop Game");
             }
 
-            Task initTask = localGame.method_4(____raidSettings.BotSettings, ____backendUrl, null, new Callback((r) =>
+            Task finishTask = localGame.method_4(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
+            __result = Task.WhenAll(finishTask);
+        }
+
+        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3163 timeHasComeScreenController)
+        {
+            private readonly TarkovApplication tarkovApplication = tarkovApplication;
+            private readonly Profile pmcProfile = pmcProfile;
+            private readonly Profile scavProfile = scavProfile;
+            private readonly LocationSettingsClass.Location location = location;
+            private readonly MatchmakerTimeHasCome.GClass3163 timeHasComeScreenController = timeHasComeScreenController;
+
+            public void HandleStart(Result<ExitStatus, TimeSpan, MetricsClass> result)
+            {
+                tarkovApplication.method_46(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
+            }
+
+            public void HandleLoadComplete(IResult error)
             {
                 using (GClass21.StartWithToken("LoadingScreen.LoadComplete"))
                 {
                     UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
-                    MainMenuController mmc = (MainMenuController)typeof(TarkovApplication).GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(x => x.FieldType == typeof(MainMenuController)).FirstOrDefault().GetValue(__instance);
-                    mmc.Unsubscribe();
+                    MainMenuController mmc = (MainMenuController)typeof(TarkovApplication).GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(x => x.FieldType == typeof(MainMenuController)).FirstOrDefault().GetValue(tarkovApplication);
+                    mmc?.Unsubscribe();
                     GameWorld gameWorld = Singleton<GameWorld>.Instance;
                     gameWorld.OnGameStarted();
                     FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(gameWorld));
                 }
-            }));
-
-            __result = Task.WhenAll(initTask);
+            }
         }
     }
 }
