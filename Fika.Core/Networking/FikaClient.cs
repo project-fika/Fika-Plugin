@@ -487,7 +487,7 @@ namespace Fika.Core.Networking
             else
             {
                 clientLogger.LogError("OnAirdropLootPacketReceived: Received loot package but manager is not instantiated!");
-            }                
+            }
         }
 
         private void OnAirdropPacketReceived(AirdropPacket packet, NetPeer peer)
