@@ -653,10 +653,39 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
+            Vector3 PosToSpawn = spawnPoint.Position;
+            Quaternion RotToSpawn = spawnPoint.Rotation;
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                ReconnectRequestPacket reconnectPacket = new(ProfileId);
+                Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                Logger.LogError($"reconnectRequest packet sent");
+
+                do
+                {
+                    Logger.LogError("Waiting for ReconnectResponse packet from Host...");
+                    await Task.Delay(100);
+                }
+                while (MatchmakerAcceptPatches.ReconnectPacket.Position == Vector3.zero);
+
+                Logger.LogError($"setting pos to {MatchmakerAcceptPatches.ReconnectPacket.Position}");
+                PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Position;
+                Logger.LogError($"Setting rot to {MatchmakerAcceptPatches.ReconnectPacket.Rotation}");
+                RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Rotation;
+            }
+
+            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
                 GClass549.Config.CharacterController.ClientPlayerMode, () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
+
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                // finish off setting client up
+                // currently only prone
+                // TODO: get pose from server
+                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.IsProne;
+            }
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
