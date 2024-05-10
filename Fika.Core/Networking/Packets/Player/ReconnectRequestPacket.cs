@@ -2,18 +2,18 @@ using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
-    public struct ReconnectRequestPacket(int netId): INetSerializable
+    public struct ReconnectRequestPacket(string profileId): INetSerializable
     {
-        public int NetId = netId;
+        public string ProfileId = profileId;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
+            ProfileId = reader.GetString();
         }
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(NetId);
+            writer.Put(ProfileId);
         }
     }
 }

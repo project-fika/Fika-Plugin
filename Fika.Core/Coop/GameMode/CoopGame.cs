@@ -657,9 +657,9 @@ namespace Fika.Core.Coop.GameMode
             Quaternion RotToSpawn = spawnPoint.Rotation;
             if (MatchmakerAcceptPatches.IsReconnect)
             {
-                ReconnectRequestPacket reconnectPacket = new(playerId);
+                ReconnectRequestPacket reconnectPacket = new(ProfileId);
                 Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
-                Logger.LogError($"reconnectRequest packet sent");
+                Logger.LogError($"reconnectRequest packet sent for netId: {playerId} with profileId: {ProfileId}");
 
                 do
                 {
@@ -679,14 +679,6 @@ namespace Fika.Core.Coop.GameMode
                 GClass549.Config.CharacterController.ClientPlayerMode, () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
 
-            if (MatchmakerAcceptPatches.IsReconnect)
-            {
-                // finish off setting client up
-                // currently only prone
-                // TODO: get pose from server
-                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.IsProne;
-            }
-
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
@@ -695,7 +687,15 @@ namespace Fika.Core.Coop.GameMode
                 await Task.Delay(5000);
             }
 
-            CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
+            CoopPlayer coopPlayer = (CoopPlayer) myPlayer;
+            
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                // TODO: get pose from server
+                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.IsProne;
+                coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.NetId;
+            }
+
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
             PlayerSpawnRequest body = new PlayerSpawnRequest(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId());
