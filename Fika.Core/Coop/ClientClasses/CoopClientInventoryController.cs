@@ -79,6 +79,8 @@ namespace Fika.Core.Coop.ClientClasses
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
+                ConsoleScreen.Log(operation.GetType().ToString());
+
                 // Do not replicate picking up quest items, throws an error on the other clients
                 if (operation is GClass2839 pickupOperation)
                 {
@@ -142,15 +144,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 if (!result.Succeed)
                 {
-                    inventoryController.Logger.LogError("[{0}][{5}] {1} - Local operation failed: {2} - {3}\r\nError: {4}",
-                    [
-                    Time.frameCount,
-                    inventoryController.ID,
-                    operation.Id,
-                    operation,
-                    result.Error,
-                    inventoryController.Name
-                    ]);
+                    FikaPlugin.Instance.FikaLogger.LogError($"[{Time.frameCount}][{inventoryController.Name}] {inventoryController.ID} - Local operation failed: {operation.Id} - {operation}\r\nError: {result.Error}");
                 }
                 callback?.Invoke(result);
             }

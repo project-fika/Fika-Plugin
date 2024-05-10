@@ -44,8 +44,8 @@ namespace Aki.Custom.Airdrops
         protected void Awake()
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("FikaAirdropsManager");
-            Logger.LogInfo("Initializing...");
-            if (Singleton<FikaAirdropsManager>.Instantiated)
+            Logger.LogInfo(isFlareDrop ? "Initializing from flare..." : "Initializing...");
+            if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Logger.LogWarning("Another manager already exists, destroying old...");
                 if (airdropPlane != null)
@@ -57,17 +57,13 @@ namespace Aki.Custom.Airdrops
                     Destroy(AirdropBox.gameObject);
                 }
                 Destroy(Singleton<FikaAirdropsManager>.Instance);
-                Singleton<FikaAirdropsManager>.Release(Singleton<FikaAirdropsManager>.Instance);
             }
             Singleton<FikaAirdropsManager>.Create(this);
         }
 
         protected void OnDestroy()
         {
-            if (Singleton<FikaAirdropsManager>.Instantiated)
-            {
-                Singleton<FikaAirdropsManager>.Release(Singleton<FikaAirdropsManager>.Instance);
-            }
+            Logger.LogWarning("Destroying AirdropsManager");
         }
 
         protected async void Start()
@@ -99,6 +95,15 @@ namespace Aki.Custom.Airdrops
             if (!AirdropParameters.AirdropAvailable)
             {
                 Logger.LogInfo("Airdrop is not available, destroying manager...");
+
+                GenericPacket packet = new()
+                {
+                    NetId = 0,
+                    PacketType = EPackageType.RemoveAirdropManager
+                };
+
+                Singleton<FikaServer>.Instance.SendDataToAll(new(), ref packet, DeliveryMethod.ReliableOrdered);
+
                 Destroy(this);
                 return;
             }
@@ -150,7 +155,7 @@ namespace Aki.Custom.Airdrops
                 LookPoint = airdropPlane.newRotation
             };
             NetDataWriter writer = new();
-            Singleton<FikaServer>.Instance.SendDataToAll(writer, ref airdropPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<FikaServer>.Instance.SendDataToAll(writer, ref airdropPacket, DeliveryMethod.ReliableOrdered);
         }
 
         protected async void FixedUpdate()
@@ -261,7 +266,7 @@ namespace Aki.Custom.Airdrops
         {
             AirdropParameters.BoxSpawned = true;
             Vector3 pointPos = AirdropParameters.RandomAirdropPoint;
-            Vector3 dropPos = new Vector3(pointPos.x, AirdropParameters.DropHeight, pointPos.z);
+            Vector3 dropPos = new(pointPos.x, AirdropParameters.DropHeight, pointPos.z);
             AirdropBox.gameObject.SetActive(true);
             AirdropBox.StartCoroutine(AirdropBox.DropCrate(dropPos));
         }
@@ -304,6 +309,7 @@ namespace Aki.Custom.Airdrops
 
         public void ReceiveBuildLootContainer(AirdropLootPacket packet)
         {
+            Logger.LogInfo("Received loot container parameters");
             rootItem = packet.RootItem;
             ContainerId = packet.ContainerId;
         }

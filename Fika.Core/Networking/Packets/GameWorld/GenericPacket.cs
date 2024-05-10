@@ -1,5 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using Aki.Custom.Airdrops;
+using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Factories;
 using LiteNetLib.Utils;
@@ -96,6 +98,7 @@ namespace Fika.Core.Networking
         TrainSync,
         ExfilCountdown,
         TraderServiceNotification,
-        DisposeBot
+        DisposeBot,
+        RemoveAirdropManager
     }
 }

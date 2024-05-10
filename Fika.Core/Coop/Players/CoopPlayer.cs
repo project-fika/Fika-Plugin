@@ -1476,7 +1476,7 @@ namespace Fika.Core.Coop.Players
 
             internal void HandleResult(IResult result)
             {
-                if (!result.Succeed)
+                if (!result.Succeed || !string.IsNullOrEmpty(result.Error))
                 {
                     FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error}");
                 }

@@ -364,97 +364,109 @@ namespace Fika.Core.Networking
 
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
         {
-            if (!Players.ContainsKey(packet.NetId))
+            switch (packet.PacketType)
             {
-                return;
-            }
-
-            if (packet.PacketType == EPackageType.ClientExtract)
-            {
-                if (CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-                {
-                    CoopHandler.Players.Remove(packet.NetId);
-                    if (!CoopHandler.ExtractedPlayers.Contains(packet.NetId))
+                case EPackageType.ClientExtract:
                     {
-                        CoopHandler.ExtractedPlayers.Add(packet.NetId);
-                        CoopGame coopGame = (CoopGame)CoopHandler.LocalGameInstance;
-                        coopGame.ExtractedPlayers.Add(packet.NetId);
-                        coopGame.ClearHostAI(playerToApply);
-
-                        if (FikaPlugin.ShowNotifications.Value)
+                        if (CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"Group member '{playerToApply.Profile.Nickname}' has extracted.",
-                                            EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+                            CoopHandler.Players.Remove(packet.NetId);
+                            if (!CoopHandler.ExtractedPlayers.Contains(packet.NetId))
+                            {
+                                CoopHandler.ExtractedPlayers.Add(packet.NetId);
+                                CoopGame coopGame = (CoopGame)CoopHandler.LocalGameInstance;
+                                coopGame.ExtractedPlayers.Add(packet.NetId);
+                                coopGame.ClearHostAI(playerToApply);
+
+                                if (FikaPlugin.ShowNotifications.Value)
+                                {
+                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{playerToApply.Profile.Nickname}' has extracted.",
+                                                    EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+                                }
+                            }
+
+                            playerToApply.Dispose();
+                            AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
                         }
                     }
-
-                    playerToApply.Dispose();
-                    AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
-                }
-            }
-            else if (packet.PacketType == EPackageType.Ping && FikaPlugin.UsePingSystem.Value)
-            {
-                if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-                {
-                    playerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname);
-                }
-            }
-            else if (packet.PacketType == EPackageType.TrainSync)
-            {
-                Locomotive locomotive = FindObjectOfType<Locomotive>();
-                if (locomotive != null)
-                {
-                    DateTime depart = new(packet.DepartureTime);
-                    Traverse.Create(locomotive).Field("_depart").SetValue(depart);
-                }
-                else
-                {
-                    clientLogger.LogWarning("GenericPacketReceived: Could not find locomotive!");
-                }
-            }
-            else if (packet.PacketType == EPackageType.ExfilCountdown)
-            {
-                if (ExfiltrationControllerClass.Instance != null)
-                {
-                    ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
-                    ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
-                    if (exfilPoint != null)
+                    break;
+                case EPackageType.Ping:
                     {
-                        CoopGame game = (CoopGame)Singleton<AbstractGame>.Instance;
-                        exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
-
-                        if (exfilPoint.Status != EExfiltrationStatus.Countdown)
+                        if (Players.TryGetValue(packet.NetId, out CoopPlayer pingPlayerToApply))
                         {
-                            exfilPoint.Status = EExfiltrationStatus.Countdown;
+                            pingPlayerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname);
                         }
                     }
-                }
-            }
-            else if (packet.PacketType == EPackageType.TraderServiceNotification)
-            {
-                CoopHandler.clientBTR?.DisplayNetworkNotification(packet.TraderServiceType);
-            }
-            else if (packet.PacketType == EPackageType.DisposeBot)
-            {
-                if (CoopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer playerToApply))
-                {
+                    break;
+                case EPackageType.TrainSync:
+                    {
+                        Locomotive locomotive = FindObjectOfType<Locomotive>();
+                        if (locomotive != null)
+                        {
+                            DateTime depart = new(packet.DepartureTime);
+                            Traverse.Create(locomotive).Field("_depart").SetValue(depart);
+                        }
+                        else
+                        {
+                            clientLogger.LogWarning("GenericPacketReceived: Could not find locomotive!");
+                        }
+                    }
+                    break;
+                case EPackageType.ExfilCountdown:
+                    {
+                        if (ExfiltrationControllerClass.Instance != null)
+                        {
+                            ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
 
-                    if (CoopHandler.Players.Remove(packet.BotNetId))
-                    {
-                        playerToApply.Dispose();
-                        AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
-                        clientLogger.LogInfo("Disposing bot: " + packet.BotNetId);
+                            ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
+                            if (exfilPoint != null)
+                            {
+                                CoopGame game = (CoopGame)Singleton<AbstractGame>.Instance;
+                                exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
+
+                                if (exfilPoint.Status != EExfiltrationStatus.Countdown)
+                                {
+                                    exfilPoint.Status = EExfiltrationStatus.Countdown;
+                                }
+                            }
+                        }
                     }
-                    else
+                    break;
+                case EPackageType.TraderServiceNotification:
                     {
-                        clientLogger.LogWarning("Unable to dispose of bot: " + packet.BotNetId);
+                        CoopHandler.clientBTR?.DisplayNetworkNotification(packet.TraderServiceType);
                     }
-                }
-                else
-                {
-                    clientLogger.LogWarning("Unable to dispose of bot: " + packet.BotNetId + ", unable to find GameObject");
-                }
+                    break;
+                case EPackageType.DisposeBot:
+                    {
+                        if (CoopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToDispose))
+                        {
+
+                            if (CoopHandler.Players.Remove(packet.BotNetId))
+                            {
+                                botToDispose.Dispose();
+                                AssetPoolObject.ReturnToPool(botToDispose.gameObject, true);
+                                clientLogger.LogInfo("Disposing bot: " + packet.BotNetId);
+                            }
+                            else
+                            {
+                                clientLogger.LogWarning("Unable to dispose of bot: " + packet.BotNetId);
+                            }
+                        }
+                        else
+                        {
+                            clientLogger.LogWarning("Unable to dispose of bot: " + packet.BotNetId + ", unable to find GameObject");
+                        }
+                    }
+                    break;
+                case EPackageType.RemoveAirdropManager:
+                    {
+                        if (Singleton<FikaAirdropsManager>.Instance != null)
+                        {
+                            Destroy(Singleton<FikaAirdropsManager>.Instance);
+                        }
+                    }
+                    break;
             }
         }
 
@@ -468,17 +480,19 @@ namespace Fika.Core.Networking
 
         private void OnAirdropLootPacketReceived(AirdropLootPacket packet, NetPeer peer)
         {
-            if (!Singleton<FikaAirdropsManager>.Instantiated)
+            if (Singleton<FikaAirdropsManager>.Instance != null)
+            {
+                Singleton<FikaAirdropsManager>.Instance.ReceiveBuildLootContainer(packet);
+            }
+            else
             {
                 clientLogger.LogError("OnAirdropLootPacketReceived: Received loot package but manager is not instantiated!");
-                return;
-            }
-            Singleton<FikaAirdropsManager>.Instance.ReceiveBuildLootContainer(packet);
+            }                
         }
 
         private void OnAirdropPacketReceived(AirdropPacket packet, NetPeer peer)
         {
-            if (Singleton<FikaAirdropsManager>.Instantiated)
+            if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Singleton<FikaAirdropsManager>.Instance.AirdropParameters = new()
                 {

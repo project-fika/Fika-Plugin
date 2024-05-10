@@ -1596,7 +1596,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            if (Singleton<FikaAirdropsManager>.Instantiated)
+            if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Destroy(Singleton<FikaAirdropsManager>.Instance);
             }
