@@ -657,7 +657,7 @@ namespace Fika.Core.Coop.GameMode
             Quaternion RotToSpawn = spawnPoint.Rotation;
             if (MatchmakerAcceptPatches.IsReconnect)
             {
-                ReconnectRequestPacket reconnectPacket = new(ProfileId);
+                ReconnectRequestPacket reconnectPacket = new(playerId);
                 Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
                 Logger.LogError($"reconnectRequest packet sent");
 

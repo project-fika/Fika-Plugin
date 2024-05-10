@@ -196,33 +196,36 @@ namespace Fika.Core.Networking
             MatchmakerAcceptPatches.IsReconnect = true;
             MatchmakerAcceptPatches.ReconnectPacket = packet;
 
-            // TODO: turn into Coroutine for server/client
-            // doors/keycard doors/trunks
-            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState && x.DoorState != EDoorState.Interacting).ToArray();
-            for (int i = 0; i < packet.InteractiveObjectAmount; i++)
-            {
-                // TODO: this is totally wrong logic, to fix
-                interactiveObjects[i].SetFromStatusInfo(packet.InteractiveObjects[i]);
-            }
+            // // TODO: turn into Coroutine for server/client
+            // // doors/keycard doors/trunks
+            // WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
+            // for (int i = 0; i < packet.InteractiveObjectAmount; i++)
+            // {
+            //     WorldInteractiveObject.GStruct385 packetInteractiveObject = packet.InteractiveObjects[i];
+            //     // find interactive object with id
+            //     WorldInteractiveObject interactiveObject = interactiveObjects.FirstOrDefault(x => x.Id == packetInteractiveObject.Id);
+            //     interactiveObject?.SetFromStatusInfo(packetInteractiveObject);
+            // }
 
-            // Windows
-            for (int i = 0; i < packet.WindowBreakerAmount; i++)
-            {
-                gameWorld.method_20(packet.Windows[i].Id.GetHashCode(), packet.Windows[i].FirstHitPosition.Value);
-            }
+            // // Windows
+            // for (int i = 0; i < packet.WindowBreakerAmount; i++)
+            // {
+            //     gameWorld.method_20(packet.Windows[i].Id.GetHashCode(), packet.Windows[i].FirstHitPosition.Value);
+            // }
 
-            // lights
-            LampController[]lights = LocationScene.GetAllObjects<LampController>(true).ToArray();
-            for (int i = 0; i < packet.LightAmount; i++)
-            {
-                // TODO: this is totally wrong logic, to fix
-                lights[i].Switch(packet.Lights[i].LampState);
-            }
+            // // lights
+            // LampController[] clientLights = LocationScene.GetAllObjects<LampController>(true).ToArray();
+            // for (int i = 0; i < packet.LightAmount; i++)
+            // {
+            //     LampController lampController = packet.Lights[i];
+            //     LampController clientLightToChange = clientLights.FirstOrDefault(x => x.NetId == lampController.NetId);
+            //     clientLightToChange?.Switch(lampController.LampState);                
+            // }
 
-            // TODO: smokes
-            // serialize - World.method_8
-            // deserialize - ClientWorld.method_28
-            // GStruct34 for packet
+            // // TODO: smokes
+            // // serialize - World.method_8
+            // // deserialize - ClientWorld.method_28
+            // // GStruct34 for packet
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
