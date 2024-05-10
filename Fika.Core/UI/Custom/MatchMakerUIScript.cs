@@ -375,23 +375,32 @@ namespace Fika.Core.UI.Custom
 
                 switch (entry.Status)
                 {
-                    case LobbyEntry.ELobbyStatus.LOADING:
+                    case LobbyEntry.ELobbyStatus.LOADING:                        
+                        tooltipTextGetter = new()
                         {
-                            tooltipTextGetter = new()
-                            {
-                                TooltipText = "Host is still loading."
-                            };
+                            TooltipText = "Host is still loading."
+                        };
 
-                            button.enabled = false;
-                            if (image != null)
-                            {
-                                image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
-                            }
-
-                            tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
-                            tooltipArea.enabled = true;
-                            tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+                        button.enabled = false;
+                        if (image != null)
+                        {
+                            image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
                         }
+
+                        tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                        tooltipArea.enabled = true;
+                        tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));                        
+                        break;
+                    case LobbyEntry.ELobbyStatus.REJOIN:
+                        MatchmakerAcceptPatches.IsReconnect = true;
+                        tooltipTextGetter = new()
+                        {
+                            TooltipText = "Click to Rejoin raid."
+                        };
+
+                        tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                        tooltipArea.enabled = true;
+                        tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
                         break;
                     case LobbyEntry.ELobbyStatus.IN_GAME:
                         tooltipTextGetter = new()
