@@ -80,6 +80,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectRequestPacket, NetPeer>(OnReconnectRequestPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -161,12 +162,34 @@ namespace Fika.Core.Networking
             ServerReady = true;
         }
 
+
         public int PopNetId()
         {
             int netId = _currentNetId;
             _currentNetId++;
 
             return netId;
+        }
+
+        private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
+        {
+            serverLogger.LogError($"Player Wanting to reconnect {packet.ProfileId}");
+
+            var player = Players.TryGetValue(packet.ProfileId, out CoopPlayer playerToApply);
+
+            if (!player)
+            {
+                serverLogger.LogError($"Player was not found");
+            }
+
+            // TODO: double check doors are working
+            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState && x.DoorState != EDoorState.Interacting).ToArray();
+            WindowBreaker[] windows = Singleton<GameWorld>.Instance?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
+            LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
+
+            ReconnectResponsePacket responsePacket = new(packet.ProfileId, playerToApply.Transform.position, playerToApply.Transform.rotation, playerToApply.IsInPronePose, interactiveObjects, windows, lights);
+            _dataWriter.Reset();
+            SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)

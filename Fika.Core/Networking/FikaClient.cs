@@ -82,6 +82,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket, NetPeer>(OnAssignNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket, NetPeer>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket, NetPeer>(OnOperationCallbackPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket, NetPeer>(OnReconnectResponsePacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -186,6 +187,40 @@ namespace Fika.Core.Networking
 
             Players.Remove(i);
             Players[packet.NetId] = MyPlayer;
+        }
+
+        private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet, NetPeer peer)
+        {
+            ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
+
+            MatchmakerAcceptPatches.IsReconnect = true;
+            MatchmakerAcceptPatches.ReconnectPacket = packet;
+
+            // TODO: turn into Coroutine for server/client
+            // doors/keycard doors/trunks
+            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState && x.DoorState != EDoorState.Interacting).ToArray();
+            for (int i = 0; i < packet.InteractiveObjectAmount; i++)
+            {
+                interactiveObjects[i].SetFromStatusInfo(packet.InteractiveObjects[i]);
+            }
+
+            // Windows
+            for (int i = 0; i < packet.WindowBreakerAmount; i++)
+            {
+                gameWorld.method_20(packet.Windows[i].Id.GetHashCode(), packet.Windows[i].FirstHitPosition.Value);
+            }
+
+            // lights
+            LampController[]lights = LocationScene.GetAllObjects<LampController>(true).ToArray();
+            for (int i = 0; i < packet.LightAmount; i++)
+            {
+                lights[i].Switch(packet.Lights[i].LampState);
+            }
+
+            // TODO: smokes
+            // serialize - World.method_8
+            // deserialize - ClientWorld.method_28
+            // GStruct34 for packet
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
