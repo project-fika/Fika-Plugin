@@ -363,7 +363,7 @@ namespace Fika.Core.Coop.Components
 
             if (!spawnObject.IsAlive)
             {
-                // TODO: Spawn them as corpses?
+                otherPlayer.OnDead(EDamageType.Undefined);
             }
 
             if (MatchmakerAcceptPatches.IsServer)
