@@ -289,5 +289,31 @@ namespace Fika.Core.Networking
                 LampState = (Turnable.EState) reader.GetByte()
             };
         }
+
+        public static void PutSmokeState(this NetDataWriter writer, Throwable smoke)
+        {
+            var test = smoke as SmokeGrenade;
+            var data = test.NetworkData;
+
+            writer.Put(data.Id);
+            writer.Put(data.Position);
+            writer.Put(data.Template);
+            writer.Put(data.Time);
+            writer.Put(data.Orientation);
+            writer.Put(data.PlatformId);
+        }
+
+        public static GStruct34 GetSmokeState(this NetDataReader reader)
+        {
+            return new()
+            {
+                Id = reader.GetString(),
+                Position = reader.GetVector3(),
+                Template = reader.GetString(),
+                Time = reader.GetInt(),
+                Orientation = reader.GetQuaternion(),
+                PlatformId = reader.GetShort()
+            };
+        }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Fika.Core.Networking
 {
     public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, bool isProne, 
-    WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights): INetSerializable
+    WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes): INetSerializable
     {
         public int NetId = netId;
         public Vector3 Position = position;
@@ -17,6 +17,8 @@ namespace Fika.Core.Networking
         public WindowBreaker[] Windows;
         public int LightAmount;
         public LampController[] Lights;
+        public int SmokeAmount;
+        public GStruct34[] Smokes;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -56,6 +58,17 @@ namespace Fika.Core.Networking
                     Lights[i] = reader.GetLightState();
                 }
             }
+
+            SmokeAmount = reader.GetInt();
+
+            if (SmokeAmount > 0)
+            {
+                Smokes = new GStruct34[SmokeAmount];
+                for (int i = 0; i < SmokeAmount; i++)
+                {
+                    Smokes[i] = reader.GetSmokeState();
+                }
+            }
         }
 
         public void Serialize(NetDataWriter writer)
@@ -91,6 +104,16 @@ namespace Fika.Core.Networking
                 for (int i = 0; i < lights.Length; i++)
                 {
                     writer.PutLightState(lights[i]);
+                }
+            }
+
+            writer.Put(smokes.Length);
+
+            if (smokes.Length > 0)
+            {
+                for (int i = 0; i < smokes.Length; i++)
+                {
+                    writer.PutSmokeState(smokes[i]);
                 }
             }
         }
