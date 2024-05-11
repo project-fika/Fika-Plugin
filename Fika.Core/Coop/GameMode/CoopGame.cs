@@ -56,6 +56,8 @@ namespace Fika.Core.Coop.GameMode
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
 
+        public RaidSettings RaidSettings { get; private set; }
+
         //WildSpawnType for sptUsec and sptBear
         const int sptUsecValue = 47;
         const int sptBearValue = 48;
@@ -91,7 +93,8 @@ namespace Fika.Core.Coop.GameMode
 
         internal static CoopGame Create(InputTree inputTree, Profile profile, GameDateTime backendDateTime, InsuranceCompanyClass insurance, MenuUI menuUI,
             CommonUI commonUI, PreloaderUI preloaderUI, GameUI gameUI, LocationSettingsClass.Location location, TimeAndWeatherSettings timeAndWeather,
-            WavesSettings wavesSettings, EDateTime dateTime, Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue, ISession backEndSession, TimeSpan sessionTime)
+            WavesSettings wavesSettings, EDateTime dateTime, Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
+            ISession backEndSession, TimeSpan sessionTime, RaidSettings raidSettings)
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("Coop Game Mode");
             Logger.LogInfo("CoopGame::Create");
@@ -113,7 +116,7 @@ namespace Fika.Core.Coop.GameMode
             BossLocationSpawn[] bossSpawns = EFT.LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.GClass579 = GClass579.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
-            if (useCustomWeather)
+            if (useCustomWeather && MatchmakerAcceptPatches.IsServer)
             {
                 Logger.LogInfo("Custom weather enabled, initializing curves");
                 coopGame.SetupCustomWeather(timeAndWeather);
@@ -123,6 +126,8 @@ namespace Fika.Core.Coop.GameMode
 
             Singleton<IFikaGame>.Create(coopGame);
             FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
+
+            coopGame.RaidSettings = raidSettings;
 
             return coopGame;
         }
@@ -687,13 +692,22 @@ namespace Fika.Core.Coop.GameMode
                 await Task.Delay(5000);
             }
 
-            CoopPlayer coopPlayer = (CoopPlayer) myPlayer;
+            CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
             
             if (MatchmakerAcceptPatches.IsReconnect)
             {
                 // TODO: get pose from server
                 myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
+            }
+
+            if (MatchmakerAcceptPatches.IsServer)
+            {
+                if (RaidSettings.MetabolismDisabled)
+                {
+                    myPlayer.HealthController.DisableMetabolism();
+                    NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
+                } 
             }
 
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);

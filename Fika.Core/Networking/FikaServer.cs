@@ -82,6 +82,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectRequestPacket, NetPeer>(OnReconnectRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SessionSettingsPacket, NetPeer>(OnSessionSettingsPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -163,6 +164,22 @@ namespace Fika.Core.Networking
             ServerReady = true;
         }
 
+        private void OnSessionSettingsPacketReceived(SessionSettingsPacket packet, NetPeer peer)
+        {
+            if (packet.IsRequest)
+            {
+                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                if (coopGame != null)
+                {
+                    SessionSettingsPacket returnPacket = new(false)
+                    {
+                        MetabolismDisabled = coopGame.RaidSettings.MetabolismDisabled
+                    };
+
+                    SendDataToPeer(peer, new(), ref returnPacket, DeliveryMethod.ReliableUnordered);
+                }
+            }
+        }
 
         public int PopNetId()
         {

@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Matchmaker
         private static GameObject MatchmakerObject { get; set; }
 
         [PatchPrefix]
-        private static void Pre(ref ISession session, ref RaidSettings raidSettings, Profile ___profile_0, MatchMakerAcceptScreen __instance,
+        private static void PreFix(ref ISession session, ref RaidSettings raidSettings, Profile ___profile_0, MatchMakerAcceptScreen __instance,
             DefaultUIButton ____acceptButton, DefaultUIButton ____backButton, MatchMakerPlayerPreview ____playerModelView)
         {
             if (MatchmakerObject == null)
@@ -29,14 +29,14 @@ namespace Fika.Core.Coop.Matchmaker
                 raidSettings.RaidMode = ERaidMode.Local;
             }
 
-            var newMatchMaker = MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
+            MatchMakerUIScript newMatchMaker = MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
             newMatchMaker.RaidSettings = raidSettings;
             newMatchMaker.AcceptButton = ____acceptButton;
             newMatchMaker.BackButton = ____backButton;
         }
 
         [PatchPostfix]
-        private static void Post(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
+        private static void PostFix(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
         {
             MatchmakerAcceptPatches.MatchMakerAcceptScreenInstance = __instance;
             MatchmakerAcceptPatches.Profile = ___profile_0;

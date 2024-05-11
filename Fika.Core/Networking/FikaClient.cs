@@ -84,6 +84,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket, NetPeer>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket, NetPeer>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket, NetPeer>(OnReconnectResponsePacketReceived);
+            packetProcessor.SubscribeNetSerializable<SessionSettingsPacket, NetPeer>(OnSessionSettingsPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -116,6 +117,18 @@ namespace Fika.Core.Networking
             Singleton<FikaClient>.Create(this);
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
             ClientReady = true;
+        }
+
+        private void OnSessionSettingsPacketReceived(SessionSettingsPacket packet, NetPeer peer)
+        {
+            if (!packet.IsRequest)
+            {
+                if (packet.MetabolismDisabled)
+                {
+                    Singleton<GameWorld>.Instance.MainPlayer.HealthController.DisableMetabolism();
+                    NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
+                }
+            }
         }
 
         private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet, NetPeer peer)

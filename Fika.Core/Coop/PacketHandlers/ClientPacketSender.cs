@@ -134,6 +134,15 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private IEnumerator SyncWorld()
         {
+            while (Client.NetClient.FirstPeer == null)
+            {
+                yield return null;
+            }
+
+            Writer?.Reset();
+            SessionSettingsPacket settingsPacket = new(true);
+            Client?.SendData(Writer, ref settingsPacket, DeliveryMethod.ReliableOrdered);
+
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
             if (coopGame == null)
