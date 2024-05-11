@@ -666,12 +666,12 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogError("Waiting for ReconnectResponse packet from Host...");
                     await Task.Delay(100);
                 }
-                while (MatchmakerAcceptPatches.ReconnectPacket.Position == Vector3.zero);
+                while (MatchmakerAcceptPatches.ReconnectPacket == null);
 
-                Logger.LogError($"setting pos to {MatchmakerAcceptPatches.ReconnectPacket.Position}");
-                PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Position;
-                Logger.LogError($"Setting rot to {MatchmakerAcceptPatches.ReconnectPacket.Rotation}");
-                RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Rotation;
+                Logger.LogError($"setting pos to {MatchmakerAcceptPatches.ReconnectPacket.Value.Position}");
+                PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
+                Logger.LogError($"Setting rot to {MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation}");
+                RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
             }
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
@@ -692,8 +692,8 @@ namespace Fika.Core.Coop.GameMode
             if (MatchmakerAcceptPatches.IsReconnect)
             {
                 // TODO: get pose from server
-                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.IsProne;
-                coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.NetId;
+                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
+                coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
             }
 
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
@@ -1377,6 +1377,13 @@ namespace Fika.Core.Coop.GameMode
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
         {
             Logger.LogInfo("CoopGame::Stop");
+
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                // game ended, reset these values
+                MatchmakerAcceptPatches.IsReconnect = false;
+                MatchmakerAcceptPatches.ReconnectPacket = null;
+            }
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender?.DestroyThis();

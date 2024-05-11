@@ -34,7 +34,7 @@ namespace Fika.Core.Coop.Matchmaker
         private static string groupId;
         private static long timestamp;
         public static bool IsReconnect = false;
-        public static ReconnectResponsePacket ReconnectPacket;
+        public static ReconnectResponsePacket? ReconnectPacket;
         
         #endregion
 
