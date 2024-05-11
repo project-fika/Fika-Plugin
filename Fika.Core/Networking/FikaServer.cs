@@ -19,6 +19,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -174,6 +175,23 @@ namespace Fika.Core.Networking
         private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
         {
             serverLogger.LogError($"Player Wanting to reconnect {packet.ProfileId}");
+            StartCoroutine(SyncClientToHost(packet, peer));
+        }
+
+        public IEnumerator SyncClientToHost(ReconnectRequestPacket packet, NetPeer peer)
+        {
+            while (!Singleton<GameWorld>.Instantiated)
+            {
+                yield return null;
+            }
+
+            ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
+
+            while (string.IsNullOrEmpty(gameWorld.MainPlayer.Location))
+            {
+                yield return null;
+            }
+
             CoopPlayer playerToUse = Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
 
             if (playerToUse == null)
@@ -181,12 +199,12 @@ namespace Fika.Core.Networking
                 serverLogger.LogError($"Player was not found");
             }
 
-            // TODO: double check doors are working
             WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState && x.DoorState != EDoorState.Interacting).ToArray();
-            WindowBreaker[] windows = Singleton<GameWorld>.Instance?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
+            WindowBreaker[] windows = gameWorld?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
             LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
+            Throwable[] smokes = gameWorld.Grenades.Where(x => x as SmokeGrenade is SmokeGrenade).ToArray(); // maybe just cast to SmokeGrenade and pass that in
 
-            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, playerToUse.Transform.rotation, playerToUse.IsInPronePose, interactiveObjects, windows, lights);
+            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, playerToUse.Transform.rotation, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes);
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
 

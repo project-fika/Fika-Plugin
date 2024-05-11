@@ -23,6 +23,7 @@ using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -203,13 +204,22 @@ namespace Fika.Core.Networking
 
         private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet, NetPeer peer)
         {
-            ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
-
             MatchmakerAcceptPatches.IsReconnect = true;
             MatchmakerAcceptPatches.ReconnectPacket = packet;
 
-            // TODO: turn into Coroutine for server/client
-            // doors/keycard doors/trunks
+            StartCoroutine(SyncClientToHost(packet));
+        }
+
+        public IEnumerator SyncClientToHost(ReconnectResponsePacket packet)
+        {
+            while (!Singleton<GameWorld>.Instantiated)
+            {
+                yield return null;
+            }
+
+            ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
+
+            // interactables
             WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
             for (int i = 0; i < packet.InteractiveObjectAmount; i++)
             {
@@ -234,10 +244,14 @@ namespace Fika.Core.Networking
                 clientLightToChange?.Switch(lampController.LampState);                
             }
 
-            // TODO: smokes
-            // serialize - World.method_8
-            // deserialize - ClientWorld.method_28
-            // GStruct34 for packet
+            // smokes
+            List<GStruct34> smokes = new();
+            for (int i = 0; i < packet.SmokeAmount; i++)
+            {
+                smokes.Add(packet.Smokes[i]);
+            }
+            // FIXME: currently ERRORS on bundles not being loaded, maybe delay till after people have spawned
+            //gameWorld.OnSmokeGrenadesDeserialized(smokes);
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
@@ -539,7 +553,7 @@ namespace Fika.Core.Networking
             else
             {
                 clientLogger.LogError("OnAirdropLootPacketReceived: Received loot package but manager is not instantiated!");
-            }                
+            }
         }
 
         private void OnAirdropPacketReceived(AirdropPacket packet, NetPeer peer)
