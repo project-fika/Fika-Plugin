@@ -27,6 +27,7 @@ using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -49,26 +50,20 @@ namespace Fika.Core
         /// Stores the Instance of this Plugin
         /// </summary>
         public static FikaPlugin Instance;
-
         public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
-
         /// <summary>
         /// If any mod dependencies fail, show an error. This is a flag to say it has occurred.
         /// </summary>
         private bool ShownDependencyError { get; set; }
-
         /// <summary>
         /// This is the Official EFT Version defined by BSG
         /// </summary>
         public static string EFTVersionMajor { get; internal set; }
-
         public static string[] LoadedPlugins { get; private set; }
-
         public ManualLogSource FikaLogger { get => Logger; }
-
         public BotDifficulties BotDifficulties;
-
         public string Locale { get; private set; } = "en";
+        public string[] LocalIPs;
 
         public static Dictionary<string, string> RespectedPlayersList = new()
         {
@@ -356,7 +351,7 @@ namespace Fika.Core
 
             ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalIPAddress()), new ConfigurationManagerAttributes() { Order = 5 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 5 }));
 
             AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 4 }));
 
@@ -373,7 +368,7 @@ namespace Fika.Core
             ArmpitDamageMultiplier = Config.Bind("Gameplay", "Armpit Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the armpits collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
         }
 
-        private string[] GetLocalIPAddress()
+        private string[] GetLocalAddresses()
         {
             IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
             List<string> ips = [];
@@ -385,6 +380,8 @@ namespace Fika.Core
                     ips.Add(ip.ToString());
                 }
             }
+
+            LocalIPs = ips.Skip(1).ToArray();
             return [.. ips];
         }
 

@@ -150,7 +150,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = false;
 
-            InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, false);
+            InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, true);
 
             PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
             byte[] healthBytes = tempController.SerializeState();

@@ -66,8 +66,7 @@ namespace Fika.Core.Coop.ClientClasses
                     packet.ItemControllerExecutePacket = new()
                     {
                         CallbackId = operation.Id,
-                        OperationBytes = opBytes,
-                        InventoryId = ID
+                        OperationBytes = opBytes
                     };
 
                     CoopPlayer.PacketSender?.InventoryPackets?.Enqueue(packet);
@@ -79,8 +78,6 @@ namespace Fika.Core.Coop.ClientClasses
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
-                ConsoleScreen.Log(operation.GetType().ToString());
-
                 // Do not replicate picking up quest items, throws an error on the other clients
                 if (operation is GClass2839 pickupOperation)
                 {
@@ -89,12 +86,6 @@ namespace Fika.Core.Coop.ClientClasses
                         base.Execute(operation, callback);
                         return;
                     }
-                }
-
-                if (operation is GClass2870)
-                {
-                    base.Execute(operation, callback);
-                    return;
                 }
 
                 InventoryPacket packet = new()
@@ -119,8 +110,7 @@ namespace Fika.Core.Coop.ClientClasses
                 packet.ItemControllerExecutePacket = new()
                 {
                     CallbackId = operationNum,
-                    OperationBytes = opBytes,
-                    InventoryId = ID
+                    OperationBytes = opBytes
                 };
 
                 CoopPlayer.PacketSender?.InventoryPackets?.Enqueue(packet);
@@ -165,24 +155,27 @@ namespace Fika.Core.Coop.ClientClasses
                     clientOperationManager = this,
                     result = result
                 };
-                if (callbackManager.result.Succeed && callbackManager.result.Value != EOperationStatus.Failed)
+
+                if (callbackManager.result.Succeed)
                 {
                     EOperationStatus value = callbackManager.result.Value;
                     if (value == EOperationStatus.Started)
                     {
                         localOperationStatus = EOperationStatus.Started;
                         serverOperationStatus = EOperationStatus.Started;
-                        operation.vmethod_0(new Callback(callbackManager.HandleResult), false);
+                        operation.vmethod_0(new Callback(callbackManager.HandleResult), true);
                         return;
                     }
-                    /*if (value == EOperationStatus.Finished)
+                    if (value == EOperationStatus.Finished)
                     {
                         serverOperationStatus = EOperationStatus.Finished;
-                        localOperationStatus = EOperationStatus.Finished;
-                        operation.Dispose();
-                        callback.Succeed();
-                        return;
-                    }*/
+                        if (localOperationStatus == serverOperationStatus)
+                        {
+                            operation.Dispose();
+                            callback.Succeed();
+                            return;
+                        }
+                    }
                 }
                 else
                 {
@@ -202,32 +195,28 @@ namespace Fika.Core.Coop.ClientClasses
 
             public void HandleResult(IResult executeResult)
             {
-                if (!executeResult.Succeed)
+                if (!executeResult.Succeed && (executeResult.Error is not "skipped skippable" or "skipped _completed"))
                 {
                     FikaPlugin.Instance.FikaLogger.LogError($"{clientOperationManager.inventoryController.ID} - Client operation critical failure: {clientOperationManager.inventoryController.ID} - {clientOperationManager.operation}\r\nError: {executeResult.Error}");
                 }
 
-                clientOperationManager.operation.Dispose();
-                clientOperationManager.callback.Invoke(result);
+                clientOperationManager.localOperationStatus = EOperationStatus.Finished;
 
-                /*clientOperationManager.localOperationStatus = EOperationStatus.Finished;
-                EOperationStatus? serverOperationStatus = clientOperationManager.serverOperationStatus;
-                EOperationStatus? eoperationStatus = clientOperationManager.localOperationStatus;
-                if ((serverOperationStatus.GetValueOrDefault() == eoperationStatus.GetValueOrDefault()) & (serverOperationStatus != null == (eoperationStatus != null)))
+                if (clientOperationManager.localOperationStatus == clientOperationManager.serverOperationStatus)
                 {
                     clientOperationManager.operation.Dispose();
                     clientOperationManager.callback.Invoke(result);
                     return;
-                }*/
-                /*if (clientOperationManager.serverOperationStatus != null)
+                }
+
+                if (clientOperationManager.serverOperationStatus != null)
                 {
-                    eoperationStatus = clientOperationManager.serverOperationStatus;
-                    if ((eoperationStatus.GetValueOrDefault() == EOperationStatus.Failed) & (eoperationStatus != null))
+                    if (clientOperationManager.serverOperationStatus == EOperationStatus.Failed)
                     {
                         clientOperationManager.operation.Dispose();
                         clientOperationManager.callback.Invoke(result);
                     }
-                }*/
+                }
             }
         }
     }
