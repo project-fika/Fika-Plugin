@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Fika.Core.Networking
 {
     public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, bool isProne, 
-    WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes): INetSerializable
+    WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, SmokeGrenade[] smokes): INetSerializable
     {
         public int NetId = netId;
         public Vector3 Position = position;

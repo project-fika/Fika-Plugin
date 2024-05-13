@@ -219,12 +219,14 @@ namespace Fika.Core.Networking
                 serverLogger.LogError($"Player was not found");
             }
 
-            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState && x.DoorState != EDoorState.Interacting).ToArray();
+            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState 
+                && x.DoorState != EDoorState.Interacting && x.DoorState != EDoorState.Interacting).ToArray();
             WindowBreaker[] windows = gameWorld?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
             LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
-            Throwable[] smokes = gameWorld.Grenades.Where(x => x as SmokeGrenade is SmokeGrenade).ToArray(); // maybe just cast to SmokeGrenade and pass that in
+            SmokeGrenade[] smokes = (SmokeGrenade[]) gameWorld.Grenades.Where(x => x as SmokeGrenade is SmokeGrenade).ToArray();
 
-            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, playerToUse.Transform.rotation, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes);
+            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
+                playerToUse.Transform.rotation, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes);
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
 
