@@ -213,6 +213,12 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 else if (packet.ShotInfoPacket.ShotType == EShotType.RegularShot)
                 {
+                    if (string.IsNullOrEmpty(packet.ShotInfoPacket.AmmoTemplate))
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::HandleFirearmPacket: AmmoTemplate was null or empty!");
+                        return;
+                    }
+
                     BulletClass ammo = (BulletClass)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
                     InitiateShot(Item, ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
                         packet.ShotInfoPacket.FireportPosition, packet.ShotInfoPacket.ChamberIndex, packet.ShotInfoPacket.Overheat);
