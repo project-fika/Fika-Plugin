@@ -194,6 +194,7 @@ namespace Fika.Core
             new Minefield_method_2_Patch().Enable();
             new BotCacher().Enable();
             new InventoryScrollPatch().Enable();
+            new AbstractGame_InRaid_Patch().Enable();
 #if GOLDMASTER
             new TOSPatch().Enable();
 #endif
