@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -220,6 +221,7 @@ namespace Fika.Core.Networking
             }
 
             ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
             // interactables
             WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
@@ -252,8 +254,16 @@ namespace Fika.Core.Networking
             {
                 smokes.Add(packet.Smokes[i]);
             }
-            // FIXME: currently ERRORS on bundles not being loaded, maybe delay till after people have spawned
-            //gameWorld.OnSmokeGrenadesDeserialized(smokes);
+
+            // -------------------  Anything that needs to come after player spawns  -------------------------------
+            while (!MatchmakerAcceptPatches.SpawnedPlayersComplete)
+            {
+                yield return null;
+            }
+            gameWorld.OnSmokeGrenadesDeserialized(smokes);
+            // TODO: Smokes do spawn on the ground, but no visible smoke effect shows, im using BSG's method of doing this currently, so this might be a BSG thing.
+            // Decide if to fix or not.
+
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)

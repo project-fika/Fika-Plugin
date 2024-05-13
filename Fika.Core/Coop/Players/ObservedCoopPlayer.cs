@@ -11,6 +11,7 @@ using EFT.Vaulting;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Networking;
@@ -744,7 +745,10 @@ namespace Fika.Core.Coop.Players
                     }
                     else
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{Profile.Nickname}' has died");
+                        if (!MatchmakerAcceptPatches.IsReconnect)
+                        {
+                            NotificationManagerClass.DisplayWarningNotification($"Group member '{Profile.Nickname}' has died");
+                        }
                     }
                 }
                 if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
