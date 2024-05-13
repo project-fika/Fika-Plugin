@@ -4,12 +4,14 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, bool isProne, 
-    WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, SmokeGrenade[] smokes): INetSerializable
+    public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, float poseLevel, 
+    bool isProne, WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes
+    , EquipmentClass equipment): INetSerializable
     {
         public int NetId = netId;
         public Vector3 Position = position;
         public Quaternion Rotation = rotation;
+        public float PoseLevel;
         public bool IsProne = isProne;
         public int InteractiveObjectAmount;
         public WorldInteractiveObject.GStruct385[] InteractiveObjects;
@@ -19,12 +21,14 @@ namespace Fika.Core.Networking
         public LampController[] Lights;
         public int SmokeAmount;
         public GStruct34[] Smokes;
+        public EquipmentClass Equipment;
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
             Position = reader.GetVector3();
             Rotation = reader.GetQuaternion();
+            PoseLevel = reader.GetFloat();
             IsProne = reader.GetBool();
             InteractiveObjectAmount = reader.GetInt();
             
@@ -69,6 +73,8 @@ namespace Fika.Core.Networking
                     Smokes[i] = reader.GetSmokeState();
                 }
             }
+
+            Equipment = (EquipmentClass)reader.GetItem();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -76,6 +82,7 @@ namespace Fika.Core.Networking
             writer.Put(NetId);
             writer.Put(Position);
             writer.Put(Rotation);
+            writer.Put(poseLevel);
             writer.Put(IsProne);
             writer.Put(interactiveObjects.Length);
 
@@ -116,6 +123,8 @@ namespace Fika.Core.Networking
                     writer.PutSmokeState(smokes[i]);
                 }
             }
+
+            writer.PutItem(equipment);
         }
     }
 }

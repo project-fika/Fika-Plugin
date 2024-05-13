@@ -256,7 +256,7 @@ namespace Fika.Core.Networking
             }
 
             // -------------------  Anything that needs to come after player spawns  -------------------------------
-            while (!MatchmakerAcceptPatches.SpawnedPlayersComplete)
+            while (coopGame.Status != GameStatus.Started)
             {
                 yield return null;
             }

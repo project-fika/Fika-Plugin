@@ -675,6 +675,7 @@ namespace Fika.Core.Coop.GameMode
 
                 PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
                 RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
+                profile.Inventory.Equipment = MatchmakerAcceptPatches.ReconnectPacket.Value.Equipment;
             }
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
@@ -694,7 +695,8 @@ namespace Fika.Core.Coop.GameMode
             
             if (MatchmakerAcceptPatches.IsReconnect)
             {
-                // TODO: get pose from server
+                // TODO: get pose and leaning from server
+                myPlayer.MovementContext.SmoothedPoseLevel = MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel;
                 myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
             }
