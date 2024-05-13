@@ -701,14 +701,12 @@ namespace Fika.Core.Networking
         {
             public uint CallbackId;
             public byte[] OperationBytes;
-            public string InventoryId;
             public static ItemControllerExecutePacket Deserialize(NetDataReader reader)
             {
                 ItemControllerExecutePacket packet = new()
                 {
                     CallbackId = reader.GetUInt(),
                     OperationBytes = reader.GetByteArray(),
-                    InventoryId = reader.GetString()
                 };
                 return packet;
             }
@@ -716,7 +714,6 @@ namespace Fika.Core.Networking
             {
                 writer.Put(packet.CallbackId);
                 writer.PutByteArray(packet.OperationBytes);
-                writer.Put(packet.InventoryId);
             }
         }
 

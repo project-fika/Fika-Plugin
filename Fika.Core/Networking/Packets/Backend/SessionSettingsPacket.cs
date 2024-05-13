@@ -12,7 +12,7 @@ namespace Fika.Core.Networking
             IsRequest = reader.GetBool();
             if (!IsRequest)
             {
-                MetabolismDisabled = reader.GetBool(); 
+                MetabolismDisabled = reader.GetBool();
             }
         }
 
@@ -21,7 +21,7 @@ namespace Fika.Core.Networking
             writer.Put(IsRequest);
             if (!IsRequest)
             {
-                writer.Put(MetabolismDisabled); 
+                writer.Put(MetabolismDisabled);
             }
         }
     }

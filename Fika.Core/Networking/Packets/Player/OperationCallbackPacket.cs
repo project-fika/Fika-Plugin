@@ -1,25 +1,35 @@
-﻿using LiteNetLib.Utils;
+﻿using EFT;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking.Packets.Player
 {
-    public struct OperationCallbackPacket(int netId, uint callbackId, bool success) : INetSerializable
+    public struct OperationCallbackPacket(int netId, uint callbackId, EOperationStatus operationStatus, string error = null) : INetSerializable
     {
         public int NetId = netId;
         public uint CallbackId = callbackId;
-        public bool Success = success;
+        public EOperationStatus OperationStatus = operationStatus;
+        public string Error = error;
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
             CallbackId = reader.GetUInt();
-            Success = reader.GetBool();
+            OperationStatus = (EOperationStatus)reader.GetInt();
+            if (OperationStatus == EOperationStatus.Failed)
+            {
+                Error = reader.GetString();
+            }
         }
 
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.Put(CallbackId);
-            writer.Put(Success);
+            writer.Put((int)OperationStatus);
+            if (OperationStatus == EOperationStatus.Failed)
+            {
+                writer.Put(Error);
+            }
         }
     }
 }

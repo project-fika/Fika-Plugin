@@ -707,7 +707,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     myPlayer.HealthController.DisableMetabolism();
                     NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
-                } 
+                }
             }
 
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);

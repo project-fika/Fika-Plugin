@@ -193,16 +193,16 @@ namespace Fika.Core.UI.Custom
             if (pingingClient.Init())
             {
                 int attempts = 0;
-                bool success = false;
+                bool success;
 
                 do
                 {
                     attempts++;
-                    if (pingingClient.PingEndPoint())
-                    {
-                        pingingClient.NetClient.PollEvents();
-                        success = pingingClient.Received;
-                    }
+
+                    pingingClient.PingEndPoint();
+                    pingingClient.NetClient.PollEvents();
+                    success = pingingClient.Received;
+
                     yield return new WaitForSeconds(0.1f);
                 } while (!success && attempts < 50);
 

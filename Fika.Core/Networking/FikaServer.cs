@@ -5,6 +5,7 @@ using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
@@ -15,12 +16,14 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
+using Fika.Core.Networking.Packets.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -542,11 +545,91 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.InventoryPackets?.Enqueue(packet);
-            }
+                using MemoryStream memoryStream = new(packet.ItemControllerExecutePacket.OperationBytes);
+                using BinaryReader binaryReader = new(memoryStream);
+                try
+                {
+                    GStruct411 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1532>());
 
-            /*_dataWriter.Reset();
-            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);*/
+                    InventoryOperationHandler opHandler = new()
+                    {
+                        opResult = result,
+                        operationId = packet.ItemControllerExecutePacket.CallbackId,
+                        netId = playerToApply.NetId,
+                        peer = peer,
+                        server = this
+                    };
+
+                    OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
+                    SendDataToPeer(peer, new(), ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+
+                    opHandler.opResult.Value.vmethod_0(new Callback(opHandler.HandleResult), false);
+
+                    // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
+                    // Unknown what problems this might cause so far.
+                    if (result.Value is GClass2861 unloadOperation)
+                    {
+                        if (unloadOperation.InternalOperation is GClass2872 internalSplitOperation)
+                        {
+                            Item item = internalSplitOperation.To.Item;
+                            if (item != null)
+                            {
+                                if (item.Id != internalSplitOperation.CloneId && item.TemplateId == internalSplitOperation.Item.TemplateId)
+                                {
+                                    item.Id = internalSplitOperation.CloneId;
+                                }
+                                else
+                                {
+                                    FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {item.Id}, SplitOperationItemID: {internalSplitOperation.To.Item.Id}");
+                                }
+                            }
+                            else
+                            {
+                                FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
+                            }
+                        }
+                    }
+
+                    // TODO: Same as above.
+                    if (result.Value is GClass2872 splitOperation)
+                    {
+                        Item item = splitOperation.To.Item;
+                        if (item != null)
+                        {
+                            if (item.Id != splitOperation.CloneId && item.TemplateId == splitOperation.Item.TemplateId)
+                            {
+                                item.Id = splitOperation.CloneId;
+                            }
+                            else
+                            {
+                                FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {item.Id}, SplitOperationItemID: {splitOperation.To.Item.Id}");
+                            }
+                        }
+                        else
+                        {
+                            FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
+                        }
+                    }
+
+                    /*// Fix for folding not replicating
+                    if (result.Value is GClass2858 foldOperation)
+                    {
+                        if (playerToApply.HandsController is CoopObservedFirearmController observedFirearmController)
+                        {
+                            if (observedFirearmController.Weapon != null && observedFirearmController.Weapon.Foldable != null)
+                            {
+                                observedFirearmController.InitiateOperation<FirearmController.Class1020>().Start(foldOperation, null);
+                            }
+                        }
+                    }*/
+                }
+                catch (Exception exception)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
+                    OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
+                    SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                }
+            }
         }
 
         private void OnDamagePacketReceived(DamagePacket packet, NetPeer peer)
@@ -714,6 +797,52 @@ namespace Fika.Core.Networking
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
             packetProcessor.ReadAllPackets(reader, peer);
+        }
+
+        private class InventoryOperationHandler
+        {
+            public GStruct411 opResult;
+            public uint operationId;
+            public int netId;
+            public NetPeer peer;
+            public FikaServer server;
+
+            internal void HandleResult(IResult result)
+            {
+                NetDataWriter writer = new();
+                OperationCallbackPacket operationCallbackPacket;
+
+                if (!result.Succeed)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
+                    operationCallbackPacket = new(netId, operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
+                    writer.Reset();
+                    server.SendDataToPeer(peer, writer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+
+                    return;
+                }
+
+                InventoryPacket packet = new(netId)
+                {
+                    HasItemControllerExecutePacket = true
+                };
+
+                using MemoryStream memoryStream = new();
+                using BinaryWriter binaryWriter = new(memoryStream);
+                binaryWriter.WritePolymorph(GClass1632.FromInventoryOperation(opResult.Value, false));
+                byte[] opBytes = memoryStream.ToArray();
+                packet.ItemControllerExecutePacket = new()
+                {
+                    CallbackId = operationId,
+                    OperationBytes = opBytes
+                };
+
+                server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+                operationCallbackPacket = new(netId, operationId, EOperationStatus.Finished);
+                writer.Reset();
+                server.SendDataToPeer(peer, writer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+            }
         }
     }
 }

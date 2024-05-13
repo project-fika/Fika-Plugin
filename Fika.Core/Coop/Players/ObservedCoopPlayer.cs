@@ -150,7 +150,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = false;
 
-            InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, false);
+            InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, true);
 
             PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
             byte[] healthBytes = tempController.SerializeState();
@@ -988,6 +988,29 @@ namespace Fika.Core.Coop.Players
                 observedFixedTime = fixedTime;
                 OcclusionDirty = true;
                 UpdateOcclusion();
+            }
+        }
+
+        public override void LandingAdjustments(float d)
+        {
+            // Do nothing
+        }
+
+        public new void CreateCompass()
+        {
+            bool compassInstantiated = Traverse.Create(this).Field("_compassInstantiated").GetValue<bool>();
+            if (!compassInstantiated)
+            {
+                Transform transform = Singleton<PoolManager>.Instance.CreateFromPool<Transform>(new ResourceKey
+                {
+                    path = "assets/content/weapons/additional_hands/item_compass.bundle"
+                });
+                transform.SetParent(PlayerBones.Ribcage.Original, false);
+                transform.localRotation = Quaternion.identity;
+                transform.localPosition = Vector3.zero;
+                method_29(transform.gameObject);
+                compassInstantiated = true;
+                return;
             }
         }
 

@@ -59,7 +59,6 @@ namespace Fika.Core.Networking
 
         protected void Start()
         {
-
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnFirearmPacketReceived);
@@ -82,7 +81,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket, NetPeer>(OnAssignNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket, NetPeer>(OnSyncNetIdPacketReceived);
-            packetProcessor.SubscribeNetSerializable<OperationCallbackPacket, NetPeer>(OnOperationCallbackPacketReceived);
+            packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket, NetPeer>(OnReconnectResponsePacketReceived);
             packetProcessor.SubscribeNetSerializable<SessionSettingsPacket, NetPeer>(OnSessionSettingsPacketReceived);
 
@@ -131,21 +130,11 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet, NetPeer peer)
+        private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer player) && player.IsYourPlayer)
             {
-                if (player.OperationCallbacks.TryGetValue(packet.CallbackId, out Callback<EOperationStatus> callback))
-                {
-                    callback(new Result<EOperationStatus>(EOperationStatus.Failed)
-                    {
-                        Error = "CRITICAL ERROR DURING PROCESSING OF PACKET"
-                    });
-                }
-                else
-                {
-                    FikaPlugin.Instance.FikaLogger.LogError($"OnOperationCallbackPacketReceived: Could not find CallbackId {packet.CallbackId}!");
-                }
+                player.HandleCallbackFromServer(in packet);
             }
         }
 
@@ -720,7 +709,7 @@ namespace Fika.Core.Networking
             CoopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
         }
 
-        void Update()
+        protected void Update()
         {
             _netClient.PollEvents();
 
@@ -730,7 +719,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        void OnDestroy()
+        protected void OnDestroy()
         {
             _netClient?.Stop();
             FikaEventDispatcher.DispatchEvent(new FikaClientDestroyedEvent(this));
@@ -770,7 +759,7 @@ namespace Fika.Core.Networking
         public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
         {
             Ping = latency;
-            NetworkGameSession.RTT = Ping;
+            NetworkGameSession.RTT = peer.RoundTripTime;
             NetworkGameSession.LossPercent = (int)NetClient.Statistics.PacketLossPercent;
         }
 
