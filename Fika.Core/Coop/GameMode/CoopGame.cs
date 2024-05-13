@@ -699,6 +699,7 @@ namespace Fika.Core.Coop.GameMode
                 myPlayer.MovementContext.SmoothedPoseLevel = MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel;
                 myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
+                myPlayer.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
             }
 
             if (MatchmakerAcceptPatches.IsServer)
