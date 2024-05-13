@@ -673,9 +673,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 while (MatchmakerAcceptPatches.ReconnectPacket == null);
 
-                Logger.LogError($"setting pos to {MatchmakerAcceptPatches.ReconnectPacket.Value.Position}");
                 PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
-                Logger.LogError($"Setting rot to {MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation}");
                 RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
             }
 
@@ -926,6 +924,8 @@ namespace Fika.Core.Coop.GameMode
                     client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
                 } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
+
+                MatchmakerAcceptPatches.SpawnedPlayersComplete = true;
             }
         }
 
@@ -1397,6 +1397,7 @@ namespace Fika.Core.Coop.GameMode
                 // game ended, reset these values
                 MatchmakerAcceptPatches.IsReconnect = false;
                 MatchmakerAcceptPatches.ReconnectPacket = null;
+                MatchmakerAcceptPatches.SpawnedPlayersComplete = false;
             }
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
