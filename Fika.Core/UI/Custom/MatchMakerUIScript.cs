@@ -187,13 +187,15 @@ namespace Fika.Core.UI.Custom
                 button.enabled = false;
             }
 
-            NotificationManagerClass.DisplayMessageNotification("Connecting to server...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+            NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
             FikaPingingClient pingingClient = new(serverId);
             if (pingingClient.Init())
             {
                 int attempts = 0;
                 bool success;
+
+                FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
 
                 do
                 {
@@ -212,6 +214,8 @@ namespace Fika.Core.UI.Custom
                     "ERROR CONNECTING",
                     "Unable to connect to the server. Make sure that all ports are open and that all settings are configured correctly.",
                     ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                    FikaPlugin.Instance.FikaLogger.LogError("Unable to connect to the session!");
 
                     if (button != null)
                     {
