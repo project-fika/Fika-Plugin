@@ -1,4 +1,7 @@
-﻿using Fika.Core.Bundles;
+﻿using Comfort.Common;
+using EFT;
+using Fika.Core.Bundles;
+using Fika.Core.Coop.Players;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = System.Object;
@@ -41,25 +44,35 @@ public static class PingFactory
         protected Vector3 hitPoint;
         private float screenScale = 1f;
         private Color _pingColor = Color.white;
+        private CoopPlayer mainPlayer;
 
         static AbstractPing()
         {
             pingBundle = InternalBundleLoader.Instance.GetAssetBundle("ping");
         }
 
-        private void Awake()
+        protected void Awake()
         {
             image = GetComponentInChildren<Image>();
             image.color = Color.clear;
+            mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            if (mainPlayer == null)
+            {
+                Destroy(gameObject);
+                FikaPlugin.Instance.FikaLogger.LogError("Ping::Awake: Could not find MainPlayer!");
+            }
             Destroy(gameObject, FikaPlugin.PingTime.Value);
         }
 
-        private void Update()
+        protected void Update()
         {
-            if (CameraClass.Instance.OpticCameraManager.Boolean_0 && CameraClass.Instance.OpticCameraManager.CurrentOpticSight != null)
+            if (mainPlayer.HealthController.IsAlive && mainPlayer.ProceduralWeaponAnimation.IsAiming)
             {
-                image.color = Color.clear;
-                return;
+                if (mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic && !FikaPlugin.ShowPingDuringOptics.Value)
+                {
+                    image.color = Color.clear;
+                    return;
+                }
             }
 
             Camera camera = CameraClass.Instance.Camera;
