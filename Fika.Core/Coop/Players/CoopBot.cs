@@ -213,24 +213,21 @@ namespace Fika.Core.Coop.Players
             ActiveHealthController.SetDamageCoeff(0);
             Vector3 spawnPosition = Position;
             int connectedPeers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
-            float randomY = UnityEngine.Random.RandomRange(-9500, -10000);
+            float randomY = UnityEngine.Random.RandomRange(-500, -1000);
             DateTime start = DateTime.Now;
             Teleport(new(0, randomY, 0));
 
             while (loadedPlayers < connectedPeers && Math.Abs((start - DateTime.Now).TotalSeconds) < 30)
             {
                 yield return new WaitForSeconds(1);
-                Teleport(new(0, randomY, 0));
             }
 
-            // Wait a little bit longer just to make sure...
-            yield return new WaitForSeconds(2);
-
-            Teleport(new Vector3(spawnPosition.x, spawnPosition.y + 0.5f, spawnPosition.z));
-            yield return new WaitForSeconds(1);
-            ActiveHealthController.SetDamageCoeff(originalDamageCoeff);
+            Teleport(new Vector3(spawnPosition.x, spawnPosition.y + 1f, spawnPosition.z));
             AIData.BotOwner.BotState = EBotState.PreActive;
             isStarted = true;
+            yield return new WaitUntil(() => { return MovementContext.IsGrounded; });
+            FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}");
+            ActiveHealthController.SetDamageCoeff(originalDamageCoeff);
         }
 
         public override void OnDead(EDamageType damageType)
