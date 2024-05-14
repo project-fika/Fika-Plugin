@@ -226,7 +226,9 @@ namespace Fika.Core.Coop.Players
             AIData.BotOwner.BotState = EBotState.PreActive;
             isStarted = true;
             yield return new WaitUntil(() => { return MovementContext.IsGrounded; });
-            FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}");
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}"); 
+#endif
             ActiveHealthController.SetDamageCoeff(originalDamageCoeff);
         }
 
