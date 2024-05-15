@@ -76,7 +76,7 @@ namespace Fika.Core.Coop.Players
             InventoryControllerClass inventoryController = new CoopBotInventoryController(player, profile, true);
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
-                new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
+                new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
                 new CoopObservedStatisticsManager(), questController, achievementController, filter,
                 EVoipState.NotAvailable, aiControl, async: false);
 
@@ -219,23 +219,35 @@ namespace Fika.Core.Coop.Players
             Vector3 spawnPosition = Position;
             int connectedPeers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
             float randomY = UnityEngine.Random.RandomRange(-500, -1000);
-            DateTime start = DateTime.Now;
+            float start = 0f;
             Teleport(new(0, randomY, 0));
 
-            while (loadedPlayers < connectedPeers && Math.Abs((start - DateTime.Now).TotalSeconds) < 30)
+            while (loadedPlayers < connectedPeers && start < 30f)
             {
-                yield return new WaitForSeconds(1);
+                start += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
             }
 
             Teleport(new Vector3(spawnPosition.x, spawnPosition.y + 1f, spawnPosition.z));
             AIData.BotOwner.BotState = EBotState.PreActive;
             isStarted = true;
-            DateTime fallStart = DateTime.Now;
-            yield return new WaitUntil(() => { return MovementContext.IsGrounded || Math.Abs((fallStart - DateTime.Now).TotalSeconds) < 2; });
+            float fallStart = 0f;
+
+            while (!MovementContext.IsGrounded || fallStart < 5f)
+            {
+                fallStart += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+
+            if (!MovementContext.IsGrounded)
+            {
+                FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} was still not grounded after being loaded in! Forcing to be grounded.");
+                MovementContext.IsGrounded = true; 
+            }
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}"); 
 #endif
-            yield return new WaitForFixedUpdate();
+            yield return new WaitForEndOfFrame();
             ActiveHealthController.SetDamageCoeff(originalDamageCoeff);
         }
 
