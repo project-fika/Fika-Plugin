@@ -11,7 +11,6 @@ using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
@@ -382,7 +381,8 @@ namespace Fika.Core.Networking
 
                                 if (FikaPlugin.ShowNotifications.Value)
                                 {
-                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{playerToApply.Profile.Nickname}' has extracted.",
+                                    string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
+                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
                                                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                                 }
                             }
