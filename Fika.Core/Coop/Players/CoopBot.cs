@@ -180,6 +180,11 @@ namespace Fika.Core.Coop.Players
             {
                 dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
             }
+
+            if (FikaPlugin.DisableBotMetabolism.Value)
+            {
+                HealthController.DisableMetabolism();
+            }
         }
 
         public override void BtrInteraction()

@@ -218,6 +218,11 @@ namespace Fika.Core.Coop.Players
                 {
                     damageInfo.Damage *= FikaPlugin.ArmpitDamageMultiplier.Value;
                 }
+
+                if (bodyPartType is EBodyPart.Stomach)
+                {
+                    damageInfo.Damage *= FikaPlugin.StomachDamageMultiplier.Value;
+                }
             }
 
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
