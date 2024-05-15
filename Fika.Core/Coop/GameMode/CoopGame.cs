@@ -728,6 +728,8 @@ namespace Fika.Core.Coop.GameMode
                         ErrorScreen.EButtonType.OkButton, 15f, () =>
                         {
                             StopFromError(myPlayer.ProfileId, ExitStatus.Runner);
+                            PlayerLeftRequest playerLeftRequest = new(coopPlayer.ProfileId);
+                            FikaRequestHandler.RaidLeave(playerLeftRequest);
                         }, null);
                 });
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
