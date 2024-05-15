@@ -382,7 +382,8 @@ namespace Fika.Core.Networking
 
                                 if (FikaPlugin.ShowNotifications.Value)
                                 {
-                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{playerToApply.Profile.Nickname}' has extracted.",
+                                    string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
+                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
                                                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                                 }
                             }

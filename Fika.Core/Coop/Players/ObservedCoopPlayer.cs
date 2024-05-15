@@ -710,21 +710,25 @@ namespace Fika.Core.Coop.Players
             {
                 if (!IsObservedAI)
                 {
+                    string nickname = !string.IsNullOrEmpty(Profile.Info.MainProfileNickname) ? Profile.Info.MainProfileNickname : Profile.Nickname;
                     if (damageType != EDamageType.Undefined)
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{Profile.Nickname}' has died from '{("DamageType_" + damageType.ToString()).Localized()}'");
+                        NotificationManagerClass.DisplayWarningNotification($"Group member '{nickname}' has died from '{("DamageType_" + damageType.ToString()).Localized()}'");
                     }
                     else
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{Profile.Nickname}' has died");
+                        NotificationManagerClass.DisplayWarningNotification($"Group member '{nickname}' has died");
                     }
                 }
                 if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
                 {
                     if (LastAggressor is CoopPlayer aggressor)
                     {
+                        string aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
                         if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
-                            NotificationManagerClass.DisplayMessageNotification($"{LastAggressor.Profile.Nickname} killed boss {name}", iconType: EFT.Communications.ENotificationIconType.Friend);
+                        {
+                            NotificationManagerClass.DisplayMessageNotification($"{LastAggressor.Profile.Info.MainProfileNickname} killed boss {name}", iconType: EFT.Communications.ENotificationIconType.Friend);
+                        }
                     }
                 }
             }
