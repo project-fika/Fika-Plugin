@@ -229,6 +229,7 @@ namespace Fika.Core.Coop.Players
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}"); 
 #endif
+            yield return new WaitForFixedUpdate();
             ActiveHealthController.SetDamageCoeff(originalDamageCoeff);
         }
 
