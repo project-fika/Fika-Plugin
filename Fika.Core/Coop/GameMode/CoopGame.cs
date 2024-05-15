@@ -660,8 +660,8 @@ namespace Fika.Core.Coop.GameMode
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
-                GClass549.Config.CharacterController.ClientPlayerMode, () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
-                () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
+                GClass549.Config.CharacterController.ClientPlayerMode, getSensitivity,
+                getAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
@@ -1008,6 +1008,10 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogError("CoopGame::vmethod_4: Halloween controller could not be instantiated!");
                 }
+            }
+            if (GClass549.Config.FixedFrameRate > 0f)
+            {
+                FixedDeltaTime = 1f / GClass549.Config.FixedFrameRate;
             }
 
             bool isWinter = BackEndSession.IsWinter;
