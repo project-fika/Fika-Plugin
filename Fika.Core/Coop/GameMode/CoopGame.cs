@@ -280,7 +280,7 @@ namespace Fika.Core.Coop.GameMode
 
             CoopBot coopBot = (CoopBot)kvp.Value;
 
-            if (coopBot != null && coopBot.isStarted == false)
+            if (coopBot != null && coopBot.IsStarted == false)
             {
 #if DEBUG
                 Logger.LogWarning("Bot is not started, skipping");
@@ -290,7 +290,7 @@ namespace Fika.Core.Coop.GameMode
 
             WildSpawnType role = kvp.Value.Profile.Info.Settings.Role;
 
-            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
+            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != WildSpawnType.assault)
             {
                 // We skip all the bots that are not sptUsec, sptBear or assault. That means we never remove bosses, bossfollowers, and raiders
                 return true;
@@ -317,7 +317,7 @@ namespace Fika.Core.Coop.GameMode
 
             WildSpawnType role = profile.Info.Settings.Role;
             bool isSpecial = false;
-            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != EFT.WildSpawnType.assault)
+            if ((int)role != sptUsecValue && (int)role != sptBearValue && role != WildSpawnType.assault)
             {
 #if DEBUG
                 Logger.LogWarning($"Bot {profile.Info.Settings.Role} is a special bot.");
@@ -425,7 +425,7 @@ namespace Fika.Core.Coop.GameMode
 
         private bool TryDespawnFurthest(Profile profile, Vector3 position, CoopHandler coopHandler)
         {
-            String botKey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
+            string botKey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
 
             if (botKey == string.Empty)
             {

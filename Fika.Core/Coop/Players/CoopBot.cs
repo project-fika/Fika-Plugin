@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.Players
         /// </summary>
         public int loadedPlayers = 0;
         private FikaDynamicAI dynamicAi;
-        public bool isStarted = false;
+        public bool IsStarted = false;
 
         public static async Task<LocalPlayer> CreateBot(
             int playerId,
@@ -173,7 +173,7 @@ namespace Fika.Core.Coop.Players
             }
             else
             {
-                isStarted = true;
+                IsStarted = true;
             }
 
             if (FikaPlugin.DynamicAI.Value)
@@ -230,7 +230,7 @@ namespace Fika.Core.Coop.Players
 
             Teleport(new Vector3(spawnPosition.x, spawnPosition.y + 1f, spawnPosition.z));
             AIData.BotOwner.BotState = EBotState.PreActive;
-            isStarted = true;
+            IsStarted = true;
             float fallStart = 0f;
 
             while (!MovementContext.IsGrounded || fallStart < 5f)
