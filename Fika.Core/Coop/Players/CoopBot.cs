@@ -225,7 +225,8 @@ namespace Fika.Core.Coop.Players
             Teleport(new Vector3(spawnPosition.x, spawnPosition.y + 1f, spawnPosition.z));
             AIData.BotOwner.BotState = EBotState.PreActive;
             isStarted = true;
-            yield return new WaitUntil(() => { return MovementContext.IsGrounded; });
+            DateTime fallStart = DateTime.Now;
+            yield return new WaitUntil(() => { return MovementContext.IsGrounded || Math.Abs((fallStart - DateTime.Now).TotalSeconds) < 2; });
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}"); 
 #endif
@@ -320,19 +321,6 @@ namespace Fika.Core.Coop.Players
         public override void UpdateTick()
         {
             base.UpdateTick();
-
-            // Temp test to fix AI dying from hydration and energy...
-            /*if (ActiveHealthController.Energy.Current < 1)
-            {
-                logger($"Setting energy to 50 on {ProfileId}");
-                ActiveHealthController.ChangeEnergy(50);
-            }
-
-            if (ActiveHealthController.Hydration.Current < 1)
-            {
-                logger($"Setting hydration to 50 on {ProfileId}");
-                ActiveHealthController.ChangeHydration(50);
-            }*/
         }
 
         public override void OnDestroy()
