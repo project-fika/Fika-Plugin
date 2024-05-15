@@ -242,7 +242,7 @@ namespace Fika.Core.Coop.Players
             if (!MovementContext.IsGrounded)
             {
                 FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} was still not grounded after being loaded in! Forcing to be grounded.");
-                MovementContext.IsGrounded = true; 
+                MovementContext.IsGrounded = true;
             }
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}"); 

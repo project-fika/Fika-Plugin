@@ -585,7 +585,7 @@ namespace Fika.Core.Coop.GameMode
                 UpdateSpawnPointRequest body = new(spawnTogether ? spawnPoint.Id : "");
                 if (spawnTogether)
                 {
-                    Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}"); 
+                    Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}");
                 }
                 else
                 {
@@ -611,7 +611,7 @@ namespace Fika.Core.Coop.GameMode
                         {
                             spawnPoint = spawnPointObject;
                         }
-                    } 
+                    }
                 }
                 else
                 {

@@ -2,7 +2,6 @@
 
 using EFT;
 using EFT.HealthSystem;
-using EFT.UI;
 using Fika.Core.Coop.Players;
 
 namespace Fika.Core.Coop.ClientClasses

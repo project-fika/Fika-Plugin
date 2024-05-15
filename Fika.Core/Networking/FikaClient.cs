@@ -11,7 +11,6 @@ using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
