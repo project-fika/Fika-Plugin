@@ -150,7 +150,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = false;
 
-            InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, false);
+            InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, true);
 
             PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
             byte[] healthBytes = tempController.SerializeState();
@@ -278,7 +278,7 @@ namespace Fika.Core.Coop.Players
 
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
         {
-            /*if (damageInfo.Player == null)
+            if (damageInfo.Player == null)
             {
                 return;
             }
@@ -288,39 +288,11 @@ namespace Fika.Core.Coop.Players
                 return;
             }
 
-            if (damageInfo.HittedBallisticCollider != null)
-            {
-                BodyPartCollider bodyPartCollider = (BodyPartCollider)damageInfo.HittedBallisticCollider;
-                colliderType = bodyPartCollider.BodyPartColliderType;
-            }
-
-            PacketSender?.HealthPackets?.Enqueue(new()
-            {
-                ApplyDamageInfo = new()
-                {
-                    Damage = damageInfo.Damage,
-                    DamageType = damageInfo.DamageType,
-                    BodyPartType = bodyPartType,
-                    ColliderType = colliderType,
-                    Absorbed = absorbed,
-                    Direction = damageInfo.Direction,
-                    Point = damageInfo.HitPoint,
-                    PenetrationPower = damageInfo.PenetrationPower,
-                    BlockedBy = damageInfo.BlockedBy,
-                    DeflectedBy = damageInfo.DeflectedBy,
-                    SourceId = damageInfo.SourceId,
-                    ProfileId = damageInfo.Player.iPlayer.ProfileId
-                }
-            });
-
             LastAggressor = damageInfo.Player.iPlayer;
             LastDamagedBodyPart = bodyPartType;
             LastBodyPart = bodyPartType;
             LastDamageInfo = damageInfo;
             LastDamageType = damageInfo.DamageType;
-
-            // Run this to get weapon skill
-            ManageAggressor(damageInfo, bodyPartType, colliderType);*/
         }
 
         /*public override void ShotReactions(DamageInfo shot, EBodyPart bodyPart)
@@ -988,6 +960,29 @@ namespace Fika.Core.Coop.Players
                 observedFixedTime = fixedTime;
                 OcclusionDirty = true;
                 UpdateOcclusion();
+            }
+        }
+
+        public override void LandingAdjustments(float d)
+        {
+            // Do nothing
+        }
+
+        public new void CreateCompass()
+        {
+            bool compassInstantiated = Traverse.Create(this).Field("_compassInstantiated").GetValue<bool>();
+            if (!compassInstantiated)
+            {
+                Transform transform = Singleton<PoolManager>.Instance.CreateFromPool<Transform>(new ResourceKey
+                {
+                    path = "assets/content/weapons/additional_hands/item_compass.bundle"
+                });
+                transform.SetParent(PlayerBones.Ribcage.Original, false);
+                transform.localRotation = Quaternion.identity;
+                transform.localPosition = Vector3.zero;
+                method_29(transform.gameObject);
+                compassInstantiated = true;
+                return;
             }
         }
 

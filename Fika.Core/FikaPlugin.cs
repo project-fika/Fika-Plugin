@@ -27,6 +27,9 @@ using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 
@@ -47,26 +50,20 @@ namespace Fika.Core
         /// Stores the Instance of this Plugin
         /// </summary>
         public static FikaPlugin Instance;
-
         public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
-
         /// <summary>
         /// If any mod dependencies fail, show an error. This is a flag to say it has occurred.
         /// </summary>
         private bool ShownDependencyError { get; set; }
-
         /// <summary>
         /// This is the Official EFT Version defined by BSG
         /// </summary>
         public static string EFTVersionMajor { get; internal set; }
-
         public static string[] LoadedPlugins { get; private set; }
-
         public ManualLogSource FikaLogger { get => Logger; }
-
         public BotDifficulties BotDifficulties;
-
         public string Locale { get; private set; } = "en";
+        public string[] LocalIPs;
 
         public static Dictionary<string, string> RespectedPlayersList = new()
         {
@@ -126,6 +123,7 @@ namespace Fika.Core
         public static ConfigEntry<float> PingSize { get; set; }
         public static ConfigEntry<int> PingTime { get; set; }
         public static ConfigEntry<bool> PlayPingAnimation { get; set; }
+        public static ConfigEntry<bool> ShowPingDuringOptics { get; set; }
 
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
@@ -156,6 +154,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> NativeSockets { get; set; }
         public static ConfigEntry<string> ForceIP { get; set; }
         public static ConfigEntry<string> ForceBindIP { get; set; }
+        public static ConfigEntry<string> ForceBindIP2 { get; set; }
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
@@ -196,6 +195,7 @@ namespace Fika.Core
             new Minefield_method_2_Patch().Enable();
             new BotCacher().Enable();
             new InventoryScrollPatch().Enable();
+            new AbstractGame_InRaid_Patch().Enable();
 #if GOLDMASTER
             new TOSPatch().Enable();
 #endif
@@ -291,17 +291,19 @@ namespace Fika.Core
 
             // Coop | Custom
 
-            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 3 }));
+            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 2 }));
+            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 3 }));
 
-            PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+            PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+            ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false, new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Coop | Debug
 
@@ -325,7 +327,7 @@ namespace Fika.Core
 
             DespawnFurthest = Config.Bind("Performance | Max Bots", "Despawn Furthest", false, new ConfigDescription("When enforcing spawn limits, should the furthest bot be de-spawned instead of blocking the spawn. This will make for a much more active raid on a lower Max Bots count. Helpful for weaker PCs. Will only despawn pmcs and scavs. If you don't run a dynamic spawn mod, this will however quickly exhaust the spawns on the map, making the raid very dead instead.", tags: new ConfigurationManagerAttributes() { Order = 13 }));
 
-            DespawnMinimumDistance = Config.Bind("Performance | Max Bots", "Despawn Minimum Distance", 200.0f, new ConfigDescription("Don't despawn bots within this distance.", new AcceptableValueRange<float>(50f, 750f), new ConfigurationManagerAttributes() { Order = 12 }));
+            DespawnMinimumDistance = Config.Bind("Performance | Max Bots", "Despawn Minimum Distance", 200.0f, new ConfigDescription("Don't despawn bots within this distance.", new AcceptableValueRange<float>(50f, 3000f), new ConfigurationManagerAttributes() { Order = 12 }));
 
             MaxBotsFactory = Config.Bind("Performance | Max Bots", "Max Bots Factory", 0, new ConfigDescription("Max amount of bots that can be active at the same time on Factory. Useful if you have a weaker PC. Set to 0 to use vanilla limits.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 11 }));
 
@@ -353,7 +355,7 @@ namespace Fika.Core
 
             ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 5 }));
 
             AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 4 }));
 
@@ -368,6 +370,23 @@ namespace Fika.Core
             HeadDamageMultiplier = Config.Bind("Gameplay", "Head Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the head collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
             ArmpitDamageMultiplier = Config.Bind("Gameplay", "Armpit Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the armpits collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+        }
+
+        private string[] GetLocalAddresses()
+        {
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            List<string> ips = [];
+            ips.Add("Disabled");
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    ips.Add(ip.ToString());
+                }
+            }
+
+            LocalIPs = ips.Skip(1).ToArray();
+            return [.. ips];
         }
 
         private void DisableSPTPatches()

@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Components
         private ExfiltrationPoint[] exfiltrationPoints;
         private CarExtraction carExfil = null;
 
-        void Awake()
+        protected void Awake()
         {
             game = gameObject.GetComponent<CoopGame>();
             playerHandlers = [];
@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.Components
             carExfil = FindObjectOfType<CarExtraction>();
         }
 
-        void Update()
+        protected void Update()
         {
             if (exfiltrationPoints == null)
             {

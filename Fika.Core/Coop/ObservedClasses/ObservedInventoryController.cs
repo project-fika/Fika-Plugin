@@ -1,13 +1,6 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Comfort.Common;
-using Diz.LanguageExtensions;
-
-
-// © 2024 Lacyway All Rights Reserved
-
 using EFT;
-using EFT.InventoryLogic;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
@@ -41,7 +34,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return false;
         }
 
-        public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface338 operation, Callback callback)
+        /*public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface338 operation, Callback callback)
         {
             if (!succeed)
             {
@@ -54,6 +47,6 @@ namespace Fika.Core.Coop.ObservedClasses
                 return;
             }
             callback.Succeed();
-        }
+        }*/
     }
 }

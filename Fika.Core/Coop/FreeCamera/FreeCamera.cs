@@ -225,7 +225,7 @@ namespace Fika.Core.Coop.FreeCamera
             float movementSpeed = fastMode ? 20f : 2f;
             if (superFastMode)
             {
-                movementSpeed *= 3;
+                movementSpeed *= 8;
             }
 
             if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))

@@ -30,8 +30,7 @@ namespace Fika.Core.Coop.BotClasses
             packet.ItemControllerExecutePacket = new()
             {
                 CallbackId = operation.Id,
-                OperationBytes = opBytes,
-                InventoryId = ID
+                OperationBytes = opBytes
             };
 
             CoopBot.PacketSender?.InventoryPackets?.Enqueue(packet);

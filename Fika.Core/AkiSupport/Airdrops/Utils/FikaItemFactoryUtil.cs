@@ -24,10 +24,11 @@ namespace Aki.Custom.Airdrops.Utils
 
         public void BuildContainer(LootableContainer container, FikaAirdropConfigModel config, string dropType)
         {
-            var containerId = config.ContainerIds[dropType];
-            if (itemFactory.ItemTemplates.TryGetValue(containerId, out var template))
+            string containerId = config.ContainerIds[dropType];
+            if (itemFactory.ItemTemplates.TryGetValue(containerId, out ItemTemplate template))
             {
                 Item item = itemFactory.CreateItem(containerId, template._id, null);
+                item.Id = Singleton<GameWorld>.Instance.MainPlayer.GClass2761_0.NextId;
                 LootItem.CreateLootContainer(container, item, "CRATE", Singleton<GameWorld>.Instance);
             }
             else
@@ -69,7 +70,7 @@ namespace Aki.Custom.Airdrops.Utils
                 await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Local, resources, JobPriority.Immediate, null, PoolManager.DefaultCancellationToken);
             }
 
-            if (Singleton<FikaAirdropsManager>.Instantiated)
+            if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Singleton<FikaAirdropsManager>.Instance.ClientLootBuilt = true;
             }

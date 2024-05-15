@@ -25,7 +25,8 @@ namespace Aki.Custom.Airdrops.Patches
 
             if (gameWorld != null && points && _usableFlares.Any(x => x == flareCartridge.Template._id))
             {
-                gameWorld.gameObject.AddComponent<FikaAirdropsManager>().isFlareDrop = true;
+                FikaAirdropsManager airdropsManager = gameWorld.gameObject.AddComponent<FikaAirdropsManager>();
+                airdropsManager.isFlareDrop = true;
             }
         }
     }

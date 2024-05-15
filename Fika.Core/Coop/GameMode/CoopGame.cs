@@ -56,6 +56,8 @@ namespace Fika.Core.Coop.GameMode
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
 
+        public RaidSettings RaidSettings { get; private set; }
+
         //WildSpawnType for sptUsec and sptBear
         const int sptUsecValue = 47;
         const int sptBearValue = 48;
@@ -91,7 +93,8 @@ namespace Fika.Core.Coop.GameMode
 
         internal static CoopGame Create(InputTree inputTree, Profile profile, GameDateTime backendDateTime, InsuranceCompanyClass insurance, MenuUI menuUI,
             CommonUI commonUI, PreloaderUI preloaderUI, GameUI gameUI, LocationSettingsClass.Location location, TimeAndWeatherSettings timeAndWeather,
-            WavesSettings wavesSettings, EDateTime dateTime, Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue, ISession backEndSession, TimeSpan sessionTime)
+            WavesSettings wavesSettings, EDateTime dateTime, Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
+            ISession backEndSession, TimeSpan sessionTime, RaidSettings raidSettings)
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("Coop Game Mode");
             Logger.LogInfo("CoopGame::Create");
@@ -113,7 +116,7 @@ namespace Fika.Core.Coop.GameMode
             BossLocationSpawn[] bossSpawns = EFT.LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.GClass579 = GClass579.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
-            if (useCustomWeather)
+            if (useCustomWeather && MatchmakerAcceptPatches.IsServer)
             {
                 Logger.LogInfo("Custom weather enabled, initializing curves");
                 coopGame.SetupCustomWeather(timeAndWeather);
@@ -123,6 +126,8 @@ namespace Fika.Core.Coop.GameMode
 
             Singleton<IFikaGame>.Create(coopGame);
             FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
+
+            coopGame.RaidSettings = raidSettings;
 
             return coopGame;
         }
@@ -443,13 +448,19 @@ namespace Fika.Core.Coop.GameMode
 #endif
                 return false;
             }
-
             Player bot = Bots[botKey];
-
 #if DEBUG
             Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
 #endif
+            DespawnBot(coopHandler, bot);
+#if DEBUG
+            Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
+#endif
+            return true;
+        }
 
+        private void DespawnBot(CoopHandler coopHandler, Player bot)
+        {
             IBotGame botGame = Singleton<IBotGame>.Instance;
             BotOwner botOwner = bot.AIData.BotOwner;
 
@@ -458,13 +469,9 @@ namespace Fika.Core.Coop.GameMode
             BotUnspawn(botOwner);
             botOwner?.Dispose();
 
-            Bots.Remove(botKey);
             CoopPlayer coopPlayer = (CoopPlayer)bot;
             coopHandler.Players.Remove(coopPlayer.NetId);
-#if DEBUG
-            Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
-#endif
-            return true;
+            Bots.Remove(bot.ProfileId);
         }
 
         /// <summary>
@@ -653,8 +660,8 @@ namespace Fika.Core.Coop.GameMode
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
-                GClass549.Config.CharacterController.ClientPlayerMode, () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
-                () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
+                GClass549.Config.CharacterController.ClientPlayerMode, getSensitivity,
+                getAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
@@ -662,6 +669,15 @@ namespace Fika.Core.Coop.GameMode
             {
                 Logger.LogDebug($"{nameof(vmethod_2)}:Unable to find {nameof(CoopHandler)}");
                 await Task.Delay(5000);
+            }
+
+            if (MatchmakerAcceptPatches.IsServer)
+            {
+                if (RaidSettings.MetabolismDisabled)
+                {
+                    myPlayer.HealthController.DisableMetabolism();
+                    NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
+                }
             }
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
@@ -992,6 +1008,10 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogError("CoopGame::vmethod_4: Halloween controller could not be instantiated!");
                 }
+            }
+            if (GClass549.Config.FixedFrameRate > 0f)
+            {
+                FixedDeltaTime = 1f / GClass549.Config.FixedFrameRate;
             }
 
             bool isWinter = BackEndSession.IsWinter;
@@ -1594,7 +1614,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            if (Singleton<FikaAirdropsManager>.Instantiated)
+            if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Destroy(Singleton<FikaAirdropsManager>.Instance);
             }

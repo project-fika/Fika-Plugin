@@ -96,6 +96,7 @@ namespace Fika.Core.Networking
         TrainSync,
         ExfilCountdown,
         TraderServiceNotification,
-        DisposeBot
+        DisposeBot,
+        RemoveAirdropManager
     }
 }

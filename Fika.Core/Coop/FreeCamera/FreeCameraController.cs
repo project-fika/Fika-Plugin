@@ -235,7 +235,7 @@ namespace Fika.Core.Coop.FreeCamera
                 string text = FikaPlugin.ExtractKey.Value.MainKey.ToString();
                 if (FikaPlugin.ExtractKey.Value.Modifiers.Count() > 0)
                 {
-                    string modifiers = string.Join("+", FikaPlugin.ExtractKey.Value.Modifiers);
+                    string modifiers = string.Join(" + ", FikaPlugin.ExtractKey.Value.Modifiers);
                     text = modifiers + " + " + text;
                 }
                 extractText = FikaUIUtils.CreateOverlayText($"Press '{text}' to extract");
