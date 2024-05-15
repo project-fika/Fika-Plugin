@@ -99,9 +99,8 @@ namespace Fika.Core.Coop.Players
                 achievementsController.Init();
                 achievementsController.Run();
             }
-
-            IStatisticsManager statisticsManager = null;
-            statisticsManager = new CoopClientStatisticsManager(player.Profile);
+            
+            IStatisticsManager statisticsManager = new CoopClientStatisticsManager(player.Profile);
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),

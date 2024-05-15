@@ -21,7 +21,7 @@ namespace Fika.Core.AkiSupport.Overrides
 
         [PatchPostfix]
         private static void PatchPostfix(RaidSettingsWindow __instance, UiElementBlocker ____coopModeBlocker, List<CanvasGroup> ____weatherCanvasGroups,
-            UpdatableToggle ____randomTimeToggle, UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups)
+            UpdatableToggle ____randomTimeToggle, UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups, List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown)
         {
             // Always disable the Coop Mode checkbox
             ____coopModeBlocker.SetBlock(true, "Co-op is always enabled in Fika");
@@ -35,6 +35,26 @@ namespace Fika.Core.AkiSupport.Overrides
             {
                 canvasGroup.SetUnlockStatus(true, true);
             }
+
+            foreach (CanvasGroup canvasGroup in ____playersSpawnPlaceCanvasGroups)
+            {
+                canvasGroup.SetUnlockStatus(true, true);
+            }
+
+            // Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
+            List<BaseDropDownBox.Struct945> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field("list_0").GetValue<List<BaseDropDownBox.Struct945>>();
+            labelList.Clear();
+            labelList.Add(new()
+            {
+                Label = "Together",
+                Enabled = true
+            });
+            labelList.Add(new()
+            {
+                Label = "Random",
+                Enabled = true
+            });
+            ____playersSpawnPlaceDropdown.SetTextInternal("Together");
 
             instance = __instance;
 
