@@ -230,7 +230,12 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
-            if (damageInfo.Player != null & damageInfo.Player.iPlayer is CoopBot)
+            if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
+            {
+                return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+            }
+
+            if (damageInfo.Player != null && damageInfo.Player.iPlayer is CoopBot)
             {
                 return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
@@ -1333,7 +1338,8 @@ namespace Fika.Core.Coop.Players
                 PenetrationPower = packet.DamageInfo.PenetrationPower,
                 BlockedBy = packet.DamageInfo.BlockedBy,
                 DeflectedBy = packet.DamageInfo.DeflectedBy,
-                SourceId = packet.DamageInfo.SourceId
+                SourceId = packet.DamageInfo.SourceId,
+                ArmorDamage = packet.DamageInfo.ArmorDamage
             };
 
             if (!string.IsNullOrEmpty(packet.DamageInfo.ProfileId))

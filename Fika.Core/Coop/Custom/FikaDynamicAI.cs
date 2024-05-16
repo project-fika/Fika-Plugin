@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.Custom
 
         private void FixedUpdate()
         {
-            if (!bot.isStarted)
+            if (!bot.IsStarted)
             {
                 return;
             }
