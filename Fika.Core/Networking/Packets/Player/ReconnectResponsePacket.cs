@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
 {
     public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, float poseLevel, 
     bool isProne, WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes
-    , EquipmentClass equipment): INetSerializable
+    , EquipmentClass equipment, LootItemPositionClass[] items): INetSerializable
     {
         public int NetId = netId;
         public Vector3 Position = position;
@@ -22,6 +22,8 @@ namespace Fika.Core.Networking
         public int SmokeAmount;
         public GStruct34[] Smokes;
         public EquipmentClass Equipment;
+        public int ItemAmount;
+        public GClass1202 Items;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -75,6 +77,7 @@ namespace Fika.Core.Networking
             }
 
             Equipment = (EquipmentClass)reader.GetItem();
+            Items = reader.GetLocationItem();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -125,6 +128,11 @@ namespace Fika.Core.Networking
             }
 
             writer.PutItem(equipment);
+
+            if (items.Length > 0)
+            {
+                writer.PutLocationItem(items);
+            }
         }
     }
 }

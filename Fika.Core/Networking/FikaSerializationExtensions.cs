@@ -315,5 +315,21 @@ namespace Fika.Core.Networking
                 PlatformId = reader.GetShort()
             };
         }
+
+        public static void PutLocationItem(this NetDataWriter writer, LootItemPositionClass[] locationItem)
+        {
+			using MemoryStream memoryStream = new();
+			using BinaryWriter binaryWriter = new(memoryStream);
+			binaryWriter.Write(GClass1524.SerializeLootData(locationItem));
+			writer.PutByteArray(memoryStream.ToArray());
+		}
+
+        public static GClass1202 GetLocationItem(this NetDataReader reader)
+        {
+			using MemoryStream memoryStream = new(reader.GetByteArray());
+			using BinaryReader binaryReader = new(memoryStream);
+
+            return GClass1524.DeserializeLootData(Singleton<ItemFactory>.Instance, binaryReader.ReadEFTLootDataDescriptor());
+		}
     }
 }

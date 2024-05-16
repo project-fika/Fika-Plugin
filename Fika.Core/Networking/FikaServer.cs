@@ -204,10 +204,10 @@ namespace Fika.Core.Networking
             {
                 yield return null;
             }
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            ClientGameWorld ClientgameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
 
-            ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
-
-            while (string.IsNullOrEmpty(gameWorld.MainPlayer.Location))
+            while (string.IsNullOrEmpty(ClientgameWorld.MainPlayer.Location))
             {
                 yield return null;
             }
@@ -222,15 +222,18 @@ namespace Fika.Core.Networking
             WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState 
                 && x.DoorState != EDoorState.Interacting && x.DoorState != EDoorState.Interacting).ToArray();
 
-            WindowBreaker[] windows = gameWorld?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
+            WindowBreaker[] windows = ClientgameWorld?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
 
             LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
 
-            Throwable[] smokes = gameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
+            Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
 
-            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
+            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray();
+
+			ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
                 playerToUse.Transform.rotation, playerToUse.MovementContext.SmoothedPoseLevel, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes, 
-                playerToUse.Profile.Inventory.Equipment);
+                playerToUse.Profile.Inventory.Equipment, items);
+
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
 

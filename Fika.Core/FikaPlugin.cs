@@ -195,6 +195,7 @@ namespace Fika.Core
             new BotCacher().Enable();
             new InventoryScrollPatch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
+            new BaseLocalGame_method_6_Patch().Enable();
 #if GOLDMASTER
             new TOSPatch().Enable();
 #endif
