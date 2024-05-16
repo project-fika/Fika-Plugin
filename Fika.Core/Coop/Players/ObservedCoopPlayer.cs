@@ -1,5 +1,6 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using Aki.SinglePlayer.Patches.MainMenu;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
@@ -11,6 +12,7 @@ using EFT.Vaulting;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Networking;
@@ -278,6 +280,31 @@ namespace Fika.Core.Coop.Players
 
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
         {
+            if (damageInfo.DamageType == EDamageType.Landmine && MatchmakerAcceptPatches.IsServer)
+            {
+                PacketSender?.DamagePackets?.Enqueue(new()
+                {
+                    DamageInfo = new()
+                    {
+                        Damage = damageInfo.Damage,
+                        DamageType = damageInfo.DamageType,
+                        BodyPartType = bodyPartType,
+                        ColliderType = colliderType,
+                        Absorbed = 0f,
+                        Direction = damageInfo.Direction,
+                        Point = damageInfo.HitPoint,
+                        HitNormal = damageInfo.HitNormal,
+                        PenetrationPower = damageInfo.PenetrationPower,
+                        BlockedBy = damageInfo.BlockedBy,
+                        DeflectedBy = damageInfo.DeflectedBy,
+                        SourceId = damageInfo.SourceId,
+                        ArmorDamage = damageInfo.ArmorDamage
+                    }
+                });
+
+                return;
+            }
+
             if (damageInfo.Player == null)
             {
                 return;
@@ -324,11 +351,32 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
-            /*if (!IsObservedAI)
+            if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
             {
                 ShotReactions(damageInfo, bodyPartType);
+                PacketSender?.DamagePackets?.Enqueue(new()
+                {
+                    DamageInfo = new()
+                    {
+                        Damage = damageInfo.Damage,
+                        DamageType = damageInfo.DamageType,
+                        BodyPartType = bodyPartType,
+                        ColliderType = colliderType,
+                        ArmorPlateCollider = armorPlateCollider,
+                        Absorbed = 0f,
+                        Direction = damageInfo.Direction,
+                        Point = damageInfo.HitPoint,
+                        HitNormal = damageInfo.HitNormal,
+                        PenetrationPower = damageInfo.PenetrationPower,
+                        BlockedBy = damageInfo.BlockedBy,
+                        DeflectedBy = damageInfo.DeflectedBy,
+                        SourceId = damageInfo.SourceId,
+                        ArmorDamage = damageInfo.ArmorDamage
+                    }
+                });
+
                 return null;
-            }*/
+            }
 
             if (damageInfo.Player != null)
             {
@@ -374,7 +422,7 @@ namespace Fika.Core.Coop.Players
                         colliderType = bodyPartCollider.BodyPartColliderType;
                     }
 
-                    PacketSender?.HealthPackets?.Enqueue(new()
+                    PacketSender?.DamagePackets?.Enqueue(new()
                     {
                         DamageInfo = new()
                         {
@@ -391,6 +439,7 @@ namespace Fika.Core.Coop.Players
                             BlockedBy = damageInfo.BlockedBy,
                             DeflectedBy = damageInfo.DeflectedBy,
                             SourceId = damageInfo.SourceId,
+                            ArmorDamage = damageInfo.ArmorDamage,
                             ProfileId = damageInfo.Player.iPlayer.ProfileId
                         }
                     });
@@ -433,7 +482,7 @@ namespace Fika.Core.Coop.Players
                         colliderType = bodyPartCollider.BodyPartColliderType;
                     }
 
-                    PacketSender?.HealthPackets?.Enqueue(new()
+                    PacketSender?.DamagePackets?.Enqueue(new()
                     {
                         DamageInfo = new()
                         {
@@ -450,6 +499,7 @@ namespace Fika.Core.Coop.Players
                             BlockedBy = damageInfo.BlockedBy,
                             DeflectedBy = damageInfo.DeflectedBy,
                             SourceId = damageInfo.SourceId,
+                            ArmorDamage = damageInfo.ArmorDamage,
                             ProfileId = damageInfo.Player.iPlayer.ProfileId
                         }
                     });

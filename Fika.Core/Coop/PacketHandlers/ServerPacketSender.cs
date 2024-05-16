@@ -26,7 +26,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public FikaClient Client { get; set; }
         public NetDataWriter Writer { get; set; } = new();
         public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
-        public Queue<DamagePacket> HealthPackets { get; set; } = new(50);
+        public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
@@ -81,12 +81,12 @@ namespace Fika.Core.Coop.PacketHandlers
                     Server?.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            int healthPackets = HealthPackets.Count;
+            int healthPackets = DamagePackets.Count;
             if (healthPackets > 0)
             {
                 for (int i = 0; i < healthPackets; i++)
                 {
-                    DamagePacket healthPacket = HealthPackets.Dequeue();
+                    DamagePacket healthPacket = DamagePackets.Dequeue();
                     healthPacket.NetId = player.NetId;
 
                     Writer?.Reset();
@@ -195,7 +195,7 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             Writer = null;
             FirearmPackets.Clear();
-            HealthPackets.Clear();
+            DamagePackets.Clear();
             InventoryPackets.Clear();
             CommonPlayerPackets.Clear();
             HealthSyncPackets.Clear();

@@ -651,6 +651,7 @@ namespace Fika.Core.Networking
             public string SourceId;
             public string AmmoId;
             public int FragmentIndex;
+            public float ArmorDamage = 0f;
             public string ProfileId;
 
             public static ApplyShotPacket Deserialize(NetDataReader reader)
@@ -672,6 +673,7 @@ namespace Fika.Core.Networking
                     SourceId = reader.GetString(),
                     AmmoId = reader.GetString(),
                     FragmentIndex = reader.GetInt(),
+                    ArmorDamage = reader.GetFloat(),
                     ProfileId = reader.GetString()
                 };
                 return packet;
@@ -693,6 +695,7 @@ namespace Fika.Core.Networking
                 writer.Put(packet.SourceId);
                 writer.Put(packet.AmmoId);
                 writer.Put(packet.FragmentIndex);
+                writer.Put(packet.ArmorDamage);
                 writer.Put(packet.ProfileId);
             }
         }
