@@ -681,15 +681,21 @@ namespace Fika.Core.Coop.GameMode
             if (MatchmakerAcceptPatches.IsReconnect)
             {
                 ReconnectRequestPacket reconnectPacket = new(ProfileId);
-                Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
-                Logger.LogError($"reconnectRequest packet sent for netId: {playerId} with profileId: {ProfileId}");
-
-                do
+                
+                int retryCount = 0;
+                while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
                 {
-                    Logger.LogError("Waiting for ReconnectResponse packet from Host...");
-                    await Task.Delay(100);
+                    Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                    Logger.LogError($"reconnectRequest packet sent for netId: {playerId} with profileId: {ProfileId}");
+                    await Task.Delay(3000);
+                    retryCount++;
                 }
-                while (MatchmakerAcceptPatches.ReconnectPacket == null);
+
+                if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
+                {
+                    throw new Exception("ReconnectRequestPacket was not received from Host!");
+                    // TODO: Make this way more elegant and return to mainmenu
+                }
 
                 PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
                 RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
