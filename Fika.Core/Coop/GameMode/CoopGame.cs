@@ -713,10 +713,9 @@ namespace Fika.Core.Coop.GameMode
             
             if (MatchmakerAcceptPatches.IsReconnect)
             {
-                // TODO: get pose and leaning from server
-                myPlayer.MovementContext.SmoothedPoseLevel = MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel;
-                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
+                myPlayer.MovementContext.SetPoseLevel(MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel, true);
+                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
                 myPlayer.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
             }
 
