@@ -923,7 +923,7 @@ namespace Fika.Core.Coop.GameMode
                 NetDataWriter writer = new();
                 writer.Reset();
                 client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-                numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
+                numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1); // TODO: this needed?
                 do
                 {
                     numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
