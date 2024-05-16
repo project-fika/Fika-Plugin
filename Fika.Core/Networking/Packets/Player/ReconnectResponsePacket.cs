@@ -1,16 +1,18 @@
+using EFT;
 using EFT.Interactive;
 using LiteNetLib.Utils;
 using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, float poseLevel, 
+    public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, EPlayerPose playerPose, float poseLevel, 
     bool isProne, WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes
     , EquipmentClass equipment, LootItemPositionClass[] items): INetSerializable
     {
-        public int NetId = netId;
-        public Vector3 Position = position;
-        public Quaternion Rotation = rotation;
+        public int NetId;
+        public Vector3 Position;
+        public Quaternion Rotation;
+        public EPlayerPose PlayerPose;
         public float PoseLevel;
         public bool IsProne = isProne;
         public int InteractiveObjectAmount;
@@ -30,6 +32,7 @@ namespace Fika.Core.Networking
             NetId = reader.GetInt();
             Position = reader.GetVector3();
             Rotation = reader.GetQuaternion();
+            PlayerPose = (EPlayerPose)reader.GetByte();
             PoseLevel = reader.GetFloat();
             IsProne = reader.GetBool();
             InteractiveObjectAmount = reader.GetInt();
@@ -82,9 +85,10 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put(NetId);
-            writer.Put(Position);
-            writer.Put(Rotation);
+            writer.Put(netId);
+            writer.Put(position);
+            writer.Put(rotation);
+            writer.Put((byte)playerPose);
             writer.Put(poseLevel);
             writer.Put(IsProne);
             writer.Put(interactiveObjects.Length);

@@ -231,7 +231,7 @@ namespace Fika.Core.Networking
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1200 is null).ToArray();
 
 			ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
-                playerToUse.Transform.rotation, playerToUse.MovementContext.SmoothedPoseLevel, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes, 
+                playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes, 
                 playerToUse.Profile.Inventory.Equipment, items);
 
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
