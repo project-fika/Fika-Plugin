@@ -450,7 +450,7 @@ namespace Fika.Core.Coop.Components
                 position,
                 Quaternion.identity,
                 "Player",
-                isAI == true ? $"Bot_{netId}" : $"Player_{profile.Nickname}_",
+                isAI == true ? $"Bot_{netId}_" : $"Player_{profile.Nickname}_",
                 EPointOfView.ThirdPerson,
                 profile,
                 isAI,
