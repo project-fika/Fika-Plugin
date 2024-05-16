@@ -88,7 +88,9 @@ namespace Fika.Core.Coop.Components
         {
             CoopHandler coopGC = GetCoopHandler();
             if (coopGC == null)
-                return null;
+            {
+                return MatchmakerAcceptPatches.GetGroupId();
+            }
 
             return coopGC.ServerId;
         }

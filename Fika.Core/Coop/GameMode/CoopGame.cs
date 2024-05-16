@@ -213,7 +213,7 @@ namespace Fika.Core.Coop.GameMode
 
         private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
         {
-            List<CoopPlayer> humanPlayers = new List<CoopPlayer>();
+            List<CoopPlayer> humanPlayers = new();
 
             // Grab all players
             foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -498,7 +498,7 @@ namespace Fika.Core.Coop.GameMode
                         Destroy(fikaStartButton);
                     }
 
-                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
+                    SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     await FikaRequestHandler.UpdateSetStatus(status);
 
                     Singleton<FikaServer>.Instance.ReadyClients++;
@@ -515,7 +515,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (MatchmakerAcceptPatches.IsServer)
                 {
-                    SetStatusModel status = new SetStatusModel(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
+                    SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     await FikaRequestHandler.UpdateSetStatus(status);
 
                     do
@@ -581,25 +581,43 @@ namespace Fika.Core.Coop.GameMode
         {
             if (MatchmakerAcceptPatches.IsServer)
             {
-                UpdateSpawnPointRequest body = new UpdateSpawnPointRequest(spawnPoint.Id);
-                Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}");
+                bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
+                UpdateSpawnPointRequest body = new(spawnTogether ? spawnPoint.Id : "");
+                if (spawnTogether)
+                {
+                    Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}");
+                }
+                else
+                {
+                    Logger.LogInfo("Using random spawn points!");
+                    NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
+                }
                 await FikaRequestHandler.UpdateSpawnPoint(body);
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
-                SpawnPointRequest body = new SpawnPointRequest();
+                SpawnPointRequest body = new();
                 SpawnPointResponse response = await FikaRequestHandler.RaidSpawnPoint(body);
                 string name = response.SpawnPoint;
 
-                Logger.LogInfo($"Retrieved Spawn Point '{name}' from server");
-
-                Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field("dictionary_0").GetValue<Dictionary<ISpawnPoint, SpawnPointMarker>>();
-                foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
+                if (!string.IsNullOrEmpty(name))
                 {
-                    if (spawnPointObject.Id == name)
+                    Logger.LogInfo($"Retrieved Spawn Point '{name}' from server");
+
+                    Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field("dictionary_0").GetValue<Dictionary<ISpawnPoint, SpawnPointMarker>>();
+                    foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
                     {
-                        spawnPoint = spawnPointObject;
+                        if (spawnPointObject.Id == name)
+                        {
+                            spawnPoint = spawnPointObject;
+                        }
                     }
+                }
+                else
+                {
+                    Logger.LogInfo("Spawn Point was empty, selecting random.");
+                    NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
+                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 }
             }
         }
@@ -654,7 +672,7 @@ namespace Fika.Core.Coop.GameMode
                 if (spawnPoint == null)
                 {
                     Logger.LogWarning("SpawnPoint was null after retrieving it from the server!");
-                    SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 }
             }
 
@@ -680,8 +698,8 @@ namespace Fika.Core.Coop.GameMode
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
-                GClass549.Config.CharacterController.ClientPlayerMode, () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
-                () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
+                GClass549.Config.CharacterController.ClientPlayerMode, getSensitivity,
+                getAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
@@ -713,7 +731,7 @@ namespace Fika.Core.Coop.GameMode
 
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
-            PlayerSpawnRequest body = new PlayerSpawnRequest(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId());
+            PlayerSpawnRequest body = new(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId());
             await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             myPlayer.SpawnPoint = spawnPoint;
@@ -740,6 +758,8 @@ namespace Fika.Core.Coop.GameMode
                         ErrorScreen.EButtonType.OkButton, 15f, () =>
                         {
                             StopFromError(myPlayer.ProfileId, ExitStatus.Runner);
+                            PlayerLeftRequest playerLeftRequest = new(coopPlayer.ProfileId);
+                            FikaRequestHandler.RaidLeave(playerLeftRequest);
                         }, null);
                 });
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
@@ -934,7 +954,7 @@ namespace Fika.Core.Coop.GameMode
 
         private async Task SetStatus(LocalPlayer myPlayer, LobbyEntry.ELobbyStatus status)
         {
-            SetStatusModel statusBody = new SetStatusModel(myPlayer.ProfileId, status);
+            SetStatusModel statusBody = new(myPlayer.ProfileId, status);
             await FikaRequestHandler.UpdateSetStatus(statusBody);
             Logger.LogInfo("Setting game status to: " + status.ToString());
         }
@@ -1040,6 +1060,10 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogError("CoopGame::vmethod_4: Halloween controller could not be instantiated!");
                 }
+            }
+            if (GClass549.Config.FixedFrameRate > 0f)
+            {
+                FixedDeltaTime = 1f / GClass549.Config.FixedFrameRate;
             }
 
             bool isWinter = BackEndSession.IsWinter;
@@ -1518,7 +1542,7 @@ namespace Fika.Core.Coop.GameMode
             string exitName = null;
             float delay = 0f;
 
-            PlayerLeftRequest body = new PlayerLeftRequest(profileId);
+            PlayerLeftRequest body = new(profileId);
             FikaRequestHandler.RaidLeave(body);
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))

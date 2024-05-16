@@ -197,6 +197,12 @@ namespace Fika.Core.Coop.ObservedClasses
                             break;
                     }
 
+                    if (string.IsNullOrEmpty(packet.ShotInfoPacket.AmmoTemplate))
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::HandleFirearmPacket: AmmoTemplate was null or empty!");
+                        return;
+                    }
+
                     Weapon.MalfState.MalfunctionedAmmo = (BulletClass)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
                     if (weaponPrefab != null)
                     {

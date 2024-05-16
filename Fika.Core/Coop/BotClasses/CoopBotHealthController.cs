@@ -6,10 +6,10 @@ using Fika.Core.Coop.Players;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public sealed class CoopClientHealthController(Profile.GClass1756 healthInfo, Player player, InventoryControllerClass inventoryController, SkillManager skillManager, bool aiHealth)
+    public sealed class CoopBotHealthController(Profile.GClass1756 healthInfo, Player player, InventoryControllerClass inventoryController, SkillManager skillManager, bool aiHealth)
         : PlayerHealthController(healthInfo, player, inventoryController, skillManager, aiHealth)
     {
-        private readonly CoopPlayer coopPlayer = (CoopPlayer)player;
+        private readonly CoopBot coopBot = (CoopBot)player;
         public override bool _sendNetworkSyncPackets
         {
             get
@@ -22,11 +22,11 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (packet.SyncType == GStruct346.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
-                coopPlayer?.PacketSender?.HealthSyncPackets.Enqueue(coopPlayer.SetupDeathPacket(packet));
+                coopBot?.PacketSender?.HealthSyncPackets.Enqueue(coopBot.SetupDeathPacket(packet));
                 return;
             }
 
-            coopPlayer?.PacketSender?.HealthSyncPackets.Enqueue(new(coopPlayer.NetId)
+            coopBot?.PacketSender?.HealthSyncPackets.Enqueue(new(coopBot.NetId)
             {
                 Packet = packet
             });

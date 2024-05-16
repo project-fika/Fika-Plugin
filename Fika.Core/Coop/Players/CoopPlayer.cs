@@ -100,8 +100,7 @@ namespace Fika.Core.Coop.Players
                 achievementsController.Run();
             }
 
-            IStatisticsManager statisticsManager = null;
-            statisticsManager = new CoopClientStatisticsManager(player.Profile);
+            IStatisticsManager statisticsManager = new CoopClientStatisticsManager(player.Profile);
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
@@ -218,6 +217,11 @@ namespace Fika.Core.Coop.Players
                 if (colliderType is EBodyPartColliderType.RightSideChestUp or EBodyPartColliderType.LeftSideChestUp)
                 {
                     damageInfo.Damage *= FikaPlugin.ArmpitDamageMultiplier.Value;
+                }
+
+                if (bodyPartType is EBodyPart.Stomach)
+                {
+                    damageInfo.Damage *= FikaPlugin.StomachDamageMultiplier.Value;
                 }
             }
 

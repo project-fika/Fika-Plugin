@@ -60,31 +60,31 @@ namespace Fika.Core.Networking
 
         protected void Start()
         {
-            packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-            packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
-            packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnFirearmPacketReceived);
-            packetProcessor.SubscribeNetSerializable<DamagePacket, NetPeer>(OnDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializable<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
-            packetProcessor.SubscribeNetSerializable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializable<InformationPacket, NetPeer>(OnInformationPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AirdropPacket, NetPeer>(OnAirdropPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AirdropLootPacket, NetPeer>(OnAirdropLootPacketReceived);
-            packetProcessor.SubscribeNetSerializable<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializable<GenericPacket, NetPeer>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializable<ExfiltrationPacket, NetPeer>(OnExfiltrationPacketReceived);
-            packetProcessor.SubscribeNetSerializable<WeatherPacket, NetPeer>(OnWeatherPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRPacket, NetPeer>(OnBTRPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<DeathPacket, NetPeer>(OnDeathPacketReceived);
-            packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
-            packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
-            packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AssignNetIdPacket, NetPeer>(OnAssignNetIdPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SyncNetIdPacket, NetPeer>(OnSyncNetIdPacketReceived);
+            packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
+            packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
+            packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnFirearmPacketReceived);
+            packetProcessor.SubscribeNetSerializable<DamagePacket>(OnDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializable<InventoryPacket>(OnInventoryPacketReceived);
+            packetProcessor.SubscribeNetSerializable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
+            packetProcessor.SubscribeNetSerializable<AllCharacterRequestPacket>(OnAllCharacterRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializable<InformationPacket>(OnInformationPacketReceived);
+            packetProcessor.SubscribeNetSerializable<AirdropPacket>(OnAirdropPacketReceived);
+            packetProcessor.SubscribeNetSerializable<AirdropLootPacket>(OnAirdropLootPacketReceived);
+            packetProcessor.SubscribeNetSerializable<HealthSyncPacket>(OnHealthSyncPacketReceived);
+            packetProcessor.SubscribeNetSerializable<GenericPacket>(OnGenericPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ExfiltrationPacket>(OnExfiltrationPacketReceived);
+            packetProcessor.SubscribeNetSerializable<WeatherPacket>(OnWeatherPacketReceived);
+            packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
+            packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
+            packetProcessor.SubscribeNetSerializable<DeathPacket>(OnDeathPacketReceived);
+            packetProcessor.SubscribeNetSerializable<MinePacket>(OnMinePacketReceived);
+            packetProcessor.SubscribeNetSerializable<BorderZonePacket>(OnBorderZonePacketReceived);
+            packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializable<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
-            packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket, NetPeer>(OnReconnectResponsePacketReceived);
-            packetProcessor.SubscribeNetSerializable<SessionSettingsPacket, NetPeer>(OnSessionSettingsPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SessionSettingsPacket>(OnSessionSettingsPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket>(OnReconnectResponsePacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -119,7 +119,7 @@ namespace Fika.Core.Networking
             ClientReady = true;
         }
 
-        private void OnSessionSettingsPacketReceived(SessionSettingsPacket packet, NetPeer peer)
+        private void OnSessionSettingsPacketReceived(SessionSettingsPacket packet)
         {
             if (!packet.IsRequest)
             {
@@ -139,7 +139,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet, NetPeer peer)
+        private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet)
         {
             if (MatchmakerAcceptPatches.IsReconnect)
             {
@@ -174,7 +174,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet, NetPeer peer)
+        private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet)
         {
             if (MatchmakerAcceptPatches.IsReconnect)
             {
@@ -205,7 +205,7 @@ namespace Fika.Core.Networking
             Players[packet.NetId] = MyPlayer;
         }
 
-        private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet, NetPeer peer)
+        private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet)
         {
             MatchmakerAcceptPatches.IsReconnect = true;
             MatchmakerAcceptPatches.ReconnectPacket = packet;
@@ -266,7 +266,7 @@ namespace Fika.Core.Networking
 
         }
 
-        private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
+        private void OnSendCharacterPacketReceived(SendCharacterPacket packet)
         {
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
@@ -274,7 +274,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnBorderZonePacketReceived(BorderZonePacket packet, NetPeer peer)
+        private void OnBorderZonePacketReceived(BorderZonePacket packet)
         {
             if (Singleton<GameWorld>.Instantiated)
             {
@@ -300,7 +300,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnMinePacketReceived(MinePacket packet, NetPeer peer)
+        private void OnMinePacketReceived(MinePacket packet)
         {
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
@@ -317,7 +317,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnDeathPacketReceived(DeathPacket packet, NetPeer peer)
+        private void OnDeathPacketReceived(DeathPacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
@@ -325,7 +325,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
+        private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
@@ -333,12 +333,12 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnBTRPacketReceived(BTRPacket packet, NetPeer peer)
+        private void OnBTRPacketReceived(BTRPacket packet)
         {
             CoopHandler.clientBTR?.btrPackets.Enqueue(packet);
         }
 
-        private void OnWeatherPacketReceived(WeatherPacket packet, NetPeer peer)
+        private void OnWeatherPacketReceived(WeatherPacket packet)
         {
             if (!packet.IsRequest)
             {
@@ -353,7 +353,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnExfiltrationPacketReceived(ExfiltrationPacket packet, NetPeer peer)
+        private void OnExfiltrationPacketReceived(ExfiltrationPacket packet)
         {
             if (!packet.IsRequest)
             {
@@ -440,7 +440,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
+        private void OnGenericPacketReceived(GenericPacket packet)
         {
             switch (packet.PacketType)
             {
@@ -458,7 +458,8 @@ namespace Fika.Core.Networking
 
                                 if (FikaPlugin.ShowNotifications.Value)
                                 {
-                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{playerToApply.Profile.Nickname}' has extracted.",
+                                    string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
+                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
                                                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                                 }
                             }
@@ -548,7 +549,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnHealthSyncPacketReceived(HealthSyncPacket packet, NetPeer peer)
+        private void OnHealthSyncPacketReceived(HealthSyncPacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
@@ -556,7 +557,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnAirdropLootPacketReceived(AirdropLootPacket packet, NetPeer peer)
+        private void OnAirdropLootPacketReceived(AirdropLootPacket packet)
         {
             if (Singleton<FikaAirdropsManager>.Instance != null)
             {
@@ -568,7 +569,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnAirdropPacketReceived(AirdropPacket packet, NetPeer peer)
+        private void OnAirdropPacketReceived(AirdropPacket packet)
         {
             if (Singleton<FikaAirdropsManager>.Instance != null)
             {
@@ -595,7 +596,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnInformationPacketReceived(InformationPacket packet, NetPeer peer)
+        private void OnInformationPacketReceived(InformationPacket packet)
         {
             if (!packet.IsRequest)
             {
@@ -612,7 +613,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
+        private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet)
         {
             if (!packet.IsRequest)
             {
@@ -642,7 +643,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet, NetPeer peer)
+        private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
@@ -650,7 +651,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnInventoryPacketReceived(InventoryPacket packet, NetPeer peer)
+        private void OnInventoryPacketReceived(InventoryPacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
@@ -658,7 +659,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnDamagePacketReceived(DamagePacket packet, NetPeer peer)
+        private void OnDamagePacketReceived(DamagePacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
@@ -666,7 +667,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnFirearmPacketReceived(WeaponPacket packet, NetPeer peer)
+        private void OnFirearmPacketReceived(WeaponPacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
@@ -674,7 +675,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnGameTimerPacketReceived(GameTimerPacket packet, NetPeer peer)
+        private void OnGameTimerPacketReceived(GameTimerPacket packet)
         {
             CoopHandler coopHandler = CoopHandler.GetCoopHandler();
             if (coopHandler == null)
@@ -682,31 +683,28 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            if (MatchmakerAcceptPatches.IsClient)
+            TimeSpan sessionTime = new(packet.Tick);
+
+            if (coopHandler.LocalGameInstance is CoopGame coopGame)
             {
-                TimeSpan sessionTime = new(packet.Tick);
-
-                if (coopHandler.LocalGameInstance is CoopGame coopGame)
+                GameTimerClass gameTimer = coopGame.GameTimer;
+                if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
                 {
-                    GameTimerClass gameTimer = coopGame.GameTimer;
-                    if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
+                    if (gameTimer.PastTime.TotalSeconds < 3)
                     {
-                        if (gameTimer.PastTime.TotalSeconds < 3)
-                        {
-                            return;
-                        }
-
-                        TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
-
-                        gameTimer.ChangeSessionTime(timeRemain);
-
-                        Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
+                        return;
                     }
+
+                    TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
+
+                    gameTimer.ChangeSessionTime(timeRemain);
+
+                    Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
                 }
             }
         }
 
-        private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)
+        private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {

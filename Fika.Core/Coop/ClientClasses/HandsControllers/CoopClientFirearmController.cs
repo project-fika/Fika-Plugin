@@ -446,7 +446,8 @@ namespace Fika.Core.Coop.ClientClasses
                     IsPrimaryActive = true,
                     ShotType = shotType,
                     AmmoAfterShot = Item.GetCurrentMagazineCount(),
-                    Overheat = overheat
+                    Overheat = overheat,
+                    AmmoTemplate = ammo.TemplateId
                 }
             });
 
