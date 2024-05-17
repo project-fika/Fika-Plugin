@@ -95,6 +95,7 @@ namespace Fika.Core.Coop.Custom
             bot.AIData.BotOwner.ShootData.EndShoot();
             bot.AIData.BotOwner.ShootData.SetCanShootByState(false);
             bot.AIData.BotOwner.DecisionQueue.Clear();
+            bot.AIData.BotOwner.PatrollingData.Pause();
             bot.AIData.BotOwner.Memory.GoalEnemy = null;
             bot.gameObject.SetActive(false);
         }
@@ -104,9 +105,10 @@ namespace Fika.Core.Coop.Custom
 #if DEBUG
             logger.LogWarning($"Enabling {bot.gameObject.name}");
 #endif
+            bot.gameObject.SetActive(true);
             bot.AIData.BotOwner.BotState = EBotState.Active;
             bot.AIData.BotOwner.ShootData.SetCanShootByState(true);
-            bot.gameObject.SetActive(true);
+            bot.AIData.BotOwner.PatrollingData.Unpause();
         }
 
         private void CheckForPlayers(CoopBot bot)

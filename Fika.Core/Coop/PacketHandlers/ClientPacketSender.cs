@@ -19,6 +19,7 @@ namespace Fika.Core.Coop.PacketHandlers
     {
         private CoopPlayer player;
 
+        public bool Enabled { get; set; } = true;
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
         public NetDataWriter Writer { get; set; } = new();
@@ -28,7 +29,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 
-        private void Awake()
+        protected void Awake()
         {
             player = GetComponent<CoopPlayer>();
             Client = Singleton<FikaClient>.Instance;
@@ -37,7 +38,7 @@ namespace Fika.Core.Coop.PacketHandlers
             StartCoroutine(SyncWeather());
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
             if (player == null || Writer == null)
             {
@@ -60,7 +61,7 @@ namespace Fika.Core.Coop.PacketHandlers
             }
         }
 
-        private void Update()
+        protected void Update()
         {
             int firearmPackets = FirearmPackets.Count;
             if (firearmPackets > 0)

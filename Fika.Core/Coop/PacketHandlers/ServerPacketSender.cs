@@ -22,6 +22,7 @@ namespace Fika.Core.Coop.PacketHandlers
     {
         private CoopPlayer player;
 
+        public bool Enabled { get; set; } = true;
         public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
         public FikaClient Client { get; set; }
         public NetDataWriter Writer { get; set; } = new();
@@ -33,18 +34,18 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private ManualLogSource logger;
 
-        private void Awake()
+        protected void Awake()
         {
             logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
             player = GetComponent<CoopPlayer>();
         }
 
-        private void Start()
+        protected void Start()
         {
             StartCoroutine(SendTrainTime());
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
             if (player == null || Writer == null)
             {
@@ -67,7 +68,7 @@ namespace Fika.Core.Coop.PacketHandlers
             }
         }
 
-        private void Update()
+        protected void Update()
         {
             int firearmPackets = FirearmPackets.Count;
             if (firearmPackets > 0)

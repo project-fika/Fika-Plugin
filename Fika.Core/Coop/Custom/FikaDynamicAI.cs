@@ -43,15 +43,16 @@ namespace Fika.Core.Coop.Custom
                 switch (FikaPlugin.DynamicAIRate.Value)
                 {
                     case FikaPlugin.DynamicAIRates.Low:
-                        resetCount = 300;
+                        resetCount = 600;
                         break;
                     case FikaPlugin.DynamicAIRates.Medium:
-                        resetCount = 150;
+                        resetCount = 300;
                         break;
                     case FikaPlugin.DynamicAIRates.High:
-                        resetCount = 75;
+                        resetCount = 120;
                         break;
                     default:
+                        resetCount = 300;
                         break;
                 }
             }
@@ -86,6 +87,7 @@ namespace Fika.Core.Coop.Custom
 
         private void DeactivateBot()
         {
+            bot.PacketSender.Enabled = false;
             botOwner.BotState = EBotState.NonActive;
             botOwner.ShootData.EndShoot();
             botOwner.ShootData.SetCanShootByState(false);
@@ -95,6 +97,7 @@ namespace Fika.Core.Coop.Custom
 
         private void ActivateBot()
         {
+            bot.PacketSender.Enabled = true;
             botOwner.BotState = EBotState.Active;
             botOwner.ShootData.SetCanShootByState(true);
         }
