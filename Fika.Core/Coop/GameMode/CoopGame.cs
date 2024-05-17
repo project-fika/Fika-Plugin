@@ -367,9 +367,10 @@ namespace Fika.Core.Coop.GameMode
                 SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = profile }, true, true, position, netId);
                 Singleton<FikaServer>.Instance?.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
 
-                await WaitForPlayersToLoadBotProfile(netId, profile);
-
-                Logger.LogInfo("Await complete!");
+                if (server.NetServer.ConnectedPeersCount > 0)
+                {
+                    await WaitForPlayersToLoadBotProfile(netId, profile); 
+                }
 
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
                    "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Manual,
@@ -427,7 +428,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-
             CoopBot coopBot = (CoopBot)localPlayer;
             coopBot.NetId = netId;
             coopHandler.Players.Add(coopBot.NetId, coopBot);
@@ -450,10 +450,12 @@ namespace Fika.Core.Coop.GameMode
         private async Task WaitForPlayersToLoadBotProfile(int netId, Profile profile)
         {
             botQueue.Add(netId, 0);
+            int waitTime = 0;
             int connectedPeers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
 
-            while (botQueue[netId] < connectedPeers)
+            while (botQueue[netId] < connectedPeers || waitTime < 60) // ~15 second failsafe
             {
+                waitTime++;
                 await Task.Delay(250);
             }
 
