@@ -194,6 +194,7 @@ namespace Fika.Core.Networking
 
         private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
         {
+            // [CWX]
             serverLogger.LogError($"Player Wanting to reconnect {packet.ProfileId}");
             StartCoroutine(SyncClientToHost(packet, peer));
         }

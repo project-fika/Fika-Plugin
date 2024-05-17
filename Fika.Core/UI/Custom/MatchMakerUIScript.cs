@@ -300,6 +300,15 @@ namespace Fika.Core.UI.Custom
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+                    if (entry.Status == LobbyEntry.ELobbyStatus.REJOIN)
+                    {
+                        // [CWX]
+                        MatchmakerAcceptPatches.IsReconnect = true;
+                    }
+                    else
+                    {
+                        MatchmakerAcceptPatches.IsReconnect = false;
+                    }
                     StartCoroutine(JoinMatch(ProfileId, server.name, button));
                 });
 
@@ -395,8 +404,7 @@ namespace Fika.Core.UI.Custom
                         tooltipArea.enabled = true;
                         tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));                        
                         break;
-                    case LobbyEntry.ELobbyStatus.REJOIN:
-                        MatchmakerAcceptPatches.IsReconnect = true;
+                    case LobbyEntry.ELobbyStatus.REJOIN:                        
                         tooltipTextGetter = new()
                         {
                             TooltipText = "Click to Rejoin raid."

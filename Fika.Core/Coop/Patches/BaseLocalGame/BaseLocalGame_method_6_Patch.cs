@@ -15,7 +15,7 @@ namespace Fika.Core.Coop.Patches
         [PatchPrefix]
         public static bool PatchPrefix(ref LocationSettingsClass.Location location)
         {
-            if (MatchmakerAcceptPatches.IsReconnect)
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
 				location.Loot = MatchmakerAcceptPatches.ReconnectPacket.Value.Items;
             }

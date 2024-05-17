@@ -141,7 +141,8 @@ namespace Fika.Core.Networking
 
         private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet)
         {
-            if (MatchmakerAcceptPatches.IsReconnect)
+            // [CWX]
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
                 FikaPlugin.Instance.FikaLogger.LogInfo($"OnSyncNetIdPacketReceived: Client is reconnecting, ignore Sync.");
                 return;
@@ -176,7 +177,7 @@ namespace Fika.Core.Networking
 
         private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet)
         {
-            if (MatchmakerAcceptPatches.IsReconnect)
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
                 FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Client is reconnecting, ignore assignment.");
                 return;
@@ -207,6 +208,7 @@ namespace Fika.Core.Networking
 
         private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet)
         {
+            // [CWX]
             MatchmakerAcceptPatches.IsReconnect = true;
             MatchmakerAcceptPatches.ReconnectPacket = packet;
 
@@ -215,6 +217,7 @@ namespace Fika.Core.Networking
 
         public IEnumerator SyncClientToHost(ReconnectResponsePacket packet)
         {
+            // [CWX]
             while (!Singleton<GameWorld>.Instantiated)
             {
                 yield return null;

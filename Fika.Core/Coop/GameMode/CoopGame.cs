@@ -664,6 +664,10 @@ namespace Fika.Core.Coop.GameMode
             {
                 spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 await SendOrReceiveSpawnPoint();
+                // [CWX] after disconnect, and trying to host, make sure this is set back to defaults
+                // TODO: move working out if reconnect to earlier on, to mitigate issues hosting your own and joining a different game
+                MatchmakerAcceptPatches.IsReconnect = false;
+                MatchmakerAcceptPatches.ReconnectPacket = null;
             }
 
             if (MatchmakerAcceptPatches.IsClient)
@@ -676,27 +680,31 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
+            // [CWX]
             Vector3 PosToSpawn = spawnPoint.Position;
             Quaternion RotToSpawn = spawnPoint.Rotation;
-            if (MatchmakerAcceptPatches.IsReconnect)
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
                 ReconnectRequestPacket reconnectPacket = new(ProfileId);
+                MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Sending Reconnect Request...");
                 
                 int retryCount = 0;
                 while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
                 {
                     Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
-                    Logger.LogError($"reconnectRequest packet sent for netId: {playerId} with profileId: {ProfileId}");
+                    MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Request Sent... {retryCount + 1}");
                     await Task.Delay(3000);
                     retryCount++;
                 }
 
                 if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
                 {
-                    throw new Exception("ReconnectRequestPacket was not received from Host!");
-                    // TODO: Make this way more elegant and return to mainmenu
+                    MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Failed to Reconnect...");
+                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("Network Error", "[EXPERIMENTAL] Unable to reconnect to the host. Please try again after returning to main menu.", 
+                        ErrorScreen.EButtonType.OkButton, 10f, ReconnectFailed, ReconnectFailed);
                 }
 
+                MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Reconnecting to host...");
                 PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
                 RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
                 profile.Inventory.Equipment = MatchmakerAcceptPatches.ReconnectPacket.Value.Equipment;
@@ -717,7 +725,8 @@ namespace Fika.Core.Coop.GameMode
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
             
-            if (MatchmakerAcceptPatches.IsReconnect)
+            // [CWX]
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
                 myPlayer.MovementContext.SetPoseLevel(MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel, true);
@@ -837,6 +846,12 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.ActiveHealthController.DiedEvent += MainPlayerDied;
 
             return myPlayer;
+        }
+
+        private void ReconnectFailed()
+        {
+            ClientAppUtils.GetMainApp().method_48().HandleExceptions();
+            Logger.LogError($"Failed to reconnect to the host. Returning to main menu...");
         }
 
         private void MainPlayerDied(EDamageType obj)
@@ -1424,6 +1439,7 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogInfo("CoopGame::Stop");
 
+            // [CWX]
             if (MatchmakerAcceptPatches.IsReconnect)
             {
                 // game ended, reset these values

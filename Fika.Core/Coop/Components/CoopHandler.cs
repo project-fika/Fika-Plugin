@@ -365,6 +365,7 @@ namespace Fika.Core.Coop.Components
 
             if (!spawnObject.IsAlive)
             {
+                // [CWX]
                 otherPlayer.OnDead(EDamageType.Undefined);
             }
 
