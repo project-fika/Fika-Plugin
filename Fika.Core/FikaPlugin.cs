@@ -26,9 +26,10 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
@@ -383,19 +384,39 @@ namespace Fika.Core
 
         private string[] GetLocalAddresses()
         {
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
             List<string> ips = [];
             ips.Add("Disabled");
-            foreach (IPAddress ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    ips.Add(ip.ToString());
-                }
-            }
+            ips.Add("0.0.0.0");
 
-            LocalIPs = ips.Skip(1).ToArray();
-            return [.. ips];
+            try
+            {                
+                foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)
+                    {
+                        if (!ip.IsDnsEligible)
+                        {
+                            continue;
+                        }
+
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            string stringIp = ip.Address.ToString();
+                            if (stringIp != "127.0.0.1")
+                            {
+                                ips.Add(stringIp);
+                            }
+                        }
+                    }
+                }
+
+                LocalIPs = ips.Skip(1).ToArray();
+                return [.. ips];
+            }
+            catch (Exception)
+            {
+                return [.. ips];
+            }
         }
 
         private void DisableSPTPatches()
