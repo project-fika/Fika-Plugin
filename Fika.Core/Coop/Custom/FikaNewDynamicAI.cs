@@ -34,7 +34,7 @@ namespace Fika.Core.Coop.Custom
                 FikaPlugin.DynamicAIRates.Medium => 300,
                 FikaPlugin.DynamicAIRates.High => 120,
                 _ => 300,
-            };            
+            };
 
             spawner = Singleton<IBotGame>.Instance.BotsController.BotSpawner;
             if (spawner == null)
@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.Custom
                 }
             }
         }
-        
+
         public void AddHumans()
         {
             foreach (CoopPlayer player in coopHandler.Players.Values)

@@ -9,7 +9,6 @@ using EFT.Bots;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
-using EFT.HealthSystem;
 using EFT.InputSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
@@ -17,10 +16,8 @@ using EFT.UI;
 using EFT.UI.BattleTimer;
 using EFT.UI.Screens;
 using EFT.Weather;
-using Fika.Core.Coop.BotClasses;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
@@ -41,7 +38,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -200,7 +196,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     await Task.Delay(100);
                 }
-                Logger.LogInfo("FikaServer has started!");                
+                Logger.LogInfo("FikaServer has started!");
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
@@ -431,10 +427,10 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            
+
             CoopBot coopBot = (CoopBot)localPlayer;
             coopBot.NetId = netId;
-            coopHandler.Players.Add(coopBot.NetId, coopBot);            
+            coopHandler.Players.Add(coopBot.NetId, coopBot);
 
             return localPlayer;
         }

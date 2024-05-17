@@ -1,6 +1,5 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.SinglePlayer.Patches.MainMenu;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
