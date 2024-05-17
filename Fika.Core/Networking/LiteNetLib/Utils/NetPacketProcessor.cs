@@ -277,7 +277,14 @@ namespace LiteNetLib.Utils
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                reference.Deserialize(reader);
+                try
+                {
+                    reference.Deserialize(reader);
+                }
+                catch
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError("Error when deserializing " + nameof(reference) + " packet.");
+                }
                 onReceive(reference);
             };
         }
