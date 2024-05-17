@@ -369,7 +369,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (server.NetServer.ConnectedPeersCount > 0)
                 {
-                    await WaitForPlayersToLoadBotProfile(netId, profile); 
+                    await WaitForPlayersToLoadBotProfile(netId); 
                 }
 
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
@@ -447,15 +447,21 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        private async Task WaitForPlayersToLoadBotProfile(int netId, Profile profile)
+        private async Task WaitForPlayersToLoadBotProfile(int netId)
         {
             botQueue.Add(netId, 0);
-            int waitTime = 0;
+            DateTime start = DateTime.Now;
             int connectedPeers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
 
-            while (botQueue[netId] < connectedPeers || waitTime < 60) // ~15 second failsafe
+            while (botQueue[netId] < connectedPeers)
             {
-                waitTime++;
+                if (start.Subtract(DateTime.Now).TotalSeconds >= 30) // ~30 second failsafe
+                {
+                    Logger.LogWarning("WaitForPlayersToLoadBotProfile: Took too long to receive all packets!");
+                    botQueue.Remove(netId);
+                    return;
+                }
+
                 await Task.Delay(250);
             }
 

@@ -376,7 +376,7 @@ namespace Fika.Core.Networking
             else if (packet.PacketType == EPackageType.LoadBot)
             {
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-                coopGame.IncreaseLoadedPlayers(packet.NetId);
+                coopGame.IncreaseLoadedPlayers(packet.BotNetId);
 
                 return;
             }
