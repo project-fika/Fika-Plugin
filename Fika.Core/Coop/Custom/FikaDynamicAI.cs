@@ -40,21 +40,13 @@ namespace Fika.Core.Coop.Custom
                     Destroy(this);
                 }
 
-                switch (FikaPlugin.DynamicAIRate.Value)
+                resetCount = FikaPlugin.DynamicAIRate.Value switch
                 {
-                    case FikaPlugin.DynamicAIRates.Low:
-                        resetCount = 600;
-                        break;
-                    case FikaPlugin.DynamicAIRates.Medium:
-                        resetCount = 300;
-                        break;
-                    case FikaPlugin.DynamicAIRates.High:
-                        resetCount = 120;
-                        break;
-                    default:
-                        resetCount = 300;
-                        break;
-                }
+                    FikaPlugin.DynamicAIRates.Low => 600,
+                    FikaPlugin.DynamicAIRates.Medium => 300,
+                    FikaPlugin.DynamicAIRates.High => 120,
+                    _ => 300,
+                };
             }
             else
             {
