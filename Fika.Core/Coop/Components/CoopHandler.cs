@@ -68,12 +68,16 @@ namespace Fika.Core.Coop.Components
 
         public static CoopHandler GetCoopHandler()
         {
-            if (CoopHandler.CoopHandlerParent == null)
+            if (CoopHandlerParent == null)
+            {
                 return null;
+            }
 
             CoopHandler coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             if (coopHandler != null)
+            {
                 return coopHandler;
+            }
 
             return null;
         }
