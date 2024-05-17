@@ -35,7 +35,6 @@ namespace Fika.Core.Coop.Players
         /// </summary>
         public int loadedPlayers = 0;
         private FikaDynamicAI dynamicAi;
-        public bool IsStarted = false;
 
         public static async Task<LocalPlayer> CreateBot(
             int playerId,
@@ -164,15 +163,6 @@ namespace Fika.Core.Coop.Players
             PacketSender = gameObject.AddComponent<BotPacketSender>();
             PacketReceiver = gameObject.AddComponent<PacketReceiver>();
 
-            if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0)
-            {
-                StartCoroutine(WaitForPlayersToLoadBot());
-            }
-            else
-            {
-                IsStarted = true;
-            }
-
             if (FikaPlugin.DynamicAI.Value)
             {
                 dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
@@ -206,46 +196,6 @@ namespace Fika.Core.Coop.Players
             handler.process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.weapon, flag);
             handler.confirmCallback = new(handler.SendPacket);
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
-        }
-
-        private IEnumerator WaitForPlayersToLoadBot()
-        {
-            float originalDamageCoeff = ActiveHealthController.DamageCoeff;
-            AIData.BotOwner.Disable();
-            ActiveHealthController.SetDamageCoeff(0);
-            Vector3 spawnPosition = Position;
-            int connectedPeers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
-            float randomY = UnityEngine.Random.RandomRange(-500, -1000);
-            float start = 0f;
-            Teleport(new(0, randomY, 0));
-
-            while (loadedPlayers < connectedPeers && start < 30f)
-            {
-                start += Time.deltaTime;
-                yield return null;
-            }
-
-            Teleport(new Vector3(spawnPosition.x, spawnPosition.y + 1f, spawnPosition.z));
-            AIData.BotOwner.BotState = EBotState.PreActive;            
-            float fallStart = 0f;
-
-            while (!MovementContext.IsGrounded || fallStart < 5f)
-            {
-                fallStart += Time.deltaTime;
-                yield return null;
-            }
-
-            if (!MovementContext.IsGrounded)
-            {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} was still not grounded after being loaded in! Forcing to be grounded.");
-                MovementContext.IsGrounded = true;
-            }
-#if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogWarning($"{gameObject.name} is now grounded, started at Y: {randomY}, now at {Position.ToStringVerbose()}"); 
-#endif
-            yield return new WaitForEndOfFrame();
-            ActiveHealthController.SetDamageCoeff(originalDamageCoeff);
-            IsStarted = true;
         }
 
         public override void OnDead(EDamageType damageType)

@@ -122,11 +122,6 @@ namespace Fika.Core.Coop.Custom
                 }
             }
 
-            if (!bot.IsStarted)
-            {
-                return;
-            }
-
             if (!bot.HealthController.IsAlive)
             {
                 return;

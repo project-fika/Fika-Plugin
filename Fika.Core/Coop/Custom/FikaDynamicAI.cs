@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Custom
         private BotOwner botOwner;
         private List<CoopPlayer> humanPlayers;
 
-        private void Start()
+        protected void Start()
         {
             humanPlayers = [];
 
@@ -63,13 +63,8 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
-            if (!bot.IsStarted)
-            {
-                return;
-            }
-
             fpsCounter++;
 
             if (fpsCounter % resetCount == 0)
