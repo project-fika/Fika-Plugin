@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -205,7 +206,9 @@ namespace Fika.Core
             DisableSPTPatches();
             EnableOverridePatches();
 
-            Logger.LogInfo($"Fika is loaded!");
+            string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
+
+            Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
 
             // Store all loaded plugins (mods) to improve compatibility
             List<string> tempPluginInfos = [];
