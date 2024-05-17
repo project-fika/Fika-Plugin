@@ -88,10 +88,7 @@ namespace Fika.Core.Coop.Players
             };
             player.AggressorFound = false;
             player._animators[0].enabled = true;
-            if (!player.IsYourPlayer)
-            {
-                player._armsUpdateQueue = EUpdateQueue.Update;
-            }
+            player._armsUpdateQueue = EUpdateQueue.Update;
 
             return player;
         }
