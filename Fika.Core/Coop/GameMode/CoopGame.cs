@@ -18,6 +18,7 @@ using EFT.UI.Screens;
 using EFT.Weather;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
@@ -195,7 +196,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     await Task.Delay(100);
                 }
-                Logger.LogInfo("FikaServer has started!");
+                Logger.LogInfo("FikaServer has started!");                
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
@@ -213,7 +214,7 @@ namespace Fika.Core.Coop.GameMode
 
         private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
         {
-            List<CoopPlayer> humanPlayers = new();
+            List<CoopPlayer> humanPlayers = [];
 
             // Grab all players
             foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -498,6 +499,9 @@ namespace Fika.Core.Coop.GameMode
                         Destroy(fikaStartButton);
                     }
 
+                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                    newDynamicAI?.AddHumans();*/
+
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     await FikaRequestHandler.UpdateSetStatus(status);
 
@@ -545,6 +549,9 @@ namespace Fika.Core.Coop.GameMode
                         writer.Reset();
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
                     }
+
+                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                    newDynamicAI?.AddHumans();*/
                 }
                 else if (MatchmakerAcceptPatches.IsClient)
                 {
@@ -996,6 +1003,8 @@ namespace Fika.Core.Coop.GameMode
                 {
                     botsController_0.BotSpawner.SetMaxBots(limits);
                 }
+
+                //gameObject.AddComponent<FikaNewDynamicAI>();
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
@@ -1610,6 +1619,12 @@ namespace Fika.Core.Coop.GameMode
 
                 Singleton<FikaServer>.Instance?.NetServer.Stop();
                 Singleton<FikaServer>.TryRelease(Singleton<FikaServer>.Instance);
+
+                /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                if (newDynamicAI != null)
+                {
+                    Destroy(newDynamicAI);
+                }*/
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
