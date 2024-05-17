@@ -225,18 +225,17 @@ namespace Fika.Core.Coop.Players
             while (loadedPlayers < connectedPeers && start < 30f)
             {
                 start += Time.deltaTime;
-                yield return new WaitForEndOfFrame();
+                yield return null;
             }
 
             Teleport(new Vector3(spawnPosition.x, spawnPosition.y + 1f, spawnPosition.z));
-            AIData.BotOwner.BotState = EBotState.PreActive;
-            IsStarted = true;
+            AIData.BotOwner.BotState = EBotState.PreActive;            
             float fallStart = 0f;
 
             while (!MovementContext.IsGrounded || fallStart < 5f)
             {
                 fallStart += Time.deltaTime;
-                yield return new WaitForEndOfFrame();
+                yield return null;
             }
 
             if (!MovementContext.IsGrounded)
@@ -249,6 +248,7 @@ namespace Fika.Core.Coop.Players
 #endif
             yield return new WaitForEndOfFrame();
             ActiveHealthController.SetDamageCoeff(originalDamageCoeff);
+            IsStarted = true;
         }
 
         public override void OnDead(EDamageType damageType)
