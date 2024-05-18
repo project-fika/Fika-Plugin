@@ -14,6 +14,7 @@ namespace Fika.Core.Coop.PacketHandlers
     {
         private CoopPlayer player;
 
+        public bool Enabled { get; set; } = true;
         public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
         public FikaClient Client { get; set; }
         public NetDataWriter Writer { get; set; } = new();
@@ -23,13 +24,19 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 
-        private void Awake()
+        protected void Awake()
         {
             player = GetComponent<CoopPlayer>();
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
+            if (!Enabled)
+            {
+                player.LastDirection = Vector2.zero;
+                return;
+            }
+
             if (player == null || Writer == null)
             {
                 return;
@@ -48,7 +55,7 @@ namespace Fika.Core.Coop.PacketHandlers
             player.LastDirection = Vector2.zero; // Bots give a constant input for some odd reason, resetting on FixedUpdate should be ok from my testing and does not cause sliding for clients
         }
 
-        private void Update()
+        protected void Update()
         {
             int firearmPackets = FirearmPackets.Count;
             if (firearmPackets > 0)

@@ -55,6 +55,7 @@ namespace Fika.Core.Coop.GameMode
         public bool forceStart = false;
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
+        private Dictionary<int, int> botQueue = [];
 
         public RaidSettings RaidSettings { get; private set; }
 
@@ -213,7 +214,7 @@ namespace Fika.Core.Coop.GameMode
 
         private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
         {
-            List<CoopPlayer> humanPlayers = new();
+            List<CoopPlayer> humanPlayers = [];
 
             // Grab all players
             foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -280,7 +281,7 @@ namespace Fika.Core.Coop.GameMode
 
             CoopBot coopBot = (CoopBot)kvp.Value;
 
-            if (coopBot != null && coopBot.IsStarted == false)
+            if (coopBot != null)
             {
 #if DEBUG
                 Logger.LogWarning("Bot is not started, skipping");
@@ -299,7 +300,7 @@ namespace Fika.Core.Coop.GameMode
             return false;
         }
 
-        private async Task<LocalPlayer> CreatePhysicalBot(Profile profile, Vector3 position)
+        private async Task<LocalPlayer> CreateBot(Profile profile, Vector3 position)
         {
 #if DEBUG
             Logger.LogWarning($"Creating bot {profile.Info.Settings.Role} at {position}");
@@ -311,8 +312,8 @@ namespace Fika.Core.Coop.GameMode
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                Logger.LogDebug($"{nameof(CreatePhysicalBot)}:Unable to find {nameof(CoopHandler)}");
-                await Task.Delay(5000);
+                Logger.LogDebug($"{nameof(CreateBot)}:Unable to find {nameof(CoopHandler)}");
+                return null;
             }
 
             WildSpawnType role = profile.Info.Settings.Role;
@@ -344,6 +345,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
+            int netId = 1000;
             LocalPlayer localPlayer;
 
             if (!Status.IsRunned())
@@ -358,6 +360,17 @@ namespace Fika.Core.Coop.GameMode
             {
                 int num = 999 + Bots.Count;
                 profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
+
+                FikaServer server = Singleton<FikaServer>.Instance;
+                netId = server.PopNetId();
+
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = profile }, true, true, position, netId);
+                Singleton<FikaServer>.Instance?.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+
+                if (server.NetServer.ConnectedPeersCount > 0)
+                {
+                    await WaitForPlayersToLoadBotProfile(netId); 
+                }
 
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
                    "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Manual,
@@ -392,7 +405,9 @@ namespace Fika.Core.Coop.GameMode
                             {
                                 Item item = items[i];
                                 if (item == backpack)
+                                {
                                     continue;
+                                }
 
                                 item.SpawnedInSession = true;
                             }
@@ -403,7 +418,9 @@ namespace Fika.Core.Coop.GameMode
                 if (Singleton<GameWorld>.Instance != null)
                 {
                     if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == localPlayer.ProfileId))
+                    {
                         Singleton<GameWorld>.Instance.RegisterPlayer(localPlayer);
+                    }
                 }
                 else
                 {
@@ -411,16 +428,44 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-
-            FikaServer server = Singleton<FikaServer>.Instance;
-            int netId = server.PopNetId();
-            CoopPlayer coopPlayer = (CoopPlayer)localPlayer;
-            coopPlayer.NetId = netId;
-            coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = localPlayer.Profile }, localPlayer.HealthController.IsAlive, true, localPlayer.Transform.position, netId);
-            Singleton<FikaServer>.Instance?.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+            CoopBot coopBot = (CoopBot)localPlayer;
+            coopBot.NetId = netId;
+            coopHandler.Players.Add(coopBot.NetId, coopBot);
 
             return localPlayer;
+        }
+
+        public void IncreaseLoadedPlayers(int netId)
+        {
+            if (botQueue.ContainsKey(netId))
+            {
+                botQueue[netId]++;
+            }
+            else
+            {
+                Logger.LogError($"IncreaseLoadedPlayers: could not find netId {netId}!");
+            }
+        }
+
+        private async Task WaitForPlayersToLoadBotProfile(int netId)
+        {
+            botQueue.Add(netId, 0);
+            DateTime start = DateTime.Now;
+            int connectedPeers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
+
+            while (botQueue[netId] < connectedPeers)
+            {
+                if (start.Subtract(DateTime.Now).TotalSeconds >= 30) // ~30 second failsafe
+                {
+                    Logger.LogWarning("WaitForPlayersToLoadBotProfile: Took too long to receive all packets!");
+                    botQueue.Remove(netId);
+                    return;
+                }
+
+                await Task.Delay(250);
+            }
+
+            botQueue.Remove(netId);
         }
 
         private bool TryDespawnFurthest(Profile profile, Vector3 position, CoopHandler coopHandler)
@@ -498,6 +543,9 @@ namespace Fika.Core.Coop.GameMode
                         Destroy(fikaStartButton);
                     }
 
+                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                    newDynamicAI?.AddHumans();*/
+
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     await FikaRequestHandler.UpdateSetStatus(status);
 
@@ -545,6 +593,9 @@ namespace Fika.Core.Coop.GameMode
                         writer.Reset();
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
                     }
+
+                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                    newDynamicAI?.AddHumans();*/
                 }
                 else if (MatchmakerAcceptPatches.IsClient)
                 {
@@ -930,7 +981,7 @@ namespace Fika.Core.Coop.GameMode
 
                     if (client.ServerConnection == null && connectionAttempts == 5)
                     {
-                        Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the server. Make sure ports are forwarded and/or UPnP is enabled and supported.");
+                        Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. Make sure ports are forwarded and/or UPnP is enabled and supported.");
                     }
                 }
 
@@ -998,7 +1049,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 BotsPresets profileCreator = new(BackEndSession, wavesSpawnScenario_0.SpawnWaves, GClass579.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1467_0, false);
 
-                GClass813 botCreator = new(this, profileCreator, CreatePhysicalBot);
+                GClass813 botCreator = new(this, profileCreator, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 
                 bool enableWaves = controllerSettings.BotAmount == EBotAmount.Horde;
@@ -1048,12 +1099,14 @@ namespace Fika.Core.Coop.GameMode
                 {
                     botsController_0.BotSpawner.SetMaxBots(limits);
                 }
+
+                //gameObject.AddComponent<FikaNewDynamicAI>();
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
                 BotsPresets profileCreator = new(BackEndSession, [], [], [], false);
 
-                GClass813 botCreator = new(this, profileCreator, CreatePhysicalBot);
+                GClass813 botCreator = new(this, profileCreator, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 
                 // Setting this to an empty array stops the client from downloading bots
@@ -1671,6 +1724,12 @@ namespace Fika.Core.Coop.GameMode
 
                 Singleton<FikaServer>.Instance?.NetServer.Stop();
                 Singleton<FikaServer>.TryRelease(Singleton<FikaServer>.Instance);
+
+                /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                if (newDynamicAI != null)
+                {
+                    Destroy(newDynamicAI);
+                }*/
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {

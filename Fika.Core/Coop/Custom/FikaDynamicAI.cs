@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Custom
         private BotOwner botOwner;
         private List<CoopPlayer> humanPlayers;
 
-        private void Start()
+        protected void Start()
         {
             humanPlayers = [];
 
@@ -40,20 +40,13 @@ namespace Fika.Core.Coop.Custom
                     Destroy(this);
                 }
 
-                switch (FikaPlugin.DynamicAIRate.Value)
+                resetCount = FikaPlugin.DynamicAIRate.Value switch
                 {
-                    case FikaPlugin.DynamicAIRates.Low:
-                        resetCount = 300;
-                        break;
-                    case FikaPlugin.DynamicAIRates.Medium:
-                        resetCount = 150;
-                        break;
-                    case FikaPlugin.DynamicAIRates.High:
-                        resetCount = 75;
-                        break;
-                    default:
-                        break;
-                }
+                    FikaPlugin.DynamicAIRates.Low => 600,
+                    FikaPlugin.DynamicAIRates.Medium => 300,
+                    FikaPlugin.DynamicAIRates.High => 120,
+                    _ => 300,
+                };
             }
             else
             {
@@ -62,13 +55,8 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
-            if (!bot.IsStarted)
-            {
-                return;
-            }
-
             fpsCounter++;
 
             if (fpsCounter % resetCount == 0)
@@ -86,6 +74,7 @@ namespace Fika.Core.Coop.Custom
 
         private void DeactivateBot()
         {
+            bot.PacketSender.Enabled = false;
             botOwner.BotState = EBotState.NonActive;
             botOwner.ShootData.EndShoot();
             botOwner.ShootData.SetCanShootByState(false);
@@ -95,6 +84,7 @@ namespace Fika.Core.Coop.Custom
 
         private void ActivateBot()
         {
+            bot.PacketSender.Enabled = true;
             botOwner.BotState = EBotState.Active;
             botOwner.ShootData.SetCanShootByState(true);
         }

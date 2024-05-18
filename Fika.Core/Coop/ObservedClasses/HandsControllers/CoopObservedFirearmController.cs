@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.ObservedClasses
         public CoopPlayer coopPlayer;
         bool triggerPressed = false;
         bool needsReset = false;
-        float lastFireTime = Time.time;
+        float lastFireTime = 0f;
         public override bool IsTriggerPressed => triggerPressed;
         private float overlapCounter = 0f;
         private float aimMovementSpeed = 1f;

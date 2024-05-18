@@ -68,12 +68,16 @@ namespace Fika.Core.Coop.Components
 
         public static CoopHandler GetCoopHandler()
         {
-            if (CoopHandler.CoopHandlerParent == null)
+            if (CoopHandlerParent == null)
+            {
                 return null;
+            }
 
             CoopHandler coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             if (coopHandler != null)
+            {
                 return coopHandler;
+            }
 
             return null;
         }
@@ -399,7 +403,7 @@ namespace Fika.Core.Coop.Components
         {
             while (true)
             {
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(1f);
 
                 if (Singleton<AbstractGame>.Instantiated)
                 {
@@ -422,13 +426,19 @@ namespace Fika.Core.Coop.Components
         public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
         {
             if (Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == profile.ProfileId))
+            {
                 return;
+            }
 
             if (Singleton<GameWorld>.Instance.AllAlivePlayersList.Any(x => x.ProfileId == profile.ProfileId))
+            {
                 return;
+            }
 
             if (queuedProfileIds.Contains(profile.ProfileId))
+            {
                 return;
+            }
 
             queuedProfileIds.Add(profile.ProfileId);
             Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
@@ -466,7 +476,9 @@ namespace Fika.Core.Coop.Components
                 null).Result;
 
             if (otherPlayer == null)
+            {
                 return null;
+            }
 
             ((CoopPlayer)otherPlayer).NetId = netId;
             Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
@@ -485,7 +497,9 @@ namespace Fika.Core.Coop.Components
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))
+            {
                 Singleton<GameWorld>.Instance.RegisteredPlayers.Add(otherPlayer);
+            }
 
             foreach (CoopPlayer player in Players.Values)
             {

@@ -15,6 +15,7 @@ namespace Fika.Core.Coop.PacketHandlers
     {
         private CoopPlayer player;
         private bool isServer;
+        public bool Enabled { get; set; } = true;
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
         public NetDataWriter Writer { get; set; } = new();
@@ -24,7 +25,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 
-        private void Awake()
+        protected void Awake()
         {
             player = GetComponent<ObservedCoopPlayer>();
             isServer = MatchmakerAcceptPatches.IsServer;
@@ -38,7 +39,7 @@ namespace Fika.Core.Coop.PacketHandlers
             }
         }
 
-        private void Update()
+        protected void Update()
         {
             if (player == null || Writer == null)
             {

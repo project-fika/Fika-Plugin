@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.InputSystem;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using System.Collections.Generic;
@@ -135,7 +136,9 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 CoopHandler coopHandler = CoopHandler.GetCoopHandler();
                 if (coopHandler == null)
+                {
                     return;
+                }
 
                 List<CoopPlayer> players = [.. coopHandler.Players.Values.Where(x => !x.IsYourPlayer && x.gameObject.name.StartsWith("Player_") && x.HealthController.IsAlive)];
 
@@ -290,16 +293,6 @@ namespace Fika.Core.Coop.FreeCamera
             float newRotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * 3f;
             float newRotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * 3f;
             transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
-
-            /*if (FreecamPlugin.CameraMousewheelZoom.Value)
-            {
-                float axis = Input.GetAxis("Mouse ScrollWheel");
-                if (axis != 0)
-                {
-                    var zoomSensitivity = fastMode ? FreecamPlugin.CameraFastZoomSpeed.Value : FreecamPlugin.CameraZoomSpeed.Value;
-                    transform.position += transform.forward * (axis * zoomSensitivity);
-                }
-            }*/
         }
 
         public void JumpToPlayer()
@@ -336,7 +329,7 @@ namespace Fika.Core.Coop.FreeCamera
             transform.parent = null;
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             Destroy(this);
         }
