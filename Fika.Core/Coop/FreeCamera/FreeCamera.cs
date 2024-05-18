@@ -25,6 +25,29 @@ namespace Fika.Core.Coop.FreeCamera
         private bool isFollowing = false;
         private bool disableInput = false;
 
+        private KeyCode forwardKey = KeyCode.W;
+        private KeyCode backKey = KeyCode.S;
+        private KeyCode leftKey = KeyCode.A;
+        private KeyCode rightKey = KeyCode.D;
+        private KeyCode relUpKey = KeyCode.E;
+        private KeyCode relDownKey = KeyCode.Q;
+        private readonly KeyCode upKey = KeyCode.R;
+        private readonly KeyCode downKey = KeyCode.F;
+
+        protected void Start()
+        {
+            if (FikaPlugin.AZERTYMode.Value)
+            {
+                forwardKey = KeyCode.Z;
+                backKey = KeyCode.S;
+                leftKey = KeyCode.Q;
+                rightKey = KeyCode.D;
+
+                relUpKey = KeyCode.E;
+                relDownKey = KeyCode.A;
+            }
+        }
+
         protected void Update()
         {
             if (!IsActive)
@@ -231,22 +254,22 @@ namespace Fika.Core.Coop.FreeCamera
                 movementSpeed *= 8;
             }
 
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+            if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
             {
                 transform.position += (-transform.right * (movementSpeed * Time.deltaTime));
             }
 
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+            if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
             {
                 transform.position += (transform.right * (movementSpeed * Time.deltaTime));
             }
 
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+            if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
             {
                 transform.position += (transform.forward * (movementSpeed * Time.deltaTime));
             }
 
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+            if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
             {
                 transform.position += (-transform.forward * (movementSpeed * Time.deltaTime));
             }
@@ -269,22 +292,22 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (true)
             {
-                if (Input.GetKey(KeyCode.E))
+                if (Input.GetKey(relUpKey))
                 {
                     transform.position += (transform.up * (movementSpeed * Time.deltaTime));
                 }
 
-                if (Input.GetKey(KeyCode.Q))
+                if (Input.GetKey(relDownKey))
                 {
                     transform.position += (-transform.up * (movementSpeed * Time.deltaTime));
                 }
 
-                if (Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.PageUp))
+                if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
                 {
                     transform.position += (Vector3.up * (movementSpeed * Time.deltaTime));
                 }
 
-                if (Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.PageDown))
+                if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
                 {
                     transform.position += (-Vector3.up * (movementSpeed * Time.deltaTime));
                 }

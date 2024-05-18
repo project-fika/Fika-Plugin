@@ -129,6 +129,7 @@ namespace Fika.Core
 
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
+        public static ConfigEntry<bool> AZERTYMode { get; set; }
 
         // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
@@ -314,6 +315,8 @@ namespace Fika.Core
             // Coop | Debug
 
             FreeCamButton = Config.Bind("Coop | Debug", "Free Camera Button", new KeyboardShortcut(KeyCode.F9), "Button used to toggle free camera.");
+
+            AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false, "If free camera should use AZERTY keys for input.");
 
             // Performance
 
