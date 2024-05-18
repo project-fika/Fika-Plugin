@@ -37,7 +37,9 @@ namespace Fika.Core.AkiSupport.Overrides
             if (aggressor is ObservedCoopPlayer)
             {
                 if (target.IsYourPlayer)
+                {
                     return false;
+                }
             }
 
             BotZone botZone = groupOwner.AIData.BotOwner.BotsGroup.BotZone;
