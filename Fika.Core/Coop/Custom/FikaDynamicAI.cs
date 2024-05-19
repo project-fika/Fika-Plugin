@@ -1,5 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using BepInEx.Logging;
+using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
@@ -8,104 +10,141 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Custom
 {
-    internal class FikaDynamicAI : MonoBehaviour
+    public class FikaDynamicAI : MonoBehaviour
     {
-        private int fpsCounter = 0;
-        private int resetCount = 150;
-        private CoopBot bot;
-        private BotOwner botOwner;
-        private List<CoopPlayer> humanPlayers;
+        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("DynamicAI");
+        private CoopHandler coopHandler;
+        private int frameCounter;
+        private int resetCounter;
+        private List<CoopPlayer> humanPlayers = [];
+        private List<CoopBot> bots = [];
+        private BotSpawner spawner;
 
-        protected void Start()
+        protected void Awake()
         {
-            humanPlayers = [];
-
-            if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            if (FikaPlugin.Instance.ModHandler.QuestingBotsLoaded)
             {
-                // Add all human players to this Limiter
-                foreach (CoopPlayer player in coopHandler.Players.Values)
-                {
-                    if (player.IsYourPlayer || player is ObservedCoopPlayer)
-                    {
-                        humanPlayers.Add(player);
-                    }
-                }
-
-                bot = GetComponent<CoopBot>();
-                botOwner = GetComponent<BotOwner>();
-
-                if (bot == null || botOwner == null || humanPlayers == null)
-                {
-                    FikaPlugin.Instance.FikaLogger.LogError("DynamicAI::Start: bot, botOwner or humanPlayers was null!");
-                    Destroy(this);
-                }
-
-                resetCount = FikaPlugin.DynamicAIRate.Value switch
-                {
-                    FikaPlugin.DynamicAIRates.Low => 600,
-                    FikaPlugin.DynamicAIRates.Medium => 300,
-                    FikaPlugin.DynamicAIRates.High => 120,
-                    _ => 300,
-                };
-            }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError("DynamicAI::Start: CoopHandler was null!");
+                logger.LogWarning("QuestingBots detected, destroying DynamicAI component. Use QuestingBots AI limiter instead!");
                 Destroy(this);
             }
+
+            if (!CoopHandler.TryGetCoopHandler(out coopHandler))
+            {
+                logger.LogError("Could not find CoopHandler! Destroying self");
+                Destroy(this);
+                return;
+            }
+
+            resetCounter = FikaPlugin.DynamicAIRate.Value switch
+            {
+                FikaPlugin.DynamicAIRates.Low => 600,
+                FikaPlugin.DynamicAIRates.Medium => 300,
+                FikaPlugin.DynamicAIRates.High => 120,
+                _ => 300,
+            };
+
+            spawner = Singleton<IBotGame>.Instance.BotsController.BotSpawner;
+            if (spawner == null)
+            {
+                logger.LogError("Could not find BotSpawner! Destroying self");
+                Destroy(this);
+                return;
+            }
+
+            spawner.OnBotCreated += Spawner_OnBotCreated;
+            spawner.OnBotRemoved += Spawner_OnBotRemoved;
         }
 
-        protected void FixedUpdate()
+        private void Spawner_OnBotRemoved(BotOwner botOwner)
         {
-            fpsCounter++;
-
-            if (fpsCounter % resetCount == 0)
+            if (!bots.Remove((CoopBot)botOwner.GetPlayer))
             {
-                fpsCounter = 0;
-                if (!bot.HealthController.IsAlive)
-                {
-                    Destroy(this);
-                    return;
-                }
-
-                CheckForPlayers();
+                logger.LogWarning($"Could not remove {botOwner.gameObject.name} from bots list.");
             }
         }
 
-        private void DeactivateBot()
+        private void Spawner_OnBotCreated(BotOwner botOwner)
         {
-            bot.PacketSender.Enabled = false;
-            botOwner.BotState = EBotState.NonActive;
-            botOwner.ShootData.EndShoot();
-            botOwner.ShootData.SetCanShootByState(false);
-            botOwner.DecisionQueue.Clear();
-            botOwner.Memory.GoalEnemy = null;
+            bots.Add((CoopBot)botOwner.GetPlayer);
         }
 
-        private void ActivateBot()
+        protected void Update()
         {
-            bot.PacketSender.Enabled = true;
-            botOwner.BotState = EBotState.Active;
-            botOwner.ShootData.SetCanShootByState(true);
+            frameCounter++;
+
+            if (frameCounter % resetCounter == 0)
+            {
+                frameCounter = 0;
+                foreach (CoopBot bot in bots)
+                {
+                    CheckForPlayers(bot);
+                }
+            }
         }
 
-        private void CheckForPlayers()
+        public void AddHumans()
         {
+            foreach (CoopPlayer player in coopHandler.Players.Values)
+            {
+                if (player.IsYourPlayer || player is ObservedCoopPlayer)
+                {
+                    humanPlayers.Add(player);
+                }
+            }
+        }
+
+        private void DeactivateBot(CoopPlayer bot)
+        {
+#if DEBUG
+            logger.LogWarning($"Disabling {bot.gameObject.name}");
+#endif
+            bot.AIData.BotOwner.DecisionQueue.Clear();
+            bot.AIData.BotOwner.Memory.GoalEnemy = null;
+            bot.AIData.BotOwner.PatrollingData.Pause();
+            bot.gameObject.SetActive(false);
+        }
+
+        private void ActivateBot(CoopPlayer bot)
+        {
+#if DEBUG
+            logger.LogWarning($"Enabling {bot.gameObject.name}");
+#endif
+            bot.gameObject.SetActive(true);
+            bot.AIData.BotOwner.PatrollingData.Unpause();
+            bot.AIData.BotOwner.PostActivate();
+        }
+
+        private void CheckForPlayers(CoopBot bot)
+        {
+            if (!FikaPlugin.DynamicAI.Value)
+            {
+                if (!bot.gameObject.activeSelf)
+                {
+                    ActivateBot(bot);
+                    return;
+                }
+            }
+
+            if (!bot.HealthController.IsAlive)
+            {
+                return;
+            }
+
             int notInRange = 0;
 
-            foreach (CoopPlayer player in humanPlayers)
+            foreach (CoopPlayer humanPlayer in humanPlayers)
             {
-                if (player == null)
+                if (humanPlayer == null)
                 {
                     notInRange++;
                     continue;
                 }
-                if (!player.HealthController.IsAlive)
+                if (!humanPlayer.HealthController.IsAlive)
                 {
                     notInRange++;
                     continue;
                 }
-                float distance = Vector3.SqrMagnitude(bot.Position - player.Position);
+                float distance = Vector3.SqrMagnitude(bot.Position - humanPlayer.Position);
                 float range = FikaPlugin.DynamicAIRange.Value;
                 if (distance > range * range)
                 {
@@ -113,13 +152,13 @@ namespace Fika.Core.Coop.Custom
                 }
             }
 
-            if (notInRange >= humanPlayers.Count && botOwner.BotState is EBotState.Active or EBotState.ActiveFail)
+            if (notInRange >= humanPlayers.Count && bot.gameObject.activeSelf)
             {
-                DeactivateBot();
+                DeactivateBot(bot);
             }
-            else if (notInRange < humanPlayers.Count && botOwner.BotState == EBotState.NonActive)
+            else if (notInRange < humanPlayers.Count && !bot.gameObject.activeSelf)
             {
-                ActivateBot();
+                ActivateBot(bot);
             }
         }
     }

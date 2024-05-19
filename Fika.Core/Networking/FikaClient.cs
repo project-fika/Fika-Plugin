@@ -469,6 +469,42 @@ namespace Fika.Core.Networking
                         }
                     }
                     break;
+                case EPackageType.EnableBot:
+                    {
+                        if (CoopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToEnable))
+                        {
+                            if (!botToEnable.gameObject.activeSelf)
+                            {
+#if DEBUG
+                                clientLogger.LogWarning("Enabling " + packet.BotNetId); 
+#endif
+                                botToEnable.gameObject.SetActive(true); 
+                            }
+                            else
+                            {
+                                clientLogger.LogWarning($"Received packet to enable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already enabled!");
+                            }
+                        }
+                    }
+                    break;
+                case EPackageType.DisableBot:
+                    {
+                        if (CoopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToEnable))
+                        {
+                            if (botToEnable.gameObject.activeSelf)
+                            {
+#if DEBUG
+                                clientLogger.LogWarning("Disabling " + packet.BotNetId); 
+#endif
+                                botToEnable.gameObject.SetActive(false);
+                            }
+                            else
+                            {
+                                clientLogger.LogWarning($"Received packet to disable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already disabled!");
+                            }
+                        }
+                    }
+                    break;
             }
         }
 

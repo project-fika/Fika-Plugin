@@ -20,6 +20,7 @@ using EFT.Weather;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
@@ -545,8 +546,8 @@ namespace Fika.Core.Coop.GameMode
                         Destroy(fikaStartButton);
                     }
 
-                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
-                    newDynamicAI?.AddHumans();*/
+                    FikaDynamicAI newDynamicAI = gameObject.GetComponent<FikaDynamicAI>();
+                    newDynamicAI?.AddHumans();
 
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     await FikaRequestHandler.UpdateSetStatus(status);
@@ -596,8 +597,8 @@ namespace Fika.Core.Coop.GameMode
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
                     }
 
-                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
-                    newDynamicAI?.AddHumans();*/
+                    FikaDynamicAI newDynamicAI = gameObject.GetComponent<FikaDynamicAI>();
+                    newDynamicAI?.AddHumans();
                 }
                 else if (MatchmakerAcceptPatches.IsClient)
                 {
@@ -1141,7 +1142,7 @@ namespace Fika.Core.Coop.GameMode
                     botsController_0.BotSpawner.SetMaxBots(limits);
                 }
 
-                //gameObject.AddComponent<FikaNewDynamicAI>();
+                gameObject.AddComponent<FikaDynamicAI>();
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
@@ -1740,11 +1741,11 @@ namespace Fika.Core.Coop.GameMode
                 Singleton<FikaServer>.Instance?.NetServer.Stop();
                 Singleton<FikaServer>.TryRelease(Singleton<FikaServer>.Instance);
 
-                /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                FikaDynamicAI newDynamicAI = gameObject.GetComponent<FikaDynamicAI>();
                 if (newDynamicAI != null)
                 {
                     Destroy(newDynamicAI);
-                }*/
+                }
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {

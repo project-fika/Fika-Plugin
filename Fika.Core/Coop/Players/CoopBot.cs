@@ -34,7 +34,8 @@ namespace Fika.Core.Coop.Players
         /// The amount of players that have loaded this bot
         /// </summary>
         public int loadedPlayers = 0;
-        private FikaDynamicAI dynamicAi;
+        //private FikaDynamicAI dynamicAi;
+        private bool firstEnabled;
 
         public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
@@ -140,10 +141,10 @@ namespace Fika.Core.Coop.Players
             PacketSender = gameObject.AddComponent<BotPacketSender>();
             PacketReceiver = gameObject.AddComponent<PacketReceiver>();
 
-            if (FikaPlugin.DynamicAI.Value)
+            /*if (FikaPlugin.DynamicAI.Value)
             {
                 dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
-            }
+            }*/
 
             if (FikaPlugin.DisableBotMetabolism.Value)
             {
@@ -262,6 +263,48 @@ namespace Fika.Core.Coop.Players
         public override void UpdateTick()
         {
             base.UpdateTick();
+        }
+
+        protected void OnEnable()
+        {
+            if (!firstEnabled)
+            {
+                firstEnabled = true;
+                return;
+            }
+
+            if (Singleton<FikaServer>.Instantiated)
+            {
+                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                if (coopGame != null && coopGame.Status == GameStatus.Started)
+                {
+                    FikaServer server = Singleton<FikaServer>.Instance;
+                    GenericPacket packet = new(EPackageType.EnableBot)
+                    {
+                        NetId = MainPlayer.NetId,
+                        BotNetId = NetId
+                    };
+                    server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                }
+            }
+        }
+
+        protected void OnDisable()
+        {
+            if (Singleton<FikaServer>.Instantiated)
+            {
+                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                if (coopGame != null && coopGame.Status == GameStatus.Started)
+                {
+                    FikaServer server = Singleton<FikaServer>.Instance;
+                    GenericPacket packet = new(EPackageType.DisableBot)
+                    {
+                        NetId = MainPlayer.NetId,
+                        BotNetId = NetId
+                    };
+                    server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                }
+            }
         }
 
         public override void OnDestroy()
