@@ -115,39 +115,17 @@ namespace Fika.Core.Coop.Players
         }
         #endregion
 
-        public static async Task<LocalPlayer> CreateObservedPlayer(
-            int playerId,
-            Vector3 position,
-            Quaternion rotation,
-            string layerName,
-            string prefix,
-            EPointOfView pointOfView,
-            Profile profile,
-            bool aiControl,
-            EUpdateQueue updateQueue,
-            EUpdateMode armsUpdateMode,
-            EUpdateMode bodyUpdateMode,
-            CharacterControllerSpawner.Mode characterControllerMode,
-            Func<float> getSensitivity, Func<float> getAimingSensitivity,
-            GInterface99 filter,
-            AbstractQuestControllerClass questController = null,
-            AbstractAchievementControllerClass achievementsController = null
-            )
+        public static async Task<LocalPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
+            string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
+            EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
+            CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
+            Func<float> getAimingSensitivity, GInterface99 filter)
         {
             ObservedCoopPlayer player = null;
 
-            player = Create<ObservedCoopPlayer>(
-                    GClass1388.PLAYER_BUNDLE_NAME,
-                    playerId,
-                    position,
-                    updateQueue,
-                    armsUpdateMode,
-                    bodyUpdateMode,
-                    characterControllerMode,
-                    getSensitivity,
-                    getAimingSensitivity,
-                    prefix,
-                    aiControl);
+            player = Create<ObservedCoopPlayer>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
+                armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
+                aiControl);
 
             player.IsYourPlayer = false;
 
@@ -156,10 +134,12 @@ namespace Fika.Core.Coop.Players
             PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
             byte[] healthBytes = tempController.SerializeState();
 
-            await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
-                new ObservedHealthController(healthBytes, inventoryController, profile.Skills),
-                new CoopObservedStatisticsManager(), questController, achievementsController, filter,
-                EVoipState.NotAvailable, aiControl, async: false);
+            ObservedHealthController healthController = new(healthBytes, inventoryController, profile.Skills);
+
+            CoopObservedStatisticsManager statisticsManager = new();
+
+            await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
+                statisticsManager, null, null, filter, EVoipState.NotAvailable, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });

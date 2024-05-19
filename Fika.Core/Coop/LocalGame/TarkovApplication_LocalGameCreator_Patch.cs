@@ -50,10 +50,14 @@ namespace Fika.Core.Coop.LocalGame
             RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
         {
             if (MatchmakerAcceptPatches.IsSinglePlayer)
+            {
                 return;
+            }
 
             if (CurrentSession == null)
+            {
                 return;
+            }
 
             if (____raidSettings == null)
             {
@@ -101,8 +105,6 @@ namespace Fika.Core.Coop.LocalGame
                 timeHasComeScreenController.ChangeStatus("Creating Coop Game");
             }
 
-            await Task.Delay(1000);
-
             StartHandler startHandler = new(__instance, session.Profile, session.ProfileOfPet, ____raidSettings.SelectedLocation, timeHasComeScreenController);
 
             CoopGame localGame = CoopGame.Create(____inputTree, profile, ____localGameDateTime,
@@ -124,7 +126,7 @@ namespace Fika.Core.Coop.LocalGame
                 timeHasComeScreenController.ChangeStatus("Created Coop Game");
             }
 
-            Task finishTask = localGame.method_4(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
+            Task finishTask = localGame.InitPlayer(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
             __result = Task.WhenAll(finishTask);
         }
 

@@ -36,48 +36,25 @@ namespace Fika.Core.Coop.Players
         public int loadedPlayers = 0;
         private FikaDynamicAI dynamicAi;
 
-        public static async Task<LocalPlayer> CreateBot(
-            int playerId,
-            Vector3 position,
-            Quaternion rotation,
-            string layerName,
-            string prefix,
-            EPointOfView pointOfView,
-            Profile profile,
-            bool aiControl,
-            EUpdateQueue updateQueue,
-            EUpdateMode armsUpdateMode,
-            EUpdateMode bodyUpdateMode,
-            CharacterControllerSpawner.Mode characterControllerMode,
-            Func<float> getSensitivity, Func<float> getAimingSensitivity,
-            GInterface99 filter,
-            AbstractQuestControllerClass questController = null,
-            AbstractAchievementControllerClass achievementController = null,
-            bool isYourPlayer = false
-            )
+        public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
+            string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
+            EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
+            CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
+            Func<float> getAimingSensitivity, GInterface99 filter)
         {
             CoopBot player = null;
 
-            player = Create<CoopBot>(
-                    GClass1388.PLAYER_BUNDLE_NAME,
-                    playerId,
-                    position,
-                    updateQueue,
-                    armsUpdateMode,
-                    bodyUpdateMode,
-                    characterControllerMode,
-                    getSensitivity,
-                    getAimingSensitivity,
-                    prefix,
-                    aiControl);
-            player.IsYourPlayer = isYourPlayer;
+            player = Create<CoopBot>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+                bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
+
+            player.IsYourPlayer = false;
 
             InventoryControllerClass inventoryController = new CoopBotInventoryController(player, profile, true);
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
-                new CoopObservedStatisticsManager(), questController, achievementController, filter,
-                EVoipState.NotAvailable, aiControl, async: false);
+                new CoopObservedStatisticsManager(), null, null, filter,
+                EVoipState.NotAvailable, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });

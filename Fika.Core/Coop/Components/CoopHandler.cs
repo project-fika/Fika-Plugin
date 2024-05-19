@@ -455,24 +455,13 @@ namespace Fika.Core.Coop.Components
 
         private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
-            LocalPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(
-                playerId,
-                position,
-                Quaternion.identity,
-                "Player",
-                isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
-                EPointOfView.ThirdPerson,
-                profile,
-                isAI,
-                EUpdateQueue.Update,
-                Player.EUpdateMode.Manual,
-                Player.EUpdateMode.Auto,
+            LocalPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position, Quaternion.identity,
+                "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, isAI,
+                EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
                 GClass549.Config.CharacterController.ObservedPlayerMode,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
-                GClass1446.Default,
-                null,
-                null).Result;
+                GClass1446.Default).Result;
 
             if (otherPlayer == null)
             {

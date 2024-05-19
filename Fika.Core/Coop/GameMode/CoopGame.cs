@@ -6,6 +6,7 @@ using CommonAssets.Scripts.Game;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
+using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
@@ -17,6 +18,7 @@ using EFT.UI.BattleTimer;
 using EFT.UI.Screens;
 using EFT.Weather;
 using Fika.Core.Coop.BTR;
+using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.Matchmaker;
@@ -369,7 +371,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (server.NetServer.ConnectedPeersCount > 0)
                 {
-                    await WaitForPlayersToLoadBotProfile(netId); 
+                    await WaitForPlayersToLoadBotProfile(netId);
                 }
 
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
@@ -706,31 +708,10 @@ namespace Fika.Core.Coop.GameMode
             await CreateCoopHandler();
             CoopHandler.GetCoopHandler().LocalGameInstance = this;
 
-            spawnPoints = GClass2928.CreateFromScene(new DateTime?(GClass1296.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)), Location_0.SpawnPointParams);
-            int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-            GStruct380 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-            SpawnSystem = GClass2929.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
-
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
-                await SendOrReceiveSpawnPoint();
-            }
-
-            if (MatchmakerAcceptPatches.IsClient)
-            {
-                await SendOrReceiveSpawnPoint();
-                if (spawnPoint == null)
-                {
-                    Logger.LogWarning("SpawnPoint was null after retrieving it from the server!");
-                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
-                }
-            }
-
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
-                false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
+                false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 GClass549.Config.CharacterController.ClientPlayerMode, getSensitivity,
-                getAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
+                getAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, statisticsManager);
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
@@ -866,6 +847,118 @@ namespace Fika.Core.Coop.GameMode
             {
                 GameUi.TimerPanel.Close();
             }
+        }
+
+        public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, InventoryControllerClass inventoryController, Callback runCallback)
+        {
+            Status = GameStatus.Running;
+            UnityEngine.Random.InitState((int)GClass1296.Now.Ticks);
+
+            LocationSettingsClass.Location location;
+            if (Location_0.IsHideout)
+            {
+                location = Location_0;
+            }
+            else
+            {
+                using (GClass21.StartWithToken("LoadLocation"))
+                {
+                    int num = UnityEngine.Random.Range(1, 6);
+                    method_6(backendUrl, Location_0.Id, num);
+                    location = await ginterface145_0.LoadLocationLoot(Location_0.Id, num);
+                }
+            }
+
+            BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
+            {
+                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
+                if (gameObject != null)
+                {
+                    transform.InstantiatePrefab(gameObject);
+                }
+                else
+                {
+                    Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
+                }
+            }
+            GClass785 config = GClass549.Config;
+            if (config.FixedFrameRate > 0f)
+            {
+                FixedDeltaTime = 1f / config.FixedFrameRate;
+            }
+
+            using (GClass21.StartWithToken("player create"))
+            {
+                Player player = await CreateLocalPlayer();
+                dictionary_0.Add(player.ProfileId, player);
+                gparam_0 = func_1(player);
+                PlayerCameraController.Create(gparam_0.Player);
+                CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
+                CameraClass.Instance.IsActive = false;
+            }
+
+            StartHandler startHandler = new(this, botsSettings, SpawnSystem, runCallback);
+
+            await method_11(location, startHandler.FinishLoading);
+        }
+
+        private class StartHandler(BaseLocalGame<GamePlayerOwner> localGame, BotControllerSettings botSettings, ISpawnSystem spawnSystem, Callback runCallback)
+        {
+            private readonly BaseLocalGame<GamePlayerOwner> localGame = localGame;
+            private readonly BotControllerSettings botSettings = botSettings;
+            private readonly ISpawnSystem spawnSystem = spawnSystem;
+            private readonly Callback runCallback = runCallback;
+
+            public void FinishLoading()
+            {
+                localGame.method_5(botSettings, spawnSystem, runCallback);
+            }
+        }
+
+        private async Task<Player> CreateLocalPlayer()
+        {
+            int num = Traverse.Create(this).Field("int_0").GetValue<int>();
+            num++;
+
+            Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
+            if (GClass549.Config.UseHandsFastAnimator)
+            {
+                eupdateMode = Player.EUpdateMode.Manual;
+            }
+
+            spawnPoints = GClass2928.CreateFromScene(new DateTime?(GClass1296.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)), Location_0.SpawnPointParams);
+            int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+            GStruct380 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+            SpawnSystem = GClass2929.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
+
+            if (MatchmakerAcceptPatches.IsServer)
+            {
+                spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                await SendOrReceiveSpawnPoint();
+            }
+
+            if (MatchmakerAcceptPatches.IsClient)
+            {
+                await SendOrReceiveSpawnPoint();
+                if (spawnPoint == null)
+                {
+                    Logger.LogWarning("SpawnPoint was null after retrieving it from the server!");
+                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                }
+            }
+
+            IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
+
+            LocalPlayer myPlayer = await vmethod_2(num, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, Profile_0, false,
+                UpdateQueue, eupdateMode, Player.EUpdateMode.Auto, GClass549.Config.CharacterController.ClientPlayerMode,
+                new Func<float>(Class1362.class1362_0.method_1), new Func<float>(Class1362.class1362_0.method_2),
+                statisticsManager, null, null);
+
+            myPlayer.Location = Location_0.Id;
+            myPlayer.OnEpInteraction += OnEpInteraction;
+
+            return myPlayer;
         }
 
         private async Task WaitForPlayers()
@@ -1069,23 +1162,6 @@ namespace Fika.Core.Coop.GameMode
             }
 
             BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
-            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
-            {
-                Singleton<GameWorld>.Instance.HalloweenEventController = new();
-                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
-                if (gameObject != null)
-                {
-                    transform.InstantiatePrefab(gameObject);
-                }
-                else
-                {
-                    Logger.LogError("CoopGame::vmethod_4: Halloween controller could not be instantiated!");
-                }
-            }
-            if (GClass549.Config.FixedFrameRate > 0f)
-            {
-                FixedDeltaTime = 1f / GClass549.Config.FixedFrameRate;
-            }
 
             bool isWinter = BackEndSession.IsWinter;
             Class420 winterEventController = new();

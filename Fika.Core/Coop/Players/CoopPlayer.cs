@@ -48,59 +48,29 @@ namespace Fika.Core.Coop.Players
         public bool IsObservedAI = false;
         public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
 
-        public static async Task<LocalPlayer> Create(
-            int playerId,
-            Vector3 position,
-            Quaternion rotation,
-            string layerName,
-            string prefix,
-            EPointOfView pointOfView,
-            Profile profile,
-            bool aiControl,
-            EUpdateQueue updateQueue,
-            EUpdateMode armsUpdateMode,
-            EUpdateMode bodyUpdateMode,
-            CharacterControllerSpawner.Mode characterControllerMode,
-            Func<float> getSensitivity, Func<float> getAimingSensitivity,
-            GInterface99 filter,
-            int netId,
-            AbstractQuestControllerClass questController = null,
-            AbstractAchievementControllerClass achievementsController = null)
+        public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
+            string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
+            EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
+            CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
+            Func<float> getAimingSensitivity, GInterface99 filter, int netId, IStatisticsManager statisticsManager)
         {
             CoopPlayer player = null;
 
-            player = Create<CoopPlayer>(
-                    GClass1388.PLAYER_BUNDLE_NAME,
-                    playerId,
-                    position,
-                    updateQueue,
-                    armsUpdateMode,
-                    bodyUpdateMode,
-                    characterControllerMode,
-                    getSensitivity,
-                    getAimingSensitivity,
-                    prefix,
-                    isThirdPerson: false);
+            player = Create<CoopPlayer>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+                bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
             player.NetId = netId;
+
             CoopClientInventoryController inventoryController = new(player, profile, true);
 
-            if (questController == null)
-            {
-                questController = new GClass3206(profile, inventoryController, null, true);
-                questController.Init();
-                questController.Run();
-            }
+            GClass3206 questController = new(profile, inventoryController, null, true);
+            questController.Init();
+            questController.Run();
 
-            if (achievementsController == null)
-            {
-                achievementsController = new AchievementControllerClass(profile, inventoryController, null, true);
-                achievementsController.Init();
-                achievementsController.Run();
-            }
-
-            IStatisticsManager statisticsManager = new CoopClientStatisticsManager(player.Profile);
+            AchievementControllerClass achievementsController = new(profile, inventoryController, null, true);
+            achievementsController.Init();
+            achievementsController.Run();
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
