@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.ObservedClasses
         public CoopPlayer coopPlayer;
         bool triggerPressed = false;
         bool needsReset = false;
-        float lastFireTime = Time.time;
+        float lastFireTime = 0f;
         public override bool IsTriggerPressed => triggerPressed;
         private float overlapCounter = 0f;
         private float aimMovementSpeed = 1f;
@@ -52,12 +52,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override Vector3 WeaponDirection => -CurrentFireport.up;
 
-        private void Awake()
+        protected void Awake()
         {
             coopPlayer = GetComponent<CoopPlayer>();
         }
 
-        private void Start()
+        protected void Start()
         {
             _objectInHandsAnimator.SetAiming(false);
             aimMovementSpeed = coopPlayer.Skills.GetWeaponInfo(Item).AimMovementSpeed;

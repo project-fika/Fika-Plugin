@@ -342,11 +342,6 @@ namespace Fika.Core.Networking
 
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
         {
-            if (!Players.ContainsKey(packet.NetId))
-            {
-                return;
-            }
-
             if (packet.PacketType == EPackageType.ClientExtract)
             {
                 if (CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
@@ -380,13 +375,8 @@ namespace Fika.Core.Networking
             }
             else if (packet.PacketType == EPackageType.LoadBot)
             {
-                if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-                {
-                    if (playerToApply is CoopBot botToApply)
-                    {
-                        botToApply.loadedPlayers++;
-                    }
-                }
+                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                coopGame.IncreaseLoadedPlayers(packet.BotNetId);
 
                 return;
             }

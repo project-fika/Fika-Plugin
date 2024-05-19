@@ -14,22 +14,29 @@ namespace Fika.Core.Coop.PacketHandlers
     {
         private CoopPlayer player;
 
+        public bool Enabled { get; set; } = true;
         public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
         public FikaClient Client { get; set; }
         public NetDataWriter Writer { get; set; } = new();
         public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
-        public Queue<DamagePacket> HealthPackets { get; set; } = new(50);
+        public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 
-        private void Awake()
+        protected void Awake()
         {
             player = GetComponent<CoopPlayer>();
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
+            if (!Enabled)
+            {
+                player.LastDirection = Vector2.zero;
+                return;
+            }
+
             if (player == null || Writer == null)
             {
                 return;
@@ -48,7 +55,7 @@ namespace Fika.Core.Coop.PacketHandlers
             player.LastDirection = Vector2.zero; // Bots give a constant input for some odd reason, resetting on FixedUpdate should be ok from my testing and does not cause sliding for clients
         }
 
-        private void Update()
+        protected void Update()
         {
             int firearmPackets = FirearmPackets.Count;
             if (firearmPackets > 0)
@@ -62,12 +69,12 @@ namespace Fika.Core.Coop.PacketHandlers
                     Server?.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            int healthPackets = HealthPackets.Count;
+            int healthPackets = DamagePackets.Count;
             if (healthPackets > 0)
             {
                 for (int i = 0; i < healthPackets; i++)
                 {
-                    DamagePacket healthPacket = HealthPackets.Dequeue();
+                    DamagePacket healthPacket = DamagePackets.Dequeue();
                     healthPacket.NetId = player.NetId;
 
                     Writer?.Reset();
@@ -116,7 +123,7 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             Writer = null;
             FirearmPackets.Clear();
-            HealthPackets.Clear();
+            DamagePackets.Clear();
             InventoryPackets.Clear();
             CommonPlayerPackets.Clear();
             HealthSyncPackets.Clear();

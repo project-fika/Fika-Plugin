@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.FreeCamera.Patches
 {
-    public class DeathFadePatch : ModulePatch
+    public class DeathFade_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

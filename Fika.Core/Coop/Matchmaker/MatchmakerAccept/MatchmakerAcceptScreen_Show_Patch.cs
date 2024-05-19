@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Matchmaker
 {
-    public class MatchmakerAcceptScreenShowPatch : ModulePatch
+    public class MatchmakerAcceptScreen_Show_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(MatchMakerAcceptScreen).GetMethods(BindingFlags.Public | BindingFlags.Instance).First(x => x.Name == "Show" && x.GetParameters()[0].Name == "session");
 

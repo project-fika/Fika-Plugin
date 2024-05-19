@@ -16,9 +16,9 @@ using Fika.Core.AkiSupport.Scav;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
-using Fika.Core.Coop.LocalGame;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Patches;
+using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.World;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
@@ -26,10 +26,14 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
+using Fika.Core.Utils;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -40,10 +44,12 @@ namespace Fika.Core
     /// Originally by: Paulov <br/>
     /// Re-written by: Lacyway
     /// </summary>
-    [BepInPlugin("com.fika.core", "Fika.Core", "1.0.0")]
+    [BepInPlugin("com.fika.core", "Fika.Core", "0.9.89")]
     [BepInProcess("EscapeFromTarkov.exe")]
     [BepInDependency("com.spt-aki.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     [BepInDependency("com.spt-aki.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
+    [BepInDependency("com.spt-aki.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.spt-aki.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
         /// <summary>
@@ -59,9 +65,9 @@ namespace Fika.Core
         /// This is the Official EFT Version defined by BSG
         /// </summary>
         public static string EFTVersionMajor { get; internal set; }
-        public static string[] LoadedPlugins { get; private set; }
         public ManualLogSource FikaLogger { get => Logger; }
         public BotDifficulties BotDifficulties;
+        public FikaModHandler ModHandler = new();
         public string Locale { get; private set; } = "en";
         public string[] LocalIPs;
 
@@ -127,6 +133,7 @@ namespace Fika.Core
 
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
+        public static ConfigEntry<bool> AZERTYMode { get; set; }
 
         // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
@@ -182,41 +189,32 @@ namespace Fika.Core
 
             SetupConfig();
 
-            new FikaVersionLabelPatch().Enable();
-            new DisableReadyButtonPatch().Enable();
-            new DisableInsuranceReadyButtonPatch().Enable();
-            new DisableMatchSettingsReadyButton().Enable();
+            new FikaVersionLabel_Patch().Enable();
+            new DisableReadyButton_Patch().Enable();
+            new DisableInsuranceReadyButton_Patch().Enable();
+            new DisableMatchSettingsReadyButton_Patch().Enable();
             new TarkovApplication_LocalGameCreator_Patch().Enable();
-            new DeathFadePatch().Enable();
-            new NonWaveSpawnScenarioPatch().Enable();
-            new WaveSpawnScenarioPatch().Enable();
-            new WeatherNodePatch().Enable();
-            new EnvironmentUIRootPatch().Enable();
-            new MatchmakerAcceptScreenAwakePatch().Enable();
-            new MatchmakerAcceptScreenShowPatch().Enable();
+            new DeathFade_Patch().Enable();
+            new NonWaveSpawnScenario_Patch().Enable();
+            new WaveSpawnScenario_Patch().Enable();
+            new WeatherNode_Patch().Enable();
+            new EnvironmentUIRoot_Patch().Enable();
+            new MatchmakerAcceptScreen_Awake_Patch().Enable();
+            new MatchmakerAcceptScreen_Show_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
-            new BotCacher().Enable();
-            new InventoryScrollPatch().Enable();
+            new BotCacher_Patch().Enable();
+            new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
 #if GOLDMASTER
-            new TOSPatch().Enable();
+            new TOS_Patch().Enable();
 #endif
 
             DisableSPTPatches();
             EnableOverridePatches();
 
-            Logger.LogInfo($"Fika is loaded!");
+            string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
 
-            // Store all loaded plugins (mods) to improve compatibility
-            List<string> tempPluginInfos = [];
-
-            foreach (PluginInfo plugin in Chainloader.PluginInfos.Values)
-            {
-                Logger.LogInfo($"Adding {plugin.Metadata.Name} to loaded mods.");
-                tempPluginInfos.Add(plugin.Metadata.Name);
-            }
-
-            LoadedPlugins = [.. tempPluginInfos];
+            Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
 
             BundleLoaderPlugin = new();
             BundleLoaderPlugin.Create();
@@ -227,11 +225,23 @@ namespace Fika.Core
 
             if (AllowItemSending)
             {
-                new ItemContextPatch().Enable();
+                new ItemContext_Patch().Enable();
             }
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
+
+            StartCoroutine(RunModHandler());
+        }
+
+        /// <summary>
+        /// Coroutine to ensure all mods are loaded by waiting 5 seconds
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator RunModHandler()
+        {
+            yield return new WaitForSeconds(5);
+            ModHandler.Run();
         }
 
         private void GetClientConfig()
@@ -311,11 +321,13 @@ namespace Fika.Core
 
             FreeCamButton = Config.Bind("Coop | Debug", "Free Camera Button", new KeyboardShortcut(KeyCode.F9), "Button used to toggle free camera.");
 
+            AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false, "If free camera should use AZERTY keys for input.");
+
             // Performance
 
             DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(50f, 750f), new ConfigurationManagerAttributes() { Order = 4 }));
+            DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 4 }));
 
             DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", DynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
@@ -380,19 +392,39 @@ namespace Fika.Core
 
         private string[] GetLocalAddresses()
         {
-            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
             List<string> ips = [];
             ips.Add("Disabled");
-            foreach (IPAddress ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    ips.Add(ip.ToString());
-                }
-            }
+            ips.Add("0.0.0.0");
 
-            LocalIPs = ips.Skip(1).ToArray();
-            return [.. ips];
+            try
+            {
+                foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)
+                    {
+                        if (!ip.IsDnsEligible)
+                        {
+                            continue;
+                        }
+
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            string stringIp = ip.Address.ToString();
+                            if (stringIp != "127.0.0.1")
+                            {
+                                ips.Add(stringIp);
+                            }
+                        }
+                    }
+                }
+
+                LocalIPs = ips.Skip(1).ToArray();
+                return [.. ips];
+            }
+            catch (Exception)
+            {
+                return [.. ips];
+            }
         }
 
         private void DisableSPTPatches()
@@ -420,13 +452,13 @@ namespace Fika.Core
 
         private void EnableOverridePatches()
         {
-            new BotDifficultyPatchOverride().Enable();
-            new ScavProfileLoadOverride().Enable();
-            new MaxBotPatchOverride().Enable();
-            new BotTemplateLimitPatchOverride().Enable();
-            new OfflineRaidSettingsMenuPatchOverride().Enable();
-            new AddEnemyToAllGroupsInBotZonePatchOverride().Enable();
-            new FikaAirdropFlarePatch().Enable();
+            new BotDifficultyPatch_Override().Enable();
+            new ScavProfileLoad_Override().Enable();
+            new MaxBotPatch_Override().Enable();
+            new BotTemplateLimitPatch_Override().Enable();
+            new OfflineRaidSettingsMenuPatch_Override().Enable();
+            new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
+            new FikaAirdropFlare_Patch().Enable();
         }
 
         private void LogDependencyErrors()

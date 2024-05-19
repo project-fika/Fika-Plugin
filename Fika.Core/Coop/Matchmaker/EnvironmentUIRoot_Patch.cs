@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Matchmaker
 {
-    public class EnvironmentUIRootPatch : ModulePatch
+    public class EnvironmentUIRoot_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

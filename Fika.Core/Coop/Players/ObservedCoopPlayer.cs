@@ -11,6 +11,7 @@ using EFT.Vaulting;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Networking;
@@ -114,39 +115,17 @@ namespace Fika.Core.Coop.Players
         }
         #endregion
 
-        public static async Task<LocalPlayer> CreateObservedPlayer(
-            int playerId,
-            Vector3 position,
-            Quaternion rotation,
-            string layerName,
-            string prefix,
-            EPointOfView pointOfView,
-            Profile profile,
-            bool aiControl,
-            EUpdateQueue updateQueue,
-            EUpdateMode armsUpdateMode,
-            EUpdateMode bodyUpdateMode,
-            CharacterControllerSpawner.Mode characterControllerMode,
-            Func<float> getSensitivity, Func<float> getAimingSensitivity,
-            GInterface99 filter,
-            AbstractQuestControllerClass questController = null,
-            AbstractAchievementControllerClass achievementsController = null
-            )
+        public static async Task<LocalPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
+            string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
+            EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
+            CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
+            Func<float> getAimingSensitivity, GInterface99 filter)
         {
             ObservedCoopPlayer player = null;
 
-            player = Create<ObservedCoopPlayer>(
-                    GClass1388.PLAYER_BUNDLE_NAME,
-                    playerId,
-                    position,
-                    updateQueue,
-                    armsUpdateMode,
-                    bodyUpdateMode,
-                    characterControllerMode,
-                    getSensitivity,
-                    getAimingSensitivity,
-                    prefix,
-                    aiControl);
+            player = Create<ObservedCoopPlayer>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
+                armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
+                aiControl);
 
             player.IsYourPlayer = false;
 
@@ -155,10 +134,12 @@ namespace Fika.Core.Coop.Players
             PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
             byte[] healthBytes = tempController.SerializeState();
 
-            await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
-                new ObservedHealthController(healthBytes, inventoryController, profile.Skills),
-                new CoopObservedStatisticsManager(), questController, achievementsController, filter,
-                EVoipState.NotAvailable, aiControl, async: false);
+            ObservedHealthController healthController = new(healthBytes, inventoryController, profile.Skills);
+
+            CoopObservedStatisticsManager statisticsManager = new();
+
+            await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
+                statisticsManager, null, null, filter, EVoipState.NotAvailable, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
@@ -278,6 +259,31 @@ namespace Fika.Core.Coop.Players
 
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
         {
+            if (damageInfo.DamageType == EDamageType.Landmine && MatchmakerAcceptPatches.IsServer)
+            {
+                PacketSender?.DamagePackets?.Enqueue(new()
+                {
+                    DamageInfo = new()
+                    {
+                        Damage = damageInfo.Damage,
+                        DamageType = damageInfo.DamageType,
+                        BodyPartType = bodyPartType,
+                        ColliderType = colliderType,
+                        Absorbed = 0f,
+                        Direction = damageInfo.Direction,
+                        Point = damageInfo.HitPoint,
+                        HitNormal = damageInfo.HitNormal,
+                        PenetrationPower = damageInfo.PenetrationPower,
+                        BlockedBy = damageInfo.BlockedBy,
+                        DeflectedBy = damageInfo.DeflectedBy,
+                        SourceId = damageInfo.SourceId,
+                        ArmorDamage = damageInfo.ArmorDamage
+                    }
+                });
+
+                return;
+            }
+
             if (damageInfo.Player == null)
             {
                 return;
@@ -324,11 +330,32 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
-            /*if (!IsObservedAI)
+            if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
             {
                 ShotReactions(damageInfo, bodyPartType);
+                PacketSender?.DamagePackets?.Enqueue(new()
+                {
+                    DamageInfo = new()
+                    {
+                        Damage = damageInfo.Damage,
+                        DamageType = damageInfo.DamageType,
+                        BodyPartType = bodyPartType,
+                        ColliderType = colliderType,
+                        ArmorPlateCollider = armorPlateCollider,
+                        Absorbed = 0f,
+                        Direction = damageInfo.Direction,
+                        Point = damageInfo.HitPoint,
+                        HitNormal = damageInfo.HitNormal,
+                        PenetrationPower = damageInfo.PenetrationPower,
+                        BlockedBy = damageInfo.BlockedBy,
+                        DeflectedBy = damageInfo.DeflectedBy,
+                        SourceId = damageInfo.SourceId,
+                        ArmorDamage = damageInfo.ArmorDamage
+                    }
+                });
+
                 return null;
-            }*/
+            }
 
             if (damageInfo.Player != null)
             {
@@ -374,7 +401,7 @@ namespace Fika.Core.Coop.Players
                         colliderType = bodyPartCollider.BodyPartColliderType;
                     }
 
-                    PacketSender?.HealthPackets?.Enqueue(new()
+                    PacketSender?.DamagePackets?.Enqueue(new()
                     {
                         DamageInfo = new()
                         {
@@ -391,6 +418,7 @@ namespace Fika.Core.Coop.Players
                             BlockedBy = damageInfo.BlockedBy,
                             DeflectedBy = damageInfo.DeflectedBy,
                             SourceId = damageInfo.SourceId,
+                            ArmorDamage = damageInfo.ArmorDamage,
                             ProfileId = damageInfo.Player.iPlayer.ProfileId
                         }
                     });
@@ -433,7 +461,7 @@ namespace Fika.Core.Coop.Players
                         colliderType = bodyPartCollider.BodyPartColliderType;
                     }
 
-                    PacketSender?.HealthPackets?.Enqueue(new()
+                    PacketSender?.DamagePackets?.Enqueue(new()
                     {
                         DamageInfo = new()
                         {
@@ -450,6 +478,7 @@ namespace Fika.Core.Coop.Players
                             BlockedBy = damageInfo.BlockedBy,
                             DeflectedBy = damageInfo.DeflectedBy,
                             SourceId = damageInfo.SourceId,
+                            ArmorDamage = damageInfo.ArmorDamage,
                             ProfileId = damageInfo.Player.iPlayer.ProfileId
                         }
                     });
@@ -470,11 +499,7 @@ namespace Fika.Core.Coop.Players
 
         public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
         {
-            RemoveHandsControllerHandler handler = new()
-            {
-                coopPlayer = this,
-                callback = callback
-            };
+            RemoveHandsControllerHandler handler = new(this, callback);
             _removeFromHandsCallback = callback;
             Proceed(false, new Callback<GInterface125>(handler.Handle), false);
         }
@@ -1227,10 +1252,7 @@ namespace Fika.Core.Coop.Players
         #region handControllers
         private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
         {
-            CreateHandsControllerHandler handler = new()
-            {
-                setInHandsOperation = (item != null) ? method_67(item) : null
-            };
+            CreateHandsControllerHandler handler = new((item != null) ? method_67(item) : null);
 
             handler.setInHandsOperation?.Confirm(true);
 
@@ -1261,10 +1283,7 @@ namespace Fika.Core.Coop.Players
 
         private void CreateFirearmController(string itemId)
         {
-            CreateFirearmControllerHandler handler = new()
-            {
-                coopPlayer = this
-            };
+            CreateFirearmControllerHandler handler = new(this);
 
             if (MovementContext.StationaryWeapon != null && MovementContext.StationaryWeapon.Id == itemId)
             {
@@ -1287,10 +1306,7 @@ namespace Fika.Core.Coop.Players
 
         private void CreateGrenadeController(string itemId)
         {
-            CreateGrenadeControllerHandler handler = new()
-            {
-                coopPlayer = this
-            };
+            CreateGrenadeControllerHandler handler = new(this);
 
             Item item = FindItem(itemId);
             handler.item = item;
@@ -1306,14 +1322,7 @@ namespace Fika.Core.Coop.Players
 
         private void CreateMedsController(string itemId, EBodyPart bodyPart, float amount, int animationVariant)
         {
-            CreateMedsControllerHandler handler = new()
-            {
-                coopPlayer = this,
-                bodyPart = bodyPart,
-                amount = amount,
-                animationVariant = animationVariant,
-                item = FindItem(itemId)
-            };
+            CreateMedsControllerHandler handler = new(this, FindItem(itemId), bodyPart, amount, animationVariant);
             if (handler.item != null)
             {
                 CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
@@ -1326,10 +1335,7 @@ namespace Fika.Core.Coop.Players
 
         private void CreateKnifeController(string itemId)
         {
-            CreateKnifeControllerHandler handler = new()
-            {
-                coopPlayer = this
-            };
+            CreateKnifeControllerHandler handler = new(this);
 
             Item item = FindItem(itemId);
             handler.knife = item.GetItemComponent<KnifeComponent>();
@@ -1345,10 +1351,7 @@ namespace Fika.Core.Coop.Players
 
         private void CreateQuickGrenadeController(string itemId)
         {
-            CreateQuickGrenadeControllerHandler handler = new()
-            {
-                coopPlayer = this
-            };
+            CreateQuickGrenadeControllerHandler handler = new(this);
 
             Item item = FindItem(itemId);
             if ((handler.item = item as GrenadeClass) != null)
@@ -1363,10 +1366,7 @@ namespace Fika.Core.Coop.Players
 
         private void CreateQuickKnifeController(string itemId)
         {
-            CreateQuickKnifeControllerHandler handler = new()
-            {
-                coopPlayer = this
-            };
+            CreateQuickKnifeControllerHandler handler = new(this);
 
             Item item = FindItem(itemId);
             handler.knife = item.GetItemComponent<KnifeComponent>();
@@ -1382,11 +1382,7 @@ namespace Fika.Core.Coop.Players
 
         private void CreateQuickUseItemController(string itemId)
         {
-            CreateQuickUseItemControllerHandler handler = new()
-            {
-                coopPlayer = this,
-                item = FindItem(itemId)
-            };
+            CreateQuickUseItemControllerHandler handler = new(this, FindItem(itemId));
             if (handler.item != null)
             {
                 CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
@@ -1417,8 +1413,11 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class RemoveHandsControllerHandler
+        private class RemoveHandsControllerHandler(ObservedCoopPlayer coopPlayer, Callback callback)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            private readonly Callback callback = callback;
+
             public void Handle(Result<GInterface125> result)
             {
                 if (coopPlayer._removeFromHandsCallback == callback)
@@ -1427,13 +1426,12 @@ namespace Fika.Core.Coop.Players
                 }
                 callback.Invoke(result);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-            public Callback callback;
         }
 
-        private class CreateHandsControllerHandler
+        private class CreateHandsControllerHandler(Class1059 setInHandsOperation)
         {
+            public readonly Class1059 setInHandsOperation = setInHandsOperation;
+
             internal void DisposeHandler()
             {
                 Class1059 handler = setInHandsOperation;
@@ -1441,98 +1439,86 @@ namespace Fika.Core.Coop.Players
                     return;
                 handler.Dispose();
             }
-
-            public Class1059 setInHandsOperation;
         }
 
-        private class CreateFirearmControllerHandler
+        private class CreateFirearmControllerHandler(ObservedCoopPlayer coopPlayer)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            public Item item;
+
             internal AbstractHandsController ReturnController()
             {
                 return CoopObservedFirearmController.Create(coopPlayer, (Weapon)item);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-
-            public Item item;
         }
 
-        private class CreateGrenadeControllerHandler
+        private class CreateGrenadeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            public Item item;
+
             internal AbstractHandsController ReturnController()
             {
                 return CoopObservedGrenadeController.Create(coopPlayer, (GrenadeClass)item);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-
-            public Item item;
         }
 
-        private class CreateMedsControllerHandler
+        private class CreateMedsControllerHandler(ObservedCoopPlayer coopPlayer, Item item, EBodyPart bodyPart, float amount, int animationVariant)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            public readonly Item item = item;
+            private readonly EBodyPart bodyPart = bodyPart;
+            private readonly float amount = amount;
+            private readonly int animationVariant = animationVariant;
+
             internal AbstractHandsController ReturnController()
             {
                 return CoopObservedMedsController.Create(coopPlayer, item, bodyPart, amount, animationVariant);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-
-            public Item item;
-
-            public EBodyPart bodyPart;
-
-            public float amount;
-
-            public int animationVariant;
         }
 
-        private class CreateKnifeControllerHandler
+        private class CreateKnifeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            public KnifeComponent knife;
+
             internal AbstractHandsController ReturnController()
             {
                 return CoopObservedKnifeController.Create(coopPlayer, knife);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-
-            public KnifeComponent knife;
         }
 
-        private class CreateQuickGrenadeControllerHandler
+        private class CreateQuickGrenadeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            public Item item;
+
             internal AbstractHandsController ReturnController()
             {
                 return CoopObservedQuickGrenadeController.Create(coopPlayer, (GrenadeClass)item);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-
-            public Item item;
         }
 
-        private class CreateQuickKnifeControllerHandler
+        private class CreateQuickKnifeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            public KnifeComponent knife;
+
             internal AbstractHandsController ReturnController()
             {
                 return QuickKnifeKickController.smethod_8<QuickKnifeKickController>(coopPlayer, knife);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-
-            public KnifeComponent knife;
         }
 
-        private class CreateQuickUseItemControllerHandler
+        private class CreateQuickUseItemControllerHandler(ObservedCoopPlayer coopPlayer, Item item)
         {
+            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            public readonly Item item = item;
+
             internal AbstractHandsController ReturnController()
             {
                 return QuickUseItemController.smethod_5<QuickUseItemController>(coopPlayer, item);
             }
-
-            public ObservedCoopPlayer coopPlayer;
-
-            public Item item;
         }
     }
 }

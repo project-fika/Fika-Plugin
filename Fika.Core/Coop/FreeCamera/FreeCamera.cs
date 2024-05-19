@@ -24,6 +24,29 @@ namespace Fika.Core.Coop.FreeCamera
         private bool isFollowing = false;
         private bool disableInput = false;
 
+        private KeyCode forwardKey = KeyCode.W;
+        private KeyCode backKey = KeyCode.S;
+        private KeyCode leftKey = KeyCode.A;
+        private KeyCode rightKey = KeyCode.D;
+        private KeyCode relUpKey = KeyCode.E;
+        private KeyCode relDownKey = KeyCode.Q;
+        private readonly KeyCode upKey = KeyCode.R;
+        private readonly KeyCode downKey = KeyCode.F;
+
+        protected void Start()
+        {
+            if (FikaPlugin.AZERTYMode.Value)
+            {
+                forwardKey = KeyCode.Z;
+                backKey = KeyCode.S;
+                leftKey = KeyCode.Q;
+                rightKey = KeyCode.D;
+
+                relUpKey = KeyCode.E;
+                relDownKey = KeyCode.A;
+            }
+        }
+
         protected void Update()
         {
             if (!IsActive)
@@ -135,7 +158,9 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 CoopHandler coopHandler = CoopHandler.GetCoopHandler();
                 if (coopHandler == null)
+                {
                     return;
+                }
 
                 List<CoopPlayer> players = [.. coopHandler.Players.Values.Where(x => !x.IsYourPlayer && x.gameObject.name.StartsWith("Player_") && x.HealthController.IsAlive)];
 
@@ -228,22 +253,22 @@ namespace Fika.Core.Coop.FreeCamera
                 movementSpeed *= 8;
             }
 
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+            if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
             {
                 transform.position += (-transform.right * (movementSpeed * Time.deltaTime));
             }
 
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+            if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
             {
                 transform.position += (transform.right * (movementSpeed * Time.deltaTime));
             }
 
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+            if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
             {
                 transform.position += (transform.forward * (movementSpeed * Time.deltaTime));
             }
 
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+            if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
             {
                 transform.position += (-transform.forward * (movementSpeed * Time.deltaTime));
             }
@@ -266,22 +291,22 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (true)
             {
-                if (Input.GetKey(KeyCode.E))
+                if (Input.GetKey(relUpKey))
                 {
                     transform.position += (transform.up * (movementSpeed * Time.deltaTime));
                 }
 
-                if (Input.GetKey(KeyCode.Q))
+                if (Input.GetKey(relDownKey))
                 {
                     transform.position += (-transform.up * (movementSpeed * Time.deltaTime));
                 }
 
-                if (Input.GetKey(KeyCode.R) || Input.GetKey(KeyCode.PageUp))
+                if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
                 {
                     transform.position += (Vector3.up * (movementSpeed * Time.deltaTime));
                 }
 
-                if (Input.GetKey(KeyCode.F) || Input.GetKey(KeyCode.PageDown))
+                if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
                 {
                     transform.position += (-Vector3.up * (movementSpeed * Time.deltaTime));
                 }
@@ -290,16 +315,6 @@ namespace Fika.Core.Coop.FreeCamera
             float newRotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * 3f;
             float newRotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * 3f;
             transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
-
-            /*if (FreecamPlugin.CameraMousewheelZoom.Value)
-            {
-                float axis = Input.GetAxis("Mouse ScrollWheel");
-                if (axis != 0)
-                {
-                    var zoomSensitivity = fastMode ? FreecamPlugin.CameraFastZoomSpeed.Value : FreecamPlugin.CameraZoomSpeed.Value;
-                    transform.position += transform.forward * (axis * zoomSensitivity);
-                }
-            }*/
         }
 
         public void JumpToPlayer()
@@ -336,7 +351,7 @@ namespace Fika.Core.Coop.FreeCamera
             transform.parent = null;
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             Destroy(this);
         }

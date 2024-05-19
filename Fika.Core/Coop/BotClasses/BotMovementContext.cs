@@ -11,7 +11,7 @@ namespace Fika.Core.Coop.BotClasses
 
         public override void ApplyGravity(ref Vector3 motion, float deltaTime, bool stickToGround)
         {
-            if (!Bot.isStarted || Bot.AIData.BotOwner.BotState == EBotState.NonActive)
+            if (Bot.AIData.BotOwner.BotState == EBotState.NonActive)
             {
                 return;
             }

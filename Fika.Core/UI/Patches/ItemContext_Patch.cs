@@ -15,8 +15,10 @@ using UnityEngine;
 
 namespace Fika.Core.UI.Patches
 {
-    public class ItemContextPatch : ModulePatch
+    public class ItemContext_Patch : ModulePatch
     {
+        private static int lastIndex = 0;
+
         protected override MethodBase GetTargetMethod()
         {
             return typeof(SimpleContextMenu).GetMethod(nameof(SimpleContextMenu.method_0)).MakeGenericMethod(typeof(EItemInfoButton));
@@ -82,6 +84,11 @@ namespace Fika.Core.UI.Patches
                     sendItemUI.PlayersDropdown.ClearOptions();
                     sendItemUI.PlayersDropdown.AddOptions(optionDatas);
 
+                    if (sendItemUI.PlayersDropdown.options.Count >= lastIndex)
+                    {
+                        sendItemUI.PlayersDropdown.value = lastIndex;
+                    }
+
                     sendItemUI.PlayersDropdown.onValueChanged.AddListener((value) =>
                     {
                         Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
@@ -102,6 +109,7 @@ namespace Fika.Core.UI.Patches
                         if (sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text != null)
                         {
                             string player = sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text;
+                            lastIndex = sendItemUI.PlayersDropdown.value;
                             if (Singleton<ClientApplication<ISession>>.Instantiated)
                             {
                                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);

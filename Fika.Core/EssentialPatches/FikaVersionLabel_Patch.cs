@@ -13,7 +13,7 @@ namespace Fika.Core.EssentialPatches
     /// <summary>
     /// Originally developed by SPT-Aki
     /// </summary>
-    public class FikaVersionLabelPatch : ModulePatch
+    public class FikaVersionLabel_Patch : ModulePatch
     {
         private static string _versionLabel;
 
@@ -31,7 +31,7 @@ namespace Fika.Core.EssentialPatches
                 Logger.LogInfo($"Server version: {_versionLabel}");
             }
 
-            string fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabelPatch)).GetName().Version.ToString();
+            string fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();
 
             Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance).Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
             Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance).Field("string_2").SetValue($"Fika {fikaVersion} |");

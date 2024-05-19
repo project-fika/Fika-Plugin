@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Scav
 {
-    internal class ScavProfileLoadOverride : ModulePatch
+    internal class ScavProfileLoad_Override : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_46));
 

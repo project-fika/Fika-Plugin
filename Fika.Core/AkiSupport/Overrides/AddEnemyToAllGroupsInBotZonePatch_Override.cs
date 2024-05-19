@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Overrides
 {
-    internal class AddEnemyToAllGroupsInBotZonePatchOverride : ModulePatch
+    internal class AddEnemyToAllGroupsInBotZonePatch_Override : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -37,7 +37,9 @@ namespace Fika.Core.AkiSupport.Overrides
             if (aggressor is ObservedCoopPlayer)
             {
                 if (target.IsYourPlayer)
+                {
                     return false;
+                }
             }
 
             BotZone botZone = groupOwner.AIData.BotOwner.BotsGroup.BotZone;
