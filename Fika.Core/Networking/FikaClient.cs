@@ -478,7 +478,7 @@ namespace Fika.Core.Networking
 #if DEBUG
                                 clientLogger.LogWarning("Enabling " + packet.BotNetId); 
 #endif
-                                botToEnable.gameObject.SetActive(true); 
+                                botToEnable.gameObject.SetActive(true);
                             }
                             else
                             {

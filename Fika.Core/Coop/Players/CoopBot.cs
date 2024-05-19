@@ -9,7 +9,6 @@ using EFT.InventoryLogic;
 using Fika.Core.Coop.BotClasses;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;

@@ -86,7 +86,7 @@ namespace Fika.Core.UI.Patches
 
                     if (sendItemUI.PlayersDropdown.options.Count >= lastIndex)
                     {
-                        sendItemUI.PlayersDropdown.value = lastIndex; 
+                        sendItemUI.PlayersDropdown.value = lastIndex;
                     }
 
                     sendItemUI.PlayersDropdown.onValueChanged.AddListener((value) =>

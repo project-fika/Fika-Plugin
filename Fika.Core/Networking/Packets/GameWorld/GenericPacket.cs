@@ -36,7 +36,7 @@ namespace Fika.Core.Networking
                     PingType = (PingFactory.EPingType)reader.GetByte();
                     PingColor = reader.GetColor();
                     Nickname = reader.GetString();
-                    break;                
+                    break;
                 case EPackageType.TrainSync:
                     DepartureTime = reader.GetLong();
                     break;

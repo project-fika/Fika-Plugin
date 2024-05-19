@@ -16,9 +16,9 @@ using Fika.Core.AkiSupport.Scav;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
-using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Patches;
+using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.World;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
@@ -214,7 +214,7 @@ namespace Fika.Core
 
             string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
 
-            Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);            
+            Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
 
             BundleLoaderPlugin = new();
             BundleLoaderPlugin.Create();
@@ -397,7 +397,7 @@ namespace Fika.Core
             ips.Add("0.0.0.0");
 
             try
-            {                
+            {
                 foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
                     foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)
