@@ -743,9 +743,16 @@ namespace Fika.Core.Coop.GameMode
                 while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
                 {
                     Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
-                    MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Request Sent... {retryCount + 1}");
+                    MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
                     await Task.Delay(3000);
                     retryCount++;
+                }
+
+                // TODO: [CWX] Remove before final PR
+                if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+                {
+                    // add synthetic retrys
+                    await Task.Delay(12000); // 4 extra trys
                 }
 
                 if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
@@ -889,6 +896,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
+            coopHandler.StartSpawning = true;
             await WaitForPlayers();
 
             Destroy(customButton);
@@ -934,7 +942,6 @@ namespace Fika.Core.Coop.GameMode
 
                 FikaServer server = Singleton<FikaServer>.Instance;
 
-                numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
                 do
                 {
                     numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);

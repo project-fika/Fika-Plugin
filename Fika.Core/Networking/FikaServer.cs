@@ -229,7 +229,8 @@ namespace Fika.Core.Networking
 
             Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
 
-            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1200 is null).ToArray();
+            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1200 is null).ToArray(); // will ignore corpses
+            // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
 
 			ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes, 

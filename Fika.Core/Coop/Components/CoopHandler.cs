@@ -61,6 +61,7 @@ namespace Fika.Core.Coop.Components
         internal static GameObject CoopHandlerParent;
 
         private Coroutine PingRoutine;
+        public bool StartSpawning = false;
 
         #endregion
 
@@ -283,6 +284,11 @@ namespace Fika.Core.Coop.Components
         {
             while (RunAsyncTasks)
             {
+                while (!StartSpawning)
+                {
+                    await Task.Delay(1000);
+                }
+
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
                 int waitTime = 2500;
                 if (coopGame.Status == GameStatus.Started)
@@ -294,7 +300,6 @@ namespace Fika.Core.Coop.Components
                 if (Players == null)
                 {
                     continue;
-
                 }
 
                 ReadFromServerCharacters();
@@ -403,6 +408,11 @@ namespace Fika.Core.Coop.Components
         {
             while (true)
             {
+                if (!StartSpawning)
+                {
+                    yield return new WaitUntil(() => StartSpawning);
+                }
+
                 yield return new WaitForSeconds(1f);
 
                 if (Singleton<AbstractGame>.Instantiated)
