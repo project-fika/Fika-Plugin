@@ -159,11 +159,8 @@ namespace Fika.Core.Coop.Players
 
         public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)
         {
-            BotFirearmControllerHandler handler = new()
-            {
-                coopBot = this,
-                weapon = weapon
-            };
+            BotFirearmControllerHandler handler = new(this, weapon);
+
             bool flag = false;
             FirearmController firearmController;
             if ((firearmController = _handsController as FirearmController) != null)
@@ -342,8 +339,13 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class BotFirearmControllerHandler
+        private class BotFirearmControllerHandler(CoopBot coopBot, Weapon weapon)
         {
+            private readonly CoopBot coopBot = coopBot;
+            public readonly Weapon weapon = weapon;
+            public Process<FirearmController, IFirearmHandsController> process;
+            public Action confirmCallback;
+
             internal BotFirearmController ReturnController()
             {
                 return BotFirearmController.Create(coopBot, weapon);
@@ -375,14 +377,6 @@ namespace Fika.Core.Coop.Players
                     confirmCallback();
                 }
             }
-
-            public CoopBot coopBot;
-
-            public Weapon weapon;
-
-            public Process<FirearmController, IFirearmHandsController> process;
-
-            public Action confirmCallback;
         }
     }
 }
