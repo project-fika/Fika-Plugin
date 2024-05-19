@@ -26,7 +26,9 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
+using Fika.Core.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -46,6 +48,8 @@ namespace Fika.Core
     [BepInProcess("EscapeFromTarkov.exe")]
     [BepInDependency("com.spt-aki.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     [BepInDependency("com.spt-aki.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
+    [BepInDependency("com.spt-aki.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.spt-aki.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
         /// <summary>
@@ -61,9 +65,9 @@ namespace Fika.Core
         /// This is the Official EFT Version defined by BSG
         /// </summary>
         public static string EFTVersionMajor { get; internal set; }
-        public static string[] LoadedPlugins { get; private set; }
         public ManualLogSource FikaLogger { get => Logger; }
         public BotDifficulties BotDifficulties;
+        public FikaModHandler ModHandler = new();
         public string Locale { get; private set; } = "en";
         public string[] LocalIPs;
 
@@ -210,18 +214,7 @@ namespace Fika.Core
 
             string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
 
-            Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
-
-            // Store all loaded plugins (mods) to improve compatibility
-            List<string> tempPluginInfos = [];
-
-            foreach (PluginInfo plugin in Chainloader.PluginInfos.Values)
-            {
-                Logger.LogInfo($"Adding {plugin.Metadata.Name} to loaded mods.");
-                tempPluginInfos.Add(plugin.Metadata.Name);
-            }
-
-            LoadedPlugins = [.. tempPluginInfos];
+            Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);            
 
             BundleLoaderPlugin = new();
             BundleLoaderPlugin.Create();
@@ -237,6 +230,18 @@ namespace Fika.Core
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
+
+            StartCoroutine(RunModHandler());
+        }
+
+        /// <summary>
+        /// Coroutine to ensure all mods are loaded by waiting 5 seconds
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator RunModHandler()
+        {
+            yield return new WaitForSeconds(5);
+            ModHandler.Run();
         }
 
         private void GetClientConfig()
