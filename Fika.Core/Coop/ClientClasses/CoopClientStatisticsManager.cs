@@ -7,12 +7,6 @@ namespace Fika.Core.Coop.ClientClasses
     {
         public Profile Profile = profile;
 
-        public override void BeginStatisticsSession()
-        {
-            //player_0.OnSpecialPlaceVisited += OnSpecialPlaceVisited;
-            base.BeginStatisticsSession();
-        }
-
         public new void Init(Profile profile, IHealthController healthController)
         {
             Profile_0 = Profile;
