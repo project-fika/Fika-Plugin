@@ -121,8 +121,8 @@ namespace Fika.Core.Coop.Custom
                 if (!bot.gameObject.activeSelf)
                 {
                     ActivateBot(bot);
-                    return;
                 }
+                return;
             }
 
             if (!bot.HealthController.IsAlive)
