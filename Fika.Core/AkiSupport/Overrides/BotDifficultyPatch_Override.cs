@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Overrides
 {
-    public class BotDifficultyPatchOverride : ModulePatch
+    public class BotDifficultyPatch_Override : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

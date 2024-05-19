@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Overrides
 {
-    internal class MaxBotPatchOverride : ModulePatch
+    internal class MaxBotPatch_Override : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

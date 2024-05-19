@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Fika.Core.UI.Patches
 {
-    public class InventoryScrollPatch : ModulePatch
+    public class InventoryScroll_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

@@ -1540,9 +1540,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             GClass579?.Stop();
-
             nonWavesSpawnScenario_0?.Stop();
-
             wavesSpawnScenario_0?.Stop();
 
             try

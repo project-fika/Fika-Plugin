@@ -15,7 +15,7 @@ using UnityEngine;
 
 namespace Fika.Core.UI.Patches
 {
-    public class ItemContextPatch : ModulePatch
+    public class ItemContext_Patch : ModulePatch
     {
         private static int lastIndex = 0;
 

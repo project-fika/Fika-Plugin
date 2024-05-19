@@ -13,7 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Coop.LocalGame
+namespace Fika.Core.Coop.Patches.LocalGame
 {
     /// <summary>
     /// Created by: Paulov

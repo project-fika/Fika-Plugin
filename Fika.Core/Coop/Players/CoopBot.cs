@@ -306,7 +306,9 @@ namespace Fika.Core.Coop.Players
 
         public override void OnDestroy()
         {
-            FikaPlugin.Instance.FikaLogger.LogInfo("Destroying " + ProfileId);
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogInfo("Destroying " + ProfileId); 
+#endif
             if (Singleton<FikaServer>.Instantiated)
             {
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;

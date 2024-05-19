@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Fika.Core.AkiSupport.Overrides
 {
-    public class OfflineRaidSettingsMenuPatchOverride : ModulePatch
+    public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

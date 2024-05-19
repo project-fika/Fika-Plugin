@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Matchmaker
 {
-    public class MatchmakerAcceptScreenAwakePatch : ModulePatch
+    public class MatchmakerAcceptScreen_Awake_Patch : ModulePatch
     {
         [Serializable]
         private class ServerStatus

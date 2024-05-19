@@ -16,7 +16,7 @@ using Fika.Core.AkiSupport.Scav;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
-using Fika.Core.Coop.LocalGame;
+using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.World;
@@ -189,21 +189,21 @@ namespace Fika.Core
 
             SetupConfig();
 
-            new FikaVersionLabelPatch().Enable();
-            new DisableReadyButtonPatch().Enable();
-            new DisableInsuranceReadyButtonPatch().Enable();
-            new DisableMatchSettingsReadyButton().Enable();
+            new FikaVersionLabel_Patch().Enable();
+            new DisableReadyButton_Patch().Enable();
+            new DisableInsuranceReadyButton_Patch().Enable();
+            new DisableMatchSettingsReadyButton_Patch().Enable();
             new TarkovApplication_LocalGameCreator_Patch().Enable();
-            new DeathFadePatch().Enable();
-            new NonWaveSpawnScenarioPatch().Enable();
-            new WaveSpawnScenarioPatch().Enable();
-            new WeatherNodePatch().Enable();
-            new EnvironmentUIRootPatch().Enable();
-            new MatchmakerAcceptScreenAwakePatch().Enable();
-            new MatchmakerAcceptScreenShowPatch().Enable();
+            new DeathFade_Patch().Enable();
+            new NonWaveSpawnScenario_Patch().Enable();
+            new WaveSpawnScenario_Patch().Enable();
+            new WeatherNode_Patch().Enable();
+            new EnvironmentUIRoot_Patch().Enable();
+            new MatchmakerAcceptScreen_Awake_Patch().Enable();
+            new MatchmakerAcceptScreen_Show_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
-            new BotCacher().Enable();
-            new InventoryScrollPatch().Enable();
+            new BotCacher_Patch().Enable();
+            new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
 #if GOLDMASTER
             new TOSPatch().Enable();
@@ -225,7 +225,7 @@ namespace Fika.Core
 
             if (AllowItemSending)
             {
-                new ItemContextPatch().Enable();
+                new ItemContext_Patch().Enable();
             }
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
@@ -452,13 +452,13 @@ namespace Fika.Core
 
         private void EnableOverridePatches()
         {
-            new BotDifficultyPatchOverride().Enable();
-            new ScavProfileLoadOverride().Enable();
-            new MaxBotPatchOverride().Enable();
-            new BotTemplateLimitPatchOverride().Enable();
-            new OfflineRaidSettingsMenuPatchOverride().Enable();
-            new AddEnemyToAllGroupsInBotZonePatchOverride().Enable();
-            new FikaAirdropFlarePatch().Enable();
+            new BotDifficultyPatch_Override().Enable();
+            new ScavProfileLoad_Override().Enable();
+            new MaxBotPatch_Override().Enable();
+            new BotTemplateLimitPatch_Override().Enable();
+            new OfflineRaidSettingsMenuPatch_Override().Enable();
+            new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
+            new FikaAirdropFlare_Patch().Enable();
         }
 
         private void LogDependencyErrors()

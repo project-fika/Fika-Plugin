@@ -11,9 +11,9 @@ namespace Fika.Core.UI
     /// <summary>
     /// Created by: Lacyway
     /// </summary>
-    public class DisableMatchSettingsReadyButton : ModulePatch
+    public class DisableReadyButton_Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(MatchmakerOfflineRaidScreen).GetMethod(nameof(MatchmakerOfflineRaidScreen.Awake));
+        protected override MethodBase GetTargetMethod() => typeof(MatchMakerSelectionLocationScreen).GetMethod("method_7", BindingFlags.Public | BindingFlags.Instance);
 
         [PatchPostfix]
         static void PatchPostfix()

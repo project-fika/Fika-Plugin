@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Overrides
 {
-    internal class AddEnemyToAllGroupsInBotZonePatchOverride : ModulePatch
+    internal class AddEnemyToAllGroupsInBotZonePatch_Override : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
