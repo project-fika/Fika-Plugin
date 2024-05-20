@@ -743,7 +743,7 @@ namespace Fika.Core.Coop.GameMode
                 MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Reconnecting to host...");
                 PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
                 RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
-                profile.Inventory.Equipment = MatchmakerAcceptPatches.ReconnectPacket.Value.Equipment;
+                profile = MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
             }
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
@@ -767,7 +767,7 @@ namespace Fika.Core.Coop.GameMode
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
                 myPlayer.MovementContext.SetPoseLevel(MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel, true);
                 myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
-                myPlayer.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
+                // myPlayer.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
             }
 
             if (RaidSettings.MetabolismDisabled)

@@ -2,12 +2,13 @@ using EFT;
 using EFT.Interactive;
 using LiteNetLib.Utils;
 using UnityEngine;
+using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
     public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, EPlayerPose playerPose, float poseLevel, 
     bool isProne, WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes
-    , EquipmentClass equipment, LootItemPositionClass[] items): INetSerializable
+    , PlayerInfoPacket profile, LootItemPositionClass[] items): INetSerializable
     {
         public int NetId;
         public Vector3 Position;
@@ -23,7 +24,7 @@ namespace Fika.Core.Networking
         public LampController[] Lights;
         public int SmokeAmount;
         public GStruct34[] Smokes;
-        public EquipmentClass Equipment;
+        public PlayerInfoPacket Profile;
         public int ItemAmount;
         public GClass1202 Items;
 
@@ -79,7 +80,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            Equipment = (EquipmentClass)reader.GetItem();
+            Profile = PlayerInfoPacket.Deserialize(reader);
             Items = reader.GetLocationItem();
         }
 
@@ -131,7 +132,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            writer.PutItem(equipment);
+            PlayerInfoPacket.Serialize(writer, profile);
 
             if (items.Length > 0)
             {

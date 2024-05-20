@@ -214,9 +214,13 @@ namespace Fika.Core.Networking
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1200 is null).ToArray(); // will ignore corpses
             // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
 
+            // activehealthcontroller dictionary_0 each .Health.Value and .IsDestroyed - call method_0 to change
+            // 
+
 			ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
-                playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose, interactiveObjects, windows, lights, smokes, 
-                playerToUse.Profile.Inventory.Equipment, items);
+                playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose, 
+                interactiveObjects, windows, lights, smokes, 
+                new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile }, items);
 
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
