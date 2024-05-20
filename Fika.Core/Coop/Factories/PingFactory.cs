@@ -4,6 +4,7 @@ using EFT.CameraControl;
 using EFT.InventoryLogic;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
+using Fika.Core.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = System.Object;
@@ -77,54 +78,6 @@ public static class PingFactory
                 }
             }
 
-            Camera camera = CameraClass.Instance.Camera;
-            Vector3 screenPoint = Vector3.zero;
-
-            if (mainPlayer.ProceduralWeaponAnimation.IsAiming && mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic)
-            {
-                SightComponent currentSightComponent = mainPlayer.ProceduralWeaponAnimation.CurrentAimingMod;
-
-                if (currentSightComponent != null)
-                {
-                    float opticZoomLevel = currentSightComponent.GetCurrentOpticZoom();
-
-                    //only calculate optic screen point if zoom is higher than 1
-                    if (opticZoomLevel > 1.0f)
-                    {
-                        Camera opticCamera = CameraClass.Instance.OpticCameraManager.Camera;
-
-                        if (opticCamera != null)
-                        {
-                            //calculate where the optic is relative to the center of the screen due to weapon sway
-                            OpticSight currentOptic = mainPlayer.ProceduralWeaponAnimation.HandsContainer.Weapon.GetComponentInChildren<OpticSight>();
-
-                            if (currentOptic != null)
-                            {
-                                Transform opticLensTransform = currentOptic.LensRenderer.transform;
-                                Vector3 opticCenterScreenPosition = camera.WorldToScreenPoint(opticLensTransform.position);
-                                Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(Screen.width, Screen.height, 0) / 2);
-
-                                //calculate where the zoomed in camera & world camera correspond to each other
-                                float opticScale = (Screen.height / opticCamera.scaledPixelHeight);
-                                Vector3 opticCameraOffset = new Vector3(x: (camera.pixelWidth / 2 - opticCamera.pixelWidth / 2), y: (camera.pixelHeight / 2 - opticCamera.pixelHeight / 2), z: 0);
-                                Vector3 scopeScreenPoint = (opticCamera.WorldToScreenPoint(hitPoint) + opticCameraOffset) * opticScale;
-
-                                if (scopeScreenPoint.z > 0)
-                                {
-                                    screenPoint = scopeScreenPoint + opticCenterScreenOffset;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            //no optic, not aiming, or optic is not zoomed (thus no pip camera component)
-            if (screenPoint ==  Vector3.zero)
-            {
-                screenPoint = camera.WorldToScreenPoint(hitPoint);
-            }
-
             if (CameraClass.Instance.SSAA != null && CameraClass.Instance.SSAA.isActiveAndEnabled)
             {
                 int outputWidth = CameraClass.Instance.SSAA.GetOutputWidth();
@@ -132,7 +85,7 @@ public static class PingFactory
                 screenScale = outputWidth / inputWidth;
             }
 
-            if (screenPoint.z > 0)
+            if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint))
             {
                 float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(x: Screen.width, y: Screen.height, 0) / 2);
 
