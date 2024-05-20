@@ -2,17 +2,18 @@
 
 using Aki.Reflection.Patching;
 using EFT.UI;
+using EFT.UI.Matchmaker;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.UI.Patches
+namespace Fika.Core.UI
 {
     /// <summary>
     /// Created by: Lacyway
     /// </summary>
-    public class DisableInsuranceReadyButtonPatch : ModulePatch
+    public class DisableMatchSettingsReadyButton_Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(MainMenuController).GetMethod(nameof(MainMenuController.method_42));
+        protected override MethodBase GetTargetMethod() => typeof(MatchmakerOfflineRaidScreen).GetMethod(nameof(MatchmakerOfflineRaidScreen.Awake));
 
         [PatchPostfix]
         static void PatchPostfix()

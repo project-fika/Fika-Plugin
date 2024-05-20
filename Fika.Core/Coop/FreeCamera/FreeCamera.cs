@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.InputSystem;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using System.Collections.Generic;

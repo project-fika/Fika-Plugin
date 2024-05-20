@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Aki.Custom.Airdrops.Patches
 {
-    public class FikaAirdropFlarePatch : ModulePatch
+    public class FikaAirdropFlare_Patch : ModulePatch
     {
         private static readonly string[] _usableFlares = ["624c09cfbc2e27219346d955", "62389ba9a63f32501b1b4451"];
 

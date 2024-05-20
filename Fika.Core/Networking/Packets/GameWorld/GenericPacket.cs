@@ -37,9 +37,6 @@ namespace Fika.Core.Networking
                     PingColor = reader.GetColor();
                     Nickname = reader.GetString();
                     break;
-                case EPackageType.LoadBot:
-                    BotNetId = reader.GetInt();
-                    break;
                 case EPackageType.TrainSync:
                     DepartureTime = reader.GetLong();
                     break;
@@ -50,7 +47,10 @@ namespace Fika.Core.Networking
                 case EPackageType.TraderServiceNotification:
                     TraderServiceType = (ETraderServiceType)reader.GetInt();
                     break;
+                case EPackageType.LoadBot:
                 case EPackageType.DisposeBot:
+                case EPackageType.EnableBot:
+                case EPackageType.DisableBot:
                     BotNetId = reader.GetInt();
                     break;
             }
@@ -68,9 +68,6 @@ namespace Fika.Core.Networking
                     writer.Put(PingColor);
                     writer.Put(Nickname);
                     break;
-                case EPackageType.LoadBot:
-                    writer.Put(BotNetId);
-                    break;
                 case EPackageType.TrainSync:
                     writer.Put(DepartureTime);
                     break;
@@ -81,7 +78,10 @@ namespace Fika.Core.Networking
                 case EPackageType.TraderServiceNotification:
                     writer.Put((int)TraderServiceType);
                     break;
+                case EPackageType.LoadBot:
                 case EPackageType.DisposeBot:
+                case EPackageType.EnableBot:
+                case EPackageType.DisableBot:
                     writer.Put(BotNetId);
                     break;
             }
@@ -92,11 +92,13 @@ namespace Fika.Core.Networking
     {
         ClientExtract,
         Ping,
-        LoadBot,
         TrainSync,
         ExfilCountdown,
         TraderServiceNotification,
+        LoadBot,
         DisposeBot,
+        EnableBot,
+        DisableBot,
         RemoveAirdropManager
     }
 }

@@ -8,9 +8,9 @@ using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Overrides
 {
-    internal class BotTemplateLimitPatchOverride : ModulePatch
+    internal class BotTemplateLimitPatch_Override : ModulePatch
     {
-        static BotTemplateLimitPatchOverride()
+        static BotTemplateLimitPatch_Override()
         {
             _ = nameof(BotsPresets.CreateProfile);
             _ = nameof(WaveInfo.Difficulty);

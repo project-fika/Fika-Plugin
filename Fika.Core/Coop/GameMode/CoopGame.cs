@@ -1,11 +1,13 @@
 ﻿using Aki.Custom.Airdrops;
 using Aki.Reflection.Utils;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
+using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
@@ -17,7 +19,9 @@ using EFT.UI.BattleTimer;
 using EFT.UI.Screens;
 using EFT.Weather;
 using Fika.Core.Coop.BTR;
+using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
@@ -55,7 +59,8 @@ namespace Fika.Core.Coop.GameMode
         public bool forceStart = false;
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
-        private Dictionary<int, int> botQueue = [];
+        private readonly Dictionary<int, int> botQueue = [];
+        private FikaDynamicAI dynamicAI;
 
         public RaidSettings RaidSettings { get; private set; }
 
@@ -111,10 +116,10 @@ namespace Fika.Core.Coop.GameMode
             coopGame.nonWavesSpawnScenario_0.ImplementWaveSettings(wavesSettings);
 
             // Waves Scenario setup
-            WildSpawnWave[] waves = EFT.LocalGame.smethod_7(wavesSettings, location.waves);
+            WildSpawnWave[] waves = LocalGame.smethod_7(wavesSettings, location.waves);
             coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, new Action<BotWaveDataClass>(coopGame.botsController_0.ActivateBotsByWave), location);
 
-            BossLocationSpawn[] bossSpawns = EFT.LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
+            BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.GClass579 = GClass579.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
             if (useCustomWeather && MatchmakerAcceptPatches.IsServer)
@@ -358,7 +363,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                int num = 999 + Bots.Count;
+                int num = method_12();
                 profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
 
                 FikaServer server = Singleton<FikaServer>.Instance;
@@ -369,7 +374,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (server.NetServer.ConnectedPeersCount > 0)
                 {
-                    await WaitForPlayersToLoadBotProfile(netId); 
+                    await WaitForPlayersToLoadBotProfile(netId);
                 }
 
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
@@ -387,7 +392,7 @@ namespace Fika.Core.Coop.GameMode
                 else
                 {
 #if DEBUG
-                    Logger.LogInfo($"Bot {profile.Info.Settings.Role.ToString()} created at {position} SUCCESSFULLY!");
+                    Logger.LogInfo($"Bot {profile.Info.Settings.Role} created at {position} SUCCESSFULLY!");
 #endif
                     Bots.Add(localPlayer.ProfileId, localPlayer);
                 }
@@ -543,8 +548,7 @@ namespace Fika.Core.Coop.GameMode
                         Destroy(fikaStartButton);
                     }
 
-                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
-                    newDynamicAI?.AddHumans();*/
+                    dynamicAI?.AddHumans();
 
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     await FikaRequestHandler.UpdateSetStatus(status);
@@ -594,8 +598,7 @@ namespace Fika.Core.Coop.GameMode
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
                     }
 
-                    /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
-                    newDynamicAI?.AddHumans();*/
+                    dynamicAI?.AddHumans();
                 }
                 else if (MatchmakerAcceptPatches.IsClient)
                 {
@@ -706,31 +709,6 @@ namespace Fika.Core.Coop.GameMode
             await CreateCoopHandler();
             CoopHandler.GetCoopHandler().LocalGameInstance = this;
 
-            spawnPoints = GClass2928.CreateFromScene(new DateTime?(GClass1296.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)), Location_0.SpawnPointParams);
-            int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-            GStruct380 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-            SpawnSystem = GClass2929.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
-
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
-                await SendOrReceiveSpawnPoint();
-                // [CWX] after disconnect, and trying to host, make sure this is set back to defaults
-                // TODO: move working out if reconnect to earlier on, to mitigate issues hosting your own and joining a different game
-                MatchmakerAcceptPatches.IsReconnect = false;
-                MatchmakerAcceptPatches.ReconnectPacket = null;
-            }
-
-            if (MatchmakerAcceptPatches.IsClient)
-            {
-                await SendOrReceiveSpawnPoint();
-                if (spawnPoint == null)
-                {
-                    Logger.LogWarning("SpawnPoint was null after retrieving it from the server!");
-                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
-                }
-            }
-
             // [CWX]
             Vector3 PosToSpawn = spawnPoint.Position;
             Quaternion RotToSpawn = spawnPoint.Rotation;
@@ -769,9 +747,9 @@ namespace Fika.Core.Coop.GameMode
             }
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
-                false, UpdateQueue, Player.EUpdateMode.Auto, Player.EUpdateMode.Auto,
+                false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 GClass549.Config.CharacterController.ClientPlayerMode, getSensitivity,
-                getAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, questController);
+                getAimingSensitivity, new GClass1445(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, statisticsManager);
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
@@ -782,7 +760,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
-            
+
             // [CWX]
             if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
@@ -926,6 +904,121 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, InventoryControllerClass inventoryController, Callback runCallback)
+        {
+            Status = GameStatus.Running;
+            UnityEngine.Random.InitState((int)GClass1296.Now.Ticks);
+
+            LocationSettingsClass.Location location;
+            if (Location_0.IsHideout)
+            {
+                location = Location_0;
+            }
+            else
+            {
+                using (GClass21.StartWithToken("LoadLocation"))
+                {
+                    int num = UnityEngine.Random.Range(1, 6);
+                    method_6(backendUrl, Location_0.Id, num);
+                    location = await ginterface145_0.LoadLocationLoot(Location_0.Id, num);
+                }
+            }
+
+            BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
+            {
+                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
+                if (gameObject != null)
+                {
+                    transform.InstantiatePrefab(gameObject);
+                }
+                else
+                {
+                    Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
+                }
+            }
+            GClass785 config = GClass549.Config;
+            if (config.FixedFrameRate > 0f)
+            {
+                FixedDeltaTime = 1f / config.FixedFrameRate;
+            }
+
+            using (GClass21.StartWithToken("player create"))
+            {
+                Player player = await CreateLocalPlayer();
+                dictionary_0.Add(player.ProfileId, player);
+                gparam_0 = func_1(player);
+                PlayerCameraController.Create(gparam_0.Player);
+                CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
+                CameraClass.Instance.IsActive = false;
+            }
+
+            StartHandler startHandler = new(this, botsSettings, SpawnSystem, runCallback);
+
+            await method_11(location, startHandler.FinishLoading);
+        }
+
+        private class StartHandler(BaseLocalGame<GamePlayerOwner> localGame, BotControllerSettings botSettings, ISpawnSystem spawnSystem, Callback runCallback)
+        {
+            private readonly BaseLocalGame<GamePlayerOwner> localGame = localGame;
+            private readonly BotControllerSettings botSettings = botSettings;
+            private readonly ISpawnSystem spawnSystem = spawnSystem;
+            private readonly Callback runCallback = runCallback;
+
+            public void FinishLoading()
+            {
+                localGame.method_5(botSettings, spawnSystem, runCallback);
+            }
+        }
+
+        private async Task<Player> CreateLocalPlayer()
+        {
+            int num = method_12();
+
+            Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
+            if (GClass549.Config.UseHandsFastAnimator)
+            {
+                eupdateMode = Player.EUpdateMode.Manual;
+            }
+
+            spawnPoints = GClass2928.CreateFromScene(new DateTime?(GClass1296.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)), Location_0.SpawnPointParams);
+            int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+            GStruct380 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+            SpawnSystem = GClass2929.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
+
+            if (MatchmakerAcceptPatches.IsServer)
+            {
+                spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                await SendOrReceiveSpawnPoint();
+                // [CWX] after disconnect, and trying to host, make sure this is set back to defaults
+                // TODO: move working out if reconnect to earlier on, to mitigate issues hosting your own and joining a different game
+                MatchmakerAcceptPatches.IsReconnect = false;
+                MatchmakerAcceptPatches.ReconnectPacket = null;
+            }
+
+            if (MatchmakerAcceptPatches.IsClient)
+            {
+                await SendOrReceiveSpawnPoint();
+                if (spawnPoint == null)
+                {
+                    Logger.LogWarning("SpawnPoint was null after retrieving it from the server!");
+                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                }
+            }
+
+            IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
+
+            LocalPlayer myPlayer = await vmethod_2(num, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, Profile_0, false,
+                UpdateQueue, eupdateMode, Player.EUpdateMode.Auto, GClass549.Config.CharacterController.ClientPlayerMode,
+                new Func<float>(Class1362.class1362_0.method_1), new Func<float>(Class1362.class1362_0.method_2),
+                statisticsManager, null, null);
+
+            myPlayer.Location = Location_0.Id;
+            myPlayer.OnEpInteraction += OnEpInteraction;
+
+            return myPlayer;
+        }
+
         private async Task WaitForPlayers()
         {
             Logger.LogInfo("Starting task to wait for other players.");
@@ -1001,7 +1094,6 @@ namespace Fika.Core.Coop.GameMode
                 NetDataWriter writer = new();
                 writer.Reset();
                 client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-                numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1); // TODO: this needed?
                 do
                 {
                     numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
@@ -1107,7 +1199,7 @@ namespace Fika.Core.Coop.GameMode
                     botsController_0.BotSpawner.SetMaxBots(limits);
                 }
 
-                //gameObject.AddComponent<FikaNewDynamicAI>();
+                dynamicAI = gameObject.AddComponent<FikaDynamicAI>();
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
@@ -1128,23 +1220,6 @@ namespace Fika.Core.Coop.GameMode
             }
 
             BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
-            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
-            {
-                Singleton<GameWorld>.Instance.HalloweenEventController = new();
-                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
-                if (gameObject != null)
-                {
-                    transform.InstantiatePrefab(gameObject);
-                }
-                else
-                {
-                    Logger.LogError("CoopGame::vmethod_4: Halloween controller could not be instantiated!");
-                }
-            }
-            if (GClass549.Config.FixedFrameRate > 0f)
-            {
-                FixedDeltaTime = 1f / GClass549.Config.FixedFrameRate;
-            }
 
             bool isWinter = BackEndSession.IsWinter;
             Class420 winterEventController = new();
@@ -1191,6 +1266,8 @@ namespace Fika.Core.Coop.GameMode
                 }
 
                 GClass579.Run(EBotsSpawnMode.Anyway);
+
+                FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
             }
             else
             {
@@ -1218,6 +1295,14 @@ namespace Fika.Core.Coop.GameMode
             runCallback.Succeed();
 
             yield break;
+        }
+
+        private void DynamicAI_SettingChanged(object sender, EventArgs e)
+        {
+            if (dynamicAI != null)
+            {
+                dynamicAI.SettingChanged(FikaPlugin.DynamicAI.Value);
+            }
         }
 
         private void SetupBorderzones()
@@ -1531,9 +1616,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             GClass579?.Stop();
-
             nonWavesSpawnScenario_0?.Stop();
-
             wavesSpawnScenario_0?.Stop();
 
             try
@@ -1723,7 +1806,6 @@ namespace Fika.Core.Coop.GameMode
                 Singleton<GameWorld>.Instance.MineManager.OnExplosion -= OnMineExplode;
             }
 
-            // Add these to coopgame directly?
             if (MatchmakerAcceptPatches.IsServer)
             {
                 CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
@@ -1732,11 +1814,13 @@ namespace Fika.Core.Coop.GameMode
                 Singleton<FikaServer>.Instance?.NetServer.Stop();
                 Singleton<FikaServer>.TryRelease(Singleton<FikaServer>.Instance);
 
-                /*FikaNewDynamicAI newDynamicAI = gameObject.GetComponent<FikaNewDynamicAI>();
+                FikaDynamicAI newDynamicAI = gameObject.GetComponent<FikaDynamicAI>();
                 if (newDynamicAI != null)
                 {
                     Destroy(newDynamicAI);
-                }*/
+                }
+
+                FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {

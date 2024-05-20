@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Fika.Core.Coop.FreeCamera
 {
-    internal class FadeBlackScreenPatch : ModulePatch
+    internal class FadeBlackScreen_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.FadeBlackScreen));
 
@@ -18,7 +18,7 @@ namespace Fika.Core.Coop.FreeCamera
         }
     }
 
-    internal class StartBlackScreenShowPatch : ModulePatch
+    internal class StartBlackScreenShow_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.StartBlackScreenShow));
 
@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.FreeCamera
         }
     }
 
-    internal class SetBlackImageAlphaPatch : ModulePatch
+    internal class SetBlackImageAlpha_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.SetBlackImageAlpha));
 

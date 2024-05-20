@@ -3,9 +3,9 @@ using EFT;
 using Fika.Core.Coop.Matchmaker;
 using System.Reflection;
 
-namespace Fika.Core.Coop.LocalGame
+namespace Fika.Core.Coop.Patches.LocalGame
 {
-    internal class WaveSpawnScenarioPatch : ModulePatch
+    internal class WaveSpawnScenario_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(WavesSpawnScenario).GetMethod(nameof(WavesSpawnScenario.Run));
 

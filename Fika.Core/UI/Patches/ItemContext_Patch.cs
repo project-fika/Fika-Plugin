@@ -15,7 +15,7 @@ using UnityEngine;
 
 namespace Fika.Core.UI.Patches
 {
-    public class ItemContextPatch : ModulePatch
+    public class ItemContext_Patch : ModulePatch
     {
         private static int lastIndex = 0;
 
@@ -86,7 +86,7 @@ namespace Fika.Core.UI.Patches
 
                     if (sendItemUI.PlayersDropdown.options.Count >= lastIndex)
                     {
-                        sendItemUI.PlayersDropdown.value = lastIndex; 
+                        sendItemUI.PlayersDropdown.value = lastIndex;
                     }
 
                     sendItemUI.PlayersDropdown.onValueChanged.AddListener((value) =>

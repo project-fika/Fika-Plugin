@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class BotCacher : ModulePatch
+    public class BotCacher_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

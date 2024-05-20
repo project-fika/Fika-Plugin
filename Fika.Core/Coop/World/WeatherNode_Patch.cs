@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.World
 {
-    internal class WeatherNodePatch : ModulePatch
+    internal class WeatherNode_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod() => typeof(WeatherController).GetMethod(nameof(WeatherController.method_4));
 
@@ -15,7 +15,9 @@ namespace Fika.Core.Coop.World
         public static void Postfix(WeatherController __instance, WeatherClass[] nodes)
         {
             if (MatchmakerAcceptPatches.IsClient)
+            {
                 return;
+            }
 
             MatchmakerAcceptPatches.Nodes = nodes;
         }

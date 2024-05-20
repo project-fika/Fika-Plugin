@@ -52,12 +52,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override Vector3 WeaponDirection => -CurrentFireport.up;
 
-        private void Awake()
+        protected void Awake()
         {
             coopPlayer = GetComponent<CoopPlayer>();
         }
 
-        private void Start()
+        protected void Start()
         {
             _objectInHandsAnimator.SetAiming(false);
             aimMovementSpeed = coopPlayer.Skills.GetWeaponInfo(Item).AimMovementSpeed;
