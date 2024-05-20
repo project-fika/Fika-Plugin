@@ -85,7 +85,7 @@ public static class PingFactory
 
             if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint))
             {
-                float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(x: Screen.width, y: Screen.height, 0) / 2);
+                float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
 
                 if (distanceToCenter < 200)
                 {
