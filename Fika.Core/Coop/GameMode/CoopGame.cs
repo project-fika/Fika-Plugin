@@ -719,16 +719,13 @@ namespace Fika.Core.Coop.GameMode
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
                 Logger.LogDebug($"{nameof(vmethod_2)}:Unable to find {nameof(CoopHandler)}");
-                await Task.Delay(5000);
+                throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (RaidSettings.MetabolismDisabled)
             {
-                if (RaidSettings.MetabolismDisabled)
-                {
-                    myPlayer.HealthController.DisableMetabolism();
-                    NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
-                }
+                myPlayer.HealthController.DisableMetabolism();
+                NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;

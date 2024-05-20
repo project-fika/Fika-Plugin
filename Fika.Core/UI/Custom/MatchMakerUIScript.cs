@@ -34,14 +34,14 @@ namespace Fika.Core.UI.Custom
 
         private float _lastRefreshed;
 
-        private void Start()
+        protected void Start()
         {
             CreateMatchMakerUI();
 
             StartCoroutine(ServerQuery());
         }
 
-        void Update()
+        protected void Update()
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -64,7 +64,7 @@ namespace Fika.Core.UI.Custom
             Destroy(this);
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             StopQuery = true;
             if (NewBackButton != null)
@@ -232,12 +232,12 @@ namespace Fika.Core.UI.Custom
             pingingClient.NetClient?.Stop();
             pingingClient = null;
 
-            if (MatchmakerAcceptPatches.JoinMatch(RaidSettings, profileId, serverId, out CreateMatch result, out string errorMessage))
+            if (MatchmakerAcceptPatches.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
                 MatchmakerAcceptPatches.SetGroupId(result.ServerId);
                 MatchmakerAcceptPatches.SetTimestamp(result.Timestamp);
                 MatchmakerAcceptPatches.MatchingType = EMatchmakerType.GroupPlayer;
-                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
+                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;                
 
                 DestroyThis();
 

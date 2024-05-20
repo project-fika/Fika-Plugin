@@ -140,10 +140,6 @@ namespace Fika.Core.Coop.PacketHandlers
                 yield return null;
             }
 
-            Writer?.Reset();
-            SessionSettingsPacket settingsPacket = new(true);
-            Client?.SendData(Writer, ref settingsPacket, DeliveryMethod.ReliableOrdered);
-
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
             if (coopGame == null)
