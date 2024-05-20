@@ -5,6 +5,7 @@ using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,8 +17,9 @@ namespace Fika.Core.Coop.Custom
         private CoopHandler coopHandler;
         private int frameCounter;
         private int resetCounter;
-        private List<CoopPlayer> humanPlayers = [];
-        private List<CoopBot> bots = [];
+        private readonly List<CoopPlayer> humanPlayers = [];
+        private readonly List<CoopBot> bots = [];
+        private readonly HashSet<CoopBot> disabledBots = [];
         private BotSpawner spawner;
 
         protected void Awake()
@@ -65,11 +67,21 @@ namespace Fika.Core.Coop.Custom
 
         private void Spawner_OnBotCreated(BotOwner botOwner)
         {
+            if (botOwner.IsYourPlayer || !botOwner.IsAI)
+            {
+                return;
+            }
+
             bots.Add((CoopBot)botOwner.GetPlayer);
         }
 
         protected void Update()
         {
+            if (!FikaPlugin.DynamicAI.Value)
+            {
+                return;
+            }
+
             frameCounter++;
 
             if (frameCounter % resetCounter == 0)
@@ -93,7 +105,7 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        private void DeactivateBot(CoopPlayer bot)
+        private void DeactivateBot(CoopBot bot)
         {
 #if DEBUG
             logger.LogWarning($"Disabling {bot.gameObject.name}");
@@ -102,9 +114,18 @@ namespace Fika.Core.Coop.Custom
             bot.AIData.BotOwner.Memory.GoalEnemy = null;
             bot.AIData.BotOwner.PatrollingData.Pause();
             bot.gameObject.SetActive(false);
+
+            if (!disabledBots.Contains(bot))
+            {
+                disabledBots.Add(bot); 
+            }
+            else
+            {
+                logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
+            }
         }
 
-        private void ActivateBot(CoopPlayer bot)
+        private void ActivateBot(CoopBot bot)
         {
 #if DEBUG
             logger.LogWarning($"Enabling {bot.gameObject.name}");
@@ -112,17 +133,15 @@ namespace Fika.Core.Coop.Custom
             bot.gameObject.SetActive(true);
             bot.AIData.BotOwner.PatrollingData.Unpause();
             bot.AIData.BotOwner.PostActivate();
+            disabledBots.Remove(bot);
         }
 
         private void CheckForPlayers(CoopBot bot)
         {
-            if (!FikaPlugin.DynamicAI.Value)
+            // Do not run on bots that have no initialized yet
+            if (bot.AIData.BotOwner.BotState is EBotState.NonActive or EBotState.PreActive)
             {
-                if (!bot.gameObject.activeSelf)
-                {
-                    ActivateBot(bot);
-                    return;
-                }
+                return;
             }
 
             if (!bot.HealthController.IsAlive)
@@ -139,13 +158,16 @@ namespace Fika.Core.Coop.Custom
                     notInRange++;
                     continue;
                 }
+
                 if (!humanPlayer.HealthController.IsAlive)
                 {
                     notInRange++;
                     continue;
                 }
+
                 float distance = Vector3.SqrMagnitude(bot.Position - humanPlayer.Position);
                 float range = FikaPlugin.DynamicAIRange.Value;
+
                 if (distance > range * range)
                 {
                     notInRange++;
@@ -159,6 +181,19 @@ namespace Fika.Core.Coop.Custom
             else if (notInRange < humanPlayers.Count && !bot.gameObject.activeSelf)
             {
                 ActivateBot(bot);
+            }
+        }
+
+        public void SettingChanged(bool value)
+        {
+            if (!value)
+            {
+                foreach (CoopBot bot in disabledBots)
+                {
+                    bot.gameObject.SetActive(true);
+                }
+
+                disabledBots.Clear();
             }
         }
     }

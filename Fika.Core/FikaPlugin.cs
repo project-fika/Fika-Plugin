@@ -234,6 +234,11 @@ namespace Fika.Core
             StartCoroutine(RunModHandler());
         }
 
+        private void Config_SettingChanged(object sender, SettingChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Coroutine to ensure all mods are loaded by waiting 5 seconds
         /// </summary>
