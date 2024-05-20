@@ -8,6 +8,8 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Http;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -82,15 +84,11 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             ISession session = CurrentSession;
 
-            /*Profile profile = session.Profile;
-            Profile profileScav = session.ProfileOfPet;*/
-
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
 
             profile.Inventory.Stash = null;
             profile.Inventory.QuestStashItems = null;
             profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();
-            //____raidSettings.RaidMode = ERaidMode.Online;
 
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
 
@@ -99,6 +97,12 @@ namespace Fika.Core.Coop.Patches.LocalGame
             if (MatchmakerAcceptPatches.IsClient)
             {
                 timeHasComeScreenController.ChangeStatus("Joining Coop Game");
+
+                RaidSettingsRequest data = new();
+                RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
+
+                ____raidSettings.MetabolismDisabled = raidSettingsResponse.MetabolismDisabled;
+                ____raidSettings.PlayersSpawnPlace = (EPlayersSpawnPlace)Enum.Parse(typeof(EPlayersSpawnPlace), raidSettingsResponse.PlayersSpawnPlace);
             }
             else
             {
@@ -114,6 +118,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
                 ____fixedDeltaTime, EUpdateQueue.Update, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit), ____raidSettings
             );
+
             Singleton<AbstractGame>.Create(localGame);
             FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(localGame));
 

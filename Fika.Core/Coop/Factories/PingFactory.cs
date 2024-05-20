@@ -2,6 +2,7 @@
 using EFT;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
+using Fika.Core.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = System.Object;
@@ -75,8 +76,6 @@ public static class PingFactory
                 }
             }
 
-            Camera camera = CameraClass.Instance.Camera;
-
             if (CameraClass.Instance.SSAA != null && CameraClass.Instance.SSAA.isActiveAndEnabled)
             {
                 int outputWidth = CameraClass.Instance.SSAA.GetOutputWidth();
@@ -84,10 +83,9 @@ public static class PingFactory
                 screenScale = outputWidth / inputWidth;
             }
 
-            Vector3 screenPoint = camera.WorldToScreenPoint(hitPoint);
-            if (screenPoint.z > 0)
+            if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint))
             {
-                float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(x: Screen.width, Screen.height, 0) / 2);
+                float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
 
                 if (distanceToCenter < 200)
                 {

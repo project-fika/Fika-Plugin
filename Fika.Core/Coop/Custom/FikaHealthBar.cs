@@ -6,6 +6,7 @@ using EFT.Animations;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
+using Fika.Core.Utils;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -98,9 +99,8 @@ namespace Fika.Core.Coop.Custom
 
             float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
             Vector3 position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), currentPlayer.PlayerBones.Neck.position.z);
-            Vector3 screenPoint = camera.WorldToScreenPoint(position);
-
-            if (screenPoint.z <= 0)
+            
+            if (!WorldToScreen.GetScreenPoint(position, mainPlayer, out Vector3 screenPoint))
             {
                 UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, 0);
                 UpdateColorImage(playerPlate.healthBarScreen, 0);

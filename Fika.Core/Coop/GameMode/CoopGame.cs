@@ -756,7 +756,7 @@ namespace Fika.Core.Coop.GameMode
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
                 Logger.LogDebug($"{nameof(vmethod_2)}:Unable to find {nameof(CoopHandler)}");
-                await Task.Delay(5000);
+                throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
@@ -770,13 +770,10 @@ namespace Fika.Core.Coop.GameMode
                 myPlayer.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (RaidSettings.MetabolismDisabled)
             {
-                if (RaidSettings.MetabolismDisabled)
-                {
-                    myPlayer.HealthController.DisableMetabolism();
-                    NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
-                }
+                myPlayer.HealthController.DisableMetabolism();
+                NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
@@ -1595,6 +1592,18 @@ namespace Fika.Core.Coop.GameMode
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender?.DestroyThis();
+
+            if (myPlayer.Side != EPlayerSide.Savage)
+            {
+                if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
+                {
+                    GStruct414<GClass2785> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2761_0, false, true);
+                    if (result.Error != null)
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::Stop: Error removing dog tag!");
+                    }
+                }
+            }
 
             if (!myPlayer.ActiveHealthController.IsAlive && exitStatus == ExitStatus.Survived)
             {
