@@ -1,7 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.CameraControl;
-using EFT.InventoryLogic;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
 using Fika.Core.Utils;
