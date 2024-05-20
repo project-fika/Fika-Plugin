@@ -82,7 +82,6 @@ public static class PingFactory
 
             if (mainPlayer.ProceduralWeaponAnimation.IsAiming && mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic)
             {
-                //SightComponent currentSightComponent = mainPlayer.ProceduralWeaponAnimation.CurrentScope.Mod;
                 SightComponent currentSightComponent = mainPlayer.ProceduralWeaponAnimation.CurrentAimingMod;
 
                 if (currentSightComponent != null)
@@ -101,18 +100,19 @@ public static class PingFactory
 
                             if (currentOptic != null)
                             {
-                                Vector3 opticCenterScreenPosition = camera.WorldToScreenPoint(currentOptic.LensRenderer.transform.position);
+                                Transform opticLensTransform = currentOptic.LensRenderer.transform;
+                                Vector3 opticCenterScreenPosition = camera.WorldToScreenPoint(opticLensTransform.position);
                                 Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(Screen.width, Screen.height, 0) / 2);
 
-                                //TO-DO?: calculate optic radius & don't use optic camera to render if distance from middle of screen is > radius
-
                                 //calculate where the zoomed in camera & world camera correspond to each other
-                                float opticScale = Screen.height / opticCamera.scaledPixelHeight;
+                                float opticScale = (Screen.height / opticCamera.scaledPixelHeight);
                                 Vector3 opticCameraOffset = new Vector3(x: (camera.pixelWidth / 2 - opticCamera.pixelWidth / 2), y: (camera.pixelHeight / 2 - opticCamera.pixelHeight / 2), z: 0);
                                 Vector3 scopeScreenPoint = (opticCamera.WorldToScreenPoint(hitPoint) + opticCameraOffset) * opticScale;
 
-                                screenPoint = scopeScreenPoint + opticCenterScreenOffset;
-                                //screenPoint = scopeScreenPoint;
+                                if (scopeScreenPoint.z > 0)
+                                {
+                                    screenPoint = scopeScreenPoint + opticCenterScreenOffset;
+                                }
                             }
                         }
                     }
