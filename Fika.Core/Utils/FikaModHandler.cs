@@ -10,6 +10,7 @@ namespace Fika.Core.Utils
         private readonly ManualLogSource logger = Logger.CreateLogSource("FikaModHandler");
 
         public bool QuestingBotsLoaded = false;
+        public bool SAINLoaded = false;
 
         public void Run()
         {
@@ -33,6 +34,11 @@ namespace Fika.Core.Utils
             if (key == "com.DanW.QuestingBots")
             {
                 QuestingBotsLoaded = true;
+            }
+
+            if (key == "me.sol.sain")
+            {
+                SAINLoaded = true;
             }
         }
     }
