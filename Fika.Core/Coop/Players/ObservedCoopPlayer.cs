@@ -261,7 +261,7 @@ namespace Fika.Core.Coop.Players
         {
             if (damageInfo.DamageType == EDamageType.Landmine && MatchmakerAcceptPatches.IsServer)
             {
-                PacketSender?.DamagePackets?.Enqueue(new()
+                PacketSender.DamagePackets.Enqueue(new()
                 {
                     DamageInfo = new()
                     {
@@ -333,7 +333,7 @@ namespace Fika.Core.Coop.Players
             if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
             {
                 ShotReactions(damageInfo, bodyPartType);
-                PacketSender?.DamagePackets?.Enqueue(new()
+                PacketSender.DamagePackets.Enqueue(new()
                 {
                     DamageInfo = new()
                     {
@@ -401,7 +401,7 @@ namespace Fika.Core.Coop.Players
                         colliderType = bodyPartCollider.BodyPartColliderType;
                     }
 
-                    PacketSender?.DamagePackets?.Enqueue(new()
+                    PacketSender.DamagePackets.Enqueue(new()
                     {
                         DamageInfo = new()
                         {
@@ -461,7 +461,7 @@ namespace Fika.Core.Coop.Players
                         colliderType = bodyPartCollider.BodyPartColliderType;
                     }
 
-                    PacketSender?.DamagePackets?.Enqueue(new()
+                    PacketSender.DamagePackets.Enqueue(new()
                     {
                         DamageInfo = new()
                         {
@@ -602,7 +602,10 @@ namespace Fika.Core.Coop.Players
             if (gesture == EGesture.Hello)
             {
                 InteractionRaycast();
-                InteractablePlayer?.ShowHelloNotification(Profile.Nickname);
+                if (InteractablePlayer != null)
+                {
+                    InteractablePlayer.ShowHelloNotification(Profile.Nickname); 
+                }
             }
             base.vmethod_3(gesture);
         }
@@ -829,7 +832,10 @@ namespace Fika.Core.Coop.Players
                 Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
                 PlayerBody.GClass1860 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
                 PlayerBody.GClass1860 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
-                gclass2?.Dispose();
+                if (gclass2 != null)
+                {
+                    gclass2.Dispose(); 
+                }
             }
 
             //PlayerBody.Init(PlayerBody.BodyCustomization, Inventory.Equipment, shouldSet ? itemInHands : null, LayerMask.NameToLayer("Player"), Side);
@@ -1013,7 +1019,7 @@ namespace Fika.Core.Coop.Players
                 transform.localRotation = Quaternion.identity;
                 transform.localPosition = Vector3.zero;
                 method_29(transform.gameObject);
-                compassInstantiated = true;
+                Traverse.Create(this).Field("_compassInstantiated").SetValue(true);
                 return;
             }
         }
@@ -1145,7 +1151,10 @@ namespace Fika.Core.Coop.Players
 
         private void SetSoundRollOff()
         {
-            NestedStepSoundSource?.SetRolloff(60f * ProtagonistHearing);
+            if (NestedStepSoundSource != null)
+            {
+                NestedStepSoundSource.SetRolloff(60f * ProtagonistHearing); 
+            }
         }
 
         public override bool UpdateGrenadeAnimatorDuePoV()

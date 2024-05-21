@@ -69,7 +69,7 @@ namespace Fika.Core.Coop.ClientClasses
                         OperationBytes = opBytes
                     };
 
-                    CoopPlayer.PacketSender?.InventoryPackets?.Enqueue(packet);
+                    CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
 
                     return;
                 }
@@ -113,7 +113,7 @@ namespace Fika.Core.Coop.ClientClasses
                     OperationBytes = opBytes
                 };
 
-                CoopPlayer.PacketSender?.InventoryPackets?.Enqueue(packet);
+                CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
             }
         }
 

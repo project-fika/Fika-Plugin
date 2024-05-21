@@ -320,7 +320,7 @@ namespace Fika.Core.Coop.Components
             if (writer != null)
             {
                 writer.Reset();
-                Singleton<FikaClient>.Instance?.SendData(writer, ref requestPacket, DeliveryMethod.ReliableOrdered);
+                Singleton<FikaClient>.Instance.SendData(writer, ref requestPacket, DeliveryMethod.ReliableOrdered);
             }
         }
 
@@ -358,15 +358,15 @@ namespace Fika.Core.Coop.Components
             {
                 if (x.IsCompleted)
                 {
-                    Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete.");
+                    Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
                 }
                 else if (x.IsFaulted)
                 {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed.");
+                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
                 }
                 else if (x.IsCanceled)
                 {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled?");
+                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
                 }
             });
 
