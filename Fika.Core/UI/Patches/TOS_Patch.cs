@@ -32,18 +32,22 @@ namespace Fika.Core.UI.Patches
             {
                 byte[] str_1_b = Convert.FromBase64String(str_1);
                 string str_1_d = Encoding.UTF8.GetString(str_1_b);
-                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("Fika", str_1_d, ErrorScreen.EButtonType.QuitButton, 30f,
-                    Application.Quit,
-                    () => { FikaPlugin.AcceptedTOS.Value = true; });
+                Singleton<PreloaderUI>.Instance.ShowFikaMessage("FIKA", str_1_d, ErrorScreen.EButtonType.QuitButton, 30f,
+                    Application.Quit, AcceptTos);
             }
             else
             {
                 byte[] str_2_b = Convert.FromBase64String(str_2);
                 string str_2_d = Encoding.UTF8.GetString(str_2_b);
-                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("Fika", str_2_d, ErrorScreen.EButtonType.OkButton, 0f,
+                Singleton<PreloaderUI>.Instance.ShowFikaMessage("FIKA", str_2_d, ErrorScreen.EButtonType.OkButton, 0f,
                     null,
                     null);
             }
+        }
+
+        private static void AcceptTos()
+        {
+            FikaPlugin.AcceptedTOS.Value = true;
         }
     }
 }

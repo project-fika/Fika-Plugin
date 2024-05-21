@@ -72,6 +72,17 @@ namespace Fika.Core.Coop.Players
             achievementsController.Init();
             achievementsController.Run();
 
+            if (MatchmakerAcceptPatches.IsServer)
+            {
+                player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
+            }
+            else if (MatchmakerAcceptPatches.IsClient)
+            {
+                player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
+            }
+
+            player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
+
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
                 statisticsManager, questController, achievementsController, filter,
@@ -376,15 +387,18 @@ namespace Fika.Core.Coop.Players
         {
             GStruct163[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct163>(ClientPlayer.Class1430.class1430_0.method_0)).ToArray();
 
-            PacketSender.CommonPlayerPackets.Enqueue(new()
+            if (PacketSender != null)
             {
-                HasHeadLightsPacket = true,
-                HeadLightsPacket = new()
+                PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
-                    Amount = lightStates.Count(),
-                    LightStates = lightStates
-                }
-            });
+                    HasHeadLightsPacket = true,
+                    HeadLightsPacket = new()
+                    {
+                        Amount = lightStates.Count(),
+                        LightStates = lightStates
+                    }
+                }); 
+            }
         }
 
         public override void OnItemAddedOrRemoved(Item item, ItemAddress location, bool added)
@@ -827,15 +841,6 @@ namespace Fika.Core.Coop.Players
 
         protected virtual void Start()
         {
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                PacketSender = gameObject.AddComponent<ServerPacketSender>();
-            }
-            else if (MatchmakerAcceptPatches.IsClient)
-            {
-                PacketSender = gameObject.AddComponent<ClientPacketSender>();
-            }
-            PacketReceiver = gameObject.AddComponent<PacketReceiver>();
             Profile.Info.GroupId = "Fika";
 
             if (Side != EPlayerSide.Savage)

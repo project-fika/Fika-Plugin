@@ -370,7 +370,7 @@ namespace Fika.Core.Coop.Components
                 }
             });
 
-            LocalPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
+            ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
 
             if (!spawnObject.IsAlive)
             {
@@ -465,9 +465,9 @@ namespace Fika.Core.Coop.Components
             return null;
         }
 
-        private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
+        private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
-            LocalPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position, Quaternion.identity,
+            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position, Quaternion.identity,
                 "Player", isAI == true ? $"Bot_{netId}_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, isAI,
                 EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
                 GClass549.Config.CharacterController.ObservedPlayerMode,
@@ -480,7 +480,7 @@ namespace Fika.Core.Coop.Components
                 return null;
             }
 
-            ((CoopPlayer)otherPlayer).NetId = netId;
+            otherPlayer.NetId = netId;
             Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
             if (!isAI)
             {
@@ -489,7 +489,7 @@ namespace Fika.Core.Coop.Components
 
             if (!Players.ContainsKey(netId))
             {
-                Players.Add(netId, (CoopPlayer)otherPlayer);
+                Players.Add(netId, otherPlayer);
             }
             else
             {
@@ -543,6 +543,8 @@ namespace Fika.Core.Coop.Components
                     item.SpawnedInSession = true;
                 }
             }
+
+            otherPlayer.InitObservedPlayer();
 
             Logger.LogDebug($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 

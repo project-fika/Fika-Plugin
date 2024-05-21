@@ -871,7 +871,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
             }
 
             if (MatchmakerAcceptPatches.IsServer)

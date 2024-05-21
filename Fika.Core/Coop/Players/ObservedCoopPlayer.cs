@@ -115,7 +115,7 @@ namespace Fika.Core.Coop.Players
         }
         #endregion
 
-        public static async Task<LocalPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
+        public static async Task<ObservedCoopPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
@@ -893,7 +893,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        protected override async void Start()
+        public void InitObservedPlayer()
         {
             if (gameObject.name.StartsWith("Bot_"))
             {
@@ -901,6 +901,7 @@ namespace Fika.Core.Coop.Players
             }
 
             PacketSender = gameObject.AddComponent<ObservedPacketSender>();
+            Traverse playerTraverse = Traverse.Create(this);
 
             if (IsObservedAI)
             {
@@ -912,18 +913,20 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
-                IVaultingComponent vaultingComponent = Traverse.Create(this).Field("_vaultingComponent").GetValue<IVaultingComponent>();
+                IVaultingComponent vaultingComponent = playerTraverse.Field("_vaultingComponent").GetValue<IVaultingComponent>();
                 if (vaultingComponent != null)
                 {
                     UpdateEvent -= vaultingComponent.DoVaultingTick;
                 }
-                Traverse.Create(this).Field("_vaultingComponent").SetValue(null);
-                Traverse.Create(this).Field("_vaultingComponentDebug").SetValue(null);
-                Traverse.Create(this).Field("_vaultingParameters").SetValue(null);
-                Traverse.Create(this).Field("_vaultingGameplayRestrictions").SetValue(null);
-                Traverse.Create(this).Field("_vaultAudioController").SetValue(null);
-                Traverse.Create(this).Field("_sprintVaultAudioController").SetValue(null);
-                Traverse.Create(this).Field("_climbAudioController").SetValue(null);
+
+
+                playerTraverse.Field("_vaultingComponent").SetValue(null);
+                playerTraverse.Field("_vaultingComponentDebug").SetValue(null);
+                playerTraverse.Field("_vaultingParameters").SetValue(null);
+                playerTraverse.Field("_vaultingGameplayRestrictions").SetValue(null);
+                playerTraverse.Field("_vaultAudioController").SetValue(null);
+                playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
+                playerTraverse.Field("_climbAudioController").SetValue(null);
 
                 if (FikaPlugin.CullPlayers.Value)
                 {
@@ -939,15 +942,15 @@ namespace Fika.Core.Coop.Players
 
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
-                IVaultingComponent vaultingComponent = Traverse.Create(this).Field("_vaultingComponent").GetValue<IVaultingComponent>();
+                IVaultingComponent vaultingComponent = playerTraverse.Field("_vaultingComponent").GetValue<IVaultingComponent>();
                 if (vaultingComponent != null)
                 {
                     UpdateEvent -= vaultingComponent.DoVaultingTick;
                 }
-                Traverse.Create(this).Field("_vaultingComponent").SetValue(null);
-                Traverse.Create(this).Field("_vaultingComponentDebug").SetValue(null);
-                Traverse.Create(this).Field("_vaultingParameters").SetValue(null);
-                Traverse.Create(this).Field("_vaultingGameplayRestrictions").SetValue(null);
+                playerTraverse.Field("_vaultingComponent").SetValue(null);
+                playerTraverse.Field("_vaultingComponentDebug").SetValue(null);
+                playerTraverse.Field("_vaultingParameters").SetValue(null);
+                playerTraverse.Field("_vaultingGameplayRestrictions").SetValue(null);
 
                 InitVaultingAudioControllers(ObservedVaultingParameters);
 
@@ -957,16 +960,15 @@ namespace Fika.Core.Coop.Players
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
                 }
 
-                // Spawn these later to prevent errors
-                while (coopGame.Status != GameStatus.Started)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
-
                 healthBar = gameObject.AddComponent<FikaHealthBar>();
 
-                RaycastCameraTransform = Traverse.Create(this).Field("_playerLookRaycastTransform").GetValue<Transform>();
+                RaycastCameraTransform = playerTraverse.Field("_playerLookRaycastTransform").GetValue<Transform>();
             }
+        }
+
+        protected override void Start()
+        {
+            // Do nothing
         }
 
         public override void LateUpdate()
