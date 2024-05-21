@@ -5,7 +5,6 @@ Copyright (c) 2023 Stay in Tarkov. All rights reserved.
 Developed by:   
 * Paulov-t - Original Stay In Tarkov (SIT) Code
 * Stay in Tarkov team
-* Merijn Hendriks - SPT-AKI Libraries
 * SPT-AKI Dev Team - SPT-AKI Libraries (credits given through-out code files)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy  
