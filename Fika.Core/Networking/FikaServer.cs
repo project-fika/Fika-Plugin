@@ -195,7 +195,7 @@ namespace Fika.Core.Networking
                 yield return null;
             }
 
-            CoopPlayer playerToUse = Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
+            ObservedCoopPlayer playerToUse = (ObservedCoopPlayer) Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
 
             if (playerToUse == null)
             {
@@ -214,8 +214,7 @@ namespace Fika.Core.Networking
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1200 is null).ToArray(); // will ignore corpses
             // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
 
-            // activehealthcontroller dictionary_0 each .Health.Value and .IsDestroyed - call method_0 to change
-            // 
+            playerToUse.Profile.Health = playerToUse.NetworkHealthController.Store(null); // Hp is synced, Effects are not
 
 			ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose, 

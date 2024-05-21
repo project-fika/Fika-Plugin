@@ -739,11 +739,11 @@ namespace Fika.Core.Coop.GameMode
                 }
 
                 // TODO: [CWX] Remove before final PR
-                if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
-                {
-                    // add synthetic retrys
-                    await Task.Delay(12000); // 4 extra trys
-                }
+                // if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+                // {
+                //     // add synthetic retrys
+                //     await Task.Delay(12000); // 4 extra trys
+                // }
 
                 if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
                 {

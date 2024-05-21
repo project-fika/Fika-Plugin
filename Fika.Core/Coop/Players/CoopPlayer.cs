@@ -842,7 +842,6 @@ namespace Fika.Core.Coop.Players
         protected virtual void Start()
         {
             Profile.Info.GroupId = "Fika";
-
             if (Side != EPlayerSide.Savage)
             {
                 if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
