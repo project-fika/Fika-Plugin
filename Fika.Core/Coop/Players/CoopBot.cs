@@ -253,7 +253,10 @@ namespace Fika.Core.Coop.Players
         {
             yield return new WaitForSeconds(2);
 
-            PacketSender.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis(); 
+            }
         }
 
         public override void UpdateTick()

@@ -533,7 +533,10 @@ namespace Fika.Core.Coop.Players
         {
             yield return new WaitForSeconds(2);
 
-            PacketSender.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis(); 
+            }
         }
 
         public override void Move(Vector2 direction)
@@ -1342,7 +1345,10 @@ namespace Fika.Core.Coop.Players
         public override void Dispose()
         {
             base.Dispose();
-            PacketSender.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis(); 
+            }
         }
 
         public override void SendHandsInteractionStateChanged(bool value, int animationId)
