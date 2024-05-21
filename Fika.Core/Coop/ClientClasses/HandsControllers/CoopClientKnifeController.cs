@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             base.ExamineWeapon();
 
-            coopPlayer.PacketSender?.FirearmPackets?.Enqueue(new()
+            coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
             {
                 HasKnifePacket = true,
                 KnifePacket = new()
@@ -39,7 +39,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (knifeKick)
             {
-                coopPlayer.PacketSender?.FirearmPackets?.Enqueue(new()
+                coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
                 {
                     HasKnifePacket = true,
                     KnifePacket = new()
@@ -58,7 +58,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (alternateKnifeKick)
             {
-                coopPlayer.PacketSender?.FirearmPackets?.Enqueue(new()
+                coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
                 {
                     HasKnifePacket = true,
                     KnifePacket = new()
@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             base.BrakeCombo();
 
-            coopPlayer.PacketSender?.FirearmPackets?.Enqueue(new()
+            coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
             {
                 HasKnifePacket = true,
                 KnifePacket = new()

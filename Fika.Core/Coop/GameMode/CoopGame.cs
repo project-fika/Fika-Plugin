@@ -370,7 +370,7 @@ namespace Fika.Core.Coop.GameMode
                 netId = server.PopNetId();
 
                 SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = profile }, true, true, position, netId);
-                Singleton<FikaServer>.Instance?.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
 
                 if (server.NetServer.ConnectedPeersCount > 0)
                 {
@@ -517,7 +517,10 @@ namespace Fika.Core.Coop.GameMode
             BotsController.Bots.Remove(botOwner);
             bot.HealthController.DiedEvent -= botOwner.method_6; // Unsubscribe from the event to prevent errors.
             BotUnspawn(botOwner);
-            botOwner?.Dispose();
+			if (botOwner != null)
+            {
+                botOwner.Dispose();
+            }
 
             CoopPlayer coopPlayer = (CoopPlayer)bot;
             coopHandler.Players.Remove(coopPlayer.NetId);
@@ -548,7 +551,10 @@ namespace Fika.Core.Coop.GameMode
                         Destroy(fikaStartButton);
                     }
 
-                    dynamicAI?.AddHumans();
+                    if (dynamicAI != null)
+                    {
+                        dynamicAI.AddHumans();
+                    }
 
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     await FikaRequestHandler.UpdateSetStatus(status);
@@ -563,7 +569,10 @@ namespace Fika.Core.Coop.GameMode
 
                 MatchmakerAcceptPatches.GClass3163.ChangeStatus("Waiting for other players to finish loading...");
 
-                fikaStartButton?.SetActive(true);
+                if (fikaStartButton != null)
+                {
+                    fikaStartButton.SetActive(true); 
+                }
 
                 if (MatchmakerAcceptPatches.IsServer)
                 {
@@ -598,7 +607,10 @@ namespace Fika.Core.Coop.GameMode
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
                     }
 
-                    dynamicAI?.AddHumans();
+                    if (dynamicAI != null)
+                    {
+                        dynamicAI.AddHumans(); 
+                    }
                 }
                 else if (MatchmakerAcceptPatches.IsClient)
                 {
@@ -790,10 +802,16 @@ namespace Fika.Core.Coop.GameMode
                         writer.Reset();
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
-                        fikaStartButton?.SetActive(false);
+                        if (fikaStartButton != null)
+                        {
+                            fikaStartButton.SetActive(false); 
+                        }
                     });
                     Traverse.Create(startButtonComponent).Field("OnClick").SetValue(newStartEvent);
-                    customButton?.SetActive(true);
+                    if (customButton != null)
+                    {
+                        customButton.SetActive(true); 
+                    }
                     fikaStartButton = customButtonStart;
                 }
             }
@@ -827,7 +845,10 @@ namespace Fika.Core.Coop.GameMode
             await WaitForPlayers();
 
             Destroy(customButton);
-            fikaStartButton?.SetActive(false);
+            if (fikaStartButton != null)
+            {
+                fikaStartButton.SetActive(false); 
+            }
 
             myPlayer.ActiveHealthController.DiedEvent += MainPlayerDied;
 
@@ -962,7 +983,10 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogInfo("Starting task to wait for other players.");
 
-            MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Initializing Coop Game...");
+            if (MatchmakerAcceptPatches.GClass3163 != null)
+            {
+                MatchmakerAcceptPatches.GClass3163.ChangeStatus($"Initializing Coop Game..."); 
+            }
             int numbersOfPlayersToWaitFor = 0;
 
             if (MatchmakerAcceptPatches.IsServer)
@@ -1193,14 +1217,20 @@ namespace Fika.Core.Coop.GameMode
                 if (Location_0.OldSpawn && wavesSpawnScenario_0.SpawnWaves != null && wavesSpawnScenario_0.SpawnWaves.Length != 0)
                 {
                     Logger.LogInfo("Running old spawn system. Waves: " + wavesSpawnScenario_0.SpawnWaves.Length);
-                    wavesSpawnScenario_0?.Run(EBotsSpawnMode.Anyway);
+                    if (wavesSpawnScenario_0 != null)
+                    {
+                        wavesSpawnScenario_0.Run(EBotsSpawnMode.Anyway); 
+                    }
                 }
 
                 if (Location_0.NewSpawn)
                 {
                     Logger.LogInfo("Running new spawn system.");
-                    nonWavesSpawnScenario_0?.Run();
-                }
+                    if (nonWavesSpawnScenario_0 != null)
+                    {
+                        nonWavesSpawnScenario_0.Run(); 
+                    }
+				}
 
                 GClass579.Run(EBotsSpawnMode.Anyway);
 
@@ -1208,9 +1238,18 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                wavesSpawnScenario_0?.Stop();
-                nonWavesSpawnScenario_0?.Stop();
-                GClass579?.Stop();
+                if (wavesSpawnScenario_0 != null)
+                {
+                    wavesSpawnScenario_0.Stop(); 
+                }
+                if (nonWavesSpawnScenario_0 != null)
+                {
+                    nonWavesSpawnScenario_0.Stop(); 
+                }
+                if (GClass579 != null)
+                {
+                    GClass579.Stop(); 
+                }
             }
 
             yield return new WaitForEndOfFrame();
@@ -1421,11 +1460,11 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (MatchmakerAcceptPatches.IsClient)
                 {
-                    Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 }
                 else if (MatchmakerAcceptPatches.IsServer)
                 {
-                    Singleton<FikaServer>.Instance?.SendDataToAll(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     ClearHostAI(player);
                 }
             }
@@ -1522,7 +1561,7 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogInfo("CoopGame::Stop");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            myPlayer.PacketSender?.DestroyThis();
+            myPlayer.PacketSender.DestroyThis();
 
             if (myPlayer.Side != EPlayerSide.Savage)
             {
@@ -1555,9 +1594,18 @@ namespace Fika.Core.Coop.GameMode
                 botsController_0.DestroyInfo(gparam_0.Player);
             }
 
-            GClass579?.Stop();
-            nonWavesSpawnScenario_0?.Stop();
-            wavesSpawnScenario_0?.Stop();
+            if (GClass579 != null)
+            {
+                GClass579.Stop(); 
+            }
+            if (nonWavesSpawnScenario_0 != null)
+            {
+                nonWavesSpawnScenario_0.Stop(); 
+            }
+            if (wavesSpawnScenario_0 != null)
+            {
+                wavesSpawnScenario_0.Stop(); 
+            }
 
             try
             {
@@ -1631,7 +1679,10 @@ namespace Fika.Core.Coop.GameMode
             {
                 gameUI.TimerPanel.Close();
             }
-            EnvironmentManager.Instance?.Stop();
+            if (EnvironmentManager.Instance != null)
+            {
+                EnvironmentManager.Instance.Stop(); 
+            }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.method_0));
             GClass549.Config.UseSpiritPlayer = false;
         }
@@ -1641,7 +1692,7 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogInfo("CoopGame::StopFromError");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            myPlayer.PacketSender?.DestroyThis();
+            myPlayer.PacketSender.DestroyThis();
 
             string exitName = null;
             float delay = 0f;
@@ -1676,11 +1727,18 @@ namespace Fika.Core.Coop.GameMode
                 Destroy(CoopHandler.CoopHandlerParent);
             }
 
-            GClass579?.Stop();
-
-            nonWavesSpawnScenario_0?.Stop();
-
-            wavesSpawnScenario_0?.Stop();
+            if (GClass579 != null)
+            {
+                GClass579.Stop(); 
+            }
+            if (nonWavesSpawnScenario_0 != null)
+            {
+                nonWavesSpawnScenario_0.Stop(); 
+            }
+            if (wavesSpawnScenario_0 != null)
+            {
+                wavesSpawnScenario_0.Stop(); 
+            }
 
             ErrorExitManager stopManager = new()
             {
@@ -1702,17 +1760,29 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            exfilManager?.Stop();
+            if (exfilManager != null)
+            {
+                exfilManager.Stop(); 
+            }
 
             Status = GameStatus.Stopping;
-            GameTimer?.TryStop();
-            endByExitTrigger?.Stop();
+            if (GameTimer != null)
+            {
+                GameTimer.TryStop(); 
+            }
+            if (endByExitTrigger != null)
+            {
+                endByExitTrigger.Stop(); 
+            }
             if (gameUI.TimerPanel.enabled)
             {
                 gameUI.TimerPanel.Close();
             }
 
-            EnvironmentManager.Instance?.Stop();
+            if (EnvironmentManager.Instance != null)
+            {
+                EnvironmentManager.Instance.Stop(); 
+            }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
             GClass549.Config.UseSpiritPlayer = false;
         }
@@ -1749,9 +1819,9 @@ namespace Fika.Core.Coop.GameMode
             if (MatchmakerAcceptPatches.IsServer)
             {
                 CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-                coopPlayer?.PacketSender.DestroyThis();
+                coopPlayer.PacketSender.DestroyThis();
 
-                Singleton<FikaServer>.Instance?.NetServer.Stop();
+                Singleton<FikaServer>.Instance.NetServer.Stop();
                 Singleton<FikaServer>.TryRelease(Singleton<FikaServer>.Instance);
 
                 FikaDynamicAI newDynamicAI = gameObject.GetComponent<FikaDynamicAI>();
@@ -1764,7 +1834,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
-                Singleton<FikaClient>.Instance?.NetClient.Stop();
+                Singleton<FikaClient>.Instance.NetClient.Stop();
                 Singleton<FikaClient>.TryRelease(Singleton<FikaClient>.Instance);
 
                 // Resetting this array to null forces the game to re-allocate it if the client hosts the next session
@@ -1807,12 +1877,15 @@ namespace Fika.Core.Coop.GameMode
                 {
                     instance.CloseAllScreensForced();
                 }
-                baseLocalGame_0?.CleanUp();
-                if (baseLocalGame_0 is not null)
+                if (baseLocalGame_0 != null)
                 {
+                    baseLocalGame_0.CleanUp(); 
                     baseLocalGame_0.Status = GameStatus.Stopped;
                 }
-                MonoBehaviourSingleton<BetterAudio>.Instance?.FadeOutVolumeAfterRaid();
+                if (MonoBehaviourSingleton<BetterAudio>.Instance != null)
+                {
+                    MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid(); 
+                }
                 MonoBehaviour instance2 = StaticManager.Instance;
                 float num = delay;
                 Action action;

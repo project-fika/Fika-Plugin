@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.BotClasses
                 OperationBytes = opBytes
             };
 
-            CoopBot.PacketSender?.InventoryPackets?.Enqueue(packet);
+            CoopBot.PacketSender.InventoryPackets.Enqueue(packet);
         }
     }
 }

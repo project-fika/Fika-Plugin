@@ -245,7 +245,10 @@ namespace Fika.Core.Networking
 
         private void OnBTRPacketReceived(BTRPacket packet)
         {
-            CoopHandler.clientBTR?.btrPackets.Enqueue(packet);
+            if (CoopHandler.clientBTR != null)
+            {
+                CoopHandler.clientBTR.btrPackets.Enqueue(packet); 
+            }
         }
 
         private void OnWeatherPacketReceived(WeatherPacket packet)
@@ -423,7 +426,10 @@ namespace Fika.Core.Networking
                     break;
                 case EPackageType.TraderServiceNotification:
                     {
-                        CoopHandler.clientBTR?.DisplayNetworkNotification(packet.TraderServiceType);
+                        if (CoopHandler.clientBTR)
+                        {
+                            CoopHandler.clientBTR.DisplayNetworkNotification(packet.TraderServiceType); 
+                        }
                     }
                     break;
                 case EPackageType.DisposeBot:
@@ -499,7 +505,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
             }
         }
 
@@ -593,7 +599,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
             }
         }
 
@@ -601,7 +607,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.InventoryPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.InventoryPackets?.Enqueue(packet);
             }
         }
 
@@ -609,7 +615,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.DamagePackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.DamagePackets?.Enqueue(packet);
             }
         }
 
@@ -617,7 +623,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.FirearmPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.FirearmPackets?.Enqueue(packet);
             }
         }
 

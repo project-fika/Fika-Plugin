@@ -253,7 +253,7 @@ namespace Fika.Core.Coop.Players
         {
             yield return new WaitForSeconds(2);
 
-            PacketSender?.DestroyThis();
+            PacketSender.DestroyThis();
         }
 
         public override void UpdateTick()
@@ -359,7 +359,7 @@ namespace Fika.Core.Coop.Players
                     return;
                 }
 
-                coopBot.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopBot.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
