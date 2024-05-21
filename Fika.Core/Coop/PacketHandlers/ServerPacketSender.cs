@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void FixedUpdate()
         {
-            if (player == null || Writer == null)
+            if (player == null || Writer == null || Server == null)
             {
                 return;
             }

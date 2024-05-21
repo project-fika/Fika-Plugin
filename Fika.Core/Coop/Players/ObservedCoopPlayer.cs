@@ -115,7 +115,7 @@ namespace Fika.Core.Coop.Players
         }
         #endregion
 
-        public static async Task<LocalPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
+        public static async Task<ObservedCoopPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
@@ -890,7 +890,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        protected override async void Start()
+        public void InitObservedPlayer()
         {
             if (gameObject.name.StartsWith("Bot_"))
             {
@@ -954,16 +954,15 @@ namespace Fika.Core.Coop.Players
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
                 }
 
-                // Spawn these later to prevent errors
-                while (coopGame.Status != GameStatus.Started)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
-
                 healthBar = gameObject.AddComponent<FikaHealthBar>();
 
                 RaycastCameraTransform = Traverse.Create(this).Field("_playerLookRaycastTransform").GetValue<Transform>();
             }
+        }
+
+        protected override void Start()
+        {
+            // Do nothing
         }
 
         public override void LateUpdate()
