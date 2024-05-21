@@ -23,7 +23,10 @@ namespace Fika.Core.Coop.GameMode
         {
             get
             {
-                BotsController ??= (BotsController)GetType().GetFields().Where(x => x.FieldType == typeof(BotsController)).FirstOrDefault().GetValue(this);
+                if (BotsController == null)
+                {
+                    BotsController = (BotsController)GetType().GetFields().Where(x => x.FieldType == typeof(BotsController)).FirstOrDefault().GetValue(this);
+				}
                 return BotsController;
             }
         }
@@ -34,8 +37,11 @@ namespace Fika.Core.Coop.GameMode
         {
             get
             {
-                BotsController ??= (BotsController)GetType().GetFields().Where(x => x.FieldType == typeof(BotsController)).FirstOrDefault().GetValue(this);
-                return BotsController;
+				if (BotsController == null)
+				{
+					BotsController = (BotsController)GetType().GetFields().Where(x => x.FieldType == typeof(BotsController)).FirstOrDefault().GetValue(this);
+				}
+				return BotsController;
             }
         }
 

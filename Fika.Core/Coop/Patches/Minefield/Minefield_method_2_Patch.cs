@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.Patches
 
                 foreach (BodyPartCollider bodyPartCollider in enumerable)
                 {
-                    coopPlayer.PacketSender?.DamagePackets?.Enqueue(new()
+                    coopPlayer.PacketSender.DamagePackets.Enqueue(new()
                     {
                         DamageInfo = new()
                         {

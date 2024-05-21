@@ -229,7 +229,10 @@ namespace Fika.Core.Networking
 
         private void OnBTRServicePacketReceived(BTRServicePacket packet, NetPeer peer)
         {
-            CoopHandler.serverBTR?.NetworkBtrTraderServicePurchased(packet);
+            if (CoopHandler.serverBTR != null)
+            {
+                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet); 
+            }
         }
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
@@ -389,7 +392,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -415,7 +418,6 @@ namespace Fika.Core.Networking
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
         {
-            // This method needs to be refined. For some reason the ping-pong has to be run twice for it to work on the host?
             if (packet.IsRequest)
             {
                 foreach (CoopPlayer player in CoopHandler.Players.Values)
@@ -469,7 +471,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -571,7 +573,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.DamagePackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.DamagePackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -582,7 +584,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.FirearmPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.FirearmPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
