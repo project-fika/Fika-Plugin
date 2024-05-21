@@ -1016,7 +1016,7 @@ namespace Fika.Core.Coop.Players
                 transform.localRotation = Quaternion.identity;
                 transform.localPosition = Vector3.zero;
                 method_29(transform.gameObject);
-                compassInstantiated = true;
+                Traverse.Create(this).Field("_compassInstantiated").SetValue(true);
                 return;
             }
         }
