@@ -1,6 +1,5 @@
 ﻿using Aki.Custom.Airdrops;
 using Aki.Reflection.Utils;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
@@ -50,26 +49,31 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     internal sealed class CoopGame : BaseLocalGame<GamePlayerOwner>, IBotGame, IFikaGame
     {
-        public new bool InRaid { get => true; }
-
         public string InfiltrationPoint;
-
         public bool HasAddedFenceRep = false;
-
         public bool forceStart = false;
+        public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
+        public string MyExitLocation { get; set; } = null;
+        public ISpawnSystem SpawnSystem;
+
+        public Dictionary<string, Player> Bots = [];
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
         private readonly Dictionary<int, int> botQueue = [];
-        private FikaDynamicAI dynamicAI;
+        private Coroutine extractRoutine;
+        private GClass2928 spawnPoints = null;
+        private ISpawnPoint spawnPoint = null;
+        private GClass579 GClass579;
+        private WavesSpawnScenario wavesSpawnScenario_0;
+        private NonWavesSpawnScenario nonWavesSpawnScenario_0;
+        private Func<Player, GamePlayerOwner> func_1;
 
+        public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
-
         //WildSpawnType for sptUsec and sptBear
         const int sptUsecValue = 47;
         const int sptBearValue = 48;
-
         public ISession BackEndSession { get => PatchConstants.BackEndSession; }
-
         BotsController IBotGame.BotsController
         {
             get
@@ -77,7 +81,6 @@ namespace Fika.Core.Coop.GameMode
                 return botsController_0;
             }
         }
-
         public BotsController BotsController
         {
             get
@@ -85,7 +88,6 @@ namespace Fika.Core.Coop.GameMode
                 return botsController_0;
             }
         }
-
         public IWeatherCurve WeatherCurve
         {
             get
@@ -93,7 +95,6 @@ namespace Fika.Core.Coop.GameMode
                 return WeatherController.Instance.WeatherCurve;
             }
         }
-
 
         private static ManualLogSource Logger;
 
@@ -214,8 +215,6 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogInfo("FikaClient has started!");
             }
         }
-
-        public Dictionary<string, Player> Bots { get; set; } = [];
 
         private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
         {
@@ -517,7 +516,7 @@ namespace Fika.Core.Coop.GameMode
             BotsController.Bots.Remove(botOwner);
             bot.HealthController.DiedEvent -= botOwner.method_6; // Unsubscribe from the event to prevent errors.
             BotUnspawn(botOwner);
-			if (botOwner != null)
+            if (botOwner != null)
             {
                 botOwner.Dispose();
             }
@@ -551,9 +550,9 @@ namespace Fika.Core.Coop.GameMode
                         Destroy(fikaStartButton);
                     }
 
-                    if (dynamicAI != null)
+                    if (DynamicAI != null)
                     {
-                        dynamicAI.AddHumans();
+                        DynamicAI.AddHumans();
                     }
 
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
@@ -571,7 +570,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (fikaStartButton != null)
                 {
-                    fikaStartButton.SetActive(true); 
+                    fikaStartButton.SetActive(true);
                 }
 
                 if (MatchmakerAcceptPatches.IsServer)
@@ -607,9 +606,9 @@ namespace Fika.Core.Coop.GameMode
                         Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
                     }
 
-                    if (dynamicAI != null)
+                    if (DynamicAI != null)
                     {
-                        dynamicAI.AddHumans(); 
+                        DynamicAI.AddHumans();
                     }
                 }
                 else if (MatchmakerAcceptPatches.IsClient)
@@ -688,9 +687,6 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        GClass2928 spawnPoints = null;
-        ISpawnPoint spawnPoint = null;
-
         /// <summary>
         /// Creating the EFT.LocalPlayer
         /// </summary>
@@ -717,7 +713,7 @@ namespace Fika.Core.Coop.GameMode
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity, Func<float> getAimingSensitivity,
             IStatisticsManager statisticsManager, AbstractQuestControllerClass questController, AbstractAchievementControllerClass achievementsController)
         {
-            Logger.LogInfo("Creating CoopHandler!");
+            Logger.LogInfo("Creating CoopHandler");
             await CreateCoopHandler();
             CoopHandler.GetCoopHandler().LocalGameInstance = this;
 
@@ -851,13 +847,13 @@ namespace Fika.Core.Coop.GameMode
 
                         if (fikaStartButton != null)
                         {
-                            fikaStartButton.SetActive(false); 
+                            fikaStartButton.SetActive(false);
                         }
                     });
                     Traverse.Create(startButtonComponent).Field("OnClick").SetValue(newStartEvent);
                     if (customButton != null)
                     {
-                        customButton.SetActive(true); 
+                        customButton.SetActive(true);
                     }
                     fikaStartButton = customButtonStart;
                 }
@@ -895,7 +891,7 @@ namespace Fika.Core.Coop.GameMode
             Destroy(customButton);
             if (fikaStartButton != null)
             {
-                fikaStartButton.SetActive(false); 
+                fikaStartButton.SetActive(false);
             }
 
             myPlayer.ActiveHealthController.DiedEvent += MainPlayerDied;
@@ -1043,7 +1039,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (MatchmakerAcceptPatches.GClass3163 != null)
             {
-                MatchmakerAcceptPatches.GClass3163.ChangeStatus($"Initializing Coop Game..."); 
+                MatchmakerAcceptPatches.GClass3163.ChangeStatus($"Initializing Coop Game...");
             }
             int numbersOfPlayersToWaitFor = 0;
 
@@ -1220,7 +1216,7 @@ namespace Fika.Core.Coop.GameMode
                     botsController_0.BotSpawner.SetMaxBots(limits);
                 }
 
-                dynamicAI = gameObject.AddComponent<FikaDynamicAI>();
+                DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
@@ -1279,7 +1275,7 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogInfo("Running old spawn system. Waves: " + wavesSpawnScenario_0.SpawnWaves.Length);
                     if (wavesSpawnScenario_0 != null)
                     {
-                        wavesSpawnScenario_0.Run(EBotsSpawnMode.Anyway); 
+                        wavesSpawnScenario_0.Run(EBotsSpawnMode.Anyway);
                     }
                 }
 
@@ -1288,27 +1284,28 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogInfo("Running new spawn system.");
                     if (nonWavesSpawnScenario_0 != null)
                     {
-                        nonWavesSpawnScenario_0.Run(); 
+                        nonWavesSpawnScenario_0.Run();
                     }
-				}
+                }
 
                 GClass579.Run(EBotsSpawnMode.Anyway);
 
                 FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
+                FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
             }
             else
             {
                 if (wavesSpawnScenario_0 != null)
                 {
-                    wavesSpawnScenario_0.Stop(); 
+                    wavesSpawnScenario_0.Stop();
                 }
                 if (nonWavesSpawnScenario_0 != null)
                 {
-                    nonWavesSpawnScenario_0.Stop(); 
+                    nonWavesSpawnScenario_0.Stop();
                 }
                 if (GClass579 != null)
                 {
-                    GClass579.Stop(); 
+                    GClass579.Stop();
                 }
             }
 
@@ -1333,11 +1330,19 @@ namespace Fika.Core.Coop.GameMode
             yield break;
         }
 
+        private void DynamicAIRate_SettingChanged(object sender, EventArgs e)
+        {
+            if (DynamicAI != null)
+            {
+                DynamicAI.RateChanged(FikaPlugin.DynamicAIRate.Value);
+            }
+        }
+
         private void DynamicAI_SettingChanged(object sender, EventArgs e)
         {
-            if (dynamicAI != null)
+            if (DynamicAI != null)
             {
-                dynamicAI.SettingChanged(FikaPlugin.DynamicAI.Value);
+                DynamicAI.EnabledChange(FikaPlugin.DynamicAI.Value);
             }
         }
 
@@ -1485,7 +1490,7 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         /// <param name="player">The local player to start the Coroutine on</param>
         /// <returns></returns>
-        public void Extract(Player player, ExfiltrationPoint point)
+        public void Extract(CoopPlayer player, ExfiltrationPoint point)
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
 
@@ -1512,7 +1517,7 @@ namespace Fika.Core.Coop.GameMode
 
             GenericPacket genericPacket = new()
             {
-                NetId = ((CoopPlayer)player).NetId,
+                NetId = player.NetId,
                 PacketType = EPackageType.ClientExtract
             };
 
@@ -1547,6 +1552,8 @@ namespace Fika.Core.Coop.GameMode
             player.ActiveHealthController.DisableMetabolism();
             player.ActiveHealthController.PauseAllEffects();
 
+            extractRoutine = StartCoroutine(ExtractRoutine(player));
+
             // Prevents players from looting after extracting
             GClass3107.Instance.CloseAllScreensForced();
 
@@ -1576,6 +1583,30 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Used to make sure no stims or mods reset the DamageCoeff
+        /// </summary>
+        /// <param name="player">The <see cref="CoopPlayer"/> to run the coroutine on</param>
+        /// <returns></returns>
+        private IEnumerator ExtractRoutine(CoopPlayer player)
+        {
+            while (true)
+            {
+                if (player != null && player.ActiveHealthController != null)
+                {
+                    if (player.ActiveHealthController.DamageCoeff != 0)
+                    {
+                        player.ActiveHealthController.SetDamageCoeff(0);
+                    } 
+                }
+                else
+                {
+                    yield break;
+                }
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
         public void ClearHostAI(Player player)
         {
             if (player != null)
@@ -1601,10 +1632,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
         }
-
-        public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
-        public string MyExitLocation { get; set; } = null;
-        public ISpawnSystem SpawnSystem { get; set; }
 
         private void HealthController_DiedEvent(EDamageType obj)
         {
@@ -1665,15 +1692,15 @@ namespace Fika.Core.Coop.GameMode
 
             if (GClass579 != null)
             {
-                GClass579.Stop(); 
+                GClass579.Stop();
             }
             if (nonWavesSpawnScenario_0 != null)
             {
-                nonWavesSpawnScenario_0.Stop(); 
+                nonWavesSpawnScenario_0.Stop();
             }
             if (wavesSpawnScenario_0 != null)
             {
-                wavesSpawnScenario_0.Stop(); 
+                wavesSpawnScenario_0.Stop();
             }
 
             try
@@ -1750,7 +1777,7 @@ namespace Fika.Core.Coop.GameMode
             }
             if (EnvironmentManager.Instance != null)
             {
-                EnvironmentManager.Instance.Stop(); 
+                EnvironmentManager.Instance.Stop();
             }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.method_0));
             GClass549.Config.UseSpiritPlayer = false;
@@ -1762,6 +1789,18 @@ namespace Fika.Core.Coop.GameMode
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
+
+            if (myPlayer.Side != EPlayerSide.Savage)
+            {
+                if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
+                {
+                    GStruct414<GClass2785> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2761_0, false, true);
+                    if (result.Error != null)
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::StopFromError: Error removing dog tag!");
+                    }
+                }
+            }
 
             string exitName = null;
             float delay = 0f;
@@ -1798,15 +1837,15 @@ namespace Fika.Core.Coop.GameMode
 
             if (GClass579 != null)
             {
-                GClass579.Stop(); 
+                GClass579.Stop();
             }
             if (nonWavesSpawnScenario_0 != null)
             {
-                nonWavesSpawnScenario_0.Stop(); 
+                nonWavesSpawnScenario_0.Stop();
             }
             if (wavesSpawnScenario_0 != null)
             {
-                wavesSpawnScenario_0.Stop(); 
+                wavesSpawnScenario_0.Stop();
             }
 
             ErrorExitManager stopManager = new()
@@ -1831,17 +1870,17 @@ namespace Fika.Core.Coop.GameMode
 
             if (exfilManager != null)
             {
-                exfilManager.Stop(); 
+                exfilManager.Stop();
             }
 
             Status = GameStatus.Stopping;
             if (GameTimer != null)
             {
-                GameTimer.TryStop(); 
+                GameTimer.TryStop();
             }
             if (endByExitTrigger != null)
             {
-                endByExitTrigger.Stop(); 
+                endByExitTrigger.Stop();
             }
             if (gameUI.TimerPanel.enabled)
             {
@@ -1850,7 +1889,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (EnvironmentManager.Instance != null)
             {
-                EnvironmentManager.Instance.Stop(); 
+                EnvironmentManager.Instance.Stop();
             }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
             GClass549.Config.UseSpiritPlayer = false;
@@ -1885,6 +1924,11 @@ namespace Fika.Core.Coop.GameMode
                 Singleton<GameWorld>.Instance.MineManager.OnExplosion -= OnMineExplode;
             }
 
+            if (extractRoutine != null)
+            {
+                StopCoroutine(extractRoutine);
+            }
+
             if (MatchmakerAcceptPatches.IsServer)
             {
                 CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
@@ -1900,6 +1944,7 @@ namespace Fika.Core.Coop.GameMode
                 }
 
                 FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
+                FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
@@ -1932,11 +1977,6 @@ namespace Fika.Core.Coop.GameMode
             base.Dispose();
         }
 
-        private GClass579 GClass579;
-        private WavesSpawnScenario wavesSpawnScenario_0;
-        private NonWavesSpawnScenario nonWavesSpawnScenario_0;
-        private Func<Player, GamePlayerOwner> func_1;
-
         private class ErrorExitManager : Class1364
         {
             public void ExitOverride()
@@ -1948,12 +1988,12 @@ namespace Fika.Core.Coop.GameMode
                 }
                 if (baseLocalGame_0 != null)
                 {
-                    baseLocalGame_0.CleanUp(); 
+                    baseLocalGame_0.CleanUp();
                     baseLocalGame_0.Status = GameStatus.Stopped;
                 }
                 if (MonoBehaviourSingleton<BetterAudio>.Instance != null)
                 {
-                    MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid(); 
+                    MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
                 }
                 MonoBehaviour instance2 = StaticManager.Instance;
                 float num = delay;
@@ -1966,10 +2006,9 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-
         public new void method_6(string backendUrl, string locationId, int variantId)
         {
-            Logger.LogInfo("CoopGame:method_6");
+            Logger.LogDebug("CoopGame::method_6");
             return;
         }
     }

@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.Components
                         if (!exfiltrationPoint.UnmetRequirements(player).Any())
                         {
                             game.MyExitLocation = exfiltrationPoint.Settings.Name;
-                            game.Extract(player, exfiltrationPoint);
+                            game.Extract((CoopPlayer)player, exfiltrationPoint);
                         }
                     }
 
