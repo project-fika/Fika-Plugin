@@ -54,9 +54,9 @@ namespace Fika.Core.Coop.GameMode
         public bool forceStart = false;
         public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
         public string MyExitLocation { get; set; } = null;
-        public ISpawnSystem SpawnSystem { get; set; }
+        public ISpawnSystem SpawnSystem;
 
-        public Dictionary<string, Player> Bots { get; set; } = [];
+        public Dictionary<string, Player> Bots = [];
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
         private readonly Dictionary<int, int> botQueue = [];
