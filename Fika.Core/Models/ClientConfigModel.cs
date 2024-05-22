@@ -21,13 +21,17 @@ namespace Fika.Core.UI.Models
         [DataMember(Name = "allowItemSending")]
         public bool AllowItemSending;
 
-        public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowItemSending)
+        [DataMember(Name = "forceSaveOnDeath")]
+        public bool ForceSaveOnDeath;
+
+        public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowItemSending, bool forceSaveOnDeath)
         {
             UseBTR = useBTR;
             FriendlyFire = friendlyFire;
             DynamicVExfils = dynamicVExfils;
             AllowFreeCam = allowFreeCam;
             AllowItemSending = allowItemSending;
+            ForceSaveOnDeath = forceSaveOnDeath;
         }
 
         public new void ToString()

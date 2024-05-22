@@ -1516,7 +1516,10 @@ namespace Fika.Core.Coop.GameMode
 
             player.ActiveHealthController.DiedEvent -= MainPlayerDied;
 
-            SavePlayer(coopPlayer, MyExitStatus, null);
+            if(FikaPlugin.Instance.ForceSaveOnDeath)
+            {
+                SavePlayer(coopPlayer, MyExitStatus, null);
+            }
 
             if (FikaPlugin.AutoExtract.Value)
             {
@@ -1590,7 +1593,10 @@ namespace Fika.Core.Coop.GameMode
             MyExitStatus = ExitStatus.Killed;
             MyExitLocation = null;
 
-            SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null);
+            if(FikaPlugin.Instance.ForceSaveOnDeath)
+            {
+                SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null);
+            }
         }
 
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
