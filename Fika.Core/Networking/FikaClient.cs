@@ -436,6 +436,10 @@ namespace Fika.Core.Networking
                     {
                         if (CoopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToDispose))
                         {
+                            if (!botToDispose.gameObject.activeSelf)
+                            {
+                                botToDispose.gameObject.SetActive(true);
+                            }
 
                             if (CoopHandler.Players.Remove(packet.BotNetId))
                             {
