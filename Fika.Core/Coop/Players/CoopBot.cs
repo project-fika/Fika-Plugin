@@ -311,8 +311,6 @@ namespace Fika.Core.Coop.Players
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
                 if (coopGame != null && coopGame.Status == GameStatus.Started)
                 {
-                    coopGame.DynamicAI.RemoveBot(this);
-
                     FikaServer server = Singleton<FikaServer>.Instance;
                     GenericPacket packet = new(EPackageType.DisposeBot)
                     {
