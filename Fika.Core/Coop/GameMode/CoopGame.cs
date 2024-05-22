@@ -1694,6 +1694,18 @@ namespace Fika.Core.Coop.GameMode
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
 
+            if (myPlayer.Side != EPlayerSide.Savage)
+            {
+                if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
+                {
+                    GStruct414<GClass2785> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2761_0, false, true);
+                    if (result.Error != null)
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::StopFromError: Error removing dog tag!");
+                    }
+                }
+            }
+
             string exitName = null;
             float delay = 0f;
 
