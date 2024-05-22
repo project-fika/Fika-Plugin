@@ -49,26 +49,31 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     internal sealed class CoopGame : BaseLocalGame<GamePlayerOwner>, IBotGame, IFikaGame
     {
-        public new bool InRaid { get => true; }
-
         public string InfiltrationPoint;
-
         public bool HasAddedFenceRep = false;
-
         public bool forceStart = false;
+        public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
+        public string MyExitLocation { get; set; } = null;
+        public ISpawnSystem SpawnSystem { get; set; }
+
+        public Dictionary<string, Player> Bots { get; set; } = [];
         private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
         private readonly Dictionary<int, int> botQueue = [];
+        private Coroutine extractRoutine;
+        private GClass2928 spawnPoints = null;
+        private ISpawnPoint spawnPoint = null;
+        private GClass579 GClass579;
+        private WavesSpawnScenario wavesSpawnScenario_0;
+        private NonWavesSpawnScenario nonWavesSpawnScenario_0;
+        private Func<Player, GamePlayerOwner> func_1;
+
         public FikaDynamicAI DynamicAI { get; private set; }
-
         public RaidSettings RaidSettings { get; private set; }
-
         //WildSpawnType for sptUsec and sptBear
         const int sptUsecValue = 47;
         const int sptBearValue = 48;
-
         public ISession BackEndSession { get => PatchConstants.BackEndSession; }
-
         BotsController IBotGame.BotsController
         {
             get
@@ -76,7 +81,6 @@ namespace Fika.Core.Coop.GameMode
                 return botsController_0;
             }
         }
-
         public BotsController BotsController
         {
             get
@@ -84,7 +88,6 @@ namespace Fika.Core.Coop.GameMode
                 return botsController_0;
             }
         }
-
         public IWeatherCurve WeatherCurve
         {
             get
@@ -92,7 +95,6 @@ namespace Fika.Core.Coop.GameMode
                 return WeatherController.Instance.WeatherCurve;
             }
         }
-
 
         private static ManualLogSource Logger;
 
@@ -213,8 +215,6 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogInfo("FikaClient has started!");
             }
         }
-
-        public Dictionary<string, Player> Bots { get; set; } = [];
 
         private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
         {
@@ -686,9 +686,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
         }
-
-        GClass2928 spawnPoints = null;
-        ISpawnPoint spawnPoint = null;
 
         /// <summary>
         /// Creating the EFT.LocalPlayer
@@ -1433,7 +1430,7 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         /// <param name="player">The local player to start the Coroutine on</param>
         /// <returns></returns>
-        public void Extract(Player player, ExfiltrationPoint point)
+        public void Extract(CoopPlayer player, ExfiltrationPoint point)
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
 
@@ -1460,7 +1457,7 @@ namespace Fika.Core.Coop.GameMode
 
             GenericPacket genericPacket = new()
             {
-                NetId = ((CoopPlayer)player).NetId,
+                NetId = player.NetId,
                 PacketType = EPackageType.ClientExtract
             };
 
@@ -1495,6 +1492,8 @@ namespace Fika.Core.Coop.GameMode
             player.ActiveHealthController.DisableMetabolism();
             player.ActiveHealthController.PauseAllEffects();
 
+            extractRoutine = StartCoroutine(ExtractRoutine(player));
+
             // Prevents players from looting after extracting
             GClass3107.Instance.CloseAllScreensForced();
 
@@ -1524,6 +1523,30 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Used to make sure no stims or mods reset the DamageCoeff
+        /// </summary>
+        /// <param name="player">The <see cref="CoopPlayer"/> to run the coroutine on</param>
+        /// <returns></returns>
+        private IEnumerator ExtractRoutine(CoopPlayer player)
+        {
+            while (true)
+            {
+                if (player != null && player.ActiveHealthController != null)
+                {
+                    if (player.ActiveHealthController.DamageCoeff != 0)
+                    {
+                        player.ActiveHealthController.SetDamageCoeff(0);
+                    } 
+                }
+                else
+                {
+                    yield break;
+                }
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
         public void ClearHostAI(Player player)
         {
             if (player != null)
@@ -1549,10 +1572,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
         }
-
-        public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
-        public string MyExitLocation { get; set; } = null;
-        public ISpawnSystem SpawnSystem { get; set; }
 
         private void HealthController_DiedEvent(EDamageType obj)
         {
@@ -1836,6 +1855,11 @@ namespace Fika.Core.Coop.GameMode
                 Singleton<GameWorld>.Instance.MineManager.OnExplosion -= OnMineExplode;
             }
 
+            if (extractRoutine != null)
+            {
+                StopCoroutine(extractRoutine);
+            }
+
             if (MatchmakerAcceptPatches.IsServer)
             {
                 CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
@@ -1884,11 +1908,6 @@ namespace Fika.Core.Coop.GameMode
             base.Dispose();
         }
 
-        private GClass579 GClass579;
-        private WavesSpawnScenario wavesSpawnScenario_0;
-        private NonWavesSpawnScenario nonWavesSpawnScenario_0;
-        private Func<Player, GamePlayerOwner> func_1;
-
         private class ErrorExitManager : Class1364
         {
             public void ExitOverride()
@@ -1918,10 +1937,9 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-
         public new void method_6(string backendUrl, string locationId, int variantId)
         {
-            Logger.LogInfo("CoopGame:method_6");
+            Logger.LogDebug("CoopGame::method_6");
             return;
         }
     }
