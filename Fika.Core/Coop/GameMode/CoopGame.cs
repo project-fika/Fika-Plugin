@@ -1,5 +1,10 @@
-﻿using Aki.Custom.Airdrops;
+﻿using Aki.Common.Http;
+using Aki.Custom.Airdrops;
 using Aki.Reflection.Utils;
+using Aki.SinglePlayer.Models.Progression;
+using Aki.SinglePlayer.Utils.Healing;
+using Aki.SinglePlayer.Utils.Insurance;
+using Aki.SinglePlayer.Utils.Progression;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
@@ -34,6 +39,7 @@ using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
 using LiteNetLib.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1510,6 +1516,8 @@ namespace Fika.Core.Coop.GameMode
 
             player.ActiveHealthController.DiedEvent -= MainPlayerDied;
 
+            SavePlayer(coopPlayer, MyExitStatus, null);
+
             if (FikaPlugin.AutoExtract.Value)
             {
                 if (MatchmakerAcceptPatches.IsClient)
@@ -1581,6 +1589,8 @@ namespace Fika.Core.Coop.GameMode
             PlayerOwner.vmethod_1();
             MyExitStatus = ExitStatus.Killed;
             MyExitLocation = null;
+
+            SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null);
         }
 
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
@@ -1712,6 +1722,30 @@ namespace Fika.Core.Coop.GameMode
             }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.method_0));
             GClass549.Config.UseSpiritPlayer = false;
+        }
+
+        private void SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName)
+        {
+            //Since we're bypassing saving on exiting, run this now.
+            player.Profile.EftStats.LastPlayerState = null;
+            player.StatisticsManager.EndStatisticsSession(exitStatus, base.PastTime);
+            player.CheckAndResetControllers(exitStatus, base.PastTime, base.Location_0.Id, exitName);
+
+            //Method taken directly from AKI, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
+            var converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
+
+            JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;
+
+            SaveProfileRequest SaveRequest = new SaveProfileRequest
+            {
+                Exit = exitStatus.ToString().ToLowerInvariant(),
+                Profile = player.Profile,
+                Health = HealthListener.Instance.CurrentHealth,
+                Insurance = InsuredItemManager.Instance.GetTrackedItems(),
+                IsPlayerScav = RaidSettings.IsScav // If session joining mixed with both PMC's and scavs is added this might have to be changed
+            };
+
+            RequestHandler.PutJson("/raid/profile/save", SaveRequest.ToJson(Converters.AddItem(new NotesJsonConverter()).ToArray()));
         }
 
         private void StopFromError(string profileId, ExitStatus exitStatus)

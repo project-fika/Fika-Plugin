@@ -453,6 +453,7 @@ namespace Fika.Core
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
             new BTRPatch().Disable();
+            new OfflineSaveProfilePatch().Disable(); //Disable this as we've moved it forward immediately after extraction or death
         }
 
         private void EnableOverridePatches()
