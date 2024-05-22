@@ -17,10 +17,10 @@ namespace Fika.Core.Coop.Patches
         {
             if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
-				location.Loot = MatchmakerAcceptPatches.ReconnectPacket.Value.Items;
+                location.Loot = MatchmakerAcceptPatches.ReconnectPacket.Value.Items;
             }
 
-			return true;
-		}
+            return true;
+        }
     }
 }

@@ -13,8 +13,7 @@ namespace Fika.Core.Networking
         {
             NetId = reader.GetInt();
             ConditionId = reader.GetString();
-            ConditionValue = reader.GetFloat();
-            
+            ConditionValue = reader.GetFloat();            
         }
 
         public void Serialize(NetDataWriter writer)

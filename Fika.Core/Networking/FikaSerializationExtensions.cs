@@ -244,9 +244,9 @@ namespace Fika.Core.Networking
         public static void PutInteractiveObjectState(this NetDataWriter writer, WorldInteractiveObject worldInteractiveObject)
         {
             writer.Put(worldInteractiveObject.Id);
-            writer.Put((byte) worldInteractiveObject.DoorState);
+            writer.Put((byte)worldInteractiveObject.DoorState);
             writer.Put(Mathf.FloorToInt(worldInteractiveObject.CurrentAngle));
-            writer.Put(worldInteractiveObject as Door is Door door ? door.IsBroken: false);
+            writer.Put(worldInteractiveObject as Door is Door door ? door.IsBroken : false);
         }
 
         public static WorldInteractiveObject.GStruct385 GetInteractiveObjectState(this NetDataReader reader)
@@ -271,14 +271,14 @@ namespace Fika.Core.Networking
             return new()
             {
                 Id = reader.GetString(),
-                FirstHitPosition = reader.GetVector3(),                
+                FirstHitPosition = reader.GetVector3(),
             };
         }
 
         public static void PutLightState(this NetDataWriter writer, LampController windowBreaker)
         {
             writer.Put(windowBreaker.NetId);
-            writer.Put((byte) windowBreaker.LampState);
+            writer.Put((byte)windowBreaker.LampState);
         }
 
         public static LampController GetLightState(this NetDataReader reader)
@@ -286,7 +286,7 @@ namespace Fika.Core.Networking
             return new()
             {
                 NetId = reader.GetInt(),
-                LampState = (Turnable.EState) reader.GetByte()
+                LampState = (Turnable.EState)reader.GetByte()
             };
         }
 
@@ -318,18 +318,18 @@ namespace Fika.Core.Networking
 
         public static void PutLocationItem(this NetDataWriter writer, LootItemPositionClass[] locationItem)
         {
-			using MemoryStream memoryStream = new();
-			using BinaryWriter binaryWriter = new(memoryStream);
-			binaryWriter.Write(GClass1524.SerializeLootData(locationItem));
-			writer.PutByteArray(memoryStream.ToArray());
-		}
+            using MemoryStream memoryStream = new();
+            using BinaryWriter binaryWriter = new(memoryStream);
+            binaryWriter.Write(GClass1524.SerializeLootData(locationItem));
+            writer.PutByteArray(memoryStream.ToArray());
+        }
 
         public static GClass1202 GetLocationItem(this NetDataReader reader)
         {
-			using MemoryStream memoryStream = new(reader.GetByteArray());
-			using BinaryReader binaryReader = new(memoryStream);
+            using MemoryStream memoryStream = new(reader.GetByteArray());
+            using BinaryReader binaryReader = new(memoryStream);
 
             return GClass1524.DeserializeLootData(Singleton<ItemFactory>.Instance, binaryReader.ReadEFTLootDataDescriptor());
-		}
+        }
     }
 }
