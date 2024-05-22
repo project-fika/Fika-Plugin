@@ -138,17 +138,9 @@ namespace Fika.Core.Coop.Players
 
             CoopObservedStatisticsManager statisticsManager = new();
 
-            //[CWX] Syncing of quests and achievements would help with reconnecting, otherwise we'd have to redo them
-            GClass3206 questController = new(profile, inventoryController, null, false);
-            questController.Init();
-            questController.Run();
-
-            AchievementControllerClass achievementsController = new(profile, inventoryController, null, true);
-            achievementsController.Init();
-            achievementsController.Run();
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-                statisticsManager, questController, achievementsController, filter, EVoipState.NotAvailable, aiControl, false);
+                statisticsManager, null, null, filter, EVoipState.NotAvailable, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });

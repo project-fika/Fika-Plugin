@@ -66,11 +66,11 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            GClass3206 questController = new(profile, inventoryController, session, true);
+            CoopClientQuestController questController = new(profile, inventoryController, session, true);
             questController.Init();
             questController.Run();
 
-            AchievementControllerClass achievementsController = new(profile, inventoryController, session, true);
+            CoopClientAchievementController achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
 
@@ -173,7 +173,7 @@ namespace Fika.Core.Coop.Players
                     {
                         if (coopHandler.clientBTR != null)
                         {
-                            coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket); 
+                            coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket);
                         }
                     }
                 }
@@ -399,7 +399,7 @@ namespace Fika.Core.Coop.Players
                         Amount = lightStates.Count(),
                         LightStates = lightStates
                     }
-                }); 
+                });
             }
         }
 
@@ -551,7 +551,7 @@ namespace Fika.Core.Coop.Players
 
             if (PacketSender != null)
             {
-                PacketSender.DestroyThis(); 
+                PacketSender.DestroyThis();
             }
         }
 
@@ -1353,7 +1353,7 @@ namespace Fika.Core.Coop.Players
             base.Dispose();
             if (PacketSender != null)
             {
-                PacketSender.DestroyThis(); 
+                PacketSender.DestroyThis();
             }
         }
 

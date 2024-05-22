@@ -85,6 +85,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectRequestPacket, NetPeer>(OnReconnectRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ConditionChangePacket, NetPeer>(OnConditionChangedPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -166,6 +167,13 @@ namespace Fika.Core.Networking
             ServerReady = true;
         }
 
+        private void OnConditionChangedPacketReceived(ConditionChangePacket packet, NetPeer peer)
+        {
+            // [CWX]
+            Players.FirstOrDefault(x => x.Key == packet.NetId).Value.Profile.TaskConditionCounters
+                .FirstOrDefault(c => c.Key == packet.ConditionId).Value.Value = (int)packet.ConditionValue;
+        }
+
         public int PopNetId()
         {
             int netId = _currentNetId;
@@ -195,14 +203,14 @@ namespace Fika.Core.Networking
                 yield return null;
             }
 
-            ObservedCoopPlayer playerToUse = (ObservedCoopPlayer) Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
+            ObservedCoopPlayer playerToUse = (ObservedCoopPlayer)Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
 
             if (playerToUse == null)
             {
                 serverLogger.LogError($"Player was not found");
             }
 
-            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState 
+            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState
                 && x.DoorState != EDoorState.Interacting && x.DoorState != EDoorState.Interacting).ToArray();
 
             WindowBreaker[] windows = ClientgameWorld?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
@@ -216,9 +224,9 @@ namespace Fika.Core.Networking
 
             playerToUse.Profile.Health = playerToUse.NetworkHealthController.Store(null); // Hp is synced, Effects are not
 
-			ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position, 
-                playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose, 
-                interactiveObjects, windows, lights, smokes, 
+            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
+                playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
+                interactiveObjects, windows, lights, smokes,
                 new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile }, items);
 
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
@@ -283,7 +291,7 @@ namespace Fika.Core.Networking
         {
             if (CoopHandler.serverBTR != null)
             {
-                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet); 
+                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
             }
         }
 
