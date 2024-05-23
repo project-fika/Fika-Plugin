@@ -1732,7 +1732,7 @@ namespace Fika.Core.Coop.GameMode
                 //Since we're bypassing saving on exiting, run this now.
                 player.Profile.EftStats.LastPlayerState = null;
                 player.StatisticsManager.EndStatisticsSession(exitStatus, PastTime);
-                player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName); 
+                player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
             }
 
             //Method taken directly from AKI, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch

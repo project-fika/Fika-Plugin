@@ -237,7 +237,7 @@ namespace Fika.Core.Coop.ClientClasses
                     FireportPosition = fireportPosition,
                     ChamberIndex = chamberIndex,
                     Overheat = overheat,
-                    UnderbarrelShot = weapon.IsUnderbarrelWeapon,
+                    UnderbarrelShot = Weapon.IsUnderBarrelDeviceActive,
                     AmmoTemplate = ammo.AmmoTemplate._id,
                     LastShotOverheat = weapon.MalfState.LastShotOverheat,
                     LastShotTime = weapon.MalfState.LastShotTime,
@@ -308,18 +308,36 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
-
             string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
-
             coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
             {
+                HasReloadLauncherPacket = true,
                 ReloadLauncher = new()
                 {
                     Reload = true,
                     AmmoIds = reloadingAmmoIds
                 }
             });
+
+            CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
+        }
+
+        public override void UnderbarrelSightingRangeUp()
+        {
+            coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+            {
+                UnderbarrelSightingRangeUp = true
+            });
+            base.UnderbarrelSightingRangeUp();
+        }
+
+        public override void UnderbarrelSightingRangeDown()
+        {
+            coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+            {
+                UnderbarrelSightingRangeDown = true
+            });
+            base.UnderbarrelSightingRangeDown();
         }
 
         public override void ReloadMag(MagazineClass magazine, GClass2769 gridItemAddress, Callback callback)

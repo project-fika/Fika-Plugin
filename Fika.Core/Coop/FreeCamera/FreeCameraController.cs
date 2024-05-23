@@ -12,7 +12,6 @@ using Koenigz.PerfectCulling.EFT;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 
@@ -120,7 +119,7 @@ namespace Fika.Core.Coop.FreeCamera
             if (_player.PlayerHealthController == null)
             {
                 return;
-            }            
+            }
 
             CoopHandler.EQuitState quitState = coopHandler.GetQuitState();
 
@@ -201,7 +200,7 @@ namespace Fika.Core.Coop.FreeCamera
             if (!_freeCamScript.IsActive)
             {
                 ToggleCamera();
-                ToggleUi(); 
+                ToggleUi();
             }
             ShowExtractMessage();
 

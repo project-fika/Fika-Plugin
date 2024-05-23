@@ -54,6 +54,8 @@ namespace Fika.Core.Networking
         public bool ReloadBoltAction = false;
         public bool HasRollCylinder = false;
         public bool RollToZeroCamora = false;
+        public bool UnderbarrelSightingRangeUp = false;
+        public bool UnderbarrelSightingRangeDown = false;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -123,6 +125,8 @@ namespace Fika.Core.Networking
             HasRollCylinder = reader.GetBool();
             if (HasRollCylinder)
                 RollToZeroCamora = reader.GetBool();
+            UnderbarrelSightingRangeUp = reader.GetBool();
+            UnderbarrelSightingRangeDown = reader.GetBool();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -189,6 +193,8 @@ namespace Fika.Core.Networking
             writer.Put(HasRollCylinder);
             if (HasRollCylinder)
                 writer.Put(RollToZeroCamora);
+            writer.Put(UnderbarrelSightingRangeUp);
+            writer.Put(UnderbarrelSightingRangeDown);
         }
     }
 }
