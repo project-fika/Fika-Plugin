@@ -6,6 +6,7 @@ using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Custom
@@ -193,9 +194,10 @@ namespace Fika.Core.Coop.Custom
         {
             if (!value)
             {
-                foreach (CoopBot bot in disabledBots)
+                CoopBot[] disabledBotsArray = [.. disabledBots];
+                for (int i = 0; i < disabledBotsArray.Length; i++)
                 {
-                    bot.gameObject.SetActive(true);
+                    ActivateBot(disabledBotsArray[i]);
                 }
 
                 disabledBots.Clear();
