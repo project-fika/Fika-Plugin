@@ -180,6 +180,7 @@ namespace Fika.Core
         public bool DynamicVExfils;
         public bool AllowFreeCam;
         public bool AllowItemSending;
+        public bool ForceSaveOnDeath;
         #endregion
 
         protected void Awake()
@@ -228,6 +229,11 @@ namespace Fika.Core
                 new ItemContext_Patch().Enable();
             }
 
+            if(ForceSaveOnDeath)
+            {
+                new OfflineSaveProfilePatch().Disable(); //Disable this as we've moved it forward immediately after extraction or death
+            }
+
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
 
@@ -258,6 +264,7 @@ namespace Fika.Core
             DynamicVExfils = clientConfig.DynamicVExfils;
             AllowFreeCam = clientConfig.AllowFreeCam;
             AllowItemSending = clientConfig.AllowItemSending;
+            ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
 
             clientConfig.ToString();
         }
