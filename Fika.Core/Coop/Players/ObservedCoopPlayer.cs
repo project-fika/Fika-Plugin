@@ -37,6 +37,7 @@ namespace Fika.Core.Coop.Players
         private readonly float interpolationRatio = 0.5f;
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
+        private Coroutine waitForStartRoutine;
         public GClass2417 NetworkHealthController
         {
             get => HealthController as GClass2417;
@@ -605,7 +606,7 @@ namespace Fika.Core.Coop.Players
                 InteractionRaycast();
                 if (InteractablePlayer != null)
                 {
-                    InteractablePlayer.ShowHelloNotification(Profile.Nickname); 
+                    InteractablePlayer.ShowHelloNotification(Profile.Nickname);
                 }
             }
             base.vmethod_3(gesture);
@@ -835,7 +836,7 @@ namespace Fika.Core.Coop.Players
                 PlayerBody.GClass1860 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
                 if (gclass2 != null)
                 {
-                    gclass2.Dispose(); 
+                    gclass2.Dispose();
                 }
             }
 
@@ -941,6 +942,8 @@ namespace Fika.Core.Coop.Players
             {
                 Profile.Info.GroupId = "Fika";
 
+                var asd = Side;
+
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
                 IVaultingComponent vaultingComponent = playerTraverse.Field("_vaultingComponent").GetValue<IVaultingComponent>();
@@ -961,10 +964,29 @@ namespace Fika.Core.Coop.Players
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
                 }
 
-                healthBar = gameObject.AddComponent<FikaHealthBar>();
+                waitForStartRoutine = StartCoroutine(CreateHealthBar());
 
                 RaycastCameraTransform = playerTraverse.Field("_playerLookRaycastTransform").GetValue<Transform>();
             }
+        }
+
+        private IEnumerator CreateHealthBar()
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            if (coopGame == null)
+            {
+                yield break;
+            }
+
+            while (coopGame.Status != GameStatus.Started)
+            {
+                yield return null;
+            }
+
+            healthBar = gameObject.AddComponent<FikaHealthBar>();
+
+            yield break;
         }
 
         protected override void Start()
@@ -1156,7 +1178,7 @@ namespace Fika.Core.Coop.Players
         {
             if (NestedStepSoundSource != null)
             {
-                NestedStepSoundSource.SetRolloff(60f * ProtagonistHearing); 
+                NestedStepSoundSource.SetRolloff(60f * ProtagonistHearing);
             }
         }
 

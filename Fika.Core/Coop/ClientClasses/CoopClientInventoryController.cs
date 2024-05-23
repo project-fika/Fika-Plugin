@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.ClientClasses
                 HostInventoryOperationManager operationManager = new(this, operation, callback);
                 if (vmethod_0(operationManager.operation))
                 {
-                    operationManager.operation.vmethod_0(operationManager.HandleResult);            
+                    operationManager.operation.vmethod_0(operationManager.HandleResult);
 
                     InventoryPacket packet = new()
                     {

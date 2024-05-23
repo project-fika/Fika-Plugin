@@ -1,5 +1,10 @@
-﻿using Aki.Custom.Airdrops;
+﻿using Aki.Common.Http;
+using Aki.Custom.Airdrops;
 using Aki.Reflection.Utils;
+using Aki.SinglePlayer.Models.Progression;
+using Aki.SinglePlayer.Utils.Healing;
+using Aki.SinglePlayer.Utils.Insurance;
+using Aki.SinglePlayer.Utils.Progression;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
@@ -34,6 +39,7 @@ using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
 using LiteNetLib.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -67,6 +73,7 @@ namespace Fika.Core.Coop.GameMode
         private WavesSpawnScenario wavesSpawnScenario_0;
         private NonWavesSpawnScenario nonWavesSpawnScenario_0;
         private Func<Player, GamePlayerOwner> func_1;
+        private bool hasSaved = false;
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
@@ -316,7 +323,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                Logger.LogDebug($"{nameof(CreateBot)}:Unable to find {nameof(CoopHandler)}");
+                Logger.LogError($"{nameof(CreateBot)}: Unable to find {nameof(CoopHandler)}");
                 return null;
             }
 
@@ -330,7 +337,7 @@ namespace Fika.Core.Coop.GameMode
                 isSpecial = true;
             }
 
-            if (FikaPlugin.EnforcedSpawnLimits.Value && botsController_0.AliveAndLoadingBotsCount >= botsController_0.BotSpawner.MaxBots)
+            if (FikaPlugin.EnforcedSpawnLimits.Value && Bots.Count >= botsController_0.BotSpawner.MaxBots)
             {
                 bool despawned = false;
 
@@ -478,6 +485,9 @@ namespace Fika.Core.Coop.GameMode
 
             if (botKey == string.Empty)
             {
+#if DEBUG
+                Logger.LogWarning("TryDespawnFurthest: botKey was empty"); 
+#endif
                 return false;
             }
 
@@ -1195,25 +1205,28 @@ namespace Fika.Core.Coop.GameMode
                 botsController_0.SetSettings(numberOfBots, BackEndSession.BackEndConfig.BotPresets, BackEndSession.BackEndConfig.BotWeaponScatterings);
                 botsController_0.AddActivePLayer(PlayerOwner.Player);
 
-                int limits = Location_0.Id.ToLower() switch
+                if (FikaPlugin.EnforcedSpawnLimits.Value)
                 {
-                    "factory4_day" => FikaPlugin.MaxBotsFactory.Value,
-                    "factory4_night" => FikaPlugin.MaxBotsFactory.Value,
-                    "bigmap" => FikaPlugin.MaxBotsCustoms.Value,
-                    "interchange" => FikaPlugin.MaxBotsInterchange.Value,
-                    "rezervbase" => FikaPlugin.MaxBotsReserve.Value,
-                    "woods" => FikaPlugin.MaxBotsWoods.Value,
-                    "shoreline" => FikaPlugin.MaxBotsShoreline.Value,
-                    "tarkovstreets" => FikaPlugin.MaxBotsStreets.Value,
-                    "sandbox" => FikaPlugin.MaxBotsGroundZero.Value,
-                    "laboratory" => FikaPlugin.MaxBotsLabs.Value,
-                    "lighthouse" => FikaPlugin.MaxBotsLighthouse.Value,
-                    _ => 0
-                };
+                    int limits = Location_0.Id.ToLower() switch
+                    {
+                        "factory4_day" => FikaPlugin.MaxBotsFactory.Value,
+                        "factory4_night" => FikaPlugin.MaxBotsFactory.Value,
+                        "bigmap" => FikaPlugin.MaxBotsCustoms.Value,
+                        "interchange" => FikaPlugin.MaxBotsInterchange.Value,
+                        "rezervbase" => FikaPlugin.MaxBotsReserve.Value,
+                        "woods" => FikaPlugin.MaxBotsWoods.Value,
+                        "shoreline" => FikaPlugin.MaxBotsShoreline.Value,
+                        "tarkovstreets" => FikaPlugin.MaxBotsStreets.Value,
+                        "sandbox" => FikaPlugin.MaxBotsGroundZero.Value,
+                        "laboratory" => FikaPlugin.MaxBotsLabs.Value,
+                        "lighthouse" => FikaPlugin.MaxBotsLighthouse.Value,
+                        _ => 0
+                    };
 
-                if (limits > 0)
-                {
-                    botsController_0.BotSpawner.SetMaxBots(limits);
+                    if (limits > 0)
+                    {
+                        botsController_0.BotSpawner.SetMaxBots(limits);
+                    } 
                 }
 
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
@@ -1597,7 +1610,7 @@ namespace Fika.Core.Coop.GameMode
                     if (player.ActiveHealthController.DamageCoeff != 0)
                     {
                         player.ActiveHealthController.SetDamageCoeff(0);
-                    } 
+                    }
                 }
                 else
                 {
@@ -1641,6 +1654,11 @@ namespace Fika.Core.Coop.GameMode
             PlayerOwner.vmethod_1();
             MyExitStatus = ExitStatus.Killed;
             MyExitLocation = null;
+
+            if (FikaPlugin.Instance.ForceSaveOnDeath)
+            {
+                SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true);
+            }
         }
 
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
@@ -1746,13 +1764,7 @@ namespace Fika.Core.Coop.GameMode
                 Destroy(CoopHandler.CoopHandlerParent);
             }
 
-            Class1364 stopManager = new()
-            {
-                baseLocalGame_0 = this,
-                exitStatus = exitStatus,
-                exitName = exitName,
-                delay = delay
-            };
+            ExitManager stopManager = new(this, exitStatus, exitName, delay, myPlayer);
 
             EndByExitTrigerScenario endByExitTrigger = GetComponent<EndByExitTrigerScenario>();
             EndByTimerScenario endByTimerScenario = GetComponent<EndByTimerScenario>();
@@ -1779,8 +1791,42 @@ namespace Fika.Core.Coop.GameMode
             {
                 EnvironmentManager.Instance.Stop();
             }
-            MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.method_0));
+            MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.HandleExit));
             GClass549.Config.UseSpiritPlayer = false;
+        }
+
+        private void SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
+        {
+            if (hasSaved)
+            {
+                return;
+            }
+
+            if (fromDeath)
+            {
+                //Since we're bypassing saving on exiting, run this now.
+                player.Profile.EftStats.LastPlayerState = null;
+                player.StatisticsManager.EndStatisticsSession(exitStatus, PastTime);
+                player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
+            }
+
+            //Method taken directly from AKI, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
+            Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
+
+            JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;
+
+            SaveProfileRequest SaveRequest = new()
+            {
+                Exit = exitStatus.ToString().ToLowerInvariant(),
+                Profile = player.Profile,
+                Health = HealthListener.Instance.CurrentHealth,
+                Insurance = InsuredItemManager.Instance.GetTrackedItems(),
+                IsPlayerScav = player.Side is EPlayerSide.Savage
+            };
+
+            RequestHandler.PutJson("/raid/profile/save", SaveRequest.ToJson(Converters.AddItem(new NotesJsonConverter()).ToArray()));
+
+            hasSaved = true;
         }
 
         private void StopFromError(string profileId, ExitStatus exitStatus)
@@ -1975,6 +2021,49 @@ namespace Fika.Core.Coop.GameMode
             }
 
             base.Dispose();
+        }
+
+        private class ExitManager(CoopGame localGame, ExitStatus exitStatus, string exitName, float delay, CoopPlayer localPlayer)
+        {
+            private readonly CoopGame localGame = localGame;
+            private readonly ExitStatus exitStatus = exitStatus;
+            private readonly string exitName = exitName;
+            private readonly float delay = delay;
+            private readonly CoopPlayer localPlayer = localPlayer;
+            private Action EndAction;
+
+            public void HandleExit()
+            {
+                GClass3107 screenManager = GClass3107.Instance;
+                if (screenManager.CheckCurrentScreen(EEftScreenType.Reconnect))
+                {
+                    screenManager.CloseAllScreensForced();
+                }
+                localGame.gparam_0.Player.OnGameSessionEnd(exitStatus, localGame.PastTime, localGame.Location_0.Id, exitName);
+                localGame.CleanUp();
+                localGame.Status = GameStatus.Stopped;
+                TimeSpan timeSpan = GClass1296.Now - localGame.dateTime_0;
+                localGame.ginterface145_0.OfflineRaidEnded(exitStatus, exitName, timeSpan.TotalSeconds).HandleExceptions();
+                MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
+                StaticManager staticManager = StaticManager.Instance;
+                float num = delay;
+                Action action;
+                if ((action = EndAction) == null)
+                {
+                    action = (EndAction = new Action(FireCallback));
+                }
+                staticManager.WaitSeconds(num, action);
+            }
+
+            private void FireCallback()
+            {
+                Callback<ExitStatus, TimeSpan, MetricsClass> endCallback = Traverse.Create(localGame).Field("callback_0").GetValue<Callback<ExitStatus, TimeSpan, MetricsClass>>();
+
+                localGame.SavePlayer(localPlayer, exitStatus, exitName, false);
+
+                endCallback(new Result<ExitStatus, TimeSpan, MetricsClass>(exitStatus, GClass1296.Now - localGame.dateTime_0, new MetricsClass()));
+                UIEventSystem.Instance.Enable();
+            }
         }
 
         private class ErrorExitManager : Class1364

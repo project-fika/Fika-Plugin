@@ -99,7 +99,7 @@ namespace Fika.Core.Coop.Custom
 
             float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
             Vector3 position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), currentPlayer.PlayerBones.Neck.position.z);
-            
+
             if (!WorldToScreen.GetScreenPoint(position, mainPlayer, out Vector3 screenPoint))
             {
                 UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, 0);

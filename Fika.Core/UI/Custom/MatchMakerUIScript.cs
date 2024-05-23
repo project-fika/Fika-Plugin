@@ -237,7 +237,7 @@ namespace Fika.Core.UI.Custom
                 MatchmakerAcceptPatches.SetGroupId(result.ServerId);
                 MatchmakerAcceptPatches.SetTimestamp(result.Timestamp);
                 MatchmakerAcceptPatches.MatchingType = EMatchmakerType.GroupPlayer;
-                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;                
+                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
                 DestroyThis();
 

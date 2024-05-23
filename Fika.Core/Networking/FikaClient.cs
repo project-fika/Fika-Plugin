@@ -327,7 +327,7 @@ namespace Fika.Core.Networking
         {
             if (CoopHandler.clientBTR != null)
             {
-                CoopHandler.clientBTR.btrPackets.Enqueue(packet); 
+                CoopHandler.clientBTR.btrPackets.Enqueue(packet);
             }
         }
 
@@ -508,7 +508,7 @@ namespace Fika.Core.Networking
                     {
                         if (CoopHandler.clientBTR)
                         {
-                            CoopHandler.clientBTR.DisplayNetworkNotification(packet.TraderServiceType); 
+                            CoopHandler.clientBTR.DisplayNetworkNotification(packet.TraderServiceType);
                         }
                     }
                     break;

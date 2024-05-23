@@ -3,8 +3,10 @@
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,6 +30,7 @@ namespace Fika.Core.Coop.ObservedClasses
         private float aimMovementSpeed = 1f;
         private bool hasFired = false;
         private WeaponPrefab weaponPrefab;
+        private GClass1582 underBarrelManager;
         public override bool IsAiming
         {
             get => base.IsAiming;
@@ -43,7 +46,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
 
                 _isAiming = value;
-                _player.Skills.FastAimTimer.Target = (value ? 0f : 2f);
+                _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
                 _player.MovementContext.SetAimingSlowdown(IsAiming, 0.33f + aimMovementSpeed);
                 _player.Physical.Aim((!_isAiming || !(_player.MovementContext.StationaryWeapon == null)) ? 0f : ErgonomicWeight);
                 coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
@@ -62,6 +65,10 @@ namespace Fika.Core.Coop.ObservedClasses
             _objectInHandsAnimator.SetAiming(false);
             aimMovementSpeed = coopPlayer.Skills.GetWeaponInfo(Item).AimMovementSpeed;
             weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
+            if (UnderbarrelWeapon != null)
+            {
+                underBarrelManager = Traverse.Create(this).Field("gclass1582_0").GetValue<GClass1582>();
+            }
         }
 
         public static CoopObservedFirearmController Create(CoopPlayer player, Weapon weapon)
@@ -226,7 +233,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     }
 
                     BulletClass ammo = (BulletClass)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
-                    InitiateShot(Item, ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
+                    InitiateShot(packet.ShotInfoPacket.UnderbarrelShot ? UnderbarrelWeapon : Item, ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
                         packet.ShotInfoPacket.FireportPosition, packet.ShotInfoPacket.ChamberIndex, packet.ShotInfoPacket.Overheat);
 
                     if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
@@ -253,6 +260,18 @@ namespace Fika.Core.Coop.ObservedClasses
                     MagazineClass magazine = Weapon.GetCurrentMagazine();
 
                     FirearmsAnimator.SetFire(true);
+
+                    if (packet.ShotInfoPacket.UnderbarrelShot)
+                    {
+                        if (UnderbarrelWeapon.Chamber.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
+                        {
+                            grenadeBullet.IsUsed = true;
+                            UnderbarrelWeapon.Chamber.RemoveItem();
+                            underBarrelManager?.DestroyPatronInWeapon();
+                        }
+                        FirearmsAnimator.SetFire(false);
+                        return;
+                    }
 
                     if (Weapon.HasChambers)
                     {
@@ -284,7 +303,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         }
                         else
                         {
-                            Weapon.Chambers[0].RemoveItem(false);
+                            Weapon.Chambers[0].RemoveItem();
                             if (weaponPrefab != null && weaponPrefab.ObjectInHands is GClass1668 weaponEffectsManager)
                             {
                                 HandleShellEvent(weaponEffectsManager, packet, ammo, magazine);
@@ -521,8 +540,6 @@ namespace Fika.Core.Coop.ObservedClasses
                 {
                     CurrentOperation.SetTriggerPressed(true);
                 }
-
-                
             }*/
 
             if (packet.HasRollCylinder && Weapon is GClass2696 rollWeapon)
@@ -593,6 +610,16 @@ namespace Fika.Core.Coop.ObservedClasses
             if (packet.ReloadBoltAction)
             {
                 StartCoroutine(ObservedBoltAction(FirearmsAnimator, this, inventoryController));
+            }
+
+            if (packet.UnderbarrelSightingRangeUp)
+            {
+                UnderbarrelSightingRangeUp();
+            }
+
+            if (packet.UnderbarrelSightingRangeDown)
+            {
+                UnderbarrelSightingRangeDown();
             }
         }
 

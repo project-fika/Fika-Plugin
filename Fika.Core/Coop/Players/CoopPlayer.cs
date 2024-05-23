@@ -62,7 +62,7 @@ namespace Fika.Core.Coop.Players
             player.IsYourPlayer = true;
             player.NetId = netId;
 
-            CoopClientInventoryController inventoryController = new(player, profile, true);
+            CoopClientInventoryController inventoryController = new(player, profile, false);
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
@@ -1336,6 +1336,15 @@ namespace Fika.Core.Coop.Players
                     }
                 }
             }
+        }
+
+        public void CheckAndResetControllers(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
+        {
+            _questController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
+            _questController?.ResetCurrentNullableCounters();
+
+            _achievementsController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
+            _achievementsController?.ResetCurrentNullableCounters();
         }
 
         public virtual void SetInventory(EquipmentClass equipmentClass)
