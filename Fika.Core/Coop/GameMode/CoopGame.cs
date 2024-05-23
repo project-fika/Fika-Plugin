@@ -73,6 +73,7 @@ namespace Fika.Core.Coop.GameMode
         private WavesSpawnScenario wavesSpawnScenario_0;
         private NonWavesSpawnScenario nonWavesSpawnScenario_0;
         private Func<Player, GamePlayerOwner> func_1;
+        private bool hasSaved = false;
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
@@ -1721,6 +1722,11 @@ namespace Fika.Core.Coop.GameMode
 
         private void SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
         {
+            if (hasSaved)
+            {
+                return;
+            }
+
             if (fromDeath)
             {
                 //Since we're bypassing saving on exiting, run this now.
@@ -1734,7 +1740,7 @@ namespace Fika.Core.Coop.GameMode
 
             JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;
 
-            SaveProfileRequest SaveRequest = new SaveProfileRequest
+            SaveProfileRequest SaveRequest = new()
             {
                 Exit = exitStatus.ToString().ToLowerInvariant(),
                 Profile = player.Profile,
@@ -1744,6 +1750,8 @@ namespace Fika.Core.Coop.GameMode
             };
 
             RequestHandler.PutJson("/raid/profile/save", SaveRequest.ToJson(Converters.AddItem(new NotesJsonConverter()).ToArray()));
+
+            hasSaved = true;
         }
 
         private void StopFromError(string profileId, ExitStatus exitStatus)
