@@ -1738,7 +1738,7 @@ namespace Fika.Core.Coop.GameMode
             player.CheckAndResetControllers(exitStatus, base.PastTime, base.Location_0.Id, exitName);
 
             //Method taken directly from AKI, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
-            var converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
+            Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
 
             JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;
 
@@ -1748,7 +1748,7 @@ namespace Fika.Core.Coop.GameMode
                 Profile = player.Profile,
                 Health = HealthListener.Instance.CurrentHealth,
                 Insurance = InsuredItemManager.Instance.GetTrackedItems(),
-                IsPlayerScav = RaidSettings.IsScav // If session joining mixed with both PMC's and scavs is added this might have to be changed
+                IsPlayerScav = player.Side is EPlayerSide.Savage
             };
 
             RequestHandler.PutJson("/raid/profile/save", SaveRequest.ToJson(Converters.AddItem(new NotesJsonConverter()).ToArray()));
