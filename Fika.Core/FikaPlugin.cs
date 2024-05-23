@@ -229,11 +229,6 @@ namespace Fika.Core
                 new ItemContext_Patch().Enable();
             }
 
-            if (ForceSaveOnDeath)
-            {
-                new OfflineSaveProfilePatch().Disable(); //Disable this as we've moved it forward immediately after extraction or death
-            }
-
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
 
@@ -456,6 +451,7 @@ namespace Fika.Core
             new AmmoUsedCounterPatch().Disable();
             new ArmorDamageCounterPatch().Disable();
             new DogtagPatch().Disable();
+            new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();

@@ -1516,11 +1516,6 @@ namespace Fika.Core.Coop.GameMode
 
             player.ActiveHealthController.DiedEvent -= MainPlayerDied;
 
-            if (FikaPlugin.Instance.ForceSaveOnDeath)
-            {
-                SavePlayer(coopPlayer, MyExitStatus, null);
-            }
-
             if (FikaPlugin.AutoExtract.Value)
             {
                 if (MatchmakerAcceptPatches.IsClient)
@@ -1595,7 +1590,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null);
+                SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true);
             }
         }
 
@@ -1693,13 +1688,7 @@ namespace Fika.Core.Coop.GameMode
                 Destroy(CoopHandler.CoopHandlerParent);
             }
 
-            Class1364 stopManager = new()
-            {
-                baseLocalGame_0 = this,
-                exitStatus = exitStatus,
-                exitName = exitName,
-                delay = delay
-            };
+            ExitManager stopManager = new(this, exitStatus, exitName, delay, myPlayer);
 
             EndByExitTrigerScenario endByExitTrigger = GetComponent<EndByExitTrigerScenario>();
             EndByTimerScenario endByTimerScenario = GetComponent<EndByTimerScenario>();
@@ -1726,16 +1715,19 @@ namespace Fika.Core.Coop.GameMode
             {
                 EnvironmentManager.Instance.Stop();
             }
-            MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.method_0));
+            MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.HandleExit));
             GClass549.Config.UseSpiritPlayer = false;
         }
 
-        private void SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName)
+        private void SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
         {
-            //Since we're bypassing saving on exiting, run this now.
-            player.Profile.EftStats.LastPlayerState = null;
-            player.StatisticsManager.EndStatisticsSession(exitStatus, base.PastTime);
-            player.CheckAndResetControllers(exitStatus, base.PastTime, base.Location_0.Id, exitName);
+            if (fromDeath)
+            {
+                //Since we're bypassing saving on exiting, run this now.
+                player.Profile.EftStats.LastPlayerState = null;
+                player.StatisticsManager.EndStatisticsSession(exitStatus, PastTime);
+                player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName); 
+            }
 
             //Method taken directly from AKI, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
             Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
@@ -1946,6 +1938,49 @@ namespace Fika.Core.Coop.GameMode
             }
 
             base.Dispose();
+        }
+
+        private class ExitManager(CoopGame localGame, ExitStatus exitStatus, string exitName, float delay, CoopPlayer localPlayer)
+        {
+            private readonly CoopGame localGame = localGame;
+            private readonly ExitStatus exitStatus = exitStatus;
+            private readonly string exitName = exitName;
+            private readonly float delay = delay;
+            private readonly CoopPlayer localPlayer = localPlayer;
+            private Action EndAction;
+
+            public void HandleExit()
+            {
+                GClass3107 screenManager = GClass3107.Instance;
+                if (screenManager.CheckCurrentScreen(EEftScreenType.Reconnect))
+                {
+                    screenManager.CloseAllScreensForced();
+                }
+                localGame.gparam_0.Player.OnGameSessionEnd(exitStatus, localGame.PastTime, localGame.Location_0.Id, exitName);
+                localGame.CleanUp();
+                localGame.Status = GameStatus.Stopped;
+                TimeSpan timeSpan = GClass1296.Now - localGame.dateTime_0;
+                localGame.ginterface145_0.OfflineRaidEnded(exitStatus, exitName, timeSpan.TotalSeconds).HandleExceptions();
+                MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
+                StaticManager staticManager = StaticManager.Instance;
+                float num = delay;
+                Action action;
+                if ((action = EndAction) == null)
+                {
+                    action = (EndAction = new Action(FireCallback));
+                }
+                staticManager.WaitSeconds(num, action);
+            }
+
+            private void FireCallback()
+            {
+                Callback<ExitStatus, TimeSpan, MetricsClass> endCallback = Traverse.Create(localGame).Field("callback_0").GetValue<Callback<ExitStatus, TimeSpan, MetricsClass>>();
+
+                localGame.SavePlayer(localPlayer, exitStatus, exitName, false);
+
+                endCallback(new Result<ExitStatus, TimeSpan, MetricsClass>(exitStatus, GClass1296.Now - localGame.dateTime_0, new MetricsClass()));
+                UIEventSystem.Instance.Enable();
+            }
         }
 
         private class ErrorExitManager : Class1364
