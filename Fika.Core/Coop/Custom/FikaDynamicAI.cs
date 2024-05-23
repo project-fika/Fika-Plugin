@@ -5,7 +5,6 @@ using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -123,7 +122,7 @@ namespace Fika.Core.Coop.Custom
 
             if (!disabledBots.Contains(bot))
             {
-                disabledBots.Add(bot); 
+                disabledBots.Add(bot);
             }
             else
             {

@@ -1516,7 +1516,7 @@ namespace Fika.Core.Coop.GameMode
 
             player.ActiveHealthController.DiedEvent -= MainPlayerDied;
 
-            if(FikaPlugin.Instance.ForceSaveOnDeath)
+            if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
                 SavePlayer(coopPlayer, MyExitStatus, null);
             }
@@ -1548,7 +1548,7 @@ namespace Fika.Core.Coop.GameMode
                     if (player.ActiveHealthController.DamageCoeff != 0)
                     {
                         player.ActiveHealthController.SetDamageCoeff(0);
-                    } 
+                    }
                 }
                 else
                 {
@@ -1593,7 +1593,7 @@ namespace Fika.Core.Coop.GameMode
             MyExitStatus = ExitStatus.Killed;
             MyExitLocation = null;
 
-            if(FikaPlugin.Instance.ForceSaveOnDeath)
+            if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
                 SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null);
             }

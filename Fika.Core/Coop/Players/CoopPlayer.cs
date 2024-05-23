@@ -173,7 +173,7 @@ namespace Fika.Core.Coop.Players
                     {
                         if (coopHandler.clientBTR != null)
                         {
-                            coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket); 
+                            coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket);
                         }
                     }
                 }
@@ -399,7 +399,7 @@ namespace Fika.Core.Coop.Players
                         Amount = lightStates.Count(),
                         LightStates = lightStates
                     }
-                }); 
+                });
             }
         }
 
@@ -551,7 +551,7 @@ namespace Fika.Core.Coop.Players
 
             if (PacketSender != null)
             {
-                PacketSender.DestroyThis(); 
+                PacketSender.DestroyThis();
             }
         }
 
@@ -1363,7 +1363,7 @@ namespace Fika.Core.Coop.Players
             base.Dispose();
             if (PacketSender != null)
             {
-                PacketSender.DestroyThis(); 
+                PacketSender.DestroyThis();
             }
         }
 

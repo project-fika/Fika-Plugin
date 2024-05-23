@@ -250,7 +250,7 @@ namespace Fika.Core.Coop.Players
 
             if (PacketSender != null)
             {
-                PacketSender.DestroyThis(); 
+                PacketSender.DestroyThis();
             }
         }
 

@@ -605,7 +605,7 @@ namespace Fika.Core.Coop.Players
                 InteractionRaycast();
                 if (InteractablePlayer != null)
                 {
-                    InteractablePlayer.ShowHelloNotification(Profile.Nickname); 
+                    InteractablePlayer.ShowHelloNotification(Profile.Nickname);
                 }
             }
             base.vmethod_3(gesture);
@@ -832,7 +832,7 @@ namespace Fika.Core.Coop.Players
                 PlayerBody.GClass1860 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
                 if (gclass2 != null)
                 {
-                    gclass2.Dispose(); 
+                    gclass2.Dispose();
                 }
             }
 
@@ -1174,7 +1174,7 @@ namespace Fika.Core.Coop.Players
         {
             if (NestedStepSoundSource != null)
             {
-                NestedStepSoundSource.SetRolloff(60f * ProtagonistHearing); 
+                NestedStepSoundSource.SetRolloff(60f * ProtagonistHearing);
             }
         }
 

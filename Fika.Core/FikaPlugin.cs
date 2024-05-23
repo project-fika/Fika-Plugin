@@ -229,7 +229,7 @@ namespace Fika.Core
                 new ItemContext_Patch().Enable();
             }
 
-            if(ForceSaveOnDeath)
+            if (ForceSaveOnDeath)
             {
                 new OfflineSaveProfilePatch().Disable(); //Disable this as we've moved it forward immediately after extraction or death
             }

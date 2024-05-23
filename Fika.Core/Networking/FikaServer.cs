@@ -231,7 +231,7 @@ namespace Fika.Core.Networking
         {
             if (CoopHandler.serverBTR != null)
             {
-                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet); 
+                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
             }
         }
 
