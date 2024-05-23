@@ -456,7 +456,7 @@ namespace Fika.Core.Coop.BTR
         {
             try
             {
-                BTRSide btrSide = lastInteractPlayer.BtrInteractionSide ?? lastInteractedBtrSide;
+                BTRSide btrSide = lastInteractPlayer.BtrInteractionSide != null ? lastInteractPlayer.BtrInteractionSide : lastInteractedBtrSide;
                 byte sideId = btrClientSide.GetSideId(btrSide);
                 switch (sideId)
                 {

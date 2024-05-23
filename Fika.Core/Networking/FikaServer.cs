@@ -83,7 +83,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SessionSettingsPacket, NetPeer>(OnSessionSettingsPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -165,23 +164,6 @@ namespace Fika.Core.Networking
             ServerReady = true;
         }
 
-        private void OnSessionSettingsPacketReceived(SessionSettingsPacket packet, NetPeer peer)
-        {
-            if (packet.IsRequest)
-            {
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-                if (coopGame != null)
-                {
-                    SessionSettingsPacket returnPacket = new(false)
-                    {
-                        MetabolismDisabled = coopGame.RaidSettings.MetabolismDisabled
-                    };
-
-                    SendDataToPeer(peer, new(), ref returnPacket, DeliveryMethod.ReliableUnordered);
-                }
-            }
-        }
-
         public int PopNetId()
         {
             int netId = _currentNetId;
@@ -247,7 +229,10 @@ namespace Fika.Core.Networking
 
         private void OnBTRServicePacketReceived(BTRServicePacket packet, NetPeer peer)
         {
-            CoopHandler.serverBTR?.NetworkBtrTraderServicePurchased(packet);
+            if (CoopHandler.serverBTR != null)
+            {
+                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
+            }
         }
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
@@ -407,7 +392,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -433,7 +418,6 @@ namespace Fika.Core.Networking
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
         {
-            // This method needs to be refined. For some reason the ping-pong has to be run twice for it to work on the host?
             if (packet.IsRequest)
             {
                 foreach (CoopPlayer player in CoopHandler.Players.Values)
@@ -487,7 +471,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -589,7 +573,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.DamagePackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.DamagePackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -600,7 +584,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.FirearmPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.FirearmPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();

@@ -80,7 +80,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SessionSettingsPacket>(OnSessionSettingsPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -113,18 +112,6 @@ namespace Fika.Core.Networking
             Singleton<FikaClient>.Create(this);
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
             ClientReady = true;
-        }
-
-        private void OnSessionSettingsPacketReceived(SessionSettingsPacket packet)
-        {
-            if (!packet.IsRequest)
-            {
-                if (packet.MetabolismDisabled)
-                {
-                    Singleton<GameWorld>.Instance.MainPlayer.HealthController.DisableMetabolism();
-                    NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
-                }
-            }
         }
 
         private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet)
@@ -258,7 +245,10 @@ namespace Fika.Core.Networking
 
         private void OnBTRPacketReceived(BTRPacket packet)
         {
-            CoopHandler.clientBTR?.btrPackets.Enqueue(packet);
+            if (CoopHandler.clientBTR != null)
+            {
+                CoopHandler.clientBTR.btrPackets.Enqueue(packet);
+            }
         }
 
         private void OnWeatherPacketReceived(WeatherPacket packet)
@@ -436,13 +426,20 @@ namespace Fika.Core.Networking
                     break;
                 case EPackageType.TraderServiceNotification:
                     {
-                        CoopHandler.clientBTR?.DisplayNetworkNotification(packet.TraderServiceType);
+                        if (CoopHandler.clientBTR)
+                        {
+                            CoopHandler.clientBTR.DisplayNetworkNotification(packet.TraderServiceType);
+                        }
                     }
                     break;
                 case EPackageType.DisposeBot:
                     {
                         if (CoopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToDispose))
                         {
+                            if (!botToDispose.gameObject.activeSelf)
+                            {
+                                botToDispose.gameObject.SetActive(true);
+                            }
 
                             if (CoopHandler.Players.Remove(packet.BotNetId))
                             {
@@ -512,7 +509,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
             }
         }
 
@@ -606,7 +603,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
             }
         }
 
@@ -614,7 +611,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.InventoryPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.InventoryPackets?.Enqueue(packet);
             }
         }
 
@@ -622,7 +619,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.DamagePackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.DamagePackets?.Enqueue(packet);
             }
         }
 
@@ -630,7 +627,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply?.PacketReceiver?.FirearmPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver?.FirearmPackets?.Enqueue(packet);
             }
         }
 

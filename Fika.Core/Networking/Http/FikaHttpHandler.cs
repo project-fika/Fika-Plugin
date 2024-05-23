@@ -135,5 +135,10 @@ namespace Fika.Core.Networking.Http
         {
             return PostJson<AvailableReceiversRequest, Dictionary<string, string>>("/fika/senditem/availablereceivers", data);
         }
+
+        public static async Task<RaidSettingsResponse> GetRaidSettings(RaidSettingsRequest data)
+        {
+            return await PostJsonAsync<RaidSettingsRequest, RaidSettingsResponse>("/fika/raid/getsettings", data);
+        }
     }
 }

@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.Matchmaker
             timestamp = ts;
         }
 
-        public static bool JoinMatch(RaidSettings settings, string profileId, string serverId, out CreateMatch result, out string errorMessage)
+        public static bool JoinMatch(string profileId, string serverId, out CreateMatch result, out string errorMessage)
         {
             result = new CreateMatch();
             errorMessage = $"No server matches the data provided or the server no longer exists";

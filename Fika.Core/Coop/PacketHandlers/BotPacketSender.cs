@@ -50,7 +50,7 @@ namespace Fika.Core.Coop.PacketHandlers
                             player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
 
             Writer.Reset();
-            Server?.SendDataToAll(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
+            Server.SendDataToAll(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
 
             player.LastDirection = Vector2.zero; // Bots give a constant input for some odd reason, resetting on FixedUpdate should be ok from my testing and does not cause sliding for clients
         }
@@ -65,8 +65,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     WeaponPacket firearmPacket = FirearmPackets.Dequeue();
                     firearmPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Server?.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Server.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int healthPackets = DamagePackets.Count;
@@ -77,8 +77,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     DamagePacket healthPacket = DamagePackets.Dequeue();
                     healthPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Server?.SendDataToAll(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Server.SendDataToAll(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int inventoryPackets = InventoryPackets.Count;
@@ -89,8 +89,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     InventoryPacket inventoryPacket = InventoryPackets.Dequeue();
                     inventoryPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Server?.SendDataToAll(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Server.SendDataToAll(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int commonPlayerPackets = CommonPlayerPackets.Count;
@@ -101,8 +101,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     CommonPlayerPacket commonPlayerPacket = CommonPlayerPackets.Dequeue();
                     commonPlayerPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Server?.SendDataToAll(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Server.SendDataToAll(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int healthSyncPackets = HealthSyncPackets.Count;
@@ -113,8 +113,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     HealthSyncPacket healthSyncPacket = HealthSyncPackets.Dequeue();
                     healthSyncPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Server?.SendDataToAll(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Server.SendDataToAll(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
         }

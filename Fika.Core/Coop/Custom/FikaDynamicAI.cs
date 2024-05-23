@@ -5,8 +5,8 @@ using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Custom
@@ -59,9 +59,15 @@ namespace Fika.Core.Coop.Custom
 
         private void Spawner_OnBotRemoved(BotOwner botOwner)
         {
-            if (!bots.Remove((CoopBot)botOwner.GetPlayer))
+            CoopBot bot = (CoopBot)botOwner.GetPlayer;
+            if (!bots.Remove(bot))
             {
                 logger.LogWarning($"Could not remove {botOwner.gameObject.name} from bots list.");
+            }
+
+            if (disabledBots.Contains(bot))
+            {
+                disabledBots.Remove(bot);
             }
         }
 
@@ -117,7 +123,7 @@ namespace Fika.Core.Coop.Custom
 
             if (!disabledBots.Contains(bot))
             {
-                disabledBots.Add(bot); 
+                disabledBots.Add(bot);
             }
             else
             {
@@ -184,17 +190,29 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        public void SettingChanged(bool value)
+        public void EnabledChange(bool value)
         {
             if (!value)
             {
-                foreach (CoopBot bot in disabledBots)
+                CoopBot[] disabledBotsArray = [.. disabledBots];
+                for (int i = 0; i < disabledBotsArray.Length; i++)
                 {
-                    bot.gameObject.SetActive(true);
+                    ActivateBot(disabledBotsArray[i]);
                 }
 
                 disabledBots.Clear();
             }
+        }
+
+        internal void RateChanged(FikaPlugin.DynamicAIRates value)
+        {
+            resetCounter = value switch
+            {
+                FikaPlugin.DynamicAIRates.Low => 600,
+                FikaPlugin.DynamicAIRates.Medium => 300,
+                FikaPlugin.DynamicAIRates.High => 120,
+                _ => 300,
+            };
         }
     }
 }

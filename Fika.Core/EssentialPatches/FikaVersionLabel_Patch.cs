@@ -33,8 +33,10 @@ namespace Fika.Core.EssentialPatches
 
             string fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();
 
-            Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance).Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
-            Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance).Field("string_2").SetValue($"Fika {fikaVersion} |");
+            Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+
+            preloaderUiTraverse.Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
+            preloaderUiTraverse.Field("string_2").SetValue($"Fika {fikaVersion} |");
             Traverse.Create(__result).Field("Major").SetValue($"FIKA BETA {fikaVersion} | {_versionLabel}");
         }
     }

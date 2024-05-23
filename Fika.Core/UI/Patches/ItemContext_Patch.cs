@@ -40,6 +40,14 @@ namespace Fika.Core.UI.Patches
                     return;
                 }
 
+                // Save as variable in case we need to add more checks later...
+                MenuUI menuUI = Singleton<MenuUI>.Instance;
+
+                if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled)
+                {
+                    return;
+                }
+
                 IEnumerable<Item> parentItems = item.GetAllParentItems();
                 if (parentItems.Any(x => x is EquipmentClass))
                 {

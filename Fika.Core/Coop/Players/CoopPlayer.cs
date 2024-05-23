@@ -62,15 +62,28 @@ namespace Fika.Core.Coop.Players
             player.IsYourPlayer = true;
             player.NetId = netId;
 
-            CoopClientInventoryController inventoryController = new(player, profile, true);
+            CoopClientInventoryController inventoryController = new(player, profile, false);
 
-            GClass3206 questController = new(profile, inventoryController, null, true);
+            ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
+
+            GClass3206 questController = new(profile, inventoryController, session, true);
             questController.Init();
             questController.Run();
 
-            AchievementControllerClass achievementsController = new(profile, inventoryController, null, true);
+            AchievementControllerClass achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
+
+            if (MatchmakerAcceptPatches.IsServer)
+            {
+                player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
+            }
+            else if (MatchmakerAcceptPatches.IsClient)
+            {
+                player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
+            }
+
+            player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
@@ -124,8 +137,8 @@ namespace Fika.Core.Coop.Players
                     InteractPacket = btr.GetInteractWithBtrPacket(placeId, interaction)
                 };
 
-                PacketSender?.Writer?.Reset();
-                PacketSender?.Client?.SendData(PacketSender?.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                PacketSender.Writer.Reset();
+                PacketSender.Client.SendData(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
             }
             else if (MatchmakerAcceptPatches.IsServer)
             {
@@ -142,8 +155,8 @@ namespace Fika.Core.Coop.Players
                             InteractPacket = interactPacket
                         };
 
-                        PacketSender?.Writer?.Reset();
-                        PacketSender?.Server?.SendDataToAll(PacketSender?.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.Writer.Reset();
+                        PacketSender.Server.SendDataToAll(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
                 }
             }
@@ -158,7 +171,10 @@ namespace Fika.Core.Coop.Players
                 {
                     if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                     {
-                        coopHandler.clientBTR?.ClientInteraction(this, packet.InteractPacket);
+                        if (coopHandler.clientBTR != null)
+                        {
+                            coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket);
+                        }
                     }
                 }
             }
@@ -216,7 +232,7 @@ namespace Fika.Core.Coop.Players
         public override void Proceed(bool withNetwork, Callback<GInterface125> callback, bool scheduled = true)
         {
             base.Proceed(withNetwork, callback, scheduled);
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasProceedPacket = true,
                 ProceedPacket = new()
@@ -322,7 +338,7 @@ namespace Fika.Core.Coop.Players
         {
             base.DropCurrentController(callback, fastDrop, nextControllerItem);
 
-            /*PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            /*PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasDrop = true,
                 DropPacket = new()
@@ -342,7 +358,7 @@ namespace Fika.Core.Coop.Players
             }
 
             base.SetInventoryOpened(opened);
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasInventoryChanged = true,
                 SetInventoryOpen = opened
@@ -352,7 +368,7 @@ namespace Fika.Core.Coop.Players
         public override void SetCompassState(bool value)
         {
             base.SetCompassState(value);
-            PacketSender?.FirearmPackets?.Enqueue(new()
+            PacketSender.FirearmPackets.Enqueue(new()
             {
                 HasCompassChange = true,
                 CompassState = value
@@ -373,15 +389,18 @@ namespace Fika.Core.Coop.Players
         {
             GStruct163[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct163>(ClientPlayer.Class1430.class1430_0.method_0)).ToArray();
 
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            if (PacketSender != null)
             {
-                HasHeadLightsPacket = true,
-                HeadLightsPacket = new()
+                PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
-                    Amount = lightStates.Count(),
-                    LightStates = lightStates
-                }
-            });
+                    HasHeadLightsPacket = true,
+                    HeadLightsPacket = new()
+                    {
+                        Amount = lightStates.Count(),
+                        LightStates = lightStates
+                    }
+                });
+            }
         }
 
         public override void OnItemAddedOrRemoved(Item item, ItemAddress location, bool added)
@@ -395,7 +414,7 @@ namespace Fika.Core.Coop.Players
 
             if (ActiveHealthController.IsAlive)
             {
-                PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     Phrase = @event,
                     PhraseIndex = clip.NetId
@@ -406,7 +425,7 @@ namespace Fika.Core.Coop.Players
         public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct169.EStationaryCommand command)
         {
             base.OperateStationaryWeapon(stationaryWeapon, command);
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasStationaryPacket = true,
                 StationaryPacket = new()
@@ -447,7 +466,7 @@ namespace Fika.Core.Coop.Players
                     ItemId = (interactionResult is GClass2964 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
-            PacketSender?.CommonPlayerPackets?.Enqueue(packet);
+            PacketSender.CommonPlayerPackets.Enqueue(packet);
         }
 
         // Execute
@@ -472,7 +491,7 @@ namespace Fika.Core.Coop.Players
                     ItemId = (interactionResult is GClass2964 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
-            PacketSender?.CommonPlayerPackets?.Enqueue(packet);
+            PacketSender.CommonPlayerPackets.Enqueue(packet);
 
             UpdateInteractionCast();
         }
@@ -480,7 +499,7 @@ namespace Fika.Core.Coop.Players
         public override void vmethod_3(EGesture gesture)
         {
             base.vmethod_3(gesture);
-            PacketSender?.FirearmPackets?.Enqueue(new()
+            PacketSender.FirearmPackets.Enqueue(new()
             {
                 Gesture = gesture
             });
@@ -530,7 +549,10 @@ namespace Fika.Core.Coop.Players
         {
             yield return new WaitForSeconds(2);
 
-            PacketSender?.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis();
+            }
         }
 
         public override void Move(Vector2 direction)
@@ -761,7 +783,7 @@ namespace Fika.Core.Coop.Players
                     Color pingColor = FikaPlugin.PingColor.Value;
                     pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
                     // ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
-                    abstractPing?.Initialize(ref hitPoint, userData, pingColor);
+                    abstractPing.Initialize(ref hitPoint, userData, pingColor);
 
                     GenericPacket genericPacket = new()
                     {
@@ -773,14 +795,14 @@ namespace Fika.Core.Coop.Players
                         Nickname = Profile.Nickname
                     };
 
-                    PacketSender?.Writer?.Reset();
+                    PacketSender.Writer.Reset();
                     if (MatchmakerAcceptPatches.IsServer)
                     {
-                        PacketSender?.Server?.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.Server.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
                     else if (MatchmakerAcceptPatches.IsClient)
                     {
-                        PacketSender?.Client?.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
 
                     if (FikaPlugin.PlayPingAnimation.Value)
@@ -821,15 +843,6 @@ namespace Fika.Core.Coop.Players
 
         protected virtual void Start()
         {
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                PacketSender = gameObject.AddComponent<ServerPacketSender>();
-            }
-            else if (MatchmakerAcceptPatches.IsClient)
-            {
-                PacketSender = gameObject.AddComponent<ClientPacketSender>();
-            }
-            PacketReceiver = gameObject.AddComponent<PacketReceiver>();
             Profile.Info.GroupId = "Fika";
 
             if (Side != EPlayerSide.Savage)
@@ -934,7 +947,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (this is ObservedCoopPlayer observedCoopPlayer)
                 {
-                    observedCoopPlayer?.HandleProceedPacket(packet.ProceedPacket);
+                    observedCoopPlayer.HandleProceedPacket(packet.ProceedPacket);
                 }
             }
 
@@ -1326,6 +1339,15 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public void CheckAndResetControllers(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
+        {
+            _questController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
+            _questController?.ResetCurrentNullableCounters();
+
+            _achievementsController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
+            _achievementsController?.ResetCurrentNullableCounters();
+        }
+
         public virtual void SetInventory(EquipmentClass equipmentClass)
         {
             // Do nothing
@@ -1339,7 +1361,10 @@ namespace Fika.Core.Coop.Players
         public override void Dispose()
         {
             base.Dispose();
-            PacketSender?.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis();
+            }
         }
 
         public override void SendHandsInteractionStateChanged(bool value, int animationId)
@@ -1347,7 +1372,7 @@ namespace Fika.Core.Coop.Players
             base.SendHandsInteractionStateChanged(value, animationId);
             if (value)
             {
-                PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     Pickup = value,
                     PickupAnimation = animationId
@@ -1357,7 +1382,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnVaulting()
         {
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasVaultPacket = true,
                 VaultPacket = new()
@@ -1421,7 +1446,7 @@ namespace Fika.Core.Coop.Players
 
             public void Handle()
             {
-                player.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                player.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasContainerInteractionPacket = true,
                     ContainerInteractionPacket = new()
@@ -1459,7 +1484,7 @@ namespace Fika.Core.Coop.Players
                     return;
                 }
 
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1494,7 +1519,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1531,7 +1556,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1571,7 +1596,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1609,7 +1634,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1644,7 +1669,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1679,7 +1704,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1714,7 +1739,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()

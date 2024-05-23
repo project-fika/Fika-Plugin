@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
         {
-            coopPlayer.PacketSender?.FirearmPackets?.Enqueue(new()
+            coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
             {
                 HasGrenadePacket = true,
                 GrenadePacket = new()

@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.Components
                         if (!exfiltrationPoint.UnmetRequirements(player).Any())
                         {
                             game.MyExitLocation = exfiltrationPoint.Settings.Name;
-                            game.Extract(player, exfiltrationPoint);
+                            game.Extract((CoopPlayer)player, exfiltrationPoint);
                         }
                     }
 
@@ -201,16 +201,16 @@ namespace Fika.Core.Coop.Components
                         ExfilStartTime = point.ExfiltrationStartTime
                     };
 
-                    NetDataWriter writer = mainPlayer.PacketSender?.Writer;
+                    NetDataWriter writer = mainPlayer.PacketSender.Writer;
                     writer.Reset();
 
                     if (MatchmakerAcceptPatches.IsServer)
                     {
-                        mainPlayer.PacketSender?.Server?.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
+                        mainPlayer.PacketSender.Server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
                     }
                     else if (MatchmakerAcceptPatches.IsClient)
                     {
-                        mainPlayer.PacketSender?.Client?.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
+                        mainPlayer.PacketSender.Client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
                     }
                 }
                 countdownPoints.Add(point);

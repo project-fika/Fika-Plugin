@@ -26,33 +26,35 @@ namespace Fika.Core.Coop.ClientClasses
             base.CallMalfunctionRepaired(weapon);
             if (!Player.IsAI && (bool)Singleton<SharedGameSettingsClass>.Instance.Game.Settings.MalfunctionVisability)
             {
-                MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.GlowType.Repaired, force: true, method_44());
+                MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.GlowType.Repaired, true, method_44());
             }
         }
 
         public override void Execute(GClass2837 operation, [CanBeNull] Callback callback)
         {
+            // Do not replicate picking up quest items, throws an error on the other clients
+            if (operation is GClass2839 pickupOperation)
+            {
+                if (pickupOperation.Item.Template.QuestItem)
+                {
+                    base.Execute(operation, callback);
+                    return;
+                }
+            }
+
             if (MatchmakerAcceptPatches.IsServer)
             {
+                // Do not replicate quest operations
+                if (operation is GClass2866 or GClass2879)
+                {
+                    base.Execute(operation, callback);
+                    return;
+                }
+
                 HostInventoryOperationManager operationManager = new(this, operation, callback);
                 if (vmethod_0(operationManager.operation))
                 {
                     operationManager.operation.vmethod_0(operationManager.HandleResult);
-
-                    // Do not replicate picking up quest items, throws an error on the other clients
-                    if (operation is GClass2839 pickupOperation)
-                    {
-                        if (pickupOperation.Item.Template.QuestItem)
-                        {
-                            return;
-                        }
-                    }
-
-                    // TODO: Check for glass increments
-                    if (operation is GClass2870)
-                    {
-                        return;
-                    }
 
                     InventoryPacket packet = new()
                     {
@@ -69,7 +71,7 @@ namespace Fika.Core.Coop.ClientClasses
                         OperationBytes = opBytes
                     };
 
-                    CoopPlayer.PacketSender?.InventoryPackets?.Enqueue(packet);
+                    CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
 
                     return;
                 }
@@ -78,14 +80,11 @@ namespace Fika.Core.Coop.ClientClasses
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
-                // Do not replicate picking up quest items, throws an error on the other clients
-                if (operation is GClass2839 pickupOperation)
+                // Do not replicate quest operations
+                if (operation is GClass2866 or GClass2879)
                 {
-                    if (pickupOperation.Item.Template.QuestItem)
-                    {
-                        base.Execute(operation, callback);
-                        return;
-                    }
+                    base.Execute(operation, callback);
+                    return;
                 }
 
                 InventoryPacket packet = new()
@@ -113,7 +112,7 @@ namespace Fika.Core.Coop.ClientClasses
                     OperationBytes = opBytes
                 };
 
-                CoopPlayer.PacketSender?.InventoryPackets?.Enqueue(packet);
+                CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
             }
         }
 

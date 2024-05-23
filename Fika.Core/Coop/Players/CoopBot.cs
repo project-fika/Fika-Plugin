@@ -51,6 +51,9 @@ namespace Fika.Core.Coop.Players
 
             InventoryControllerClass inventoryController = new CoopBotInventoryController(player, profile, true);
 
+            player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
+            player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
+
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
                 new CoopObservedStatisticsManager(), null, null, filter,
@@ -137,14 +140,6 @@ namespace Fika.Core.Coop.Players
 
         protected override void Start()
         {
-            PacketSender = gameObject.AddComponent<BotPacketSender>();
-            PacketReceiver = gameObject.AddComponent<PacketReceiver>();
-
-            /*if (FikaPlugin.DynamicAI.Value)
-            {
-                dynamicAi = gameObject.AddComponent<FikaDynamicAI>();
-            }*/
-
             if (FikaPlugin.DisableBotMetabolism.Value)
             {
                 HealthController.DisableMetabolism();
@@ -253,7 +248,10 @@ namespace Fika.Core.Coop.Players
         {
             yield return new WaitForSeconds(2);
 
-            PacketSender?.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis();
+            }
         }
 
         public override void UpdateTick()
@@ -359,7 +357,7 @@ namespace Fika.Core.Coop.Players
                     return;
                 }
 
-                coopBot.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopBot.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()

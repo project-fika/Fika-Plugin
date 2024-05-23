@@ -53,7 +53,7 @@ namespace Fika.Core.Coop.PacketHandlers
                             player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
 
             Writer.Reset();
-            Client?.SendData(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
+            Client.SendData(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
 
             if (player.MovementIdlingTime > 0.01f)
             {
@@ -71,8 +71,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     WeaponPacket firearmPacket = FirearmPackets.Dequeue();
                     firearmPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Client?.SendData(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Client.SendData(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int healthPackets = DamagePackets.Count;
@@ -83,8 +83,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     DamagePacket healthPacket = DamagePackets.Dequeue();
                     healthPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Client?.SendData(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Client.SendData(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int inventoryPackets = InventoryPackets.Count;
@@ -95,8 +95,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     InventoryPacket inventoryPacket = InventoryPackets.Dequeue();
                     inventoryPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Client?.SendData(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Client.SendData(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int commonPlayerPackets = CommonPlayerPackets.Count;
@@ -107,8 +107,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     CommonPlayerPacket commonPlayerPacket = CommonPlayerPackets.Dequeue();
                     commonPlayerPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Client?.SendData(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Client.SendData(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int healthSyncPackets = HealthSyncPackets.Count;
@@ -119,8 +119,8 @@ namespace Fika.Core.Coop.PacketHandlers
                     HealthSyncPacket healthSyncPacket = HealthSyncPackets.Dequeue();
                     healthSyncPacket.NetId = player.NetId;
 
-                    Writer?.Reset();
-                    Client?.SendData(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
+                    Writer.Reset();
+                    Client.SendData(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             if (FikaPlugin.UsePingSystem.Value
@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                 && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey))
             {
-                player?.Ping();
+                player.Ping();
             }
         }
 
@@ -139,10 +139,6 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 yield return null;
             }
-
-            Writer?.Reset();
-            SessionSettingsPacket settingsPacket = new(true);
-            Client?.SendData(Writer, ref settingsPacket, DeliveryMethod.ReliableOrdered);
 
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
@@ -158,13 +154,13 @@ namespace Fika.Core.Coop.PacketHandlers
 
             yield return new WaitForSeconds(10f);
 
-            Writer?.Reset();
+            Writer.Reset();
             GameTimerPacket gameTimerPacket = new(true);
-            Client?.SendData(Writer, ref gameTimerPacket, DeliveryMethod.ReliableOrdered);
+            Client.SendData(Writer, ref gameTimerPacket, DeliveryMethod.ReliableOrdered);
 
-            Writer?.Reset();
+            Writer.Reset();
             ExfiltrationPacket exfilPacket = new(true);
-            Client?.SendData(Writer, ref exfilPacket, DeliveryMethod.ReliableOrdered);
+            Client.SendData(Writer, ref exfilPacket, DeliveryMethod.ReliableOrdered);
         }
 
         private IEnumerator SyncWeather()
@@ -192,8 +188,8 @@ namespace Fika.Core.Coop.PacketHandlers
                 HasData = false
             };
 
-            Writer?.Reset();
-            Client?.SendData(Writer, ref packet, DeliveryMethod.ReliableOrdered);
+            Writer.Reset();
+            Client.SendData(Writer, ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public void DestroyThis()
