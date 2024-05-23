@@ -323,7 +323,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                Logger.LogDebug($"{nameof(CreateBot)}:Unable to find {nameof(CoopHandler)}");
+                Logger.LogError($"{nameof(CreateBot)}:Unable to find {nameof(CoopHandler)}");
                 return null;
             }
 
@@ -1142,25 +1142,28 @@ namespace Fika.Core.Coop.GameMode
                 botsController_0.SetSettings(numberOfBots, BackEndSession.BackEndConfig.BotPresets, BackEndSession.BackEndConfig.BotWeaponScatterings);
                 botsController_0.AddActivePLayer(PlayerOwner.Player);
 
-                int limits = Location_0.Id.ToLower() switch
+                if (FikaPlugin.EnforcedSpawnLimits.Value)
                 {
-                    "factory4_day" => FikaPlugin.MaxBotsFactory.Value,
-                    "factory4_night" => FikaPlugin.MaxBotsFactory.Value,
-                    "bigmap" => FikaPlugin.MaxBotsCustoms.Value,
-                    "interchange" => FikaPlugin.MaxBotsInterchange.Value,
-                    "rezervbase" => FikaPlugin.MaxBotsReserve.Value,
-                    "woods" => FikaPlugin.MaxBotsWoods.Value,
-                    "shoreline" => FikaPlugin.MaxBotsShoreline.Value,
-                    "tarkovstreets" => FikaPlugin.MaxBotsStreets.Value,
-                    "sandbox" => FikaPlugin.MaxBotsGroundZero.Value,
-                    "laboratory" => FikaPlugin.MaxBotsLabs.Value,
-                    "lighthouse" => FikaPlugin.MaxBotsLighthouse.Value,
-                    _ => 0
-                };
+                    int limits = Location_0.Id.ToLower() switch
+                    {
+                        "factory4_day" => FikaPlugin.MaxBotsFactory.Value,
+                        "factory4_night" => FikaPlugin.MaxBotsFactory.Value,
+                        "bigmap" => FikaPlugin.MaxBotsCustoms.Value,
+                        "interchange" => FikaPlugin.MaxBotsInterchange.Value,
+                        "rezervbase" => FikaPlugin.MaxBotsReserve.Value,
+                        "woods" => FikaPlugin.MaxBotsWoods.Value,
+                        "shoreline" => FikaPlugin.MaxBotsShoreline.Value,
+                        "tarkovstreets" => FikaPlugin.MaxBotsStreets.Value,
+                        "sandbox" => FikaPlugin.MaxBotsGroundZero.Value,
+                        "laboratory" => FikaPlugin.MaxBotsLabs.Value,
+                        "lighthouse" => FikaPlugin.MaxBotsLighthouse.Value,
+                        _ => 0
+                    };
 
-                if (limits > 0)
-                {
-                    botsController_0.BotSpawner.SetMaxBots(limits);
+                    if (limits > 0)
+                    {
+                        botsController_0.BotSpawner.SetMaxBots(limits);
+                    } 
                 }
 
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
