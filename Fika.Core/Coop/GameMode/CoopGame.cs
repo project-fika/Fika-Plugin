@@ -323,7 +323,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                Logger.LogError($"{nameof(CreateBot)}:Unable to find {nameof(CoopHandler)}");
+                Logger.LogError($"{nameof(CreateBot)}: Unable to find {nameof(CoopHandler)}");
                 return null;
             }
 
@@ -337,7 +337,7 @@ namespace Fika.Core.Coop.GameMode
                 isSpecial = true;
             }
 
-            if (FikaPlugin.EnforcedSpawnLimits.Value && botsController_0.AliveAndLoadingBotsCount >= botsController_0.BotSpawner.MaxBots)
+            if (FikaPlugin.EnforcedSpawnLimits.Value && Bots.Count >= botsController_0.BotSpawner.MaxBots)
             {
                 bool despawned = false;
 
@@ -485,6 +485,9 @@ namespace Fika.Core.Coop.GameMode
 
             if (botKey == string.Empty)
             {
+#if DEBUG
+                Logger.LogWarning("TryDespawnFurthest: botKey was empty"); 
+#endif
                 return false;
             }
 
