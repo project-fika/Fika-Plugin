@@ -62,7 +62,7 @@ namespace Fika.Core.Coop.Players
             player.IsYourPlayer = true;
             player.NetId = netId;
 
-            CoopClientInventoryController inventoryController = new(player, profile, true);
+            CoopClientInventoryController inventoryController = new(player, profile, false);
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
