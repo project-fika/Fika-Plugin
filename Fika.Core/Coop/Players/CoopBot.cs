@@ -40,11 +40,11 @@ namespace Fika.Core.Coop.Players
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-            Func<float> getAimingSensitivity, GInterface99 filter)
+            Func<float> getAimingSensitivity, GInterface111 filter)
         {
             CoopBot player = null;
 
-            player = Create<CoopBot>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+            player = Create<CoopBot>(GClass1398.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
 
             player.IsYourPlayer = false;
@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public override void OnSkillLevelChanged(GClass1766 skill)
+        public override void OnSkillLevelChanged(GClass1776 skill)
         {
             // Do nothing
         }
@@ -101,7 +101,7 @@ namespace Fika.Core.Coop.Players
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
         }*/
 
-        public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1686 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
             if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
             {
@@ -121,7 +121,7 @@ namespace Fika.Core.Coop.Players
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-            GClass1676 hitInfo = new()
+            GClass1686 hitInfo = new()
             {
                 PoV = PointOfView,
                 Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),

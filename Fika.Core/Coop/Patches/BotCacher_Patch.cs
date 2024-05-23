@@ -10,11 +10,11 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass532).GetMethod(nameof(GClass532.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+            return typeof(GClass531).GetMethod(nameof(GClass531.LoadInternal), BindingFlags.Static | BindingFlags.Public);
         }
 
         [PatchPrefix]
-        private static bool PatchPrefix(out GClass531 core, ref bool __result)
+        private static bool PatchPrefix(out GClass530 core, ref bool __result)
         {
             if (FikaPlugin.Instance.BotDifficulties != null)
             {
@@ -22,14 +22,14 @@ namespace Fika.Core.Coop.Patches
             }
             else
             {
-                string text = GClass532.LoadCoreByString();
+                string text = GClass531.LoadCoreByString();
                 if (text == null)
                 {
                     core = null;
                     __result = false;
                     return false;
                 }
-                core = GClass531.Create(text);
+                core = GClass530.Create(text);
             }
 
             if (MatchmakerAcceptPatches.IsServer)
@@ -42,19 +42,19 @@ namespace Fika.Core.Coop.Patches
                         botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
                         if (botSettingsComponents != null)
                         {
-                            if (!GClass532.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+                            if (!GClass531.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
                             {
-                                GClass532.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                GClass531.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
                             }
                         }
                         else
                         {
-                            botSettingsComponents = GClass532.smethod_1(GClass532.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
+                            botSettingsComponents = GClass531.smethod_1(GClass531.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
                             if (botSettingsComponents != null)
                             {
-                                if (!GClass532.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+                                if (!GClass531.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
                                 {
-                                    GClass532.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                    GClass531.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
                                 }
                             }
                             else

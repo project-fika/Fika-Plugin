@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
     /// </summary>
     internal class TarkovApplication_LocalGameCreator_Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_43));
+        protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_47));
 
         static ISession CurrentSession { get; set; }
 
@@ -48,8 +48,8 @@ namespace Fika.Core.Coop.Patches.LocalGame
         }
 
         [PatchPostfix]
-        public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3163 timeHasComeScreenController,
-            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
+        public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController,
+            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, EUpdateQueue __PlayerUpdateQueue)
         {
             if (MatchmakerAcceptPatches.IsSinglePlayer)
             {
@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             LocationSettingsClass.Location location = ____raidSettings.SelectedLocation;
 
-            MatchmakerAcceptPatches.GClass3163 = timeHasComeScreenController;
+            MatchmakerAcceptPatches.GClass3182 = timeHasComeScreenController;
 
             if (Singleton<NotificationManagerClass>.Instantiated)
             {
@@ -111,16 +111,12 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             StartHandler startHandler = new(__instance, session.Profile, session.ProfileOfPet, ____raidSettings.SelectedLocation, timeHasComeScreenController);
 
-            CoopGame localGame = CoopGame.Create(____inputTree, profile, ____localGameDateTime,
-                session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance,
-                MonoBehaviourSingleton<CommonUI>.Instance, MonoBehaviourSingleton<PreloaderUI>.Instance,
-                MonoBehaviourSingleton<GameUI>.Instance, ____raidSettings.SelectedLocation, timeAndWeather,
-                ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
-                ____fixedDeltaTime, EUpdateQueue.Update, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit), ____raidSettings
-            );
+            CoopGame coopgAme = CoopGame.Create(____inputTree, profile, ____localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
+                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
+                ____fixedDeltaTime, __PlayerUpdateQueue, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit), ____raidSettings);
 
-            Singleton<AbstractGame>.Create(localGame);
-            FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(localGame));
+            Singleton<AbstractGame>.Create(coopgAme);
+            FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopgAme));
 
             if (MatchmakerAcceptPatches.IsClient)
             {
@@ -131,21 +127,21 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 timeHasComeScreenController.ChangeStatus("Created Coop Game");
             }
 
-            Task finishTask = localGame.InitPlayer(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
+            Task finishTask = coopgAme.InitPlayer(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
             __result = Task.WhenAll(finishTask);
         }
 
-        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3163 timeHasComeScreenController)
+        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController)
         {
             private readonly TarkovApplication tarkovApplication = tarkovApplication;
             private readonly Profile pmcProfile = pmcProfile;
             private readonly Profile scavProfile = scavProfile;
             private readonly LocationSettingsClass.Location location = location;
-            private readonly MatchmakerTimeHasCome.GClass3163 timeHasComeScreenController = timeHasComeScreenController;
+            private readonly MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController = timeHasComeScreenController;
 
             public void HandleStart(Result<ExitStatus, TimeSpan, MetricsClass> result)
             {
-                tarkovApplication.method_46(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
+                tarkovApplication.method_50(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
             }
 
             public void HandleLoadComplete(IResult error)

@@ -27,7 +27,7 @@ namespace Fika.Core.Coop.FreeCamera
         //private GameObject _mainCamera;
         private FreeCamera _freeCamScript;
 
-        private BattleUIScreen _playerUi;
+        private EftBattleUIScreen _playerUi;
         private bool _uiHidden;
 
         private bool _effectsCleared = false;
@@ -233,10 +233,10 @@ namespace Fika.Core.Coop.FreeCamera
                 Destroy(bloodOnScreen);
             }
 
-            List<EffectsController.Class566> effectsManagerList = effectsController.Field("list_0").GetValue<List<EffectsController.Class566>>();
+            List<EffectsController.Class572> effectsManagerList = effectsController.Field("list_0").GetValue<List<EffectsController.Class572>>();
             if (effectsManagerList != null)
             {
-                foreach (EffectsController.Class566 effectsManager in effectsManagerList)
+                foreach (EffectsController.Class572 effectsManager in effectsManagerList)
                 {
                     while (effectsManager.ActiveEffects.Count > 0)
                     {
@@ -326,7 +326,7 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                _playerUi = gameObject.GetComponent<BattleUIScreen>();
+                _playerUi = gameObject.GetComponent<EftBattleUIScreen>();
 
                 if (_playerUi == null)
                 {

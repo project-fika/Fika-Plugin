@@ -200,7 +200,7 @@ namespace Fika.Core.Networking
                             {
                                 if (player.ProfileId == packet.ProfileId)
                                 {
-                                    GInterface94 playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(player.ProfileId);
+                                    GInterface106 playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(player.ProfileId);
                                     borderZone.ProcessIncomingPacket(playerBridge, true);
                                 }
                             }
@@ -214,7 +214,7 @@ namespace Fika.Core.Networking
         {
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
-                NetworkGame.Class1381 mineSeeker = new()
+                NetworkGame<EftGamePlayerOwner>.Class1403 mineSeeker = new()
                 {
                     minePosition = packet.MinePositon
                 };
@@ -257,7 +257,7 @@ namespace Fika.Core.Networking
             {
                 if (WeatherController.Instance != null)
                 {
-                    WeatherController.Instance.method_4(packet.WeatherClasses);
+                    WeatherController.Instance.method_0(packet.WeatherClasses);
                 }
                 else
                 {

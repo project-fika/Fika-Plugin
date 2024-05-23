@@ -60,8 +60,7 @@
         <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-        <HintPath>..\References\hollowed.dll</HintPath>
-        <Private>False</Private>
+      <HintPath>..\References\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="bsg.componentace.compression.libs.zlib">
         <HintPath>..\References\bsg.componentace.compression.libs.zlib.dll</HintPath>

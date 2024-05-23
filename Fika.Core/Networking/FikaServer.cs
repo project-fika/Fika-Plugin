@@ -203,7 +203,7 @@ namespace Fika.Core.Networking
         {
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
-                NetworkGame.Class1381 mineSeeker = new()
+                NetworkGame<EftGamePlayerOwner>.Class1403 mineSeeker = new()
                 {
                     minePosition = packet.MinePositon
                 };
@@ -504,9 +504,9 @@ namespace Fika.Core.Networking
 
                     // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
                     // Unknown what problems this might cause so far.
-                    if (result.Value is GClass2861 unloadOperation)
+                    if (result.Value is GClass2874 unloadOperation)
                     {
-                        if (unloadOperation.InternalOperation is GClass2872 internalSplitOperation)
+                        if (unloadOperation.InternalOperation is GClass2885 internalSplitOperation)
                         {
                             Item item = internalSplitOperation.To.Item;
                             if (item != null)
@@ -528,7 +528,7 @@ namespace Fika.Core.Networking
                     }
 
                     // TODO: Same as above.
-                    if (result.Value is GClass2872 splitOperation)
+                    if (result.Value is GClass2885 splitOperation)
                     {
                         Item item = splitOperation.To.Item;
                         if (item != null)
@@ -766,7 +766,7 @@ namespace Fika.Core.Networking
 
                 using MemoryStream memoryStream = new();
                 using BinaryWriter binaryWriter = new(memoryStream);
-                binaryWriter.WritePolymorph(GClass1632.FromInventoryOperation(opResult.Value, false));
+                binaryWriter.WritePolymorph(GClass1642.FromInventoryOperation(opResult.Value, false));
                 byte[] opBytes = memoryStream.ToArray();
                 packet.ItemControllerExecutePacket = new()
                 {

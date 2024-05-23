@@ -38,11 +38,11 @@ namespace Fika.Core.Coop.Players
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
-        public GClass2417 NetworkHealthController
+        public GClass2428 NetworkHealthController
         {
-            get => HealthController as GClass2417;
+            get => HealthController as GClass2428;
         }
-        private readonly GClass2156 ObservedVaultingParameters = new();
+        private readonly GClass2167 ObservedVaultingParameters = new();
         public override bool CanBeSnapped => false;
         public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
         public override AbstractHandsController HandsController
@@ -120,11 +120,11 @@ namespace Fika.Core.Coop.Players
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-            Func<float> getAimingSensitivity, GInterface99 filter)
+            Func<float> getAimingSensitivity, GInterface111 filter)
         {
             ObservedCoopPlayer player = null;
 
-            player = Create<ObservedCoopPlayer>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
+            player = Create<ObservedCoopPlayer>(GClass1398.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
                 armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
                 aiControl);
 
@@ -165,12 +165,12 @@ namespace Fika.Core.Coop.Players
 
         public override void PlayGroundedSound(float fallHeight, float jumpHeight)
         {
-            (bool hit, BaseBallistic.ESurfaceSound surfaceSound) values = method_53();
-            method_54(values.hit, values.surfaceSound);
+            (bool hit, BaseBallistic.ESurfaceSound surfaceSound) values = method_57();
+            method_58(values.hit, values.surfaceSound);
             base.PlayGroundedSound(fallHeight, jumpHeight);
         }
 
-        public override void OnSkillLevelChanged(GClass1766 skill)
+        public override void OnSkillLevelChanged(GClass1776 skill)
         {
             //base.OnSkillLevelChanged(skill);
         }
@@ -241,7 +241,7 @@ namespace Fika.Core.Coop.Players
 
             bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface244>(bodyPart) != null;
             player.StatisticsManager.OnEnemyDamage(damageInfo, bodyPart,
-                Profile.Info.Side, Profile.Info.Settings.Role.ToString(),
+                Profile.Info.Side, Profile.Info.Settings.Role,
                 Profile.Info.GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum,
                 flag, Vector3.Distance(player.Transform.position, Transform.position),
                 CurrentHour, Inventory.EquippedInSlotsTemplateIds,
@@ -329,7 +329,7 @@ namespace Fika.Core.Coop.Players
             }
         }*/
 
-        public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1686 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
             if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
             {
@@ -380,7 +380,7 @@ namespace Fika.Core.Coop.Players
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
                     MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1676 hitInfo = new()
+                    GClass1686 hitInfo = new()
                     {
                         PoV = PointOfView,
                         Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
@@ -440,7 +440,7 @@ namespace Fika.Core.Coop.Players
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
                     MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1676 hitInfo = new()
+                    GClass1686 hitInfo = new()
                     {
                         PoV = PointOfView,
                         Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
@@ -502,7 +502,7 @@ namespace Fika.Core.Coop.Players
         {
             RemoveHandsControllerHandler handler = new(this, callback);
             _removeFromHandsCallback = callback;
-            Proceed(false, new Callback<GInterface125>(handler.Handle), false);
+            Proceed(false, new Callback<GInterface137>(handler.Handle), false);
         }
 
         public override Corpse CreateCorpse()
@@ -528,7 +528,7 @@ namespace Fika.Core.Coop.Players
         public override void OnHealthEffectAdded(IEffect effect)
         {
             // Remember to check if classes increment
-            if (effect is GInterface245 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
+            if (effect is GInterface269 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
             {
                 Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraClass.Instance.Distance(Position),
                     BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);
@@ -571,7 +571,7 @@ namespace Fika.Core.Coop.Players
                 .method_0(null, callback, scheduled);
         }
 
-        public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface130> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this)
             {
@@ -580,11 +580,11 @@ namespace Fika.Core.Coop.Players
                 animationVariant = animationVariant
             };
             Func<MedsController> func = new(factory.CreateObservedMedsController);
-            new Process<MedsController, GInterface130>(this, func, meds, false)
+            new Process<MedsController, GInterface142>(this, func, meds, false)
                 .method_0(null, callback, scheduled);
         }
 
-        public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface130> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this)
             {
@@ -593,7 +593,7 @@ namespace Fika.Core.Coop.Players
                 animationVariant = animationVariant
             };
             Func<MedsController> func = new(factory.CreateObservedMedsController);
-            new Process<MedsController, GInterface130>(this, func, foodDrink, false)
+            new Process<MedsController, GInterface142>(this, func, foodDrink, false)
                 .method_0(null, callback, scheduled);
         }
         #endregion
@@ -633,12 +633,12 @@ namespace Fika.Core.Coop.Players
 
         public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
         {
-            method_32(clip);
+            method_34(clip);
         }
 
         public PlayerStatePacket Interpolate(in PlayerStatePacket newState, in PlayerStatePacket lastState)
         {
-            method_54(newState.HasGround, newState.SurfaceSound);
+            method_58(newState.HasGround, newState.SurfaceSound);
 
             Rotation = new Vector2(Mathf.LerpAngle(MovementContext.Rotation.x, newState.Rotation.x, interpolationRatio),
                 Mathf.Lerp(MovementContext.Rotation.y, newState.Rotation.y, interpolationRatio));
@@ -828,8 +828,8 @@ namespace Fika.Core.Coop.Players
             {
                 Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
                 Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-                PlayerBody.GClass1860 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-                PlayerBody.GClass1860 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+                PlayerBody.GClass1872 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
+                PlayerBody.GClass1872 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
                 if (gclass2 != null)
                 {
                     gclass2.Dispose();
@@ -1285,7 +1285,7 @@ namespace Fika.Core.Coop.Players
         #region handControllers
         private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
         {
-            CreateHandsControllerHandler handler = new((item != null) ? method_67(item) : null);
+            CreateHandsControllerHandler handler = new((item != null) ? method_71(item) : null);
 
             handler.setInHandsOperation?.Confirm(true);
 
@@ -1451,7 +1451,7 @@ namespace Fika.Core.Coop.Players
             private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
             private readonly Callback callback = callback;
 
-            public void Handle(Result<GInterface125> result)
+            public void Handle(Result<GInterface137> result)
             {
                 if (coopPlayer._removeFromHandsCallback == callback)
                 {
@@ -1461,13 +1461,13 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class CreateHandsControllerHandler(Class1059 setInHandsOperation)
+        private class CreateHandsControllerHandler(Class1079 setInHandsOperation)
         {
-            public readonly Class1059 setInHandsOperation = setInHandsOperation;
+            public readonly Class1079 setInHandsOperation = setInHandsOperation;
 
             internal void DisposeHandler()
             {
-                Class1059 handler = setInHandsOperation;
+                Class1079 handler = setInHandsOperation;
                 if (handler == null)
                     return;
                 handler.Dispose();

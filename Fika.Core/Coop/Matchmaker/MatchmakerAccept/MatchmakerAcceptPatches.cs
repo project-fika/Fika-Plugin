@@ -51,7 +51,7 @@ namespace Fika.Core.Coop.Matchmaker
         }
 
         public static GameObject EnvironmentUIRoot { get; internal set; }
-        public static MatchmakerTimeHasCome.GClass3163 GClass3163 { get; internal set; }
+        public static MatchmakerTimeHasCome.GClass3182 GClass3182 { get; internal set; }
         #endregion
 
         public static string GetGroupId()
