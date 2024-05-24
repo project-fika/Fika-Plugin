@@ -134,7 +134,9 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             triggerPressed = false;
             SetTriggerPressed(false);
-            WeaponSoundPlayer.enabled = false;
+
+            needsReset = false;
+            WeaponSoundPlayer.OnBreakLoop();
 
             coopPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
             ManualUpdate(Time.fixedDeltaTime);
@@ -143,7 +145,21 @@ namespace Fika.Core.Coop.ObservedClasses
                 CurrentOperation.FastForward();
             }
 
+            StartCoroutine(BreakFiringLoop());
+
             base.OnPlayerDead();
+        }
+
+        private IEnumerator BreakFiringLoop()
+        {
+            Traverse<bool> isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
+            int attempts = 0;
+            while (isFiring.Value && attempts < 10)
+            {
+                yield return new WaitForEndOfFrame();
+                WeaponSoundPlayer.OnBreakLoop();
+                attempts++;
+            }
         }
 
         public override void SetScopeMode(GStruct164[] scopeStates)
