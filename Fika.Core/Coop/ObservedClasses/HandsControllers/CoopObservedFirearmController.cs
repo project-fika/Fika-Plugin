@@ -218,7 +218,10 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 else if (packet.ShotInfoPacket.ShotType == EShotType.DryFire)
                 {
+                    FirearmsAnimator.SetFire(true);
                     DryShot();
+                    hasFired = true;
+                    lastFireTime = Time.time;
                 }
                 else if (packet.ShotInfoPacket.ShotType == EShotType.RegularShot)
                 {
