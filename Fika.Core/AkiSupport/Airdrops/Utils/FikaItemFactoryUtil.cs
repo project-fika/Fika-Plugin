@@ -1,12 +1,12 @@
-﻿using Aki.Common.Http;
-using Aki.Custom.Airdrops.Models;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core;
 using Newtonsoft.Json;
+using SPT.Common.Http;
+using SPT.Custom.Airdrops.Models;
 using System.Linq;
 
 namespace Aki.Custom.Airdrops.Utils

@@ -149,7 +149,7 @@ namespace Open.Nat
         public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
         {
 #if DEBUG
-			return await task;
+            return await task;
 #endif
             var timeoutCancellationTokenSource = new CancellationTokenSource();
 

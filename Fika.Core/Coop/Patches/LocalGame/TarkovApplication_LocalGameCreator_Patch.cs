@@ -1,5 +1,4 @@
-﻿using Aki.Reflection.Patching;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
 using EFT.UI;
@@ -10,6 +9,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using SPT.Reflection.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
         [PatchPostfix]
         public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController,
-            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, EUpdateQueue __PlayerUpdateQueue)
+            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
         {
             if (MatchmakerAcceptPatches.IsSinglePlayer)
             {
@@ -113,7 +113,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             CoopGame coopgAme = CoopGame.Create(____inputTree, profile, ____localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
                 ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
-                ____fixedDeltaTime, __PlayerUpdateQueue, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit), ____raidSettings);
+                ____fixedDeltaTime, EUpdateQueue.Update, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit), ____raidSettings);
 
             Singleton<AbstractGame>.Create(coopgAme);
             FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopgAme));

@@ -1,7 +1,7 @@
-﻿using Aki.Reflection.Patching;
-using EFT;
+﻿using EFT;
 using Fika.Core.Coop.Players;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 

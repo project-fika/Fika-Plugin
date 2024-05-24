@@ -1,7 +1,7 @@
-﻿using Aki.Common.Http;
-using Aki.Reflection.Patching;
-using Aki.Reflection.Utils;
-using Fika.Core.Coop.Matchmaker;
+﻿using Fika.Core.Coop.Matchmaker;
+using SPT.Common.Http;
+using SPT.Reflection.Patching;
+using SPT.Reflection.Utils;
 using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Overrides

@@ -486,7 +486,7 @@ namespace Fika.Core.Networking
                 using BinaryReader binaryReader = new(memoryStream);
                 try
                 {
-                    GStruct411 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1532>());
+                    GStruct411 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1542>());
 
                     InventoryOperationHandler opHandler = new()
                     {

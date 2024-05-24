@@ -609,6 +609,16 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 StartCoroutine(ObservedBoltAction(FirearmsAnimator, this, inventoryController));
             }
+
+            if (packet.UnderbarrelSightingRangeUp)
+            {
+                UnderbarrelSightingRangeUp();
+            }
+
+            if (packet.UnderbarrelSightingRangeDown)
+            {
+                UnderbarrelSightingRangeDown();
+            }
         }
 
         private IEnumerator ObservedBoltAction(FirearmsAnimator animator, FirearmController controller, InventoryControllerClass inventoryController)

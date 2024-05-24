@@ -1,6 +1,6 @@
-﻿using Aki.Reflection.Patching;
-using EFT;
+﻿using EFT;
 using Fika.Core.Coop.GameMode;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches

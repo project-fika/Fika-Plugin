@@ -473,7 +473,7 @@ namespace Fika.Core.Networking
                             if (!botToEnable.gameObject.activeSelf)
                             {
 #if DEBUG
-                                clientLogger.LogWarning("Enabling " + packet.BotNetId); 
+                                clientLogger.LogWarning("Enabling " + packet.BotNetId);
 #endif
                                 botToEnable.gameObject.SetActive(true);
                             }
@@ -491,7 +491,7 @@ namespace Fika.Core.Networking
                             if (botToEnable.gameObject.activeSelf)
                             {
 #if DEBUG
-                                clientLogger.LogWarning("Disabling " + packet.BotNetId); 
+                                clientLogger.LogWarning("Disabling " + packet.BotNetId);
 #endif
                                 botToEnable.gameObject.SetActive(false);
                             }

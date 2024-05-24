@@ -1,10 +1,10 @@
-﻿using Aki.Common.Http;
-using Aki.Common.Utils;
-using Aki.Custom.Models;
-using Aki.Reflection.Patching;
-using Aki.Reflection.Utils;
-using EFT.UI;
+﻿using EFT.UI;
 using HarmonyLib;
+using SPT.Common.Http;
+using SPT.Common.Utils;
+using SPT.Custom.Models;
+using SPT.Reflection.Patching;
+using SPT.Reflection.Utils;
 using System.Linq;
 using System.Reflection;
 

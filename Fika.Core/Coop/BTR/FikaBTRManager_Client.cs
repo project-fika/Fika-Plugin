@@ -1,7 +1,4 @@
-﻿using Aki.Custom.BTR;
-using Aki.Custom.BTR.Utils;
-using Aki.SinglePlayer.Utils.TraderServices;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
@@ -13,6 +10,9 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib.Utils;
+using SPT.Custom.BTR;
+using SPT.Custom.BTR.Utils;
+using SPT.SinglePlayer.Utils.TraderServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -360,8 +360,8 @@ namespace Fika.Core.Coop.BTR
             btrDataPacket.rotation = btrServerSide.transform.rotation;
             if (btrTurretServer != null && btrTurretServer.gunsBlockRoot != null)
             {
-                btrDataPacket.turretRotation = btrTurretServer.transform.rotation;
-                btrDataPacket.gunsBlockRotation = btrTurretServer.gunsBlockRoot.rotation;
+                btrDataPacket.turretRotation = btrTurretServer.transform.localEulerAngles.y;
+                btrDataPacket.gunsBlockRotation = btrTurretServer.gunsBlockRoot.localEulerAngles.x;
             }
             btrDataPacket.State = (byte)btrServerSide.BtrState;
             btrDataPacket.RouteState = (byte)btrServerSide.VehicleRouteState;

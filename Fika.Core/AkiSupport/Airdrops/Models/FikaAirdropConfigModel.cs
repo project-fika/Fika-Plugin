@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Aki.Custom.Airdrops.Models
+namespace SPT.Custom.Airdrops.Models
 {
     /// <summary>
     /// Created by: SPT-Aki team

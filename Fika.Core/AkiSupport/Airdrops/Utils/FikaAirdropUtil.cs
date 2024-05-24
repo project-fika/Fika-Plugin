@@ -1,9 +1,9 @@
-﻿using Aki.Common.Http;
-using Aki.Custom.Airdrops.Models;
-using EFT;
+﻿using EFT;
 using EFT.Airdrop;
 using Fika.Core.AkiSupport.Airdrops.Models;
 using Newtonsoft.Json;
+using SPT.Common.Http;
+using SPT.Custom.Airdrops.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

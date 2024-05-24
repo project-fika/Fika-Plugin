@@ -1,10 +1,4 @@
 ﻿using Aki.Custom.Airdrops.Patches;
-using Aki.Custom.BTR.Patches;
-using Aki.Custom.Patches;
-using Aki.SinglePlayer.Patches.MainMenu;
-using Aki.SinglePlayer.Patches.Progression;
-using Aki.SinglePlayer.Patches.Quests;
-using Aki.SinglePlayer.Patches.RaidFix;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -27,6 +21,13 @@ using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.Utils;
+using SPT.Custom.Airdrops.Patches;
+using SPT.Custom.BTR.Patches;
+using SPT.Custom.Patches;
+using SPT.SinglePlayer.Patches.MainMenu;
+using SPT.SinglePlayer.Patches.Progression;
+using SPT.SinglePlayer.Patches.Quests;
+using SPT.SinglePlayer.Patches.RaidFix;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -46,10 +47,10 @@ namespace Fika.Core
     /// </summary>
     [BepInPlugin("com.fika.core", "Fika.Core", "0.9.8906")]
     [BepInProcess("EscapeFromTarkov.exe")]
-    [BepInDependency("com.spt-aki.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
-    [BepInDependency("com.spt-aki.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
-    [BepInDependency("com.spt-aki.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
-    [BepInDependency("com.spt-aki.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.spt.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
+    [BepInDependency("com.SPT.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
         /// <summary>

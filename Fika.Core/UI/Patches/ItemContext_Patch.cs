@@ -1,5 +1,4 @@
-﻿using Aki.Reflection.Patching;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -7,6 +6,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -32,7 +32,7 @@ namespace Fika.Core.UI.Patches
                 return;
             }
 
-            ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("gclass2813_0").Value;
+            ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("gclass2826_0").Value;
             if (itemContext.ViewType == EItemViewType.Inventory)
             {
                 if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld)
@@ -57,17 +57,17 @@ namespace Fika.Core.UI.Patches
                 Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions).Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
                 if (dynamicInteractions == null)
                 {
-                    dynamicInteractions = new Dictionary<string, DynamicInteractionClass>();
+                    dynamicInteractions = [];
                 }
 
                 dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
                 {
-                    var body = new AvailableReceiversRequest(itemContext.Item.Id);
-                    var availableUsers = FikaRequestHandler.AvailableReceivers(body);
+                    AvailableReceiversRequest body = new(itemContext.Item.Id);
+                    Dictionary<string, string> availableUsers = FikaRequestHandler.AvailableReceivers(body);
 
                     // convert availableUsers.Keys
                     List<TMP_Dropdown.OptionData> optionDatas = [];
-                    foreach (var user in availableUsers.Keys)
+                    foreach (string user in availableUsers.Keys)
                     {
                         optionDatas.Add(new()
                         {

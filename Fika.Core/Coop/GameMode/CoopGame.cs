@@ -1,10 +1,4 @@
-﻿using Aki.Common.Http;
-using Aki.Custom.Airdrops;
-using Aki.Reflection.Utils;
-using Aki.SinglePlayer.Models.Progression;
-using Aki.SinglePlayer.Utils.Healing;
-using Aki.SinglePlayer.Utils.Insurance;
-using Aki.SinglePlayer.Utils.Progression;
+﻿using Aki.Custom.Airdrops;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
@@ -15,11 +9,11 @@ using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
-using EFT.InputSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.BattleTimer;
+using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
 using EFT.Weather;
 using Fika.Core.Coop.BTR;
@@ -40,6 +34,12 @@ using HarmonyLib;
 using JsonType;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
+using SPT.Common.Http;
+using SPT.Reflection.Utils;
+using SPT.SinglePlayer.Models.Progression;
+using SPT.SinglePlayer.Utils.Healing;
+using SPT.SinglePlayer.Utils.Insurance;
+using SPT.SinglePlayer.Utils.Progression;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -488,7 +488,7 @@ namespace Fika.Core.Coop.GameMode
             if (botKey == string.Empty)
             {
 #if DEBUG
-                Logger.LogWarning("TryDespawnFurthest: botKey was empty"); 
+                Logger.LogWarning("TryDespawnFurthest: botKey was empty");
 #endif
                 return false;
             }
@@ -539,7 +539,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         /// <summary>
-        /// We use <see cref="DeployScreen(float)"/> instead
+        /// We use <see cref="WaitScreen(float)"/> instead
         /// </summary>
         /// <param name="timeBeforeDeploy"></param>
         public override IEnumerator vmethod_1()
@@ -552,7 +552,7 @@ namespace Fika.Core.Coop.GameMode
         /// Matchmaker countdown
         /// </summary>
         /// <param name="timeBeforeDeploy">Time in seconds to count down</param>
-        private async void DeployScreen(float timeBeforeDeploy)
+        private async Task WaitScreen(int timeBeforeDeploy)
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
@@ -572,7 +572,6 @@ namespace Fika.Core.Coop.GameMode
                     await FikaRequestHandler.UpdateSetStatus(status);
 
                     Singleton<FikaServer>.Instance.ReadyClients++;
-                    base.vmethod_1(timeBeforeDeploy);
                     return;
                 }
 
@@ -649,10 +648,18 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Destroy(fikaStartButton);
                 }
-
             }
+        }
 
-            base.vmethod_1(timeBeforeDeploy);
+        private async Task DeployScreen(int timeBeforeDeploy)
+        {
+            DateTime dateTime = GClass1304.Now.AddSeconds(timeBeforeDeploy);
+            new MatchmakerFinalCountdown.GClass3181(Profile_0, dateTime).ShowScreen(EScreenState.Root);
+            MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeploy);
+            Singleton<GUISounds>.Instance.StopMenuBackgroundMusicWithDelay(timeBeforeDeploy);
+            GameUi.gameObject.SetActive(true);
+            GameUi.TimerPanel.ProfileId = ProfileId;
+            await Task.Delay(timeBeforeDeploy * 1000);
         }
 
         private async Task SendOrReceiveSpawnPoint()
@@ -1025,7 +1032,7 @@ namespace Fika.Core.Coop.GameMode
                     {
                         Logger.LogError("WaitForPlayers::GClass3163 was null!");
                     }
-                    await Task.Delay(1000);
+                    await Task.Delay(100);
                 } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
             }
             else if (MatchmakerAcceptPatches.IsClient)
@@ -1109,6 +1116,10 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override IEnumerator vmethod_4(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem, Callback runCallback)
         {
+#if DEBUG
+            Logger.LogWarning("CoopGame::vmethod_4");
+#endif
+
             if (MatchmakerAcceptPatches.IsClient)
             {
                 controllerSettings.BotAmount = EBotAmount.NoBots;
@@ -1169,7 +1180,7 @@ namespace Fika.Core.Coop.GameMode
                     if (limits > 0)
                     {
                         botsController_0.BotSpawner.SetMaxBots(limits);
-                    } 
+                    }
                 }
 
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
@@ -1201,13 +1212,20 @@ namespace Fika.Core.Coop.GameMode
             seasonTaskHandler.task = seasonHandler.Run(season);
             yield return new WaitUntil(new Func<bool>(seasonTaskHandler.method_0));
 
-            if (startDelay < 5)
+            int timeBeforeDeployLocal = Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
+
+            if (timeBeforeDeployLocal < 5)
             {
-                startDelay = 5;
+                timeBeforeDeployLocal = 5;
                 NotificationManagerClass.DisplayWarningNotification("You have set the deploy timer too low, resetting to 5!");
             }
 
-            DeployScreen(startDelay);
+            Task waitTask = WaitScreen(timeBeforeDeployLocal);
+
+            while (!waitTask.IsCompleted)
+            {
+                yield return null;
+            }
 
             if (MatchmakerAcceptPatches.IsServer)
             {
@@ -1223,8 +1241,6 @@ namespace Fika.Core.Coop.GameMode
                     yield return new WaitForEndOfFrame();
                 }
             }
-
-            yield return new WaitForSeconds(startDelay);
 
             if (MatchmakerAcceptPatches.IsServer)
             {
@@ -1267,9 +1283,19 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
+            Task deployTask = DeployScreen(timeBeforeDeployLocal);
+
+            while (!deployTask.IsCompleted)
+            {
+                yield return null;
+            }
+
             yield return new WaitForEndOfFrame();
 
-            CreateExfiltrationPointAndInitDeathHandler();
+            using (GClass21.StartWithToken("SessionRun"))
+            {
+                CreateExfiltrationPointAndInitDeathHandler();
+            }
 
             // Add FreeCamController to GameWorld GameObject
             Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
@@ -1364,9 +1390,15 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogInfo("CreateExfiltrationPointAndInitDeathHandler");
 
-            GameTimer.Start();
-            gparam_0.vmethod_0();
+            GameTimer.Start(null, null);
             gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
+            gparam_0.vmethod_0();
+
+            SkillClass[] skills = Profile_0.Skills.Skills;
+            for (int i = 0; i < skills.Length; i++)
+            {
+                skills[i].SetPointsEarnedInSession(0f, false);
+            }
 
             InfiltrationPoint = spawnPoint.Infiltration;
             Profile_0.Info.EntryPoint = InfiltrationPoint;
@@ -1498,7 +1530,7 @@ namespace Fika.Core.Coop.GameMode
 
             CoopHandler coopHandler = CoopHandler.GetCoopHandler();
 
-            CoopPlayer coopPlayer = (CoopPlayer)player;
+            CoopPlayer coopPlayer = player;
             ExtractedPlayers.Add(coopPlayer.NetId);
             coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
             coopHandler.Players.Remove(coopPlayer.NetId);
