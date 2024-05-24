@@ -367,6 +367,23 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void SetScopeMode(GStruct165[] scopeStates)
         {
+            SendScopeStates(scopeStates);
+            base.SetScopeMode(scopeStates);
+        }
+        public override void OpticCalibrationSwitchUp(GStruct165[] scopeStates)
+        {
+            SendScopeStates(scopeStates);
+            base.OpticCalibrationSwitchUp(scopeStates);
+        }
+
+        public override void OpticCalibrationSwitchDown(GStruct165[] scopeStates)
+        {
+            SendScopeStates(scopeStates);
+            base.OpticCalibrationSwitchDown(scopeStates);
+        }
+
+        private void SendScopeStates(GStruct165[] scopeStates)
+        {
             if (!CurrentOperation.CanChangeScopeStates(scopeStates))
             {
                 return;
@@ -381,8 +398,6 @@ namespace Fika.Core.Coop.ClientClasses
                     GStruct165 = scopeStates
                 }
             });
-
-            base.SetScopeMode(scopeStates);
         }
 
         public override void ShotMisfired(BulletClass ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
