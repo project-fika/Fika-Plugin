@@ -302,7 +302,6 @@ namespace Fika.Core.UI.Custom
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                     if (entry.Status == LobbyEntry.ELobbyStatus.REJOIN)
                     {
-                        // [CWX]
                         MatchmakerAcceptPatches.IsReconnect = true;
                     }
                     else

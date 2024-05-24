@@ -374,8 +374,6 @@ namespace Fika.Core.Coop.Components
 
             if (!spawnObject.IsAlive)
             {
-                // [CWX] - might be able to be removed if dead AI isnt sent as someone to spawn / dont spawn them
-                // when sending lootpositions we get corpses.
                 otherPlayer.OnDead(EDamageType.Undefined);
             }
 

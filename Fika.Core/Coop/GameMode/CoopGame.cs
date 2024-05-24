@@ -38,6 +38,7 @@ using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using System;
@@ -486,7 +487,7 @@ namespace Fika.Core.Coop.GameMode
             if (botKey == string.Empty)
             {
 #if DEBUG
-                Logger.LogWarning("TryDespawnFurthest: botKey was empty"); 
+                Logger.LogWarning("TryDespawnFurthest: botKey was empty");
 #endif
                 return false;
             }
@@ -677,7 +678,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (!string.IsNullOrEmpty(name))
                 {
-                    Logger.LogInfo($"Retrieved Spawn Point '{name}' from server");
+                    Logger.LogInfo($"Retrieved Spawn Point {name} from server");
 
                     Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field("dictionary_0").GetValue<Dictionary<ISpawnPoint, SpawnPointMarker>>();
                     foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
@@ -727,7 +728,6 @@ namespace Fika.Core.Coop.GameMode
             await CreateCoopHandler();
             CoopHandler.GetCoopHandler().LocalGameInstance = this;
 
-            // [CWX]
             Vector3 PosToSpawn = spawnPoint.Position;
             Quaternion RotToSpawn = spawnPoint.Rotation;
             if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
@@ -738,27 +738,21 @@ namespace Fika.Core.Coop.GameMode
                 int retryCount = 0;
                 while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
                 {
-                    Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                    Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, DeliveryMethod.ReliableUnordered);
                     MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
                     await Task.Delay(3000);
                     retryCount++;
                 }
 
-                // TODO: [CWX] Remove before final PR
-                // if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
-                // {
-                //     // add synthetic retrys
-                //     await Task.Delay(12000); // 4 extra trys
-                // }
-
                 if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
                 {
                     MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Failed to Reconnect...");
-                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("Network Error", "[EXPERIMENTAL] Unable to reconnect to the host. Please try again after returning to main menu.", 
+                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("Network Error", "[EXPERIMENTAL] Unable to reconnect to the host. Please try again after returning to main menu.",
                         ErrorScreen.EButtonType.OkButton, 10f, ReconnectFailed, ReconnectFailed);
                 }
 
                 MatchmakerAcceptPatches.GClass3163?.ChangeStatus($"Reconnecting to host...");
+
                 PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
                 RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
                 profile = MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
@@ -779,13 +773,11 @@ namespace Fika.Core.Coop.GameMode
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
 
-            // [CWX]
             if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
             {
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
                 myPlayer.MovementContext.SetPoseLevel(MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel, true);
                 myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
-                // myPlayer.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
             }
 
             if (RaidSettings.MetabolismDisabled)
@@ -869,15 +861,18 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
+            if (!MatchmakerAcceptPatches.IsReconnect)
+            {
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-            }
-            else
-            {
-                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                if (MatchmakerAcceptPatches.IsServer)
+                {
+                    await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
+                }
+                else
+                {
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                }
             }
 
             if (MatchmakerAcceptPatches.IsServer)
@@ -1014,8 +1009,6 @@ namespace Fika.Core.Coop.GameMode
             {
                 spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 await SendOrReceiveSpawnPoint();
-                // [CWX] after disconnect, and trying to host, make sure this is set back to defaults
-                // TODO: move working out if reconnect to earlier on, to mitigate issues hosting your own and joining a different game
                 MatchmakerAcceptPatches.IsReconnect = false;
                 MatchmakerAcceptPatches.ReconnectPacket = null;
             }
@@ -1226,7 +1219,7 @@ namespace Fika.Core.Coop.GameMode
                     if (limits > 0)
                     {
                         botsController_0.BotSpawner.SetMaxBots(limits);
-                    } 
+                    }
                 }
 
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
@@ -1665,10 +1658,8 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogInfo("CoopGame::Stop");
 
-            // [CWX]
             if (MatchmakerAcceptPatches.IsReconnect)
             {
-                // game ended, reset these values
                 MatchmakerAcceptPatches.IsReconnect = false;
                 MatchmakerAcceptPatches.ReconnectPacket = null;
                 MatchmakerAcceptPatches.SpawnedPlayersComplete = false;
