@@ -169,6 +169,14 @@ namespace Fika.Core.Coop.GameMode
             WeatherController.Instance.method_0([weather, weather2]);
         }
 
+        public override void SetMatchmakerStatus(string status, float? progress = null)
+        {
+            if (GClass3126.Instance.CurrentScreenController is MatchmakerTimeHasCome.GClass3182 gclass)
+            {
+                gclass.ChangeStatus(status, progress);
+            }
+        }
+
         public async Task CreateCoopHandler()
         {
             CoopHandler coopHandler = CoopHandler.GetCoopHandler();
@@ -539,20 +547,26 @@ namespace Fika.Core.Coop.GameMode
         }
 
         /// <summary>
-        /// We use <see cref="WaitScreen(float)"/> instead
+        /// The countdown deploy screen
         /// </summary>
-        /// <param name="timeBeforeDeploy"></param>
+        /// <returns></returns>
         public override IEnumerator vmethod_1()
         {
-            // Do nothing
-            yield break;
+            int timeBeforeDeployLocal = Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
+            DateTime dateTime = GClass1304.Now.AddSeconds(timeBeforeDeployLocal);
+            new MatchmakerFinalCountdown.GClass3181(Profile_0, dateTime).ShowScreen(EScreenState.Root);
+            MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeployLocal);
+            Singleton<GUISounds>.Instance.StopMenuBackgroundMusicWithDelay(timeBeforeDeployLocal);
+            GameUi.gameObject.SetActive(true);
+            GameUi.TimerPanel.ProfileId = ProfileId;
+            yield return new WaitForSeconds(timeBeforeDeployLocal);
         }
 
         /// <summary>
-        /// Matchmaker countdown
+        /// This task ensures that all players are joined and loaded before continuing
         /// </summary>
-        /// <param name="timeBeforeDeploy">Time in seconds to count down</param>
-        private async Task WaitScreen(int timeBeforeDeploy)
+        /// <returns></returns>
+        private IEnumerator WaitForOtherPlayers()
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
@@ -569,10 +583,15 @@ namespace Fika.Core.Coop.GameMode
                     }
 
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    await FikaRequestHandler.UpdateSetStatus(status);
+                    Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
+
+                    while (!updateStatus.IsCompleted)
+                    {
+                        yield return null;
+                    }
 
                     Singleton<FikaServer>.Instance.ReadyClients++;
-                    return;
+                    yield break;
                 }
 
                 NetDataWriter writer = new();
@@ -588,11 +607,16 @@ namespace Fika.Core.Coop.GameMode
                 if (MatchmakerAcceptPatches.IsServer)
                 {
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    await FikaRequestHandler.UpdateSetStatus(status);
+                    Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
+
+                    while (!updateStatus.IsCompleted)
+                    {
+                        yield return null;
+                    }
 
                     do
                     {
-                        await Task.Delay(100);
+                        yield return null;
                     } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
 
                     FikaServer server = Singleton<FikaServer>.Instance;
@@ -607,7 +631,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        await Task.Delay(250);
+                        yield return null;
                     } while (Singleton<FikaServer>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
 
                     foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -627,7 +651,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     do
                     {
-                        await Task.Delay(100);
+                        yield return null;
                     } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
 
                     FikaClient client = Singleton<FikaClient>.Instance;
@@ -640,7 +664,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        await Task.Delay(250);
+                        yield return null;
                     } while (Singleton<FikaClient>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
                 }
 
@@ -649,17 +673,6 @@ namespace Fika.Core.Coop.GameMode
                     Destroy(fikaStartButton);
                 }
             }
-        }
-
-        private async Task DeployScreen(int timeBeforeDeploy)
-        {
-            DateTime dateTime = GClass1304.Now.AddSeconds(timeBeforeDeploy);
-            new MatchmakerFinalCountdown.GClass3181(Profile_0, dateTime).ShowScreen(EScreenState.Root);
-            MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeploy);
-            Singleton<GUISounds>.Instance.StopMenuBackgroundMusicWithDelay(timeBeforeDeploy);
-            GameUi.gameObject.SetActive(true);
-            GameUi.TimerPanel.ProfileId = ProfileId;
-            await Task.Delay(timeBeforeDeploy * 1000);
         }
 
         private async Task SendOrReceiveSpawnPoint()
@@ -1220,12 +1233,7 @@ namespace Fika.Core.Coop.GameMode
                 NotificationManagerClass.DisplayWarningNotification("You have set the deploy timer too low, resetting to 5!");
             }
 
-            Task waitTask = WaitScreen(timeBeforeDeployLocal);
-
-            while (!waitTask.IsCompleted)
-            {
-                yield return null;
-            }
+            yield return WaitForOtherPlayers();
 
             if (MatchmakerAcceptPatches.IsServer)
             {
@@ -1283,19 +1291,17 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            Task deployTask = DeployScreen(timeBeforeDeployLocal);
+            /*Task deployTask = DeployScreen(timeBeforeDeployLocal);
 
             while (!deployTask.IsCompleted)
             {
                 yield return null;
-            }
+            }*/
 
-            yield return new WaitForEndOfFrame();
-
-            using (GClass21.StartWithToken("SessionRun"))
+            /*using (GClass21.StartWithToken("SessionRun"))
             {
                 CreateExfiltrationPointAndInitDeathHandler();
-            }
+            }*/
 
             // Add FreeCamController to GameWorld GameObject
             Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
@@ -1309,8 +1315,11 @@ namespace Fika.Core.Coop.GameMode
                 Singleton<GameWorld>.Instance.MineManager.OnExplosion += OnMineExplode;
             }
 
-            runCallback.Succeed();
+            /*runCallback.Succeed();*/
 
+            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 5);
+
+            yield return base.vmethod_4(controllerSettings, spawnSystem, runCallback);
             yield break;
         }
 
@@ -1386,7 +1395,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public void CreateExfiltrationPointAndInitDeathHandler()
+        public override void vmethod_5()
         {
             Logger.LogInfo("CreateExfiltrationPointAndInitDeathHandler");
 

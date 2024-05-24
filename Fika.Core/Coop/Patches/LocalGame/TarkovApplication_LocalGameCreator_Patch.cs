@@ -33,7 +33,9 @@ namespace Fika.Core.Coop.Patches.LocalGame
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
             if (MatchmakerAcceptPatches.IsSinglePlayer)
+            {
                 return true;
+            }
 
             ISession session = __instance.GetClientBackEndSession();
             if (session == null)
@@ -96,7 +98,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             if (MatchmakerAcceptPatches.IsClient)
             {
-                timeHasComeScreenController.ChangeStatus("Joining Coop Game");
+                timeHasComeScreenController.ChangeStatus("Joining coop game...");
 
                 RaidSettingsRequest data = new();
                 RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
@@ -106,28 +108,30 @@ namespace Fika.Core.Coop.Patches.LocalGame
             }
             else
             {
-                timeHasComeScreenController.ChangeStatus("Creating Coop Game");
+                timeHasComeScreenController.ChangeStatus("Creating coop game...");
             }
 
             StartHandler startHandler = new(__instance, session.Profile, session.ProfileOfPet, ____raidSettings.SelectedLocation, timeHasComeScreenController);
 
-            CoopGame coopgAme = CoopGame.Create(____inputTree, profile, ____localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
-                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
-                ____fixedDeltaTime, EUpdateQueue.Update, session, TimeSpan.FromSeconds(60 * ____raidSettings.SelectedLocation.EscapeTimeLimit), ____raidSettings);
+            TimeSpan raidLimits = __instance.method_48(____raidSettings.SelectedLocation.EscapeTimeLimit);
 
-            Singleton<AbstractGame>.Create(coopgAme);
-            FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopgAme));
+            CoopGame coopGame = CoopGame.Create(____inputTree, profile, ____localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
+                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
+                ____fixedDeltaTime, EUpdateQueue.Update, session, raidLimits, ____raidSettings);
+
+            Singleton<AbstractGame>.Create(coopGame);
+            FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
 
             if (MatchmakerAcceptPatches.IsClient)
             {
-                timeHasComeScreenController.ChangeStatus("Joined Coop Game");
+                coopGame.SetMatchmakerStatus("Coop game joined");
             }
             else
             {
-                timeHasComeScreenController.ChangeStatus("Created Coop Game");
+                coopGame.SetMatchmakerStatus("Coop game created");
             }
 
-            Task finishTask = coopgAme.InitPlayer(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
+            Task finishTask = coopGame.InitPlayer(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
             __result = Task.WhenAll(finishTask);
         }
 
