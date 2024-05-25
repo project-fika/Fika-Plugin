@@ -32,6 +32,7 @@ using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
@@ -750,6 +751,36 @@ namespace Fika.Core.Coop.GameMode
             await CreateCoopHandler();
             CoopHandler.GetCoopHandler().LocalGameInstance = this;
 
+            Vector3 PosToSpawn = spawnPoint.Position;
+            Quaternion RotToSpawn = spawnPoint.Rotation;
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+            {
+                ReconnectRequestPacket reconnectPacket = new(ProfileId);
+                MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Sending Reconnect Request...");
+
+                int retryCount = 0;
+                while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
+                {
+                    Singleton<FikaClient>.Instance?.SendData(new NetDataWriter(), ref reconnectPacket, DeliveryMethod.ReliableUnordered);
+                    MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
+                    await Task.Delay(3000);
+                    retryCount++;
+                }
+
+                if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
+                {
+                    MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Failed to Reconnect...");
+                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("Network Error", "[EXPERIMENTAL] Unable to reconnect to the host. Please try again after returning to main menu.",
+                        ErrorScreen.EButtonType.OkButton, 10f, ReconnectFailed, ReconnectFailed);
+                }
+
+                MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Reconnecting to host...");
+
+                PosToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Position;
+                RotToSpawn = MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation;
+                profile = MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
+            }
+
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 GClass548.Config.CharacterController.ClientPlayerMode, getSensitivity,
@@ -763,13 +794,21 @@ namespace Fika.Core.Coop.GameMode
                 throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
+            CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
+
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+            {
+                coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
+                myPlayer.MovementContext.SetPoseLevel(MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel, true);
+                myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
+            }
+
             if (RaidSettings.MetabolismDisabled)
             {
                 myPlayer.HealthController.DisableMetabolism();
                 NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
             PlayerSpawnRequest body = new(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId());
@@ -845,15 +884,18 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
+            if (!MatchmakerAcceptPatches.IsReconnect)
+            {
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-            }
-            else
-            {
-                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                if (MatchmakerAcceptPatches.IsServer)
+                {
+                    await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
+                }
+                else
+                {
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                }
             }
 
             if (MatchmakerAcceptPatches.IsServer)
@@ -871,6 +913,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
+            coopHandler.StartSpawning = true;
             await WaitForPlayers();
 
             Destroy(customButton);
@@ -882,6 +925,12 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.ActiveHealthController.DiedEvent += MainPlayerDied;
 
             return myPlayer;
+        }
+
+        private void ReconnectFailed()
+        {
+            ClientAppUtils.GetMainApp().method_52().HandleExceptions();
+            Logger.LogError($"Failed to reconnect to the host. Returning to main menu...");
         }
 
         private void MainPlayerDied(EDamageType obj)
@@ -983,6 +1032,8 @@ namespace Fika.Core.Coop.GameMode
             {
                 spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 await SendOrReceiveSpawnPoint();
+                MatchmakerAcceptPatches.IsReconnect = false;
+                MatchmakerAcceptPatches.ReconnectPacket = null;
             }
 
             if (MatchmakerAcceptPatches.IsClient)
@@ -1109,6 +1160,8 @@ namespace Fika.Core.Coop.GameMode
                     client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
                 } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
+
+                MatchmakerAcceptPatches.SpawnedPlayersComplete = true;
             }
         }
 
@@ -1636,6 +1689,13 @@ namespace Fika.Core.Coop.GameMode
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
         {
             Logger.LogInfo("CoopGame::Stop");
+
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                MatchmakerAcceptPatches.IsReconnect = false;
+                MatchmakerAcceptPatches.ReconnectPacket = null;
+                MatchmakerAcceptPatches.SpawnedPlayersComplete = false;
+            }
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();

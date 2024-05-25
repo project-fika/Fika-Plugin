@@ -746,7 +746,10 @@ namespace Fika.Core.Coop.Players
                     }
                     else
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{nickname}' has died");
+                        if (!MatchmakerAcceptPatches.IsReconnect)
+                        {
+                            NotificationManagerClass.DisplayWarningNotification($"Group member '{Profile.Nickname}' has died");
+                        }
                     }
                 }
                 if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)

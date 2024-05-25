@@ -61,6 +61,7 @@ namespace Fika.Core.Coop.Components
         internal static GameObject CoopHandlerParent;
 
         private Coroutine PingRoutine;
+        public bool StartSpawning = false;
 
         #endregion
 
@@ -283,6 +284,11 @@ namespace Fika.Core.Coop.Components
         {
             while (RunAsyncTasks)
             {
+                while (!StartSpawning)
+                {
+                    await Task.Delay(1000);
+                }
+
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
                 int waitTime = 2500;
                 if (coopGame.Status == GameStatus.Started)
@@ -369,7 +375,7 @@ namespace Fika.Core.Coop.Components
 
             if (!spawnObject.IsAlive)
             {
-                // TODO: Spawn them as corpses?
+                otherPlayer.OnDead(EDamageType.Undefined);
             }
 
             if (MatchmakerAcceptPatches.IsServer)
@@ -402,6 +408,11 @@ namespace Fika.Core.Coop.Components
         {
             while (true)
             {
+                if (!StartSpawning)
+                {
+                    yield return new WaitUntil(() => StartSpawning);
+                }
+
                 yield return new WaitForSeconds(1f);
 
                 if (Singleton<AbstractGame>.Instantiated)
@@ -456,7 +467,7 @@ namespace Fika.Core.Coop.Components
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
             ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position, Quaternion.identity,
-                "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, isAI,
+                "Player", isAI == true ? $"Bot_{netId}_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, isAI,
                 EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
                 GClass548.Config.CharacterController.ObservedPlayerMode,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,

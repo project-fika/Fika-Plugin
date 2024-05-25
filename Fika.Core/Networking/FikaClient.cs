@@ -11,6 +11,7 @@ using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
@@ -22,6 +23,7 @@ using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -80,6 +82,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket>(OnReconnectResponsePacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -124,6 +127,12 @@ namespace Fika.Core.Networking
 
         private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet)
         {
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+            {
+                FikaPlugin.Instance.FikaLogger.LogInfo($"OnSyncNetIdPacketReceived: Client is reconnecting, ignore Sync.");
+                return;
+            }
+
             Dictionary<int, CoopPlayer> newPlayers = Players;
             if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
@@ -153,6 +162,12 @@ namespace Fika.Core.Networking
 
         private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet)
         {
+            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+            {
+                FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Client is reconnecting, ignore assignment.");
+                return;
+            }
+
             FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Assigned NetId {packet.NetId} to my own client.");
             MyPlayer.NetId = packet.NetId;
             int i = -1;
@@ -743,6 +758,67 @@ namespace Fika.Core.Networking
                 Destroy(this);
                 Singleton<FikaClient>.Release(this);
             }
+        }
+
+        private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet)
+        {
+            MatchmakerAcceptPatches.IsReconnect = true;
+            MatchmakerAcceptPatches.ReconnectPacket = packet;
+
+            StartCoroutine(SyncClientToHost(packet));
+        }
+
+        public IEnumerator SyncClientToHost(ReconnectResponsePacket packet)
+        {
+            while (!Singleton<GameWorld>.Instantiated)
+            {
+                yield return null;
+            }
+
+            ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            // interactables
+            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
+            for (int i = 0; i < packet.InteractiveObjectAmount; i++)
+            {
+                WorldInteractiveObject.GStruct385 packetInteractiveObject = packet.InteractiveObjects[i];
+                // find interactive object with id
+                WorldInteractiveObject interactiveObject = interactiveObjects.FirstOrDefault(x => x.Id == packetInteractiveObject.Id);
+                interactiveObject?.SetFromStatusInfo(packetInteractiveObject);
+            }
+
+            // Windows
+            for (int i = 0; i < packet.WindowBreakerAmount; i++)
+            {
+                gameWorld.method_20(packet.Windows[i].Id.GetHashCode(), packet.Windows[i].FirstHitPosition.Value);
+            }
+
+            // lights
+            LampController[] clientLights = LocationScene.GetAllObjects<LampController>(true).ToArray();
+            for (int i = 0; i < packet.LightAmount; i++)
+            {
+                LampController lampController = packet.Lights[i];
+                LampController clientLightToChange = clientLights.FirstOrDefault(x => x.NetId == lampController.NetId);
+                clientLightToChange?.Switch(lampController.LampState);                
+            }
+
+            // smokes
+            List<GStruct35> smokes = new();
+            for (int i = 0; i < packet.SmokeAmount; i++)
+            {
+                smokes.Add(packet.Smokes[i]);
+            }
+
+            // -------------------  Anything that needs to come after player spawns  -------------------------------
+            while (coopGame.Status != GameStatus.Started)
+            {
+                yield return null;
+            }
+            gameWorld.OnSmokeGrenadesDeserialized(smokes);
+            // TODO: Smokes do spawn on the ground, but no visible smoke effect shows, im using BSG's method of doing this currently, so this might be a BSG thing.
+            // Decide if to fix or not.
+
         }
     }
 }

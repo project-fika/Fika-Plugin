@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
@@ -238,6 +239,97 @@ namespace Fika.Core.Networking
             using BinaryReader binaryReader = new(memoryStream);
 
             return GClass1534.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+        }
+
+        public static void PutInteractiveObjectState(this NetDataWriter writer, WorldInteractiveObject worldInteractiveObject)
+        {
+            writer.Put(worldInteractiveObject.Id);
+            writer.Put((byte)worldInteractiveObject.DoorState);
+            writer.Put(Mathf.FloorToInt(worldInteractiveObject.CurrentAngle));
+            writer.Put(worldInteractiveObject as Door is Door door ? door.IsBroken : false);
+        }
+
+        public static WorldInteractiveObject.GStruct385 GetInteractiveObjectState(this NetDataReader reader)
+        {
+            return new()
+            {
+                Id = reader.GetString(),
+                State = reader.GetByte(),
+                Angle = reader.GetInt(),
+                IsBroken = reader.GetBool()
+            };
+        }
+
+        public static void PutWindowBreakerState(this NetDataWriter writer, WindowBreaker windowBreaker)
+        {
+            writer.Put(windowBreaker.Id);
+            writer.Put(windowBreaker.FirstHitPosition.Value);
+        }
+
+        public static WindowBreaker GetWindowBreakerState(this NetDataReader reader)
+        {
+            return new()
+            {
+                Id = reader.GetString(),
+                FirstHitPosition = reader.GetVector3(),
+            };
+        }
+
+        public static void PutLightState(this NetDataWriter writer, LampController windowBreaker)
+        {
+            writer.Put(windowBreaker.NetId);
+            writer.Put((byte)windowBreaker.LampState);
+        }
+
+        public static LampController GetLightState(this NetDataReader reader)
+        {
+            return new()
+            {
+                NetId = reader.GetInt(),
+                LampState = (Turnable.EState)reader.GetByte()
+            };
+        }
+
+        public static void PutSmokeState(this NetDataWriter writer, Throwable smoke)
+        {
+            var smokeToUse = smoke as SmokeGrenade;
+            GStruct35 data = smokeToUse.NetworkData;
+
+            writer.Put(data.Id);
+            writer.Put(data.Position);
+            writer.Put(data.Template);
+            writer.Put(data.Time);
+            writer.Put(data.Orientation);
+            writer.Put(data.PlatformId);
+        }
+
+        public static GStruct35 GetSmokeState(this NetDataReader reader)
+        {
+            return new()
+            {
+                Id = reader.GetString(),
+                Position = reader.GetVector3(),
+                Template = reader.GetString(),
+                Time = reader.GetInt(),
+                Orientation = reader.GetQuaternion(),
+                PlatformId = reader.GetShort()
+            };
+        }
+
+        public static void PutLocationItem(this NetDataWriter writer, LootItemPositionClass[] locationItem)
+        {
+            using MemoryStream memoryStream = new();
+            using BinaryWriter binaryWriter = new(memoryStream);
+            binaryWriter.Write(GClass1534.SerializeLootData(locationItem));
+            writer.PutByteArray(memoryStream.ToArray());
+        }
+
+        public static GClass1211 GetLocationItem(this NetDataReader reader)
+        {
+            using MemoryStream memoryStream = new(reader.GetByteArray());
+            using BinaryReader binaryReader = new(memoryStream);
+
+            return GClass1534.DeserializeLootData(Singleton<ItemFactory>.Instance, binaryReader.ReadEFTLootDataDescriptor());
         }
     }
 }

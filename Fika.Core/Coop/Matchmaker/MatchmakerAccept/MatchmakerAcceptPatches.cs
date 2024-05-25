@@ -1,5 +1,6 @@
 ﻿using EFT;
 using EFT.UI.Matchmaker;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
@@ -32,6 +33,9 @@ namespace Fika.Core.Coop.Matchmaker
         public static WeatherClass[] Nodes { get; set; } = null;
         private static string groupId;
         private static long timestamp;
+        public static bool IsReconnect = false;
+        public static ReconnectResponsePacket? ReconnectPacket; // change to not be nullable
+        public static bool SpawnedPlayersComplete = false;
         #endregion
 
         #region Static Fields

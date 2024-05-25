@@ -66,11 +66,11 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            GClass3223 questController = new(profile, inventoryController, session, true);
+            CoopClientQuestController questController = new(profile, inventoryController, session, true);
             questController.Init();
             questController.Run();
 
-            AchievementControllerClass achievementsController = new(profile, inventoryController, session, true);
+            CoopClientAchievementController achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
 

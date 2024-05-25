@@ -21,6 +21,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -83,6 +84,8 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectRequestPacket, NetPeer>(OnReconnectRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ConditionChangePacket, NetPeer>(OnConditionChangedPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -780,6 +783,84 @@ namespace Fika.Core.Networking
                 writer.Reset();
                 server.SendDataToPeer(peer, writer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
             }
+        }
+
+        private void OnConditionChangedPacketReceived(ConditionChangePacket packet, NetPeer peer)
+        {
+            Players.FirstOrDefault(x => x.Key == packet.NetId).Value.Profile.TaskConditionCounters
+                .FirstOrDefault(c => c.Key == packet.ConditionId).Value.Value = (int)packet.ConditionValue;
+        }
+
+        private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
+        {
+            serverLogger.LogError($"Player Wanting to reconnect {packet.ProfileId}");
+            StartCoroutine(SyncClientToHost(packet, peer));
+        }
+
+        public IEnumerator SyncClientToHost(ReconnectRequestPacket packet, NetPeer peer)
+        {
+            while (!Singleton<GameWorld>.Instantiated)
+            {
+                yield return null;
+            }
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            ClientGameWorld ClientgameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            while (string.IsNullOrEmpty(ClientgameWorld.MainPlayer.Location))
+            {
+                yield return null;
+            }
+
+            ObservedCoopPlayer playerToUse = (ObservedCoopPlayer)Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
+
+            if (playerToUse == null)
+            {
+                serverLogger.LogError($"Player was not found");
+            }
+
+            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState
+                && x.DoorState != EDoorState.Interacting && x.DoorState != EDoorState.Interacting).ToArray();
+
+            WindowBreaker[] windows = ClientgameWorld?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
+
+            LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
+
+            Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
+
+            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray(); // will ignore corpses
+            // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
+
+            Profile.GClass1766 health = playerToUse.NetworkHealthController.Store(null);
+            GClass2428.GClass2431[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
+
+            foreach (GClass2428.GClass2431 effect in effects)
+            {
+                if (!effect.Active)
+                {
+                    continue;
+                }
+
+                if (health.BodyParts[effect.BodyPart].Effects == null)
+                {
+                    health.BodyParts[effect.BodyPart].Effects = new Dictionary<string, Profile.GClass1766.GClass1767>();
+                }
+
+                if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface250)
+                {
+                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.GClass1766.GClass1767 { Time = -1f, ExtraData = effect.StoreObj });
+                }
+            }
+
+            playerToUse.Profile.Health = health;
+            playerToUse.Profile.Info.EntryPoint = coopGame.InfiltrationPoint;
+
+            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
+                playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
+                interactiveObjects, windows, lights, smokes,
+                new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile }, items);
+
+            SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
     }
 }
