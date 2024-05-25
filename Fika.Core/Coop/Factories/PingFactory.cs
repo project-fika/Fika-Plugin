@@ -108,7 +108,16 @@ public static class PingFactory
 
             float distance = Mathf.Clamp(Vector3.Distance(CameraClass.Instance.Camera.transform.position, transform.position) / 100, 0.4f, 0.6f);
             float pingSize = FikaPlugin.PingSize.Value;
-            image.rectTransform.localScale = new Vector3(pingSize, pingSize, pingSize) * distance;
+            Vector3 scaledSize = new Vector3(pingSize, pingSize, pingSize);
+            if (FikaPlugin.PingScaleWithDistance.Value == true)
+            {
+                scaledSize *= distance;
+            }
+            else
+            {
+                scaledSize *= 0.5f;
+            }
+            image.rectTransform.localScale = scaledSize;
         }
     }
 

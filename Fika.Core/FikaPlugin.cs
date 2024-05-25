@@ -318,7 +318,7 @@ namespace Fika.Core
 
             PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 3 }));
 
-            PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            PingScaleWithDistance = Config.Bind("Coop | Custom", "Ping Scale With Distance", true, new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 1, IsAdvanced = true }));
 
             PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f, new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 0, IsAdvanced = true }));
 
