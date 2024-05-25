@@ -115,6 +115,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> UseHealthNumber { get; set; }
         public static ConfigEntry<bool> UsePlateFactionSide { get; set; }
         public static ConfigEntry<bool> HideNamePlateInOptic { get; set; }
+        public static ConfigEntry<bool> NamePlateUseOpticZoom { get; set; }
         public static ConfigEntry<bool> DecreaseOpacityNotLookingAt { get; set; }
         public static ConfigEntry<float> NamePlateScale { get; set; }
         public static ConfigEntry<float> OpacityInADS { get; set; }
@@ -130,6 +131,9 @@ namespace Fika.Core
         public static ConfigEntry<int> PingTime { get; set; }
         public static ConfigEntry<bool> PlayPingAnimation { get; set; }
         public static ConfigEntry<bool> ShowPingDuringOptics { get; set; }
+        public static ConfigEntry<bool> PingUseOpticZoom { get; set; }
+        public static ConfigEntry<bool> PingScaleWithDistance { get; set; }
+        public static ConfigEntry<float> PingMinimumOpacity { get; set; }
 
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
@@ -284,13 +288,15 @@ namespace Fika.Core
 
             // Coop | Name Plates
 
-            UseNamePlates = Config.Bind("Coop | Name Plates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+            UseNamePlates = Config.Bind("Coop | Name Plates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
 
-            HideHealthBar = Config.Bind("Coop | Name Plates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            HideHealthBar = Config.Bind("Coop | Name Plates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-            UseHealthNumber = Config.Bind("Coop | Name Plates", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            UseHealthNumber = Config.Bind("Coop | Name Plates", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-            UsePlateFactionSide = Config.Bind("Coop | Name Plates", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            UsePlateFactionSide = Config.Bind("Coop | Name Plates", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+
+            HideNamePlateInOptic = Config.Bind("Coop | Name Plates", "Hide Name Plate in Optic", true, new ConfigDescription("Hides the name plate when viewing through PiP scopes.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
             NamePlateUseOpticZoom = Config.Bind("Coop | Name Plates", "Name Plates Use Optic Zoom", true, new ConfigDescription("If name plate location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 6, IsAdvanced = true }));
 
@@ -308,15 +314,21 @@ namespace Fika.Core
 
             // Coop | Custom
 
-            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 4 }));
+            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 6 }));
 
-            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 3 }));
+            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 5 }));
+
+            PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+
+            ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false, new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+
+            PingUseOpticZoom = Config.Bind("Coop | Custom", "Ping Use Optic Zoom", true, new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
 
             PingScaleWithDistance = Config.Bind("Coop | Custom", "Ping Scale With Distance", true, new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 1, IsAdvanced = true }));
 
