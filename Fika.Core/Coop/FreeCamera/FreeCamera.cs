@@ -1,7 +1,10 @@
-﻿using Comfort.Common;
+﻿using BSG.CameraEffects;
+using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -240,6 +243,11 @@ namespace Fika.Core.Coop.FreeCamera
                 }
             }
 
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                ToggleVision();
+            }
+
             if (isFollowing)
             {
                 return;
@@ -317,6 +325,31 @@ namespace Fika.Core.Coop.FreeCamera
             transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
         }
 
+        private void ToggleVision()
+        {
+            NightVision nightVision = CameraClass.Instance.NightVision;
+            ThermalVision thermalVision = CameraClass.Instance.ThermalVision;
+
+            if (nightVision != null && thermalVision != null)
+            {
+                if (!nightVision.On && !thermalVision.On)
+                {
+                    nightVision.method_1(true);
+                    nightVision.SetMask(NightVisionComponent.EMask.Anvis);
+                }
+                else if (nightVision.On && !thermalVision.On)
+                {
+                    nightVision.method_1(false);
+                    thermalVision.method_1(true);
+                    thermalVision.SetMask(NightVisionComponent.EMask.Anvis);
+                }
+                else if (thermalVision.On)
+                {
+                    thermalVision.method_1(false);
+                }
+            }
+        }
+
         public void JumpToPlayer()
         {
             transform.position = new Vector3(CurrentPlayer.Transform.position.x - 2, CurrentPlayer.Transform.position.y + 2, CurrentPlayer.Transform.position.z);
@@ -346,6 +379,54 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void SetActive(bool status)
         {
+            if (!status)
+            {
+                NightVision nightVision = CameraClass.Instance.NightVision;
+                ThermalVision thermalVision = CameraClass.Instance.ThermalVision;
+
+                if (nightVision != null && nightVision.On)
+                {
+                    nightVision.method_1(false);
+                }
+
+                if (thermalVision != null && thermalVision.On)
+                {
+                    thermalVision.method_1(false);
+                }
+            }
+
+            if (status)
+            {
+                Player player = Singleton<GameWorld>.Instance.MainPlayer;
+                if (player != null && player.HealthController.IsAlive)
+                {
+                    if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
+                    {
+                        player.NightVisionObserver.Component.Togglable.ForceToggle(false);
+                    }
+
+                    if (player.ThermalVisionObserver.Component != null && player.ThermalVisionObserver.Component.Togglable.On)
+                    {
+                        player.ThermalVisionObserver.Component.Togglable.ForceToggle(false);
+                    }
+                }
+                else if (player != null && !player.HealthController.IsAlive)
+                {
+                    NightVision nightVision = CameraClass.Instance.NightVision;
+                    ThermalVision thermalVision = CameraClass.Instance.ThermalVision;
+
+                    if (nightVision != null && nightVision.On)
+                    {
+                        nightVision.method_1(false);
+                    }
+
+                    if (thermalVision != null && thermalVision.On)
+                    {
+                        thermalVision.method_1(false);
+                    }
+                }
+            }
+
             IsActive = status;
             isFollowing = false;
             transform.parent = null;
