@@ -1291,18 +1291,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            /*Task deployTask = DeployScreen(timeBeforeDeployLocal);
-
-            while (!deployTask.IsCompleted)
-            {
-                yield return null;
-            }*/
-
-            /*using (GClass21.StartWithToken("SessionRun"))
-            {
-                CreateExfiltrationPointAndInitDeathHandler();
-            }*/
-
             // Add FreeCamController to GameWorld GameObject
             Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
             Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FikaAirdropsManager>();
@@ -1314,8 +1302,6 @@ namespace Fika.Core.Coop.GameMode
             {
                 Singleton<GameWorld>.Instance.MineManager.OnExplosion += OnMineExplode;
             }
-
-            /*runCallback.Succeed();*/
 
             Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 5);
 

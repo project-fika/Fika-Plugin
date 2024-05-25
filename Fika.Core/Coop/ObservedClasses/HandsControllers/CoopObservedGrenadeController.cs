@@ -51,10 +51,10 @@ namespace Fika.Core.Coop.ObservedClasses
                 };
         }*/
 
-        private void CreateGrenadeClass1()
+        /*private void CreateGrenadeClass1()
         {
 
-        }
+        }*/
 
         public override bool CanChangeCompassState(bool newState)
         {
