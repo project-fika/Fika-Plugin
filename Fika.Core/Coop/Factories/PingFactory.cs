@@ -89,7 +89,7 @@ public static class PingFactory
 
                 if (distanceToCenter < 200)
                 {
-                    image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, Mathf.Max(0.05f, distanceToCenter / 200));
+                    image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200));
                 }
                 else
                 {

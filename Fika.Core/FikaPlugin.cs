@@ -320,7 +320,7 @@ namespace Fika.Core
 
             PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
-            ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false, new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+            PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f, new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 0, IsAdvanced = true }));
 
             // Coop | Debug
 
