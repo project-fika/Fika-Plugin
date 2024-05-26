@@ -781,7 +781,7 @@ namespace Fika.Core.Coop.GameMode
                 profile = MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
             }
 
-            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
+            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 GClass548.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1455(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, statisticsManager);
