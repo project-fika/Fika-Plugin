@@ -214,11 +214,11 @@ namespace Fika.Core.Coop.Players
                             // This one is already handled by SPT, so we do not add directly to profile until they move it to client side
                             // They also do a flat value of 0.02 rather than 0.01 for 1 scav kill or 0.03 for >1
                             LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.02, [CounterTag.FenceStanding, EFenceStandingSource.ScavHelp]);
-                            //LastAggressor.Profile.FenceInfo.AddStanding(0.01, EFenceStandingSource.ScavHelp);
+                            LastAggressor.Profile.FenceInfo.AddStanding(0.01, EFenceStandingSource.ScavHelp);
                         }
                         else if (Side == EPlayerSide.Savage)
                         {
-                            //LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.03, [CounterTag.FenceStanding, EFenceStandingSource.TraitorKill]);
+                            LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.03, [CounterTag.FenceStanding, EFenceStandingSource.TraitorKill]);
                             LastAggressor.Profile.FenceInfo.AddStanding(0.03, EFenceStandingSource.TraitorKill);
                         }
                     }
@@ -308,6 +308,11 @@ namespace Fika.Core.Coop.Players
                         BotNetId = NetId
                     };
                     server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+                    if (!coopGame.Bots.Remove(ProfileId))
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("Unable to remove " + ProfileId + " from CoopGame.Bots when Destroying");
+                    }
                 }
             }
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
