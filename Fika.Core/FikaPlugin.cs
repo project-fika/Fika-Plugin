@@ -48,7 +48,7 @@ namespace Fika.Core
     [BepInPlugin("com.fika.core", "Fika.Core", "0.9.8906")]
     [BepInProcess("EscapeFromTarkov.exe")]
     [BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
-    [BepInDependency("com.spt.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
+    [BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
     [BepInDependency("com.SPT.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin

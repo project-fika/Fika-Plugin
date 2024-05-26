@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Fika.Core.Coop.FreeCamera
+namespace Fika.Core.Coop.FreeCamera.Patches
 {
     internal class FadeBlackScreen_Patch : ModulePatch
     {

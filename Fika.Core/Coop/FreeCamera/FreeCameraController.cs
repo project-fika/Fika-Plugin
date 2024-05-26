@@ -267,8 +267,14 @@ namespace Fika.Core.Coop.FreeCamera
             Destroy(cameraClass.VisorEffect);
             cameraClass.VisorSwitcher.Deinit();
             Destroy(cameraClass.VisorSwitcher);
-            Destroy(cameraClass.NightVision);
-            Destroy(cameraClass.ThermalVision);
+            if (cameraClass.NightVision.On)
+            {
+                cameraClass.NightVision.method_1(false); 
+            }
+            if (cameraClass.ThermalVision.On)
+            {
+                cameraClass.ThermalVision.method_1(false);
+            }
         }
 
         private void ShowExtractMessage()
