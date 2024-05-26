@@ -858,7 +858,7 @@ namespace Fika.Core.Networking
             ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
                 interactiveObjects, windows, lights, smokes,
-                new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile }, items);
+                new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile }, items, gameWorld.AllPlayersEverExisted.Count());
 
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }

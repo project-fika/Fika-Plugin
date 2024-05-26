@@ -74,6 +74,8 @@ namespace Fika.Core.Coop.Players
             achievementsController.Init();
             achievementsController.Run();
 
+            profile.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
+
             if (MatchmakerAcceptPatches.IsServer)
             {
                 player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
@@ -1028,6 +1030,11 @@ namespace Fika.Core.Coop.Players
 
         public virtual void HandleInventoryPacket(in InventoryPacket packet)
         {
+            if (packet.SearchPacket.ItemId == null)
+            {
+                FikaPlugin.Instance.FikaLogger.LogWarning($"HandleInventoryPacket SearchPacket.ItemId was null && HasSearchPacket was {packet.HasSearchPacket}");
+            }
+
             if (packet.HasItemControllerExecutePacket)
             {
                 if (_inventoryController != null)

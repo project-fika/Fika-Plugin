@@ -801,7 +801,6 @@ namespace Fika.Core.Coop.GameMode
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
                 myPlayer.MovementContext.SetPoseLevel(MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel, true);
                 myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
-                myPlayer.Inventory.Equipment.GetAllBundleTokens(); // force retain bundles to fix bundles not being loaded on reconnect
             }
 
             if (RaidSettings.MetabolismDisabled)
@@ -1137,7 +1136,7 @@ namespace Fika.Core.Coop.GameMode
                 InformationPacket packet = new(true);
                 NetDataWriter writer = new();
                 writer.Reset();
-                client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
                 do
                 {
                     numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
@@ -1158,10 +1157,20 @@ namespace Fika.Core.Coop.GameMode
                     }
                     packet = new(true);
                     writer.Reset();
-                    client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
                 } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
 
+                if (MatchmakerAcceptPatches.IsReconnect && MatchmakerAcceptPatches.IsClient)
+                {                    
+                    do
+                    {
+                        MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Loading all expected Players/Bots, ExpectedCount: {MatchmakerAcceptPatches.ReconnectPacket.Value.PlayerCount}, CurrentCount: {Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count()}");
+                        Logger.LogError($"current count of players: {Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count()} & expected {MatchmakerAcceptPatches.ReconnectPacket.Value.PlayerCount}");
+                        await Task.Delay(1000);
+                    } while (Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count() < MatchmakerAcceptPatches.ReconnectPacket.Value.PlayerCount);
+                }
+                await Task.Delay(1000);
                 MatchmakerAcceptPatches.SpawnedPlayersComplete = true;
             }
         }

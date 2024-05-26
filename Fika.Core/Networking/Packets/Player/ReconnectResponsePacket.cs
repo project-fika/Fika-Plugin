@@ -8,7 +8,7 @@ namespace Fika.Core.Networking
 {
     public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, EPlayerPose playerPose, float poseLevel,
     bool isProne, WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes
-    , PlayerInfoPacket profile, LootItemPositionClass[] items) : INetSerializable
+    , PlayerInfoPacket profile, LootItemPositionClass[] items, int playerCount) : INetSerializable
     {
         public int NetId;
         public Vector3 Position;
@@ -27,6 +27,7 @@ namespace Fika.Core.Networking
         public PlayerInfoPacket Profile;
         public int ItemAmount;
         public GClass1211 Items;
+        public int PlayerCount;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -82,6 +83,7 @@ namespace Fika.Core.Networking
 
             Profile = PlayerInfoPacket.Deserialize(reader);
             Items = reader.GetLocationItem();
+            PlayerCount = reader.GetInt();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -138,6 +140,8 @@ namespace Fika.Core.Networking
             {
                 writer.PutLocationItem(items);
             }
+
+            writer.Put(playerCount);
         }
     }
 }
