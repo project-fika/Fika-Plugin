@@ -892,7 +892,6 @@ namespace Fika.Core.Networking
         public struct ShotInfoPacket()
         {
 
-            public bool IsPrimaryActive = true;
             public EShotType ShotType = EShotType.Unknown;
             public int AmmoAfterShot = 0;
             public Vector3 ShotPosition = Vector3.zero;
@@ -910,7 +909,6 @@ namespace Fika.Core.Networking
             {
                 ShotInfoPacket packet = new()
                 {
-                    IsPrimaryActive = reader.GetBool(),
                     ShotType = (EShotType)reader.GetInt(),
                     AmmoAfterShot = reader.GetInt(),
                     ShotPosition = reader.GetVector3(),
@@ -929,7 +927,6 @@ namespace Fika.Core.Networking
             }
             public static void Serialize(NetDataWriter writer, ShotInfoPacket packet)
             {
-                writer.Put(packet.IsPrimaryActive);
                 writer.Put((int)packet.ShotType);
                 writer.Put(packet.AmmoAfterShot);
                 writer.Put(packet.ShotPosition);
