@@ -93,15 +93,34 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             await NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
 
-			ISession session = CurrentSession;
+            ISession session = CurrentSession;
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
 
-			if (MatchmakerAcceptPatches.IsReconnect)
-			{
-				profile = await GetReconnectProfile(profile.Id);
-			}
+            if (MatchmakerAcceptPatches.IsReconnect)
+            {
+                profile = await GetReconnectProfile(profile.Id);
+                // Load bundles of this new profile, Game originally does this in method_38 which is before this
+                await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
+                PoolManager.AssemblyType.Local,
+                profile.GetAllPrefabPaths(true).ToArray(),
+                JobPriority.General).ContinueWith(x =>
+                {
+                    if (x.IsCompleted)
+                    {
+                        Logger.LogDebug($"SpawnPlayer::{profile.Info.Nickname}::Load Complete");
+                    }
+                    else if (x.IsFaulted)
+                    {
+                        Logger.LogError($"SpawnPlayer::{profile.Info.Nickname}::Load Failed");
+                    }
+                    else if (x.IsCanceled)
+                    {
+                        Logger.LogError($"SpawnPlayer::{profile.Info.Nickname}::Load Cancelled");
+                    }
+                });
+            }
 
-			profile.Inventory.Stash = null;
+            profile.Inventory.Stash = null;
             profile.Inventory.QuestStashItems = null;
             profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();
 
@@ -148,32 +167,32 @@ namespace Fika.Core.Coop.Patches.LocalGame
             __result = Task.WhenAll(finishTask);
         }
 
-		private static async Task<Profile> GetReconnectProfile(string profileId)
-		{
-			ReconnectRequestPacket reconnectPacket = new(profileId);
-			MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Sending Reconnect Request...");
+        private static async Task<Profile> GetReconnectProfile(string profileId)
+        {
+            ReconnectRequestPacket reconnectPacket = new(profileId);
+            MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Sending Reconnect Request...");
 
-			int retryCount = 0;
-			while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
-			{
-				Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref reconnectPacket, DeliveryMethod.ReliableUnordered);
-				MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
-				await Task.Delay(3000);
-				retryCount++;
-			}
+            int retryCount = 0;
+            while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
+            {
+                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref reconnectPacket, DeliveryMethod.ReliableUnordered);
+                MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
+                await Task.Delay(3000);
+                retryCount++;
+            }
 
-			if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
-			{
-				MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Failed to Reconnect...");
-				throw new Exception("Failed to Reconnect");
-			}
+            if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
+            {
+                MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Failed to Reconnect...");
+                throw new Exception("Failed to Reconnect");
+            }
 
-			MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Reconnecting to host...");
-			 
-			return MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
-		}
+            MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Reconnecting to host...");
 
-		private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController)
+            return MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
+        }
+
+        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController)
         {
             private readonly TarkovApplication tarkovApplication = tarkovApplication;
             private readonly Profile pmcProfile = pmcProfile;

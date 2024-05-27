@@ -405,7 +405,7 @@ namespace Fika.Core.UI.Custom
                             tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
                         }
                         break;
-                    case LobbyEntry.ELobbyStatus.REJOIN:                        
+                    case LobbyEntry.ELobbyStatus.REJOIN:
                         tooltipTextGetter = new()
                         {
                             TooltipText = "Click to Rejoin raid."

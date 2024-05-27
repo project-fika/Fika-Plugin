@@ -878,7 +878,7 @@ namespace Fika.Core.Networking
 
             // Test, remove if does nothing
             Profile profileToUse = playerToUse.Profile;
-            profileToUse.Inventory.Equipment = playerToUse.Equipment;
+            profileToUse.Inventory = playerToUse.Inventory;
 
             ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
