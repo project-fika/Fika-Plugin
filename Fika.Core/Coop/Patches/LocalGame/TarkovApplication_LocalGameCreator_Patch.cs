@@ -1,19 +1,26 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
+using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using SPT.Reflection.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {
@@ -84,11 +91,17 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
             }
 
-            ISession session = CurrentSession;
+            await NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
 
+			ISession session = CurrentSession;
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
 
-            profile.Inventory.Stash = null;
+			if (MatchmakerAcceptPatches.IsReconnect)
+			{
+				profile = await GetReconnectProfile(profile.Id);
+			}
+
+			profile.Inventory.Stash = null;
             profile.Inventory.QuestStashItems = null;
             profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();
 
@@ -116,7 +129,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
             TimeSpan raidLimits = __instance.method_48(____raidSettings.SelectedLocation.EscapeTimeLimit);
 
             CoopGame coopGame = CoopGame.Create(____inputTree, profile, ____localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
-                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
+                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStop),
                 ____fixedDeltaTime, EUpdateQueue.Update, session, raidLimits, ____raidSettings);
 
             Singleton<AbstractGame>.Create(coopGame);
@@ -135,7 +148,32 @@ namespace Fika.Core.Coop.Patches.LocalGame
             __result = Task.WhenAll(finishTask);
         }
 
-        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController)
+		private static async Task<Profile> GetReconnectProfile(string profileId)
+		{
+			ReconnectRequestPacket reconnectPacket = new(profileId);
+			MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Sending Reconnect Request...");
+
+			int retryCount = 0;
+			while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
+			{
+				Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref reconnectPacket, DeliveryMethod.ReliableUnordered);
+				MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
+				await Task.Delay(3000);
+				retryCount++;
+			}
+
+			if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
+			{
+				MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Failed to Reconnect...");
+				throw new Exception("Failed to Reconnect");
+			}
+
+			MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Reconnecting to host...");
+			 
+			return MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
+		}
+
+		private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController)
         {
             private readonly TarkovApplication tarkovApplication = tarkovApplication;
             private readonly Profile pmcProfile = pmcProfile;
@@ -143,7 +181,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
             private readonly LocationSettingsClass.Location location = location;
             private readonly MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController = timeHasComeScreenController;
 
-            public void HandleStart(Result<ExitStatus, TimeSpan, MetricsClass> result)
+            public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
             {
                 tarkovApplication.method_50(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
             }

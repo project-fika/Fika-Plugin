@@ -39,12 +39,12 @@ namespace Fika.Core.Networking
         private NetManager _netServer;
         public NetPacketProcessor packetProcessor = new();
         private readonly NetDataWriter _dataWriter = new();
-        public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-        public Dictionary<int, CoopPlayer> Players => CoopHandler.Players;
+        public CoopPlayer MyPlayer;
+        public Dictionary<int, CoopPlayer> Players => coopHandler.Players;
         public List<string> PlayersMissing = [];
         public string MyExternalIP { get; private set; } = NetUtils.GetLocalIp(LocalAddrType.IPv4);
         private int Port => FikaPlugin.UDPPort.Value;
-        private CoopHandler CoopHandler { get; set; }
+        private CoopHandler coopHandler;
         public int ReadyClients = 0;
         public NetManager NetServer
         {
@@ -175,13 +175,29 @@ namespace Fika.Core.Networking
             return netId;
         }
 
+        public void SetupGameVariables(CoopPlayer coopPlayer)
+        {
+            //if (Singleton<GameWorld>.Instance != null && Singleton<IBotGame>.Instance != null)
+            //{
+            //    coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
+            //    MyPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            //}
+            //else
+            //{
+            //    serverLogger.LogWarning("Required instances were null when setting up game variables!");
+            //}
+
+			coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
+            MyPlayer = coopPlayer;
+		}
+
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
         {
             int netId = PopNetId();
             packet.netId = netId;
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
-                CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
+                coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
             }
 
             _dataWriter.Reset();
@@ -232,21 +248,21 @@ namespace Fika.Core.Networking
 
         private void OnBTRServicePacketReceived(BTRServicePacket packet, NetPeer peer)
         {
-            if (CoopHandler.serverBTR != null)
+            if (coopHandler.serverBTR != null)
             {
-                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
+                coopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
             }
         }
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
         {
-            if (CoopHandler.serverBTR != null)
+            if (coopHandler.serverBTR != null)
             {
                 if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
                 {
-                    if (CoopHandler.serverBTR.CanPlayerEnter(player))
+                    if (coopHandler.serverBTR.CanPlayerEnter(player))
                     {
-                        CoopHandler.serverBTR.HostObservedInteraction(player, packet.InteractPacket);
+                        coopHandler.serverBTR.HostObservedInteraction(player, packet.InteractPacket);
 
                         _dataWriter.Reset();
                         SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered);
@@ -332,13 +348,13 @@ namespace Fika.Core.Networking
         {
             if (packet.PacketType == EPackageType.ClientExtract)
             {
-                if (CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+                if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                 {
-                    CoopHandler.Players.Remove(packet.NetId);
-                    if (!CoopHandler.ExtractedPlayers.Contains(packet.NetId))
+                    coopHandler.Players.Remove(packet.NetId);
+                    if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
                     {
-                        CoopHandler.ExtractedPlayers.Add(packet.NetId);
-                        CoopGame coopGame = (CoopGame)CoopHandler.LocalGameInstance;
+                        coopHandler.ExtractedPlayers.Add(packet.NetId);
+                        CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
                         coopGame.ExtractedPlayers.Add(packet.NetId);
                         coopGame.ClearHostAI(playerToApply);
 
@@ -423,7 +439,7 @@ namespace Fika.Core.Networking
         {
             if (packet.IsRequest)
             {
-                foreach (CoopPlayer player in CoopHandler.Players.Values)
+                foreach (CoopPlayer player in coopHandler.Players.Values)
                 {
                     if (player.ProfileId == packet.ProfileId)
                     {
@@ -451,7 +467,7 @@ namespace Fika.Core.Networking
                     SendDataToPeer(peer, _dataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            if (!Players.ContainsKey(packet.NetId) && !PlayersMissing.Contains(packet.ProfileId) && !CoopHandler.ExtractedPlayers.Contains(packet.NetId))
+            if (!Players.ContainsKey(packet.NetId) && !PlayersMissing.Contains(packet.ProfileId) && !coopHandler.ExtractedPlayers.Contains(packet.NetId))
             {
                 PlayersMissing.Add(packet.ProfileId);
                 serverLogger.LogInfo($"Requesting missing player from server.");
@@ -464,7 +480,7 @@ namespace Fika.Core.Networking
                 serverLogger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
-                    CoopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
+                    coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
                     PlayersMissing.Remove(packet.ProfileId);
                 }
             }
@@ -621,11 +637,6 @@ namespace Fika.Core.Networking
 
             _dataWriter.Reset();
             SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);
-        }
-
-        protected void Awake()
-        {
-            CoopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
         }
 
         void Update()
@@ -787,8 +798,18 @@ namespace Fika.Core.Networking
 
         private void OnConditionChangedPacketReceived(ConditionChangePacket packet, NetPeer peer)
         {
-            Players.FirstOrDefault(x => x.Key == packet.NetId).Value.Profile.TaskConditionCounters
-                .FirstOrDefault(c => c.Key == packet.ConditionId).Value.Value = (int)packet.ConditionValue;
+            /*Players.FirstOrDefault(x => x.Key == packet.NetId).Value.Profile.TaskConditionCounters
+                .FirstOrDefault(c => c.Key == packet.ConditionId).Value.Value = (int)packet.ConditionValue;*/
+            if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            {
+                foreach (KeyValuePair<string, GClass3236> taskConditionCounter in player.Profile.TaskConditionCounters)
+                {
+                    if (taskConditionCounter.Key == packet.ConditionId)
+                    {
+                        taskConditionCounter.Value.Value = (int)packet.ConditionValue;
+                    }
+                }
+            }
         }
 
         private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
@@ -803,6 +824,7 @@ namespace Fika.Core.Networking
             {
                 yield return null;
             }
+
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             ClientGameWorld ClientgameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
@@ -812,7 +834,16 @@ namespace Fika.Core.Networking
                 yield return null;
             }
 
-            ObservedCoopPlayer playerToUse = (ObservedCoopPlayer)Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;
+            /*ObservedCoopPlayer playerToUse = (ObservedCoopPlayer)Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;*/
+            ObservedCoopPlayer playerToUse = null;
+
+            foreach (CoopPlayer coopPlayer in Players.Values)
+            {
+                if (coopPlayer.ProfileId == packet.ProfileId)
+                {
+                    playerToUse = (ObservedCoopPlayer)coopPlayer;
+                }
+            }
 
             if (playerToUse == null)
             {
@@ -829,7 +860,7 @@ namespace Fika.Core.Networking
             Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
 
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray(); // will ignore corpses
-            // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
+                                                                                                                        // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
 
             Profile.GClass1766 health = playerToUse.NetworkHealthController.Store(null);
             GClass2428.GClass2431[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
@@ -843,7 +874,7 @@ namespace Fika.Core.Networking
 
                 if (health.BodyParts[effect.BodyPart].Effects == null)
                 {
-                    health.BodyParts[effect.BodyPart].Effects = new Dictionary<string, Profile.GClass1766.GClass1767>();
+                    health.BodyParts[effect.BodyPart].Effects = [];
                 }
 
                 if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface250)
@@ -855,10 +886,14 @@ namespace Fika.Core.Networking
             playerToUse.Profile.Health = health;
             playerToUse.Profile.Info.EntryPoint = coopGame.InfiltrationPoint;
 
+            // Test, remove if does nothing
+            Profile profileToUse = playerToUse.Profile;
+            profileToUse.Inventory.Equipment = playerToUse.Equipment;
+
             ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
                 interactiveObjects, windows, lights, smokes,
-                new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile }, items, gameWorld.AllPlayersEverExisted.Count());
+                new FikaSerialization.PlayerInfoPacket() { Profile = profileToUse }, items, gameWorld.AllPlayersEverExisted.Count());
 
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
