@@ -65,7 +65,6 @@ namespace Fika.Core.Coop.GameMode
         public ISpawnSystem SpawnSystem;
 
         public Dictionary<string, Player> Bots = [];
-        private CoopExfilManager exfilManager;
         private GameObject fikaStartButton;
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
@@ -76,6 +75,8 @@ namespace Fika.Core.Coop.GameMode
         private NonWavesSpawnScenario nonWavesSpawnScenario_0;
         private Func<Player, EftGamePlayerOwner> func_1;
         private bool hasSaved = false;
+        private CoopExfilManager exfilManager;
+        private CoopTimeManager timeManager;
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
@@ -144,6 +145,20 @@ namespace Fika.Core.Coop.GameMode
 
             Singleton<IFikaGame>.Create(coopGame);
             FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
+
+            EndByExitTrigerScenario endByExitTrigger = coopGame.GetComponent<EndByExitTrigerScenario>();
+            EndByTimerScenario endByTimerScenario = coopGame.GetComponent<EndByTimerScenario>();
+
+            if (endByExitTrigger != null)
+            {
+                Destroy(endByExitTrigger);
+            }
+            if (endByTimerScenario != null)
+            {
+                Destroy(endByTimerScenario);
+            }
+
+            coopGame.timeManager = CoopTimeManager.Create(coopGame);
 
             coopGame.RaidSettings = raidSettings;
 
@@ -535,6 +550,9 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override IEnumerator vmethod_1()
         {
+            CoopPlayer coopPlayer = (CoopPlayer)PlayerOwner.Player;
+            coopPlayer.PacketSender.Init();
+
             int timeBeforeDeployLocal = Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
             DateTime dateTime = GClass1304.Now.AddSeconds(timeBeforeDeployLocal);
             new MatchmakerFinalCountdown.GClass3181(Profile_0, dateTime).ShowScreen(EScreenState.Root);
@@ -774,6 +792,8 @@ namespace Fika.Core.Coop.GameMode
             GameObject customButton = null;
             GameObject customButtonStart = null;
 
+            await NetManagerUtils.SetupGameVariables(MatchmakerAcceptPatches.IsServer, coopPlayer);
+
             // This creates a "custom" Back button so that we can back out if we get stuck
             if (MenuUI.Instantiated)
             {
@@ -886,10 +906,9 @@ namespace Fika.Core.Coop.GameMode
 
         private void MainPlayerDied(EDamageType obj)
         {
-            EndByTimerScenario endByTimerScenario = GetComponent<EndByTimerScenario>();
-            if (endByTimerScenario != null)
+            if (timeManager != null)
             {
-                Destroy(endByTimerScenario);
+                Destroy(timeManager);
             }
             if (GameUi.TimerPanel.enabled)
             {
@@ -1493,6 +1512,11 @@ namespace Fika.Core.Coop.GameMode
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
 
+            if (MyExitStatus == ExitStatus.MissingInAction)
+            {
+                NotificationManagerClass.DisplayMessageNotification("You have gone missing in action...", iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
+            }
+
             if (point != null)
             {
                 point.Disable();
@@ -1557,10 +1581,9 @@ namespace Fika.Core.Coop.GameMode
             GClass3126.Instance.CloseAllScreensForced();
 
             // Detroys session timer
-            EndByTimerScenario endByTimerScenario = GetComponent<EndByTimerScenario>();
-            if (endByTimerScenario != null)
+            if (timeManager != null)
             {
-                Destroy(endByTimerScenario);
+                Destroy(timeManager);
             }
             if (GameUi.TimerPanel.enabled)
             {
@@ -1749,24 +1772,13 @@ namespace Fika.Core.Coop.GameMode
             }
 
             ExitManager stopManager = new(this, exitStatus, exitName, delay, myPlayer);
-
-            EndByExitTrigerScenario endByExitTrigger = GetComponent<EndByExitTrigerScenario>();
-            EndByTimerScenario endByTimerScenario = GetComponent<EndByTimerScenario>();
+            
             GameUI gameUI = GameUI.Instance;
-
-            if (endByTimerScenario != null)
-            {
-                if (Status == GameStatus.Starting || Status == GameStatus.Started)
-                {
-                    endByTimerScenario.GameStatus_0 = GameStatus.SoftStopping;
-                }
-            }
 
             exfilManager.Stop();
 
             Status = GameStatus.Stopping;
             GameTimer.TryStop();
-            endByExitTrigger.Stop();
             if (gameUI.TimerPanel.enabled)
             {
                 gameUI.TimerPanel.Close();
@@ -1886,17 +1898,7 @@ namespace Fika.Core.Coop.GameMode
                 delay = delay
             };
 
-            EndByExitTrigerScenario endByExitTrigger = GetComponent<EndByExitTrigerScenario>();
-            EndByTimerScenario endByTimerScenario = GetComponent<EndByTimerScenario>();
             GameUI gameUI = GameUI.Instance;
-
-            if (endByTimerScenario != null)
-            {
-                if (Status == GameStatus.Starting || Status == GameStatus.Started)
-                {
-                    endByTimerScenario.GameStatus_0 = GameStatus.SoftStopping;
-                }
-            }
 
             if (exfilManager != null)
             {
@@ -1907,10 +1909,6 @@ namespace Fika.Core.Coop.GameMode
             if (GameTimer != null)
             {
                 GameTimer.TryStop();
-            }
-            if (endByExitTrigger != null)
-            {
-                endByExitTrigger.Stop();
             }
             if (gameUI.TimerPanel.enabled)
             {

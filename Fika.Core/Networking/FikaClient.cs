@@ -119,19 +119,9 @@ namespace Fika.Core.Networking
 
         public void SetupGameVariables(CoopPlayer coopPlayer)
         {
-            //if (Singleton<GameWorld>.Instance != null && Singleton<IBotGame>.Instance != null)
-            //{
-            //    coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
-            //    MyPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            //}
-            //else
-            //{
-            //    clientLogger.LogWarning("Required instances were null when setting up game variables!");
-            //}
-
-			coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
+            coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             MyPlayer = coopPlayer;
-		}
+        }
 
         private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet)
         {

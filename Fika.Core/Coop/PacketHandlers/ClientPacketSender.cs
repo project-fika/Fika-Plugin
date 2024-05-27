@@ -33,7 +33,12 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             player = GetComponent<CoopPlayer>();
             Client = Singleton<FikaClient>.Instance;
+            enabled = false;
+        }
 
+        public void Init()
+        {
+            enabled = true;
             StartCoroutine(SyncWorld());
             StartCoroutine(SyncWeather());
         }

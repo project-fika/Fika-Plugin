@@ -7,6 +7,7 @@ using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
+using System.Security.Policy;
 using UnityEngine;
 
 namespace Fika.Core.Coop.PacketHandlers
@@ -37,6 +38,11 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 Client = Singleton<FikaClient>.Instance;
             }
+        }
+
+        public void Init()
+        {
+
         }
 
         protected void Update()

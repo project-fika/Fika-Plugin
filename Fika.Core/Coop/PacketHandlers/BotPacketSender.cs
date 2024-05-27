@@ -29,6 +29,11 @@ namespace Fika.Core.Coop.PacketHandlers
             player = GetComponent<CoopPlayer>();
         }
 
+        public void Init()
+        {
+
+        }
+
         protected void FixedUpdate()
         {
             if (!Enabled)
