@@ -5,10 +5,12 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using LiteNetLib;
 using SPT.Reflection.Patching;
 using System;
 using System.Linq;
@@ -84,6 +86,8 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
             }
 
+            await NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
+
             ISession session = CurrentSession;
 
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
@@ -116,7 +120,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
             TimeSpan raidLimits = __instance.method_48(____raidSettings.SelectedLocation.EscapeTimeLimit);
 
             CoopGame coopGame = CoopGame.Create(____inputTree, profile, ____localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
-                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStart),
+                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStop),
                 ____fixedDeltaTime, EUpdateQueue.Update, session, raidLimits, ____raidSettings);
 
             Singleton<AbstractGame>.Create(coopGame);
@@ -143,7 +147,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
             private readonly LocationSettingsClass.Location location = location;
             private readonly MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController = timeHasComeScreenController;
 
-            public void HandleStart(Result<ExitStatus, TimeSpan, MetricsClass> result)
+            public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
             {
                 tarkovApplication.method_50(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
             }

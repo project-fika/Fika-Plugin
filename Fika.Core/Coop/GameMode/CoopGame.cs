@@ -23,6 +23,7 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
@@ -192,7 +193,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public async Task CreateCoopHandler()
+        public Task CreateCoopHandler()
         {
             CoopHandler coopHandler = CoopHandler.GetCoopHandler();
             if (coopHandler != null)
@@ -226,26 +227,7 @@ namespace Fika.Core.Coop.GameMode
                 throw new Exception("No Server Id found");
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                FikaServer server = gameObject.AddComponent<FikaServer>();
-
-                while (!server.ServerReady)
-                {
-                    await Task.Delay(100);
-                }
-                Logger.LogInfo("FikaServer has started!");
-            }
-            else if (MatchmakerAcceptPatches.IsClient)
-            {
-                FikaClient client = gameObject.AddComponent<FikaClient>();
-
-                while (!client.ClientReady)
-                {
-                    await Task.Delay(100);
-                }
-                Logger.LogInfo("FikaClient has started!");
-            }
+            return Task.CompletedTask;
         }
 
         private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
@@ -567,6 +549,9 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override IEnumerator vmethod_1()
         {
+            CoopPlayer coopPlayer = (CoopPlayer)PlayerOwner.Player;
+            coopPlayer.PacketSender.Init();
+
             int timeBeforeDeployLocal = Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
             DateTime dateTime = GClass1304.Now.AddSeconds(timeBeforeDeployLocal);
             new MatchmakerFinalCountdown.GClass3181(Profile_0, dateTime).ShowScreen(EScreenState.Root);
@@ -765,12 +750,13 @@ namespace Fika.Core.Coop.GameMode
             await CreateCoopHandler();
             CoopHandler.GetCoopHandler().LocalGameInstance = this;
 
+            profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
+
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 GClass548.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1455(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, statisticsManager);
 
-            profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
@@ -794,6 +780,8 @@ namespace Fika.Core.Coop.GameMode
 
             GameObject customButton = null;
             GameObject customButtonStart = null;
+
+            await NetManagerUtils.SetupGameVariables(MatchmakerAcceptPatches.IsServer, coopPlayer);
 
             // This creates a "custom" Back button so that we can back out if we get stuck
             if (MenuUI.Instantiated)
@@ -1936,9 +1924,6 @@ namespace Fika.Core.Coop.GameMode
                 CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                 coopPlayer.PacketSender.DestroyThis();
 
-                Singleton<FikaServer>.Instance.NetServer.Stop();
-                Singleton<FikaServer>.TryRelease(Singleton<FikaServer>.Instance);
-
                 FikaDynamicAI newDynamicAI = gameObject.GetComponent<FikaDynamicAI>();
                 if (newDynamicAI != null)
                 {
@@ -1950,12 +1935,11 @@ namespace Fika.Core.Coop.GameMode
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
-                Singleton<FikaClient>.Instance.NetClient.Stop();
-                Singleton<FikaClient>.TryRelease(Singleton<FikaClient>.Instance);
-
                 // Resetting this array to null forces the game to re-allocate it if the client hosts the next session
                 typeof(BotsController).GetField("_allTypes", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance).SetValue(botsController_0, null);
             }
+
+            NetManagerUtils.DestroyNetManager(MatchmakerAcceptPatches.IsServer);
 
             MatchmakerAcceptPatches.Nodes = null;
             MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = 1;

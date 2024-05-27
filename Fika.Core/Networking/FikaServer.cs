@@ -38,12 +38,12 @@ namespace Fika.Core.Networking
         private NetManager _netServer;
         public NetPacketProcessor packetProcessor = new();
         private readonly NetDataWriter _dataWriter = new();
-        public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-        public Dictionary<int, CoopPlayer> Players => CoopHandler.Players;
+        public CoopPlayer MyPlayer;
+        public Dictionary<int, CoopPlayer> Players => coopHandler.Players;
         public List<string> PlayersMissing = [];
         public string MyExternalIP { get; private set; } = NetUtils.GetLocalIp(LocalAddrType.IPv4);
         private int Port => FikaPlugin.UDPPort.Value;
-        private CoopHandler CoopHandler { get; set; }
+        private CoopHandler coopHandler;
         public int ReadyClients = 0;
         public NetManager NetServer
         {
@@ -172,13 +172,19 @@ namespace Fika.Core.Networking
             return netId;
         }
 
+        public void SetupGameVariables(CoopPlayer coopPlayer)
+        {
+            coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
+            MyPlayer = coopPlayer;
+        }
+
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
         {
             int netId = PopNetId();
             packet.netId = netId;
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
-                CoopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
+                coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
             }
 
             _dataWriter.Reset();
@@ -229,21 +235,21 @@ namespace Fika.Core.Networking
 
         private void OnBTRServicePacketReceived(BTRServicePacket packet, NetPeer peer)
         {
-            if (CoopHandler.serverBTR != null)
+            if (coopHandler.serverBTR != null)
             {
-                CoopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
+                coopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
             }
         }
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
         {
-            if (CoopHandler.serverBTR != null)
+            if (coopHandler.serverBTR != null)
             {
                 if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
                 {
-                    if (CoopHandler.serverBTR.CanPlayerEnter(player))
+                    if (coopHandler.serverBTR.CanPlayerEnter(player))
                     {
-                        CoopHandler.serverBTR.HostObservedInteraction(player, packet.InteractPacket);
+                        coopHandler.serverBTR.HostObservedInteraction(player, packet.InteractPacket);
 
                         _dataWriter.Reset();
                         SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered);
@@ -329,13 +335,13 @@ namespace Fika.Core.Networking
         {
             if (packet.PacketType == EPackageType.ClientExtract)
             {
-                if (CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+                if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                 {
-                    CoopHandler.Players.Remove(packet.NetId);
-                    if (!CoopHandler.ExtractedPlayers.Contains(packet.NetId))
+                    coopHandler.Players.Remove(packet.NetId);
+                    if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
                     {
-                        CoopHandler.ExtractedPlayers.Add(packet.NetId);
-                        CoopGame coopGame = (CoopGame)CoopHandler.LocalGameInstance;
+                        coopHandler.ExtractedPlayers.Add(packet.NetId);
+                        CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
                         coopGame.ExtractedPlayers.Add(packet.NetId);
                         coopGame.ClearHostAI(playerToApply);
 
@@ -420,7 +426,7 @@ namespace Fika.Core.Networking
         {
             if (packet.IsRequest)
             {
-                foreach (CoopPlayer player in CoopHandler.Players.Values)
+                foreach (CoopPlayer player in coopHandler.Players.Values)
                 {
                     if (player.ProfileId == packet.ProfileId)
                     {
@@ -448,7 +454,7 @@ namespace Fika.Core.Networking
                     SendDataToPeer(peer, _dataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            if (!Players.ContainsKey(packet.NetId) && !PlayersMissing.Contains(packet.ProfileId) && !CoopHandler.ExtractedPlayers.Contains(packet.NetId))
+            if (!Players.ContainsKey(packet.NetId) && !PlayersMissing.Contains(packet.ProfileId) && !coopHandler.ExtractedPlayers.Contains(packet.NetId))
             {
                 PlayersMissing.Add(packet.ProfileId);
                 serverLogger.LogInfo($"Requesting missing player from server.");
@@ -461,7 +467,7 @@ namespace Fika.Core.Networking
                 serverLogger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
-                    CoopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
+                    coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
                     PlayersMissing.Remove(packet.ProfileId);
                 }
             }
@@ -618,11 +624,6 @@ namespace Fika.Core.Networking
 
             _dataWriter.Reset();
             SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);
-        }
-
-        protected void Awake()
-        {
-            CoopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
         }
 
         void Update()

@@ -38,10 +38,12 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
             player = GetComponent<CoopPlayer>();
+            enabled = false;
         }
 
-        protected void Start()
+        public void Init()
         {
+            enabled = true;
             StartCoroutine(SendTrainTime());
         }
 
