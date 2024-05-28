@@ -28,6 +28,7 @@ using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.Progression;
 using SPT.SinglePlayer.Patches.Quests;
 using SPT.SinglePlayer.Patches.RaidFix;
+using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -459,6 +460,7 @@ namespace Fika.Core
             new ArmorDamageCounterPatch().Disable();
             new DogtagPatch().Disable();
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
+            new ScavRepAdjustmentPatch().Disable();
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();

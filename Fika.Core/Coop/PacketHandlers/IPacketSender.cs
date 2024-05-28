@@ -18,6 +18,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; }
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; }
 
+        public void Init();
         public void DestroyThis();
     }
 }
