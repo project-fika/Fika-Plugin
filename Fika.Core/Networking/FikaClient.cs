@@ -55,9 +55,8 @@ namespace Fika.Core.Networking
         public int Port { get; private set; }
         public bool SpawnPointsReceived { get; private set; } = false;
         private readonly ManualLogSource clientLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
-        public bool ClientReady = false;
 
-        protected void Start()
+        public void Init()
         {
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
@@ -112,9 +111,7 @@ namespace Fika.Core.Networking
                 ServerConnection = _netClient.Connect(IP, Port, "fika.core");
             };
 
-            Singleton<FikaClient>.Create(this);
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
-            ClientReady = true;
         }
 
         public void SetupGameVariables(CoopPlayer coopPlayer)
@@ -691,12 +688,12 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            _netClient.PollEvents();
+            _netClient?.PollEvents();
 
-            if (_netClient.FirstPeer == null)
+            /*if (_netClient.FirstPeer == null)
             {
                 _netClient.SendBroadcast([1], Port);
-            }
+            }*/
         }
 
         protected void OnDestroy()

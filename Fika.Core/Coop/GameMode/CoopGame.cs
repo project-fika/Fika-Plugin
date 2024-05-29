@@ -77,6 +77,7 @@ namespace Fika.Core.Coop.GameMode
         private bool hasSaved = false;
         private CoopExfilManager exfilManager;
         private CoopTimeManager timeManager;
+        private bool isServer;
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
@@ -124,6 +125,8 @@ namespace Fika.Core.Coop.GameMode
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
                 new TimeSpan?(sessionTime));
 
+            coopGame.isServer = MatchmakerAcceptPatches.IsServer;
+
             // Non Waves Scenario setup
             coopGame.nonWavesSpawnScenario_0 = NonWavesSpawnScenario.smethod_0(coopGame, location, coopGame.botsController_0);
             coopGame.nonWavesSpawnScenario_0.ImplementWaveSettings(wavesSettings);
@@ -135,7 +138,7 @@ namespace Fika.Core.Coop.GameMode
             BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.GClass579 = GClass579.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
-            if (useCustomWeather && MatchmakerAcceptPatches.IsServer)
+            if (useCustomWeather && coopGame.isServer)
             {
                 Logger.LogInfo("Custom weather enabled, initializing curves");
                 coopGame.SetupCustomWeather(timeAndWeather);
@@ -324,7 +327,7 @@ namespace Fika.Core.Coop.GameMode
 #if DEBUG
             Logger.LogWarning($"Creating bot {profile.Info.Settings.Role} at {position}");
 #endif
-            if (MatchmakerAcceptPatches.IsClient)
+            if (!isServer)
             {
                 return null;
             }
@@ -571,7 +574,7 @@ namespace Fika.Core.Coop.GameMode
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (MatchmakerAcceptPatches.IsServer && MatchmakerAcceptPatches.HostExpectedNumberOfPlayers <= 1)
+                if (isServer && MatchmakerAcceptPatches.HostExpectedNumberOfPlayers <= 1)
                 {
                     if (fikaStartButton != null)
                     {
@@ -605,7 +608,7 @@ namespace Fika.Core.Coop.GameMode
                     fikaStartButton.SetActive(true);
                 }
 
-                if (MatchmakerAcceptPatches.IsServer)
+                if (isServer)
                 {
                     SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
                     Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
@@ -648,7 +651,7 @@ namespace Fika.Core.Coop.GameMode
                         DynamicAI.AddHumans();
                     }
                 }
-                else if (MatchmakerAcceptPatches.IsClient)
+                else
                 {
                     do
                     {
@@ -678,7 +681,7 @@ namespace Fika.Core.Coop.GameMode
 
         private async Task SendOrReceiveSpawnPoint()
         {
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
                 UpdateSpawnPointRequest body = new(spawnTogether ? spawnPoint.Id : "");
@@ -693,7 +696,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 await FikaRequestHandler.UpdateSpawnPoint(body);
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else
             {
                 SpawnPointRequest body = new();
                 SpawnPointResponse response = await FikaRequestHandler.RaidSpawnPoint(body);
@@ -758,8 +761,9 @@ namespace Fika.Core.Coop.GameMode
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 GClass548.Config.CharacterController.ClientPlayerMode, getSensitivity,
-                getAimingSensitivity, new GClass1455(), MatchmakerAcceptPatches.IsServer ? 0 : 1000, statisticsManager);
+                getAimingSensitivity, new GClass1455(), isServer ? 0 : 1000, statisticsManager);
 
+            await NetManagerUtils.InitNetManager(isServer);
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
@@ -792,7 +796,7 @@ namespace Fika.Core.Coop.GameMode
             GameObject customButton = null;
             GameObject customButtonStart = null;
 
-            await NetManagerUtils.SetupGameVariables(MatchmakerAcceptPatches.IsServer, coopPlayer);
+            await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
 
             // This creates a "custom" Back button so that we can back out if we get stuck
             if (MenuUI.Instantiated)
@@ -819,7 +823,7 @@ namespace Fika.Core.Coop.GameMode
                 });
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
 
-                if (MatchmakerAcceptPatches.IsServer)
+                if (isServer)
                 {
                     DefaultUIButton startButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field("_cancelButton").GetValue<DefaultUIButton>();
                     customButtonStart = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
@@ -863,29 +867,13 @@ namespace Fika.Core.Coop.GameMode
             {
                 SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
-                if (MatchmakerAcceptPatches.IsServer)
-                {
-                    await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-                }
-                else
-                {
-                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
-                }
-            }
-
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
-                while (!Singleton<FikaServer>.Instantiated && !Singleton<FikaServer>.Instance.ServerReady)
-                {
-                    await Task.Delay(100);
-                }
+                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else
             {
-                while (!Singleton<FikaClient>.Instantiated && !Singleton<FikaClient>.Instance.ClientReady)
-                {
-                    await Task.Delay(100);
-                }
+                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
             }
 
             await NetManagerUtils.SetupGameVariables(MatchmakerAcceptPatches.IsServer, coopPlayer);
@@ -998,7 +986,7 @@ namespace Fika.Core.Coop.GameMode
             GStruct380 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
             SpawnSystem = GClass2946.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 await SendOrReceiveSpawnPoint();
@@ -1006,7 +994,7 @@ namespace Fika.Core.Coop.GameMode
                 MatchmakerAcceptPatches.ReconnectPacket = null;
             }
 
-            if (MatchmakerAcceptPatches.IsClient)
+            if (!isServer)
             {
                 await SendOrReceiveSpawnPoint();
                 if (spawnPoint == null)
@@ -1039,13 +1027,8 @@ namespace Fika.Core.Coop.GameMode
             }
             int numbersOfPlayersToWaitFor = 0;
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
-                while (!Singleton<FikaServer>.Instantiated && !Singleton<FikaServer>.Instance.ServerReady)
-                {
-                    await Task.Delay(100);
-                }
-
                 FikaServer server = Singleton<FikaServer>.Instance;
 
                 do
@@ -1069,13 +1052,8 @@ namespace Fika.Core.Coop.GameMode
                     await Task.Delay(100);
                 } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else
             {
-                while (!Singleton<FikaClient>.Instantiated && !Singleton<FikaClient>.Instance.ClientReady)
-                {
-                    await Task.Delay(100);
-                }
-
                 FikaClient client = Singleton<FikaClient>.Instance;
 
                 while (client.NetClient == null)
@@ -1166,12 +1144,12 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogWarning("CoopGame::vmethod_4");
 #endif
 
-            if (MatchmakerAcceptPatches.IsClient)
+            if (!isServer)
             {
                 controllerSettings.BotAmount = EBotAmount.NoBots;
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 BotsPresets profileCreator = new(BackEndSession, wavesSpawnScenario_0.SpawnWaves, GClass579.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1477_0, false);
 
@@ -1197,7 +1175,7 @@ namespace Fika.Core.Coop.GameMode
                     _ => 0,
                 };
 
-                if (MatchmakerAcceptPatches.IsClient)
+                if (!isServer)
                 {
                     numberOfBots = 0;
                 }
@@ -1231,7 +1209,7 @@ namespace Fika.Core.Coop.GameMode
 
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else
             {
                 BotsPresets profileCreator = new(BackEndSession, [], [], [], false);
 
@@ -1268,14 +1246,14 @@ namespace Fika.Core.Coop.GameMode
 
             yield return WaitForOtherPlayers();
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 while (Singleton<FikaServer>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart)
                 {
                     yield return new WaitForEndOfFrame();
                 }
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else
             {
                 while (Singleton<FikaClient>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart)
                 {
@@ -1283,7 +1261,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 if (Location_0.OldSpawn && wavesSpawnScenario_0.SpawnWaves != null && wavesSpawnScenario_0.SpawnWaves.Length != 0)
                 {
@@ -1367,14 +1345,14 @@ namespace Fika.Core.Coop.GameMode
                 gameWorld.BorderZones[i].Id = i;
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 foreach (BorderZone borderZone in gameWorld.BorderZones)
                 {
                     borderZone.PlayerShotEvent += OnBorderZoneShot;
                 }
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else
             {
                 foreach (BorderZone borderZone in gameWorld.BorderZones)
                 {
@@ -1404,11 +1382,11 @@ namespace Fika.Core.Coop.GameMode
             {
                 MinePositon = directional.transform.position
             };
-            if (MatchmakerAcceptPatches.IsClient)
+            if (!isServer)
             {
                 Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
             }
-            else if (MatchmakerAcceptPatches.IsServer)
+            else
             {
                 Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
             }
@@ -1432,7 +1410,7 @@ namespace Fika.Core.Coop.GameMode
             Profile_0.Info.EntryPoint = InfiltrationPoint;
             Logger.LogDebug("SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint);
 
-            if (MatchmakerAcceptPatches.IsClient)
+            if (!isServer)
             {
                 CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
                 if (carExtraction != null)
@@ -1441,7 +1419,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0.exits, MatchmakerAcceptPatches.IsClient, "");
+            ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0.exits, !isServer, "");
             ExfiltrationPoint[] exfilPoints = ExfiltrationControllerClass.Instance.EligiblePoints(Profile_0);
 
             GameUi.TimerPanel.SetTime(GClass1304.UtcNow, Profile_0.Info.Side, GameTimer.SessionSeconds(), exfilPoints);
@@ -1462,11 +1440,11 @@ namespace Fika.Core.Coop.GameMode
                     {
                         if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                         {
-                            if (MatchmakerAcceptPatches.IsServer)
+                            if (isServer)
                             {
                                 coopHandler.serverBTR = gameWorld.gameObject.AddComponent<FikaBTRManager_Host>();
                             }
-                            else if (MatchmakerAcceptPatches.IsClient)
+                            else
                             {
                                 coopHandler.clientBTR = gameWorld.gameObject.AddComponent<FikaBTRManager_Client>();
                             }
@@ -1546,11 +1524,11 @@ namespace Fika.Core.Coop.GameMode
 
             try // This is to allow clients to extract if they lose connection
             {
-                if (MatchmakerAcceptPatches.IsClient)
+                if (!isServer)
                 {
                     Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 }
-                else if (MatchmakerAcceptPatches.IsServer)
+                else
                 {
                     Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     ClearHostAI(player);
@@ -1594,11 +1572,11 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.AutoExtract.Value)
             {
-                if (MatchmakerAcceptPatches.IsClient)
+                if (!isServer)
                 {
                     Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
                 }
-                else if (MatchmakerAcceptPatches.IsServer && Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0)
+                else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0)
                 {
                     Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
                 }
@@ -1709,7 +1687,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 botsController_0.Stop();
                 botsController_0.DestroyInfo(gparam_0.Player);
@@ -1957,7 +1935,7 @@ namespace Fika.Core.Coop.GameMode
                 StopCoroutine(extractRoutine);
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (isServer)
             {
                 CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                 coopPlayer.PacketSender.DestroyThis();
@@ -1971,13 +1949,13 @@ namespace Fika.Core.Coop.GameMode
                 FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
                 FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else
             {
                 // Resetting this array to null forces the game to re-allocate it if the client hosts the next session
                 typeof(BotsController).GetField("_allTypes", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance).SetValue(botsController_0, null);
             }
 
-            NetManagerUtils.DestroyNetManager(MatchmakerAcceptPatches.IsServer);
+            NetManagerUtils.DestroyNetManager(isServer);
 
             MatchmakerAcceptPatches.Nodes = null;
             MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = 1;
