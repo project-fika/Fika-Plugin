@@ -773,7 +773,12 @@ namespace Fika.Core.Networking
         {
             while (!Singleton<GameWorld>.Instantiated)
             {
-                yield return null;
+                yield return new WaitUntil(() => Singleton<GameWorld>.Instantiated);
+            }
+
+            while (!MatchmakerAcceptPatches.SpawnedPlayersComplete)
+            {
+                yield return new WaitUntil(() => MatchmakerAcceptPatches.SpawnedPlayersComplete);
             }
 
             ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
