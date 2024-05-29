@@ -183,6 +183,8 @@ namespace Fika.Core
         public bool AllowFreeCam;
         public bool AllowItemSending;
         public bool ForceSaveOnDeath;
+        public List<string> RequiredMods;
+        public List<string> OptionalMods;
         #endregion
 
         protected void Awake()
@@ -235,11 +237,6 @@ namespace Fika.Core
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
 
             StartCoroutine(RunModHandler());
-        }
-
-        private void Config_SettingChanged(object sender, SettingChangedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Utils
         private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
         public static GameObject FikaGameObject;
 
-        public static async Task CreateNetManager(bool isServer)
+        public static void CreateNetManager(bool isServer)
         {
             if (FikaGameObject == null)
             {
@@ -24,21 +24,13 @@ namespace Fika.Core.Coop.Utils
             if (isServer)
             {
                 FikaServer server = FikaGameObject.AddComponent<FikaServer>();
-
-                while (!server.ServerReady)
-                {
-                    await Task.Delay(100);
-                }
+                Singleton<FikaServer>.Create(server);
                 logger.LogInfo("FikaServer has started!");
             }
             else
             {
                 FikaClient client = FikaGameObject.AddComponent<FikaClient>();
-
-                while (!client.ClientReady)
-                {
-                    await Task.Delay(100);
-                }
+                Singleton<FikaClient>.Create(client);
                 logger.LogInfo("FikaClient has started!");
             }
         }
@@ -60,6 +52,24 @@ namespace Fika.Core.Coop.Utils
                     logger.LogInfo("Destroyed FikaClient");
                 }
             }
+        }
+
+        public static Task InitNetManager(bool isServer)
+        {
+            if (FikaGameObject != null)
+            {
+                if (isServer)
+                {
+                    return Singleton<FikaServer>.Instance.Init();
+                }
+                else
+                {
+                    Singleton<FikaClient>.Instance.Init();
+                    return Task.CompletedTask;
+                }
+            }
+
+            return Task.CompletedTask;
         }
 
         public static Task SetupGameVariables(bool isServer, CoopPlayer coopPlayer)
