@@ -334,18 +334,16 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 if (!nightVision.On && !thermalVision.On)
                 {
-                    nightVision.method_1(true);
-                    nightVision.SetMask(NightVisionComponent.EMask.Anvis);
+                    nightVision.On = true;
                 }
                 else if (nightVision.On && !thermalVision.On)
                 {
-                    nightVision.method_1(false);
-                    thermalVision.method_1(true);
-                    thermalVision.SetMask(NightVisionComponent.EMask.Anvis);
+                    nightVision.On = false;
+                    thermalVision.On = true;
                 }
                 else if (thermalVision.On)
                 {
-                    thermalVision.method_1(false);
+                    thermalVision.On = false;
                 }
             }
         }
