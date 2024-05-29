@@ -812,17 +812,12 @@ namespace Fika.Core.Networking
         {
             while (!Singleton<GameWorld>.Instantiated)
             {
-                yield return null;
+                yield return new WaitUntil(() => Singleton<GameWorld>.Instantiated);
             }
 
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             ClientGameWorld ClientgameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-            while (string.IsNullOrEmpty(ClientgameWorld.MainPlayer.Location))
-            {
-                yield return null;
-            }
 
             /*ObservedCoopPlayer playerToUse = (ObservedCoopPlayer)Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;*/
             ObservedCoopPlayer playerToUse = null;
@@ -850,7 +845,7 @@ namespace Fika.Core.Networking
             Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
 
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray(); // will ignore corpses
-                                                                                                                        // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
+            // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
 
             Profile.GClass1766 health = playerToUse.NetworkHealthController.Store(null);
             GClass2428.GClass2431[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
