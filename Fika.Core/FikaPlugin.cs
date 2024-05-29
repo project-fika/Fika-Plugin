@@ -246,7 +246,7 @@ namespace Fika.Core
         private IEnumerator RunModHandler()
         {
             yield return new WaitForSeconds(5);
-            ModHandler.Run();
+            ModHandler.VerifyMods();
         }
 
         private void GetClientConfig()
