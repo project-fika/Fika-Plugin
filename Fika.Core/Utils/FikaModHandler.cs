@@ -36,6 +36,7 @@ namespace Fika.Core.Utils
                 byte[] fileBytes = File.ReadAllBytes(location);
                 uint crc32 = CRC32C.Compute(fileBytes, 0, fileBytes.Length);
                 loadedMods.Add(pluginInfo.Metadata.GUID, crc32);
+                logger.LogInfo($"Loaded plugin: [{pluginInfo.Metadata.Name}] with GUID [{pluginInfo.Metadata.GUID}] and crc32 [{crc32}]");
                 CheckSpecialMods(pluginInfo.Metadata.GUID);
             }
 
