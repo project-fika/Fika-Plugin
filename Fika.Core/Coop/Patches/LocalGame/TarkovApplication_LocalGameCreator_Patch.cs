@@ -86,7 +86,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
             }
 
-            await NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
+            NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
 
             ISession session = CurrentSession;
 

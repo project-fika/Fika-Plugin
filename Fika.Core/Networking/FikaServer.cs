@@ -55,10 +55,9 @@ namespace Fika.Core.Networking
         public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
         public bool hasHadPeer = false;
         private readonly ManualLogSource serverLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
-        public bool ServerReady = false;
         private int _currentNetId;
 
-        public async void Start()
+        public async Task Init()
         {
             // Start at 1 to avoid having 0 and making us think it's working when it's not
             _currentNetId = 1;
@@ -100,24 +99,21 @@ namespace Fika.Core.Networking
             {
                 bool upnpFailed = false;
 
-                await Task.Run(async () =>
+                try
                 {
-                    try
-                    {
-                        NatDiscoverer discoverer = new();
-                        CancellationTokenSource cts = new(10000);
-                        NatDevice device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
-                        IPAddress extIp = await device.GetExternalIPAsync();
-                        MyExternalIP = extIp.MapToIPv4().ToString();
+                    NatDiscoverer discoverer = new();
+                    CancellationTokenSource cts = new(10000);
+                    NatDevice device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
+                    IPAddress extIp = await device.GetExternalIPAsync();
+                    MyExternalIP = extIp.MapToIPv4().ToString();
 
-                        await device.CreatePortMapAsync(new Mapping(Protocol.Udp, Port, Port, 300, "Fika UDP"));
-                    }
-                    catch (Exception ex)
-                    {
-                        serverLogger.LogError($"Error when attempting to map UPnP. Make sure the selected port is not already open! Error message: {ex.Message}");
-                        upnpFailed = true;
-                    }
-                });
+                    await device.CreatePortMapAsync(new Mapping(Protocol.Udp, Port, Port, 300, "Fika UDP"));
+                }
+                catch (Exception ex)
+                {
+                    serverLogger.LogError($"Error when attempting to map UPnP. Make sure the selected port is not already open! Error message: {ex.Message}");
+                    upnpFailed = true;
+                }
 
                 if (upnpFailed)
                 {
@@ -158,10 +154,8 @@ namespace Fika.Core.Networking
 
             SetHostRequest body = new(MyExternalIP, Port);
             FikaRequestHandler.UpdateSetHost(body);
-
-            Singleton<FikaServer>.Create(this);
+            
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
-            ServerReady = true;
         }
 
         public int PopNetId()
@@ -626,12 +620,12 @@ namespace Fika.Core.Networking
             SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
-        void Update()
+        protected void Update()
         {
-            _netServer.PollEvents();
+            _netServer?.PollEvents();
         }
 
-        void OnDestroy()
+        protected void OnDestroy()
         {
             NetDebug.Logger = null;
             _netServer?.Stop();
