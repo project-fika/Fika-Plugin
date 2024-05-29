@@ -1028,11 +1028,6 @@ namespace Fika.Core.Coop.Players
 
         public virtual void HandleInventoryPacket(in InventoryPacket packet)
         {
-            if (packet.SearchPacket.ItemId == null)
-            {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"HandleInventoryPacket SearchPacket.ItemId was null && HasSearchPacket was {packet.HasSearchPacket}");
-            }
-
             if (packet.HasItemControllerExecutePacket)
             {
                 if (_inventoryController != null)
