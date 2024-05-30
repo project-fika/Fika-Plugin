@@ -1629,7 +1629,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct414<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
+                    GStruct415<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::Stop: Error removing dog tag!");
@@ -1777,7 +1777,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct414<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
+                    GStruct415<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::StopFromError: Error removing dog tag!");
