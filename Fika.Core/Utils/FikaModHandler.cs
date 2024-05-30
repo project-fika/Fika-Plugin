@@ -46,7 +46,7 @@ namespace Fika.Core.Utils
             string validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
             logger.LogDebug(validationJson);
 
-            ModValidationResponse validationResult = 
+            ModValidationResponse validationResult =
                 JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
 
             // If any errors were detected we will print what has happened

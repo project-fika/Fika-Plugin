@@ -1,5 +1,4 @@
 ﻿using BepInEx.Logging;
-using EFT.UI;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
@@ -52,7 +51,7 @@ namespace Fika.Core.Networking
             remoteEndPoint = new(IPAddress.Parse(ip), port);
             if (!string.IsNullOrEmpty(localIp))
             {
-                localEndPoint = new(IPAddress.Parse(localIp), port); 
+                localEndPoint = new(IPAddress.Parse(localIp), port);
             }
 
             NetClient.Start();
@@ -73,7 +72,7 @@ namespace Fika.Core.Networking
             NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
             if (localEndPoint != null)
             {
-                NetClient.SendUnconnectedMessage(writer, localEndPoint); 
+                NetClient.SendUnconnectedMessage(writer, localEndPoint);
             }
         }
 

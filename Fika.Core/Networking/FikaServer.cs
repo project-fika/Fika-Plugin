@@ -171,7 +171,7 @@ namespace Fika.Core.Networking
 
             SetHostRequest body = new(Ips, Port);
             FikaRequestHandler.UpdateSetHost(body);
-            
+
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 

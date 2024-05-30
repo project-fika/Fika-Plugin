@@ -1713,7 +1713,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             ExitManager stopManager = new(this, exitStatus, exitName, delay, myPlayer);
-            
+
             GameUI gameUI = GameUI.Instance;
 
             exfilManager.Stop();

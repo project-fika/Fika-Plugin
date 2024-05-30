@@ -1,10 +1,8 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
