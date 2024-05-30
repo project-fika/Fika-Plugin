@@ -30,6 +30,8 @@ namespace Fika.Core.Coop.Matchmaker
         public static MatchMakerGroupPreview MatchMakerGroupPreview { get; set; }
         public static int HostExpectedNumberOfPlayers { get; set; } = 1;
         public static WeatherClass[] Nodes { get; set; } = null;
+        public static string RemoteIp;
+        public static int RemotePort;
         private static string groupId;
         private static long timestamp;
         #endregion

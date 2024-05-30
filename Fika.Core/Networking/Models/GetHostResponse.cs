@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Http.Models
@@ -5,15 +6,15 @@ namespace Fika.Core.Networking.Http.Models
     [DataContract]
     public struct GetHostResponse
     {
-        [DataMember(Name = "ip")]
-        public string Ip;
+        [DataMember(Name = "ips")]
+        public string[] Ips;
 
         [DataMember(Name = "port")]
         public int Port;
 
-        public GetHostResponse(string ip, int port)
+        public GetHostResponse(string[] ips, int port)
         {
-            Ip = ip;
+            Ips = ips;
             Port = port;
         }
     }

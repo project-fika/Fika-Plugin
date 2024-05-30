@@ -152,7 +152,24 @@ namespace Fika.Core.Networking
             NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
-            SetHostRequest body = new(MyExternalIP, Port);
+            string[] Ips = [];
+
+            foreach (string ip in FikaPlugin.Instance.LocalIPs)
+            {
+                if (ip.StartsWith("192.168")) // need to add more cases here later, for now only check normal range...
+                {
+                    Ips = [MyExternalIP, ip];
+                }
+            }
+
+            if (Ips.Length < 1)
+            {
+                Ips = [MyExternalIP, ""];
+                NotificationManagerClass.DisplayMessageNotification("Could not find a valid local IP!",
+                iconType: EFT.Communications.ENotificationIconType.Alert);
+            }
+
+            SetHostRequest body = new(Ips, Port);
             FikaRequestHandler.UpdateSetHost(body);
             
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));

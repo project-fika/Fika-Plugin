@@ -50,8 +50,8 @@ namespace Fika.Core.Networking
             }
         }
         public NetPeer ServerConnection { get; private set; }
-        public string IP { get; private set; }
-        public int Port { get; private set; }
+        /*public string IP { get; private set; }
+        public int Port { get; private set; }*/
         public bool SpawnPointsReceived { get; private set; } = false;
         private readonly ManualLogSource clientLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
 
@@ -94,19 +94,22 @@ namespace Fika.Core.Networking
 
             _netClient.Start();
 
-            GetHostRequest body = new(MatchmakerAcceptPatches.GetGroupId());
+            /*GetHostRequest body = new(MatchmakerAcceptPatches.GetGroupId());
             GetHostResponse result = FikaRequestHandler.GetHost(body);
 
             IP = result.Ip;
-            Port = result.Port;
+            Port = result.Port;*/
 
-            if (string.IsNullOrEmpty(IP))
+            string ip = MatchmakerAcceptPatches.RemoteIp;
+            int port = MatchmakerAcceptPatches.RemotePort;
+
+            if (string.IsNullOrEmpty(ip))
             {
                 Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
             }
             else
             {
-                ServerConnection = _netClient.Connect(IP, Port, "fika.core");
+                ServerConnection = _netClient.Connect(ip, port, "fika.core");
             };
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
