@@ -350,20 +350,20 @@ namespace Fika.Core.Coop.FreeCamera
                     transform.localPosition = new(-transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
                 }
                 leftMode = true;
+
+                return;
+            }
+
+            // Use different coordinates for headcam
+            if (transform.localPosition.z == 0.17f)
+            {
+                transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
             }
             else
             {
-                // Use different coordinates for headcam
-                if (transform.localPosition.z == 0.17f)
-                {
-                    transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
-                }
-                else
-                {
-                    transform.localPosition = new(-transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
-                }
-                leftMode = false;
+                transform.localPosition = new(-transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
             }
+            leftMode = false;
         }
 
         private void ToggleVision()
