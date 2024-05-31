@@ -158,8 +158,9 @@ namespace Fika.Core.Coop.Custom
             }
 
             int notInRange = 0;
+			float range = FikaPlugin.DynamicAIRange.Value;
 
-            foreach (CoopPlayer humanPlayer in humanPlayers)
+			foreach (CoopPlayer humanPlayer in humanPlayers)
             {
                 if (humanPlayer == null)
                 {
@@ -173,8 +174,7 @@ namespace Fika.Core.Coop.Custom
                     continue;
                 }
 
-                float distance = Vector3.SqrMagnitude(bot.Position - humanPlayer.Position);
-                float range = FikaPlugin.DynamicAIRange.Value;
+                float distance = Vector3.SqrMagnitude(bot.Position - humanPlayer.Position);                
 
                 if (distance > range * range)
                 {
