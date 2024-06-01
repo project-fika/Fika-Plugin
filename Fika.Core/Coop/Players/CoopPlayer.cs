@@ -849,7 +849,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct414<GClass2798> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
+                    GStruct415<GClass2798> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::Start: Error removing dog tag!");
@@ -1036,7 +1036,7 @@ namespace Fika.Core.Coop.Players
                     using BinaryReader binaryReader = new(memoryStream);
                     try
                     {
-                        GStruct411 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1542>());
+                        GStruct412 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1542>());
 
                         InventoryOperationHandler opHandler = new(result);
 
@@ -1406,7 +1406,7 @@ namespace Fika.Core.Coop.Players
                 return item;
             }
 
-            GStruct416<Item> itemResult = FindItemById(itemId);
+            GStruct417<Item> itemResult = FindItemById(itemId);
             if (itemResult.Error != null)
             {
                 FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
@@ -1418,7 +1418,7 @@ namespace Fika.Core.Coop.Players
         private class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct416<GClass2981> unlockResult;
+            public GStruct417<GClass2981> unlockResult;
 
             internal void HandleKeyEvent()
             {
@@ -1426,9 +1426,9 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class InventoryOperationHandler(GStruct411 opResult)
+        private class InventoryOperationHandler(GStruct412 opResult)
         {
-            public readonly GStruct411 opResult = opResult;
+            public readonly GStruct412 opResult = opResult;
 
             internal void HandleResult(IResult result)
             {

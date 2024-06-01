@@ -182,9 +182,8 @@ namespace Fika.Core
         public bool DynamicVExfils;
         public bool AllowFreeCam;
         public bool AllowItemSending;
+        public string[] BlacklistedItems;
         public bool ForceSaveOnDeath;
-        public List<string> RequiredMods;
-        public List<string> OptionalMods;
         #endregion
 
         protected void Awake()
@@ -248,7 +247,7 @@ namespace Fika.Core
         private IEnumerator RunModHandler()
         {
             yield return new WaitForSeconds(5);
-            ModHandler.Run();
+            ModHandler.VerifyMods();
         }
 
         private void GetClientConfig()
@@ -260,6 +259,7 @@ namespace Fika.Core
             DynamicVExfils = clientConfig.DynamicVExfils;
             AllowFreeCam = clientConfig.AllowFreeCam;
             AllowItemSending = clientConfig.AllowItemSending;
+            BlacklistedItems = clientConfig.BlacklistedItems;
             ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
 
             clientConfig.ToString();

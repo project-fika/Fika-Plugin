@@ -12,15 +12,13 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using LiteNetLib;
-using LiteNetLib.Utils;
 using SPT.Reflection.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.Profiling;
+using LiteNetLib;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {

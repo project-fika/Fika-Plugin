@@ -9,16 +9,16 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "serverId")]
         public string ServerId;
 
-        [DataMember(Name = "ip")]
-        public string Ip;
+        [DataMember(Name = "ips")]
+        public string[] Ips;
 
         [DataMember(Name = "port")]
         public int Port;
 
-        public SetHostRequest(string ip, int port)
+        public SetHostRequest(string[] ips, int port)
         {
             ServerId = CoopHandler.GetServerId();
-            Ip = ip;
+            Ips = ips;
             Port = port;
         }
     }

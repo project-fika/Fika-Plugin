@@ -1,7 +1,6 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using System;
@@ -25,6 +24,7 @@ namespace Fika.Core.Coop.FreeCamera
         public bool IsActive = false;
         private CoopPlayer CurrentPlayer;
         private bool isFollowing = false;
+        private bool leftMode = false;
         private bool disableInput = false;
 
         private KeyCode forwardKey = KeyCode.W;
@@ -250,6 +250,17 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (isFollowing)
             {
+                if (CurrentPlayer != null)
+                {
+                    if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
+                    {
+                        SetLeftShoulderMode(true);
+                    }
+                    else if (!CurrentPlayer.MovementContext.LeftStanceEnabled && leftMode)
+                    {
+                        SetLeftShoulderMode(false);
+                    }
+                }
                 return;
             }
 
@@ -325,6 +336,36 @@ namespace Fika.Core.Coop.FreeCamera
             transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
         }
 
+        private void SetLeftShoulderMode(bool enabled)
+        {
+            if (enabled)
+            {
+                // Use different coordinates for headcam
+                if (transform.localPosition.z == -0.17f)
+                {
+                    transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
+                }
+                else
+                {
+                    transform.localPosition = new(-transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
+                }
+                leftMode = true;
+
+                return;
+            }
+
+            // Use different coordinates for headcam
+            if (transform.localPosition.z == 0.17f)
+            {
+                transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
+            }
+            else
+            {
+                transform.localPosition = new(-transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
+            }
+            leftMode = false;
+        }
+
         private void ToggleVision()
         {
             NightVision nightVision = CameraClass.Instance.NightVision;
@@ -355,6 +396,7 @@ namespace Fika.Core.Coop.FreeCamera
             if (isFollowing)
             {
                 isFollowing = false;
+                leftMode = false;
                 transform.parent = null;
             }
         }
@@ -427,6 +469,7 @@ namespace Fika.Core.Coop.FreeCamera
 
             IsActive = status;
             isFollowing = false;
+            leftMode = false;
             transform.parent = null;
         }
 

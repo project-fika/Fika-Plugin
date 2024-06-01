@@ -269,7 +269,7 @@ namespace Fika.Core.Coop.FreeCamera
             Destroy(cameraClass.VisorSwitcher);
             if (cameraClass.NightVision.On)
             {
-                cameraClass.NightVision.method_1(false); 
+                cameraClass.NightVision.method_1(false);
             }
             if (cameraClass.ThermalVision.On)
             {

@@ -1,4 +1,5 @@
 ﻿using Aki.Custom.Airdrops;
+using AmplifyImpostors;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
@@ -753,7 +754,7 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogInfo("Creating CoopHandler");
             await CreateCoopHandler();
 
-            Vector3 PosToSpawn = (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect) ? MatchmakerAcceptPatches.ReconnectPacket.Value.Position  : spawnPoint.Position;
+            Vector3 PosToSpawn = (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect) ? MatchmakerAcceptPatches.ReconnectPacket.Value.Position : spawnPoint.Position;
             Quaternion RotToSpawn = (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect) ? MatchmakerAcceptPatches.ReconnectPacket.Value.Rotation : spawnPoint.Rotation;
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
@@ -867,13 +868,14 @@ namespace Fika.Core.Coop.GameMode
             {
                 SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
-            if (isServer)
-            {
-                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-            }
-            else
-            {
-                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                if (isServer)
+                {
+                    await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
+                }
+                else
+                {
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                }
             }
 
             await NetManagerUtils.SetupGameVariables(MatchmakerAcceptPatches.IsServer, coopPlayer);
@@ -1110,7 +1112,7 @@ namespace Fika.Core.Coop.GameMode
                 } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
 
                 if (MatchmakerAcceptPatches.IsReconnect && MatchmakerAcceptPatches.IsClient)
-                {                    
+                {
                     do
                     {
                         MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Loading all expected Players/Bots, ExpectedCount: {MatchmakerAcceptPatches.ReconnectPacket.Value.PlayerCount}, CurrentCount: {Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count()}");
@@ -1666,7 +1668,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct414<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
+                    GStruct415<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::Stop: Error removing dog tag!");
@@ -1750,7 +1752,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             ExitManager stopManager = new(this, exitStatus, exitName, delay, myPlayer);
-            
+
             GameUI gameUI = GameUI.Instance;
 
             exfilManager.Stop();
@@ -1814,7 +1816,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct414<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
+                    GStruct415<GClass2798> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, myPlayer.GClass2774_0, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::StopFromError: Error removing dog tag!");
