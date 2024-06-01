@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.UI;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using UnityEngine;

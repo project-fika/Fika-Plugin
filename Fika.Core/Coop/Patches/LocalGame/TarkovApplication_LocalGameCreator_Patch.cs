@@ -10,7 +10,6 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using LiteNetLib;
 using SPT.Reflection.Patching;
 using System;
 using System.Linq;

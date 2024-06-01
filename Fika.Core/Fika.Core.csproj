@@ -39,90 +39,32 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="AnimationSystem.Types">
-        <HintPath>..\References\AnimationSystem.Types.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\References\hollowed.dll</HintPath>
-    </Reference>
-    <Reference Include="bsg.componentace.compression.libs.zlib">
-        <HintPath>..\References\bsg.componentace.compression.libs.zlib.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="bsg.console.core">
-      <HintPath>..\References\bsg.console.core.dll</HintPath>
-    </Reference>
-    <Reference Include="Comfort">
-        <HintPath>..\References\Comfort.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="Comfort.Unity">
-        <HintPath>..\References\Comfort.Unity.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="CommonExtensions">
-        <HintPath>..\References\CommonExtensions.dll</HintPath>
-	    <Private>False</Private>
-    </Reference>
-    <Reference Include="DissonanceVoip">
-        <HintPath>..\References\DissonanceVoip.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="ItemComponent.Types">
-        <HintPath>..\References\ItemComponent.Types.dll</HintPath>
-        <Private>false</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-        <HintPath>..\References\Newtonsoft.Json.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="Sirenix.Serialization">
-        <HintPath>..\References\Sirenix.Serialization.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="spt-common">
-      <HintPath>..\References\spt-common.dll</HintPath>
-    </Reference>
-    <Reference Include="spt-core">
-      <HintPath>..\References\spt-core.dll</HintPath>
-    </Reference>
-    <Reference Include="spt-custom">
-      <HintPath>..\References\spt-custom.dll</HintPath>
-    </Reference>
-    <Reference Include="spt-debugging">
-      <HintPath>..\References\spt-debugging.dll</HintPath>
-    </Reference>
-    <Reference Include="spt-reflection">
-      <HintPath>..\References\spt-reflection.dll</HintPath>
-    </Reference>
-    <Reference Include="spt-singleplayer">
-      <HintPath>..\References\spt-singleplayer.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Postprocessing.Runtime">
-        <HintPath>..\References\Unity.Postprocessing.Runtime.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-        <HintPath>..\References\Unity.TextMeshPro.dll</HintPath>
-	    <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-        <HintPath>..\References\UnityEngine.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\References\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-        <HintPath>..\References\UnityEngine.UI.dll</HintPath>
-        <Private>False</Private>
-    </Reference>
+    <Reference Include="AnimationSystem.Types" HintPath="..\References\AnimationSystem.Types.dll" Private="false" />
+    <Reference Include="Assembly-CSharp" HintPath="..\References\hollowed.dll" Private="false" />
+    <Reference Include="bsg.componentace.compression.libs.zlib" HintPath="..\References\bsg.componentace.compression.libs.zlib.dll" Private="false" />
+    <Reference Include="bsg.console.core" HintPath="..\References\bsg.console.core.dll" Private="false" />
+    <Reference Include="Comfort" HintPath="..\References\Comfort.dll" Private="false" />
+    <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
+    <Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
+    <Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
+    <Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
+    <Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />
+    <Reference Include="Sirenix.Serialization" HintPath="..\References\Sirenix.Serialization.dll" Private="false" />
+    <Reference Include="spt-common" HintPath="..\References\spt-common.dll" Private="false" />
+    <Reference Include="spt-core" HintPath="..\References\spt-core.dll" Private="false" />
+    <Reference Include="spt-custom" HintPath="..\References\spt-custom.dll" Private="false" />
+    <Reference Include="spt-debugging" HintPath="..\References\spt-debugging.dll" Private="false" />
+    <Reference Include="spt-reflection" HintPath="..\References\spt-reflection.dll" Private="false" />
+    <Reference Include="spt-singleplayer" HintPath="..\References\spt-singleplayer.dll" Private="false" />
+    <Reference Include="Unity.Postprocessing.Runtime" HintPath="..\References\Unity.Postprocessing.Runtime.dll" Private="false" />
+    <Reference Include="Unity.TextMeshPro" HintPath="..\References\Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath="..\References\UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.UI"  HintPath="..\References\UnityEngine.UI.dll" Private="false" />
   </ItemGroup>
-  
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
     <Exec Command="call ../Properties/build/postbuild-core.bat &quot;$(TargetPath)&quot; &quot;$(ProjectDir)&quot;" />
     <Exec Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' " Command="call ../Properties/build/goldmaster-core.bat" />
   </Target>
-  
+
 </Project>

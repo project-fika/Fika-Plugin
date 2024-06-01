@@ -1,4 +1,5 @@
 ﻿using BepInEx.Logging;
+using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using LiteNetLib;
@@ -14,6 +15,7 @@ namespace Fika.Core.Networking
         private readonly ManualLogSource _logger = Logger.CreateLogSource("Fika.PingingClient");
         private readonly string serverId = serverId;
         private IPEndPoint remoteEndPoint;
+        private IPEndPoint localEndPoint;
         public bool Received = false;
 
         public bool Init()
@@ -26,7 +28,12 @@ namespace Fika.Core.Networking
             GetHostRequest body = new(serverId);
             GetHostResponse result = FikaRequestHandler.GetHost(body);
 
-            string ip = result.Ip;
+            string ip = result.Ips[0];
+            string localIp = null;
+            if (result.Ips.Length > 1)
+            {
+                localIp = result.Ips[1];
+            }
             int port = result.Port;
 
             if (string.IsNullOrEmpty(ip))
@@ -42,23 +49,31 @@ namespace Fika.Core.Networking
             }
 
             remoteEndPoint = new(IPAddress.Parse(ip), port);
+            if (!string.IsNullOrEmpty(localIp))
+            {
+                localEndPoint = new(IPAddress.Parse(localIp), port);
+            }
 
             NetClient.Start();
 
             return true;
         }
 
-        public bool PingEndPoint()
+        public void PingEndPoint()
         {
             if (Received)
             {
-                return true;
+                return;
             }
 
             NetDataWriter writer = new();
             writer.Put("fika.hello");
 
-            return NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
+            NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
+            if (localEndPoint != null)
+            {
+                NetClient.SendUnconnectedMessage(writer, localEndPoint);
+            }
         }
 
         public void OnConnectionRequest(ConnectionRequest request)
@@ -94,6 +109,8 @@ namespace Fika.Core.Networking
                 if (result == "fika.hello")
                 {
                     Received = true;
+                    MatchmakerAcceptPatches.RemoteIp = remoteEndPoint.Address.ToString();
+                    MatchmakerAcceptPatches.RemotePort = remoteEndPoint.Port;
                 }
                 else
                 {
