@@ -28,7 +28,7 @@ namespace Fika.Core.Utils
             PluginInfo[] pluginInfos = [.. Chainloader.PluginInfos.Values];
 
             // Set capacity to avoid unnecessarily resizing for people who have a lot of mods loaded
-            Dictionary<string, uint> loadedMods = new Dictionary<string, uint>(pluginInfos.Length);
+            Dictionary<string, uint> loadedMods = new(pluginInfos.Length);
 
             foreach (PluginInfo pluginInfo in pluginInfos)
             {

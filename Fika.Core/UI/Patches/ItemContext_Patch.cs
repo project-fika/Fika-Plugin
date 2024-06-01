@@ -62,6 +62,15 @@ namespace Fika.Core.UI.Patches
 
                 dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
                 {
+                    foreach (string itemId in FikaPlugin.Instance.BlacklistedItems)
+                    {
+                        if (itemId == item.TemplateId)
+                        {
+                            NotificationManagerClass.DisplayMessageNotification($"{item.ShortName.Localized()} is blacklisted from being sent.", iconType: EFT.Communications.ENotificationIconType.Alert);
+                            return;
+                        }
+                    }
+
                     AvailableReceiversRequest body = new(itemContext.Item.Id);
                     Dictionary<string, string> availableUsers = FikaRequestHandler.AvailableReceivers(body);
 
