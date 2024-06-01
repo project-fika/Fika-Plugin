@@ -68,7 +68,9 @@ namespace Fika.Core.UI.Custom
         {
             StopQuery = true;
             if (NewBackButton != null)
+            {
                 Destroy(NewBackButton);
+            }
         }
 
         private void CreateMatchMakerUI()
@@ -102,6 +104,15 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
+            fikaMatchMakerUi.CloseButton.onClick.AddListener(() =>
+            {
+                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+                if (fikaMatchMakerUi.PlayerAmountSelection.active)
+                {
+                    fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+                }
+            });
+
             fikaMatchMakerUi.StartButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
@@ -124,10 +135,9 @@ namespace Fika.Core.UI.Custom
 
                     if (!IPAddress.TryParse(ip, out _))
                     {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR FORCING IP",
-                    $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
+                            $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
+                            ErrorScreen.EButtonType.OkButton, 10f, null, null);
                         return;
                     }
                 }
@@ -135,10 +145,9 @@ namespace Fika.Core.UI.Custom
                 {
                     if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
                     {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR BINDING",
-                    $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
+                            $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
+                            ErrorScreen.EButtonType.OkButton, 10f, null, null);
                         return;
                     }
                 }
@@ -165,9 +174,20 @@ namespace Fika.Core.UI.Custom
             Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
             if (!NewBackButton.active)
+            {
                 NewBackButton.SetActive(true);
+            }
 
             BackButton.gameObject.SetActive(false);
+        }
+
+        private void AutoRefresh()
+        {
+            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+
+            _lastRefreshed = Time.time;
+
+            RefreshUI();
         }
 
         private void ManualRefresh()
@@ -460,7 +480,7 @@ namespace Fika.Core.UI.Custom
         {
             while (!StopQuery)
             {
-                ManualRefresh();
+                AutoRefresh();
 
                 while (Time.time < _lastRefreshed + FikaPlugin.AutoRefreshRate.Value)
                 {

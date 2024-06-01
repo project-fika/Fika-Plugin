@@ -66,7 +66,7 @@ namespace Fika.Core.Coop.GameMode
         public ISpawnSystem SpawnSystem;
 
         public Dictionary<string, Player> Bots = [];
-        private GameObject fikaStartButton;
+        //private GameObject fikaStartButton;
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
         private GClass2945 spawnPoints = null;
@@ -577,10 +577,10 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (isServer && MatchmakerAcceptPatches.HostExpectedNumberOfPlayers <= 1)
                 {
-                    if (fikaStartButton != null)
+                    /*if (fikaStartButton != null)
                     {
                         Destroy(fikaStartButton);
-                    }
+                    }*/
 
                     if (DynamicAI != null)
                     {
@@ -604,10 +604,10 @@ namespace Fika.Core.Coop.GameMode
 
                 MatchmakerAcceptPatches.GClass3182.ChangeStatus("Waiting for other players to finish loading...");
 
-                if (fikaStartButton != null)
+                /*if (fikaStartButton != null)
                 {
                     fikaStartButton.SetActive(true);
-                }
+                }*/
 
                 if (isServer)
                 {
@@ -673,10 +673,10 @@ namespace Fika.Core.Coop.GameMode
                     } while (Singleton<FikaClient>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
                 }
 
-                if (fikaStartButton != null)
+                /*if (fikaStartButton != null)
                 {
                     Destroy(fikaStartButton);
-                }
+                }*/
             }
         }
 
@@ -795,7 +795,7 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.SpawnPoint = spawnPoint;
 
             GameObject customButton = null;
-            GameObject customButtonStart = null;
+            //GameObject customButtonStart = null;
 
             await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
 
@@ -824,7 +824,7 @@ namespace Fika.Core.Coop.GameMode
                 });
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
 
-                if (isServer)
+                /*if (isServer)
                 {
                     DefaultUIButton startButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field("_cancelButton").GetValue<DefaultUIButton>();
                     customButtonStart = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
@@ -861,7 +861,7 @@ namespace Fika.Core.Coop.GameMode
                         customButton.SetActive(true);
                     }
                     fikaStartButton = customButtonStart;
-                }
+                }*/
             }
 
             if (!MatchmakerAcceptPatches.IsReconnect)
@@ -884,10 +884,10 @@ namespace Fika.Core.Coop.GameMode
             await WaitForPlayers();
 
             Destroy(customButton);
-            if (fikaStartButton != null)
+            /*if (fikaStartButton != null)
             {
                 fikaStartButton.SetActive(false);
-            }
+            }*/
 
             myPlayer.ActiveHealthController.DiedEvent += MainPlayerDied;
 
