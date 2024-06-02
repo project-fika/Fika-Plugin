@@ -52,6 +52,17 @@ namespace Fika.Core.Networking
         public int Port { get; private set; }*/
         public bool SpawnPointsReceived { get; private set; } = false;
         private readonly ManualLogSource clientLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
+        public bool Started
+        {
+            get
+            {
+                if (_netClient == null)
+                {
+                    return false;
+                }
+                return _netClient.IsRunning;
+            }
+        }
 
         public void Init()
         {

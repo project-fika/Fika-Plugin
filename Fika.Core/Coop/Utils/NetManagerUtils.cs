@@ -60,15 +60,25 @@ namespace Fika.Core.Coop.Utils
             {
                 if (isServer)
                 {
-                    return Singleton<FikaServer>.Instance.Init();
+                    FikaServer server = Singleton<FikaServer>.Instance;
+                    if (!server.Started)
+                    {
+                        return server.Init();
+                    }
+                    return Task.CompletedTask;
                 }
                 else
                 {
-                    Singleton<FikaClient>.Instance.Init();
+                    FikaClient client = Singleton<FikaClient>.Instance;
+                    if (!client.Started)
+                    {
+                        client.Init();
+                    }
                     return Task.CompletedTask;
                 }
             }
 
+            logger.LogError("InitNetManager: FikaGameObject was null!");
             return Task.CompletedTask;
         }
 
