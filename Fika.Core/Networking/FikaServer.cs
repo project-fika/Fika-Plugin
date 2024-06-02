@@ -56,6 +56,17 @@ namespace Fika.Core.Networking
         public bool hasHadPeer = false;
         private readonly ManualLogSource serverLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
         private int _currentNetId;
+        public bool Started
+        {
+            get
+            {
+                if (_netServer == null)
+                {
+                    return false;
+                }
+                return _netServer.IsRunning;
+            }
+        }
 
         public async Task Init()
         {
