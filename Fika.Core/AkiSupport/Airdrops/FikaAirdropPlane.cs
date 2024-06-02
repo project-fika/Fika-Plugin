@@ -24,6 +24,7 @@ namespace Fika.Core.AkiSupport.Airdrops
         private bool headingChanged;
         public Vector3 newPosition;
         public Vector3 newRotation;
+        public bool initComplete = false;
 
         public static async Task<FikaAirdropPlane> Init(Vector3 airdropPoint, int dropHeight, float planeVolume, float speed, bool isClient = false, Vector3 lookPoint = new Vector3())
         {
@@ -44,6 +45,7 @@ namespace Fika.Core.AkiSupport.Airdrops
             instance.SetAudio(planeVolume);
             instance.speed = speed;
             instance.gameObject.SetActive(false);
+            instance.initComplete = true;
             return instance;
         }
 

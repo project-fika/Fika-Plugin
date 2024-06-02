@@ -26,16 +26,18 @@ namespace Aki.Custom.Airdrops
     /// </summary>
     public class FikaAirdropsManager : MonoBehaviour
     {
-        private FikaAirdropPlane airdropPlane;
-        private FikaAirdropBox AirdropBox;
+        public FikaAirdropPlane airdropPlane;
+        public FikaAirdropBox AirdropBox;
         private FikaItemFactoryUtil factory;
         public bool isFlareDrop;
         public FikaAirdropParametersModel AirdropParameters { get; set; }
         private ManualLogSource Logger { get; set; }
-        float distanceTravelled = 0;
+        public float DistanceTravelled { get; set; } = 0f;
         public bool ClientPlaneSpawned;
         public bool ClientLootBuilt = false;
         public static int ContainerCount = 0;
+        public AirdropPacket airdropPacketToSend;
+        public AirdropLootPacket lootPacketToSend;
 
         // Client fields
         private string ContainerId;
@@ -154,6 +156,8 @@ namespace Aki.Custom.Airdrops
                 SpawnPoint = airdropPlane.newPosition,
                 LookPoint = airdropPlane.newRotation
             };
+
+            airdropPacketToSend = airdropPacket;
             NetDataWriter writer = new();
             Singleton<FikaServer>.Instance.SendDataToAll(writer, ref airdropPacket, DeliveryMethod.ReliableOrdered);
         }
@@ -238,15 +242,15 @@ namespace Aki.Custom.Airdrops
                 }
             }
 
-            if (distanceTravelled >= AirdropParameters.DistanceToDrop && !AirdropParameters.BoxSpawned)
+            if (DistanceTravelled >= AirdropParameters.DistanceToDrop && !AirdropParameters.BoxSpawned)
             {
                 StartBox();
             }
 
-            if (distanceTravelled < AirdropParameters.DistanceToTravel)
+            if (DistanceTravelled < AirdropParameters.DistanceToTravel)
             {
-                distanceTravelled += Time.deltaTime * AirdropParameters.Config.PlaneSpeed;
-                float distanceToDrop = AirdropParameters.DistanceToDrop - distanceTravelled;
+                DistanceTravelled += Time.deltaTime * AirdropParameters.Config.PlaneSpeed;
+                float distanceToDrop = AirdropParameters.DistanceToDrop - DistanceTravelled;
                 airdropPlane.ManualUpdate(distanceToDrop);
             }
             else
@@ -355,6 +359,7 @@ namespace Aki.Custom.Airdrops
                 ContainerId = AirdropBox.Container.Id
             };
 
+            lootPacketToSend = lootPacket;
             NetDataWriter writer = new();
             Singleton<FikaServer>.Instance.SendDataToAll(writer, ref lootPacket, DeliveryMethod.ReliableOrdered);
 

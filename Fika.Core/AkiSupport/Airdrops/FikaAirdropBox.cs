@@ -31,6 +31,7 @@ namespace Fika.Core.AkiSupport.Airdrops
         private AirdropSurfaceSet surfaceSet;
         private Dictionary<BaseBallistic.ESurfaceSound, AirdropSurfaceSet> soundsDictionary;
         private BetterSource audioSource;
+        public bool initComplete = false;
 
         private BetterSource AudioSource
         {
@@ -61,6 +62,7 @@ namespace Fika.Core.AkiSupport.Airdrops
             instance.paraAnimator = instance.boxSync.Parachute.GetComponent<Animator>();
             instance.paraMaterial = instance.boxSync.Parachute.GetComponentInChildren<Renderer>().material;
             instance.fallSpeed = crateFallSpeed;
+            instance.initComplete = true;
             return instance;
         }
 

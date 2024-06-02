@@ -36,6 +36,7 @@ namespace Fika.Core.Coop.Matchmaker
         private static string groupId;
         private static long timestamp;
         public static bool IsReconnect = false;
+        public static bool ReconnectPacketRecieved = false;
         public static ReconnectResponsePacket? ReconnectPacket; // change to not be nullable
         public static bool SpawnedPlayersComplete = false;
         #endregion

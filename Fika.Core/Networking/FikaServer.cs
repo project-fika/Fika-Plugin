@@ -1,5 +1,6 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using Aki.Custom.Airdrops;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
@@ -827,7 +828,43 @@ namespace Fika.Core.Networking
         private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
         {
             serverLogger.LogError($"Player Wanting to reconnect {packet.ProfileId}");
-            StartCoroutine(SyncClientToHost(packet, peer));
+
+            switch (packet.PackageType)
+            {
+                case EReconnectPackgeType.Everything:
+                    serverLogger.LogError($"Reconnecting player requesting eveything");
+                    StartCoroutine(SyncClientToHost(packet, peer));
+                    break;
+                case EReconnectPackgeType.AirdropSetup:
+                    serverLogger.LogError($"Reconnecting player requesting airdrops");
+                    // send airdrop data
+                    _dataWriter.Reset();
+                    SendDataToPeer(peer, _dataWriter, ref Singleton<FikaAirdropsManager>.Instance.airdropPacketToSend, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(peer, _dataWriter, ref Singleton<FikaAirdropsManager>.Instance.lootPacketToSend, DeliveryMethod.ReliableOrdered);
+                    break;
+                case EReconnectPackgeType.AirdropPositions:
+                    serverLogger.LogError($"[CWX] Reconnecting player requesting airdrops");
+                    SendClientAirdropPositions(peer);
+                    break;
+                default:
+                    throw new Exception("[CWX] reconnecting player sent unknown package type");
+            }
+        }
+
+        private void SendClientAirdropPositions(NetPeer peer)
+        {
+            FikaAirdropsManager manager = Singleton<FikaAirdropsManager>.Instance;
+
+            if (manager != null && manager.AirdropBox != null && manager.airdropPlane != null)
+            {
+                ReconnectAirdropPacket packet = new (
+                    manager.airdropPlane.transform.position,
+                    manager.AirdropBox.transform.position,
+                    manager.DistanceTravelled);
+
+                _dataWriter.Reset();
+                SendDataToPeer(peer, _dataWriter, ref packet, DeliveryMethod.ReliableOrdered);
+            }
         }
 
         public IEnumerator SyncClientToHost(ReconnectRequestPacket packet, NetPeer peer)
@@ -841,7 +878,6 @@ namespace Fika.Core.Networking
             ClientGameWorld ClientgameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
-            /*ObservedCoopPlayer playerToUse = (ObservedCoopPlayer)Players.FirstOrDefault((v) => v.Value.ProfileId == packet.ProfileId).Value;*/
             ObservedCoopPlayer playerToUse = null;
 
             foreach (CoopPlayer coopPlayer in Players.Values)
@@ -866,8 +902,7 @@ namespace Fika.Core.Networking
 
             Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
 
-            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray(); // will ignore corpses
-            // LootItemPositionClass[] items = gameWorld.GetJsonLootItems().ToArray(); // will include corpses
+            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray();
 
             Profile.GClass1766 health = playerToUse.NetworkHealthController.Store(null);
             GClass2428.GClass2431[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
@@ -893,15 +928,12 @@ namespace Fika.Core.Networking
             playerToUse.Profile.Health = health;
             playerToUse.Profile.Info.EntryPoint = coopGame.InfiltrationPoint;
 
-            // Test, remove if does nothing
-            Profile profileToUse = playerToUse.Profile;
-            profileToUse.Inventory = playerToUse.Inventory;
-
             ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
-                interactiveObjects, windows, lights, smokes,
-                new FikaSerialization.PlayerInfoPacket() { Profile = profileToUse }, items, gameWorld.AllPlayersEverExisted.Count());
+                interactiveObjects, windows, lights, smokes, new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile },
+                items, gameWorld.AllPlayersEverExisted.Count(), Singleton<FikaAirdropsManager>.Instance != null);
 
+            _dataWriter.Reset();
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
     }

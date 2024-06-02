@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
-using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.GameMode;
@@ -96,6 +95,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             if (MatchmakerAcceptPatches.IsReconnect)
             {
+                await NetManagerUtils.InitNetManager(MatchmakerAcceptPatches.IsServer);
                 profile = await GetReconnectProfile(profile.Id);
                 // Load bundles of this new profile, Game originally does this in method_38 which is before this
                 await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
@@ -167,7 +167,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
         private static async Task<Profile> GetReconnectProfile(string profileId)
         {
-            ReconnectRequestPacket reconnectPacket = new(profileId);
+            ReconnectRequestPacket reconnectPacket = new(profileId, EReconnectPackgeType.Everything);
             MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Sending Reconnect Request...");
 
             int retryCount = 0;

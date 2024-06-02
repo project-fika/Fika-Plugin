@@ -91,6 +91,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket>(OnReconnectResponsePacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectAirdropPacket>(OnReconnectAirdropPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -772,10 +773,27 @@ namespace Fika.Core.Networking
 
         private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet)
         {
+            // if another packet tries to come in after another, return to stop double processing
+            if (MatchmakerAcceptPatches.ReconnectPacketRecieved)
+            {
+                return;
+            }
+
             MatchmakerAcceptPatches.IsReconnect = true;
             MatchmakerAcceptPatches.ReconnectPacket = packet;
+            MatchmakerAcceptPatches.ReconnectPacketRecieved = true;
 
             StartCoroutine(SyncClientToHost(packet));
+        }
+
+        private void OnReconnectAirdropPacketReceived(ReconnectAirdropPacket packet)
+        {
+            // manager/plane/box should all be init by this point
+            FikaAirdropsManager manager = Singleton<FikaAirdropsManager>.Instance;
+
+            manager.DistanceTravelled = packet.DistanceTravelled;
+            manager.airdropPlane.transform.position = packet.PlanePosition;
+            manager.AirdropBox.transform.position = packet.BoxPosition;
         }
 
         public IEnumerator SyncClientToHost(ReconnectResponsePacket packet)
@@ -815,7 +833,7 @@ namespace Fika.Core.Networking
             {
                 LampController lampController = packet.Lights[i];
                 LampController clientLightToChange = clientLights.FirstOrDefault(x => x.NetId == lampController.NetId);
-                clientLightToChange?.Switch(lampController.LampState);                
+                clientLightToChange?.Switch(lampController.LampState);
             }
 
             // smokes
@@ -834,6 +852,39 @@ namespace Fika.Core.Networking
             // TODO: Smokes do spawn on the ground, but no visible smoke effect shows, im using BSG's method of doing this currently, so this might be a BSG thing.
             // Decide if to fix or not.
 
+            if (MatchmakerAcceptPatches.ReconnectPacket.Value.InitAirdrop)
+            {
+                // ask for airdrop params and loot
+
+                while (Singleton<FikaAirdropsManager>.Instance == null)
+                {
+                    clientLogger.LogError($"[CWX] Waiting on FikaAirdrops to be init");
+                    yield return new WaitUntil(() => Singleton<FikaAirdropsManager>.Instance != null);
+                }
+
+                FikaAirdropsManager manager = Singleton<FikaAirdropsManager>.Instance;
+
+                ReconnectRequestPacket airdropRequestPacket = new(MyPlayer.ProfileId, EReconnectPackgeType.AirdropSetup);
+                DataWriter.Reset();
+                SendData(DataWriter, ref airdropRequestPacket, DeliveryMethod.ReliableUnordered);
+
+                while (manager.AirdropBox == null || manager.airdropPlane == null)
+                {
+                    clientLogger.LogError($"[CWX] waiting on plane or box");
+                    yield return new WaitUntil(() =>
+                    {
+                        return manager.AirdropBox != null && manager.airdropPlane != null;
+                    });
+                }
+
+                ReconnectRequestPacket airdropPosPacket = new (MyPlayer.ProfileId, EReconnectPackgeType.AirdropPositions);
+                DataWriter.Reset();
+                SendData(DataWriter, ref airdropPosPacket, DeliveryMethod.ReliableUnordered);
+            }
+            else
+            {
+                Destroy(Singleton<FikaAirdropsManager>.Instance);
+            }
         }
     }
 }
