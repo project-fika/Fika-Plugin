@@ -32,6 +32,10 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void Execute(GClass2850 operation, [CanBeNull] Callback callback)
         {
+#if DEBUG
+            ConsoleScreen.Log("InvOperation: " + operation.GetType().Name); 
+#endif
+
             // Do not replicate picking up quest items, throws an error on the other clients
             if (operation is GClass2852 pickupOperation)
             {

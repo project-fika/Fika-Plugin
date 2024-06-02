@@ -78,6 +78,7 @@ namespace Fika.Core.Coop.GameMode
         private bool hasSaved = false;
         private CoopExfilManager exfilManager;
         private CoopTimeManager timeManager;
+        private FikaDebug fikaDebug;
         private bool isServer;
 
         public FikaDynamicAI DynamicAI { get; private set; }
@@ -266,12 +267,10 @@ namespace Fika.Core.Coop.GameMode
             return distance;
         }
 
-        private string GetFurthestBot(Dictionary<string, Player> bots, CoopHandler coopHandler, out float furthestDistance)
+        private string GetFurthestBot(Dictionary<string, Player> bots, CoopHandler coopHandler, List<CoopPlayer> humanPlayers, out float furthestDistance)
         {
             string furthestBot = string.Empty;
             furthestDistance = 0f;
-
-            List<CoopPlayer> humanPlayers = GetPlayers(coopHandler);
 
             foreach (var botKeyValuePair in Bots)
             {
@@ -362,7 +361,7 @@ namespace Fika.Core.Coop.GameMode
                 if (!isSpecial && !despawned)
                 {
 #if DEBUG
-                    Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled. Current: {botsController_0.AliveAndLoadingBotsCount}, Max: {botsController_0.BotSpawner.MaxBots}");
+                    Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled. Current: {Bots.Count}, Max: {botsController_0.BotSpawner.MaxBots}, Alive & Loading: {botsController_0.BotSpawner.AliveAndLoadingBotsCount}");
 #endif
                     return null;
                 }
@@ -493,7 +492,9 @@ namespace Fika.Core.Coop.GameMode
 
         private bool TryDespawnFurthest(Profile profile, Vector3 position, CoopHandler coopHandler)
         {
-            string botKey = GetFurthestBot(Bots, coopHandler, out float furthestDistance);
+            List<CoopPlayer> humanPlayers = GetPlayers(coopHandler);
+
+            string botKey = GetFurthestBot(Bots, coopHandler, humanPlayers, out float furthestDistance);
 
             if (botKey == string.Empty)
             {
@@ -503,7 +504,7 @@ namespace Fika.Core.Coop.GameMode
                 return false;
             }
 
-            if (furthestDistance > GetDistanceFromPlayers(position, GetPlayers(coopHandler)))
+            if (furthestDistance > GetDistanceFromPlayers(position, humanPlayers))
             {
 #if DEBUG
                 Logger.LogWarning($"We're not despawning anything. The furthest bot is closer than the one we wanted to spawn.");
@@ -521,7 +522,7 @@ namespace Fika.Core.Coop.GameMode
             }
             Player bot = Bots[botKey];
 #if DEBUG
-            Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from ITs nearest player.");
+            Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from its nearest player.");
 #endif
             DespawnBot(coopHandler, bot);
 #if DEBUG
@@ -883,6 +884,8 @@ namespace Fika.Core.Coop.GameMode
             coopHandler.StartSpawning = true;
             await WaitForPlayers();
 
+            fikaDebug = gameObject.AddComponent<FikaDebug>();
+
             Destroy(customButton);
             /*if (fikaStartButton != null)
             {
@@ -906,7 +909,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, InventoryControllerClass inventoryController, Callback runCallback)
+        public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, Callback runCallback)
         {
             Status = GameStatus.Running;
             UnityEngine.Random.InitState((int)GClass1304.Now.Ticks);
@@ -1901,6 +1904,14 @@ namespace Fika.Core.Coop.GameMode
             }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
             GClass548.Config.UseSpiritPlayer = false;
+        }
+
+        public void ToggleDebug(bool enabled)
+        {
+            if (fikaDebug != null)
+            {
+                fikaDebug.enabled = enabled; 
+            }
         }
 
         public override void CleanUp()

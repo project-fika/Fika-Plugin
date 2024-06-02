@@ -91,6 +91,26 @@ namespace Fika.Core.Console
             }
         }
 
+        [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
+        public static void Debug(bool state)
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            if (coopGame == null)
+            {
+                ConsoleScreen.LogWarning("You are not in a game.");
+                return;
+            }
+
+            if (coopGame.Status != GameStatus.Started)
+            {
+                ConsoleScreen.LogWarning("Game is not running.");
+                return;
+            }
+
+            coopGame.ToggleDebug(state);
+        }
+
         [ConsoleCommand("clear", "", null, "Clears the console output", [])]
         public static void Clear()
         {
