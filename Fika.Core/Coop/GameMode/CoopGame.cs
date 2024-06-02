@@ -1662,6 +1662,7 @@ namespace Fika.Core.Coop.GameMode
                 MatchmakerAcceptPatches.IsReconnect = false;
                 MatchmakerAcceptPatches.ReconnectPacket = null;
                 MatchmakerAcceptPatches.SpawnedPlayersComplete = false;
+                MatchmakerAcceptPatches.ReconnectPacketRecieved = false;
             }
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
@@ -1910,7 +1911,7 @@ namespace Fika.Core.Coop.GameMode
         {
             if (fikaDebug != null)
             {
-                fikaDebug.enabled = enabled; 
+                fikaDebug.enabled = enabled;
             }
         }
 
