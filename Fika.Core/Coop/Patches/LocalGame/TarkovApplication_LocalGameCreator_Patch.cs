@@ -134,7 +134,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 coopGame.SetMatchmakerStatus("Coop game created");
             }
 
-            Task finishTask = coopGame.InitPlayer(____raidSettings.BotSettings, ____backendUrl, null, new Callback(startHandler.HandleLoadComplete));
+            Task finishTask = coopGame.InitPlayer(____raidSettings.BotSettings, ____backendUrl, new Callback(startHandler.HandleLoadComplete));
             __result = Task.WhenAll(finishTask);
         }
 
