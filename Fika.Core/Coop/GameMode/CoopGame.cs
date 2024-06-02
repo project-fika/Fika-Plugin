@@ -76,6 +76,7 @@ namespace Fika.Core.Coop.GameMode
         private bool hasSaved = false;
         private CoopExfilManager exfilManager;
         private CoopTimeManager timeManager;
+        private FikaDebug fikaDebug;
         private bool isServer;
 
         public FikaDynamicAI DynamicAI { get; private set; }
@@ -865,6 +866,8 @@ namespace Fika.Core.Coop.GameMode
 
             await WaitForPlayers();
 
+            fikaDebug = gameObject.AddComponent<FikaDebug>();
+
             Destroy(customButton);
             /*if (fikaStartButton != null)
             {
@@ -888,7 +891,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, InventoryControllerClass inventoryController, Callback runCallback)
+        public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, Callback runCallback)
         {
             Status = GameStatus.Running;
             UnityEngine.Random.InitState((int)GClass1304.Now.Ticks);
@@ -1862,6 +1865,14 @@ namespace Fika.Core.Coop.GameMode
             }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
             GClass548.Config.UseSpiritPlayer = false;
+        }
+
+        public void ToggleDebug(bool enabled)
+        {
+            if (fikaDebug != null)
+            {
+                fikaDebug.enabled = enabled; 
+            }
         }
 
         public override void CleanUp()
