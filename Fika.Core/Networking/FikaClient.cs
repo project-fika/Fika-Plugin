@@ -122,7 +122,6 @@ namespace Fika.Core.Networking
             };
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
-            Started = true;
         }
 
         public void SetupGameVariables(CoopPlayer coopPlayer)
