@@ -8,7 +8,7 @@ namespace Fika.Core.Utils
 {
     public static class WorldToScreen
     {
-        public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint)
+        public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true)
         {
             CameraClass worldCameraInstance = CameraClass.Instance;
             Camera worldCamera = worldCameraInstance.Camera;
@@ -22,7 +22,7 @@ namespace Fika.Core.Utils
 
             ProceduralWeaponAnimation weaponAnimation = mainPlayer.ProceduralWeaponAnimation;
 
-            if (weaponAnimation != null)
+            if (useOpticCamera && weaponAnimation != null)
             {
                 if (weaponAnimation.IsAiming && weaponAnimation.CurrentScope.IsOptic)
                 {
