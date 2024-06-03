@@ -1,10 +1,10 @@
-﻿using Aki.Common.Http;
-using Aki.Common.Utils;
-using Aki.Custom.Models;
-using Aki.Reflection.Patching;
-using Aki.Reflection.Utils;
-using EFT.UI;
+﻿using EFT.UI;
 using HarmonyLib;
+using SPT.Common.Http;
+using SPT.Common.Utils;
+using SPT.Custom.Models;
+using SPT.Reflection.Patching;
+using SPT.Reflection.Utils;
 using System.Linq;
 using System.Reflection;
 
@@ -33,8 +33,10 @@ namespace Fika.Core.EssentialPatches
 
             string fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();
 
-            Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance).Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
-            Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance).Field("string_2").SetValue($"Fika {fikaVersion} |");
+            Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+
+            preloaderUiTraverse.Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
+            preloaderUiTraverse.Field("string_2").SetValue($"Fika {fikaVersion} |");
             Traverse.Create(__result).Field("Major").SetValue($"FIKA BETA {fikaVersion} | {_versionLabel}");
         }
     }

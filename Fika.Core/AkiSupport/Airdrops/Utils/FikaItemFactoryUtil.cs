@@ -1,12 +1,12 @@
-﻿using Aki.Common.Http;
-using Aki.Custom.Airdrops.Models;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core;
 using Newtonsoft.Json;
+using SPT.Common.Http;
+using SPT.Custom.Airdrops.Models;
 using System.Linq;
 
 namespace Aki.Custom.Airdrops.Utils
@@ -28,7 +28,7 @@ namespace Aki.Custom.Airdrops.Utils
             if (itemFactory.ItemTemplates.TryGetValue(containerId, out ItemTemplate template))
             {
                 Item item = itemFactory.CreateItem(containerId, template._id, null);
-                item.Id = Singleton<GameWorld>.Instance.MainPlayer.GClass2761_0.NextId;
+                item.Id = Singleton<GameWorld>.Instance.MainPlayer.GClass2774_0.NextId;
                 LootItem.CreateLootContainer(container, item, "CRATE", Singleton<GameWorld>.Instance);
             }
             else

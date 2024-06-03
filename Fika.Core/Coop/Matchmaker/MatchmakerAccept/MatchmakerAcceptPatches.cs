@@ -30,6 +30,8 @@ namespace Fika.Core.Coop.Matchmaker
         public static MatchMakerGroupPreview MatchMakerGroupPreview { get; set; }
         public static int HostExpectedNumberOfPlayers { get; set; } = 1;
         public static WeatherClass[] Nodes { get; set; } = null;
+        public static string RemoteIp;
+        public static int RemotePort;
         private static string groupId;
         private static long timestamp;
         #endregion
@@ -51,7 +53,7 @@ namespace Fika.Core.Coop.Matchmaker
         }
 
         public static GameObject EnvironmentUIRoot { get; internal set; }
-        public static MatchmakerTimeHasCome.GClass3163 GClass3163 { get; internal set; }
+        public static MatchmakerTimeHasCome.GClass3182 GClass3182 { get; internal set; }
         #endregion
 
         public static string GetGroupId()
@@ -74,7 +76,7 @@ namespace Fika.Core.Coop.Matchmaker
             timestamp = ts;
         }
 
-        public static bool JoinMatch(RaidSettings settings, string profileId, string serverId, out CreateMatch result, out string errorMessage)
+        public static bool JoinMatch(string profileId, string serverId, out CreateMatch result, out string errorMessage)
         {
             result = new CreateMatch();
             errorMessage = $"No server matches the data provided or the server no longer exists";

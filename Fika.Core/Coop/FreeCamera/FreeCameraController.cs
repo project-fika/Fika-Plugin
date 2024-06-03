@@ -6,8 +6,10 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.UI;
+using HarmonyLib;
 using Koenigz.PerfectCulling;
 using Koenigz.PerfectCulling.EFT;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -25,13 +27,14 @@ namespace Fika.Core.Coop.FreeCamera
         //private GameObject _mainCamera;
         private FreeCamera _freeCamScript;
 
-        private BattleUIScreen _playerUi;
+        private EftBattleUIScreen _playerUi;
         private bool _uiHidden;
 
         private bool _effectsCleared = false;
 
         private GamePlayerOwner _gamePlayerOwner;
-        private Player _player => Singleton<GameWorld>.Instance.MainPlayer;
+        private CoopPlayer _player => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        private CoopHandler coopHandler;
 
         public GameObject CameraParent;
         public Camera CameraFreeCamera { get; private set; }
@@ -41,7 +44,6 @@ namespace Fika.Core.Coop.FreeCamera
         private bool extracted = false;
         private DeathFade deathFade;
         private bool deathFadeEnabled;
-        private float DeadTime = 0f;
         private DisablerCullingObjectBase[] allCullingObjects;
         private List<PerfectCullingBakeGroup> previouslyActiveBakeGroups;
 
@@ -80,6 +82,26 @@ namespace Fika.Core.Coop.FreeCamera
 
             allCullingObjects = FindObjectsOfType<DisablerCullingObjectBase>();
             previouslyActiveBakeGroups = [];
+
+            _player.ActiveHealthController.DiedEvent += MainPlayer_DiedEvent;
+
+            if (CoopHandler.TryGetCoopHandler(out CoopHandler cHandler))
+            {
+                coopHandler = cHandler;
+            }
+        }
+
+        private void MainPlayer_DiedEvent(EDamageType obj)
+        {
+            _player.ActiveHealthController.DiedEvent -= MainPlayer_DiedEvent;
+
+            if (!deathFadeEnabled)
+            {
+                deathFade.EnableEffect();
+                deathFadeEnabled = true;
+            }
+
+            StartCoroutine(DeathRoutine());
         }
 
         protected void Update()
@@ -95,17 +117,6 @@ namespace Fika.Core.Coop.FreeCamera
             }
 
             if (_player.PlayerHealthController == null)
-            {
-                return;
-            }
-
-            if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-            {
-                return;
-            }
-
-            CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
-            if (coopGame == null)
             {
                 return;
             }
@@ -134,7 +145,8 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (quitState == CoopHandler.EQuitState.YouHaveExtracted && !extracted)
             {
-                if (coopGame.ExtractedPlayers.Contains(((CoopPlayer)_player).NetId))
+                CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
+                if (coopGame.ExtractedPlayers.Contains((_player).NetId))
                 {
                     extracted = true;
                     ShowExtractMessage();
@@ -161,56 +173,50 @@ namespace Fika.Core.Coop.FreeCamera
                     _effectsCleared = true;
                 }
             }
+        }
 
-            if (!_player.HealthController.IsAlive)
+        private IEnumerator DeathRoutine()
+        {
+            yield return new WaitForSeconds(5);
+
+            CameraClass cameraClassInstance = CameraClass.Instance;
+            if (cameraClassInstance == null)
             {
-                DeadTime += Time.deltaTime;
-                if (!deathFadeEnabled)
-                {
-                    deathFade.EnableEffect();
-                    deathFadeEnabled = true;
-                }
+                yield break;
             }
 
-            // Player is dead. Remove all effects!
-            if (!_player.HealthController.IsAlive && !_freeCamScript.IsActive && DeadTime > 5f)
+            if (cameraClassInstance.EffectsController == null)
             {
-                CameraClass cameraClassInstance = CameraClass.Instance;
-                if (cameraClassInstance == null)
-                {
-                    return;
-                }
+                yield break;
+            }
 
-                if (cameraClassInstance.EffectsController == null)
-                {
-                    return;
-                }
+            if (cameraClassInstance.Camera != null)
+            {
+                cameraClassInstance.Camera.fieldOfView = Singleton<SharedGameSettingsClass>.Instance.Game.Settings.FieldOfView;
+            }
 
-                if (cameraClassInstance.Camera != null)
-                {
-                    cameraClassInstance.Camera.fieldOfView = Singleton<SharedGameSettingsClass>.Instance.Game.Settings.FieldOfView;
-                }
-
-                // Disable the DeathFade effect & Toggle the Camera
-                deathFade.DisableEffect();
+            // Disable the DeathFade effect & Toggle the Camera
+            deathFade.DisableEffect();
+            if (!_freeCamScript.IsActive)
+            {
                 ToggleCamera();
                 ToggleUi();
-                ShowExtractMessage();
+            }
+            ShowExtractMessage();
 
-                if (!_effectsCleared)
+            if (!_effectsCleared)
+            {
+                if (_player != null)
                 {
-                    if (_player != null)
-                    {
-                        _player.Muffled = false;
-                        _player.HeavyBreath = false;
-                    }
-
-                    if (CameraClass.Exist)
-                    {
-                        ClearEffects();
-                    }
-                    _effectsCleared = true;
+                    _player.Muffled = false;
+                    _player.HeavyBreath = false;
                 }
+
+                if (CameraClass.Exist)
+                {
+                    ClearEffects();
+                }
+                _effectsCleared = true;
             }
         }
 
@@ -218,14 +224,57 @@ namespace Fika.Core.Coop.FreeCamera
         {
             CameraClass cameraClass = CameraClass.Instance;
             cameraClass.EffectsController.method_4(false);
-            cameraClass.EffectsController.enabled = false;
+
+            Traverse effectsController = Traverse.Create(cameraClass.EffectsController);
+
+            BloodOnScreen bloodOnScreen = effectsController.Field("bloodOnScreen_0").GetValue<BloodOnScreen>();
+            if (bloodOnScreen != null)
+            {
+                Destroy(bloodOnScreen);
+            }
+
+            List<EffectsController.Class572> effectsManagerList = effectsController.Field("list_0").GetValue<List<EffectsController.Class572>>();
+            if (effectsManagerList != null)
+            {
+                foreach (EffectsController.Class572 effectsManager in effectsManagerList)
+                {
+                    while (effectsManager.ActiveEffects.Count > 0)
+                    {
+                        IEffect effect = effectsManager.ActiveEffects[0];
+                        effectsManager.DeleteEffect(effect);
+                    }
+                }
+                effectsManagerList.Clear();
+            }
+
+            CC_Wiggle wiggleEffect = cameraClass.Camera.gameObject.GetComponent<CC_Wiggle>();
+            if (wiggleEffect != null)
+            {
+                wiggleEffect.enabled = false;
+            }
+
+            CC_Blend[] blendEffects = cameraClass.Camera.gameObject.GetComponents<CC_Blend>();
+            if (blendEffects.Length > 0)
+            {
+                foreach (CC_Blend blendEffect in blendEffects)
+                {
+                    blendEffect.enabled = false;
+                }
+            }
+
             Destroy(cameraClass.EffectsController);
             cameraClass.VisorEffect.Clear();
             Destroy(cameraClass.VisorEffect);
             cameraClass.VisorSwitcher.Deinit();
             Destroy(cameraClass.VisorSwitcher);
-            Destroy(cameraClass.NightVision);
-            Destroy(cameraClass.ThermalVision);
+            if (cameraClass.NightVision.On)
+            {
+                cameraClass.NightVision.method_1(false);
+            }
+            if (cameraClass.ThermalVision.On)
+            {
+                cameraClass.ThermalVision.method_1(false);
+            }
         }
 
         private void ShowExtractMessage()
@@ -283,7 +332,7 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                _playerUi = gameObject.GetComponent<BattleUIScreen>();
+                _playerUi = gameObject.GetComponent<EftBattleUIScreen>();
 
                 if (_playerUi == null)
                 {
@@ -432,11 +481,11 @@ namespace Fika.Core.Coop.FreeCamera
 
             // Destroy FreeCamScript before FreeCamController if exists
             Destroy(_freeCamScript);
-            Destroy(this);
             if (extractText != null)
             {
                 Destroy(extractText);
             }
+            Destroy(this);
         }
     }
 }

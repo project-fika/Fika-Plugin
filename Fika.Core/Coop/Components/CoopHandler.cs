@@ -315,7 +315,7 @@ namespace Fika.Core.Coop.Components
             if (writer != null)
             {
                 writer.Reset();
-                Singleton<FikaClient>.Instance?.SendData(writer, ref requestPacket, DeliveryMethod.ReliableOrdered);
+                Singleton<FikaClient>.Instance.SendData(writer, ref requestPacket, DeliveryMethod.ReliableOrdered);
             }
         }
 
@@ -353,19 +353,19 @@ namespace Fika.Core.Coop.Components
             {
                 if (x.IsCompleted)
                 {
-                    Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete.");
+                    Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
                 }
                 else if (x.IsFaulted)
                 {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed.");
+                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
                 }
                 else if (x.IsCanceled)
                 {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled?");
+                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
                 }
             });
 
-            LocalPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
+            ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
 
             if (!spawnObject.IsAlive)
             {
@@ -453,22 +453,22 @@ namespace Fika.Core.Coop.Components
             return null;
         }
 
-        private LocalPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
+        private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
-            LocalPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position, Quaternion.identity,
+            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position, Quaternion.identity,
                 "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, isAI,
                 EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
-                GClass549.Config.CharacterController.ObservedPlayerMode,
+                GClass548.Config.CharacterController.ObservedPlayerMode,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
-                GClass1446.Default).Result;
+                GClass1456.Default).Result;
 
             if (otherPlayer == null)
             {
                 return null;
             }
 
-            ((CoopPlayer)otherPlayer).NetId = netId;
+            otherPlayer.NetId = netId;
             Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
             if (!isAI)
             {
@@ -477,7 +477,7 @@ namespace Fika.Core.Coop.Components
 
             if (!Players.ContainsKey(netId))
             {
-                Players.Add(netId, (CoopPlayer)otherPlayer);
+                Players.Add(netId, otherPlayer);
             }
             else
             {
@@ -531,6 +531,8 @@ namespace Fika.Core.Coop.Components
                     item.SpawnedInSession = true;
                 }
             }
+
+            otherPlayer.InitObservedPlayer();
 
             Logger.LogDebug($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 
@@ -636,7 +638,7 @@ namespace Fika.Core.Coop.Components
             });
         }
 
-        public BaseLocalGame<GamePlayerOwner> LocalGameInstance { get; internal set; }
+        public BaseLocalGame<EftGamePlayerOwner> LocalGameInstance { get; internal set; }
     }
 
     public enum ESpawnState

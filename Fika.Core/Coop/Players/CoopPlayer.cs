@@ -52,25 +52,38 @@ namespace Fika.Core.Coop.Players
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-            Func<float> getAimingSensitivity, GInterface99 filter, int netId, IStatisticsManager statisticsManager)
+            Func<float> getAimingSensitivity, GInterface111 filter, int netId, IStatisticsManager statisticsManager)
         {
             CoopPlayer player = null;
 
-            player = Create<CoopPlayer>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+            player = Create<CoopPlayer>(GClass1398.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
             player.NetId = netId;
 
-            CoopClientInventoryController inventoryController = new(player, profile, true);
+            CoopClientInventoryController inventoryController = new(player, profile, false);
 
-            GClass3206 questController = new(profile, inventoryController, null, true);
+            ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
+
+            GClass3223 questController = new(profile, inventoryController, session, true);
             questController.Init();
             questController.Run();
 
-            AchievementControllerClass achievementsController = new(profile, inventoryController, null, true);
+            AchievementControllerClass achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
+
+            if (MatchmakerAcceptPatches.IsServer)
+            {
+                player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
+            }
+            else if (MatchmakerAcceptPatches.IsClient)
+            {
+                player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
+            }
+
+            player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
@@ -79,11 +92,11 @@ namespace Fika.Core.Coop.Players
 
             foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
             {
-                player.GClass2761_0.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+                player.GClass2774_0.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
             }
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, new Action(Class1500.class1500_0.method_0));
+            player._handsController.Spawn(1f, new Action(Class1522.class1522_0.method_0));
             player.AIData = new AIData(null, player);
             player.AggressorFound = false;
             player._animators[0].enabled = true;
@@ -93,7 +106,7 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
-        public override void OnSkillLevelChanged(GClass1766 skill)
+        public override void OnSkillLevelChanged(GClass1776 skill)
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format("SkillLevelUpMessage".Localized(null),
                 skill.Id.ToString().Localized(null),
@@ -124,8 +137,8 @@ namespace Fika.Core.Coop.Players
                     InteractPacket = btr.GetInteractWithBtrPacket(placeId, interaction)
                 };
 
-                PacketSender?.Writer?.Reset();
-                PacketSender?.Client?.SendData(PacketSender?.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                PacketSender.Writer.Reset();
+                PacketSender.Client.SendData(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
             }
             else if (MatchmakerAcceptPatches.IsServer)
             {
@@ -142,8 +155,8 @@ namespace Fika.Core.Coop.Players
                             InteractPacket = interactPacket
                         };
 
-                        PacketSender?.Writer?.Reset();
-                        PacketSender?.Server?.SendDataToAll(PacketSender?.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.Writer.Reset();
+                        PacketSender.Server.SendDataToAll(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
                 }
             }
@@ -158,7 +171,10 @@ namespace Fika.Core.Coop.Players
                 {
                     if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                     {
-                        coopHandler.clientBTR?.ClientInteraction(this, packet.InteractPacket);
+                        if (coopHandler.clientBTR != null)
+                        {
+                            coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket);
+                        }
                     }
                 }
             }
@@ -198,7 +214,7 @@ namespace Fika.Core.Coop.Players
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
         }
 
-        public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1686 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
             if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
             {
@@ -213,10 +229,10 @@ namespace Fika.Core.Coop.Players
             return null;
         }
 
-        public override void Proceed(bool withNetwork, Callback<GInterface125> callback, bool scheduled = true)
+        public override void Proceed(bool withNetwork, Callback<GInterface137> callback, bool scheduled = true)
         {
             base.Proceed(withNetwork, callback, scheduled);
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasProceedPacket = true,
                 ProceedPacket = new()
@@ -227,7 +243,7 @@ namespace Fika.Core.Coop.Players
             });
         }
 
-        public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface130> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
         {
             FoodControllerHandler handler = new(this, foodDrink, amount, EBodyPart.Head, animationVariant);
 
@@ -237,7 +253,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(Item item, Callback<GInterface135> callback, bool scheduled = true)
+        public override void Proceed(Item item, Callback<GInterface147> callback, bool scheduled = true)
         {
             QuickUseItemControllerHandler handler = new(this, item);
 
@@ -257,7 +273,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(KnifeComponent knife, Callback<GInterface134> callback, bool scheduled = true)
+        public override void Proceed(KnifeComponent knife, Callback<GInterface146> callback, bool scheduled = true)
         {
             QuickKnifeControllerHandler handler = new(this, knife);
 
@@ -267,7 +283,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface130> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
         {
             MedsControllerHandler handler = new(this, meds, bodyPart, animationVariant);
 
@@ -312,7 +328,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed<T>(Item item, Callback<GInterface129> callback, bool scheduled = true)
+        public override void Proceed<T>(Item item, Callback<GInterface141> callback, bool scheduled = true)
         {
             // what is this
             base.Proceed<T>(item, callback, scheduled);
@@ -322,7 +338,7 @@ namespace Fika.Core.Coop.Players
         {
             base.DropCurrentController(callback, fastDrop, nextControllerItem);
 
-            /*PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            /*PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasDrop = true,
                 DropPacket = new()
@@ -342,7 +358,7 @@ namespace Fika.Core.Coop.Players
             }
 
             base.SetInventoryOpened(opened);
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasInventoryChanged = true,
                 SetInventoryOpen = opened
@@ -352,7 +368,7 @@ namespace Fika.Core.Coop.Players
         public override void SetCompassState(bool value)
         {
             base.SetCompassState(value);
-            PacketSender?.FirearmPackets?.Enqueue(new()
+            PacketSender.FirearmPackets.Enqueue(new()
             {
                 HasCompassChange = true,
                 CompassState = value
@@ -371,17 +387,20 @@ namespace Fika.Core.Coop.Players
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            GStruct163[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct163>(ClientPlayer.Class1430.class1430_0.method_0)).ToArray();
+            GStruct164[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct164>(ClientPlayer.Class1452.class1452_0.method_0)).ToArray();
 
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            if (PacketSender != null)
             {
-                HasHeadLightsPacket = true,
-                HeadLightsPacket = new()
+                PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
-                    Amount = lightStates.Count(),
-                    LightStates = lightStates
-                }
-            });
+                    HasHeadLightsPacket = true,
+                    HeadLightsPacket = new()
+                    {
+                        Amount = lightStates.Count(),
+                        LightStates = lightStates
+                    }
+                });
+            }
         }
 
         public override void OnItemAddedOrRemoved(Item item, ItemAddress location, bool added)
@@ -395,7 +414,7 @@ namespace Fika.Core.Coop.Players
 
             if (ActiveHealthController.IsAlive)
             {
-                PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     Phrase = @event,
                     PhraseIndex = clip.NetId
@@ -403,10 +422,10 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct169.EStationaryCommand command)
+        public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct170.EStationaryCommand command)
         {
             base.OperateStationaryWeapon(stationaryWeapon, command);
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasStationaryPacket = true,
                 StationaryPacket = new()
@@ -444,10 +463,10 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass2964 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass2981 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
-            PacketSender?.CommonPlayerPackets?.Enqueue(packet);
+            PacketSender.CommonPlayerPackets.Enqueue(packet);
         }
 
         // Execute
@@ -469,10 +488,10 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = door.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Execute,
-                    ItemId = (interactionResult is GClass2964 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass2981 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
-            PacketSender?.CommonPlayerPackets?.Enqueue(packet);
+            PacketSender.CommonPlayerPackets.Enqueue(packet);
 
             UpdateInteractionCast();
         }
@@ -480,7 +499,7 @@ namespace Fika.Core.Coop.Players
         public override void vmethod_3(EGesture gesture)
         {
             base.vmethod_3(gesture);
-            PacketSender?.FirearmPackets?.Enqueue(new()
+            PacketSender.FirearmPackets.Enqueue(new()
             {
                 Gesture = gesture
             });
@@ -491,7 +510,7 @@ namespace Fika.Core.Coop.Players
             Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
         }
 
-        public HealthSyncPacket SetupDeathPacket(GStruct346 packet)
+        public HealthSyncPacket SetupDeathPacket(GStruct347 packet)
         {
             float num = EFTHardSettings.Instance.HIT_FORCE;
             num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
@@ -530,7 +549,10 @@ namespace Fika.Core.Coop.Players
         {
             yield return new WaitForSeconds(2);
 
-            PacketSender?.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis();
+            }
         }
 
         public override void Move(Vector2 direction)
@@ -761,7 +783,7 @@ namespace Fika.Core.Coop.Players
                     Color pingColor = FikaPlugin.PingColor.Value;
                     pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
                     // ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
-                    abstractPing?.Initialize(ref hitPoint, userData, pingColor);
+                    abstractPing.Initialize(ref hitPoint, userData, pingColor);
 
                     GenericPacket genericPacket = new()
                     {
@@ -773,14 +795,14 @@ namespace Fika.Core.Coop.Players
                         Nickname = Profile.Nickname
                     };
 
-                    PacketSender?.Writer?.Reset();
+                    PacketSender.Writer.Reset();
                     if (MatchmakerAcceptPatches.IsServer)
                     {
-                        PacketSender?.Server?.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.Server.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
                     else if (MatchmakerAcceptPatches.IsClient)
                     {
-                        PacketSender?.Client?.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
 
                     if (FikaPlugin.PlayPingAnimation.Value)
@@ -821,22 +843,13 @@ namespace Fika.Core.Coop.Players
 
         protected virtual void Start()
         {
-            if (MatchmakerAcceptPatches.IsServer)
-            {
-                PacketSender = gameObject.AddComponent<ServerPacketSender>();
-            }
-            else if (MatchmakerAcceptPatches.IsClient)
-            {
-                PacketSender = gameObject.AddComponent<ClientPacketSender>();
-            }
-            PacketReceiver = gameObject.AddComponent<PacketReceiver>();
             Profile.Info.GroupId = "Fika";
 
             if (Side != EPlayerSide.Savage)
             {
                 if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct414<GClass2785> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
+                    GStruct415<GClass2798> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::Start: Error removing dog tag!");
@@ -934,7 +947,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (this is ObservedCoopPlayer observedCoopPlayer)
                 {
-                    observedCoopPlayer?.HandleProceedPacket(packet.ProceedPacket);
+                    observedCoopPlayer.HandleProceedPacket(packet.ProceedPacket);
                 }
             }
 
@@ -968,7 +981,7 @@ namespace Fika.Core.Coop.Players
             if (packet.HasStationaryPacket)
             {
                 StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy) ? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
-                base.OperateStationaryWeapon(stationaryWeapon, (GStruct169.EStationaryCommand)packet.StationaryPacket.Command);
+                base.OperateStationaryWeapon(stationaryWeapon, (GStruct170.EStationaryCommand)packet.StationaryPacket.Command);
             }
 
             if (packet.Pickup)
@@ -1023,7 +1036,7 @@ namespace Fika.Core.Coop.Players
                     using BinaryReader binaryReader = new(memoryStream);
                     try
                     {
-                        GStruct411 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1532>());
+                        GStruct412 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1542>());
 
                         InventoryOperationHandler opHandler = new(result);
 
@@ -1031,9 +1044,9 @@ namespace Fika.Core.Coop.Players
 
                         // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
                         // Unknown what problems this might cause so far.
-                        if (result.Value is GClass2861 unloadOperation)
+                        if (result.Value is GClass2874 unloadOperation)
                         {
-                            if (unloadOperation.InternalOperation is GClass2872 internalSplitOperation)
+                            if (unloadOperation.InternalOperation is GClass2885 internalSplitOperation)
                             {
                                 Item item = internalSplitOperation.To.Item;
                                 if (item != null)
@@ -1055,7 +1068,7 @@ namespace Fika.Core.Coop.Players
                         }
 
                         // TODO: Same as above.
-                        if (result.Value is GClass2872 splitOperation)
+                        if (result.Value is GClass2885 splitOperation)
                         {
                             Item item = splitOperation.To.Item;
                             if (item != null)
@@ -1267,7 +1280,7 @@ namespace Fika.Core.Coop.Players
 
             if (!string.IsNullOrEmpty(packet.DamageInfo.ProfileId))
             {
-                GInterface94 player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.DamageInfo.ProfileId);
+                GInterface106 player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.DamageInfo.ProfileId);
 
                 if (player != null)
                 {
@@ -1326,6 +1339,15 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public void CheckAndResetControllers(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
+        {
+            _questController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
+            _questController?.ResetCurrentNullableCounters();
+
+            _achievementsController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
+            _achievementsController?.ResetCurrentNullableCounters();
+        }
+
         public virtual void SetInventory(EquipmentClass equipmentClass)
         {
             // Do nothing
@@ -1339,7 +1361,10 @@ namespace Fika.Core.Coop.Players
         public override void Dispose()
         {
             base.Dispose();
-            PacketSender?.DestroyThis();
+            if (PacketSender != null)
+            {
+                PacketSender.DestroyThis();
+            }
         }
 
         public override void SendHandsInteractionStateChanged(bool value, int animationId)
@@ -1347,7 +1372,7 @@ namespace Fika.Core.Coop.Players
             base.SendHandsInteractionStateChanged(value, animationId);
             if (value)
             {
-                PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     Pickup = value,
                     PickupAnimation = animationId
@@ -1357,7 +1382,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnVaulting()
         {
-            PacketSender?.CommonPlayerPackets?.Enqueue(new()
+            PacketSender.CommonPlayerPackets.Enqueue(new()
             {
                 HasVaultPacket = true,
                 VaultPacket = new()
@@ -1381,7 +1406,7 @@ namespace Fika.Core.Coop.Players
                 return item;
             }
 
-            GStruct416<Item> itemResult = FindItemById(itemId);
+            GStruct417<Item> itemResult = FindItemById(itemId);
             if (itemResult.Error != null)
             {
                 FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
@@ -1393,7 +1418,7 @@ namespace Fika.Core.Coop.Players
         private class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct416<GClass2964> unlockResult;
+            public GStruct417<GClass2981> unlockResult;
 
             internal void HandleKeyEvent()
             {
@@ -1401,9 +1426,9 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class InventoryOperationHandler(GStruct411 opResult)
+        private class InventoryOperationHandler(GStruct412 opResult)
         {
-            public readonly GStruct411 opResult = opResult;
+            public readonly GStruct412 opResult = opResult;
 
             internal void HandleResult(IResult result)
             {
@@ -1421,7 +1446,7 @@ namespace Fika.Core.Coop.Players
 
             public void Handle()
             {
-                player.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                player.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasContainerInteractionPacket = true,
                     ContainerInteractionPacket = new()
@@ -1459,7 +1484,7 @@ namespace Fika.Core.Coop.Players
                     return;
                 }
 
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1484,7 +1509,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly Item item = item;
-            public Process<QuickUseItemController, GInterface135> process;
+            public Process<QuickUseItemController, GInterface147> process;
             public Action confirmCallback;
 
             internal QuickUseItemController ReturnController()
@@ -1494,7 +1519,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1521,7 +1546,7 @@ namespace Fika.Core.Coop.Players
             private readonly MedsClass meds = meds;
             private readonly EBodyPart bodyPart = bodyPart;
             private readonly int animationVariant = animationVariant;
-            public Process<MedsController, GInterface130> process;
+            public Process<MedsController, GInterface142> process;
             public Action confirmCallback;
 
             internal MedsController ReturnController()
@@ -1531,7 +1556,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1561,7 +1586,7 @@ namespace Fika.Core.Coop.Players
             private readonly float amount = amount;
             private readonly EBodyPart bodyPart = bodyPart;
             private readonly int animationVariant = animationVariant;
-            public Process<MedsController, GInterface130> process;
+            public Process<MedsController, GInterface142> process;
             public Action confirmCallback;
 
             internal MedsController ReturnController()
@@ -1571,7 +1596,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1609,7 +1634,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1634,7 +1659,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             public readonly KnifeComponent knife = knife;
-            public Process<QuickKnifeKickController, GInterface134> process;
+            public Process<QuickKnifeKickController, GInterface146> process;
             public Action confirmCallback;
 
             internal QuickKnifeKickController ReturnController()
@@ -1644,7 +1669,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1679,7 +1704,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()
@@ -1714,7 +1739,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender?.CommonPlayerPackets?.Enqueue(new()
+                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
                 {
                     HasProceedPacket = true,
                     ProceedPacket = new()

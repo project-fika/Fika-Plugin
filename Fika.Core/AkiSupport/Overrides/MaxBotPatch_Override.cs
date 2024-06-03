@@ -1,22 +1,29 @@
-﻿using Aki.Common.Http;
-using Aki.Reflection.Patching;
-using Aki.Reflection.Utils;
+﻿using Comfort.Common;
+using EFT;
 using Fika.Core.Coop.Matchmaker;
+using SPT.Common.Http;
+using SPT.Reflection.Patching;
+using SPT.Reflection.Utils;
 using System.Reflection;
 
 namespace Fika.Core.AkiSupport.Overrides
 {
+    /// <summary>
+    /// Override of SPT patch to reduce data requests to server. <br/> 
+    /// <see href="https://dev.sp-tarkov.com/SPT/Modules/src/commit/599b5ec5203a32a9f4adcb7fae810b2103be5de0/project/SPT.SinglePlayer/Patches/RaidFix/MaxBotPatch.cs">Source</see>
+    /// </summary>
+    /// <returns></returns>
     internal class MaxBotPatch_Override : ModulePatch
-    {
+    {        
         protected override MethodBase GetTargetMethod()
         {
             const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
             const string methodName = "SetSettings";
-            var desiredType = PatchConstants.EftTypes.SingleCustom(x => x.GetMethod(methodName, flags) != null && IsTargetMethod(x.GetMethod(methodName, flags)));
-            var desiredMethod = desiredType.GetMethod(methodName, flags);
+            System.Type desiredType = PatchConstants.EftTypes.SingleCustom(x => x.GetMethod(methodName, flags) != null && IsTargetMethod(x.GetMethod(methodName, flags)));
+            MethodInfo desiredMethod = desiredType.GetMethod(methodName, flags);
 
-            Logger.LogDebug($"{this.GetType().Name} Type: {desiredType?.Name}");
-            Logger.LogDebug($"{this.GetType().Name} Method: {desiredMethod?.Name}");
+            Logger.LogDebug($"{GetType().Name} Type: {desiredType?.Name}");
+            Logger.LogDebug($"{GetType().Name} Method: {desiredMethod?.Name}");
 
             return desiredMethod;
         }
@@ -32,7 +39,10 @@ namespace Fika.Core.AkiSupport.Overrides
         {
             if (MatchmakerAcceptPatches.IsServer)
             {
-                if (int.TryParse(RequestHandler.GetJson("/singleplayer/settings/bot/maxCap"), out int parsedMaxCount))
+                GameWorld gameWorld = Singleton<GameWorld>.Instance;
+                string location = gameWorld.MainPlayer.Location;
+
+                if (int.TryParse(RequestHandler.GetJson($"/singleplayer/settings/bot/maxCap/{location ?? "default"}"), out int parsedMaxCount))
                 {
                     Logger.LogWarning($"Set max bot cap to: {parsedMaxCount}");
                     maxCount = parsedMaxCount;

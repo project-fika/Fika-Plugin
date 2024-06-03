@@ -1,9 +1,9 @@
-﻿using Aki.Reflection.Patching;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,7 +65,7 @@ namespace Fika.Core.Coop.Patches
                 IEnumerable<BodyPartCollider> enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_4))
                     : player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_5));
 
-                enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2286.class2286_0.method_0)).ToArray();
+                enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2312.class2312_0.method_0)).ToArray();
                 enumerable = enumerable.Randomize();
 
                 int num3 = ((isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue);
@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.Patches
 
                 foreach (BodyPartCollider bodyPartCollider in enumerable)
                 {
-                    coopPlayer.PacketSender?.DamagePackets?.Enqueue(new()
+                    coopPlayer.PacketSender.DamagePackets.Enqueue(new()
                     {
                         DamageInfo = new()
                         {

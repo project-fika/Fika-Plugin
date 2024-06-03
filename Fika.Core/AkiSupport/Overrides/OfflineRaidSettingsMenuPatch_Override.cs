@@ -1,7 +1,7 @@
-﻿using Aki.Reflection.Patching;
-using EFT.UI;
+﻿using EFT.UI;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -42,7 +42,7 @@ namespace Fika.Core.AkiSupport.Overrides
             }
 
             // Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
-            List<BaseDropDownBox.Struct945> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field("list_0").GetValue<List<BaseDropDownBox.Struct945>>();
+            List<BaseDropDownBox.Struct966> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field("list_0").GetValue<List<BaseDropDownBox.Struct966>>();
             labelList.Clear();
             labelList.Add(new()
             {

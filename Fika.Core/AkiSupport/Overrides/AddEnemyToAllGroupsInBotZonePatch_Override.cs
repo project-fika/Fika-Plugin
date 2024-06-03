@@ -1,7 +1,7 @@
-﻿using Aki.Reflection.Patching;
-using EFT;
+﻿using EFT;
 using Fika.Core.Coop.Players;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -43,7 +43,7 @@ namespace Fika.Core.AkiSupport.Overrides
             }
 
             BotZone botZone = groupOwner.AIData.BotOwner.BotsGroup.BotZone;
-            foreach (KeyValuePair<BotZone, GClass492> item in __instance.Groups())
+            foreach (KeyValuePair<BotZone, GClass491> item in __instance.Groups())
             {
                 if (item.Key != botZone)
                 {

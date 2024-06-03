@@ -1,10 +1,10 @@
-using Aki.Common.Http;
 using EFT;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
+using SPT.Common.Http;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -134,6 +134,11 @@ namespace Fika.Core.Networking.Http
         public static Dictionary<string, string> AvailableReceivers(AvailableReceiversRequest data)
         {
             return PostJson<AvailableReceiversRequest, Dictionary<string, string>>("/fika/senditem/availablereceivers", data);
+        }
+
+        public static async Task<RaidSettingsResponse> GetRaidSettings(RaidSettingsRequest data)
+        {
+            return await PostJsonAsync<RaidSettingsRequest, RaidSettingsResponse>("/fika/raid/getsettings", data);
         }
     }
 }

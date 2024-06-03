@@ -1,5 +1,4 @@
-﻿using Aki.Reflection.Patching;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -7,6 +6,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -27,15 +27,23 @@ namespace Fika.Core.UI.Patches
         [PatchPrefix]
         private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
         {
-            if (contextInteractions is not GClass3021 gclass)
+            if (contextInteractions is not GClass3038 gclass)
             {
                 return;
             }
 
-            ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("gclass2813_0").Value;
+            ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("gclass2826_0").Value;
             if (itemContext.ViewType == EItemViewType.Inventory)
             {
                 if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld)
+                {
+                    return;
+                }
+
+                // Save as variable in case we need to add more checks later...
+                MenuUI menuUI = Singleton<MenuUI>.Instance;
+
+                if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled)
                 {
                     return;
                 }
@@ -49,17 +57,26 @@ namespace Fika.Core.UI.Patches
                 Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions).Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
                 if (dynamicInteractions == null)
                 {
-                    dynamicInteractions = new Dictionary<string, DynamicInteractionClass>();
+                    dynamicInteractions = [];
                 }
 
                 dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
                 {
-                    var body = new AvailableReceiversRequest(itemContext.Item.Id);
-                    var availableUsers = FikaRequestHandler.AvailableReceivers(body);
+                    foreach (string itemId in FikaPlugin.Instance.BlacklistedItems)
+                    {
+                        if (itemId == item.TemplateId)
+                        {
+                            NotificationManagerClass.DisplayMessageNotification($"{item.ShortName.Localized()} is blacklisted from being sent.", iconType: EFT.Communications.ENotificationIconType.Alert);
+                            return;
+                        }
+                    }
+
+                    AvailableReceiversRequest body = new(itemContext.Item.Id);
+                    Dictionary<string, string> availableUsers = FikaRequestHandler.AvailableReceivers(body);
 
                     // convert availableUsers.Keys
                     List<TMP_Dropdown.OptionData> optionDatas = [];
-                    foreach (var user in availableUsers.Keys)
+                    foreach (string user in availableUsers.Keys)
                     {
                         optionDatas.Add(new()
                         {
@@ -78,7 +95,7 @@ namespace Fika.Core.UI.Patches
                     GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("senditemmenu").LoadAsset<GameObject>("SendItemMenu");
                     GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
                     uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
-                    InventoryScreen.GClass3116 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3116>("ScreenController").Value;
+                    InventoryScreen.GClass3137 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3137>("ScreenController").Value;
                     screenController.OnClose += () => { Object.Destroy(uiGameObj); };
                     SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
                     sendItemUI.PlayersDropdown.ClearOptions();

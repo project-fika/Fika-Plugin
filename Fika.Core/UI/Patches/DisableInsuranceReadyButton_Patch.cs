@@ -1,7 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.Reflection.Patching;
 using EFT.UI;
+using SPT.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
 

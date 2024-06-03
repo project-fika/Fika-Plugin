@@ -1,5 +1,4 @@
-﻿using Aki.Custom.Airdrops.Models;
-using Aki.Custom.Airdrops.Utils;
+﻿using Aki.Custom.Airdrops.Utils;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
@@ -13,6 +12,7 @@ using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using SPT.Custom.Airdrops.Models;
 using System;
 using System.Collections;
 using UnityEngine;

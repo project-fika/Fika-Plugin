@@ -1,5 +1,5 @@
-﻿using Aki.Custom.Airdrops.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using SPT.Custom.Airdrops.Models;
 using UnityEngine;
 
 namespace Fika.Core.AkiSupport.Airdrops.Models

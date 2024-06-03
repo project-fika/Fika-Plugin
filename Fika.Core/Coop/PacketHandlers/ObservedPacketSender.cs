@@ -39,6 +39,11 @@ namespace Fika.Core.Coop.PacketHandlers
             }
         }
 
+        public void Init()
+        {
+
+        }
+
         protected void Update()
         {
             if (player == null || Writer == null)

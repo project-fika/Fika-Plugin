@@ -2,7 +2,7 @@
     - Using Aki zlib (de-)compression
 */
 
-using Aki.Common.Utils;
+using SPT.Common.Utils;
 using System;
 using System.IO;
 using System.Net.Http;
