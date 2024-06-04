@@ -98,9 +98,9 @@ namespace Fika.Core.Coop.Custom
             playerPlate.ScalarObjectScreen.active = true;
 
             float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
-            Vector3 position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), currentPlayer.PlayerBones.Neck.position.z);
-
-            if (!WorldToScreen.GetScreenPoint(position, mainPlayer, out Vector3 screenPoint))
+            Vector3 position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), currentPlayer.PlayerBones.Neck.position.z);      
+            
+            if (!WorldToScreen.GetScreenPoint(position, mainPlayer, out Vector3 screenPoint, FikaPlugin.NamePlateUseOpticZoom.Value))
             {
                 UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, 0);
                 UpdateColorImage(playerPlate.healthBarScreen, 0);

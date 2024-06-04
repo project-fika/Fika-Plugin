@@ -79,6 +79,8 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 throw new ArgumentNullException("timeHasComeScreenController");
             }
 
+            bool isServer = MatchmakerAcceptPatches.IsServer;
+
             LocationSettingsClass.Location location = ____raidSettings.SelectedLocation;
 
             MatchmakerAcceptPatches.GClass3182 = timeHasComeScreenController;
@@ -89,6 +91,10 @@ namespace Fika.Core.Coop.Patches.LocalGame
             }
 
             NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
+            if (isServer)
+            {
+                NetManagerUtils.StartPinger(); 
+            }
 
             ISession session = CurrentSession;
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
@@ -126,7 +132,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             await session.SendRaidSettings(____raidSettings);
 
-            if (MatchmakerAcceptPatches.IsClient)
+            if (!isServer)
             {
                 timeHasComeScreenController.ChangeStatus("Joining coop game...");
 
@@ -152,7 +158,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
             Singleton<AbstractGame>.Create(coopGame);
             FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
 
-            if (MatchmakerAcceptPatches.IsClient)
+            if (!isServer)
             {
                 coopGame.SetMatchmakerStatus("Coop game joined");
             }
