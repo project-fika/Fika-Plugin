@@ -1920,6 +1920,8 @@ namespace Fika.Core.Coop.GameMode
                     Destroy(newDynamicAI);
                 }
 
+                NetManagerUtils.StopPinger();
+
                 FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
                 FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
             }

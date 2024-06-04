@@ -1,17 +1,17 @@
-using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Matchmaker;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Http.Models
 {
-    [DataContract]
-    public struct PingRequest
-    {
-        [DataMember(Name = "serverId")]
-        public string ServerId;
+	[DataContract]
+	public struct PingRequest
+	{
+		[DataMember(Name = "serverId")]
+		public string ServerId;
 
-        public PingRequest()
-        {
-            ServerId = CoopHandler.GetServerId();
-        }
-    }
+		public PingRequest()
+		{
+			ServerId = MatchmakerAcceptPatches.GetGroupId();
+		}
+	}
 }
