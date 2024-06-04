@@ -780,6 +780,11 @@ namespace Fika.Core.Coop.GameMode
                 coopPlayer.NetId = MatchmakerAcceptPatches.ReconnectPacket.Value.NetId;
                 myPlayer.MovementContext.SetPoseLevel(MatchmakerAcceptPatches.ReconnectPacket.Value.PoseLevel, true);
                 myPlayer.MovementContext.IsInPronePose = MatchmakerAcceptPatches.ReconnectPacket.Value.IsProne;
+                CoopClientHealthController healthController = (CoopClientHealthController)myPlayer.ActiveHealthController;
+                if (healthController != null)
+                {
+                    healthController.SyncBodyPartsState();
+                }
             }
 
             if (RaidSettings.MetabolismDisabled)
