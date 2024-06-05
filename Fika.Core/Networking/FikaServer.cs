@@ -8,6 +8,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
@@ -15,6 +16,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Networking.Packets.Player;
 using LiteNetLib;
@@ -54,7 +56,7 @@ namespace Fika.Core.Networking
         }
         public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
         public bool hasHadPeer = false;
-        private readonly ManualLogSource serverLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
+        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
         private int _currentNetId;
         public bool Started
         {
@@ -67,13 +69,12 @@ namespace Fika.Core.Networking
                 return _netServer.IsRunning;
             }
         }
+        private FikaChat fikaChat;
 
         public async Task Init()
         {
             // Start at 1 to avoid having 0 and making us think it's working when it's not
             _currentNetId = 1;
-
-            NetDebug.Logger = this;
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
@@ -93,6 +94,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -122,7 +124,7 @@ namespace Fika.Core.Networking
                 }
                 catch (Exception ex)
                 {
-                    serverLogger.LogError($"Error when attempting to map UPnP. Make sure the selected port is not already open! Error message: {ex.Message}");
+                    logger.LogError($"Error when attempting to map UPnP. Make sure the selected port is not already open! Error message: {ex.Message}");
                     upnpFailed = true;
                 }
 
@@ -159,7 +161,7 @@ namespace Fika.Core.Networking
                 _netServer.Start(Port);
             }
 
-            serverLogger.LogInfo("Started Fika Server");
+            logger.LogInfo("Started Fika Server");
             NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
@@ -186,6 +188,19 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnTextMessagePacketReceived(TextMessagePacket packet, NetPeer peer)
+        {
+            logger.LogInfo($"Received message from: {packet.Nickname}, Message: {packet.Message}");
+
+            if (fikaChat != null)
+            {
+                fikaChat.ReceiveMessage(packet.Nickname, packet.Message);
+            }
+
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
+        }
+
         public int PopNetId()
         {
             int netId = _currentNetId;
@@ -198,6 +213,7 @@ namespace Fika.Core.Networking
         {
             coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             MyPlayer = coopPlayer;
+            fikaChat = gameObject.AddComponent<FikaChat>();
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
@@ -348,7 +364,7 @@ namespace Fika.Core.Networking
                 }
                 else
                 {
-                    serverLogger.LogError($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
+                    logger.LogError($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
                 }
             }
         }
@@ -476,14 +492,14 @@ namespace Fika.Core.Networking
             if (!Players.ContainsKey(packet.NetId) && !PlayersMissing.Contains(packet.ProfileId) && !coopHandler.ExtractedPlayers.Contains(packet.NetId))
             {
                 PlayersMissing.Add(packet.ProfileId);
-                serverLogger.LogInfo($"Requesting missing player from server.");
+                logger.LogInfo($"Requesting missing player from server.");
                 AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
                 _dataWriter.Reset();
                 SendDataToPeer(peer, _dataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
             }
             if (!packet.IsRequest && PlayersMissing.Contains(packet.ProfileId))
             {
-                serverLogger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
+                logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
                     coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
@@ -630,7 +646,7 @@ namespace Fika.Core.Networking
             }
             else
             {
-                serverLogger.LogError("OnGameTimerPacketReceived: Game was null!");
+                logger.LogError("OnGameTimerPacketReceived: Game was null!");
             }
         }
 
@@ -652,8 +668,12 @@ namespace Fika.Core.Networking
 
         protected void OnDestroy()
         {
-            NetDebug.Logger = null;
             _netServer?.Stop();
+
+            if (fikaChat != null)
+            {
+                Destroy(fikaChat);
+            }
 
             FikaEventDispatcher.DispatchEvent(new FikaServerDestroyedEvent(this));
         }
@@ -685,21 +705,21 @@ namespace Fika.Core.Networking
         public void OnPeerConnected(NetPeer peer)
         {
             NotificationManagerClass.DisplayMessageNotification($"Peer connected to server on port {peer.Port}.", iconType: EFT.Communications.ENotificationIconType.Friend);
-            serverLogger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
+            logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
 
             hasHadPeer = true;
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
         {
-            serverLogger.LogError("[SERVER] error " + socketErrorCode);
+            logger.LogError("[SERVER] error " + socketErrorCode);
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
             if (messageType == UnconnectedMessageType.Broadcast)
             {
-                serverLogger.LogInfo("[SERVER] Received discovery request. Send discovery response");
+                logger.LogInfo("[SERVER] Received discovery request. Send discovery response");
                 NetDataWriter resp = new();
                 resp.Put(1);
                 _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
@@ -713,16 +733,16 @@ namespace Fika.Core.Networking
                         NetDataWriter resp = new();
                         resp.Put(data);
                         _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-                        serverLogger.LogInfo("PingingRequest: Correct ping query, sending response");
+                        logger.LogInfo("PingingRequest: Correct ping query, sending response");
                     }
                     else
                     {
-                        serverLogger.LogError("PingingRequest: Data was not as expected");
+                        logger.LogError("PingingRequest: Data was not as expected");
                     }
                 }
                 else
                 {
-                    serverLogger.LogError("PingingRequest: Could not parse string");
+                    logger.LogError("PingingRequest: Could not parse string");
                 }
             }
         }
@@ -738,7 +758,7 @@ namespace Fika.Core.Networking
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
-            serverLogger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
+            logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
             NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
             if (_netServer.ConnectedPeersCount == 0)
             {
