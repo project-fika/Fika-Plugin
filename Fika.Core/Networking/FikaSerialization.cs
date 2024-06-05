@@ -249,9 +249,9 @@ namespace Fika.Core.Networking
             }
         }*/
 
-        public struct PlayerInfoPacket()
+        public struct PlayerInfoPacket(Profile profile)
         {
-            public Profile Profile;
+            public Profile Profile = profile;
 
             public static void Serialize(NetDataWriter writer, PlayerInfoPacket packet)
             {
@@ -262,10 +262,7 @@ namespace Fika.Core.Networking
             public static PlayerInfoPacket Deserialize(NetDataReader reader)
             {
                 byte[] profileBytes = reader.GetByteArray();
-                PlayerInfoPacket packet = new()
-                {
-                    Profile = SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>()
-                };
+                PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>());
                 return packet;
             }
         }
