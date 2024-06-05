@@ -54,9 +54,7 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, GInterface111 filter, int netId, IStatisticsManager statisticsManager)
         {
-            CoopPlayer player = null;
-
-            player = Create<CoopPlayer>(GClass1398.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+            CoopPlayer player = Create<CoopPlayer>(GClass1398.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
@@ -97,8 +95,11 @@ namespace Fika.Core.Coop.Players
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, new Action(Class1522.class1522_0.method_0));
+
             player.AIData = new AIData(null, player);
+
             player.AggressorFound = false;
+
             player._animators[0].enabled = true;
 
             player.Profile.Info.MainProfileNickname = MatchmakerAcceptPatches.PMCName;
