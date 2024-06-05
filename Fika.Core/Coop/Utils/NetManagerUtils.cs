@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using System.Threading.Tasks;
@@ -94,6 +95,31 @@ namespace Fika.Core.Coop.Utils
             }
 
             return Task.CompletedTask;
+        }
+
+        public static void StartPinger()
+        {
+            if (FikaGameObject != null)
+            {
+                FikaPinger fikaPinger = FikaGameObject.AddComponent<FikaPinger>();
+                fikaPinger.StartPingRoutine();
+            }
+        }
+
+        public static void StopPinger()
+        {
+            if (FikaGameObject != null)
+            {
+                FikaPinger fikaPinger = FikaGameObject.GetComponent<FikaPinger>();
+                if (fikaPinger != null)
+                {
+					Object.Destroy(fikaPinger);
+                }
+                else
+                {
+                    logger.LogError("StopPinger: Could not find FikaPinger!");
+                }
+            }
         }
     }
 }
