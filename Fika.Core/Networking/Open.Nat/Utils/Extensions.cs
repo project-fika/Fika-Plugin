@@ -151,7 +151,9 @@ namespace Open.Nat
 #if DEBUG
             return await task;
 #endif
+#pragma warning disable CS0162 // Unreachable code detected
             var timeoutCancellationTokenSource = new CancellationTokenSource();
+#pragma warning restore CS0162 // Unreachable code detected
 
             Task completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
             if (completedTask == task)

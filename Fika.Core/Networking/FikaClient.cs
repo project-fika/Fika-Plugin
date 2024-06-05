@@ -575,14 +575,6 @@ namespace Fika.Core.Networking
                 ConnectedClients = packet.NumberOfPlayers;
                 ReadyClients = packet.ReadyPlayers;
             }
-            if (packet.ForceStart)
-            {
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-                if (coopGame != null)
-                {
-                    coopGame.forceStart = true;
-                }
-            }
         }
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet)

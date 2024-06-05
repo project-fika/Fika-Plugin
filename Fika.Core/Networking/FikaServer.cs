@@ -431,13 +431,10 @@ namespace Fika.Core.Networking
         {
             ReadyClients += packet.ReadyPlayers;
 
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
             InformationPacket respondPackage = new(false)
             {
                 NumberOfPlayers = _netServer.ConnectedPeersCount,
                 ReadyPlayers = ReadyClients,
-                ForceStart = coopGame.forceStart
             };
 
             _dataWriter.Reset();
