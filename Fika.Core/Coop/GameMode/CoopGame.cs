@@ -392,7 +392,7 @@ namespace Fika.Core.Coop.GameMode
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
                    "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Manual,
                    Player.EUpdateMode.Auto, GClass548.Config.CharacterController.BotPlayerMode, () => 1f,
-                   () => 1f, GClass1456.Default);
+                   () => 1f, GClass1457.Default);
 
                 localPlayer.Location = Location_0.Id;
 
