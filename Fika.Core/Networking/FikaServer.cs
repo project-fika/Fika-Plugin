@@ -1,6 +1,5 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.Custom.Airdrops;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
@@ -34,6 +33,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Coop.Airdrops;
 
 namespace Fika.Core.Networking
 {
@@ -945,7 +945,7 @@ namespace Fika.Core.Networking
             playerToUse.Profile.Health = health;
             playerToUse.Profile.Info.EntryPoint = coopGame.InfiltrationPoint;
 
-            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
+            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.HealthController.IsAlive, playerToUse.Transform.position,
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
                 interactiveObjects, windows, lights, smokes, new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile },
                 items, gameWorld.AllPlayersEverExisted.Count(), Singleton<FikaAirdropsManager>.Instance != null);

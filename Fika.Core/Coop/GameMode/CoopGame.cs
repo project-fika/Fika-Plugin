@@ -1663,6 +1663,16 @@ namespace Fika.Core.Coop.GameMode
             {
                 SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true);
             }
+
+            try
+            {
+                PlayerLeftRequest body = new(gparam_0.Player.Profile.ProfileId);
+                FikaRequestHandler.RaidLeave(body);
+            }
+            catch (Exception)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("Unable to send RaidLeave request to server.");
+            }
         }
 
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
@@ -1802,7 +1812,7 @@ namespace Fika.Core.Coop.GameMode
                 player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
             }
 
-            //Method taken directly from SPT, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
+            //Method taken directly from SPT, can be found in the spt-singleplayer assembly as OfflineSaveProfilePatch
             Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
 
             JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;

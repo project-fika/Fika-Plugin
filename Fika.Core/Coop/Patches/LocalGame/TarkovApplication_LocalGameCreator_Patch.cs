@@ -185,6 +185,12 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 retryCount++;
             }
 
+            if (!MatchmakerAcceptPatches.ReconnectPacket.Value.IsAlive)
+            {
+                Logger.LogDebug($"Player: {profileId} was dead, returning to menu");
+                throw new Exception("You were dead, returning to menu");
+            }
+
             if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
             {
                 MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Failed to Reconnect...");
