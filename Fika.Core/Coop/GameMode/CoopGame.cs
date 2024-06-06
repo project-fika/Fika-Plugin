@@ -310,7 +310,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (role is not WildSpawnType.pmcUSEC and not WildSpawnType.pmcBEAR and not WildSpawnType.assault)
             {
-                // We skip all the bots that are not sptUsec, sptBear or assault. That means we never remove bosses, bossfollowers, and raiders
+                // We skip all the bots that are not pmcUSEC, pmcBEAR or assault. That means we never remove bosses, bossfollowers, and raiders
                 return true;
             }
 
