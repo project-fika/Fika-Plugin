@@ -1,8 +1,8 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.Custom.Airdrops;
 using BepInEx.Logging;
 using Comfort.Common;
+using Coop.Airdrops;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;

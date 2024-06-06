@@ -1,17 +1,19 @@
 ﻿using EFT;
 using EFT.Airdrop;
-using Fika.Core.AkiSupport.Airdrops.Models;
+using Fika.Core.Coop.Airdrops.Models;
 using Newtonsoft.Json;
 using SPT.Common.Http;
-using SPT.Custom.Airdrops.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Fika.Core.AkiSupport.Airdrops.Utils
+namespace Fika.Core.Coop.Airdrops.Utils
 {
+    /// <summary>
+    /// Originally developed by SPT <see href="https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/Airdrops/Utils/AirdropUtil.cs"/>
+    /// </summary>
     public static class FikaAirdropUtil
     {
         public static FikaAirdropConfigModel AirdropConfigModel { get; private set; }
@@ -119,7 +121,7 @@ namespace Fika.Core.AkiSupport.Airdrops.Utils
 
             if (flareAirdropPoints.Count == 0 && isFlare)
             {
-                Debug.LogError($"[AKI-AIRDROPS]: Airdrop called in by flare, Unable to find an airdropPoint within 100m, defaulting to normal drop");
+                Debug.LogError($"[SPT-AIRDROPS]: Airdrop called in by flare, Unable to find an airdropPoint within 100m, defaulting to normal drop");
                 flareAirdropPoints.Add(allAirdropPoints.OrderBy(_ => Guid.NewGuid()).FirstOrDefault());
             }
 

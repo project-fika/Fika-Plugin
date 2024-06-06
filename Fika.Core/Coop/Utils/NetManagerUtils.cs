@@ -113,7 +113,7 @@ namespace Fika.Core.Coop.Utils
                 FikaPinger fikaPinger = FikaGameObject.GetComponent<FikaPinger>();
                 if (fikaPinger != null)
                 {
-					Object.Destroy(fikaPinger);
+                    Object.Destroy(fikaPinger);
                 }
                 else
                 {

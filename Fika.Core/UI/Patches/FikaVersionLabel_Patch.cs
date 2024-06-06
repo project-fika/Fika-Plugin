@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Fika.Core.EssentialPatches
 {
     /// <summary>
-    /// Originally developed by SPT-Aki
+    /// Originally developed by SPT team
     /// </summary>
     public class FikaVersionLabel_Patch : ModulePatch
     {

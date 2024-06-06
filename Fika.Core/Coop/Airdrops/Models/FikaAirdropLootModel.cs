@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace SPT.Custom.Airdrops.Models
+namespace Fika.Core.Coop.Airdrops.Models
 {
     /// <summary>
-    /// Created by: SPT-Aki team
-    /// Link: https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/project/Aki.Custom/Airdrops/Models
+    /// Created by: SPT team
+    /// Link: https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/Airdrops/Models
     /// </summary>
     public class FikaAirdropLootResultModel
     {

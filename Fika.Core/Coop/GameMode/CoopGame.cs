@@ -1,8 +1,8 @@
-﻿using Aki.Custom.Airdrops;
 using AmplifyImpostors;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
+using Coop.Airdrops;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
@@ -1802,7 +1802,7 @@ namespace Fika.Core.Coop.GameMode
                 player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
             }
 
-            //Method taken directly from AKI, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
+            //Method taken directly from SPT, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
             Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
 
             JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;

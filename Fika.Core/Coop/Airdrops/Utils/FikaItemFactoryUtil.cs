@@ -1,16 +1,19 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Coop.Airdrops;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
-using Fika.Core;
+using Fika.Core.Coop.Airdrops.Models;
 using Newtonsoft.Json;
 using SPT.Common.Http;
-using SPT.Custom.Airdrops.Models;
 using System.Linq;
 
-namespace Aki.Custom.Airdrops.Utils
+namespace Fika.Core.Coop.Airdrops.Utils
 {
+    /// <summary>
+    /// Originally developed by SPT <see href="https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/Airdrops/Utils/ItemFactoryUtil.cs"/>
+    /// </summary>
     public class FikaItemFactoryUtil
     {
         private readonly ItemFactory itemFactory;
@@ -33,7 +36,7 @@ namespace Aki.Custom.Airdrops.Utils
             }
             else
             {
-                logSource.LogError($"[AKI-AIRDROPS]: unable to find template: {containerId}");
+                logSource.LogError($"[SPT-AIRDROPS]: unable to find template: {containerId}");
             }
         }
 

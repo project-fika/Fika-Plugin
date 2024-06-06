@@ -1,11 +1,12 @@
 ﻿using Comfort.Common;
+using Coop.Airdrops;
 using EFT;
 using EFT.Airdrop;
 using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
 
-namespace Aki.Custom.Airdrops.Patches
+namespace Fika.Core.Coop.Patches.Airdrop
 {
     public class FikaAirdropFlare_Patch : ModulePatch
     {

@@ -5,11 +5,11 @@ using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Fika.Core.AkiSupport.Airdrops
+namespace Fika.Core.Coop.Airdrops
 {
     /// <summary>
-    /// Created by: SPT-Aki team
-    /// Link: https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/project/Aki.Custom/Airdrops/AirdropPlane.cs
+    /// Created by: SPT team
+    /// Link: https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/Airdrops/AirdropPlane.cs
     /// </summary>
     public class FikaAirdropPlane : MonoBehaviour
     {
@@ -156,7 +156,7 @@ namespace Fika.Core.AkiSupport.Airdrops
 
         private float EasingSmoothSquared(float x)
         {
-            return x < 0.5 ? x * x * 2 : (1 - (1 - x) * (1 - x) * 2);
+            return x < 0.5 ? x * x * 2 : 1 - (1 - x) * (1 - x) * 2;
         }
     }
 }

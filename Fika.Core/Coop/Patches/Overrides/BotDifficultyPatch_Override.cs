@@ -4,7 +4,7 @@ using SPT.Common.Http;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.AkiSupport.Overrides
+namespace Fika.Core.Coop.Patches.Overrides
 {
     public class BotDifficultyPatch_Override : ModulePatch
     {
