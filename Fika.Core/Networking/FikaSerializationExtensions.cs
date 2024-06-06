@@ -188,7 +188,7 @@ namespace Fika.Core.Networking
         {
             using MemoryStream memoryStream = new();
             using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.Write(GClass1534.SerializeItem(item));
+            binaryWriter.Write(GClass1535.SerializeItem(item));
             writer.PutByteArray(memoryStream.ToArray());
         }
 
@@ -202,12 +202,12 @@ namespace Fika.Core.Networking
             using MemoryStream memoryStream = new(reader.GetByteArray());
             using BinaryReader binaryReader = new(memoryStream);
 
-            Item item = GClass1534.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+            Item item = GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
 
             ContainerCollection[] containerCollections = [item as ContainerCollection];
             ResourceKey[] resourceKeys = containerCollections.GetAllItemsFromCollections()
-                .Concat(containerCollections.Where(new Func<Item, bool>(AirdropSynchronizableObject.Class1828.class1828_0.method_2)))
-                .SelectMany(new Func<Item, IEnumerable<ResourceKey>>(AirdropSynchronizableObject.Class1828.class1828_0.method_3))
+                .Concat(containerCollections.Where(new Func<Item, bool>(AirdropSynchronizableObject.Class1832.class1832_0.method_2)))
+                .SelectMany(new Func<Item, IEnumerable<ResourceKey>>(AirdropSynchronizableObject.Class1832.class1832_0.method_3))
                 .ToArray();
             Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online, resourceKeys, JobPriority.Immediate, null, default);
 
@@ -223,7 +223,7 @@ namespace Fika.Core.Networking
         {
             using MemoryStream memoryStream = new();
             using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.Write(GClass1534.SerializeItem(item));
+            binaryWriter.Write(GClass1535.SerializeItem(item));
             writer.PutByteArray(memoryStream.ToArray());
         }
 
@@ -237,7 +237,7 @@ namespace Fika.Core.Networking
             using MemoryStream memoryStream = new(reader.GetByteArray());
             using BinaryReader binaryReader = new(memoryStream);
 
-            return GClass1534.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+            return GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
         }
     }
 }
