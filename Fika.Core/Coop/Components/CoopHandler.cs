@@ -435,7 +435,7 @@ namespace Fika.Core.Coop.Components
                 GClass548.Config.CharacterController.ObservedPlayerMode,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
-                GClass1456.Default).Result;
+                GClass1457.Default).Result;
 
             if (otherPlayer == null)
             {

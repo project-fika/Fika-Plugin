@@ -38,11 +38,11 @@ namespace Fika.Core.Coop.Players
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
-        public GClass2428 NetworkHealthController
+        public GClass2430 NetworkHealthController
         {
-            get => HealthController as GClass2428;
+            get => HealthController as GClass2430;
         }
-        private readonly GClass2167 ObservedVaultingParameters = new();
+        private readonly GClass2169 ObservedVaultingParameters = new();
         public override bool CanBeSnapped => false;
         public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
         public override AbstractHandsController HandsController
@@ -122,7 +122,7 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, GInterface111 filter)
         {
-            ObservedCoopPlayer player = Create<ObservedCoopPlayer>(GClass1398.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
+            ObservedCoopPlayer player = Create<ObservedCoopPlayer>(GClass1399.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
                 armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
                 aiControl);
 
@@ -171,7 +171,7 @@ namespace Fika.Core.Coop.Players
             base.PlayGroundedSound(fallHeight, jumpHeight);
         }
 
-        public override void OnSkillLevelChanged(GClass1776 skill)
+        public override void OnSkillLevelChanged(GClass1777 skill)
         {
             //base.OnSkillLevelChanged(skill);
         }
@@ -241,12 +241,11 @@ namespace Fika.Core.Coop.Players
             }
 
             bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface244>(bodyPart) != null;
-            player.StatisticsManager.OnEnemyDamage(damageInfo, bodyPart,
-                Profile.Info.Side, Profile.Info.Settings.Role,
-                Profile.Info.GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum,
-                flag, Vector3.Distance(player.Transform.position, Transform.position),
-                CurrentHour, Inventory.EquippedInSlotsTemplateIds,
-                HealthController.BodyPartEffects, TriggerZones);
+            player.StatisticsManager.OnEnemyDamage(
+                damageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role, GroupId,
+                HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
+                Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
+                Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones);
         }
 
         public override void UpdateArmsCondition()
@@ -330,7 +329,7 @@ namespace Fika.Core.Coop.Players
             }
         }*/
 
-        public override GClass1686 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1687 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
             if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
             {
@@ -381,7 +380,7 @@ namespace Fika.Core.Coop.Players
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
                     MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1686 hitInfo = new()
+                    GClass1687 hitInfo = new()
                     {
                         PoV = PointOfView,
                         Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
@@ -441,7 +440,7 @@ namespace Fika.Core.Coop.Players
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
                     MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1686 hitInfo = new()
+                    GClass1687 hitInfo = new()
                     {
                         PoV = PointOfView,
                         Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
@@ -529,7 +528,7 @@ namespace Fika.Core.Coop.Players
         public override void OnHealthEffectAdded(IEffect effect)
         {
             // Remember to check if classes increment
-            if (effect is GInterface269 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
+            if (effect is GInterface260 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
             {
                 Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraClass.Instance.Distance(Position),
                     BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);
@@ -832,8 +831,8 @@ namespace Fika.Core.Coop.Players
             {
                 Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
                 Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-                PlayerBody.GClass1872 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-                PlayerBody.GClass1872 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+                PlayerBody.GClass1874 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
+                PlayerBody.GClass1874 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
                 if (gclass2 != null)
                 {
                     gclass2.Dispose();
@@ -1465,13 +1464,13 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class CreateHandsControllerHandler(Class1079 setInHandsOperation)
+        private class CreateHandsControllerHandler(Class1082 setInHandsOperation)
         {
-            public readonly Class1079 setInHandsOperation = setInHandsOperation;
+            public readonly Class1082 setInHandsOperation = setInHandsOperation;
 
             internal void DisposeHandler()
             {
-                Class1079 handler = setInHandsOperation;
+                Class1082 handler = setInHandsOperation;
                 if (handler == null)
                     return;
                 handler.Dispose();

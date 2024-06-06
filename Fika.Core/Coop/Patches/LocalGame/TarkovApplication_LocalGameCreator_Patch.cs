@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
         }
 
         [PatchPostfix]
-        public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController,
+        public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3186 timeHasComeScreenController,
             RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
         {
             if (MatchmakerAcceptPatches.IsSinglePlayer)
@@ -83,7 +83,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             LocationSettingsClass.Location location = ____raidSettings.SelectedLocation;
 
-            MatchmakerAcceptPatches.GClass3182 = timeHasComeScreenController;
+            MatchmakerAcceptPatches.GClass3186 = timeHasComeScreenController;
 
             if (Singleton<NotificationManagerClass>.Instantiated)
             {
@@ -202,13 +202,13 @@ namespace Fika.Core.Coop.Patches.LocalGame
             return MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
         }
 
-        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController)
+        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3186 timeHasComeScreenController)
         {
             private readonly TarkovApplication tarkovApplication = tarkovApplication;
             private readonly Profile pmcProfile = pmcProfile;
             private readonly Profile scavProfile = scavProfile;
             private readonly LocationSettingsClass.Location location = location;
-            private readonly MatchmakerTimeHasCome.GClass3182 timeHasComeScreenController = timeHasComeScreenController;
+            private readonly MatchmakerTimeHasCome.GClass3186 timeHasComeScreenController = timeHasComeScreenController;
 
             public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
             {
