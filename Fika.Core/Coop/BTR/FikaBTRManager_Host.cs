@@ -24,6 +24,9 @@ using Random = UnityEngine.Random;
 
 namespace Fika.Core.Coop.BTR
 {
+    /// <summary>
+    /// Based on <see href="https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/BTR/BTRManager.cs"/>
+    /// </summary>
     internal class FikaBTRManager_Host : MonoBehaviour
     {
         private GameWorld gameWorld;
@@ -278,12 +281,12 @@ namespace Fika.Core.Coop.BTR
             // Get config from server and initialise respective settings
             ConfigureSettingsFromServer();
 
-            var btrMapConfig = btrController.MapPathsConfiguration;
+            MapPathConfig btrMapConfig = btrController.MapPathsConfiguration;
             btrServerSide.CurrentPathConfig = btrMapConfig.PathsConfiguration.pathsConfigurations.RandomElement();
             btrServerSide.Initialization(btrMapConfig);
             btrController.method_14(); // creates and assigns the BTR a fake stash
 
-            DisableServerSideRenderers();
+            DisableServerSideObjects();
 
             gameWorld.MainPlayer.OnBtrStateChanged += HandleBtrDoorState;
 
@@ -297,7 +300,7 @@ namespace Fika.Core.Coop.BTR
 
             // Initialise turret variables
             btrTurretServer = btrServerSide.BTRTurret;
-            var btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
+            Transform btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
             isTurretInDefaultRotation = btrTurretServer.targetTransform == btrTurretDefaultTargetTransform
                 && btrTurretServer.targetPosition == btrTurretServer.defaultAimingPosition;
             btrMachineGunAmmo = (BulletClass)BTRUtil.CreateItem(BTRUtil.BTRMachineGunAmmoTplId);
@@ -311,7 +314,7 @@ namespace Fika.Core.Coop.BTR
 
         private void ConfigureSettingsFromServer()
         {
-            var serverConfig = BTRUtil.GetConfigFromServer();
+            SPT.Custom.BTR.Models.BTRConfigModel serverConfig = BTRUtil.GetConfigFromServer();
 
             btrServerSide.moveSpeed = serverConfig.MoveSpeed;
             btrServerSide.pauseDurationRange.x = serverConfig.PointWaitTime.Min;
@@ -327,7 +330,7 @@ namespace Fika.Core.Coop.BTR
         {
             btrBotShooter = btrController.BotShooterBtr;
             firearmController = btrBotShooter.GetComponent<Player.FirearmController>();
-            var weaponPrefab = (WeaponPrefab)AccessTools.Field(firearmController.GetType(), "weaponPrefab_0").GetValue(firearmController);
+            WeaponPrefab weaponPrefab = (WeaponPrefab)AccessTools.Field(firearmController.GetType(), "weaponPrefab_0").GetValue(firearmController);
             weaponSoundPlayer = weaponPrefab.GetComponent<WeaponSoundPlayer>();
 
             btrBotService.Reset(); // Player will be added to Neutrals list and removed from Enemies list
@@ -520,15 +523,23 @@ namespace Fika.Core.Coop.BTR
             return btrDataPacket;
         }
 
-        private void DisableServerSideRenderers()
+        private void DisableServerSideObjects()
         {
-            var meshRenderers = btrServerSide.transform.GetComponentsInChildren<MeshRenderer>();
-            foreach (var renderer in meshRenderers)
+            MeshRenderer[] meshRenderers = btrServerSide.transform.GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer renderer in meshRenderers)
             {
                 renderer.enabled = false;
             }
 
             btrServerSide.turnCheckerObject.GetComponent<Renderer>().enabled = false; // Disables the red debug sphere
+
+            // Something is colliding with each other. We disabled the Main exterior collider on server objects
+            // and changed the layer of the Client exterior collider to be highPolyCollider to stop it twerking. Needs Proper fix
+            MeshCollider[] servercolliders = btrServerSide.transform.GetComponentsInChildren<MeshCollider>();
+            MeshCollider[] clientcolliders = btrClientSide.transform.GetComponentsInChildren<MeshCollider>();
+
+            clientcolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").gameObject.layer = LayerMask.NameToLayer("HighPolyCollider");
+            servercolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").enabled = false;
         }
 
         private void UpdateTarget()

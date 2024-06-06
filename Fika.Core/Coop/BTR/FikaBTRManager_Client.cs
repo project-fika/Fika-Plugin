@@ -25,6 +25,9 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.BTR
 {
+    /// <summary>
+    /// Based on <see href="https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/BTR/BTRManager.cs"/>
+    /// </summary>
     internal class FikaBTRManager_Client : MonoBehaviour
     {
         private GameWorld gameWorld;
@@ -257,7 +260,7 @@ namespace Fika.Core.Coop.BTR
             btrServerSide.Initialization(btrMapConfig);*/
             btrController.method_14(); // creates and assigns the BTR a fake stash
 
-            DisableServerSideRenderers();
+            DisableServerSideObjects();
 
             /*btrServerSide.MoveEnable();*/
             btrServerSide.IncomingToDestinationEvent += ToDestinationEvent;
@@ -383,15 +386,23 @@ namespace Fika.Core.Coop.BTR
             return btrDataPacket;
         }
 
-        private void DisableServerSideRenderers()
+        private void DisableServerSideObjects()
         {
-            var meshRenderers = btrServerSide.transform.GetComponentsInChildren<MeshRenderer>();
-            foreach (var renderer in meshRenderers)
+            MeshRenderer[] meshRenderers = btrServerSide.transform.GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer renderer in meshRenderers)
             {
                 renderer.enabled = false;
             }
 
             btrServerSide.turnCheckerObject.GetComponent<Renderer>().enabled = false; // Disables the red debug sphere
+
+            // Something is colliding with each other. We disabled the Main exterior collider on server objects
+            // and changed the layer of the Client exterior collider to be highPolyCollider to stop it twerking. Needs Proper fix
+            MeshCollider[] servercolliders = btrServerSide.transform.GetComponentsInChildren<MeshCollider>();
+            MeshCollider[] clientcolliders = btrClientSide.transform.GetComponentsInChildren<MeshCollider>();
+
+            clientcolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").gameObject.layer = LayerMask.NameToLayer("HighPolyCollider");
+            servercolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").enabled = false;
         }
 
         public void ClientInteraction(Player player, PlayerInteractPacket packet)
