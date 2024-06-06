@@ -10,11 +10,13 @@ using EFT.MovingPlatforms;
 using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Networking.Packets.Player;
 using HarmonyLib;
@@ -50,7 +52,7 @@ namespace Fika.Core.Networking
         }
         public NetPeer ServerConnection { get; private set; }
         public bool SpawnPointsReceived { get; private set; } = false;
-        private readonly ManualLogSource clientLogger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
+        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         public bool Started
         {
             get
@@ -63,6 +65,7 @@ namespace Fika.Core.Networking
             }
         }
         private bool ready = false;
+        private FikaChat fikaChat;
 
         public void Init()
         {
@@ -91,6 +94,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket>(OnReconnectResponsePacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectAirdropPacket>(OnReconnectAirdropPacketReceived);
+            packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -120,11 +124,22 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
         }
 
+        private void OnTextMessagePacketReceived(TextMessagePacket packet)
+        {
+            logger.LogInfo($"Received message from: {packet.Nickname}, Message: {packet.Message}");
+
+            if (fikaChat != null)
+            {
+                fikaChat.ReceiveMessage(packet.Nickname, packet.Message);
+            }
+        }
+
         public void SetupGameVariables(CoopPlayer coopPlayer)
         {
             coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             MyPlayer = coopPlayer;
             ready = true;
+            fikaChat = gameObject.AddComponent<FikaChat>();
         }
 
         private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet)
@@ -321,7 +336,7 @@ namespace Fika.Core.Networking
                 }
                 else
                 {
-                    clientLogger.LogWarning("WeatherPacket2Received: WeatherControll was null!");
+                    logger.LogWarning("WeatherPacket2Received: WeatherControll was null!");
                 }
             }
         }
@@ -368,7 +383,7 @@ namespace Fika.Core.Networking
                         }
                         else
                         {
-                            clientLogger.LogWarning($"ExfiltrationPacketPacketReceived::ExfiltrationPoints: Could not find exfil point with name '{exfilPoint.Key}'");
+                            logger.LogWarning($"ExfiltrationPacketPacketReceived::ExfiltrationPoints: Could not find exfil point with name '{exfilPoint.Key}'");
                         }
                     }
 
@@ -396,7 +411,7 @@ namespace Fika.Core.Networking
                             }
                             else
                             {
-                                clientLogger.LogWarning($"ExfiltrationPacketPacketReceived::ScavExfiltrationPoints: Could not find exfil point with name '{scavExfilPoint.Key}'");
+                                logger.LogWarning($"ExfiltrationPacketPacketReceived::ScavExfiltrationPoints: Could not find exfil point with name '{scavExfilPoint.Key}'");
                             }
                         }
 
@@ -408,7 +423,7 @@ namespace Fika.Core.Networking
                 }
                 else
                 {
-                    clientLogger.LogWarning($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
+                    logger.LogWarning($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
                 }
             }
         }
@@ -465,7 +480,7 @@ namespace Fika.Core.Networking
                         }
                         else
                         {
-                            clientLogger.LogWarning("GenericPacketReceived: Could not find locomotive!");
+                            logger.LogWarning("GenericPacketReceived: Could not find locomotive!");
                         }
                     }
                     break;
@@ -510,16 +525,16 @@ namespace Fika.Core.Networking
                             {
                                 botToDispose.Dispose();
                                 AssetPoolObject.ReturnToPool(botToDispose.gameObject, true);
-                                clientLogger.LogInfo("Disposing bot: " + packet.BotNetId);
+                                logger.LogInfo("Disposing bot: " + packet.BotNetId);
                             }
                             else
                             {
-                                clientLogger.LogWarning("Unable to dispose of bot: " + packet.BotNetId);
+                                logger.LogWarning("Unable to dispose of bot: " + packet.BotNetId);
                             }
                         }
                         else
                         {
-                            clientLogger.LogWarning("Unable to dispose of bot: " + packet.BotNetId + ", unable to find GameObject");
+                            logger.LogWarning("Unable to dispose of bot: " + packet.BotNetId + ", unable to find GameObject");
                         }
                     }
                     break;
@@ -538,13 +553,13 @@ namespace Fika.Core.Networking
                             if (!botToEnable.gameObject.activeSelf)
                             {
 #if DEBUG
-                                clientLogger.LogWarning("Enabling " + packet.BotNetId);
+                                logger.LogWarning("Enabling " + packet.BotNetId);
 #endif
                                 botToEnable.gameObject.SetActive(true);
                             }
                             else
                             {
-                                clientLogger.LogWarning($"Received packet to enable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already enabled!");
+                                logger.LogWarning($"Received packet to enable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already enabled!");
                             }
                         }
                     }
@@ -556,13 +571,13 @@ namespace Fika.Core.Networking
                             if (botToEnable.gameObject.activeSelf)
                             {
 #if DEBUG
-                                clientLogger.LogWarning("Disabling " + packet.BotNetId);
+                                logger.LogWarning("Disabling " + packet.BotNetId);
 #endif
                                 botToEnable.gameObject.SetActive(false);
                             }
                             else
                             {
-                                clientLogger.LogWarning($"Received packet to disable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already disabled!");
+                                logger.LogWarning($"Received packet to disable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already disabled!");
                             }
                         }
                     }
@@ -591,7 +606,7 @@ namespace Fika.Core.Networking
             }
             else
             {
-                clientLogger.LogError("OnAirdropLootPacketReceived: Received loot package but manager is not instantiated!");
+                logger.LogError("OnAirdropLootPacketReceived: Received loot package but manager is not instantiated!");
             }
         }
 
@@ -618,7 +633,7 @@ namespace Fika.Core.Networking
             }
             else
             {
-                clientLogger.LogError("OnAirdropPacketReceived: Received package but manager is not instantiated!");
+                logger.LogError("OnAirdropPacketReceived: Received package but manager is not instantiated!");
             }
         }
 
@@ -628,14 +643,6 @@ namespace Fika.Core.Networking
             {
                 ConnectedClients = packet.NumberOfPlayers;
                 ReadyClients = packet.ReadyPlayers;
-            }
-            if (packet.ForceStart)
-            {
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-                if (coopGame != null)
-                {
-                    coopGame.forceStart = true;
-                }
             }
         }
 
@@ -648,7 +655,7 @@ namespace Fika.Core.Networking
 
             if (!packet.IsRequest)
             {
-                clientLogger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
+                logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
                     coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI);
@@ -656,7 +663,7 @@ namespace Fika.Core.Networking
             }
             else if (packet.IsRequest)
             {
-                clientLogger.LogInfo($"Received CharacterRequest from server, send my Profile.");
+                logger.LogInfo($"Received CharacterRequest from server, send my Profile.");
                 AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
                 {
                     IsRequest = false,
@@ -775,6 +782,12 @@ namespace Fika.Core.Networking
         protected void OnDestroy()
         {
             _netClient?.Stop();
+
+            if (fikaChat != null)
+            {
+                Destroy(fikaChat);
+            }
+
             FikaEventDispatcher.DispatchEvent(new FikaClientDestroyedEvent(this));
         }
 
@@ -792,7 +805,7 @@ namespace Fika.Core.Networking
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
         {
-            clientLogger.LogInfo("[CLIENT] We received error " + socketErrorCode);
+            logger.LogInfo("[CLIENT] We received error " + socketErrorCode);
         }
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
@@ -804,7 +817,7 @@ namespace Fika.Core.Networking
         {
             if (messageType == UnconnectedMessageType.BasicMessage && _netClient.ConnectedPeersCount == 0 && reader.GetInt() == 1)
             {
-                clientLogger.LogInfo("[CLIENT] Received discovery response. Connecting to: " + remoteEndPoint);
+                logger.LogInfo("[CLIENT] Received discovery response. Connecting to: " + remoteEndPoint);
                 _netClient.Connect(remoteEndPoint, "fika.core");
             }
         }
@@ -823,7 +836,7 @@ namespace Fika.Core.Networking
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
-            clientLogger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
+            logger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
             if (disconnectInfo.Reason is DisconnectReason.Timeout)
             {
                 NotificationManagerClass.DisplayWarningNotification("Lost connection to host!");
@@ -921,7 +934,7 @@ namespace Fika.Core.Networking
 
                 while (Singleton<FikaAirdropsManager>.Instance == null)
                 {
-                    clientLogger.LogError($"[CWX] Waiting on FikaAirdrops to be init");
+                    logger.LogError($"[CWX] Waiting on FikaAirdrops to be init");
                     yield return new WaitUntil(() => Singleton<FikaAirdropsManager>.Instance != null);
                 }
 
@@ -933,7 +946,7 @@ namespace Fika.Core.Networking
 
                 while (manager.AirdropBox == null || manager.airdropPlane == null)
                 {
-                    clientLogger.LogError($"[CWX] waiting on plane or box");
+                    logger.LogError($"[CWX] waiting on plane or box");
                     yield return new WaitUntil(() =>
                     {
                         return manager.AirdropBox != null && manager.airdropPlane != null;

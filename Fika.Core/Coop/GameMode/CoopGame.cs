@@ -60,7 +60,7 @@ namespace Fika.Core.Coop.GameMode
     {
         public string InfiltrationPoint;
         public bool HasAddedFenceRep = false;
-        public bool forceStart = false;
+        //public bool forceStart = false;
         public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
         public string MyExitLocation { get; set; } = null;
         public ISpawnSystem SpawnSystem;
@@ -386,7 +386,7 @@ namespace Fika.Core.Coop.GameMode
                 FikaServer server = Singleton<FikaServer>.Instance;
                 netId = server.PopNetId();
 
-                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = profile }, true, true, position, netId);
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile), true, true, position, netId);
                 Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
 
                 if (server.NetServer.ConnectedPeersCount > 0)
@@ -601,7 +601,6 @@ namespace Fika.Core.Coop.GameMode
                 }
 
                 NetDataWriter writer = new();
-                forceStart = false;
 
                 MatchmakerAcceptPatches.GClass3182.ChangeStatus("Waiting for other players to finish loading...");
 
@@ -609,6 +608,8 @@ namespace Fika.Core.Coop.GameMode
                 {
                     fikaStartButton.SetActive(true);
                 }*/
+
+                int expectedPlayers = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers;
 
                 if (isServer)
                 {
@@ -623,7 +624,7 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         yield return null;
-                    } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+                    } while (coopHandler.HumanPlayers < expectedPlayers);
 
                     FikaServer server = Singleton<FikaServer>.Instance;
                     server.ReadyClients++;
@@ -637,8 +638,9 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        yield return null;
-                    } while (Singleton<FikaServer>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+                        MatchmakerAcceptPatches.GClass3182.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
+                        yield return new WaitForEndOfFrame();
+                    } while (server.ReadyClients < expectedPlayers);
 
                     foreach (CoopPlayer player in coopHandler.Players.Values)
                     {
@@ -658,7 +660,7 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         yield return null;
-                    } while (coopHandler.HumanPlayers < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+                    } while (coopHandler.HumanPlayers < expectedPlayers);
 
                     FikaClient client = Singleton<FikaClient>.Instance;
                     InformationPacket packet = new(true)
@@ -670,8 +672,9 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        yield return null;
-                    } while (Singleton<FikaClient>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart);
+                        MatchmakerAcceptPatches.GClass3182.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
+                        yield return new WaitForEndOfFrame();
+                    } while (client.ReadyClients < expectedPlayers);
                 }
 
                 /*if (fikaStartButton != null)
@@ -872,7 +875,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (!MatchmakerAcceptPatches.IsReconnect)
             {
-                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket() { Profile = myPlayer.Profile }, myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
                 if (isServer)
                 {
@@ -1060,7 +1063,7 @@ namespace Fika.Core.Coop.GameMode
                         Logger.LogError("WaitForPlayers::GClass3163 was null!");
                     }
                     await Task.Delay(100);
-                } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
+                } while (numbersOfPlayersToWaitFor > 0);
             }
             else
             {
@@ -1117,7 +1120,7 @@ namespace Fika.Core.Coop.GameMode
                     writer.Reset();
                     client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
-                } while (numbersOfPlayersToWaitFor > 0 && !forceStart);
+                } while (numbersOfPlayersToWaitFor > 0);
 
                 if (MatchmakerAcceptPatches.IsReconnect && MatchmakerAcceptPatches.IsClient)
                 {
@@ -1256,16 +1259,20 @@ namespace Fika.Core.Coop.GameMode
 
             yield return WaitForOtherPlayers();
 
+
+            int expectedPlayers = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers;
             if (isServer)
             {
-                while (Singleton<FikaServer>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart)
+                FikaServer server = Singleton<FikaServer>.Instance;
+                while (server.ReadyClients < expectedPlayers)
                 {
                     yield return new WaitForEndOfFrame();
                 }
             }
             else
             {
-                while (Singleton<FikaClient>.Instance.ReadyClients < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers && !forceStart)
+                FikaClient client = Singleton<FikaClient>.Instance;
+                while (client.ReadyClients < expectedPlayers)
                 {
                     yield return new WaitForEndOfFrame();
                 }
