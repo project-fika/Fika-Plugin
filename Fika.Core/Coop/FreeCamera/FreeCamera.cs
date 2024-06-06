@@ -3,7 +3,6 @@ using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;

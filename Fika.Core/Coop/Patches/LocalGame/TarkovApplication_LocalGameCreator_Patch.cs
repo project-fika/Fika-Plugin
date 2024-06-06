@@ -90,7 +90,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
             NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
             if (isServer)
             {
-                NetManagerUtils.StartPinger(); 
+                NetManagerUtils.StartPinger();
             }
 
             ISession session = CurrentSession;

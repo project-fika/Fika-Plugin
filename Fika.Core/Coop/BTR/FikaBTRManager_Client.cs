@@ -89,7 +89,7 @@ namespace Fika.Core.Coop.BTR
             }
             catch
             {
-                btrLogger.LogError("[AKI-BTR] Unable to spawn BTR. Check logs.");
+                btrLogger.LogError("[SPT-BTR] Unable to spawn BTR. Check logs.");
                 Destroy(this);
                 throw;
             }
@@ -410,7 +410,7 @@ namespace Fika.Core.Coop.BTR
             BTRView btrView = gameWorld.BtrController.BtrView;
             if (btrView == null)
             {
-                btrLogger.LogError("[AKI-BTR] BTRInteractionPatch - btrView is null");
+                btrLogger.LogError("[SPT-BTR] BTRInteractionPatch - btrView is null");
                 return;
             }
 
@@ -469,13 +469,13 @@ namespace Fika.Core.Coop.BTR
 
             if (btrClientSide != null)
             {
-                Debug.LogWarning("[AKI-BTR] BTRManager - Destroying btrClientSide");
+                Debug.LogWarning("[SPT-BTR] BTRManager - Destroying btrClientSide");
                 Destroy(btrClientSide.gameObject);
             }
 
             if (btrServerSide != null)
             {
-                Debug.LogWarning("[AKI-BTR] BTRManager - Destroying btrServerSide");
+                Debug.LogWarning("[SPT-BTR] BTRManager - Destroying btrServerSide");
                 Destroy(btrServerSide.gameObject);
             }
         }

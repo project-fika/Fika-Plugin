@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.Custom
             {
                 FikaPlugin.Instance.FikaLogger.LogError("FikaDebug: CoopHandlera was null!");
                 Destroy(this);
-            }            
+            }
 
             if (MatchmakerAcceptPatches.IsServer)
             {
@@ -105,7 +105,7 @@ namespace Fika.Core.Coop.Custom
                 bot.OnPlayerDead -= BotDied;
             }
             aliveBots.Clear();
-        }        
+        }
 
         private void AddPlayer(CoopPlayer player)
         {
@@ -136,7 +136,7 @@ namespace Fika.Core.Coop.Custom
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             GUI.skin.window.alignment = TextAnchor.UpperCenter;
 
-            GUI.Window(0, windowRect, DrawWindow, "Fika Debug");    
+            GUI.Window(0, windowRect, DrawWindow, "Fika Debug");
         }
 
         private void DrawWindow(int windowId)
@@ -144,11 +144,11 @@ namespace Fika.Core.Coop.Custom
             Rect rect = new(5, 15, 150, 25);
             GUI.Label(rect, $"Alive Players: {alivePlayers.Count}");
             rect.y += 15;
-            GUI.Label(rect, $"Alive Bots: {aliveBots.Count}");            
+            GUI.Label(rect, $"Alive Bots: {aliveBots.Count}");
             if (isServer)
             {
                 rect.y += 15;
-                GUI.Label(rect, $"Clients: {Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount}"); 
+                GUI.Label(rect, $"Clients: {Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount}");
             }
             else
             {

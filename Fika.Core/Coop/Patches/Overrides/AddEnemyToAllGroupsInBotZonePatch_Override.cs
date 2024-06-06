@@ -5,7 +5,7 @@ using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Fika.Core.AkiSupport.Overrides
+namespace Fika.Core.Coop.Patches.Overrides
 {
     internal class AddEnemyToAllGroupsInBotZonePatch_Override : ModulePatch
     {

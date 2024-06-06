@@ -1,5 +1,5 @@
 /*  NOTES
-    - Using Aki zlib (de-)compression
+    - Using SPT zlib (de-)compression
 */
 
 using SPT.Common.Utils;

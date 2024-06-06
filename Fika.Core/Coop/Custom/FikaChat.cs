@@ -5,7 +5,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using HarmonyLib;
 using LiteNetLib.Utils;
-using System;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Custom
@@ -94,7 +93,7 @@ namespace Fika.Core.Coop.Custom
                 }
                 AudioClip outgoingClip = soundsWrapper.GetSocialNetworkClip(ESocialNetworkSoundType.OutgoingMessage);
                 Singleton<GUISounds>.Instance.PlaySound(outgoingClip);
-                AddMessage(nickname + ": " + message);               
+                AddMessage(nickname + ": " + message);
             }
         }
 

@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Fika.Core.AkiSupport.Airdrops
+namespace Fika.Core.Coop.Airdrops
 {
     /// <summary>
-    /// Created by: SPT-Aki team
-    /// Link: https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/project/Aki.Custom/Airdrops/AirdropBox.cs
+    /// Created by: SPT team
+    /// Link: https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/Airdrops/AirdropBox.cs
     /// </summary>
     public class FikaAirdropBox : MonoBehaviour
     {

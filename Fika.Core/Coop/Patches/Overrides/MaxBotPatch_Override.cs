@@ -6,7 +6,7 @@ using SPT.Reflection.Patching;
 using SPT.Reflection.Utils;
 using System.Reflection;
 
-namespace Fika.Core.AkiSupport.Overrides
+namespace Fika.Core.Coop.Patches.Overrides
 {
     /// <summary>
     /// Override of SPT patch to reduce data requests to server. <br/> 
@@ -14,7 +14,7 @@ namespace Fika.Core.AkiSupport.Overrides
     /// </summary>
     /// <returns></returns>
     internal class MaxBotPatch_Override : ModulePatch
-    {        
+    {
         protected override MethodBase GetTargetMethod()
         {
             const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
