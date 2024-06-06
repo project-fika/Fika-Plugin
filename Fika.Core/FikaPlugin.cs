@@ -102,6 +102,9 @@ namespace Fika.Core
 
         // Hidden
         public static ConfigEntry<bool> AcceptedTOS { get; set; }
+        
+        //Advanced
+        public static ConfigEntry<bool> OfficialVersion { get; set; }
 
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
@@ -273,6 +276,9 @@ namespace Fika.Core
 
             AcceptedTOS = Config.Bind("Hidden", "Accepted TOS", false, new ConfigDescription("Has accepted TOS", tags: new ConfigurationManagerAttributes() { Browsable = false }));
 
+            // Advanced
+            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Display Official Version. Effective after game restart.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            
             // Coop
 
             ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
