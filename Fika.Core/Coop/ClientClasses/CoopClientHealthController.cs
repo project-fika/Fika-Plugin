@@ -6,7 +6,7 @@ using Fika.Core.Coop.Players;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public sealed class CoopClientHealthController(Profile.GClass1766 healthInfo, Player player, InventoryControllerClass inventoryController, SkillManager skillManager, bool aiHealth)
+    public sealed class CoopClientHealthController(Profile.GClass1767 healthInfo, Player player, InventoryControllerClass inventoryController, SkillManager skillManager, bool aiHealth)
         : PlayerHealthController(healthInfo, player, inventoryController, skillManager, aiHealth)
     {
         private readonly CoopPlayer coopPlayer = (CoopPlayer)player;

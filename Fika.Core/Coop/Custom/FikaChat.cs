@@ -119,7 +119,7 @@ namespace Fika.Core.Coop.Custom
             GUI.Label(rect, chatText);
             rect.y += rect.height;
             Rect textRect = new(rect.x, rect.y, rect.width - 55, 25);
-            textField = GUI.TextField(textRect, textField);
+            textField = GUI.TextField(textRect, textField, 64);
             rect.x += 535;
             Rect buttonRect = new(rect.x, rect.y, 50, 25);
             if (GUI.Button(buttonRect, "SEND"))
