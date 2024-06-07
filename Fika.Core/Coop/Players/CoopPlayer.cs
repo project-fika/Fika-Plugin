@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, GInterface111 filter, int netId, IStatisticsManager statisticsManager)
         {
-            CoopPlayer player = Create<CoopPlayer>(GClass1398.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+            CoopPlayer player = Create<CoopPlayer>(GClass1399.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            GClass3223 questController = new(profile, inventoryController, session, true);
+            GClass3228 questController = new(profile, inventoryController, session, true);
             questController.Init();
             questController.Run();
 
@@ -90,11 +90,11 @@ namespace Fika.Core.Coop.Players
 
             foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
             {
-                player.GClass2774_0.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+                player.GClass2776_0.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
             }
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, new Action(Class1522.class1522_0.method_0));
+            player._handsController.Spawn(1f, new Action(Class1526.class1526_0.method_0));
 
             player.AIData = new AIData(null, player);
 
@@ -107,7 +107,7 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
-        public override void OnSkillLevelChanged(GClass1776 skill)
+        public override void OnSkillLevelChanged(GClass1777 skill)
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format("SkillLevelUpMessage".Localized(null),
                 skill.Id.ToString().Localized(null),
@@ -215,7 +215,7 @@ namespace Fika.Core.Coop.Players
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
         }
 
-        public override GClass1686 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1687 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
         {
             if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
             {
@@ -388,7 +388,7 @@ namespace Fika.Core.Coop.Players
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            GStruct164[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct164>(ClientPlayer.Class1452.class1452_0.method_0)).ToArray();
+            GStruct164[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct164>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
 
             if (PacketSender != null)
             {
@@ -464,7 +464,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass2981 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass2984 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -489,7 +489,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = door.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Execute,
-                    ItemId = (interactionResult is GClass2981 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass2984 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -850,7 +850,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct415<GClass2798> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
+                    GStruct415<GClass2800> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::Start: Error removing dog tag!");
@@ -931,9 +931,13 @@ namespace Fika.Core.Coop.Players
                                 void Interact() => lootableContainer.Invoke(methodName, 0);
 
                                 if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
+                                {
                                     Interact();
+                                }
                                 else
+                                {
                                     lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
+                                }
                             }
                         }
                     }
@@ -1037,7 +1041,7 @@ namespace Fika.Core.Coop.Players
                     using BinaryReader binaryReader = new(memoryStream);
                     try
                     {
-                        GStruct412 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1542>());
+                        GStruct412 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
 
                         InventoryOperationHandler opHandler = new(result);
 
@@ -1045,9 +1049,9 @@ namespace Fika.Core.Coop.Players
 
                         // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
                         // Unknown what problems this might cause so far.
-                        if (result.Value is GClass2874 unloadOperation)
+                        if (result.Value is GClass2877 unloadOperation)
                         {
-                            if (unloadOperation.InternalOperation is GClass2885 internalSplitOperation)
+                            if (unloadOperation.InternalOperation is GClass2888 internalSplitOperation)
                             {
                                 Item item = internalSplitOperation.To.Item;
                                 if (item != null)
@@ -1069,7 +1073,7 @@ namespace Fika.Core.Coop.Players
                         }
 
                         // TODO: Same as above.
-                        if (result.Value is GClass2885 splitOperation)
+                        if (result.Value is GClass2888 splitOperation)
                         {
                             Item item = splitOperation.To.Item;
                             if (item != null)
@@ -1419,7 +1423,7 @@ namespace Fika.Core.Coop.Players
         private class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct417<GClass2981> unlockResult;
+            public GStruct417<GClass2984> unlockResult;
 
             internal void HandleKeyEvent()
             {

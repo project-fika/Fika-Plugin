@@ -17,14 +17,14 @@ namespace Fika.Core.Networking
 
         /*public class AddressUtils
         {
-            public static void SerializeGridItemAddressDescriptor(NetDataWriter writer, GClass1538 gridItemAddressDescriptor)
+            public static void SerializeGridItemAddressDescriptor(NetDataWriter writer, GClass1539 gridItemAddressDescriptor)
             {
                 SerializeLocationInGrid(writer, gridItemAddressDescriptor.LocationInGrid);
             }
 
-            public static GClass1538 DeserializeGridItemAddressDescriptor(NetDataReader reader)
+            public static GClass1539 DeserializeGridItemAddressDescriptor(NetDataReader reader)
             {
-                return new GClass1538()
+                return new GClass1539()
                 {
                     LocationInGrid = DeserializeLocationInGrid(reader),
                     Container = DeserializeContainerDescriptor(reader)

@@ -23,43 +23,19 @@ namespace Fika.Core.Coop.Custom
         private CoopPlayer mainPlayer;
         private PlayerPlateUI playerPlate;
         private float screenScale = 1f;
-        private int frameCounter = 0;
-        private readonly int throttleInterval = 60; // throttle to 1 update per 60 frames
 
         protected void Awake()
         {
             currentPlayer = GetComponent<ObservedCoopPlayer>();
             mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            CreateHealthBar();
+            CreateHealthBar();            
         }
 
         protected void Update()
         {
             if (currentPlayer != null)
             {
-                bool throttleUpdate = IsThrottleUpdate();
-                if (throttleUpdate)
-                {
-                    // Handling the visibility of elements
-                    if (!FikaPlugin.UseNamePlates.Value)
-                    {
-                        playerPlate.gameObject.SetActive(false);
-                        return;
-                    }
-                    else if (playerPlate.gameObject.active == false)
-                    {
-                        playerPlate.gameObject.SetActive(true);
-                    }
-                    SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
-                    SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
-                }
-                // Finally, update the screen space position
-                UpdateScreenSpacePosition(throttleUpdate);
-                // Destroy if this player is dead
-                if (!currentPlayer.HealthController.IsAlive)
-                {
-                    Destroy(this);
-                }
+                UpdateScreenSpacePosition();
             }
             else
             {
@@ -67,7 +43,7 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        private void UpdateScreenSpacePosition(bool throttleUpdate)
+        private void UpdateScreenSpacePosition()
         {
             // ADS opacity handling
             float opacityMultiplier = 1f;
@@ -192,11 +168,25 @@ namespace Fika.Core.Coop.Custom
                 playerPlate.bearPlateScreen.gameObject.SetActive(false);
             }
 
+            SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
+            SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
+            playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
+
+            FikaPlugin.UsePlateFactionSide.SettingChanged += UsePlateFactionSide_SettingChanged;
+            FikaPlugin.HideHealthBar.SettingChanged += HideHealthBar_SettingChanged;
+            FikaPlugin.UseNamePlates.SettingChanged += UseNamePlates_SettingChanged;
+
             currentPlayer.HealthController.HealthChangedEvent += HealthController_HealthChangedEvent;
             currentPlayer.HealthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
             currentPlayer.HealthController.BodyPartRestoredEvent += HealthController_BodyPartRestoredEvent;
+            currentPlayer.HealthController.DiedEvent += HealthController_DiedEvent;
 
             UpdateHealth();
+        }
+
+        private void HealthController_DiedEvent(EDamageType obj)
+        {
+            Destroy(this);
         }
 
         private void HealthController_BodyPartRestoredEvent(EBodyPart arg1, EFT.HealthSystem.ValueStruct arg2)
@@ -212,6 +202,20 @@ namespace Fika.Core.Coop.Custom
         private void HealthController_HealthChangedEvent(EBodyPart arg1, float arg2, DamageInfo arg3)
         {
             UpdateHealth();
+        }
+
+        private void UsePlateFactionSide_SettingChanged(object sender, EventArgs e)
+        {
+            SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
+        }
+        private void HideHealthBar_SettingChanged(object sender, EventArgs e)
+        {
+            SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
+        }
+
+        private void UseNamePlates_SettingChanged(object sender, EventArgs e)
+        {
+            playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
         }
 
         /// <summary>
@@ -293,23 +297,17 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        private bool IsThrottleUpdate()
+        protected void OnDestroy()
         {
-            // For throttling updates to various elements
-            frameCounter++;
-            bool throttleUpdate = frameCounter >= throttleInterval;
-            if (throttleUpdate)
-            {
-                frameCounter = 0;
-            }
-            return throttleUpdate;
-        }
+            FikaPlugin.UsePlateFactionSide.SettingChanged -= UsePlateFactionSide_SettingChanged;
+            FikaPlugin.HideHealthBar.SettingChanged -= HideHealthBar_SettingChanged;
+            FikaPlugin.UseNamePlates.SettingChanged -= UseNamePlates_SettingChanged;
 
-        private void OnDestroy()
-        {
             currentPlayer.HealthController.HealthChangedEvent -= HealthController_HealthChangedEvent;
             currentPlayer.HealthController.BodyPartDestroyedEvent -= HealthController_BodyPartDestroyedEvent;
             currentPlayer.HealthController.BodyPartRestoredEvent -= HealthController_BodyPartRestoredEvent;
+            currentPlayer.HealthController.DiedEvent -= HealthController_DiedEvent;
+
             playerPlate.gameObject.SetActive(false);
             Destroy(this);
         }
