@@ -409,7 +409,7 @@ namespace Fika.Core.Coop.GameMode
                     Bots.Add(localPlayer.ProfileId, localPlayer);
                 }
 
-                if (profile.Info.Side == EPlayerSide.Bear || profile.Info.Side == EPlayerSide.Usec)
+                if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
                 {
                     Slot backpackSlot = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
                     Item backpack = backpackSlot.ContainedItem;
