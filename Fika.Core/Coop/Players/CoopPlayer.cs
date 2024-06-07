@@ -931,9 +931,13 @@ namespace Fika.Core.Coop.Players
                                 void Interact() => lootableContainer.Invoke(methodName, 0);
 
                                 if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
+                                {
                                     Interact();
+                                }
                                 else
+                                {
                                     lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
+                                }
                             }
                         }
                     }
