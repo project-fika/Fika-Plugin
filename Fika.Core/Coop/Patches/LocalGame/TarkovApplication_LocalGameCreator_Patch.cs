@@ -174,13 +174,13 @@ namespace Fika.Core.Coop.Patches.LocalGame
         private static async Task<Profile> GetReconnectProfile(string profileId)
         {
             ReconnectRequestPacket reconnectPacket = new(profileId, EReconnectPackgeType.Everything);
-            MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Sending Reconnect Request...");
+            MatchmakerAcceptPatches.GClass3186.ChangeStatus($"Sending Reconnect Request...");
 
             int retryCount = 0;
             while (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount < 5)
             {
                 Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref reconnectPacket, DeliveryMethod.ReliableUnordered);
-                MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
+                MatchmakerAcceptPatches.GClass3186.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
                 await Task.Delay(3000);
                 retryCount++;
             }
@@ -193,11 +193,11 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             if (MatchmakerAcceptPatches.ReconnectPacket == null && retryCount == 5)
             {
-                MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Failed to Reconnect...");
+                MatchmakerAcceptPatches.GClass3186.ChangeStatus($"Failed to Reconnect...");
                 throw new Exception("Failed to Reconnect");
             }
 
-            MatchmakerAcceptPatches.GClass3182.ChangeStatus($"Reconnecting to host...");
+            MatchmakerAcceptPatches.GClass3186.ChangeStatus($"Reconnecting to host...");
 
             return MatchmakerAcceptPatches.ReconnectPacket.Value.Profile.Profile;
         }

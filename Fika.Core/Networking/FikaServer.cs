@@ -828,11 +828,9 @@ namespace Fika.Core.Networking
 
         private void OnConditionChangedPacketReceived(ConditionChangePacket packet, NetPeer peer)
         {
-            /*Players.FirstOrDefault(x => x.Key == packet.NetId).Value.Profile.TaskConditionCounters
-                .FirstOrDefault(c => c.Key == packet.ConditionId).Value.Value = (int)packet.ConditionValue;*/
             if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
-                foreach (KeyValuePair<string, GClass3236> taskConditionCounter in player.Profile.TaskConditionCounters)
+                foreach (KeyValuePair<string, GClass3241> taskConditionCounter in player.Profile.TaskConditionCounters)
                 {
                     if (taskConditionCounter.Key == packet.ConditionId)
                     {
@@ -921,10 +919,10 @@ namespace Fika.Core.Networking
 
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray();
 
-            Profile.GClass1766 health = playerToUse.NetworkHealthController.Store(null);
-            GClass2428.GClass2431[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
+            Profile.GClass1767 health = playerToUse.NetworkHealthController.Store(null);
+            GClass2430.GClass2433[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
 
-            foreach (GClass2428.GClass2431 effect in effects)
+            foreach (GClass2430.GClass2433 effect in effects)
             {
                 if (!effect.Active)
                 {
@@ -938,7 +936,7 @@ namespace Fika.Core.Networking
 
                 if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface250)
                 {
-                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.GClass1766.GClass1767 { Time = -1f, ExtraData = effect.StoreObj });
+                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.GClass1767.GClass1768 { Time = -1f, ExtraData = effect.StoreObj });
                 }
             }
 

@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.ClientClasses
         /// </summary>
         public void SyncBodyPartsState()
         {
-            foreach (EBodyPart bodyPart in GClass2474.RealBodyParts)
+            foreach (EBodyPart bodyPart in GClass2476.RealBodyParts)
             {
                 if (GetBodyPartHealth(bodyPart, true).AtMinimum)
                 {
