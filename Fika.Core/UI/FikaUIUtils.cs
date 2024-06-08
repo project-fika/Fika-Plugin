@@ -94,7 +94,7 @@ namespace Fika.Core.UI
             errorScreenHandler.context.OnDecline += errorScreen.method_4;
             errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
 
-            GClass767 ui = Traverse.Create(errorScreen).Field("UI").GetValue<GClass767>();
+            GClass767 ui = Traverse.Create(errorScreen).Field<GClass767>("UI").Value;
 
             ui.AddDisposable(new Action(errorScreenHandler.method_0));
             string text = buttonType switch
@@ -115,7 +115,7 @@ namespace Fika.Core.UI
             string string_1 = message.SubstringIfNecessary(500);
             errorScreenTraverse.Field("string_1").SetValue(string_1);
 
-            TextMeshProUGUI errorDescription = Traverse.Create(errorScreen).Field("_errorDescription").GetValue<TextMeshProUGUI>();
+            TextMeshProUGUI errorDescription = Traverse.Create(errorScreen).Field<TextMeshProUGUI>("_errorDescription").Value;
             errorDescription.text = string_1;
 
             Coroutine coroutine_0 = errorScreenTraverse.Field("coroutine_0").GetValue<Coroutine>();

@@ -711,8 +711,8 @@ namespace Fika.Core.Coop.Players
                 Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolationRatio));
             }
 
-            Vector3 a = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolationRatio);
-            CharacterController.Move(a - MovementContext.TransformPosition, interpolationRatio);
+            Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolationRatio);
+            CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolationRatio);
 
             if (!Mathf.Approximately(MovementContext.Tilt, newState.Tilt))
             {
@@ -822,7 +822,7 @@ namespace Fika.Core.Coop.Players
         {
             Inventory.Equipment = equipmentClass;
 
-            BindableState<Item> itemInHands = (BindableState<Item>)Traverse.Create(this).Field("_itemInHands").GetValue();
+            BindableState<Item> itemInHands = Traverse.Create(this).Field<BindableState<Item>>("_itemInHands").Value;
             if (HandsController != null && HandsController.Item != null)
             {
                 Item item = FindItem(HandsController.Item.Id);
@@ -920,12 +920,11 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
-                IVaultingComponent vaultingComponent = playerTraverse.Field("_vaultingComponent").GetValue<IVaultingComponent>();
+                IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
                 if (vaultingComponent != null)
                 {
                     UpdateEvent -= vaultingComponent.DoVaultingTick;
                 }
-
 
                 playerTraverse.Field("_vaultingComponent").SetValue(null);
                 playerTraverse.Field("_vaultingComponentDebug").SetValue(null);
@@ -951,7 +950,7 @@ namespace Fika.Core.Coop.Players
 
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
-                IVaultingComponent vaultingComponent = playerTraverse.Field("_vaultingComponent").GetValue<IVaultingComponent>();
+                IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
                 if (vaultingComponent != null)
                 {
                     UpdateEvent -= vaultingComponent.DoVaultingTick;
@@ -971,7 +970,7 @@ namespace Fika.Core.Coop.Players
 
                 waitForStartRoutine = StartCoroutine(CreateHealthBar());
 
-                RaycastCameraTransform = playerTraverse.Field("_playerLookRaycastTransform").GetValue<Transform>();
+                RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
             }
         }
 
@@ -1038,7 +1037,7 @@ namespace Fika.Core.Coop.Players
 
         public new void CreateCompass()
         {
-            bool compassInstantiated = Traverse.Create(this).Field("_compassInstantiated").GetValue<bool>();
+            bool compassInstantiated = Traverse.Create(this).Field<bool>("_compassInstantiated").Value;
             if (!compassInstantiated)
             {
                 Transform transform = Singleton<PoolManager>.Instance.CreateFromPool<Transform>(new ResourceKey

@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.ObservedClasses
             weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
             if (UnderbarrelWeapon != null)
             {
-                underBarrelManager = Traverse.Create(this).Field("gclass1593_0").GetValue<GClass1593>();
+                underBarrelManager = Traverse.Create(this).Field<GClass1593>("gclass1593_0").Value;
             }
         }
 

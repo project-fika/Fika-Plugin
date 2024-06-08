@@ -176,7 +176,7 @@ namespace Fika.Core.Coop.BTR
                             weaponPrefab.transform.SetPositionAndRotation(turretView.GunRoot.position, turretView.GunRoot.rotation);
                             weaponTransform.SetPositionAndRotation(turretView.GunRoot.position, turretView.GunRoot.rotation);
 
-                            string[] gunModsToDisable = Traverse.Create(turretView).Field("_gunModsToDisable").GetValue<string[]>();
+                            string[] gunModsToDisable = Traverse.Create(turretView).Field<string[]>("_gunModsToDisable").Value;
                             if (gunModsToDisable != null)
                             {
                                 foreach (Transform child in weaponTransform)

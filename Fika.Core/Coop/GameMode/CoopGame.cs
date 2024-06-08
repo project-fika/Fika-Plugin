@@ -705,7 +705,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogInfo($"Retrieved Spawn Point '{name}' from server");
 
-                    Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field("dictionary_0").GetValue<Dictionary<ISpawnPoint, SpawnPointMarker>>();
+                    Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field<Dictionary<ISpawnPoint, SpawnPointMarker>>("dictionary_0").Value;
                     foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
                     {
                         if (spawnPointObject.Id == name)
@@ -790,7 +790,7 @@ namespace Fika.Core.Coop.GameMode
             if (MenuUI.Instantiated)
             {
                 MenuUI menuUI = MenuUI.Instance;
-                DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field("_cancelButton").GetValue<DefaultUIButton>();
+                DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
                 customButton = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
                 customButton.gameObject.name = "FikaBackButton";
                 customButton.gameObject.transform.position = new(customButton.transform.position.x, customButton.transform.position.y - 20, customButton.transform.position.z);
@@ -1445,7 +1445,7 @@ namespace Fika.Core.Coop.GameMode
 
         public void ResetExfilPointsFromServer(ExfiltrationPoint[] points)
         {
-            Dictionary<string, ExitTimerPanel> currentExfils = Traverse.Create(GameUi.TimerPanel).Field("dictionary_0").GetValue<Dictionary<string, ExitTimerPanel>>();
+            Dictionary<string, ExitTimerPanel> currentExfils = Traverse.Create(GameUi.TimerPanel).Field<Dictionary<string, ExitTimerPanel>>("dictionary_0").Value;
             foreach (ExitTimerPanel exitTimerPanel in currentExfils.Values)
             {
                 exitTimerPanel.Close();
@@ -1598,8 +1598,8 @@ namespace Fika.Core.Coop.GameMode
                         }
                     }
 
-                    BotsClass bots = Traverse.Create(botsController_0.BotSpawner).Field("_bots").GetValue<BotsClass>();
-                    HashSet<BotOwner> allBots = Traverse.Create(bots).Field("hashSet_0").GetValue<HashSet<BotOwner>>();
+                    BotsClass bots = Traverse.Create(botsController_0.BotSpawner).Field<BotsClass>("_bots").Value;
+                    HashSet<BotOwner> allBots = Traverse.Create(bots).Field<HashSet<BotOwner>>("hashSet_0").Value;
 
                     foreach (BotOwner bot in allBots)
                     {
@@ -1994,7 +1994,7 @@ namespace Fika.Core.Coop.GameMode
 
             private void FireCallback()
             {
-                Callback<ExitStatus, TimeSpan, MetricsClass> endCallback = Traverse.Create(localGame).Field("callback_0").GetValue<Callback<ExitStatus, TimeSpan, MetricsClass>>();
+                Callback<ExitStatus, TimeSpan, MetricsClass> endCallback = Traverse.Create(localGame).Field<Callback<ExitStatus, TimeSpan, MetricsClass>>("callback_0").Value;
 
                 localGame.SavePlayer(localPlayer, exitStatus, exitName, false);
 

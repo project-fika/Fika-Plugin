@@ -34,6 +34,7 @@ namespace Fika.Core.Coop.Players
     /// </summary>
     public class CoopPlayer : LocalPlayer
     {
+        #region Fields and Properties
         public PacketReceiver PacketReceiver;
         public IPacketSender PacketSender;
         private DateTime lastPingTime;
@@ -46,7 +47,8 @@ namespace Fika.Core.Coop.Players
         public Transform RaycastCameraTransform;
         public int NetId;
         public bool IsObservedAI = false;
-        public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+        public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = []; 
+        #endregion
 
         public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,

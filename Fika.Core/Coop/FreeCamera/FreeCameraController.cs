@@ -227,13 +227,13 @@ namespace Fika.Core.Coop.FreeCamera
 
             Traverse effectsController = Traverse.Create(cameraClass.EffectsController);
 
-            BloodOnScreen bloodOnScreen = effectsController.Field("bloodOnScreen_0").GetValue<BloodOnScreen>();
+            BloodOnScreen bloodOnScreen = effectsController.Field<BloodOnScreen>("bloodOnScreen_0").Value;
             if (bloodOnScreen != null)
             {
                 Destroy(bloodOnScreen);
             }
 
-            List<EffectsController.Class576> effectsManagerList = effectsController.Field("list_0").GetValue<List<EffectsController.Class576>>();
+            List<EffectsController.Class576> effectsManagerList = effectsController.Field<List<EffectsController.Class576>>("list_0").Value;
             if (effectsManagerList != null)
             {
                 foreach (EffectsController.Class576 effectsManager in effectsManagerList)
