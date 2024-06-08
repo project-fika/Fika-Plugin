@@ -2,10 +2,12 @@
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.NatPunch;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Networking
 {
@@ -16,6 +18,7 @@ namespace Fika.Core.Networking
         private readonly string serverId = serverId;
         private IPEndPoint remoteEndPoint;
         private IPEndPoint localEndPoint;
+        private IPEndPoint remoteStunEndPoint;
         public bool Received = false;
 
         public bool Init()
@@ -54,6 +57,19 @@ namespace Fika.Core.Networking
                 localEndPoint = new(IPAddress.Parse(localIp), port);
             }
 
+            //TODO: add config to enable this
+
+            var localStunEndPoint = NatPunchUtils.CreateStunEndPoint(FikaPlugin.UDPPort.Value);
+
+            FikaNatPunchClient fikaNatPunchClient = new FikaNatPunchClient();
+
+            fikaNatPunchClient.Connect();
+
+            GetHostStunRequest getStunRequest = new GetHostStunRequest(localStunEndPoint.Remote.Address.ToString(), localStunEndPoint.Remote.Port);
+            GetHostStunResponse getStunResponse = fikaNatPunchClient.GetHostStun(getStunRequest).Result;
+
+            remoteStunEndPoint = new IPEndPoint(IPAddress.Parse(getStunResponse.StunIp), getStunResponse.StunPort); 
+
             NetClient.Start();
 
             return true;
@@ -73,6 +89,11 @@ namespace Fika.Core.Networking
             if (localEndPoint != null)
             {
                 NetClient.SendUnconnectedMessage(writer, localEndPoint);
+            }
+
+            if (remoteStunEndPoint != null)
+            {
+                NetClient.SendUnconnectedMessage(writer, remoteStunEndPoint);
             }
         }
 
