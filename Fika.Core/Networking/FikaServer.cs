@@ -79,7 +79,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<WeatherPacket, NetPeer>(OnWeatherPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRServicePacket, NetPeer>(OnBTRServicePacketReceived);
-            packetProcessor.SubscribeNetSerializable<DeathPacket, NetPeer>(OnDeathPacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
@@ -214,17 +213,6 @@ namespace Fika.Core.Networking
                 }
                 mineDirectional.Explosion();
             }
-        }
-
-        private void OnDeathPacketReceived(DeathPacket packet, NetPeer peer)
-        {
-            if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-            {
-                playerToApply.HandleDeathPatchet(packet);
-            }
-
-            _dataWriter.Reset();
-            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         private void OnBTRServicePacketReceived(BTRServicePacket packet, NetPeer peer)
