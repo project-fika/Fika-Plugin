@@ -226,7 +226,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            CoopGame coopGame = (CoopGame)Singleton<IBotGame>.Instance;
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Bots.ContainsKey(ProfileId))
             {
                 coopGame.Bots.Remove(ProfileId);

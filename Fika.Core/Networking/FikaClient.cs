@@ -50,8 +50,6 @@ namespace Fika.Core.Networking
             }
         }
         public NetPeer ServerConnection { get; private set; }
-        /*public string IP { get; private set; }
-        public int Port { get; private set; }*/
         public bool SpawnPointsReceived { get; private set; } = false;
         private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         public bool Started
@@ -105,12 +103,6 @@ namespace Fika.Core.Networking
             };
 
             _netClient.Start();
-
-            /*GetHostRequest body = new(MatchmakerAcceptPatches.GetGroupId());
-            GetHostResponse result = FikaRequestHandler.GetHost(body);
-
-            IP = result.Ip;
-            Port = result.Port;*/
 
             string ip = MatchmakerAcceptPatches.RemoteIp;
             int port = MatchmakerAcceptPatches.RemotePort;
@@ -299,7 +291,7 @@ namespace Fika.Core.Networking
                     if (exfilController.ExfiltrationPoints == null)
                         return;
 
-                    CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                    CoopGame coopGame = coopHandler.LocalGameInstance;
 
                     CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
 
@@ -387,7 +379,7 @@ namespace Fika.Core.Networking
                             if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
                             {
                                 coopHandler.ExtractedPlayers.Add(packet.NetId);
-                                CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
+                                CoopGame coopGame = coopHandler.LocalGameInstance;
                                 coopGame.ExtractedPlayers.Add(packet.NetId);
                                 coopGame.ClearHostAI(playerToApply);
 
@@ -435,7 +427,7 @@ namespace Fika.Core.Networking
                             ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
                             if (exfilPoint != null)
                             {
-                                CoopGame game = (CoopGame)Singleton<AbstractGame>.Instance;
+                                CoopGame game = coopHandler.LocalGameInstance;
                                 exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
 
                                 if (exfilPoint.Status != EExfiltrationStatus.Countdown)
@@ -647,30 +639,23 @@ namespace Fika.Core.Networking
 
         private void OnGameTimerPacketReceived(GameTimerPacket packet)
         {
-            CoopHandler coopHandler = CoopHandler.GetCoopHandler();
-            if (coopHandler == null)
-            {
-                return;
-            }
-
             TimeSpan sessionTime = new(packet.Tick);
 
-            if (coopHandler.LocalGameInstance is CoopGame coopGame)
+            CoopGame coopGame = coopHandler.LocalGameInstance;
+
+            GameTimerClass gameTimer = coopGame.GameTimer;
+            if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
             {
-                GameTimerClass gameTimer = coopGame.GameTimer;
-                if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
+                if (gameTimer.PastTime.TotalSeconds < 3)
                 {
-                    if (gameTimer.PastTime.TotalSeconds < 3)
-                    {
-                        return;
-                    }
-
-                    TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
-
-                    gameTimer.ChangeSessionTime(timeRemain);
-
-                    Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
+                    return;
                 }
+
+                TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
+
+                gameTimer.ChangeSessionTime(timeRemain);
+
+                Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
             }
         }
 

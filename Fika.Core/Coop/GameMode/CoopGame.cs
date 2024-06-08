@@ -52,13 +52,12 @@ using UnityEngine;
 namespace Fika.Core.Coop.GameMode
 {
     /// <summary>
-    /// A custom Game Type
+    /// Coop game used in Fika
     /// </summary>
-    internal sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
+    public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
     {
         public string InfiltrationPoint;
         public bool HasAddedFenceRep = false;
-        //public bool forceStart = false;
         public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
         public string MyExitLocation { get; set; } = null;
         public ISpawnSystem SpawnSystem;
@@ -752,7 +751,6 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogInfo("Creating CoopHandler");
             await CreateCoopHandler();
-            CoopHandler.GetCoopHandler().LocalGameInstance = this;
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
