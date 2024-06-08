@@ -105,7 +105,8 @@ namespace Fika.Core.Networking
                 EnableStatistics = true
             };
 
-            _netClient.Start();
+            // netClient needs to bind on the same port as the STUN query
+            _netClient.Start(FikaPlugin.UDPPort.Value);
 
             /*GetHostRequest body = new(MatchmakerAcceptPatches.GetGroupId());
             GetHostResponse result = FikaRequestHandler.GetHost(body);

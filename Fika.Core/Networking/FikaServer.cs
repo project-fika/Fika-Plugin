@@ -16,6 +16,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.NatPunch;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Networking.Packets.Player;
@@ -107,6 +108,9 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true
             };
+
+            var natPunchServer = new FikaNatPunchServer(_netServer);
+            natPunchServer.Listen();
 
             if (FikaPlugin.UseUPnP.Value)
             {
