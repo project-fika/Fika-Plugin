@@ -1,6 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using EFT.UI;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
@@ -23,7 +24,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; private set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; private set; } = new(50);
 
-        private void Awake()
+        protected void Awake()
         {
             player = GetComponent<CoopPlayer>();
             if (!player.IsYourPlayer)
@@ -32,7 +33,7 @@ namespace Fika.Core.Coop.PacketHandlers
             }
         }
 
-        private void Start()
+        protected void Start()
         {
             if (MatchmakerAcceptPatches.IsServer)
             {
@@ -43,22 +44,22 @@ namespace Fika.Core.Coop.PacketHandlers
                 Client = Singleton<FikaClient>.Instance;
             }
 
-            LastState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation,
-                            player.LastDirection, player.CurrentManagedState.Name, player.MovementContext.Tilt,
-                            player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-                            player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-                            player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled, player.MovementContext.IsGrounded,
-                            false, 0, Vector3.zero);
+            LastState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
+                player.CurrentManagedState.Name, player.MovementContext.Tilt, player.MovementContext.Step,
+                player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
+                player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled,
+                player.Physical.SerializationStruct, player.MovementContext.BlindFire, player.observedOverlap,
+                player.leftStanceDisabled, player.MovementContext.IsGrounded, false, 0, Vector3.zero);
 
-            NewState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation,
-                            player.LastDirection, player.CurrentManagedState.Name, player.MovementContext.Tilt,
-                            player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-                            player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-                            player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled, player.MovementContext.IsGrounded,
-                            false, 0, Vector3.zero);
+            NewState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
+                player.CurrentManagedState.Name, player.MovementContext.Tilt, player.MovementContext.Step,
+                player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
+                player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled,
+                player.Physical.SerializationStruct, player.MovementContext.BlindFire, player.observedOverlap,
+                player.leftStanceDisabled, player.MovementContext.IsGrounded, false, 0, Vector3.zero);
         }
 
-        private void Update()
+        protected void Update()
         {
             if (observedPlayer != null)
             {
@@ -74,6 +75,14 @@ namespace Fika.Core.Coop.PacketHandlers
                             observedPlayer.SetAggressor(packet.KillerId, packet.KillerWeaponId);
                             observedPlayer.SetInventory(packet.Equipment);
                             observedPlayer.RagdollPacket = packet.RagdollPacket;
+                            if (packet.TriggerZones.Length > 0)
+                            {
+                                observedPlayer.TriggerZones.Clear();
+                                foreach (string triggerZone in packet.TriggerZones)
+                                {
+                                    observedPlayer.TriggerZones.Add(triggerZone);
+                                }
+                            }
                         }
                         observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
                     }
