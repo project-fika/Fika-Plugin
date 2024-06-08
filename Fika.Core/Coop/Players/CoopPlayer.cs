@@ -535,7 +535,8 @@ namespace Fika.Core.Coop.Players
                     Force = _corpseAppliedForce,
                     OverallVelocity = Velocity
                 },
-                Equipment = Equipment
+                Equipment = Equipment,
+                TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
             };
         }
 
@@ -1306,14 +1307,6 @@ namespace Fika.Core.Coop.Players
             }
 
             ClientApplyShot(damageInfo, packet.DamageInfo.BodyPartType, packet.DamageInfo.ColliderType, packet.DamageInfo.ArmorPlateCollider);
-        }
-
-        public void HandleDeathPatchet(DeathPacket packet)
-        {
-            if (packet.HasInventory)
-            {
-                SetInventory(packet.Equipment);
-            }
         }
 
         public virtual void SetupDogTag()

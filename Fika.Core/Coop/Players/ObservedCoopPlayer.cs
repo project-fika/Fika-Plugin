@@ -807,6 +807,15 @@ namespace Fika.Core.Coop.Players
             base.OnDead(damageType);
         }
 
+        public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+        {
+            // Only handle if it was ourselves as otherwise it's irrelevant
+            if (LastAggressor.IsYourPlayer)
+            {
+                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType); 
+            }
+        }
+
         public override void SetupDogTag()
         {
             // Do nothing
@@ -1435,7 +1444,7 @@ namespace Fika.Core.Coop.Players
             if (killer != null)
             {
                 LastAggressor = killer;
-                if (killer.IsYourPlayer)
+                /*if (killer.IsYourPlayer)
                 {
                     Item weapon = FindItem(weaponId);
                     if (weapon != null)
@@ -1445,7 +1454,7 @@ namespace Fika.Core.Coop.Players
                             Weapon = weapon
                         };
                     }
-                }
+                }*/
             }
         }
 

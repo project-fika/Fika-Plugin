@@ -12,6 +12,7 @@ namespace Fika.Core.Networking
         public string KillerWeaponId;
         public RagdollPacket RagdollPacket;
         public EquipmentClass Equipment;
+        public string[] TriggerZones;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -138,6 +139,7 @@ namespace Fika.Core.Networking
                             KillerWeaponId = reader.GetString();
                             RagdollPacket = RagdollPacket.Deserialize(reader);
                             Equipment = (EquipmentClass)reader.GetItem();
+                            TriggerZones = reader.GetStringArray();
                             break;
                         }
                         break;
@@ -349,6 +351,7 @@ namespace Fika.Core.Networking
                             writer.Put(KillerWeaponId);
                             RagdollPacket.Serialize(writer, RagdollPacket);
                             writer.PutItem(Equipment);
+                            writer.PutArray(TriggerZones);
                             break;
                         }
                         break;
