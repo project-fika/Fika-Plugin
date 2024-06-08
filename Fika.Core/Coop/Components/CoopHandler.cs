@@ -26,13 +26,13 @@ namespace Fika.Core.Coop.Components
     {
         #region Fields/Properties
         public Dictionary<string, WorldInteractiveObject> ListOfInteractiveObjects { get; private set; } = [];
+        public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
-        public Dictionary<int, CoopPlayer> Players { get; } = new();
+        public Dictionary<int, CoopPlayer> Players = [];
         public int HumanPlayers = 1;
-        public List<int> ExtractedPlayers { get; set; } = [];
+        public List<int> ExtractedPlayers = [];
         ManualLogSource Logger;
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-
         public List<string> queuedProfileIds = [];
         private Queue<SpawnObject> spawnQueue = new(50);
 
@@ -345,7 +345,7 @@ namespace Fika.Core.Coop.Components
             {
                 if (LocalGameInstance != null)
                 {
-                    CoopGame coopGame = (CoopGame)LocalGameInstance;
+                    CoopGame coopGame = LocalGameInstance;
                     BotsController botController = coopGame.BotsController;
                     if (botController != null)
                     {
@@ -517,7 +517,7 @@ namespace Fika.Core.Coop.Components
 
         private IEnumerator AddClientToBotEnemies(BotsController botController, LocalPlayer playerToAdd)
         {
-            CoopGame coopGame = (CoopGame)LocalGameInstance;
+            CoopGame coopGame = LocalGameInstance;
 
             Logger.LogInfo($"AddClientToBotEnemies: " + playerToAdd.Profile.Nickname);
 
@@ -611,8 +611,6 @@ namespace Fika.Core.Coop.Components
                 }
             });
         }
-
-        public BaseLocalGame<EftGamePlayerOwner> LocalGameInstance { get; internal set; }
     }
 
     public enum ESpawnState

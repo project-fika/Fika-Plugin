@@ -339,7 +339,7 @@ namespace Fika.Core.Networking
                     if (exfilController.ExfiltrationPoints == null)
                         return;
 
-                    CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                    CoopGame coopGame = coopHandler.LocalGameInstance;
 
                     CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
 
@@ -432,7 +432,7 @@ namespace Fika.Core.Networking
                             if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
                             {
                                 coopHandler.ExtractedPlayers.Add(packet.NetId);
-                                CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
+                                CoopGame coopGame = coopHandler.LocalGameInstance;
                                 coopGame.ExtractedPlayers.Add(packet.NetId);
                                 coopGame.ClearHostAI(playerToApply);
 
@@ -480,7 +480,7 @@ namespace Fika.Core.Networking
                             ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
                             if (exfilPoint != null)
                             {
-                                CoopGame game = (CoopGame)Singleton<AbstractGame>.Instance;
+                                CoopGame game = coopHandler.LocalGameInstance;
                                 exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
 
                                 if (exfilPoint.Status != EExfiltrationStatus.Countdown)
@@ -724,10 +724,12 @@ namespace Fika.Core.Networking
         {
             TimeSpan sessionTime = new(packet.Tick);
 
-            if (coopHandler.LocalGameInstance is CoopGame coopGame)
+            CoopGame coopGame = coopHandler.LocalGameInstance;
+
+            GameTimerClass gameTimer = coopGame.GameTimer;
+            if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
             {
-                GameTimerClass gameTimer = coopGame.GameTimer;
-                if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
+                if (gameTimer.PastTime.TotalSeconds < 3)
                 {
                     TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
 
