@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            CoopClientQuestController questController = new(profile, inventoryController, true);
+            CoopClientQuestController questController = new(profile, inventoryController, session, true);
             questController.Init();
             questController.Run();
 

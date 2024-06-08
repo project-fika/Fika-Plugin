@@ -8,6 +8,7 @@ using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.MovingPlatforms;
 using EFT.UI;
+using EFT.UI.BattleTimer;
 using EFT.Weather;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
@@ -735,35 +736,41 @@ namespace Fika.Core.Networking
 
         private void OnGameTimerPacketReceived(GameTimerPacket packet)
         {
+            TimeSpan sessionTime = new(packet.Tick);
+
+            if (coopHandler.LocalGameInstance is CoopGame coopGame)
+            {
+                GameTimerClass gameTimer = coopGame.GameTimer;
+                if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
+                {
+                    TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
+
+                    gameTimer.ChangeSessionTime(timeRemain);
+
+                    Traverse timerPanel = Traverse.Create(coopGame.GameUi.TimerPanel);
+                    timerPanel.Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds));
+
+                    MainTimerPanel mainTimerPanel = timerPanel.Field<MainTimerPanel>("_mainTimerPanel").Value;
+                    if (mainTimerPanel != null)
+                    {
+                        ConsoleScreen.Log("SETTING MAINTIMERPANEL VALUES");
+                        Traverse.Create(mainTimerPanel).Field<DateTime>("dateTime_0").Value = gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds);
+                        mainTimerPanel.UpdateTimer();
+                    }
+                }
+
+                Traverse.Create(gameTimer).Field<DateTime?>("nullable_0").Value = new DateTime(packet.StartTime);
+            }
+        }
+
+        private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
+        {
             if (!ready)
             {
                 return;
             }
 
-            TimeSpan sessionTime = new(packet.Tick);
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-            GameTimerClass gameTimer = coopGame.GameTimer;
-
-			//if (gameTimer.PastTime.TotalSeconds < 3)
-			//{
-			//	return;
-			//}
-
-			TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
-
-			gameTimer.ChangeSessionTime(timeRemain);
-
-			Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
-		}
-
-        private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
-        {
-			if (!ready)
-			{
-				return;
-			}
-
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
                 playerToApply.PacketReceiver.NewState = packet;
             }
@@ -953,7 +960,7 @@ namespace Fika.Core.Networking
                     });
                 }
 
-                ReconnectRequestPacket airdropPosPacket = new (MyPlayer.ProfileId, EReconnectPackgeType.AirdropPositions);
+                ReconnectRequestPacket airdropPosPacket = new(MyPlayer.ProfileId, EReconnectPackgeType.AirdropPositions);
                 DataWriter.Reset();
                 SendData(DataWriter, ref airdropPosPacket, DeliveryMethod.ReliableUnordered);
             }

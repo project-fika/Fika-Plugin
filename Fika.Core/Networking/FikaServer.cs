@@ -644,7 +644,7 @@ namespace Fika.Core.Networking
             CoopGame game = (CoopGame)Singleton<AbstractGame>.Instance;
             if (game != null)
             {
-                GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks);
+                GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks, game.GameTimer.StartDateTime.Value.Ticks);
                 _dataWriter.Reset();
                 SendDataToPeer(peer, _dataWriter, ref gameTimerPacket, DeliveryMethod.ReliableOrdered);
             }
