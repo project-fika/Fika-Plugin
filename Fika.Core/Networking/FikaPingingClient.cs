@@ -127,7 +127,7 @@ namespace Fika.Core.Networking
 
             if (reader.TryGetString(out string result))
             {
-                if (result == "fika.hello")
+                if (result == "fika.hello" || result == "fika.punchnat")
                 {
                     Received = true;
                     MatchmakerAcceptPatches.RemoteIp = remoteEndPoint.Address.ToString();

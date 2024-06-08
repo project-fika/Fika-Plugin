@@ -64,7 +64,7 @@ namespace Fika.Core.Networking.NatPunch
         {
             // bogus punch data
             var resp = new NetDataWriter();
-            resp.Put(9999);
+            resp.Put("fika.punchnat");
 
             // send a couple of packets to punch a hole
             for (int i = 0; i < 10; i++)
