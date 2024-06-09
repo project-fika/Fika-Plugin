@@ -367,7 +367,7 @@ namespace Fika.Core.Networking
                     if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
                     {
                         coopHandler.ExtractedPlayers.Add(packet.NetId);
-                        CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
+                        CoopGame coopGame = coopHandler.LocalGameInstance;
                         coopGame.ExtractedPlayers.Add(packet.NetId);
                         coopGame.ClearHostAI(playerToApply);
 
@@ -392,7 +392,7 @@ namespace Fika.Core.Networking
             }
             else if (packet.PacketType == EPackageType.LoadBot)
             {
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                CoopGame coopGame = coopHandler.LocalGameInstance;
                 coopGame.IncreaseLoadedPlayers(packet.BotNetId);
 
                 return;
@@ -406,7 +406,7 @@ namespace Fika.Core.Networking
                     ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
                     if (exfilPoint != null)
                     {
-                        CoopGame game = (CoopGame)Singleton<AbstractGame>.Instance;
+                        CoopGame game = coopHandler.LocalGameInstance;
                         exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
 
                         if (exfilPoint.Status != EExfiltrationStatus.Countdown)
@@ -625,7 +625,7 @@ namespace Fika.Core.Networking
             if (!packet.IsRequest)
                 return;
 
-            CoopGame game = (CoopGame)Singleton<AbstractGame>.Instance;
+            CoopGame game = coopHandler.LocalGameInstance;
             if (game != null)
             {
                 GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks);

@@ -26,13 +26,13 @@ namespace Fika.Core.Coop.Components
     {
         #region Fields/Properties        
         public Dictionary<string, WorldInteractiveObject> ListOfInteractiveObjects { get; private set; } = [];
+        public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
-        public Dictionary<int, CoopPlayer> Players { get; } = new();
+        public Dictionary<int, CoopPlayer> Players = [];
         public int HumanPlayers = 1;
-        public List<int> ExtractedPlayers { get; set; } = [];
+        public List<int> ExtractedPlayers = [];
         ManualLogSource Logger;
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-
         public List<string> queuedProfileIds = [];
         private Queue<SpawnObject> spawnQueue = new(50);
 
@@ -247,7 +247,7 @@ namespace Fika.Core.Coop.Components
         {
             while (RunAsyncTasks)
             {
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                CoopGame coopGame = LocalGameInstance;
                 int waitTime = 2500;
                 if (coopGame.Status == GameStatus.Started)
                 {
@@ -285,23 +285,30 @@ namespace Fika.Core.Coop.Components
 
         private async void SpawnPlayer(SpawnObject spawnObject)
         {
-            if (Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == spawnObject.Profile.ProfileId))
-            {
-                return;
-            }
-
-            if (Singleton<GameWorld>.Instance.AllAlivePlayersList.Any(x => x.ProfileId == spawnObject.Profile.ProfileId))
-            {
-                return;
-            }
-
-            int playerId = Players.Count + Singleton<GameWorld>.Instance.RegisteredPlayers.Count + 1;
             if (spawnObject.Profile == null)
             {
                 Logger.LogError("SpawnPlayer Profile is NULL!");
                 queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
                 return;
             }
+
+            foreach (IPlayer player in Singleton<GameWorld>.Instance.RegisteredPlayers)
+            {
+                if (player.ProfileId == spawnObject.Profile.ProfileId)
+                {
+                    return;
+                }
+            }
+
+            foreach (IPlayer player in Singleton<GameWorld>.Instance.AllAlivePlayersList)
+            {
+                if (player.ProfileId == spawnObject.Profile.ProfileId)
+                {
+                    return;
+                }
+            }
+
+            int playerId = Players.Count + Singleton<GameWorld>.Instance.RegisteredPlayers.Count + 1;            
 
             IEnumerable<ResourceKey> allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths();
             if (allPrefabPaths.Count() == 0)
@@ -311,9 +318,7 @@ namespace Fika.Core.Coop.Components
             }
 
             await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
-                PoolManager.AssemblyType.Local,
-                allPrefabPaths.ToArray(),
-                JobPriority.General).ContinueWith(x =>
+                PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.General).ContinueWith(x =>
             {
                 if (x.IsCompleted)
                 {
@@ -340,8 +345,7 @@ namespace Fika.Core.Coop.Components
             {
                 if (LocalGameInstance != null)
                 {
-                    CoopGame coopGame = (CoopGame)LocalGameInstance;
-                    BotsController botController = coopGame.BotsController;
+                    BotsController botController = LocalGameInstance.BotsController;
                     if (botController != null)
                     {
                         // Start Coroutine as botController might need a while to start sometimes...
@@ -388,14 +392,20 @@ namespace Fika.Core.Coop.Components
 
         public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
         {
-            if (Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == profile.ProfileId))
+            foreach (IPlayer player in Singleton<GameWorld>.Instance.RegisteredPlayers)
             {
-                return;
+                if (player.ProfileId == profile.ProfileId)
+                {
+                    return;
+                }
             }
 
-            if (Singleton<GameWorld>.Instance.AllAlivePlayersList.Any(x => x.ProfileId == profile.ProfileId))
+            foreach (IPlayer player in Singleton<GameWorld>.Instance.AllAlivePlayersList)
             {
-                return;
+                if (player.ProfileId == profile.ProfileId)
+                {
+                    return;
+                }
             }
 
             if (queuedProfileIds.Contains(profile.ProfileId))
@@ -419,10 +429,10 @@ namespace Fika.Core.Coop.Components
 
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
-            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position, Quaternion.identity,
-                "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, isAI,
-                EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
-                GClass548.Config.CharacterController.ObservedPlayerMode,
+            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position,
+                Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
+                EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
+                Player.EUpdateMode.Auto, GClass548.Config.CharacterController.ObservedPlayerMode,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
                 () => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
                 GClass1457.Default).Result;
@@ -474,7 +484,9 @@ namespace Fika.Core.Coop.Components
                 if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
                 {
                     Item backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
-                    backpack?.GetAllItems().Where(i => i != backpack).ExecuteForEach(i => i.SpawnedInSession = true);
+                    backpack?.GetAllItems()
+                        .Where(i => i != backpack)
+                        .ExecuteForEach(i => i.SpawnedInSession = true);
 
                     // We still want DogTags to be 'FiR'
                     Item item = otherPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
@@ -507,7 +519,7 @@ namespace Fika.Core.Coop.Components
 
         private IEnumerator AddClientToBotEnemies(BotsController botController, LocalPlayer playerToAdd)
         {
-            CoopGame coopGame = (CoopGame)LocalGameInstance;
+            CoopGame coopGame = LocalGameInstance;
 
             Logger.LogInfo($"AddClientToBotEnemies: " + playerToAdd.Profile.Nickname);
 
@@ -601,8 +613,6 @@ namespace Fika.Core.Coop.Components
                 }
             });
         }
-
-        public BaseLocalGame<EftGamePlayerOwner> LocalGameInstance { get; internal set; }
     }
 
     public enum ESpawnState

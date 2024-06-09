@@ -173,7 +173,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 Locomotive locomotive = FindObjectOfType<Locomotive>();
                 if (locomotive != null)
                 {
-                    long time = Traverse.Create(locomotive).Field("_depart").GetValue<DateTime>().Ticks;
+                    long time = Traverse.Create(locomotive).Field<DateTime>("_depart").Value.Ticks;
 
                     GenericPacket packet = new()
                     {
