@@ -35,6 +35,7 @@ namespace Fika.Core.EssentialPatches
             }
 
             Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+
             preloaderUiTraverse.Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
             if (FikaPlugin.OfficialVersion.Value)
             {
