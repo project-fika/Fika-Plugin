@@ -110,7 +110,7 @@ namespace Fika.Core.Networking
             };
 
             var natPunchServer = new FikaNatPunchServer(_netServer);
-            natPunchServer.Listen();
+            natPunchServer.Connect();
 
             if (FikaPlugin.UseUPnP.Value)
             {

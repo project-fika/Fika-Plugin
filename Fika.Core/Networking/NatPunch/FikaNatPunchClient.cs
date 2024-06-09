@@ -21,7 +21,7 @@ namespace Fika.Core.Networking.NatPunch
         public FikaNatPunchClient()
         {
             // Assuming http protocol is always used
-            Host = RequestHandler.Host.Replace("http", "ws");
+            Host = $"{RequestHandler.Host.Replace("http", "ws").Split(':')[0]}:6970";
             SessionId = RequestHandler.SessionId;
             Url = $"{Host}/{SessionId}?";
 
