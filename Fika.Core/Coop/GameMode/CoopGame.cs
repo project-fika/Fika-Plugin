@@ -1620,9 +1620,18 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true);
+                StartCoroutine(SaveOnDeathRoutine());
             }
         }
+
+        private IEnumerator SaveOnDeathRoutine()
+        {
+            Task saveTask = SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true);
+            while (!saveTask.IsCompleted)
+            {
+                yield return null;
+            }
+		}
 
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
         {
@@ -1739,11 +1748,11 @@ namespace Fika.Core.Coop.GameMode
             GClass548.Config.UseSpiritPlayer = false;
         }
 
-        private void SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
+        private Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
         {
             if (hasSaved)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             if (fromDeath)
@@ -1771,6 +1780,7 @@ namespace Fika.Core.Coop.GameMode
             RequestHandler.PutJson("/raid/profile/save", SaveRequest.ToJson(Converters.AddItem(new NotesJsonConverter()).ToArray()));
 
             hasSaved = true;
+            return Task.CompletedTask;
         }
 
         private void StopFromError(string profileId, ExitStatus exitStatus)
@@ -1984,12 +1994,8 @@ namespace Fika.Core.Coop.GameMode
                 MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
                 StaticManager staticManager = StaticManager.Instance;
                 float num = delay;
-                Action action;
-                if ((action = EndAction) == null)
-                {
-                    action = (EndAction = new Action(FireCallback));
-                }
-                staticManager.WaitSeconds(num, action);
+                EndAction = new Action(FireCallback);
+				staticManager.WaitSeconds(num, EndAction);
             }
 
             private void FireCallback()
@@ -2023,12 +2029,8 @@ namespace Fika.Core.Coop.GameMode
                 }
                 MonoBehaviour instance2 = StaticManager.Instance;
                 float num = delay;
-                Action action;
-                if ((action = action_0) == null)
-                {
-                    action = action_0 = new Action(method_1);
-                }
-                instance2.WaitSeconds(num, action);
+				action_0 = new Action(method_1);
+				instance2.WaitSeconds(num, action_0);
             }
         }
 
