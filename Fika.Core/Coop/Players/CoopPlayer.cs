@@ -66,7 +66,7 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            GClass3228 questController = new(profile, inventoryController, session, true);
+            CoopSharedQuestController questController = new(profile, inventoryController, session, player);
             questController.Init();
             questController.Run();
 

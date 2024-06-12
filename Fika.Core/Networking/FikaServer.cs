@@ -7,6 +7,7 @@ using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
+using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.GameMode;
@@ -16,6 +17,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Networking.Packets.Player;
@@ -94,6 +96,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -185,6 +188,17 @@ namespace Fika.Core.Networking
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+        }
+
+        private void OnQuestConditionPacketReceived(QuestConditionPacket packet, NetPeer peer)
+        {
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
+
+            if (MyPlayer.GClass3226_0 is CoopSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ReceiveQuestPacket(ref packet);
+            }
         }
 
         private void OnTextMessagePacketReceived(TextMessagePacket packet, NetPeer peer)
