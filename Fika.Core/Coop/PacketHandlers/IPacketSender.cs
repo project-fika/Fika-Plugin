@@ -1,6 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 
@@ -19,6 +20,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; }
 
         public void Init();
+        public void SendQuestPacket(ref QuestConditionPacket packet);
         public void DestroyThis();
     }
 }

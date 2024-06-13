@@ -7,6 +7,7 @@ using EFT.MovingPlatforms;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -45,6 +46,12 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             enabled = true;
             StartCoroutine(SendTrainTime());
+        }
+
+        public void SendQuestPacket(ref QuestConditionPacket packet)
+        {
+            Writer.Reset();
+            Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);
         }
 
         protected void FixedUpdate()

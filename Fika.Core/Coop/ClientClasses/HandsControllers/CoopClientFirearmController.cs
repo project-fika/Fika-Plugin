@@ -79,7 +79,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 return new GClass1615(this);
             }
-            if (Item is GClass2710)
+            if (Item is GClass2711)
             {
                 return new GClass1614(this);
             }
@@ -268,7 +268,7 @@ namespace Fika.Core.Coop.ClientClasses
             });
         }
 
-        public override void ReloadBarrels(GClass2508 ammoPack, GClass2784 placeToPutContainedAmmoMagazine, Callback callback)
+        public override void ReloadBarrels(GClass2509 ammoPack, GClass2785 placeToPutContainedAmmoMagazine, Callback callback)
         {
             if (!CanStartReload() && ammoPack.AmmoCount < 1)
             {
@@ -279,7 +279,7 @@ namespace Fika.Core.Coop.ClientClasses
             CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, new Callback(handler.Process));
         }
 
-        public override void ReloadCylinderMagazine(GClass2508 ammoPack, Callback callback, bool quickReload = false)
+        public override void ReloadCylinderMagazine(GClass2509 ammoPack, Callback callback, bool quickReload = false)
         {
             if (Blindfire)
             {
@@ -299,7 +299,7 @@ namespace Fika.Core.Coop.ClientClasses
             CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, new Callback(handler.Process), handler.quickReload);
         }
 
-        public override void ReloadGrenadeLauncher(GClass2508 ammoPack, Callback callback)
+        public override void ReloadGrenadeLauncher(GClass2509 ammoPack, Callback callback)
         {
             if (!CanStartReload())
             {
@@ -320,7 +320,7 @@ namespace Fika.Core.Coop.ClientClasses
             });
         }
 
-        public override void ReloadMag(MagazineClass magazine, GClass2784 gridItemAddress, Callback callback)
+        public override void ReloadMag(MagazineClass magazine, GClass2785 gridItemAddress, Callback callback)
         {
             if (!CanStartReload() || Blindfire)
             {
@@ -331,7 +331,7 @@ namespace Fika.Core.Coop.ClientClasses
             CurrentOperation.ReloadMag(magazine, gridItemAddress, callback, new Callback(handler.Process));
         }
 
-        public override void ReloadWithAmmo(GClass2508 ammoPack, Callback callback)
+        public override void ReloadWithAmmo(GClass2509 ammoPack, Callback callback)
         {
             if (Item.GetCurrentMagazine() == null)
             {
@@ -634,7 +634,7 @@ namespace Fika.Core.Coop.ClientClasses
                 SendBoltActionReloadPacket(true);
             }
 
-            public override void ReloadMag(MagazineClass magazine, GClass2784 gridItemAddress, Callback finishCallback, Callback startCallback)
+            public override void ReloadMag(MagazineClass magazine, GClass2785 gridItemAddress, Callback finishCallback, Callback startCallback)
             {
                 base.ReloadMag(magazine, gridItemAddress, finishCallback, startCallback);
                 SendBoltActionReloadPacket(true);
@@ -646,7 +646,7 @@ namespace Fika.Core.Coop.ClientClasses
                 SendBoltActionReloadPacket(true);
             }
 
-            public override void ReloadWithAmmo(GClass2508 ammoPack, Callback finishCallback, Callback startCallback)
+            public override void ReloadWithAmmo(GClass2509 ammoPack, Callback finishCallback, Callback startCallback)
             {
                 base.ReloadWithAmmo(ammoPack, finishCallback, startCallback);
                 SendBoltActionReloadPacket(true);
@@ -671,10 +671,10 @@ namespace Fika.Core.Coop.ClientClasses
             private bool hasSent;
         }
 
-        private class ReloadMagHandler(CoopPlayer coopPlayer, GClass2784 gridItemAddress, MagazineClass magazine)
+        private class ReloadMagHandler(CoopPlayer coopPlayer, GClass2785 gridItemAddress, MagazineClass magazine)
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly GClass2784 gridItemAddress = gridItemAddress;
+            private readonly GClass2785 gridItemAddress = gridItemAddress;
             private readonly MagazineClass magazine = magazine;
 
             public void Process(IResult error)
@@ -741,11 +741,11 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
-        private class ReloadBarrelsHandler(CoopPlayer coopPlayer, GClass2784 placeToPutContainedAmmoMagazine, GClass2508 ammoPack)
+        private class ReloadBarrelsHandler(CoopPlayer coopPlayer, GClass2785 placeToPutContainedAmmoMagazine, GClass2509 ammoPack)
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly GClass2784 placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
-            private readonly GClass2508 ammoPack = ammoPack;
+            private readonly GClass2785 placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
+            private readonly GClass2509 ammoPack = ammoPack;
 
             public void Process(IResult error)
             {

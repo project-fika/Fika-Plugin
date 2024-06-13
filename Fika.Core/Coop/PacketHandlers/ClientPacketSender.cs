@@ -6,6 +6,7 @@ using EFT.Weather;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections;
@@ -41,6 +42,12 @@ namespace Fika.Core.Coop.PacketHandlers
             enabled = true;
             StartCoroutine(SyncWorld());
             StartCoroutine(SyncWeather());
+        }
+
+        public void SendQuestPacket(ref QuestConditionPacket packet)
+        {
+            Writer.Reset();
+            Client.SendData(Writer, ref packet, DeliveryMethod.ReliableUnordered);
         }
 
         protected void FixedUpdate()

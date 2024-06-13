@@ -9,6 +9,7 @@ using EFT.Interactive;
 using EFT.MovingPlatforms;
 using EFT.UI;
 using EFT.Weather;
+using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.GameMode;
@@ -16,6 +17,7 @@ using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Networking.Packets.Player;
@@ -90,6 +92,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -117,6 +120,14 @@ namespace Fika.Core.Networking
             };
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnQuestConditionPacketReceived(QuestConditionPacket packet)
+        {
+            if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ReceiveQuestPacket(ref packet);
+            }
         }
 
         private void OnTextMessagePacketReceived(TextMessagePacket packet)

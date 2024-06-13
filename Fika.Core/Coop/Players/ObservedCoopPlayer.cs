@@ -38,11 +38,11 @@ namespace Fika.Core.Coop.Players
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
-        public GClass2430 NetworkHealthController
+        public GClass2431 NetworkHealthController
         {
-            get => HealthController as GClass2430;
+            get => HealthController as GClass2431;
         }
-        private readonly GClass2169 ObservedVaultingParameters = new();
+        private readonly GClass2170 ObservedVaultingParameters = new();
         public override bool CanBeSnapped => false;
         public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
         public override AbstractHandsController HandsController
@@ -171,7 +171,7 @@ namespace Fika.Core.Coop.Players
             base.PlayGroundedSound(fallHeight, jumpHeight);
         }
 
-        public override void OnSkillLevelChanged(GClass1777 skill)
+        public override void OnSkillLevelChanged(GClass1778 skill)
         {
             //base.OnSkillLevelChanged(skill);
         }
@@ -329,7 +329,7 @@ namespace Fika.Core.Coop.Players
             }
         }*/
 
-        public override GClass1687 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
             {
@@ -380,7 +380,7 @@ namespace Fika.Core.Coop.Players
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
                     MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1687 hitInfo = new()
+                    GClass1688 hitInfo = new()
                     {
                         PoV = PointOfView,
                         Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
@@ -440,7 +440,7 @@ namespace Fika.Core.Coop.Players
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
                     MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1687 hitInfo = new()
+                    GClass1688 hitInfo = new()
                     {
                         PoV = PointOfView,
                         Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
@@ -837,8 +837,8 @@ namespace Fika.Core.Coop.Players
             {
                 Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
                 Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-                PlayerBody.GClass1874 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-                PlayerBody.GClass1874 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+                PlayerBody.GClass1875 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
+                PlayerBody.GClass1875 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
                 if (gclass2 != null)
                 {
                     gclass2.Dispose();
