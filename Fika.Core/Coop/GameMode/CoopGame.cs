@@ -1466,10 +1466,17 @@ namespace Fika.Core.Coop.GameMode
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
 
-            if (MyExitStatus == ExitStatus.MissingInAction)
+
+			if (MyExitStatus == ExitStatus.MissingInAction)
             {
                 NotificationManagerClass.DisplayMessageNotification("You have gone missing in action...", iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
+
+			BackendConfigSettingsClass.GClass1361.GClass1367 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
+			if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement || PastTime < matchEndConfig.SurvivedTimeRequirement)
+			{
+				MyExitStatus = ExitStatus.Runner;
+			}
 
             if (point != null)
             {
@@ -1635,7 +1642,7 @@ namespace Fika.Core.Coop.GameMode
 
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
         {
-            Logger.LogInfo("CoopGame::Stop");
+            Logger.LogDebug("CoopGame::Stop");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
