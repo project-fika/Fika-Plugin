@@ -195,7 +195,7 @@ namespace Fika.Core.Networking
             _dataWriter.Reset();
             SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
 
-            if (MyPlayer.GClass3226_0 is CoopSharedQuestController sharedQuestController)
+            if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ReceiveQuestPacket(ref packet);
             }
@@ -529,7 +529,7 @@ namespace Fika.Core.Networking
                 using BinaryReader binaryReader = new(memoryStream);
                 try
                 {
-                    GStruct412 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
+                    GStruct411 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
 
                     InventoryOperationHandler opHandler = new()
                     {
@@ -547,9 +547,9 @@ namespace Fika.Core.Networking
 
                     // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
                     // Unknown what problems this might cause so far.
-                    if (result.Value is GClass2877 unloadOperation)
+                    if (result.Value is GClass2878 unloadOperation)
                     {
-                        if (unloadOperation.InternalOperation is GClass2888 internalSplitOperation)
+                        if (unloadOperation.InternalOperation is GClass2889 internalSplitOperation)
                         {
                             Item item = internalSplitOperation.To.Item;
                             if (item != null)
@@ -571,7 +571,7 @@ namespace Fika.Core.Networking
                     }
 
                     // TODO: Same as above.
-                    if (result.Value is GClass2888 splitOperation)
+                    if (result.Value is GClass2889 splitOperation)
                     {
                         Item item = splitOperation.To.Item;
                         if (item != null)
@@ -780,7 +780,7 @@ namespace Fika.Core.Networking
 
         private class InventoryOperationHandler
         {
-            public GStruct412 opResult;
+            public GStruct411 opResult;
             public uint operationId;
             public int netId;
             public NetPeer peer;

@@ -66,7 +66,7 @@ namespace Fika.Core.Coop.GameMode
         //private GameObject fikaStartButton;
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
-        private GClass2948 spawnPoints = null;
+        private GClass2949 spawnPoints = null;
         private ISpawnPoint spawnPoint = null;
         private GClass579 GClass579;
         private WavesSpawnScenario wavesSpawnScenario_0;
@@ -187,7 +187,7 @@ namespace Fika.Core.Coop.GameMode
 
         public override void SetMatchmakerStatus(string status, float? progress = null)
         {
-            if (GClass3130.Instance.CurrentScreenController is MatchmakerTimeHasCome.GClass3186 gclass)
+            if (GClass3131.Instance.CurrentScreenController is MatchmakerTimeHasCome.GClass3187 gclass)
             {
                 gclass.ChangeStatus(status, progress);
             }
@@ -554,7 +554,7 @@ namespace Fika.Core.Coop.GameMode
 
             int timeBeforeDeployLocal = Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
             DateTime dateTime = GClass1304.Now.AddSeconds(timeBeforeDeployLocal);
-            new MatchmakerFinalCountdown.GClass3185(Profile_0, dateTime).ShowScreen(EScreenState.Root);
+            new MatchmakerFinalCountdown.GClass3186(Profile_0, dateTime).ShowScreen(EScreenState.Root);
             MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeployLocal);
             Singleton<GUISounds>.Instance.StopMenuBackgroundMusicWithDelay(timeBeforeDeployLocal);
             GameUi.gameObject.SetActive(true);
@@ -596,7 +596,7 @@ namespace Fika.Core.Coop.GameMode
 
                 NetDataWriter writer = new();
 
-                MatchmakerAcceptPatches.GClass3186.ChangeStatus("Waiting for other players to finish loading...");
+                MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
 
                 /*if (fikaStartButton != null)
                 {
@@ -632,7 +632,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        MatchmakerAcceptPatches.GClass3186.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
+                        MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (server.ReadyClients < expectedPlayers);
 
@@ -666,7 +666,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        MatchmakerAcceptPatches.GClass3186.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
+                        MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (client.ReadyClients < expectedPlayers);
                 }
@@ -966,10 +966,10 @@ namespace Fika.Core.Coop.GameMode
                 eupdateMode = Player.EUpdateMode.Manual;
             }
 
-            spawnPoints = GClass2948.CreateFromScene(new DateTime?(GClass1304.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)), Location_0.SpawnPointParams);
+            spawnPoints = GClass2949.CreateFromScene(new DateTime?(GClass1304.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)), Location_0.SpawnPointParams);
             int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-            GStruct380 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-            SpawnSystem = GClass2949.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
+            GStruct379 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+            SpawnSystem = GClass2950.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
 
             if (isServer)
             {
@@ -1004,9 +1004,9 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogInfo("Starting task to wait for other players.");
 
-            if (MatchmakerAcceptPatches.GClass3186 != null)
+            if (MatchmakerAcceptPatches.ScreenController != null)
             {
-                MatchmakerAcceptPatches.GClass3186.ChangeStatus($"Initializing Coop Game...");
+                MatchmakerAcceptPatches.ScreenController.ChangeStatus($"Initializing Coop Game...");
             }
             int numbersOfPlayersToWaitFor = 0;
 
@@ -1017,15 +1017,15 @@ namespace Fika.Core.Coop.GameMode
                 do
                 {
                     numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
-                    if (MatchmakerAcceptPatches.GClass3186 != null)
+                    if (MatchmakerAcceptPatches.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
                         {
-                            MatchmakerAcceptPatches.GClass3186.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
+                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
                         }
                         else
                         {
-                            MatchmakerAcceptPatches.GClass3186.ChangeStatus($"All players joined, starting game...");
+                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"All players joined, starting game...");
                         }
                     }
                     else
@@ -1049,7 +1049,7 @@ namespace Fika.Core.Coop.GameMode
                 while (client.ServerConnection == null && connectionAttempts < 5)
                 {
                     // Server retries 10 times with a 500ms interval, we give it 5 seconds to try
-                    MatchmakerAcceptPatches.GClass3186.ChangeStatus("Waiting for client to connect to server... If there is no notification it failed.");
+                    MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for client to connect to server... If there is no notification it failed.");
                     connectionAttempts++;
                     await Task.Delay(1000);
 
@@ -1071,15 +1071,15 @@ namespace Fika.Core.Coop.GameMode
                 do
                 {
                     numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
-                    if (MatchmakerAcceptPatches.GClass3186 != null)
+                    if (MatchmakerAcceptPatches.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
                         {
-                            MatchmakerAcceptPatches.GClass3186.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
+                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
                         }
                         else
                         {
-                            MatchmakerAcceptPatches.GClass3186.ChangeStatus($"All players joined, starting game...");
+                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"All players joined, starting game...");
                         }
                     }
                     else
@@ -1539,7 +1539,7 @@ namespace Fika.Core.Coop.GameMode
             extractRoutine = StartCoroutine(ExtractRoutine(player));
 
             // Prevents players from looting after extracting
-            GClass3130.Instance.CloseAllScreensForced();
+            GClass3131.Instance.CloseAllScreensForced();
 
             // Detroys session timer
             if (timeManager != null)
@@ -1651,8 +1651,8 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct415<GClass2800> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
-                        myPlayer.GClass2776_0, false, true);
+                    GStruct414<GClass2801> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+                        myPlayer.GClass2777_0, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::Stop: Error removing dog tag!");
@@ -1801,8 +1801,8 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct415<GClass2800> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
-                        myPlayer.GClass2776_0, false, true);
+                    GStruct414<GClass2801> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+                        myPlayer.GClass2777_0, false, true);
                     if (result.Error != null)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::StopFromError: Error removing dog tag!");
@@ -1988,7 +1988,7 @@ namespace Fika.Core.Coop.GameMode
 
             public void HandleExit()
             {
-                GClass3130 screenManager = GClass3130.Instance;
+                GClass3131 screenManager = GClass3131.Instance;
                 if (screenManager.CheckCurrentScreen(EEftScreenType.Reconnect))
                 {
                     screenManager.CloseAllScreensForced();
@@ -2020,7 +2020,7 @@ namespace Fika.Core.Coop.GameMode
         {
             public void ExitOverride()
             {
-                GClass3130 instance = GClass3130.Instance;
+                GClass3131 instance = GClass3131.Instance;
                 if (instance != null && instance.CheckCurrentScreen(EEftScreenType.Reconnect))
                 {
                     instance.CloseAllScreensForced();

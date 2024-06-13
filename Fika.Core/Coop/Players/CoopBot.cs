@@ -78,7 +78,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public override void OnSkillLevelChanged(GClass1777 skill)
+        public override void OnSkillLevelChanged(GClass1778 skill)
         {
             // Do nothing
         }
@@ -102,7 +102,7 @@ namespace Fika.Core.Coop.Players
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
         }*/
 
-        public override GClass1687 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
             {
@@ -122,7 +122,7 @@ namespace Fika.Core.Coop.Players
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-            GClass1687 hitInfo = new()
+            GClass1688 hitInfo = new()
             {
                 PoV = PointOfView,
                 Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),

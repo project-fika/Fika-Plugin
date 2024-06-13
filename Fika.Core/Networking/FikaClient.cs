@@ -124,7 +124,7 @@ namespace Fika.Core.Networking
 
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet)
         {
-            if (MyPlayer.GClass3226_0 is CoopSharedQuestController sharedQuestController)
+            if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ReceiveQuestPacket(ref packet);
             }

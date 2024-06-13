@@ -30,14 +30,14 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
-        public override void Execute(GClass2853 operation, [CanBeNull] Callback callback)
+        public override void Execute(GClass2854 operation, [CanBeNull] Callback callback)
         {
 #if DEBUG
             ConsoleScreen.Log("InvOperation: " + operation.GetType().Name);
 #endif
 
-            // Do not replicate picking up quest items, throws an error on the other clients
-            if (operation is GClass2855 pickupOperation)
+            // Do not replicate picking up quest items, throws an error on the other clients            
+            if (operation is GClass2856 pickupOperation)
             {
                 if (pickupOperation.Item.Template.QuestItem)
                 {
@@ -46,15 +46,16 @@ namespace Fika.Core.Coop.ClientClasses
                 }
             }
 
+            // Do not replicate quest operations
+            // Check for GClass increments
+            if (operation is GClass2883 or GClass2896)
+            {
+                base.Execute(operation, callback);
+                return;
+            }
+
             if (MatchmakerAcceptPatches.IsServer)
             {
-                // Do not replicate quest operations
-                if (operation is GClass2866 or GClass2879)
-                {
-                    base.Execute(operation, callback);
-                    return;
-                }
-
                 HostInventoryOperationManager operationManager = new(this, operation, callback);
                 if (vmethod_0(operationManager.operation))
                 {
@@ -84,13 +85,6 @@ namespace Fika.Core.Coop.ClientClasses
             }
             else if (MatchmakerAcceptPatches.IsClient)
             {
-                // Do not replicate quest operations
-                if (operation is GClass2866 or GClass2879)
-                {
-                    base.Execute(operation, callback);
-                    return;
-                }
-
                 InventoryPacket packet = new()
                 {
                     HasItemControllerExecutePacket = true
@@ -120,17 +114,17 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
-        private uint AddOperationCallback(GClass2853 operation, Callback<EOperationStatus> callback)
+        private uint AddOperationCallback(GClass2854 operation, Callback<EOperationStatus> callback)
         {
             ushort id = operation.Id;
             CoopPlayer.OperationCallbacks.Add(id, callback);
             return id;
         }
 
-        private class HostInventoryOperationManager(CoopClientInventoryController inventoryController, GClass2853 operation, Callback callback)
+        private class HostInventoryOperationManager(CoopClientInventoryController inventoryController, GClass2854 operation, Callback callback)
         {
             public readonly CoopClientInventoryController inventoryController = inventoryController;
-            public GClass2853 operation = operation;
+            public GClass2854 operation = operation;
             public readonly Callback callback = callback;
 
             public void HandleResult(IResult result)
@@ -147,7 +141,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             public EOperationStatus? serverOperationStatus;
             public EOperationStatus? localOperationStatus;
-            public GClass2853 operation;
+            public GClass2854 operation;
             public Callback callback;
             public CoopClientInventoryController inventoryController;
 

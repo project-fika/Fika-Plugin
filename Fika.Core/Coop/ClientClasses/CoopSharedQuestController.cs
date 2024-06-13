@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Fika.Core.Coop.ClientClasses
 {
     public sealed class CoopSharedQuestController(Profile profile, InventoryControllerClass inventoryController,
-        GInterface161 session, CoopPlayer player, bool fromServer = true) : GClass3228(profile, inventoryController, session, fromServer)
+        GInterface161 session, CoopPlayer player, bool fromServer = true) : GClass3229(profile, inventoryController, session, fromServer)
     {
         private readonly CoopPlayer player = player;
         private readonly List<string> lastFromNetwork = [];
@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (conditional is GClass1258 quest)
             {
-                GClass3241 counter = quest.ConditionCountersManager.GetCounter(conditionId);
+                GClass3242 counter = quest.ConditionCountersManager.GetCounter(conditionId);
                 if (counter != null)
                 {
                     QuestConditionPacket packet = new(player.Profile.Info.MainProfileNickname, counter.Id, counter.SourceId);
@@ -51,7 +51,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 if (quest.Id == packet.SourceId && quest.QuestStatus == EQuestStatus.Started)
                 {
-                    GClass3241 counter = quest.ConditionCountersManager.GetCounter(packet.Id);
+                    GClass3242 counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                     if (counter != null)
                     {
                         counter.Value++;

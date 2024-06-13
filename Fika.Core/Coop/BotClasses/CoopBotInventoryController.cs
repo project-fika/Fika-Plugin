@@ -14,7 +14,7 @@ namespace Fika.Core.Coop.BotClasses
     {
         private readonly CoopBot CoopBot = (CoopBot)player;
 
-        public override void Execute(GClass2853 operation, [CanBeNull] Callback callback)
+        public override void Execute(GClass2854 operation, [CanBeNull] Callback callback)
         {
             base.Execute(operation, callback);
 
