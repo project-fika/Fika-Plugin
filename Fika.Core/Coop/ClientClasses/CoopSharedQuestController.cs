@@ -11,6 +11,7 @@ namespace Fika.Core.Coop.ClientClasses
     {
         private readonly CoopPlayer player = player;
         private readonly List<string> lastFromNetwork = [];
+        private readonly List<string> acceptedTypes = ["Kill", "Hit", "InZone", "Location"];
 
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
         {
@@ -54,6 +55,11 @@ namespace Fika.Core.Coop.ClientClasses
                     GClass3242 counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                     if (counter != null)
                     {
+                        if (!acceptedTypes.Contains(counter.Type))
+                        {
+                            return;
+                        }
+
                         counter.Value++;
                         NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",
                             iconType: EFT.Communications.ENotificationIconType.Quest);
