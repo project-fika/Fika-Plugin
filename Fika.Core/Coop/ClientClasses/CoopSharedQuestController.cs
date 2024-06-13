@@ -1,9 +1,7 @@
 ﻿using EFT;
 using EFT.Quests;
-using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
-using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -30,7 +28,7 @@ namespace Fika.Core.Coop.ClientClasses
             if (!lastFromNetwork.Contains(id))
             {
                 lastFromNetwork.Add(id);
-            }            
+            }
         }
 
         private void SendQuestPacket(IConditionCounter conditional, string conditionId)
@@ -41,7 +39,7 @@ namespace Fika.Core.Coop.ClientClasses
                 if (counter != null)
                 {
                     QuestConditionPacket packet = new(player.Profile.Info.MainProfileNickname, counter.Id, counter.SourceId);
-                    player.PacketSender.SendQuestPacket(ref packet); 
+                    player.PacketSender.SendQuestPacket(ref packet);
                 }
             }
         }
