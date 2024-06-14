@@ -104,7 +104,8 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 for (int i = 0; i < healthPackets; i++)
                 {
-                    player.HandleDamagePacket(DamagePackets.Dequeue());
+                    DamagePacket packet = DamagePackets.Dequeue();
+                    player.HandleDamagePacket(ref packet);
                 }
             }
             int inventoryPackets = InventoryPackets.Count;
