@@ -27,7 +27,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
-using static UnityEngine.SendMouseEvents;
 
 namespace Fika.Core.Coop.Players
 {
@@ -886,7 +885,7 @@ namespace Fika.Core.Coop.Players
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::Start: Error removing dog tag!");
                     }
                 }
-                
+
                 string templateId = GetDogTagTemplateId();
 
                 if (!string.IsNullOrEmpty(templateId))
@@ -904,7 +903,7 @@ namespace Fika.Core.Coop.Players
                     else
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
-                    } 
+                    }
                 }
             }
 
@@ -1335,7 +1334,7 @@ namespace Fika.Core.Coop.Players
                 {
                     ItemIds = ids,
                     Durabilities = durabilities,
-                }); 
+                });
             }
         }
 
@@ -1412,7 +1411,7 @@ namespace Fika.Core.Coop.Players
                     itemComponent.Repairable.Durability = packet.Durabilities[i];
                     itemComponent.Buff.TryDisableComponent(itemComponent.Repairable.Durability);
                     itemComponent.Item.RaiseRefreshEvent(false, false);
-                } 
+                }
             }
         }
 
