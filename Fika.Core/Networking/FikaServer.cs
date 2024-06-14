@@ -82,6 +82,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnFirearmPacketReceived);
             packetProcessor.SubscribeNetSerializable<DamagePacket, NetPeer>(OnDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializable<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
             packetProcessor.SubscribeNetSerializable<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
             packetProcessor.SubscribeNetSerializable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
             packetProcessor.SubscribeNetSerializable<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
@@ -635,6 +636,17 @@ namespace Fika.Core.Networking
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
                 playerToApply.PacketReceiver.DamagePackets?.Enqueue(packet);
+            }
+
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableOrdered, peer);
+        }
+
+        private void OnArmorDamagePacketReceived(ArmorDamagePacket packet, NetPeer peer)
+        {
+            if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            {
+                playerToApply.PacketReceiver.ArmorDamagePackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();

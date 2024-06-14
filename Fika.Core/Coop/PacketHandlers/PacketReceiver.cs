@@ -19,6 +19,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public PlayerStatePacket NewState { get; set; }
         public Queue<WeaponPacket> FirearmPackets { get; private set; } = new(50);
         public Queue<DamagePacket> DamagePackets { get; private set; } = new(50);
+        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; private set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; private set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; private set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; private set; } = new(50);
@@ -99,13 +100,22 @@ namespace Fika.Core.Coop.PacketHandlers
                     player.HandleWeaponPacket(FirearmPackets.Dequeue());
                 }
             }
-            int healthPackets = DamagePackets.Count;
-            if (healthPackets > 0)
+            int damagePackets = DamagePackets.Count;
+            if (damagePackets > 0)
             {
-                for (int i = 0; i < healthPackets; i++)
+                for (int i = 0; i < damagePackets; i++)
                 {
-                    DamagePacket packet = DamagePackets.Dequeue();
-                    player.HandleDamagePacket(ref packet);
+                    DamagePacket damagePacket = DamagePackets.Dequeue();
+                    player.HandleDamagePacket(ref damagePacket);
+                }
+            }
+            int armorDamagePackets = ArmorDamagePackets.Count;
+            if (armorDamagePackets > 0)
+            {
+                for (int i = 0; i < armorDamagePackets; i++)
+                {
+                    ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                    player.HandleArmorDamagePacket(ref armorDamagePacket);
                 }
             }
             int inventoryPackets = InventoryPackets.Count;

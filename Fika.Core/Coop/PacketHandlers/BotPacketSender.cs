@@ -21,6 +21,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public NetDataWriter Writer { get; set; } = new();
         public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
         public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
+        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
@@ -87,16 +88,28 @@ namespace Fika.Core.Coop.PacketHandlers
                     Server.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            int healthPackets = DamagePackets.Count;
-            if (healthPackets > 0)
+            int damagePackets = DamagePackets.Count;
+            if (damagePackets > 0)
             {
-                for (int i = 0; i < healthPackets; i++)
+                for (int i = 0; i < damagePackets; i++)
                 {
-                    DamagePacket healthPacket = DamagePackets.Dequeue();
-                    healthPacket.NetId = player.NetId;
+                    DamagePacket damagePacket = DamagePackets.Dequeue();
+                    damagePacket.NetId = player.NetId;
 
                     Writer.Reset();
-                    Server.SendDataToAll(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                    Server.SendDataToAll(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+                }
+            }
+            int armorDamagePackets = ArmorDamagePackets.Count;
+            if (armorDamagePackets > 0)
+            {
+                for (int i = 0; i < armorDamagePackets; i++)
+                {
+                    ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                    armorDamagePacket.NetId = player.NetId;
+
+                    Writer.Reset();
+                    Server.SendDataToAll(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int inventoryPackets = InventoryPackets.Count;

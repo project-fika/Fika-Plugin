@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.Ballistics;
 using LiteNetLib.Utils;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ namespace Fika.Core.Networking
         public int FragmentIndex;
         public float ArmorDamage = 0f;
         public string ProfileId;
+        public MaterialType Material = 0;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -45,6 +47,7 @@ namespace Fika.Core.Networking
             FragmentIndex = reader.GetInt();
             ArmorDamage = reader.GetFloat();
             ProfileId = reader.GetString();
+            Material = (MaterialType)reader.GetInt();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -67,6 +70,7 @@ namespace Fika.Core.Networking
             writer.Put(FragmentIndex);
             writer.Put(ArmorDamage);
             writer.Put(ProfileId);
+            writer.Put((int)Material);
         }
     }
 }

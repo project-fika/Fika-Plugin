@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.HealthSystem;
@@ -26,6 +27,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
+using static UnityEngine.SendMouseEvents;
 
 namespace Fika.Core.Coop.Players
 {
@@ -219,17 +221,42 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
-            if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
+            if (damageInfo.DamageType is not EDamageType.Sniper or EDamageType.Landmine)
             {
-                return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+                return null;
             }
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is CoopBot)
+            if (damageInfo.Player != null && damageInfo.Player.iPlayer is not CoopBot)
             {
-                return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+                return null;
             }
 
-            return null;
+            ActiveHealthController activeHealthController = ActiveHealthController;
+            if (activeHealthController != null && !activeHealthController.IsAlive)
+            {
+                return null;
+            }
+            bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+            float damage = damageInfo.Damage;
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            GClass1688 gclass = new()
+            {
+                PoV = PointOfView,
+                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
+                Material = materialType
+            };
+            ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
+            ShotReactions(damageInfo, bodyPartType);
+            float num = damage - damageInfo.Damage;
+            ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, gclass.Material);
+
+            if (list != null)
+            {
+                QueueArmorDamagePackets([.. list]);
+            }
+
+            return gclass;
         }
 
         public override void Proceed(bool withNetwork, Callback<GInterface137> callback, bool scheduled = true)
@@ -1095,18 +1122,6 @@ namespace Fika.Core.Coop.Players
                                 FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
                             }
                         }
-
-                        /*// Fix for folding not replicating
-                        if (result.Value is GClass2858 foldOperation)
-                        {
-                            if (HandsController is CoopObservedFirearmController observedFirearmController)
-                            {
-                                if (observedFirearmController.Weapon != null && observedFirearmController.Weapon.Foldable != null)
-                                {
-                                    observedFirearmController.InitiateOperation<FirearmController.Class1020>().Start(foldOperation, null);
-                                }
-                            }
-                        }*/
                     }
                     catch (Exception exception)
                     {
@@ -1269,6 +1284,28 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public void QueueArmorDamagePackets(ArmorComponent[] armorComponents)
+        {
+            int amount = armorComponents.Length;
+            if (amount > 0)
+            {
+                string[] ids = new string[amount];
+                float[] durabilities = new float[amount];
+
+                for (int i = 0; i < amount; i++)
+                {
+                    ids[i] = armorComponents[i].Item.Id;
+                    durabilities[i] = armorComponents[i].Repairable.Durability;
+                }
+
+                PacketSender.ArmorDamagePackets.Enqueue(new()
+                {
+                    ItemIds = ids,
+                    Durabilities = durabilities,
+                }); 
+            }
+        }
+
         public virtual void HandleDamagePacket(ref DamagePacket packet)
         {
             DamageInfo damageInfo = new()
@@ -1308,7 +1345,42 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            ClientApplyShot(damageInfo, packet.BodyPartType, packet.ColliderType, packet.ArmorPlateCollider);
+            ShotReactions(damageInfo, packet.BodyPartType);
+            ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
+            ClientApplyDamageInfo(damageInfo, packet.BodyPartType, packet.ColliderType, packet.Absorbed);
+            //ClientApplyShot(damageInfo, packet.BodyPartType, packet.ColliderType, packet.ArmorPlateCollider);
+        }
+
+        public void HandleArmorDamagePacket(ref ArmorDamagePacket packet)
+        {
+            for (int i = 0; i < packet.ItemIds.Length; i++)
+            {
+                _preAllocatedArmorComponents.Clear();
+                Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
+                foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
+                {
+                    if (armorComponent.Item.Id == packet.ItemIds[i])
+                    {
+                        armorComponent.Repairable.Durability = packet.Durabilities[i];
+                        armorComponent.Buff.TryDisableComponent(armorComponent.Repairable.Durability);
+                        armorComponent.Item.RaiseRefreshEvent(false, false);
+                        return;
+                    }
+                }
+                GStruct416<Item> gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemIds[i]);
+                if (gstruct.Failed)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError("HandleArmorDamagePacket: " + gstruct.Error);
+                    return;
+                }
+                ArmorComponent itemComponent = gstruct.Value.GetItemComponent<ArmorComponent>();
+                if (itemComponent != null)
+                {
+                    itemComponent.Repairable.Durability = packet.Durabilities[i];
+                    itemComponent.Buff.TryDisableComponent(itemComponent.Repairable.Durability);
+                    itemComponent.Item.RaiseRefreshEvent(false, false);
+                } 
+            }
         }
 
         public virtual void SetupDogTag()

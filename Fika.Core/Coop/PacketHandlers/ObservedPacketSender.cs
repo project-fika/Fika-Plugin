@@ -22,6 +22,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public NetDataWriter Writer { get; set; } = new();
         public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
         public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
+        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
@@ -66,26 +67,44 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 if (isServer)
                 {
-                    int healthPackets = DamagePackets.Count;
-                    for (int i = 0; i < healthPackets; i++)
+                    int damagePackets = DamagePackets.Count;
+                    for (int i = 0; i < damagePackets; i++)
                     {
-                        DamagePacket healthPacket = DamagePackets.Dequeue();
-                        healthPacket.NetId = player.NetId;
+                        DamagePacket damagePacket = DamagePackets.Dequeue();
+                        damagePacket.NetId = player.NetId;
 
                         Writer.Reset();
-                        Server.SendDataToAll(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                        Server.SendDataToAll(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+                    }
+                    int armorDamagePackets = ArmorDamagePackets.Count;
+                    for (int i = 0; i < armorDamagePackets; i++)
+                    {
+                        ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                        armorDamagePacket.NetId = player.NetId;
+
+                        Writer.Reset();
+                        Server.SendDataToAll(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
                     }
                 }
                 else
                 {
-                    int healthPackets = DamagePackets.Count;
-                    for (int i = 0; i < healthPackets; i++)
+                    int damagePackets = DamagePackets.Count;
+                    for (int i = 0; i < damagePackets; i++)
                     {
-                        DamagePacket healthPacket = DamagePackets.Dequeue();
-                        healthPacket.NetId = player.NetId;
+                        DamagePacket damagePacket = DamagePackets.Dequeue();
+                        damagePacket.NetId = player.NetId;
 
                         Writer.Reset();
-                        Client.SendData(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                        Client.SendData(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+                    }
+                    int armorDamagePackets = ArmorDamagePackets.Count;
+                    for (int i = 0; i < armorDamagePackets; i++)
+                    {
+                        ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                        armorDamagePacket.NetId = player.NetId;
+
+                        Writer.Reset();
+                        Client.SendData(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
                     }
                 }
             }
