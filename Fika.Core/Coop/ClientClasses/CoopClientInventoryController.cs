@@ -3,8 +3,8 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using JetBrains.Annotations;
@@ -68,7 +68,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 HostInventoryOperationManager operationManager = new(this, operation, callback);
                 if (vmethod_0(operationManager.operation))
@@ -97,7 +97,7 @@ namespace Fika.Core.Coop.ClientClasses
                 operationManager.operation.Dispose();
                 operationManager.callback?.Fail($"Can't execute {operationManager.operation}", 1);
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else if (FikaBackendUtils.IsClient)
             {
                 InventoryPacket packet = new()
                 {

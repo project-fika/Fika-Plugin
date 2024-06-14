@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
 using SPT.Reflection.Utils;
@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Patches.Overrides
         [PatchPrefix]
         private static void PatchPreFix(ref int maxCount)
         {
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 GameWorld gameWorld = Singleton<GameWorld>.Instance;
                 string location = gameWorld.MainPlayer.Location;

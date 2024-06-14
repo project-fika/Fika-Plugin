@@ -4,8 +4,8 @@ using EFT.Console.Core;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 
 namespace Fika.Core.Console
 {
@@ -30,7 +30,7 @@ namespace Fika.Core.Console
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (MatchmakerAcceptPatches.IsServer)
+                if (FikaBackendUtils.IsServer)
                 {
                     int count = 0;
                     foreach (CoopPlayer player in coopHandler.Players.Values)

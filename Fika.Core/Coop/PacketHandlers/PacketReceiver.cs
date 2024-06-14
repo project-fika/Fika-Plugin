@@ -1,8 +1,8 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void Start()
         {
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 Server = Singleton<FikaServer>.Instance;
             }

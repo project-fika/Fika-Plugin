@@ -14,9 +14,9 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using System;
@@ -76,11 +76,11 @@ namespace Fika.Core.Coop.Players
             achievementsController.Init();
             achievementsController.Run();
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else if (FikaBackendUtils.IsClient)
             {
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
@@ -106,7 +106,7 @@ namespace Fika.Core.Coop.Players
 
             player._animators[0].enabled = true;
 
-            player.Profile.Info.MainProfileNickname = MatchmakerAcceptPatches.PMCName;
+            player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
 
             return player;
         }
@@ -134,7 +134,7 @@ namespace Fika.Core.Coop.Players
         public override void BtrInteraction(BTRSide btr, byte placeId, EInteractionType interaction)
         {
             base.BtrInteraction(btr, placeId, interaction);
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 BTRInteractionPacket packet = new(NetId)
                 {
@@ -145,7 +145,7 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
             }
-            else if (MatchmakerAcceptPatches.IsServer)
+            else if (FikaBackendUtils.IsServer)
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
@@ -827,11 +827,11 @@ namespace Fika.Core.Coop.Players
                     };
 
                     PacketSender.Writer.Reset();
-                    if (MatchmakerAcceptPatches.IsServer)
+                    if (FikaBackendUtils.IsServer)
                     {
                         PacketSender.Server.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
-                    else if (MatchmakerAcceptPatches.IsClient)
+                    else if (FikaBackendUtils.IsClient)
                     {
                         PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
@@ -1159,7 +1159,7 @@ namespace Fika.Core.Coop.Players
                     catch (Exception exception)
                     {
                         FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-                        if (MatchmakerAcceptPatches.IsServer)
+                        if (FikaBackendUtils.IsServer)
                         {
                             OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
                             Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
@@ -1169,7 +1169,7 @@ namespace Fika.Core.Coop.Players
                 else
                 {
                     FikaPlugin.Instance.FikaLogger.LogError("ItemControllerExecutePacket: inventory was null!");
-                    if (MatchmakerAcceptPatches.IsServer)
+                    if (FikaBackendUtils.IsServer)
                     {
                         OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
                         Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);

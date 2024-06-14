@@ -5,8 +5,8 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -83,7 +83,7 @@ namespace Fika.Core.Coop.Components
             CoopHandler coopGC = GetCoopHandler();
             if (coopGC == null)
             {
-                return MatchmakerAcceptPatches.GetGroupId();
+                return FikaBackendUtils.GetGroupId();
             }
 
             return coopGC.ServerId;
@@ -107,7 +107,7 @@ namespace Fika.Core.Coop.Components
         /// </summary>
         protected void Start()
         {
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 _ = Task.Run(ReadFromServerCharactersLoop);
             }
@@ -200,7 +200,7 @@ namespace Fika.Core.Coop.Components
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
                 // If you are the server / host
-                if (MatchmakerAcceptPatches.IsServer)
+                if (FikaBackendUtils.IsServer)
                 {
                     // A host needs to wait for the team to extract or die!
                     if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
@@ -340,7 +340,7 @@ namespace Fika.Core.Coop.Components
                 // TODO: Spawn them as corpses?
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 if (LocalGameInstance != null)
                 {

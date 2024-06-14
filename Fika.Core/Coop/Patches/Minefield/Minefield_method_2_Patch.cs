@@ -1,8 +1,8 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.Patches
         {
             if (player is ObservedCoopPlayer)
             {
-                if (MatchmakerAcceptPatches.IsServer)
+                if (FikaBackendUtils.IsServer)
                 {
                     Vector3 position = player.Position;
                     foreach (IPlayer player2 in ___TargetedPlayers.Concat(___NotTargetedPlayers).ToList())

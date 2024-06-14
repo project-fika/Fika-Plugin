@@ -13,8 +13,8 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
@@ -109,8 +109,8 @@ namespace Fika.Core.Networking
 
             _netClient.Start();
 
-            string ip = MatchmakerAcceptPatches.RemoteIp;
-            int port = MatchmakerAcceptPatches.RemotePort;
+            string ip = FikaBackendUtils.RemoteIp;
+            int port = FikaBackendUtils.RemotePort;
 
             if (string.IsNullOrEmpty(ip))
             {

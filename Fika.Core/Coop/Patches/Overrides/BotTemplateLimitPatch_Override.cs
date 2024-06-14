@@ -1,4 +1,4 @@
-﻿using Fika.Core.Coop.Matchmaker;
+﻿using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.Patches.Overrides
 
             delayed?.Clear();
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 foreach (WaveInfo wave in __result)
                 {

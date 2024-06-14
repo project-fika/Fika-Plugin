@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.UI;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -17,7 +17,7 @@ namespace Fika.Core.UI.Patches
         [PatchPrefix]
         static bool Prefix()
         {
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 FikaServer server = Singleton<FikaServer>.Instance;
                 if (server != null && server.NetServer.ConnectedPeersCount > 0)

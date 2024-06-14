@@ -7,7 +7,7 @@ using Fika.Core.Coop.Airdrops.Models;
 using Fika.Core.Coop.Airdrops.Utils;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -82,7 +82,7 @@ namespace Coop.Airdrops
             }
 
             // If this is not the server, then this manager will have to wait for the packet to initialize stuff.
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 return;
             }
@@ -128,7 +128,7 @@ namespace Coop.Airdrops
 
         public void SendParamsToClients()
         {
-            if (!MatchmakerAcceptPatches.IsServer)
+            if (!FikaBackendUtils.IsServer)
             {
                 return;
             }
@@ -162,13 +162,13 @@ namespace Coop.Airdrops
             }
 
             // If we are a client. Wait until the server has sent all the data.
-            if (MatchmakerAcceptPatches.IsClient && rootItem == null)
+            if (FikaBackendUtils.IsClient && rootItem == null)
             {
                 return;
             }
 
             // If we have all the parameters sent from the Server. Lets build the plane, box, container and loot
-            if (MatchmakerAcceptPatches.IsClient && !ClientLootBuilt)
+            if (FikaBackendUtils.IsClient && !ClientLootBuilt)
             {
                 ClientLootBuilt = true;
 
@@ -208,7 +208,7 @@ namespace Coop.Airdrops
                 return;
             }
 
-            if (MatchmakerAcceptPatches.IsServer || MatchmakerAcceptPatches.IsSinglePlayer)
+            if (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)
             {
                 AirdropParameters.Timer += 0.02f;
 
@@ -269,7 +269,7 @@ namespace Coop.Airdrops
 
         private void BuildLootContainer(FikaAirdropConfigModel config)
         {
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 return;
             }
@@ -297,7 +297,7 @@ namespace Coop.Airdrops
             }
 
             // Get the lootData. Send to clients.
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 StartCoroutine(SendLootToClients(isFlareDrop));
             }

@@ -21,7 +21,6 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -121,7 +120,7 @@ namespace Fika.Core.Coop.GameMode
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
                 new TimeSpan?(sessionTime));
 
-            coopGame.isServer = MatchmakerAcceptPatches.IsServer;
+            coopGame.isServer = FikaBackendUtils.IsServer;
 
             // Non Waves Scenario setup
             coopGame.nonWavesSpawnScenario_0 = NonWavesSpawnScenario.smethod_0(coopGame, location, coopGame.botsController_0);
@@ -216,9 +215,9 @@ namespace Fika.Core.Coop.GameMode
             coopHandler = CoopHandler.CoopHandlerParent.AddComponent<CoopHandler>();
             coopHandler.LocalGameInstance = this;
 
-            if (!string.IsNullOrEmpty(MatchmakerAcceptPatches.GetGroupId()))
+            if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
             {
-                coopHandler.ServerId = MatchmakerAcceptPatches.GetGroupId();
+                coopHandler.ServerId = FikaBackendUtils.GetGroupId();
             }
             else
             {
@@ -570,7 +569,7 @@ namespace Fika.Core.Coop.GameMode
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (isServer && MatchmakerAcceptPatches.HostExpectedNumberOfPlayers <= 1)
+                if (isServer && FikaBackendUtils.HostExpectedNumberOfPlayers <= 1)
                 {
                     /*if (fikaStartButton != null)
                     {
@@ -596,14 +595,14 @@ namespace Fika.Core.Coop.GameMode
 
                 NetDataWriter writer = new();
 
-                MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
+                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
 
                 /*if (fikaStartButton != null)
                 {
                     fikaStartButton.SetActive(true);
                 }*/
 
-                int expectedPlayers = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers;
+                int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
 
                 if (isServer)
                 {
@@ -632,7 +631,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (server.ReadyClients < expectedPlayers);
 
@@ -666,7 +665,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (client.ReadyClients < expectedPlayers);
                 }
@@ -776,7 +775,7 @@ namespace Fika.Core.Coop.GameMode
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
-            PlayerSpawnRequest body = new(myPlayer.ProfileId, MatchmakerAcceptPatches.GetGroupId());
+            PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
             await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             myPlayer.SpawnPoint = spawnPoint;
@@ -1004,9 +1003,9 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogInfo("Starting task to wait for other players.");
 
-            if (MatchmakerAcceptPatches.ScreenController != null)
+            if (FikaBackendUtils.ScreenController != null)
             {
-                MatchmakerAcceptPatches.ScreenController.ChangeStatus($"Initializing Coop Game...");
+                FikaBackendUtils.ScreenController.ChangeStatus($"Initializing Coop Game...");
             }
             int numbersOfPlayersToWaitFor = 0;
 
@@ -1016,16 +1015,16 @@ namespace Fika.Core.Coop.GameMode
 
                 do
                 {
-                    numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
-                    if (MatchmakerAcceptPatches.ScreenController != null)
+                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
+                    if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
                         {
-                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
+                            FikaBackendUtils.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
                         }
                         else
                         {
-                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"All players joined, starting game...");
+                            FikaBackendUtils.ScreenController.ChangeStatus($"All players joined, starting game...");
                         }
                     }
                     else
@@ -1049,7 +1048,7 @@ namespace Fika.Core.Coop.GameMode
                 while (client.ServerConnection == null && connectionAttempts < 5)
                 {
                     // Server retries 10 times with a 500ms interval, we give it 5 seconds to try
-                    MatchmakerAcceptPatches.ScreenController.ChangeStatus("Waiting for client to connect to server... If there is no notification it failed.");
+                    FikaBackendUtils.ScreenController.ChangeStatus("Waiting for client to connect to server... If there is no notification it failed.");
                     connectionAttempts++;
                     await Task.Delay(1000);
 
@@ -1070,16 +1069,16 @@ namespace Fika.Core.Coop.GameMode
                 client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 do
                 {
-                    numbersOfPlayersToWaitFor = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
-                    if (MatchmakerAcceptPatches.ScreenController != null)
+                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
+                    if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
                         {
-                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
+                            FikaBackendUtils.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
                         }
                         else
                         {
-                            MatchmakerAcceptPatches.ScreenController.ChangeStatus($"All players joined, starting game...");
+                            FikaBackendUtils.ScreenController.ChangeStatus($"All players joined, starting game...");
                         }
                     }
                     else
@@ -1219,7 +1218,7 @@ namespace Fika.Core.Coop.GameMode
             yield return WaitForOtherPlayers();
 
 
-            int expectedPlayers = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers;
+            int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
             if (isServer)
             {
                 FikaServer server = Singleton<FikaServer>.Instance;
@@ -1953,8 +1952,8 @@ namespace Fika.Core.Coop.GameMode
 
             NetManagerUtils.DestroyNetManager(isServer);
 
-            MatchmakerAcceptPatches.Nodes = null;
-            MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = 1;
+            FikaBackendUtils.Nodes = null;
+            FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {

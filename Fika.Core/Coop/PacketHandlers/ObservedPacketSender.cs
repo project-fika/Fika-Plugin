@@ -1,8 +1,8 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using LiteNetLib;
@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.PacketHandlers
         protected void Awake()
         {
             player = GetComponent<ObservedCoopPlayer>();
-            isServer = MatchmakerAcceptPatches.IsServer;
+            isServer = FikaBackendUtils.IsServer;
             if (isServer)
             {
                 Server = Singleton<FikaServer>.Instance;

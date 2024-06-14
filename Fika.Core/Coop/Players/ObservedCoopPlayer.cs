@@ -12,9 +12,9 @@ using EFT.Vaulting;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using System;
@@ -260,7 +260,7 @@ namespace Fika.Core.Coop.Players
 
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
         {
-            if (damageInfo.DamageType == EDamageType.Landmine && MatchmakerAcceptPatches.IsServer)
+            if (damageInfo.DamageType == EDamageType.Landmine && FikaBackendUtils.IsServer)
             {
                 PacketSender.DamagePackets.Enqueue(new()
                 {
@@ -301,7 +301,7 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
-            if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
+            if (damageInfo.DamageType == EDamageType.Sniper && FikaBackendUtils.IsServer)
             {
                 ShotReactions(damageInfo, bodyPartType);
                 PacketSender.DamagePackets.Enqueue(new()
