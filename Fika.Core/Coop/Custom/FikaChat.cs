@@ -80,6 +80,11 @@ namespace Fika.Core.Coop.Custom
                 string message = textField;
                 textField = string.Empty;
 
+                if (message.Length > 100)
+                {
+                    message = message.Substring(0, 100);
+                }
+
                 TextMessagePacket packet = new(nickname, message);
                 writer.Reset();
 
@@ -119,7 +124,7 @@ namespace Fika.Core.Coop.Custom
             GUI.Label(rect, chatText);
             rect.y += rect.height;
             Rect textRect = new(rect.x, rect.y, rect.width - 55, 25);
-            textField = GUI.TextField(textRect, textField, 64);
+            textField = GUI.TextField(textRect, textField);
             rect.x += 535;
             Rect buttonRect = new(rect.x, rect.y, 50, 25);
             if (GUI.Button(buttonRect, "SEND"))
