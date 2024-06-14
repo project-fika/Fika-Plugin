@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.BotClasses
 
             using MemoryStream memoryStream = new();
             using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.WritePolymorph(GClass1643.FromInventoryOperation(operation, false));
+            binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
             byte[] opBytes = memoryStream.ToArray();
             packet.ItemControllerExecutePacket = new()
             {

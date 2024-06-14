@@ -68,7 +68,7 @@ namespace Fika.Core.Coop.Patches
                 enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2316.class2316_0.method_0)).ToArray();
                 enumerable = enumerable.Randomize();
 
-                int num3 = ((isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue);
+                int num3 = (isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue;
                 float num4 = (isCollateral || first) ? firstExplosionDamage : secondExplosionDamage;
                 int num5 = 0;
 
@@ -76,17 +76,14 @@ namespace Fika.Core.Coop.Patches
                 {
                     coopPlayer.PacketSender.DamagePackets.Enqueue(new()
                     {
-                        DamageInfo = new()
-                        {
-                            DamageType = EDamageType.Landmine,
-                            Damage = num4 * num2,
-                            ArmorDamage = 0.5f,
-                            PenetrationPower = 30f,
-                            Direction = Vector3.zero,
-                            HitNormal = Vector3.zero,
-                            ColliderType = bodyPartCollider.BodyPartColliderType,
-                            BodyPartType = bodyPartCollider.BodyPartType
-                        }
+                        DamageType = EDamageType.Landmine,
+                        Damage = num4 * num2,
+                        ArmorDamage = 0.5f,
+                        PenetrationPower = 30f,
+                        Direction = Vector3.zero,
+                        HitNormal = Vector3.zero,
+                        ColliderType = bodyPartCollider.BodyPartColliderType,
+                        BodyPartType = bodyPartCollider.BodyPartType
                     });
                     if (++num5 >= num3)
                     {

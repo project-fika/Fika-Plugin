@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
 
                 _isAiming = value;
-                _player.Skills.FastAimTimer.Target = (value ? 0f : 2f);
+                _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
                 _player.MovementContext.SetAimingSlowdown(IsAiming, 0.33f + aimMovementSpeed);
                 _player.Physical.Aim((!_isAiming || !(_player.MovementContext.StationaryWeapon == null)) ? 0f : ErgonomicWeight);
                 coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
@@ -158,7 +158,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        public override void SetScopeMode(GStruct165[] scopeStates)
+        public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
         {
             _player.ProceduralWeaponAnimation.ObservedCalibration();
             base.SetScopeMode(scopeStates);
@@ -418,7 +418,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             if (packet.ChangeSightMode)
             {
-                SetScopeMode(packet.ScopeStatesPacket.GStruct165);
+                SetScopeMode(packet.ScopeStatesPacket.FirearmScopeStateStruct);
             }
 
             if (packet.ToggleLauncher)
@@ -454,7 +454,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
                         throw;
                     }
-                    GClass2785 gridItemAddress = null;
+                    ItemAddressClass gridItemAddress = null;
                     if (packet.ReloadMagPacket.LocationDescription != null)
                     {
                         using MemoryStream memoryStream = new(packet.ReloadMagPacket.LocationDescription);
@@ -520,7 +520,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     if (packet.ReloadWithAmmo.Status == FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.StartReload)
                     {
                         List<BulletClass> bullets = FindAmmoByIds(packet.ReloadWithAmmo.AmmoIds);
-                        GClass2509 ammoPack = new(bullets);
+                        AmmoPackReloadingClass ammoPack = new(bullets);
                         if (!packet.HasCylinderMagPacket)
                         {
                             CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
@@ -546,7 +546,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     if (packet.ReloadWithAmmo.Status == FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.StartReload)
                     {
                         List<BulletClass> bullets = FindAmmoByIds(packet.ReloadWithAmmo.AmmoIds);
-                        GClass2509 ammoPack = new(bullets);
+                        AmmoPackReloadingClass ammoPack = new(bullets);
                         ReloadCylinderMagazine(ammoPack, null);
                     }
                 }
@@ -569,7 +569,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 if (packet.ReloadLauncher.Reload)
                 {
                     List<BulletClass> ammo = FindAmmoByIds(packet.ReloadLauncher.AmmoIds);
-                    GClass2509 ammoPack = new(ammo);
+                    AmmoPackReloadingClass ammoPack = new(ammo);
                     ReloadGrenadeLauncher(ammoPack, null);
                 }
             }
@@ -580,9 +580,9 @@ namespace Fika.Core.Coop.ObservedClasses
                 {
                     List<BulletClass> ammo = FindAmmoByIds(packet.ReloadBarrels.AmmoIds);
 
-                    GClass2509 ammoPack = new(ammo);
+                    AmmoPackReloadingClass ammoPack = new(ammo);
 
-                    GClass2785 gridItemAddress = null;
+                    ItemAddressClass gridItemAddress = null;
 
                     using MemoryStream memoryStream = new(packet.ReloadBarrels.LocationDescription);
                     using BinaryReader binaryReader = new(memoryStream);

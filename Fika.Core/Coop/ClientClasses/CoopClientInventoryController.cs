@@ -6,6 +6,7 @@ using EFT.UI;
 using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using JetBrains.Annotations;
 using System.IO;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
     public sealed class CoopClientInventoryController(Player player, Profile profile, bool examined) : Player.PlayerOwnerInventoryController(player, profile, examined)
     {
         public override bool HasDiscardLimits => false;
+
 
         ManualLogSource BepInLogger { get; set; } = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 
@@ -37,10 +39,22 @@ namespace Fika.Core.Coop.ClientClasses
 #endif
 
             // Do not replicate picking up quest items, throws an error on the other clients            
-            if (operation is GClass2856 pickupOperation)
+            if (operation is MoveOperationClass moveOperation)
             {
-                if (pickupOperation.Item.Template.QuestItem)
+                Item lootedItem = moveOperation.Item;
+                if (lootedItem.Template.QuestItem)
                 {
+                    if (CoopPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+                    {
+                        if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
+                        {
+                            sharedQuestController.AddLootedTemplateId(lootedItem.TemplateId);
+
+                            // We use templateId because each client gets a unique itemId
+                            QuestItemPacket packet = new(CoopPlayer.Profile.Info.MainProfileNickname, lootedItem.TemplateId);
+                            CoopPlayer.PacketSender.SendQuestItemPacket(ref packet);
+                        }
+                    }
                     base.Execute(operation, callback);
                     return;
                 }
@@ -48,7 +62,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             // Do not replicate quest operations
             // Check for GClass increments
-            if (operation is GClass2883 or GClass2896)
+            if (operation is GClass2897 or GClass2898 or QuestHandoverOperationClass)
             {
                 base.Execute(operation, callback);
                 return;
@@ -68,7 +82,7 @@ namespace Fika.Core.Coop.ClientClasses
 
                     using MemoryStream memoryStream = new();
                     using BinaryWriter binaryWriter = new(memoryStream);
-                    binaryWriter.WritePolymorph(GClass1643.FromInventoryOperation(operation, false));
+                    binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
                     byte[] opBytes = memoryStream.ToArray();
                     packet.ItemControllerExecutePacket = new()
                     {
@@ -102,7 +116,7 @@ namespace Fika.Core.Coop.ClientClasses
 
                 using MemoryStream memoryStream = new();
                 using BinaryWriter binaryWriter = new(memoryStream);
-                binaryWriter.WritePolymorph(GClass1643.FromInventoryOperation(operation, false));
+                binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
                 byte[] opBytes = memoryStream.ToArray();
                 packet.ItemControllerExecutePacket = new()
                 {

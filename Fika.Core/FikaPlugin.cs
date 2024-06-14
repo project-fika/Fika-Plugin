@@ -113,6 +113,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+        public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
 
         // Coop | Name Plates
         public static ConfigEntry<bool> UseNamePlates { get; set; }
@@ -216,6 +217,7 @@ namespace Fika.Core
             new BotCacher_Patch().Enable();
             new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
+            new DisconnectButton_Patch().Enable();
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
@@ -292,6 +294,8 @@ namespace Fika.Core
             FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 2 }));
 
             ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+            ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.Backspace), new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Name Plates
 

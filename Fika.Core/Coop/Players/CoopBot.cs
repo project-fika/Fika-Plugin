@@ -94,14 +94,6 @@ namespace Fika.Core.Coop.Players
             MovementContext = BotMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon), new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
         }
 
-        /*public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
-        {
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
-                return;
-
-            base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
-        }*/
-
         public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
@@ -121,11 +113,11 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
             GClass1688 hitInfo = new()
             {
                 PoV = PointOfView,
-                Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
+                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                 Material = materialType
             };
             float num = damage - damageInfo.Damage;
@@ -136,6 +128,12 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
+
+            if (list != null)
+            {
+                QueueArmorDamagePackets([.. list]); 
+            }
+
             return hitInfo;
         }
 

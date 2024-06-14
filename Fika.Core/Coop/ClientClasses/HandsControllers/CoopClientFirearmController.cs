@@ -197,7 +197,7 @@ namespace Fika.Core.Coop.ClientClasses
             return flag;
         }
 
-        public override void InitiateShot(GInterface337 weapon, BulletClass ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
+        public override void InitiateShot(IWeapon weapon, BulletClass ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
         {
             EShotType shotType = default;
 
@@ -268,7 +268,7 @@ namespace Fika.Core.Coop.ClientClasses
             });
         }
 
-        public override void ReloadBarrels(GClass2509 ammoPack, GClass2785 placeToPutContainedAmmoMagazine, Callback callback)
+        public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddressClass placeToPutContainedAmmoMagazine, Callback callback)
         {
             if (!CanStartReload() && ammoPack.AmmoCount < 1)
             {
@@ -279,7 +279,7 @@ namespace Fika.Core.Coop.ClientClasses
             CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, new Callback(handler.Process));
         }
 
-        public override void ReloadCylinderMagazine(GClass2509 ammoPack, Callback callback, bool quickReload = false)
+        public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback callback, bool quickReload = false)
         {
             if (Blindfire)
             {
@@ -299,7 +299,7 @@ namespace Fika.Core.Coop.ClientClasses
             CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, new Callback(handler.Process), handler.quickReload);
         }
 
-        public override void ReloadGrenadeLauncher(GClass2509 ammoPack, Callback callback)
+        public override void ReloadGrenadeLauncher(AmmoPackReloadingClass ammoPack, Callback callback)
         {
             if (!CanStartReload())
             {
@@ -320,7 +320,7 @@ namespace Fika.Core.Coop.ClientClasses
             });
         }
 
-        public override void ReloadMag(MagazineClass magazine, GClass2785 gridItemAddress, Callback callback)
+        public override void ReloadMag(MagazineClass magazine, ItemAddressClass gridItemAddress, Callback callback)
         {
             if (!CanStartReload() || Blindfire)
             {
@@ -331,7 +331,7 @@ namespace Fika.Core.Coop.ClientClasses
             CurrentOperation.ReloadMag(magazine, gridItemAddress, callback, new Callback(handler.Process));
         }
 
-        public override void ReloadWithAmmo(GClass2509 ammoPack, Callback callback)
+        public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
         {
             if (Item.GetCurrentMagazine() == null)
             {
@@ -346,7 +346,7 @@ namespace Fika.Core.Coop.ClientClasses
             CurrentOperation.ReloadWithAmmo(ammoPack, callback, new Callback(handler.Process));
         }
 
-        public override void SetLightsState(GStruct164[] lightsStates, bool force = false)
+        public override void SetLightsState(FirearmLightStateStruct[] lightsStates, bool force = false)
         {
             if (force || CurrentOperation.CanChangeLightState(lightsStates))
             {
@@ -363,24 +363,24 @@ namespace Fika.Core.Coop.ClientClasses
             base.SetLightsState(lightsStates, force);
         }
 
-        public override void SetScopeMode(GStruct165[] scopeStates)
+        public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
         {
             SendScopeStates(scopeStates);
             base.SetScopeMode(scopeStates);
         }
-        public override void OpticCalibrationSwitchUp(GStruct165[] scopeStates)
+        public override void OpticCalibrationSwitchUp(FirearmScopeStateStruct[] scopeStates)
         {
             SendScopeStates(scopeStates);
             base.OpticCalibrationSwitchUp(scopeStates);
         }
 
-        public override void OpticCalibrationSwitchDown(GStruct165[] scopeStates)
+        public override void OpticCalibrationSwitchDown(FirearmScopeStateStruct[] scopeStates)
         {
             SendScopeStates(scopeStates);
             base.OpticCalibrationSwitchDown(scopeStates);
         }
 
-        private void SendScopeStates(GStruct165[] scopeStates)
+        private void SendScopeStates(FirearmScopeStateStruct[] scopeStates)
         {
             if (!CurrentOperation.CanChangeScopeStates(scopeStates))
             {
@@ -393,7 +393,7 @@ namespace Fika.Core.Coop.ClientClasses
                 ScopeStatesPacket = new()
                 {
                     Amount = scopeStates.Length,
-                    GStruct165 = scopeStates
+                    FirearmScopeStateStruct = scopeStates
                 }
             });
         }
@@ -634,7 +634,7 @@ namespace Fika.Core.Coop.ClientClasses
                 SendBoltActionReloadPacket(true);
             }
 
-            public override void ReloadMag(MagazineClass magazine, GClass2785 gridItemAddress, Callback finishCallback, Callback startCallback)
+            public override void ReloadMag(MagazineClass magazine, ItemAddressClass gridItemAddress, Callback finishCallback, Callback startCallback)
             {
                 base.ReloadMag(magazine, gridItemAddress, finishCallback, startCallback);
                 SendBoltActionReloadPacket(true);
@@ -646,7 +646,7 @@ namespace Fika.Core.Coop.ClientClasses
                 SendBoltActionReloadPacket(true);
             }
 
-            public override void ReloadWithAmmo(GClass2509 ammoPack, Callback finishCallback, Callback startCallback)
+            public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback finishCallback, Callback startCallback)
             {
                 base.ReloadWithAmmo(ammoPack, finishCallback, startCallback);
                 SendBoltActionReloadPacket(true);
@@ -671,15 +671,15 @@ namespace Fika.Core.Coop.ClientClasses
             private bool hasSent;
         }
 
-        private class ReloadMagHandler(CoopPlayer coopPlayer, GClass2785 gridItemAddress, MagazineClass magazine)
+        private class ReloadMagHandler(CoopPlayer coopPlayer, ItemAddressClass gridItemAddress, MagazineClass magazine)
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly GClass2785 gridItemAddress = gridItemAddress;
+            private readonly ItemAddressClass gridItemAddress = gridItemAddress;
             private readonly MagazineClass magazine = magazine;
 
             public void Process(IResult error)
             {
-                GClass1539 gridItemAddressDescriptor = (gridItemAddress == null) ? null : GClass1643.FromGridItemAddress(gridItemAddress);
+                GClass1539 gridItemAddressDescriptor = (gridItemAddress == null) ? null : FromObjectAbstractClass.FromGridItemAddress(gridItemAddress);
 
                 using MemoryStream memoryStream = new();
                 using BinaryWriter binaryWriter = new(memoryStream);
@@ -741,15 +741,15 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
-        private class ReloadBarrelsHandler(CoopPlayer coopPlayer, GClass2785 placeToPutContainedAmmoMagazine, GClass2509 ammoPack)
+        private class ReloadBarrelsHandler(CoopPlayer coopPlayer, ItemAddressClass placeToPutContainedAmmoMagazine, AmmoPackReloadingClass ammoPack)
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly GClass2785 placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
-            private readonly GClass2509 ammoPack = ammoPack;
+            private readonly ItemAddressClass placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
+            private readonly AmmoPackReloadingClass ammoPack = ammoPack;
 
             public void Process(IResult error)
             {
-                GClass1539 gridItemAddressDescriptor = (placeToPutContainedAmmoMagazine == null) ? null : GClass1643.FromGridItemAddress(placeToPutContainedAmmoMagazine);
+                GClass1539 gridItemAddressDescriptor = (placeToPutContainedAmmoMagazine == null) ? null : FromObjectAbstractClass.FromGridItemAddress(placeToPutContainedAmmoMagazine);
 
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 

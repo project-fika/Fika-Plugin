@@ -226,7 +226,7 @@ namespace Fika.Core.Coop.BTR
         // Find `BTRControllerClass.method_9(PathDestination currentDestinationPoint, bool lastRoutePoint)`
         private bool IsUpdateTaxiPriceMethod(MethodInfo method)
         {
-            return (method.GetParameters().Length == 2 && method.GetParameters()[0].ParameterType == typeof(PathDestination));
+            return method.GetParameters().Length == 2 && method.GetParameters()[0].ParameterType == typeof(PathDestination);
         }
 
         private void Update()
