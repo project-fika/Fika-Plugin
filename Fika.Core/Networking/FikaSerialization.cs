@@ -270,14 +270,14 @@ namespace Fika.Core.Networking
         public struct LightStatesPacket
         {
             public int Amount;
-            public GStruct164[] LightStates;
+            public FirearmLightStateStruct[] LightStates;
             public static LightStatesPacket Deserialize(NetDataReader reader)
             {
                 LightStatesPacket packet = new();
                 packet.Amount = reader.GetInt();
                 if (packet.Amount > 0)
                 {
-                    packet.LightStates = new GStruct164[packet.Amount];
+                    packet.LightStates = new FirearmLightStateStruct[packet.Amount];
                     for (int i = 0; i < packet.Amount; i++)
                     {
                         packet.LightStates[i] = new()
@@ -309,14 +309,14 @@ namespace Fika.Core.Networking
         public struct HeadLightsPacket
         {
             public int Amount;
-            public GStruct164[] LightStates;
+            public FirearmLightStateStruct[] LightStates;
             public static HeadLightsPacket Deserialize(NetDataReader reader)
             {
                 HeadLightsPacket packet = new();
                 packet.Amount = reader.GetInt();
                 if (packet.Amount > 0)
                 {
-                    packet.LightStates = new GStruct164[packet.Amount];
+                    packet.LightStates = new FirearmLightStateStruct[packet.Amount];
                     for (int i = 0; i < packet.Amount; i++)
                     {
                         packet.LightStates[i] = new()
@@ -348,17 +348,17 @@ namespace Fika.Core.Networking
         public struct ScopeStatesPacket
         {
             public int Amount;
-            public GStruct165[] GStruct165;
+            public FirearmScopeStateStruct[] FirearmScopeStateStruct;
             public static ScopeStatesPacket Deserialize(NetDataReader reader)
             {
                 ScopeStatesPacket packet = new();
                 packet.Amount = reader.GetInt();
                 if (packet.Amount > 0)
                 {
-                    packet.GStruct165 = new GStruct165[packet.Amount];
+                    packet.FirearmScopeStateStruct = new FirearmScopeStateStruct[packet.Amount];
                     for (int i = 0; i < packet.Amount; i++)
                     {
-                        packet.GStruct165[i] = new()
+                        packet.FirearmScopeStateStruct[i] = new()
                         {
                             Id = reader.GetString(),
                             ScopeMode = reader.GetInt(),
@@ -377,10 +377,10 @@ namespace Fika.Core.Networking
                 {
                     for (int i = 0; i < packet.Amount; i++)
                     {
-                        writer.Put(packet.GStruct165[i].Id);
-                        writer.Put(packet.GStruct165[i].ScopeMode);
-                        writer.Put(packet.GStruct165[i].ScopeIndexInsideSight);
-                        writer.Put(packet.GStruct165[i].ScopeCalibrationIndex);
+                        writer.Put(packet.FirearmScopeStateStruct[i].Id);
+                        writer.Put(packet.FirearmScopeStateStruct[i].ScopeMode);
+                        writer.Put(packet.FirearmScopeStateStruct[i].ScopeIndexInsideSight);
+                        writer.Put(packet.FirearmScopeStateStruct[i].ScopeCalibrationIndex);
                     }
                 }
             }

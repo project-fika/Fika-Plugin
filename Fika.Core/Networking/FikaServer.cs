@@ -808,7 +808,7 @@ namespace Fika.Core.Networking
 
                 using MemoryStream memoryStream = new();
                 using BinaryWriter binaryWriter = new(memoryStream);
-                binaryWriter.WritePolymorph(GClass1643.FromInventoryOperation(opResult.Value, false));
+                binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(opResult.Value, false));
                 byte[] opBytes = memoryStream.ToArray();
                 packet.ItemControllerExecutePacket = new()
                 {

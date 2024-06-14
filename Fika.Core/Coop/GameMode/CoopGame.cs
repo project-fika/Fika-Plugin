@@ -390,7 +390,7 @@ namespace Fika.Core.Coop.GameMode
 
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
                    "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Manual,
-                   Player.EUpdateMode.Auto, GClass548.Config.CharacterController.BotPlayerMode, () => 1f,
+                   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, () => 1f,
                    () => 1f, GClass1457.Default);
 
                 localPlayer.Location = Location_0.Id;
@@ -756,7 +756,7 @@ namespace Fika.Core.Coop.GameMode
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
                 false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
-                GClass548.Config.CharacterController.ClientPlayerMode, getSensitivity,
+                BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1456(), isServer ? 0 : 1000, statisticsManager);
 
             await NetManagerUtils.InitNetManager(isServer);
@@ -922,7 +922,7 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
                 }
             }
-            GClass786 config = GClass548.Config;
+            ApplicationConfigClass config = BackendConfigAbstractClass.Config;
             if (config.FixedFrameRate > 0f)
             {
                 FixedDeltaTime = 1f / config.FixedFrameRate;
@@ -961,7 +961,7 @@ namespace Fika.Core.Coop.GameMode
             int num = method_12();
 
             Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
-            if (GClass548.Config.UseHandsFastAnimator)
+            if (BackendConfigAbstractClass.Config.UseHandsFastAnimator)
             {
                 eupdateMode = Player.EUpdateMode.Manual;
             }
@@ -990,7 +990,7 @@ namespace Fika.Core.Coop.GameMode
             IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
 
             LocalPlayer myPlayer = await vmethod_2(num, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, Profile_0, false,
-                UpdateQueue, eupdateMode, Player.EUpdateMode.Auto, GClass548.Config.CharacterController.ClientPlayerMode,
+                UpdateQueue, eupdateMode, Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
                 new Func<float>(Class1384.class1384_0.method_3), new Func<float>(Class1384.class1384_0.method_4),
                 statisticsManager, null, null);
 
@@ -1752,7 +1752,7 @@ namespace Fika.Core.Coop.GameMode
                 EnvironmentManager.Instance.Stop();
             }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.HandleExit));
-            GClass548.Config.UseSpiritPlayer = false;
+            BackendConfigAbstractClass.Config.UseSpiritPlayer = false;
         }
 
         private Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
@@ -1886,7 +1886,7 @@ namespace Fika.Core.Coop.GameMode
                 EnvironmentManager.Instance.Stop();
             }
             MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
-            GClass548.Config.UseSpiritPlayer = false;
+            BackendConfigAbstractClass.Config.UseSpiritPlayer = false;
         }
 
         public void ToggleDebug(bool enabled)

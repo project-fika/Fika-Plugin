@@ -390,7 +390,7 @@ namespace Fika.Core.Coop.Players
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            GStruct164[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct164>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
+            FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, FirearmLightStateStruct>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
 
             if (PacketSender != null)
             {
