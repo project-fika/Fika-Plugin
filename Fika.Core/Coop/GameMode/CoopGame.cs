@@ -1370,8 +1370,6 @@ namespace Fika.Core.Coop.GameMode
 
         public override void vmethod_5()
         {
-            Logger.LogInfo("CreateExfiltrationPointAndInitDeathHandler");
-
             GameTimer.Start(null, null);
             gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
             gparam_0.vmethod_0();
@@ -1429,7 +1427,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 catch (Exception)
                 {
-                    Logger.LogError("CreateExfiltrationPointAndInitDeathHandler: Exception thrown during BTR init, check logs.");
+                    Logger.LogError("CoopGame::vmethod_5: Exception thrown during BTR init, check logs.");
                 }
             }
 
