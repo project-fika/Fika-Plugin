@@ -1,12 +1,11 @@
 ﻿using EFT.UI.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Newtonsoft.Json;
 using SPT.Reflection.Patching;
-using SPT.Reflection.Utils;
 using System;
-using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Matchmaker
+namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 {
     public class MatchmakerAcceptScreen_Awake_Patch : ModulePatch
     {
@@ -14,24 +13,20 @@ namespace Fika.Core.Coop.Matchmaker
         private class ServerStatus
         {
             [JsonProperty("ip")]
-            public string ip { get; set; }
+            public string Ip { get; set; }
 
             [JsonProperty("status")]
-            public string status { get; set; }
+            public string Status { get; set; }
         }
-
-        //static BindingFlags privateFlags = BindingFlags.NonPublic | BindingFlags.Instance;
-
-        public static Type GetThisType() => PatchConstants.EftTypes.Single(x => x == typeof(MatchMakerAcceptScreen));
 
         protected override MethodBase GetTargetMethod() => typeof(MatchMakerAcceptScreen).GetMethod("Awake");
 
         [PatchPrefix]
         private static bool PatchPrefix(MatchMakerAcceptScreen __instance, PlayersRaidReadyPanel ____playersRaidReadyPanel, MatchMakerGroupPreview ____groupPreview)
         {
-            MatchmakerAcceptPatches.MatchMakerAcceptScreenInstance = __instance;
-            MatchmakerAcceptPatches.PlayersRaidReadyPanel = ____playersRaidReadyPanel;
-            MatchmakerAcceptPatches.MatchMakerGroupPreview = ____groupPreview;
+            FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
+            FikaBackendUtils.PlayersRaidReadyPanel = ____playersRaidReadyPanel;
+            FikaBackendUtils.MatchMakerGroupPreview = ____groupPreview;
             return true;
         }
 

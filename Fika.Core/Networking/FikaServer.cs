@@ -11,8 +11,8 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
@@ -331,14 +331,14 @@ namespace Fika.Core.Networking
         {
             if (packet.IsRequest)
             {
-                if (MatchmakerAcceptPatches.Nodes != null)
+                if (FikaBackendUtils.Nodes != null)
                 {
                     WeatherPacket weatherPacket2 = new()
                     {
                         IsRequest = false,
                         HasData = true,
-                        Amount = MatchmakerAcceptPatches.Nodes.Length,
-                        WeatherClasses = MatchmakerAcceptPatches.Nodes
+                        Amount = FikaBackendUtils.Nodes.Length,
+                        WeatherClasses = FikaBackendUtils.Nodes
                     };
                     _dataWriter.Reset();
                     SendDataToPeer(peer, _dataWriter, ref weatherPacket2, DeliveryMethod.ReliableOrdered);

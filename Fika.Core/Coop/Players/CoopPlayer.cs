@@ -14,9 +14,9 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using System;
@@ -27,7 +27,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
-using static UnityEngine.SendMouseEvents;
 
 namespace Fika.Core.Coop.Players
 {
@@ -76,11 +75,11 @@ namespace Fika.Core.Coop.Players
             achievementsController.Init();
             achievementsController.Run();
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else if (FikaBackendUtils.IsClient)
             {
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
@@ -106,7 +105,7 @@ namespace Fika.Core.Coop.Players
 
             player._animators[0].enabled = true;
 
-            player.Profile.Info.MainProfileNickname = MatchmakerAcceptPatches.PMCName;
+            player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
 
             return player;
         }
@@ -134,7 +133,7 @@ namespace Fika.Core.Coop.Players
         public override void BtrInteraction(BTRSide btr, byte placeId, EInteractionType interaction)
         {
             base.BtrInteraction(btr, placeId, interaction);
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 BTRInteractionPacket packet = new(NetId)
                 {
@@ -145,7 +144,7 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
             }
-            else if (MatchmakerAcceptPatches.IsServer)
+            else if (FikaBackendUtils.IsServer)
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
@@ -827,11 +826,11 @@ namespace Fika.Core.Coop.Players
                     };
 
                     PacketSender.Writer.Reset();
-                    if (MatchmakerAcceptPatches.IsServer)
+                    if (FikaBackendUtils.IsServer)
                     {
                         PacketSender.Server.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
-                    else if (MatchmakerAcceptPatches.IsClient)
+                    else if (FikaBackendUtils.IsClient)
                     {
                         PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
@@ -887,21 +886,24 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
-                string templateId = Side == EPlayerSide.Usec ? "59f32c3b86f77472a31742f0" : "59f32bb586f774757e1e8442";
+                string templateId = GetDogTagTemplateId();
 
-                Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
-
-                Equipment.GetSlot(EquipmentSlot.Dogtag).Add(item, false);
-
-                DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
-                if (dogtagComponent != null)
+                if (!string.IsNullOrEmpty(templateId))
                 {
-                    dogtagComponent.ProfileId = ProfileId;
-                    dogtagComponent.GroupId = Profile.Info.GroupId;
-                }
-                else
-                {
-                    FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
+                    Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
+
+                    Equipment.GetSlot(EquipmentSlot.Dogtag).Add(item, false);
+
+                    DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
+                    if (dogtagComponent != null)
+                    {
+                        dogtagComponent.ProfileId = ProfileId;
+                        dogtagComponent.GroupId = Profile.Info.GroupId;
+                    }
+                    else
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
+                    }
                 }
             }
 
@@ -915,6 +917,36 @@ namespace Fika.Core.Coop.Players
                     InteractionsHandlerClass.Remove(accessCardItem, _inventoryController, false, true);
                 }
             }
+        }
+
+        private string GetDogTagTemplateId()
+        {
+            if (Profile.Side is EPlayerSide.Usec)
+            {
+                switch (Profile.Info.MemberCategory)
+                {
+                    case EMemberCategory.Default:
+                        return "59f32c3b86f77472a31742f0";
+                    case EMemberCategory.UniqueId:
+                        return "6662e9f37fa79a6d83730fa0";
+                    case EMemberCategory.Unheard:
+                        return "6662ea05f6259762c56f3189";
+                }
+            }
+            else if (Profile.Side is EPlayerSide.Bear)
+            {
+                switch (Profile.Info.MemberCategory)
+                {
+                    case EMemberCategory.Default:
+                        return "59f32bb586f774757e1e8442";
+                    case EMemberCategory.UniqueId:
+                        return "6662e9aca7e0b43baa3d5f74";
+                    case EMemberCategory.Unheard:
+                        return "6662e9cda7e0b43baa3d5f76";
+                }
+            }
+
+            return string.Empty;
         }
 
         public virtual void HandleCommonPacket(in CommonPlayerPacket packet)
@@ -1126,7 +1158,7 @@ namespace Fika.Core.Coop.Players
                     catch (Exception exception)
                     {
                         FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-                        if (MatchmakerAcceptPatches.IsServer)
+                        if (FikaBackendUtils.IsServer)
                         {
                             OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
                             Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
@@ -1136,7 +1168,7 @@ namespace Fika.Core.Coop.Players
                 else
                 {
                     FikaPlugin.Instance.FikaLogger.LogError("ItemControllerExecutePacket: inventory was null!");
-                    if (MatchmakerAcceptPatches.IsServer)
+                    if (FikaBackendUtils.IsServer)
                     {
                         OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
                         Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
@@ -1302,7 +1334,7 @@ namespace Fika.Core.Coop.Players
                 {
                     ItemIds = ids,
                     Durabilities = durabilities,
-                }); 
+                });
             }
         }
 
@@ -1379,7 +1411,7 @@ namespace Fika.Core.Coop.Players
                     itemComponent.Repairable.Durability = packet.Durabilities[i];
                     itemComponent.Buff.TryDisableComponent(itemComponent.Repairable.Durability);
                     itemComponent.Item.RaiseRefreshEvent(false, false);
-                } 
+                }
             }
         }
 

@@ -3,13 +3,9 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
-using System.Linq;
 using System.Reflection;
-using Fika.Core.EssentialPatches;
-using UnityEngine;
-using Random = System.Random;
 
-namespace Fika.Core.Coop.Matchmaker
+namespace Fika.Core.Coop.Utils
 {
     public enum EMatchmakerType
     {
@@ -18,45 +14,24 @@ namespace Fika.Core.Coop.Matchmaker
         GroupLeader = 2
     }
 
-    public static class MatchmakerAcceptPatches
+    public static class FikaBackendUtils
     {
-        #region Fields/Properties
-        public static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance { get; set; }
-        public static Profile Profile { get; set; }
-        public static string PMCName { get; set; }
-        public static EMatchmakerType MatchingType { get; set; } = EMatchmakerType.Single;
+        public static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
+        public static Profile Profile;
+        public static string PMCName;
+        public static EMatchmakerType MatchingType = EMatchmakerType.Single;
         public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
         public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
         public static bool IsSinglePlayer => MatchingType == EMatchmakerType.Single;
-        public static PlayersRaidReadyPanel PlayersRaidReadyPanel { get; set; }
-        public static MatchMakerGroupPreview MatchMakerGroupPreview { get; set; }
-        public static int HostExpectedNumberOfPlayers { get; set; } = 1;
-        public static WeatherClass[] Nodes { get; set; } = null;
+        public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
+        public static MatchMakerGroupPreview MatchMakerGroupPreview;
+        public static int HostExpectedNumberOfPlayers = 1;
+        public static WeatherClass[] Nodes = null;
         public static string RemoteIp;
         public static int RemotePort;
         private static string groupId;
-        private static long timestamp;
-        #endregion
 
-        #region Static Fields
-
-        public static object MatchmakerScreenController
-        {
-            get
-            {
-                object screenController = typeof(MatchMakerAcceptScreen).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy).Where(x => x.Name == "ScreenController")
-                    .FirstOrDefault().GetValue(MatchMakerAcceptScreenInstance);
-                if (screenController != null)
-                {
-                    return screenController;
-                }
-                return null;
-            }
-        }
-
-        public static GameObject EnvironmentUIRoot { get; internal set; }
-        public static MatchmakerTimeHasCome.GClass3187 ScreenController { get; internal set; }
-        #endregion
+        public static MatchmakerTimeHasCome.GClass3187 ScreenController;
 
         public static string GetGroupId()
         {
@@ -66,16 +41,6 @@ namespace Fika.Core.Coop.Matchmaker
         public static void SetGroupId(string newId)
         {
             groupId = newId;
-        }
-
-        public static long GetTimestamp()
-        {
-            return timestamp;
-        }
-
-        public static void SetTimestamp(long ts)
-        {
-            timestamp = ts;
         }
 
         public static bool JoinMatch(string profileId, string serverId, out CreateMatch result, out string errorMessage)
@@ -88,19 +53,19 @@ namespace Fika.Core.Coop.Matchmaker
                 return false;
             }
 
-            var body = new MatchJoinRequest(serverId, profileId);
+            MatchJoinRequest body = new MatchJoinRequest(serverId, profileId);
             result = FikaRequestHandler.RaidJoin(body);
 
             if (result.GameVersion != FikaPlugin.EFTVersionMajor)
             {
-                errorMessage = $"You are attempting to use a different version of EFT {FikaPlugin.EFTVersionMajor} than what the server is running {result.GameVersion}";
+                errorMessage = $"You are attempting to use a different version of EFT than what the server is running.\nClient: {FikaPlugin.EFTVersionMajor}\nServer: {result.GameVersion}";
                 return false;
             }
 
-            var detectedFikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            Version detectedFikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
             if (result.FikaVersion != detectedFikaVersion)
             {
-                errorMessage = $"You are attempting to use a different version of Fika {detectedFikaVersion} than what the server is running {result.FikaVersion}";
+                errorMessage = $"You are attempting to use a different version of Fika than what the server is running.\nClient: {detectedFikaVersion}\nServer: {result.FikaVersion}";
                 return false;
             }
 
@@ -118,7 +83,6 @@ namespace Fika.Core.Coop.Matchmaker
             FikaRequestHandler.RaidCreate(body);
 
             SetGroupId(profileId);
-            SetTimestamp(timestamp);
             MatchingType = EMatchmakerType.GroupLeader;
             
             FikaVersionLabelUpdate_Patch.raidCode = raidCode;

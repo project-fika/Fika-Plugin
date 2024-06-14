@@ -1,5 +1,5 @@
 ﻿using EFT;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
@@ -32,7 +32,7 @@ namespace Fika.Core.Coop.Patches
                 core = GClass530.Create(text);
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 foreach (object type in Enum.GetValues(typeof(WildSpawnType)))
                 {

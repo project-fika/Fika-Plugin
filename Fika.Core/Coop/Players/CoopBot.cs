@@ -131,7 +131,7 @@ namespace Fika.Core.Coop.Players
 
             if (list != null)
             {
-                QueueArmorDamagePackets([.. list]); 
+                QueueArmorDamagePackets([.. list]);
             }
 
             return hitInfo;

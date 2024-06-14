@@ -4,7 +4,6 @@ using EFT.InputSystem;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
@@ -33,7 +32,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
         {
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
-            if (MatchmakerAcceptPatches.IsSinglePlayer)
+            if (FikaBackendUtils.IsSinglePlayer)
             {
                 return true;
             }
@@ -54,7 +53,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
         public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3187 timeHasComeScreenController,
             RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
         {
-            if (MatchmakerAcceptPatches.IsSinglePlayer)
+            if (FikaBackendUtils.IsSinglePlayer)
             {
                 return;
             }
@@ -76,18 +75,18 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 throw new ArgumentNullException("timeHasComeScreenController");
             }
 
-            bool isServer = MatchmakerAcceptPatches.IsServer;
+            bool isServer = FikaBackendUtils.IsServer;
 
             LocationSettingsClass.Location location = ____raidSettings.SelectedLocation;
 
-            MatchmakerAcceptPatches.ScreenController = timeHasComeScreenController;
+            FikaBackendUtils.ScreenController = timeHasComeScreenController;
 
             if (Singleton<NotificationManagerClass>.Instantiated)
             {
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
             }
 
-            NetManagerUtils.CreateNetManager(MatchmakerAcceptPatches.IsServer);
+            NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
             if (isServer)
             {
                 NetManagerUtils.StartPinger();

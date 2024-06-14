@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.UI;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using HarmonyLib;
@@ -23,11 +23,11 @@ namespace Fika.Core.Coop.Custom
         protected void Awake()
         {
             windowRect = new(20, Screen.height - 260, 600, 250);
-            nickname = MatchmakerAcceptPatches.PMCName;
+            nickname = FikaBackendUtils.PMCName;
             chatText = string.Empty;
             textField = string.Empty;
             show = false;
-            isServer = MatchmakerAcceptPatches.IsServer;
+            isServer = FikaBackendUtils.IsServer;
             writer = new();
             GUISounds guiSounds = Singleton<GUISounds>.Instance;
             soundsWrapper = Traverse.Create(guiSounds).Field<UISoundsWrapper>("uisoundsWrapper_0").Value;
