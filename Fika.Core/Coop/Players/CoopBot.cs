@@ -33,7 +33,6 @@ namespace Fika.Core.Coop.Players
         /// The amount of players that have loaded this bot
         /// </summary>
         public int loadedPlayers = 0;
-        //private FikaDynamicAI dynamicAi;
         private bool firstEnabled;
 
         public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
