@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.Custom
 
         protected void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Backspace))
+            if (Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))
             {
                 ToggleVisibility();
             }
