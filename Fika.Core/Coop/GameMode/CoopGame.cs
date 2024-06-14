@@ -773,6 +773,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
+            coopPlayer.SetupMainPlayer();
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
             PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());

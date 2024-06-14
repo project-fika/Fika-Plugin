@@ -871,10 +871,12 @@ namespace Fika.Core.Coop.Players
             _openAction = null;
         }
 
-        protected virtual void Start()
+        public void SetupMainPlayer()
         {
+            // Set own group id
             Profile.Info.GroupId = "Fika";
 
+            // Setup own dog tag
             if (Side != EPlayerSide.Savage)
             {
                 if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
@@ -882,7 +884,7 @@ namespace Fika.Core.Coop.Players
                     GStruct414<GClass2801> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
                     if (result.Error != null)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::Start: Error removing dog tag!");
+                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::SetupMainPlayer: Error removing dog tag!");
                     }
                 }
 
@@ -911,10 +913,12 @@ namespace Fika.Core.Coop.Players
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Location_0.Name.ToLower() == "laboratory")
             {
-                Item accessCardItem = Profile.Inventory.AllRealPlayerItems.FirstOrDefault(x => x.TemplateId == "5c94bbff86f7747ee735c08f");
-                if (accessCardItem != null)
+                foreach (Item item in Profile.Inventory.AllRealPlayerItems)
                 {
-                    InteractionsHandlerClass.Remove(accessCardItem, _inventoryController, false, true);
+                    if (item.TemplateId == "5c94bbff86f7747ee735c08f")
+                    {
+                        InteractionsHandlerClass.Remove(item, _inventoryController, false, true);
+                    }
                 }
             }
         }
