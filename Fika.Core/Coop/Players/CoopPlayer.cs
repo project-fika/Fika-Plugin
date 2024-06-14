@@ -886,22 +886,25 @@ namespace Fika.Core.Coop.Players
                         FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::Start: Error removing dog tag!");
                     }
                 }
+                
+                string templateId = GetDogTagTemplateId();
 
-                string templateId = Side == EPlayerSide.Usec ? "59f32c3b86f77472a31742f0" : "59f32bb586f774757e1e8442";
-
-                Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
-
-                Equipment.GetSlot(EquipmentSlot.Dogtag).Add(item, false);
-
-                DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
-                if (dogtagComponent != null)
+                if (!string.IsNullOrEmpty(templateId))
                 {
-                    dogtagComponent.ProfileId = ProfileId;
-                    dogtagComponent.GroupId = Profile.Info.GroupId;
-                }
-                else
-                {
-                    FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
+                    Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
+
+                    Equipment.GetSlot(EquipmentSlot.Dogtag).Add(item, false);
+
+                    DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
+                    if (dogtagComponent != null)
+                    {
+                        dogtagComponent.ProfileId = ProfileId;
+                        dogtagComponent.GroupId = Profile.Info.GroupId;
+                    }
+                    else
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
+                    } 
                 }
             }
 
@@ -915,6 +918,36 @@ namespace Fika.Core.Coop.Players
                     InteractionsHandlerClass.Remove(accessCardItem, _inventoryController, false, true);
                 }
             }
+        }
+
+        private string GetDogTagTemplateId()
+        {
+            if (Profile.Side is EPlayerSide.Usec)
+            {
+                switch (Profile.Info.MemberCategory)
+                {
+                    case EMemberCategory.Default:
+                        return "59f32c3b86f77472a31742f0";
+                    case EMemberCategory.UniqueId:
+                        return "6662e9f37fa79a6d83730fa0";
+                    case EMemberCategory.Unheard:
+                        return "6662ea05f6259762c56f3189";
+                }
+            }
+            else if (Profile.Side is EPlayerSide.Bear)
+            {
+                switch (Profile.Info.MemberCategory)
+                {
+                    case EMemberCategory.Default:
+                        return "59f32bb586f774757e1e8442";
+                    case EMemberCategory.UniqueId:
+                        return "6662e9aca7e0b43baa3d5f74";
+                    case EMemberCategory.Unheard:
+                        return "6662e9cda7e0b43baa3d5f76";
+                }
+            }
+
+            return string.Empty;
         }
 
         public virtual void HandleCommonPacket(in CommonPlayerPacket packet)
