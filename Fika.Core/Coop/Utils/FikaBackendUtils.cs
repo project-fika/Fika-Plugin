@@ -3,7 +3,9 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
+using System.Linq;
 using System.Reflection;
+using Fika.Core.EssentialPatches;
 
 namespace Fika.Core.Coop.Utils
 {
