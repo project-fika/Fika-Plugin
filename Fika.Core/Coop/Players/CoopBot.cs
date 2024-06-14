@@ -137,14 +137,6 @@ namespace Fika.Core.Coop.Players
             return hitInfo;
         }
 
-        protected override void Start()
-        {
-            if (FikaPlugin.DisableBotMetabolism.Value)
-            {
-                HealthController.DisableMetabolism();
-            }
-        }
-
         public override void BtrInteraction()
         {
             // Do nothing

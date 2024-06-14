@@ -9,6 +9,7 @@ using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
+using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -60,9 +61,8 @@ namespace Fika.Core.Coop.GameMode
         public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
         public string MyExitLocation { get; set; } = null;
         public ISpawnSystem SpawnSystem;
-
         public Dictionary<string, Player> Bots = [];
-        //private GameObject fikaStartButton;
+
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
         private GClass2949 spawnPoints = null;
@@ -463,6 +463,10 @@ namespace Fika.Core.Coop.GameMode
 
             CoopBot coopBot = (CoopBot)localPlayer;
             coopBot.NetId = netId;
+            if (FikaPlugin.DisableBotMetabolism.Value)
+            {
+                coopBot.HealthController.DisableMetabolism();
+            }
             coopHandler.Players.Add(coopBot.NetId, coopBot);
 
             return localPlayer;
