@@ -4,8 +4,6 @@ using SPT.Common.Http;
 using SPT.Common.Utils;
 using SPT.Custom.Models;
 using SPT.Reflection.Patching;
-using SPT.Reflection.Utils;
-using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.EssentialPatches
@@ -31,7 +29,7 @@ namespace Fika.Core.EssentialPatches
             {
                 string json = RequestHandler.GetJson("/singleplayer/settings/version");
                 versionLabel = Json.Deserialize<VersionResponse>(json).Version;
-                Logger.LogInfo($"Server version: {versionLabel}"); 
+                Logger.LogInfo($"Server version: {versionLabel}");
             }
 
             string fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();

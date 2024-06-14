@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void SendQuestPacket(ref QuestConditionPacket packet)
         {
-            
+
         }
 
         public void SendQuestItemPacket(ref QuestItemPacket packet)

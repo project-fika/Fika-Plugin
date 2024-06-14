@@ -1269,7 +1269,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public virtual void HandleDamagePacket(DamagePacket packet)
+        public virtual void HandleDamagePacket(ref DamagePacket packet)
         {
             DamageInfo damageInfo = new()
             {

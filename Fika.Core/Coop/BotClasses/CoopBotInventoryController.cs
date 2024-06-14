@@ -2,7 +2,6 @@
 
 using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using JetBrains.Annotations;

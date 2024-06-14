@@ -215,7 +215,7 @@ namespace Fika.Core.Networking
                 if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestPacket(ref packet);
-                } 
+                }
             }
         }
 
@@ -456,7 +456,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver?.HealthSyncPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver.HealthSyncPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -532,7 +532,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver?.CommonPlayerPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver.CommonPlayerPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -634,7 +634,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver?.DamagePackets?.Enqueue(packet);
+                playerToApply.PacketReceiver.DamagePackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();
@@ -645,7 +645,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver?.FirearmPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver.FirearmPackets?.Enqueue(packet);
             }
 
             _dataWriter.Reset();

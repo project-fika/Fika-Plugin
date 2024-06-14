@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
 
                 _isAiming = value;
-                _player.Skills.FastAimTimer.Target = (value ? 0f : 2f);
+                _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
                 _player.MovementContext.SetAimingSlowdown(IsAiming, 0.33f + aimMovementSpeed);
                 _player.Physical.Aim((!_isAiming || !(_player.MovementContext.StationaryWeapon == null)) ? 0f : ErgonomicWeight);
                 coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;

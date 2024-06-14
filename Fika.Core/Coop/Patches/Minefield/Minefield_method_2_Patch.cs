@@ -68,7 +68,7 @@ namespace Fika.Core.Coop.Patches
                 enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2316.class2316_0.method_0)).ToArray();
                 enumerable = enumerable.Randomize();
 
-                int num3 = ((isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue);
+                int num3 = (isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue;
                 float num4 = (isCollateral || first) ? firstExplosionDamage : secondExplosionDamage;
                 int num5 = 0;
 

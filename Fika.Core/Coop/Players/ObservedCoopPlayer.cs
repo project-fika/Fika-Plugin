@@ -19,7 +19,6 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
@@ -380,11 +379,11 @@ namespace Fika.Core.Coop.Players
                     bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-                    MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
+                    MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
                     GClass1688 hitInfo = new()
                     {
                         PoV = PointOfView,
-                        Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
+                        Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                         Material = materialType
                     };
                     float num = damage - damageInfo.Damage;
@@ -440,11 +439,11 @@ namespace Fika.Core.Coop.Players
                     bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-                    MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
+                    MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
                     GClass1688 hitInfo = new()
                     {
                         PoV = PointOfView,
-                        Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
+                        Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                         Material = materialType
                     };
                     float num = damage - damageInfo.Damage;
@@ -810,7 +809,7 @@ namespace Fika.Core.Coop.Players
             // Only handle if it was ourselves as otherwise it's irrelevant
             if (LastAggressor.IsYourPlayer)
             {
-                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType); 
+                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
             }
         }
 
@@ -1241,6 +1240,11 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public override void HandleDamagePacket(ref DamagePacket packet)
+        {
+            // Do nothing
+        }
+
         public void HandleProceedPacket(ProceedPacket packet)
         {
             switch (packet.ProceedType)
@@ -1250,6 +1254,7 @@ namespace Fika.Core.Coop.Players
                         CreateEmptyHandsController();
                         break;
                     }
+                case EProceedType.FoodClass:
                 case EProceedType.MedsClass:
                     {
                         CreateMedsController(packet.ItemId, packet.BodyPart, packet.Amount, packet.AnimationVariant);

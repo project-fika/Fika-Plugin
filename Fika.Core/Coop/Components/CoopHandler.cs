@@ -202,16 +202,16 @@ namespace Fika.Core.Coop.Components
                 // If you are the server / host
                 if (MatchmakerAcceptPatches.IsServer)
                 {
-					// A host needs to wait for the team to extract or die!
-					if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
+                    // A host needs to wait for the team to extract or die!
+                    if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
                     {
                         NotificationManagerClass.DisplayWarningNotification("HOSTING: You cannot exit the game until all clients have disconnected.");
                         requestQuitGame = false;
                         return;
                     }
                     else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0
-						&& Singleton<FikaServer>.Instance.timeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
-						&& Singleton<FikaServer>.Instance.hasHadPeer)
+                        && Singleton<FikaServer>.Instance.timeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
+                        && Singleton<FikaServer>.Instance.hasHadPeer)
                     {
                         NotificationManagerClass.DisplayWarningNotification($"HOSTING: Please wait at least 5 seconds after the last peer disconnected before quitting.");
                         requestQuitGame = false;
@@ -219,12 +219,12 @@ namespace Fika.Core.Coop.Components
                     }
                     else
                     {
-						coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.MyExitLocation : null, 0);
+                        coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.MyExitLocation : null, 0);
                     }
                 }
                 else
                 {
-					coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.MyExitLocation : null, 0);
+                    coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.MyExitLocation : null, 0);
                 }
                 return;
             }
@@ -307,7 +307,7 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            int playerId = Players.Count + Singleton<GameWorld>.Instance.RegisteredPlayers.Count + 1;            
+            int playerId = Players.Count + Singleton<GameWorld>.Instance.RegisteredPlayers.Count + 1;
 
             IEnumerable<ResourceKey> allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths();
             if (allPrefabPaths.Count() == 0)
