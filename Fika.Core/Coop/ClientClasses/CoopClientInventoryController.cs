@@ -39,9 +39,9 @@ namespace Fika.Core.Coop.ClientClasses
 #endif
 
             // Do not replicate picking up quest items, throws an error on the other clients            
-            if (operation is GClass2856 pickupOperation)
+            if (operation is MoveOperationClass moveOperation)
             {
-                Item lootedItem = pickupOperation.Item;
+                Item lootedItem = moveOperation.Item;
                 if (lootedItem.Template.QuestItem)
                 {
                     if (CoopPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
@@ -62,7 +62,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             // Do not replicate quest operations
             // Check for GClass increments
-            if (operation is GClass2883 or GClass2896)
+            if (operation is GClass2897 or GClass2898 or QuestHandoverOperationClass)
             {
                 base.Execute(operation, callback);
                 return;

@@ -105,7 +105,7 @@ namespace Fika.Core.Coop.GameMode
 
         private static ManualLogSource Logger;
 
-        internal static CoopGame Create(GInterface171 inputTree, Profile profile, GameDateTime backendDateTime,
+        internal static CoopGame Create(IInputTree inputTree, Profile profile, GameDateTime backendDateTime,
             InsuranceCompanyClass insurance, MenuUI menuUI, GameUI gameUI, LocationSettingsClass.Location location,
             TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
             Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,

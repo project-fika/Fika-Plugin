@@ -556,11 +556,11 @@ namespace Fika.Core.Coop.Players
             new Process<GrenadeController, IHandsThrowController>(this, func, throwWeap, false).method_0(null, callback, scheduled);
         }
 
-        public override void Proceed(GrenadeClass throwWeap, Callback<IGrenadeController> callback, bool scheduled = true)
+        public override void Proceed(GrenadeClass throwWeap, Callback<GInterface145> callback, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this, throwWeap);
             Func<QuickGrenadeThrowController> func = new(factory.CreateObservedQuickGrenadeController);
-            new Process<QuickGrenadeThrowController, IGrenadeController>(this, func, throwWeap, false).method_0(null, callback, scheduled);
+            new Process<QuickGrenadeThrowController, GInterface145>(this, func, throwWeap, false).method_0(null, callback, scheduled);
         }
 
         public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)

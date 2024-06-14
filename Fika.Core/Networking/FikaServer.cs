@@ -567,7 +567,7 @@ namespace Fika.Core.Networking
                     // Unknown what problems this might cause so far.
                     if (result.Value is GClass2878 unloadOperation)
                     {
-                        if (unloadOperation.InternalOperation is GClass2889 internalSplitOperation)
+                        if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
                         {
                             Item item = internalSplitOperation.To.Item;
                             if (item != null)
@@ -589,7 +589,7 @@ namespace Fika.Core.Networking
                     }
 
                     // TODO: Same as above.
-                    if (result.Value is GClass2889 splitOperation)
+                    if (result.Value is SplitOperationClass splitOperation)
                     {
                         Item item = splitOperation.To.Item;
                         if (item != null)

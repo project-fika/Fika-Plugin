@@ -296,7 +296,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(GrenadeClass throwWeap, Callback<IGrenadeController> callback, bool scheduled = true)
+        public override void Proceed(GrenadeClass throwWeap, Callback<GInterface145> callback, bool scheduled = true)
         {
             QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
@@ -1054,7 +1054,7 @@ namespace Fika.Core.Coop.Players
                         // Unknown what problems this might cause so far.
                         if (result.Value is GClass2878 unloadOperation)
                         {
-                            if (unloadOperation.InternalOperation is GClass2889 internalSplitOperation)
+                            if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
                             {
                                 Item item = internalSplitOperation.To.Item;
                                 if (item != null)
@@ -1076,7 +1076,7 @@ namespace Fika.Core.Coop.Players
                         }
 
                         // TODO: Same as above.
-                        if (result.Value is GClass2889 splitOperation)
+                        if (result.Value is SplitOperationClass splitOperation)
                         {
                             Item item = splitOperation.To.Item;
                             if (item != null)
@@ -1746,7 +1746,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly GrenadeClass throwWeap = throwWeap;
-            public Process<QuickGrenadeThrowController, IGrenadeController> process;
+            public Process<QuickGrenadeThrowController, GInterface145> process;
             public Action confirmCallback;
 
             internal CoopClientQuickGrenadeController ReturnController()
