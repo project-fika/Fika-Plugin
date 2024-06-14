@@ -93,6 +93,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -122,11 +123,25 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
         }
 
+        private void OnQuestItemPacketReceived(QuestItemPacket packet)
+        {
+            if (MyPlayer.HealthController.IsAlive)
+            {
+                if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestItemPacket(ref packet);
+                }
+            }
+        }
+
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet)
         {
-            if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+            if (MyPlayer.HealthController.IsAlive)
             {
-                sharedQuestController.ReceiveQuestPacket(ref packet);
+                if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestPacket(ref packet);
+                } 
             }
         }
 

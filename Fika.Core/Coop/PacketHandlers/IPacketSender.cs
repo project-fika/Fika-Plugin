@@ -21,6 +21,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void Init();
         public void SendQuestPacket(ref QuestConditionPacket packet);
+        public void SendQuestItemPacket(ref QuestItemPacket packet);
         public void DestroyThis();
     }
 }

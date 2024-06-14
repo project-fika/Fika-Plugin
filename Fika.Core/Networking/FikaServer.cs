@@ -97,6 +97,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -190,14 +191,31 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnQuestItemPacketReceived(QuestItemPacket packet, NetPeer peer)
+        {
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
+
+            if (MyPlayer.HealthController.IsAlive)
+            {
+                if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestItemPacket(ref packet);
+                }
+            }
+        }
+
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet, NetPeer peer)
         {
             _dataWriter.Reset();
             SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
 
-            if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+            if (MyPlayer.HealthController.IsAlive)
             {
-                sharedQuestController.ReceiveQuestPacket(ref packet);
+                if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestPacket(ref packet);
+                } 
             }
         }
 

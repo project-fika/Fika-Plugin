@@ -54,6 +54,12 @@ namespace Fika.Core.Coop.PacketHandlers
             Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);
         }
 
+        public void SendQuestItemPacket(ref QuestItemPacket packet)
+        {
+            Writer.Reset();
+            Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);
+        }
+
         protected void FixedUpdate()
         {
             if (player == null || Writer == null || Server == null)

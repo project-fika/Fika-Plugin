@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.Players
         public Transform RaycastCameraTransform;
         public int NetId;
         public bool IsObservedAI = false;
-        public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = []; 
+        public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
         #endregion
 
         public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
@@ -1398,8 +1398,25 @@ namespace Fika.Core.Coop.Players
             });
         }
 
-        public Item FindItem(string itemId)
+        public Item FindItem(string itemId, bool questItem = false)
         {
+            if (questItem)
+            {
+                //List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
+                foreach (GInterface12 lootItem in Singleton<GameWorld>.Instance.LootList)
+                {
+                    if (lootItem is LootItem observedLootItem)
+                    {
+                        if (observedLootItem.Item.TemplateId == itemId)
+                        {
+                            return observedLootItem.Item;
+                        }
+                    }
+                }
+                FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the world at all.");
+                return null;
+            }
+
             Item item = Inventory.Equipment.FindItem(itemId);
             if (item != null)
             {

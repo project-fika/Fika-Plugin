@@ -50,6 +50,11 @@ namespace Fika.Core.Coop.PacketHandlers
 
         }
 
+        public void SendQuestItemPacket(ref QuestItemPacket packet)
+        {
+
+        }
+
         protected void Update()
         {
             if (player == null || Writer == null)
