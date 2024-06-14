@@ -201,7 +201,8 @@ namespace Fika.Core
 
             SetupConfig();
 
-            // new FikaVersionLabel_Patch().Enable();
+            new FikaVersionLabel_Patch().Enable();
+            new FikaVersionLabelUpdate_Patch().Enable();
             new DisableReadyButton_Patch().Enable();
             new DisableInsuranceReadyButton_Patch().Enable();
             new DisableMatchSettingsReadyButton_Patch().Enable();

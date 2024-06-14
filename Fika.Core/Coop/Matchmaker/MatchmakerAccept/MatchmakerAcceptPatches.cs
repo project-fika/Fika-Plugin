@@ -5,7 +5,9 @@ using Fika.Core.Networking.Http.Models;
 using System;
 using System.Linq;
 using System.Reflection;
+using Fika.Core.EssentialPatches;
 using UnityEngine;
+using Random = System.Random;
 
 namespace Fika.Core.Coop.Matchmaker
 {
@@ -102,19 +104,33 @@ namespace Fika.Core.Coop.Matchmaker
                 return false;
             }
 
+            FikaVersionLabelUpdate_Patch.raidCode = result.RaidCode;
+            
             return true;
         }
 
         public static void CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
         {
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var body = new CreateMatch(profileId, hostUsername, timestamp, raidSettings, HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
+            var raidCode = GenerateRaidCode(6);
+            var body = new CreateMatch(raidCode, profileId, hostUsername, timestamp, raidSettings, HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
             FikaRequestHandler.RaidCreate(body);
 
             SetGroupId(profileId);
             SetTimestamp(timestamp);
             MatchingType = EMatchmakerType.GroupLeader;
+            
+            FikaVersionLabelUpdate_Patch.raidCode = raidCode;
+        }
+
+        private static string GenerateRaidCode(int length)
+        {
+            var random = new Random();
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray())
+                .ToUpper();
         }
     }
 }

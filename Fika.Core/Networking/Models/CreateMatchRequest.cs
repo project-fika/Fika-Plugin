@@ -9,6 +9,9 @@ namespace Fika.Core.Networking.Http.Models
     [DataContract]
     public struct CreateMatch
     {
+        [DataMember(Name = "raidCode")]
+        public string RaidCode;
+        
         [DataMember(Name = "serverId")]
         public string ServerId;
 
@@ -36,8 +39,9 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "time")]
         public EDateTime Time;
 
-        public CreateMatch(string serverId, string hostUsername, long timestamp, RaidSettings settings, int expectedNumberOfPlayers, ESideType side, EDateTime time)
+        public CreateMatch(string raidCode, string serverId, string hostUsername, long timestamp, RaidSettings settings, int expectedNumberOfPlayers, ESideType side, EDateTime time)
         {
+            RaidCode = raidCode;
             ServerId = serverId;
             HostUsername = hostUsername;
             Timestamp = timestamp;
