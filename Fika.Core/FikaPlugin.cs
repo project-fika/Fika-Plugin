@@ -213,6 +213,7 @@ namespace Fika.Core
             new BotCacher_Patch().Enable();
             new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
+            new DisconnectButton_Patch().Enable();
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
