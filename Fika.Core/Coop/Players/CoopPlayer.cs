@@ -1273,22 +1273,22 @@ namespace Fika.Core.Coop.Players
         {
             DamageInfo damageInfo = new()
             {
-                Damage = packet.DamageInfo.Damage,
-                DamageType = packet.DamageInfo.DamageType,
-                BodyPartColliderType = packet.DamageInfo.ColliderType,
-                HitPoint = packet.DamageInfo.Point,
-                HitNormal = packet.DamageInfo.HitNormal,
-                Direction = packet.DamageInfo.Direction,
-                PenetrationPower = packet.DamageInfo.PenetrationPower,
-                BlockedBy = packet.DamageInfo.BlockedBy,
-                DeflectedBy = packet.DamageInfo.DeflectedBy,
-                SourceId = packet.DamageInfo.SourceId,
-                ArmorDamage = packet.DamageInfo.ArmorDamage
+                Damage = packet.Damage,
+                DamageType = packet.DamageType,
+                BodyPartColliderType = packet.ColliderType,
+                HitPoint = packet.Point,
+                HitNormal = packet.HitNormal,
+                Direction = packet.Direction,
+                PenetrationPower = packet.PenetrationPower,
+                BlockedBy = packet.BlockedBy,
+                DeflectedBy = packet.DeflectedBy,
+                SourceId = packet.SourceId,
+                ArmorDamage = packet.ArmorDamage
             };
 
-            if (!string.IsNullOrEmpty(packet.DamageInfo.ProfileId))
+            if (!string.IsNullOrEmpty(packet.ProfileId))
             {
-                GInterface106 player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.DamageInfo.ProfileId);
+                GInterface106 player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
 
                 if (player != null)
                 {
@@ -1302,13 +1302,13 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
-                if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.DamageInfo.ProfileId).HandsController.Item is Weapon weapon)
+                if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
                 {
                     damageInfo.Weapon = weapon;
                 }
             }
 
-            ClientApplyShot(damageInfo, packet.DamageInfo.BodyPartType, packet.DamageInfo.ColliderType, packet.DamageInfo.ArmorPlateCollider);
+            ClientApplyShot(damageInfo, packet.BodyPartType, packet.ColliderType, packet.ArmorPlateCollider);
         }
 
         public virtual void SetupDogTag()

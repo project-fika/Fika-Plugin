@@ -264,22 +264,19 @@ namespace Fika.Core.Coop.Players
             {
                 PacketSender.DamagePackets.Enqueue(new()
                 {
-                    DamageInfo = new()
-                    {
-                        Damage = damageInfo.Damage,
-                        DamageType = damageInfo.DamageType,
-                        BodyPartType = bodyPartType,
-                        ColliderType = colliderType,
-                        Absorbed = 0f,
-                        Direction = damageInfo.Direction,
-                        Point = damageInfo.HitPoint,
-                        HitNormal = damageInfo.HitNormal,
-                        PenetrationPower = damageInfo.PenetrationPower,
-                        BlockedBy = damageInfo.BlockedBy,
-                        DeflectedBy = damageInfo.DeflectedBy,
-                        SourceId = damageInfo.SourceId,
-                        ArmorDamage = damageInfo.ArmorDamage
-                    }
+                    Damage = damageInfo.Damage,
+                    DamageType = damageInfo.DamageType,
+                    BodyPartType = bodyPartType,
+                    ColliderType = colliderType,
+                    Absorbed = 0f,
+                    Direction = damageInfo.Direction,
+                    Point = damageInfo.HitPoint,
+                    HitNormal = damageInfo.HitNormal,
+                    PenetrationPower = damageInfo.PenetrationPower,
+                    BlockedBy = damageInfo.BlockedBy,
+                    DeflectedBy = damageInfo.DeflectedBy,
+                    SourceId = damageInfo.SourceId,
+                    ArmorDamage = damageInfo.ArmorDamage
                 });
 
                 return;
@@ -336,23 +333,20 @@ namespace Fika.Core.Coop.Players
                 ShotReactions(damageInfo, bodyPartType);
                 PacketSender.DamagePackets.Enqueue(new()
                 {
-                    DamageInfo = new()
-                    {
-                        Damage = damageInfo.Damage,
-                        DamageType = damageInfo.DamageType,
-                        BodyPartType = bodyPartType,
-                        ColliderType = colliderType,
-                        ArmorPlateCollider = armorPlateCollider,
-                        Absorbed = 0f,
-                        Direction = damageInfo.Direction,
-                        Point = damageInfo.HitPoint,
-                        HitNormal = damageInfo.HitNormal,
-                        PenetrationPower = damageInfo.PenetrationPower,
-                        BlockedBy = damageInfo.BlockedBy,
-                        DeflectedBy = damageInfo.DeflectedBy,
-                        SourceId = damageInfo.SourceId,
-                        ArmorDamage = damageInfo.ArmorDamage
-                    }
+                    Damage = damageInfo.Damage,
+                    DamageType = damageInfo.DamageType,
+                    BodyPartType = bodyPartType,
+                    ColliderType = colliderType,
+                    ArmorPlateCollider = armorPlateCollider,
+                    Absorbed = 0f,
+                    Direction = damageInfo.Direction,
+                    Point = damageInfo.HitPoint,
+                    HitNormal = damageInfo.HitNormal,
+                    PenetrationPower = damageInfo.PenetrationPower,
+                    BlockedBy = damageInfo.BlockedBy,
+                    DeflectedBy = damageInfo.DeflectedBy,
+                    SourceId = damageInfo.SourceId,
+                    ArmorDamage = damageInfo.ArmorDamage
                 });
 
                 return null;
@@ -404,24 +398,21 @@ namespace Fika.Core.Coop.Players
 
                     PacketSender.DamagePackets.Enqueue(new()
                     {
-                        DamageInfo = new()
-                        {
-                            Damage = damage,
-                            DamageType = damageInfo.DamageType,
-                            BodyPartType = bodyPartType,
-                            ColliderType = colliderType,
-                            ArmorPlateCollider = armorPlateCollider,
-                            Absorbed = 0f,
-                            Direction = damageInfo.Direction,
-                            Point = damageInfo.HitPoint,
-                            HitNormal = damageInfo.HitNormal,
-                            PenetrationPower = damageInfo.PenetrationPower,
-                            BlockedBy = damageInfo.BlockedBy,
-                            DeflectedBy = damageInfo.DeflectedBy,
-                            SourceId = damageInfo.SourceId,
-                            ArmorDamage = damageInfo.ArmorDamage,
-                            ProfileId = damageInfo.Player.iPlayer.ProfileId
-                        }
+                        Damage = damage,
+                        DamageType = damageInfo.DamageType,
+                        BodyPartType = bodyPartType,
+                        ColliderType = colliderType,
+                        ArmorPlateCollider = armorPlateCollider,
+                        Absorbed = 0f,
+                        Direction = damageInfo.Direction,
+                        Point = damageInfo.HitPoint,
+                        HitNormal = damageInfo.HitNormal,
+                        PenetrationPower = damageInfo.PenetrationPower,
+                        BlockedBy = damageInfo.BlockedBy,
+                        DeflectedBy = damageInfo.DeflectedBy,
+                        SourceId = damageInfo.SourceId,
+                        ArmorDamage = damageInfo.ArmorDamage,
+                        ProfileId = damageInfo.Player.iPlayer.ProfileId
                     });
 
                     // Run this to get weapon skill
@@ -464,24 +455,21 @@ namespace Fika.Core.Coop.Players
 
                     PacketSender.DamagePackets.Enqueue(new()
                     {
-                        DamageInfo = new()
-                        {
-                            Damage = damage,
-                            DamageType = damageInfo.DamageType,
-                            BodyPartType = bodyPartType,
-                            ColliderType = colliderType,
-                            ArmorPlateCollider = armorPlateCollider,
-                            Absorbed = 0f,
-                            Direction = damageInfo.Direction,
-                            Point = damageInfo.HitPoint,
-                            HitNormal = damageInfo.HitNormal,
-                            PenetrationPower = damageInfo.PenetrationPower,
-                            BlockedBy = damageInfo.BlockedBy,
-                            DeflectedBy = damageInfo.DeflectedBy,
-                            SourceId = damageInfo.SourceId,
-                            ArmorDamage = damageInfo.ArmorDamage,
-                            ProfileId = damageInfo.Player.iPlayer.ProfileId
-                        }
+                        Damage = damage,
+                        DamageType = damageInfo.DamageType,
+                        BodyPartType = bodyPartType,
+                        ColliderType = colliderType,
+                        ArmorPlateCollider = armorPlateCollider,
+                        Absorbed = 0f,
+                        Direction = damageInfo.Direction,
+                        Point = damageInfo.HitPoint,
+                        HitNormal = damageInfo.HitNormal,
+                        PenetrationPower = damageInfo.PenetrationPower,
+                        BlockedBy = damageInfo.BlockedBy,
+                        DeflectedBy = damageInfo.DeflectedBy,
+                        SourceId = damageInfo.SourceId,
+                        ArmorDamage = damageInfo.ArmorDamage,
+                        ProfileId = damageInfo.Player.iPlayer.ProfileId
                     });
 
                     // Run this to get weapon skill

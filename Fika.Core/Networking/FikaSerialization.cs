@@ -273,8 +273,10 @@ namespace Fika.Core.Networking
             public FirearmLightStateStruct[] LightStates;
             public static LightStatesPacket Deserialize(NetDataReader reader)
             {
-                LightStatesPacket packet = new();
-                packet.Amount = reader.GetInt();
+                LightStatesPacket packet = new()
+                {
+                    Amount = reader.GetInt()
+                };
                 if (packet.Amount > 0)
                 {
                     packet.LightStates = new FirearmLightStateStruct[packet.Amount];
@@ -312,8 +314,10 @@ namespace Fika.Core.Networking
             public FirearmLightStateStruct[] LightStates;
             public static HeadLightsPacket Deserialize(NetDataReader reader)
             {
-                HeadLightsPacket packet = new();
-                packet.Amount = reader.GetInt();
+                HeadLightsPacket packet = new()
+                {
+                    Amount = reader.GetInt()
+                };
                 if (packet.Amount > 0)
                 {
                     packet.LightStates = new FirearmLightStateStruct[packet.Amount];
@@ -628,72 +632,6 @@ namespace Fika.Core.Networking
                     writer.Put(packet.ThrowForce);
                     writer.Put(packet.LowThrow);
                 }
-            }
-        }
-
-        public struct ApplyShotPacket()
-        {
-            public EDamageType DamageType;
-            public float Damage;
-            public EBodyPart BodyPartType;
-            public EBodyPartColliderType ColliderType;
-            public EArmorPlateCollider ArmorPlateCollider;
-            public float Absorbed;
-            public Vector3 Direction = Vector3.zero;
-            public Vector3 Point = Vector3.zero;
-            public Vector3 HitNormal = Vector3.zero;
-            public float PenetrationPower = 0f;
-            public string BlockedBy;
-            public string DeflectedBy;
-            public string SourceId;
-            public string AmmoId;
-            public int FragmentIndex;
-            public float ArmorDamage = 0f;
-            public string ProfileId;
-
-            public static ApplyShotPacket Deserialize(NetDataReader reader)
-            {
-                ApplyShotPacket packet = new()
-                {
-                    DamageType = (EDamageType)reader.GetInt(),
-                    Damage = reader.GetFloat(),
-                    BodyPartType = (EBodyPart)reader.GetInt(),
-                    ColliderType = (EBodyPartColliderType)reader.GetInt(),
-                    ArmorPlateCollider = (EArmorPlateCollider)reader.GetInt(),
-                    Absorbed = reader.GetFloat(),
-                    Direction = reader.GetVector3(),
-                    Point = reader.GetVector3(),
-                    HitNormal = reader.GetVector3(),
-                    PenetrationPower = reader.GetFloat(),
-                    BlockedBy = reader.GetString(),
-                    DeflectedBy = reader.GetString(),
-                    SourceId = reader.GetString(),
-                    AmmoId = reader.GetString(),
-                    FragmentIndex = reader.GetInt(),
-                    ArmorDamage = reader.GetFloat(),
-                    ProfileId = reader.GetString()
-                };
-                return packet;
-            }
-            public static void Serialize(NetDataWriter writer, ApplyShotPacket packet)
-            {
-                writer.Put((int)packet.DamageType);
-                writer.Put(packet.Damage);
-                writer.Put((int)packet.BodyPartType);
-                writer.Put((int)packet.ColliderType);
-                writer.Put((int)packet.ArmorPlateCollider);
-                writer.Put(packet.Absorbed);
-                writer.Put(packet.Direction);
-                writer.Put(packet.Point);
-                writer.Put(packet.HitNormal);
-                writer.Put(packet.PenetrationPower);
-                writer.Put(packet.BlockedBy);
-                writer.Put(packet.DeflectedBy);
-                writer.Put(packet.SourceId);
-                writer.Put(packet.AmmoId);
-                writer.Put(packet.FragmentIndex);
-                writer.Put(packet.ArmorDamage);
-                writer.Put(packet.ProfileId);
             }
         }
 
