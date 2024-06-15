@@ -273,22 +273,22 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
             {
-                transform.position += (-transform.right * (movementSpeed * Time.deltaTime));
+                transform.position += -transform.right * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
             {
-                transform.position += (transform.right * (movementSpeed * Time.deltaTime));
+                transform.position += transform.right * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
             {
-                transform.position += (transform.forward * (movementSpeed * Time.deltaTime));
+                transform.position += transform.forward * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
             {
-                transform.position += (-transform.forward * (movementSpeed * Time.deltaTime));
+                transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
             }
 
             // Teleportation
@@ -311,22 +311,22 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 if (Input.GetKey(relUpKey))
                 {
-                    transform.position += (transform.up * (movementSpeed * Time.deltaTime));
+                    transform.position += transform.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(relDownKey))
                 {
-                    transform.position += (-transform.up * (movementSpeed * Time.deltaTime));
+                    transform.position += -transform.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
                 {
-                    transform.position += (Vector3.up * (movementSpeed * Time.deltaTime));
+                    transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
                 {
-                    transform.position += (-Vector3.up * (movementSpeed * Time.deltaTime));
+                    transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
                 }
             }
 

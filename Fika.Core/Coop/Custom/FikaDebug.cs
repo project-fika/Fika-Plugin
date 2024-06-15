@@ -1,7 +1,7 @@
 ﻿using Comfort.Common;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.Custom
                 Destroy(this);
             }
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 isServer = true;
             }

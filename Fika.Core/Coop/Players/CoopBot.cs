@@ -33,7 +33,6 @@ namespace Fika.Core.Coop.Players
         /// The amount of players that have loaded this bot
         /// </summary>
         public int loadedPlayers = 0;
-        //private FikaDynamicAI dynamicAi;
         private bool firstEnabled;
 
         public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
@@ -78,7 +77,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public override void OnSkillLevelChanged(GClass1777 skill)
+        public override void OnSkillLevelChanged(GClass1778 skill)
         {
             // Do nothing
         }
@@ -94,15 +93,7 @@ namespace Fika.Core.Coop.Players
             MovementContext = BotMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon), new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
         }
 
-        /*public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
-        {
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
-                return;
-
-            base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
-        }*/
-
-        public override GClass1687 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
             {
@@ -121,11 +112,11 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-            GClass1687 hitInfo = new()
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            GClass1688 hitInfo = new()
             {
                 PoV = PointOfView,
-                Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
+                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                 Material = materialType
             };
             float num = damage - damageInfo.Damage;
@@ -136,15 +127,13 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
-            return hitInfo;
-        }
 
-        protected override void Start()
-        {
-            if (FikaPlugin.DisableBotMetabolism.Value)
+            if (list != null)
             {
-                HealthController.DisableMetabolism();
+                QueueArmorDamagePackets([.. list]);
             }
+
+            return hitInfo;
         }
 
         public override void BtrInteraction()
@@ -226,7 +215,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            CoopGame coopGame = (CoopGame)Singleton<IBotGame>.Instance;
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Bots.ContainsKey(ProfileId))
             {
                 coopGame.Bots.Remove(ProfileId);

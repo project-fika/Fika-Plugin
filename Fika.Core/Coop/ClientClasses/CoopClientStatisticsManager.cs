@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (value > 0)
             {
-                NotificationManagerClass.DisplayNotification(new GClass2055(localizationKey1, localizationKey2, value));
+                NotificationManagerClass.DisplayNotification(new GClass2056(localizationKey1, localizationKey2, value));
             }
         }
     }

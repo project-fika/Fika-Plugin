@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.UI;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using HarmonyLib;
@@ -23,11 +23,11 @@ namespace Fika.Core.Coop.Custom
         protected void Awake()
         {
             windowRect = new(20, Screen.height - 260, 600, 250);
-            nickname = MatchmakerAcceptPatches.PMCName;
+            nickname = FikaBackendUtils.PMCName;
             chatText = string.Empty;
             textField = string.Empty;
             show = false;
-            isServer = MatchmakerAcceptPatches.IsServer;
+            isServer = FikaBackendUtils.IsServer;
             writer = new();
             GUISounds guiSounds = Singleton<GUISounds>.Instance;
             soundsWrapper = Traverse.Create(guiSounds).Field<UISoundsWrapper>("uisoundsWrapper_0").Value;
@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.Custom
 
         protected void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Backspace))
+            if (Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))
             {
                 ToggleVisibility();
             }
@@ -80,6 +80,11 @@ namespace Fika.Core.Coop.Custom
                 string message = textField;
                 textField = string.Empty;
 
+                if (message.Length > 100)
+                {
+                    message = message.Substring(0, 100);
+                }
+
                 TextMessagePacket packet = new(nickname, message);
                 writer.Reset();
 
@@ -119,7 +124,7 @@ namespace Fika.Core.Coop.Custom
             GUI.Label(rect, chatText);
             rect.y += rect.height;
             Rect textRect = new(rect.x, rect.y, rect.width - 55, 25);
-            textField = GUI.TextField(textRect, textField, 64);
+            textField = GUI.TextField(textRect, textField);
             rect.x += 535;
             Rect buttonRect = new(rect.x, rect.y, 50, 25);
             if (GUI.Button(buttonRect, "SEND"))

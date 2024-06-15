@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.ObservedClasses.MovementStates
                 /*MovementContext.ProcessSpeedLimits(deltaTime);*/
                 MovementContext.MovementDirection = Vector2.Lerp(MovementContext.MovementDirection, Direction, deltaTime * EFTHardSettings.Instance.DIRECTION_LERP_SPEED);
                 //MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
-                MovementContext.SetUpDiscreteDirection(GClass1668.ConvertToMovementDirection(Direction));
+                MovementContext.SetUpDiscreteDirection(GClass1669.ConvertToMovementDirection(Direction));
                 Direction = Vector2.zero;
                 MovementContext.SprintAcceleration(deltaTime);
                 UpdateRotationAndPosition(deltaTime);

@@ -11,9 +11,9 @@ using EFT.Vaulting;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using System;
@@ -38,11 +38,11 @@ namespace Fika.Core.Coop.Players
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
-        public GClass2430 NetworkHealthController
+        public GClass2431 NetworkHealthController
         {
-            get => HealthController as GClass2430;
+            get => HealthController as GClass2431;
         }
-        private readonly GClass2169 ObservedVaultingParameters = new();
+        private readonly GClass2170 ObservedVaultingParameters = new();
         public override bool CanBeSnapped => false;
         public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
         public override AbstractHandsController HandsController
@@ -171,7 +171,7 @@ namespace Fika.Core.Coop.Players
             base.PlayGroundedSound(fallHeight, jumpHeight);
         }
 
-        public override void OnSkillLevelChanged(GClass1777 skill)
+        public override void OnSkillLevelChanged(GClass1778 skill)
         {
             //base.OnSkillLevelChanged(skill);
         }
@@ -241,9 +241,8 @@ namespace Fika.Core.Coop.Players
             }
 
             bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface244>(bodyPart) != null;
-            player.StatisticsManager.OnEnemyDamage(
-                damageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role, GroupId,
-                HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
+            player.StatisticsManager.OnEnemyDamage(damageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
+                GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
                 Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
                 Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones);
         }
@@ -260,26 +259,23 @@ namespace Fika.Core.Coop.Players
 
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
         {
-            if (damageInfo.DamageType == EDamageType.Landmine && MatchmakerAcceptPatches.IsServer)
+            if (damageInfo.DamageType == EDamageType.Landmine && FikaBackendUtils.IsServer)
             {
                 PacketSender.DamagePackets.Enqueue(new()
                 {
-                    DamageInfo = new()
-                    {
-                        Damage = damageInfo.Damage,
-                        DamageType = damageInfo.DamageType,
-                        BodyPartType = bodyPartType,
-                        ColliderType = colliderType,
-                        Absorbed = 0f,
-                        Direction = damageInfo.Direction,
-                        Point = damageInfo.HitPoint,
-                        HitNormal = damageInfo.HitNormal,
-                        PenetrationPower = damageInfo.PenetrationPower,
-                        BlockedBy = damageInfo.BlockedBy,
-                        DeflectedBy = damageInfo.DeflectedBy,
-                        SourceId = damageInfo.SourceId,
-                        ArmorDamage = damageInfo.ArmorDamage
-                    }
+                    Damage = damageInfo.Damage,
+                    DamageType = damageInfo.DamageType,
+                    BodyPartType = bodyPartType,
+                    ColliderType = colliderType,
+                    Absorbed = 0f,
+                    Direction = damageInfo.Direction,
+                    Point = damageInfo.HitPoint,
+                    HitNormal = damageInfo.HitNormal,
+                    PenetrationPower = damageInfo.PenetrationPower,
+                    BlockedBy = damageInfo.BlockedBy,
+                    DeflectedBy = damageInfo.DeflectedBy,
+                    SourceId = damageInfo.SourceId,
+                    ArmorDamage = damageInfo.ArmorDamage
                 });
 
                 return;
@@ -302,57 +298,27 @@ namespace Fika.Core.Coop.Players
             LastDamageType = damageInfo.DamageType;
         }
 
-        /*public override void ShotReactions(DamageInfo shot, EBodyPart bodyPart)
+        public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
-            Vector3 normalized = shot.Direction.normalized;
-            if (PointOfView == EPointOfView.ThirdPerson)
-            {
-                turnOffFbbikAt = Time.time + 0.6f;
-                _fbbik.solver.Quick = false;
-                BodyPartCollider bodyPartCollider;
-                if ((bodyPartCollider = shot.HittedBallisticCollider as BodyPartCollider) != null)
-                {
-                    HitReaction.Hit(bodyPartCollider.BodyPartColliderType, bodyPartCollider.BodyPartType, normalized, shot.HitPoint, false);
-                }
-            }
-            if (shot.Weapon is KnifeClass knifeClass)
-            {
-                KnifeComponent itemComponent = knifeClass.GetItemComponent<KnifeComponent>();
-                Vector3 normalized2 = (shot.Player.iPlayer.Transform.position - Transform.position).normalized;
-                Vector3 vector = Vector3.Cross(normalized2, Vector3.up);
-                float y = normalized.y;
-                float num = Vector3.Dot(vector, normalized);
-                float num2 = 1f - Mathf.Abs(Vector3.Dot(normalized2, normalized));
-                num2 = ((bodyPart == EBodyPart.Head) ? num2 : Mathf.Sqrt(num2));
-                Rotation += new Vector2(-num, -y).normalized * itemComponent.Template.AppliedTrunkRotation.Random(false) * num2;
-                ProceduralWeaponAnimation.ForceReact.AddForce(new Vector3(-y, num, 0f).normalized, num2, 1f, itemComponent.Template.AppliedHeadRotation.Random(false));
-            }
-        }*/
-
-        public override GClass1687 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
-        {
-            if (damageInfo.DamageType == EDamageType.Sniper && MatchmakerAcceptPatches.IsServer)
+            if (damageInfo.DamageType == EDamageType.Sniper && FikaBackendUtils.IsServer)
             {
                 ShotReactions(damageInfo, bodyPartType);
                 PacketSender.DamagePackets.Enqueue(new()
                 {
-                    DamageInfo = new()
-                    {
-                        Damage = damageInfo.Damage,
-                        DamageType = damageInfo.DamageType,
-                        BodyPartType = bodyPartType,
-                        ColliderType = colliderType,
-                        ArmorPlateCollider = armorPlateCollider,
-                        Absorbed = 0f,
-                        Direction = damageInfo.Direction,
-                        Point = damageInfo.HitPoint,
-                        HitNormal = damageInfo.HitNormal,
-                        PenetrationPower = damageInfo.PenetrationPower,
-                        BlockedBy = damageInfo.BlockedBy,
-                        DeflectedBy = damageInfo.DeflectedBy,
-                        SourceId = damageInfo.SourceId,
-                        ArmorDamage = damageInfo.ArmorDamage
-                    }
+                    Damage = damageInfo.Damage,
+                    DamageType = damageInfo.DamageType,
+                    BodyPartType = bodyPartType,
+                    ColliderType = colliderType,
+                    ArmorPlateCollider = armorPlateCollider,
+                    Absorbed = 0f,
+                    Direction = damageInfo.Direction,
+                    Point = damageInfo.HitPoint,
+                    HitNormal = damageInfo.HitNormal,
+                    PenetrationPower = damageInfo.PenetrationPower,
+                    BlockedBy = damageInfo.BlockedBy,
+                    DeflectedBy = damageInfo.DeflectedBy,
+                    SourceId = damageInfo.SourceId,
+                    ArmorDamage = damageInfo.ArmorDamage
                 });
 
                 return null;
@@ -369,7 +335,7 @@ namespace Fika.Core.Coop.Players
                 // There should never be other instances than CoopPlayer or its derived types
                 CoopPlayer player = (CoopPlayer)damageInfo.Player.iPlayer;
 
-                if (player.IsYourPlayer)
+                if (player.IsYourPlayer || player.IsAI)
                 {
                     if (HealthController != null && !HealthController.IsAlive)
                     {
@@ -379,11 +345,11 @@ namespace Fika.Core.Coop.Players
                     bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-                    MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1687 hitInfo = new()
+                    MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+                    GClass1688 hitInfo = new()
                     {
                         PoV = PointOfView,
-                        Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
+                        Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                         Material = materialType
                     };
                     float num = damage - damageInfo.Damage;
@@ -392,97 +358,33 @@ namespace Fika.Core.Coop.Players
                         damageInfo.DidArmorDamage = num;
                     }
                     damageInfo.DidBodyDamage = damageInfo.Damage;
-                    //ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
                     ShotReactions(damageInfo, bodyPartType);
                     ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
-                    if (damageInfo.HittedBallisticCollider != null)
-                    {
-                        BodyPartCollider bodyPartCollider = (BodyPartCollider)damageInfo.HittedBallisticCollider;
-                        colliderType = bodyPartCollider.BodyPartColliderType;
-                    }
-
                     PacketSender.DamagePackets.Enqueue(new()
                     {
-                        DamageInfo = new()
-                        {
-                            Damage = damage,
-                            DamageType = damageInfo.DamageType,
-                            BodyPartType = bodyPartType,
-                            ColliderType = colliderType,
-                            ArmorPlateCollider = armorPlateCollider,
-                            Absorbed = 0f,
-                            Direction = damageInfo.Direction,
-                            Point = damageInfo.HitPoint,
-                            HitNormal = damageInfo.HitNormal,
-                            PenetrationPower = damageInfo.PenetrationPower,
-                            BlockedBy = damageInfo.BlockedBy,
-                            DeflectedBy = damageInfo.DeflectedBy,
-                            SourceId = damageInfo.SourceId,
-                            ArmorDamage = damageInfo.ArmorDamage,
-                            ProfileId = damageInfo.Player.iPlayer.ProfileId
-                        }
-                    });
-
-                    // Run this to get weapon skill
-                    ManageAggressor(damageInfo, bodyPartType, colliderType);
-
-                    return hitInfo;
-                }
-                else if (player.IsAI)
-                {
-                    if (HealthController != null && !HealthController.IsAlive)
-                    {
-                        return null;
-                    }
-
-                    bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
-                    float damage = damageInfo.Damage;
-                    List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-                    MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-                    GClass1687 hitInfo = new()
-                    {
-                        PoV = PointOfView,
-                        Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
+                        Damage = damageInfo.Damage,
+                        DamageType = damageInfo.DamageType,
+                        BodyPartType = bodyPartType,
+                        ColliderType = colliderType,
+                        ArmorPlateCollider = armorPlateCollider,
+                        Absorbed = 0f,
+                        Direction = damageInfo.Direction,
+                        Point = damageInfo.HitPoint,
+                        HitNormal = damageInfo.HitNormal,
+                        PenetrationPower = damageInfo.PenetrationPower,
+                        BlockedBy = damageInfo.BlockedBy,
+                        DeflectedBy = damageInfo.DeflectedBy,
+                        SourceId = damageInfo.SourceId,
+                        ArmorDamage = damageInfo.ArmorDamage,
+                        ProfileId = damageInfo.Player.iPlayer.ProfileId,
                         Material = materialType
-                    };
-                    float num = damage - damageInfo.Damage;
-                    if (num > 0)
-                    {
-                        damageInfo.DidArmorDamage = num;
-                    }
-                    damageInfo.DidBodyDamage = damageInfo.Damage;
-                    //ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
-                    ShotReactions(damageInfo, bodyPartType);
-                    ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
-
-                    if (damageInfo.HittedBallisticCollider != null)
-                    {
-                        BodyPartCollider bodyPartCollider = (BodyPartCollider)damageInfo.HittedBallisticCollider;
-                        colliderType = bodyPartCollider.BodyPartColliderType;
-                    }
-
-                    PacketSender.DamagePackets.Enqueue(new()
-                    {
-                        DamageInfo = new()
-                        {
-                            Damage = damage,
-                            DamageType = damageInfo.DamageType,
-                            BodyPartType = bodyPartType,
-                            ColliderType = colliderType,
-                            ArmorPlateCollider = armorPlateCollider,
-                            Absorbed = 0f,
-                            Direction = damageInfo.Direction,
-                            Point = damageInfo.HitPoint,
-                            HitNormal = damageInfo.HitNormal,
-                            PenetrationPower = damageInfo.PenetrationPower,
-                            BlockedBy = damageInfo.BlockedBy,
-                            DeflectedBy = damageInfo.DeflectedBy,
-                            SourceId = damageInfo.SourceId,
-                            ArmorDamage = damageInfo.ArmorDamage,
-                            ProfileId = damageInfo.Player.iPlayer.ProfileId
-                        }
                     });
+
+                    if (list != null)
+                    {
+                        QueueArmorDamagePackets([.. list]);
+                    }
 
                     // Run this to get weapon skill
                     ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -556,11 +458,11 @@ namespace Fika.Core.Coop.Players
             new Process<GrenadeController, IHandsThrowController>(this, func, throwWeap, false).method_0(null, callback, scheduled);
         }
 
-        public override void Proceed(GrenadeClass throwWeap, Callback<IGrenadeController> callback, bool scheduled = true)
+        public override void Proceed(GrenadeClass throwWeap, Callback<GInterface145> callback, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this, throwWeap);
             Func<QuickGrenadeThrowController> func = new(factory.CreateObservedQuickGrenadeController);
-            new Process<QuickGrenadeThrowController, IGrenadeController>(this, func, throwWeap, false).method_0(null, callback, scheduled);
+            new Process<QuickGrenadeThrowController, GInterface145>(this, func, throwWeap, false).method_0(null, callback, scheduled);
         }
 
         public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)
@@ -711,8 +613,8 @@ namespace Fika.Core.Coop.Players
                 Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolationRatio));
             }
 
-            Vector3 a = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolationRatio);
-            CharacterController.Move(a - MovementContext.TransformPosition, interpolationRatio);
+            Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolationRatio);
+            CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolationRatio);
 
             if (!Mathf.Approximately(MovementContext.Tilt, newState.Tilt))
             {
@@ -804,6 +706,15 @@ namespace Fika.Core.Coop.Players
             base.OnDead(damageType);
         }
 
+        public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+        {
+            // Only handle if it was ourselves as otherwise it's irrelevant
+            if (LastAggressor.IsYourPlayer)
+            {
+                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
+            }
+        }
+
         public override void SetupDogTag()
         {
             // Do nothing
@@ -813,7 +724,7 @@ namespace Fika.Core.Coop.Players
         {
             Inventory.Equipment = equipmentClass;
 
-            BindableState<Item> itemInHands = (BindableState<Item>)Traverse.Create(this).Field("_itemInHands").GetValue();
+            BindableState<Item> itemInHands = Traverse.Create(this).Field<BindableState<Item>>("_itemInHands").Value;
             if (HandsController != null && HandsController.Item != null)
             {
                 Item item = FindItem(HandsController.Item.Id);
@@ -828,8 +739,8 @@ namespace Fika.Core.Coop.Players
             {
                 Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
                 Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-                PlayerBody.GClass1874 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-                PlayerBody.GClass1874 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+                PlayerBody.GClass1875 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
+                PlayerBody.GClass1875 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
                 if (gclass2 != null)
                 {
                     gclass2.Dispose();
@@ -911,12 +822,11 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
-                IVaultingComponent vaultingComponent = playerTraverse.Field("_vaultingComponent").GetValue<IVaultingComponent>();
+                IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
                 if (vaultingComponent != null)
                 {
                     UpdateEvent -= vaultingComponent.DoVaultingTick;
                 }
-
 
                 playerTraverse.Field("_vaultingComponent").SetValue(null);
                 playerTraverse.Field("_vaultingComponentDebug").SetValue(null);
@@ -942,7 +852,7 @@ namespace Fika.Core.Coop.Players
 
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
-                IVaultingComponent vaultingComponent = playerTraverse.Field("_vaultingComponent").GetValue<IVaultingComponent>();
+                IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
                 if (vaultingComponent != null)
                 {
                     UpdateEvent -= vaultingComponent.DoVaultingTick;
@@ -962,7 +872,7 @@ namespace Fika.Core.Coop.Players
 
                 waitForStartRoutine = StartCoroutine(CreateHealthBar());
 
-                RaycastCameraTransform = playerTraverse.Field("_playerLookRaycastTransform").GetValue<Transform>();
+                RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
             }
         }
 
@@ -983,11 +893,6 @@ namespace Fika.Core.Coop.Players
             healthBar = gameObject.AddComponent<FikaHealthBar>();
 
             yield break;
-        }
-
-        protected override void Start()
-        {
-            // Do nothing
         }
 
         public override void LateUpdate()
@@ -1029,7 +934,7 @@ namespace Fika.Core.Coop.Players
 
         public new void CreateCompass()
         {
-            bool compassInstantiated = Traverse.Create(this).Field("_compassInstantiated").GetValue<bool>();
+            bool compassInstantiated = Traverse.Create(this).Field<bool>("_compassInstantiated").Value;
             if (!compassInstantiated)
             {
                 Transform transform = Singleton<PoolManager>.Instance.CreateFromPool<Transform>(new ResourceKey
@@ -1232,6 +1137,11 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public override void HandleDamagePacket(ref DamagePacket packet)
+        {
+            // Do nothing
+        }
+
         public void HandleProceedPacket(ProceedPacket packet)
         {
             switch (packet.ProceedType)
@@ -1241,6 +1151,7 @@ namespace Fika.Core.Coop.Players
                         CreateEmptyHandsController();
                         break;
                     }
+                case EProceedType.FoodClass:
                 case EProceedType.MedsClass:
                     {
                         CreateMedsController(packet.ItemId, packet.BodyPart, packet.Amount, packet.AnimationVariant);
@@ -1432,7 +1343,7 @@ namespace Fika.Core.Coop.Players
             if (killer != null)
             {
                 LastAggressor = killer;
-                if (killer.IsYourPlayer)
+                /*if (killer.IsYourPlayer)
                 {
                     Item weapon = FindItem(weaponId);
                     if (weapon != null)
@@ -1442,7 +1353,7 @@ namespace Fika.Core.Coop.Players
                             Weapon = weapon
                         };
                     }
-                }
+                }*/
             }
         }
 

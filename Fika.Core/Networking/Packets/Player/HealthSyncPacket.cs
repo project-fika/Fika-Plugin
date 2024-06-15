@@ -7,22 +7,23 @@ namespace Fika.Core.Networking
     public struct HealthSyncPacket(int netId) : INetSerializable
     {
         public int NetId = netId;
-        public GStruct347 Packet;
+        public GStruct346 Packet;
         public string KillerId;
         public string KillerWeaponId;
         public RagdollPacket RagdollPacket;
         public EquipmentClass Equipment;
+        public string[] TriggerZones;
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
-            GStruct347 packet = new()
+            GStruct346 packet = new()
             {
-                SyncType = (GStruct347.ESyncType)reader.GetInt()
+                SyncType = (GStruct346.ESyncType)reader.GetInt()
             };
             switch (packet.SyncType)
             {
-                case GStruct347.ESyncType.AddEffect:
+                case GStruct346.ESyncType.AddEffect:
                     {
                         packet.Data.AddEffect = new()
                         {
@@ -34,11 +35,11 @@ namespace Fika.Core.Networking
                             WorkTime = reader.GetFloat(),
                             ResidueTime = reader.GetFloat(),
                             Strength = reader.GetFloat(),
-                            ExtraDataType = (GStruct347.GStruct348.EExtraDataType)reader.GetInt()
+                            ExtraDataType = (GStruct346.GStruct347.EExtraDataType)reader.GetInt()
                         };
                         switch (packet.Data.AddEffect.ExtraDataType)
                         {
-                            case GStruct347.GStruct348.EExtraDataType.MedEffect:
+                            case GStruct346.GStruct347.EExtraDataType.MedEffect:
                                 {
                                     packet.Data.AddEffect.ExtraData = new()
                                     {
@@ -50,7 +51,7 @@ namespace Fika.Core.Networking
                                     };
                                 }
                                 break;
-                            case GStruct347.GStruct348.EExtraDataType.Stimulator:
+                            case GStruct346.GStruct347.EExtraDataType.Stimulator:
                                 {
                                     packet.Data.AddEffect.ExtraData = new()
                                     {
@@ -64,7 +65,7 @@ namespace Fika.Core.Networking
                         }
                         break;
                     }
-                case GStruct347.ESyncType.RemoveEffect:
+                case GStruct346.ESyncType.RemoveEffect:
                     {
                         packet.Data.RemoveEffect = new()
                         {
@@ -72,7 +73,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.EffectNextState:
+                case GStruct346.ESyncType.EffectNextState:
                     {
                         packet.Data.EffectNextState = new()
                         {
@@ -81,7 +82,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.EffectStateTime:
+                case GStruct346.ESyncType.EffectStateTime:
                     {
                         packet.Data.EffectStateTime = new()
                         {
@@ -90,7 +91,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.EffectStrength:
+                case GStruct346.ESyncType.EffectStrength:
                     {
                         packet.Data.EffectStrength = new()
                         {
@@ -99,7 +100,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.EffectMedResource:
+                case GStruct346.ESyncType.EffectMedResource:
                     {
                         packet.Data.EffectMedResource = new()
                         {
@@ -108,7 +109,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.EffectStimulatorBuff:
+                case GStruct346.ESyncType.EffectStimulatorBuff:
                     {
                         packet.Data.EffectStimulatorBuff = new()
                         {
@@ -125,7 +126,7 @@ namespace Fika.Core.Networking
                         }
                         break;
                     }
-                case GStruct347.ESyncType.IsAlive:
+                case GStruct346.ESyncType.IsAlive:
                     {
                         packet.Data.IsAlive = new()
                         {
@@ -138,11 +139,12 @@ namespace Fika.Core.Networking
                             KillerWeaponId = reader.GetString();
                             RagdollPacket = RagdollPacket.Deserialize(reader);
                             Equipment = (EquipmentClass)reader.GetItem();
+                            TriggerZones = reader.GetStringArray();
                             break;
                         }
                         break;
                     }
-                case GStruct347.ESyncType.BodyHealth:
+                case GStruct346.ESyncType.BodyHealth:
                     {
                         packet.Data.BodyHealth = new()
                         {
@@ -151,7 +153,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.Energy:
+                case GStruct346.ESyncType.Energy:
                     {
                         packet.Data.Energy = new()
                         {
@@ -159,7 +161,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.Hydration:
+                case GStruct346.ESyncType.Hydration:
                     {
                         packet.Data.Hydration = new()
                         {
@@ -167,7 +169,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.Temperature:
+                case GStruct346.ESyncType.Temperature:
                     {
                         packet.Data.Temperature = new()
                         {
@@ -175,7 +177,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.DamageCoeff:
+                case GStruct346.ESyncType.DamageCoeff:
                     {
                         packet.Data.DamageCoeff = new()
                         {
@@ -183,7 +185,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.ApplyDamage:
+                case GStruct346.ESyncType.ApplyDamage:
                     {
                         packet.Data.ApplyDamage = new()
                         {
@@ -193,7 +195,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.DestroyedBodyPart:
+                case GStruct346.ESyncType.DestroyedBodyPart:
                     {
                         packet.Data.DestroyedBodyPart = new()
                         {
@@ -208,7 +210,7 @@ namespace Fika.Core.Networking
                         packet.Data.DestroyedBodyPart.HealthMaximum = reader.GetFloat();
                         break;
                     }
-                case GStruct347.ESyncType.HealthRates:
+                case GStruct346.ESyncType.HealthRates:
                     {
                         packet.Data.HealthRates = new()
                         {
@@ -221,7 +223,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.HealerDone:
+                case GStruct346.ESyncType.HealerDone:
                     {
                         packet.Data.HealerDone = new()
                         {
@@ -229,7 +231,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.BurnEyes:
+                case GStruct346.ESyncType.BurnEyes:
                     {
                         packet.Data.BurnEyes = new()
                         {
@@ -239,7 +241,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.Poison:
+                case GStruct346.ESyncType.Poison:
                     {
                         packet.Data.Poison = new()
                         {
@@ -247,7 +249,7 @@ namespace Fika.Core.Networking
                         };
                         break;
                     }
-                case GStruct347.ESyncType.StaminaCoeff:
+                case GStruct346.ESyncType.StaminaCoeff:
                     {
                         packet.Data.StaminaCoeff = new()
                         {
@@ -263,11 +265,11 @@ namespace Fika.Core.Networking
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            GStruct347.GStruct366 packet = Packet.Data;
+            GStruct346.GStruct365 packet = Packet.Data;
             writer.Put((int)Packet.SyncType);
             switch (Packet.SyncType)
             {
-                case GStruct347.ESyncType.AddEffect:
+                case GStruct346.ESyncType.AddEffect:
                     {
                         writer.Put(packet.AddEffect.EffectId);
                         writer.Put(packet.AddEffect.Type);
@@ -280,15 +282,15 @@ namespace Fika.Core.Networking
                         writer.Put((int)packet.AddEffect.ExtraDataType);
                         switch (packet.AddEffect.ExtraDataType)
                         {
-                            case GStruct347.GStruct348.EExtraDataType.None:
+                            case GStruct346.GStruct347.EExtraDataType.None:
                                 break;
-                            case GStruct347.GStruct348.EExtraDataType.MedEffect:
+                            case GStruct346.GStruct347.EExtraDataType.MedEffect:
                                 {
                                     writer.Put(packet.AddEffect.ExtraData.MedEffect.ItemId);
                                     writer.Put(packet.AddEffect.ExtraData.MedEffect.Amount);
                                     break;
                                 }
-                            case GStruct347.GStruct348.EExtraDataType.Stimulator:
+                            case GStruct346.GStruct347.EExtraDataType.Stimulator:
                                 {
                                     writer.Put(packet.AddEffect.ExtraData.Stimulator.BuffsName);
                                     break;
@@ -296,36 +298,36 @@ namespace Fika.Core.Networking
                         }
                         break;
                     }
-                case GStruct347.ESyncType.RemoveEffect:
+                case GStruct346.ESyncType.RemoveEffect:
                     {
                         writer.Put(packet.RemoveEffect.EffectId);
                         break;
                     }
-                case GStruct347.ESyncType.EffectNextState:
+                case GStruct346.ESyncType.EffectNextState:
                     {
                         writer.Put(packet.EffectNextState.EffectId);
                         writer.Put(packet.EffectNextState.StateTime);
                         break;
                     }
-                case GStruct347.ESyncType.EffectStateTime:
+                case GStruct346.ESyncType.EffectStateTime:
                     {
                         writer.Put(packet.EffectStateTime.EffectId);
                         writer.Put(packet.EffectStateTime.RemainingStateTime);
                         break;
                     }
-                case GStruct347.ESyncType.EffectStrength:
+                case GStruct346.ESyncType.EffectStrength:
                     {
                         writer.Put(packet.EffectStrength.EffectId);
                         writer.Put(packet.EffectStrength.Strength);
                         break;
                     }
-                case GStruct347.ESyncType.EffectMedResource:
+                case GStruct346.ESyncType.EffectMedResource:
                     {
                         writer.Put(packet.EffectMedResource.EffectId);
                         writer.Put(packet.EffectMedResource.Resource);
                         break;
                     }
-                case GStruct347.ESyncType.EffectStimulatorBuff:
+                case GStruct346.ESyncType.EffectStimulatorBuff:
                     {
                         writer.Put(packet.EffectStimulatorBuff.EffectId);
                         writer.Put(packet.EffectStimulatorBuff.BuffIndex);
@@ -339,7 +341,7 @@ namespace Fika.Core.Networking
                         }
                         break;
                     }
-                case GStruct347.ESyncType.IsAlive:
+                case GStruct346.ESyncType.IsAlive:
                     {
                         writer.Put(packet.IsAlive.IsAlive);
                         if (!packet.IsAlive.IsAlive)
@@ -349,44 +351,45 @@ namespace Fika.Core.Networking
                             writer.Put(KillerWeaponId);
                             RagdollPacket.Serialize(writer, RagdollPacket);
                             writer.PutItem(Equipment);
+                            writer.PutArray(TriggerZones);
                             break;
                         }
                         break;
                     }
-                case GStruct347.ESyncType.BodyHealth:
+                case GStruct346.ESyncType.BodyHealth:
                     {
                         writer.Put((int)packet.BodyHealth.BodyPart);
                         writer.Put(packet.BodyHealth.Value);
                         break;
                     }
-                case GStruct347.ESyncType.Energy:
+                case GStruct346.ESyncType.Energy:
                     {
                         writer.Put(packet.Energy.Value);
                         break;
                     }
-                case GStruct347.ESyncType.Hydration:
+                case GStruct346.ESyncType.Hydration:
                     {
                         writer.Put(packet.Hydration.Value);
                         break;
                     }
-                case GStruct347.ESyncType.Temperature:
+                case GStruct346.ESyncType.Temperature:
                     {
                         writer.Put(packet.Temperature.Value);
                         break;
                     }
-                case GStruct347.ESyncType.DamageCoeff:
+                case GStruct346.ESyncType.DamageCoeff:
                     {
                         writer.Put(packet.DamageCoeff.DamageCoeff);
                         break;
                     }
-                case GStruct347.ESyncType.ApplyDamage:
+                case GStruct346.ESyncType.ApplyDamage:
                     {
                         writer.Put((int)packet.ApplyDamage.BodyPart);
                         writer.Put(packet.ApplyDamage.Damage);
                         writer.Put((int)packet.ApplyDamage.DamageType);
                         break;
                     }
-                case GStruct347.ESyncType.DestroyedBodyPart:
+                case GStruct346.ESyncType.DestroyedBodyPart:
                     {
                         writer.Put((int)packet.DestroyedBodyPart.BodyPart);
                         writer.Put(packet.DestroyedBodyPart.IsDestroyed);
@@ -398,7 +401,7 @@ namespace Fika.Core.Networking
                         writer.Put(packet.DestroyedBodyPart.HealthMaximum);
                         break;
                     }
-                case GStruct347.ESyncType.HealthRates:
+                case GStruct346.ESyncType.HealthRates:
                     {
                         writer.Put(packet.HealthRates.HealRate);
                         writer.Put(packet.HealthRates.DamageRate);
@@ -408,24 +411,24 @@ namespace Fika.Core.Networking
                         writer.Put(packet.HealthRates.Temperature);
                         break;
                     }
-                case GStruct347.ESyncType.HealerDone:
+                case GStruct346.ESyncType.HealerDone:
                     {
                         writer.Put(packet.HealerDone.EffectId);
                         break;
                     }
-                case GStruct347.ESyncType.BurnEyes:
+                case GStruct346.ESyncType.BurnEyes:
                     {
                         writer.Put(packet.BurnEyes.Position);
                         writer.Put(packet.BurnEyes.DistanceStrength);
                         writer.Put(packet.BurnEyes.NormalTime);
                         break;
                     }
-                case GStruct347.ESyncType.Poison:
+                case GStruct346.ESyncType.Poison:
                     {
                         writer.Put(packet.Poison.Value);
                         break;
                     }
-                case GStruct347.ESyncType.StaminaCoeff:
+                case GStruct346.ESyncType.StaminaCoeff:
                     {
                         writer.Put(packet.StaminaCoeff.StaminaCoeff);
                         break;
