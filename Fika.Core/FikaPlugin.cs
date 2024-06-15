@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using EFT.UI;
@@ -36,7 +35,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace Fika.Core
@@ -54,18 +52,8 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        /// <summary>
-        /// Stores the Instance of this Plugin
-        /// </summary>
         public static FikaPlugin Instance;
         public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
-        /// <summary>
-        /// If any mod dependencies fail, show an error. This is a flag to say it has occurred.
-        /// </summary>
-        private bool ShownDependencyError { get; set; }
-        /// <summary>
-        /// This is the Official EFT Version defined by BSG
-        /// </summary>
         public static string EFTVersionMajor { get; internal set; }
         public ManualLogSource FikaLogger { get => Logger; }
         public BotDifficulties BotDifficulties;
@@ -141,6 +129,7 @@ namespace Fika.Core
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
         public static ConfigEntry<bool> AZERTYMode { get; set; }
+        public static ConfigEntry<bool> KeybindOverlay { get; set; }
 
         // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
@@ -189,12 +178,12 @@ namespace Fika.Core
         public bool AllowItemSending;
         public string[] BlacklistedItems;
         public bool ForceSaveOnDeath;
+        public bool QuestSharing;
         #endregion
 
         protected void Awake()
         {
             Instance = this;
-            LogDependencyErrors();
 
             SetupConfig();
 
@@ -344,6 +333,8 @@ namespace Fika.Core
 
             AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false, "If free camera should use AZERTY keys for input.");
 
+            KeybindOverlay = Config.Bind("Coop | Debug", "Keybind Overlay", true, "If an overlay with all free cam keybinds should show.");
+
             // Performance
 
             DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
@@ -482,31 +473,6 @@ namespace Fika.Core
             new OfflineRaidSettingsMenuPatch_Override().Enable();
             new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
             new FikaAirdropFlare_Patch().Enable();
-        }
-
-        private void LogDependencyErrors()
-        {
-            // Skip if we've already shown the message, or there are no errors
-            if (ShownDependencyError || Chainloader.DependencyErrors.Count == 0)
-            {
-                return;
-            }
-
-            StringBuilder stringBuilder = new();
-            stringBuilder.AppendLine("Errors occurred during plugin loading");
-            stringBuilder.AppendLine("-------------------------------------");
-            stringBuilder.AppendLine();
-            foreach (string error in Chainloader.DependencyErrors)
-            {
-                stringBuilder.AppendLine(error);
-                stringBuilder.AppendLine();
-            }
-            string errorMessage = stringBuilder.ToString();
-
-            // Show an error in the BepInEx console/log file
-            Logger.LogError(errorMessage);
-
-            ShownDependencyError = true;
         }
 
         public enum DynamicAIRates
