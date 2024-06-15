@@ -198,7 +198,7 @@ namespace Fika.Core
         {
             Instance = this;
             LogDependencyErrors();
-
+            
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
@@ -221,7 +221,8 @@ namespace Fika.Core
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-
+            OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
+            
             DisableSPTPatches();
             EnableOverridePatches();
 
@@ -243,6 +244,7 @@ namespace Fika.Core
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
+            
 
             StartCoroutine(RunModHandler());
         }
@@ -279,7 +281,7 @@ namespace Fika.Core
             AcceptedTOS = Config.Bind("Hidden", "Accepted TOS", false, new ConfigDescription("Has accepted TOS", tags: new ConfigurationManagerAttributes() { Browsable = false }));
 
             // Advanced
-            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Display Official Version. Effective after game restart.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Show official version instead of fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
             
             // Coop
 
@@ -416,6 +418,11 @@ namespace Fika.Core
             StomachDamageMultiplier = Config.Bind("Gameplay", "Stomach Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the stomach collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
             DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false, new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+        }
+        
+        private void OfficialVersion_SettingChanged(object sender, EventArgs e)
+        {
+            FikaVersionLabel_Patch.UpdateVersionLabel();
         }
 
         private string[] GetLocalAddresses()

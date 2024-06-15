@@ -15,6 +15,14 @@ namespace Fika.Core.EssentialPatches
     {
         private static string versionLabel;
 
+        private static Traverse preloaderUiTraverse;
+
+        private static Traverse versionNumberTraverse;
+
+        private static string fikaVersion;
+
+        private static string officalVersion;
+
         protected override MethodBase GetTargetMethod()
         {
             return typeof(VersionNumberClass).GetMethod(nameof(VersionNumberClass.Create),
@@ -33,14 +41,27 @@ namespace Fika.Core.EssentialPatches
                 Logger.LogInfo($"Server version: {versionLabel}");
             }
 
-            string fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();
+            fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();
 
-            Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+            preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
 
             preloaderUiTraverse.Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
 
-            var versionNumberTraverse = Traverse.Create(__result);
-            if (!FikaPlugin.OfficialVersion.Value)
+            versionNumberTraverse = Traverse.Create(__result);
+
+            officalVersion = (string)versionNumberTraverse.Field("Major").GetValue();
+            
+            UpdateVersionLabel();
+        }
+
+        public static void UpdateVersionLabel()
+        {
+            if (FikaPlugin.OfficialVersion.Value)
+            {
+                preloaderUiTraverse.Field("string_2").SetValue($"{officalVersion} Beta version");
+                versionNumberTraverse.Field("Major").SetValue(officalVersion);
+            }
+            else
             {
                 preloaderUiTraverse.Field("string_2").SetValue($"FIKA BETA {fikaVersion} | {versionLabel}");
                 versionNumberTraverse.Field("Major").SetValue($"{fikaVersion} {versionLabel}");
@@ -52,6 +73,8 @@ namespace Fika.Core.EssentialPatches
             // preloaderUiTraverse.Field("string_3").SetValue($"Raid code");
             //Game mode
             preloaderUiTraverse.Field("string_4").SetValue("PvE");
+            //Update version label
+            preloaderUiTraverse.Method("method_6").GetValue();
         }
     }
 }
