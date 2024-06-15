@@ -107,8 +107,7 @@ namespace Fika.Core.Networking
                 EnableStatistics = true
             };
 
-            // netClient needs to bind on the same port as the STUN query
-            _netClient.Start(FikaPlugin.UDPPort.Value);
+            _netClient.Start(FikaBackendUtils.LocalPort);
 
             string ip = FikaBackendUtils.RemoteIp;
             int port = FikaBackendUtils.RemotePort;

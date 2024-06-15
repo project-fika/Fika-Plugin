@@ -6,8 +6,8 @@ public struct GetHostStunResponse
     [DataMember(Name = "requestType")]
     public string RequestType;
 
-    [DataMember(Name = "clientId")]
-    public string ClientId;
+    [DataMember(Name = "sessionId")]
+    public string SessionId;
 
     [DataMember(Name = "StunIp")]
     public string StunIp;
@@ -15,10 +15,10 @@ public struct GetHostStunResponse
     [DataMember(Name = "StunPort")]
     public int StunPort;
 
-    public GetHostStunResponse(string clientId, string stunIp, int stunPort)
+    public GetHostStunResponse(string sessionId, string stunIp, int stunPort)
     {
         RequestType = GetType().Name;
-        ClientId = clientId;
+        SessionId = sessionId;
         StunIp = stunIp;
         StunPort = stunPort;
     }

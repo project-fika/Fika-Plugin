@@ -12,6 +12,13 @@ namespace Fika.Core.Networking.NatPunch
         public string Host { get; set; }
         public string Url { get; set; }
         public string SessionId { get; set; }
+        public bool Connected 
+        {
+            get
+            {
+                return _webSocket.ReadyState == WebSocketState.Open ? true : false;
+            }
+        }
 
         private WebSocket _webSocket;
         private TaskCompletionSource<string> _receiveTaskCompletion;
@@ -20,8 +27,7 @@ namespace Fika.Core.Networking.NatPunch
 
         public FikaNatPunchClient()
         {
-            // Assuming http protocol is always used
-            Host = $"ws:{RequestHandler.Host.Split(':')[1]}:6970";
+            Host = $"ws:{RequestHandler.Host.Split(':')[1]}:{FikaPlugin.NatPunchPort.Value}";
             SessionId = RequestHandler.SessionId;
             Url = $"{Host}/{SessionId}?";
 
@@ -38,7 +44,12 @@ namespace Fika.Core.Networking.NatPunch
 
         public void Connect()
         {
+            if (_webSocket.ReadyState == WebSocketState.Open)
+                return;
+
             _webSocket.Connect();
+
+            
         }
 
         public void Close()
@@ -75,7 +86,7 @@ namespace Fika.Core.Networking.NatPunch
         }
 
         private void Send<T1>(T1 o)
-        {
+        {           
             var data = JsonConvert.SerializeObject(o);
             _webSocket.Send(data);
         }
@@ -101,7 +112,9 @@ namespace Fika.Core.Networking.NatPunch
 
         public async Task<GetHostStunResponse> GetHostStun(GetHostStunRequest getHostStunRequest)
         {
-            return await SendAndReceiveAsync<GetHostStunRequest, GetHostStunResponse>(getHostStunRequest);
+            var result = await SendAndReceiveAsync<GetHostStunRequest, GetHostStunResponse>(getHostStunRequest);
+
+            return result;
         }
     }
 }

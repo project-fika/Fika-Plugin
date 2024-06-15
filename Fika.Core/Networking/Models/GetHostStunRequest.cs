@@ -10,8 +10,8 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "requestType")]
         public string RequestType;
 
-        [DataMember(Name = "clientId")]
-        public string ClientId;
+        [DataMember(Name = "sessionId")]
+        public string SessionId;
 
         [DataMember(Name = "serverId")]
         public string ServerId;
@@ -22,11 +22,11 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "stunPort")]
         public int StunPort;
 
-        public GetHostStunRequest(string stunIp, int stunPort)
+        public GetHostStunRequest(string serverId, string sessionId, string stunIp, int stunPort)
         {
             RequestType = GetType().Name;
-            ClientId = RequestHandler.SessionId;
-            ServerId = CoopHandler.GetServerId();
+            SessionId = sessionId;
+            ServerId = serverId;
             StunIp = stunIp;
             StunPort = stunPort;
         }

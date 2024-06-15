@@ -50,7 +50,7 @@ namespace Fika.Core.Networking.NatPunch
             }
             catch (Exception ex)
             {
-                //log exception
+                EFT.UI.ConsoleScreen.LogError($"Error during STUN query: {ex.Message}");
             }
             finally
             {

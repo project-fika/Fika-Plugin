@@ -73,6 +73,7 @@ namespace Fika.Core.Networking
             }
         }
         private FikaChat fikaChat;
+        public FikaNatPunchServer NatPunchServer;
 
         public async Task Init()
         {
@@ -112,10 +113,8 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true
             };
-
-            var natPunchServer = new FikaNatPunchServer(_netServer);
-            natPunchServer.Connect();
-
+           
+            
             if (FikaPlugin.UseUPnP.Value)
             {
                 bool upnpFailed = false;
@@ -160,13 +159,30 @@ namespace Fika.Core.Networking
                 }
             }
 
-            if (FikaPlugin.ForceBindIP.Value != "Disabled")
+            if (FikaPlugin.NatPunch.Value)
             {
-                _netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
+                var stunIpEndPoint = NatPunchUtils.CreateStunEndPoint();
+
+                NatPunchServer = new FikaNatPunchServer(_netServer, stunIpEndPoint);
+                NatPunchServer.Connect();
+
+                if(!NatPunchServer.Connected)
+                {
+                    Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Error when trying to connect to FikaNatPunchRelayService. Please ensure FikaNatPunchRelayService is enabled and the port is open.");
+                }
+
+                _netServer.Start(NatPunchServer.StunIpEndPoint.Local.Port);
             }
             else
             {
-                _netServer.Start(Port);
+                if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                {
+                    _netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
+                }
+                else
+                {
+                    _netServer.Start(Port);
+                }
             }
 
             logger.LogInfo("Started Fika Server");
