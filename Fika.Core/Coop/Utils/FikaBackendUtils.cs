@@ -55,7 +55,7 @@ namespace Fika.Core.Coop.Utils
                 return false;
             }
 
-            MatchJoinRequest body = new MatchJoinRequest(serverId, profileId);
+            MatchJoinRequest body = new(serverId, profileId);
             result = FikaRequestHandler.RaidJoin(body);
 
             if (result.GameVersion != FikaPlugin.EFTVersionMajor)

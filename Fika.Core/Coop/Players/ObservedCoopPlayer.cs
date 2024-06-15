@@ -895,11 +895,6 @@ namespace Fika.Core.Coop.Players
             yield break;
         }
 
-        protected override void Start()
-        {
-            // Do nothing
-        }
-
         public override void LateUpdate()
         {
             DistanceDirty = true;

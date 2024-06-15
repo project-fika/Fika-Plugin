@@ -9,6 +9,7 @@ using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
+using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -60,9 +61,9 @@ namespace Fika.Core.Coop.GameMode
         public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
         public string MyExitLocation { get; set; } = null;
         public ISpawnSystem SpawnSystem;
-
         public Dictionary<string, Player> Bots = [];
-        //private GameObject fikaStartButton;
+        public List<int> ExtractedPlayers { get; } = [];
+
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
         private GClass2949 spawnPoints = null;
@@ -104,14 +105,33 @@ namespace Fika.Core.Coop.GameMode
 
         private static ManualLogSource Logger;
 
+        /// <summary>
+        /// Creates a CoopGame
+        /// </summary>
+        /// <param name="inputTree"></param>
+        /// <param name="profile"></param>
+        /// <param name="backendDateTime"></param>
+        /// <param name="insurance"></param>
+        /// <param name="menuUI"></param>
+        /// <param name="gameUI"></param>
+        /// <param name="location"></param>
+        /// <param name="timeAndWeather"></param>
+        /// <param name="wavesSettings"></param>
+        /// <param name="dateTime"></param>
+        /// <param name="callback"></param>
+        /// <param name="fixedDeltaTime"></param>
+        /// <param name="updateQueue"></param>
+        /// <param name="backEndSession"></param>
+        /// <param name="sessionTime"></param>
+        /// <param name="raidSettings"></param>
+        /// <returns></returns>
         internal static CoopGame Create(IInputTree inputTree, Profile profile, GameDateTime backendDateTime,
             InsuranceCompanyClass insurance, MenuUI menuUI, GameUI gameUI, LocationSettingsClass.Location location,
             TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
             Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
             ISession backEndSession, TimeSpan sessionTime, RaidSettings raidSettings)
         {
-            Logger = BepInEx.Logging.Logger.CreateLogSource("Coop Game Mode");
-            Logger.LogInfo("CoopGame::Create");
+            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
             bool useCustomWeather = timeAndWeather.IsRandomWeather;
             timeAndWeather.IsRandomWeather = false;
@@ -139,7 +159,8 @@ namespace Fika.Core.Coop.GameMode
                 coopGame.SetupCustomWeather(timeAndWeather);
             }
 
-            coopGame.func_1 = (Player player) => EftGamePlayerOwner.Create<EftGamePlayerOwner>(player, inputTree, insurance, backEndSession, gameUI, coopGame.GameDateTime, location);
+            SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
+            coopGame.func_1 = new Func<Player, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);
 
             Singleton<IFikaGame>.Create(coopGame);
             FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
@@ -163,6 +184,36 @@ namespace Fika.Core.Coop.GameMode
             return coopGame;
         }
 
+        /// <summary>
+        /// Used to create a <see cref="EftGamePlayerOwner"/>
+        /// </summary>
+        /// <param name="inputTree"></param>
+        /// <param name="insurance"></param>
+        /// <param name="backEndSession"></param>
+        /// <param name="gameUI"></param>
+        /// <param name="game"></param>
+        /// <param name="location"></param>
+        private class SetupGamePlayerOwnerHandler(IInputTree inputTree, InsuranceCompanyClass insurance, ISession backEndSession, GameUI gameUI, CoopGame game, LocationSettingsClass.Location location)
+        {
+            private readonly IInputTree inputTree = inputTree;
+            private readonly InsuranceCompanyClass insurance = insurance;
+            private readonly ISession backEndSession = backEndSession;
+            private readonly GameUI gameUI = gameUI;
+            private readonly CoopGame game = game;
+            private readonly LocationSettingsClass.Location location = location;
+
+            public EftGamePlayerOwner HandleSetup(Player player)
+            {
+                EftGamePlayerOwner gamePlayerOwner = EftGamePlayerOwner.Create(player, inputTree, insurance, backEndSession, gameUI, game.GameDateTime, location);
+                gamePlayerOwner.OnLeave += game.vmethod_3;
+                return gamePlayerOwner;
+            }
+        }
+
+        /// <summary>
+        /// Sets up a custom weather curve
+        /// </summary>
+        /// <param name="timeAndWeather">Struct with custom settings</param>
         private void SetupCustomWeather(TimeAndWeatherSettings timeAndWeather)
         {
             if (WeatherController.Instance == null)
@@ -192,8 +243,14 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Creates and initializes the <see cref="CoopHandler"/>
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="MissingReferenceException">If no ServerId was found</exception>
         public Task CreateCoopHandler()
         {
+            Logger.LogInfo("Creating CoopHandler...");
             CoopHandler coopHandler = CoopHandler.GetCoopHandler();
             if (coopHandler != null)
             {
@@ -223,12 +280,17 @@ namespace Fika.Core.Coop.GameMode
             {
                 Destroy(coopHandler);
                 Logger.LogError("No Server Id found, Deleting Coop Handler");
-                throw new Exception("No Server Id found");
+                throw new MissingReferenceException("No Server Id found");
             }
 
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Returns all human players
+        /// </summary>
+        /// <param name="coopHandler"><see cref="CoopHandler"/> used to fetch players</param>
+        /// <returns></returns>
         private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
         {
             List<CoopPlayer> humanPlayers = [];
@@ -244,6 +306,12 @@ namespace Fika.Core.Coop.GameMode
             return humanPlayers;
         }
 
+        /// <summary>
+        /// Calculates the distance from all players
+        /// </summary>
+        /// <param name="position">The <see cref="Vector3"/> position</param>
+        /// <param name="humanPlayers"><see cref="List{T}"/> of all human <see cref="CoopPlayer"/>s</param>
+        /// <returns></returns>
         private float GetDistanceFromPlayers(Vector3 position, List<CoopPlayer> humanPlayers)
         {
             float distance = float.PositiveInfinity;
@@ -260,7 +328,13 @@ namespace Fika.Core.Coop.GameMode
             return distance;
         }
 
-        private string GetFurthestBot(Dictionary<string, Player> bots, CoopHandler coopHandler, List<CoopPlayer> humanPlayers, out float furthestDistance)
+        /// <summary>
+        /// Grabs the bot furthest away from all players and returns its distance
+        /// </summary>
+        /// <param name="humanPlayers">List of all human <see cref="CoopPlayer"/>s</param>
+        /// <param name="furthestDistance">The furthest <see cref="float"/> distance</param>
+        /// <returns></returns>
+        private string GetFurthestBot(List<CoopPlayer> humanPlayers, out float furthestDistance)
         {
             string furthestBot = string.Empty;
             furthestDistance = 0f;
@@ -284,6 +358,11 @@ namespace Fika.Core.Coop.GameMode
             return furthestBot;
         }
 
+        /// <summary>
+        /// Checks whether this bot is valid for despawning
+        /// </summary>
+        /// <param name="kvp"><see cref="KeyValuePair{TKey, TValue}"/> of <see cref="string"/> profileId and <see cref="Player"/> player</param>
+        /// <returns></returns>
         private bool IsInvalidBotForDespawning(KeyValuePair<string, Player> kvp)
         {
             if (kvp.Value == null || kvp.Value == null || kvp.Value.Position == null)
@@ -315,6 +394,12 @@ namespace Fika.Core.Coop.GameMode
             return false;
         }
 
+        /// <summary>
+        /// Used to spawn a bot for the host
+        /// </summary>
+        /// <param name="profile"><see cref="Profile"/> to spawn</param>
+        /// <param name="position">The <see cref="Vector3"/> position to spawn on</param>
+        /// <returns></returns>
         private async Task<LocalPlayer> CreateBot(Profile profile, Vector3 position)
         {
 #if DEBUG
@@ -347,7 +432,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (FikaPlugin.DespawnFurthest.Value)
                 {
-                    despawned = TryDespawnFurthest(profile, position, coopHandler);
+                    despawned = TryDespawnFurthestBot(profile, position, coopHandler);
                 }
 
                 // If it's not special and we didnt despawn something, we dont spawn a new bot.
@@ -445,11 +530,19 @@ namespace Fika.Core.Coop.GameMode
 
             CoopBot coopBot = (CoopBot)localPlayer;
             coopBot.NetId = netId;
+            if (FikaPlugin.DisableBotMetabolism.Value)
+            {
+                coopBot.HealthController.DisableMetabolism();
+            }
             coopHandler.Players.Add(coopBot.NetId, coopBot);
 
             return localPlayer;
         }
 
+        /// <summary>
+        /// Increments the amount of players that have loaded a bot, used for <see cref="WaitForPlayersToLoadBotProfile(int)"/>
+        /// </summary>
+        /// <param name="netId"></param>
         public void IncreaseLoadedPlayers(int netId)
         {
             if (botQueue.ContainsKey(netId))
@@ -462,6 +555,11 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// <see cref="Task"/> used to ensure that all players loads a bot before it spawns
+        /// </summary>
+        /// <param name="netId">The NetId to spawn</param>
+        /// <returns></returns>
         private async Task WaitForPlayersToLoadBotProfile(int netId)
         {
             botQueue.Add(netId, 0);
@@ -483,11 +581,18 @@ namespace Fika.Core.Coop.GameMode
             botQueue.Remove(netId);
         }
 
-        private bool TryDespawnFurthest(Profile profile, Vector3 position, CoopHandler coopHandler)
+        /// <summary>
+        /// Tries to despawn the furthest bot from all players
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <param name="position"></param>
+        /// <param name="coopHandler"></param>
+        /// <returns></returns>
+        private bool TryDespawnFurthestBot(Profile profile, Vector3 position, CoopHandler coopHandler)
         {
             List<CoopPlayer> humanPlayers = GetPlayers(coopHandler);
 
-            string botKey = GetFurthestBot(Bots, coopHandler, humanPlayers, out float furthestDistance);
+            string botKey = GetFurthestBot(humanPlayers, out float furthestDistance);
 
             if (botKey == string.Empty)
             {
@@ -524,6 +629,11 @@ namespace Fika.Core.Coop.GameMode
             return true;
         }
 
+        /// <summary>
+        /// Despawns a bot
+        /// </summary>
+        /// <param name="coopHandler"></param>
+        /// <param name="bot">The bot to despawn</param>
         private void DespawnBot(CoopHandler coopHandler, Player bot)
         {
             IBotGame botGame = Singleton<IBotGame>.Instance;
@@ -571,11 +681,6 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (isServer && FikaBackendUtils.HostExpectedNumberOfPlayers <= 1)
                 {
-                    /*if (fikaStartButton != null)
-                    {
-                        Destroy(fikaStartButton);
-                    }*/
-
                     if (DynamicAI != null)
                     {
                         DynamicAI.AddHumans();
@@ -596,11 +701,6 @@ namespace Fika.Core.Coop.GameMode
                 NetDataWriter writer = new();
 
                 FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
-
-                /*if (fikaStartButton != null)
-                {
-                    fikaStartButton.SetActive(true);
-                }*/
 
                 int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
 
@@ -669,14 +769,13 @@ namespace Fika.Core.Coop.GameMode
                         yield return new WaitForEndOfFrame();
                     } while (client.ReadyClients < expectedPlayers);
                 }
-
-                /*if (fikaStartButton != null)
-                {
-                    Destroy(fikaStartButton);
-                }*/
             }
         }
 
+        /// <summary>
+        /// Sends or receives the <see cref="ISpawnPoint"/> for the game
+        /// </summary>
+        /// <returns></returns>
         private async Task SendOrReceiveSpawnPoint()
         {
             if (isServer)
@@ -723,7 +822,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         /// <summary>
-        /// Creating the EFT.LocalPlayer
+        /// 
         /// </summary>
         /// <param name="playerId"></param>
         /// <param name="position"></param>
@@ -741,20 +840,21 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="getAimingSensitivity"></param>
         /// <param name="statisticsManager"></param>
         /// <param name="questController"></param>
+        /// <param name="achievementsController"></param>
         /// <returns></returns>
+        /// <exception cref="MissingComponentException"></exception>
         public override async Task<LocalPlayer> vmethod_2(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, Player.EUpdateMode armsUpdateMode, Player.EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity, Func<float> getAimingSensitivity,
             IStatisticsManager statisticsManager, AbstractQuestControllerClass questController, AbstractAchievementControllerClass achievementsController)
         {
-            Logger.LogInfo("Creating CoopHandler");
             await CreateCoopHandler();
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
-            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson, profile,
-                false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
+            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player",
+                "Main_", EPointOfView.FirstPerson, profile, false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1456(), isServer ? 0 : 1000, statisticsManager);
 
@@ -762,7 +862,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                Logger.LogDebug($"{nameof(vmethod_2)}:Unable to find {nameof(CoopHandler)}");
+                Logger.LogError($"{nameof(vmethod_2)}:Unable to find {nameof(CoopHandler)}");
                 throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
@@ -773,6 +873,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
+            coopPlayer.SetupMainPlayer();
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
             PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
@@ -781,7 +882,6 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.SpawnPoint = spawnPoint;
 
             GameObject customButton = null;
-            //GameObject customButtonStart = null;
 
             await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
 
@@ -800,54 +900,16 @@ namespace Fika.Core.Coop.GameMode
                 UnityEngine.Events.UnityEvent newEvent = new();
                 newEvent.AddListener(() =>
                 {
-                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING", message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
+                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING", 
+                        message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
                         ErrorScreen.EButtonType.OkButton, 15f, () =>
                         {
-                            StopFromError(myPlayer.ProfileId, ExitStatus.Runner);
+                            StopFromCancel(myPlayer.ProfileId, ExitStatus.Runner);
                             PlayerLeftRequest playerLeftRequest = new(coopPlayer.ProfileId);
                             FikaRequestHandler.RaidLeave(playerLeftRequest);
                         }, null);
                 });
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
-
-                /*if (isServer)
-                {
-                    DefaultUIButton startButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field("_cancelButton").GetValue<DefaultUIButton>();
-                    customButtonStart = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
-                    customButtonStart.gameObject.name = "FikaStartButton";
-                    customButtonStart.gameObject.SetActive(true);
-                    customButtonStart.gameObject.transform.position = new(customButton.transform.position.x, customButton.transform.position.y + 60, customButton.transform.position.z);
-                    DefaultUIButton startButtonComponent = customButtonStart.GetComponent<DefaultUIButton>();
-                    startButtonComponent.SetHeaderText("Force Start", 32);
-                    startButtonComponent.SetEnabledTooltip("EXPERIMENTAL: Force starts the game. Use at own risk!");
-                    UnityEngine.Events.UnityEvent newStartEvent = new();
-                    newStartEvent.AddListener(() =>
-                    {
-                        forceStart = true;
-
-                        InformationPacket packet = new(false)
-                        {
-                            ForceStart = true
-                        };
-
-                        FikaPlugin.Instance.FikaLogger.LogWarning("Force start was used!");
-
-                        NetDataWriter writer = new();
-                        writer.Reset();
-                        Singleton<FikaServer>.Instance.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-
-                        if (fikaStartButton != null)
-                        {
-                            fikaStartButton.SetActive(false);
-                        }
-                    });
-                    Traverse.Create(startButtonComponent).Field("OnClick").SetValue(newStartEvent);
-                    if (customButton != null)
-                    {
-                        customButton.SetActive(true);
-                    }
-                    fikaStartButton = customButtonStart;
-                }*/
             }
 
             SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
@@ -866,28 +928,17 @@ namespace Fika.Core.Coop.GameMode
             fikaDebug = gameObject.AddComponent<FikaDebug>();
 
             Destroy(customButton);
-            /*if (fikaStartButton != null)
-            {
-                fikaStartButton.SetActive(false);
-            }*/
-
-            myPlayer.ActiveHealthController.DiedEvent += MainPlayerDied;
 
             return myPlayer;
         }
 
-        private void MainPlayerDied(EDamageType obj)
-        {
-            if (timeManager != null)
-            {
-                Destroy(timeManager);
-            }
-            if (GameUi.TimerPanel.enabled)
-            {
-                GameUi.TimerPanel.Close();
-            }
-        }
-
+        /// <summary>
+        /// Initializes the local player
+        /// </summary>
+        /// <param name="botsSettings"></param>
+        /// <param name="backendUrl"></param>
+        /// <param name="runCallback"></param>
+        /// <returns></returns>
         public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, Callback runCallback)
         {
             Status = GameStatus.Running;
@@ -918,7 +969,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
-                    Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
+                    Logger.LogError("Can't find event prefab in resources. Path: 'Prefabs/HALLOWEEN_CONTROLLER'");
                 }
             }
             ApplicationConfigClass config = BackendConfigAbstractClass.Config;
@@ -942,6 +993,13 @@ namespace Fika.Core.Coop.GameMode
             await method_11(location, startHandler.FinishLoading);
         }
 
+        /// <summary>
+        /// Handler used to start the game
+        /// </summary>
+        /// <param name="localGame"></param>
+        /// <param name="botSettings"></param>
+        /// <param name="spawnSystem"></param>
+        /// <param name="runCallback"></param>
         private class StartHandler(BaseLocalGame<EftGamePlayerOwner> localGame, BotControllerSettings botSettings, ISpawnSystem spawnSystem, Callback runCallback)
         {
             private readonly BaseLocalGame<EftGamePlayerOwner> localGame = localGame;
@@ -955,6 +1013,10 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Creates the local player
+        /// </summary>
+        /// <returns>A <see cref="Player"/></returns>
         private async Task<Player> CreateLocalPlayer()
         {
             int num = method_12();
@@ -968,7 +1030,7 @@ namespace Fika.Core.Coop.GameMode
             spawnPoints = GClass2949.CreateFromScene(new DateTime?(GClass1304.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)), Location_0.SpawnPointParams);
             int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
             GStruct379 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-            SpawnSystem = GClass2950.CreateSpawnSystem(settings, () => Time.time, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
+            SpawnSystem = GClass2950.CreateSpawnSystem(settings, new Func<float>(Class1384.class1384_0.method_0), Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
 
             if (isServer)
             {
@@ -999,6 +1061,10 @@ namespace Fika.Core.Coop.GameMode
             return myPlayer;
         }
 
+        /// <summary>
+        /// <see cref="Task"/> used to wait for all other players to join the game
+        /// </summary>
+        /// <returns></returns>
         private async Task WaitForPlayers()
         {
             Logger.LogInfo("Starting task to wait for other players.");
@@ -1054,7 +1120,8 @@ namespace Fika.Core.Coop.GameMode
 
                     if (client.ServerConnection == null && connectionAttempts == 5)
                     {
-                        Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. Make sure ports are forwarded and/or UPnP is enabled and supported.");
+                        Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error",
+                            "Unable to connect to the raid server. Make sure ports are forwarded and/or UPnP is enabled and supported.");
                     }
                 }
 
@@ -1093,6 +1160,12 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Sets the status of the game on the backend
+        /// </summary>
+        /// <param name="myPlayer"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
         private async Task SetStatus(LocalPlayer myPlayer, LobbyEntry.ELobbyStatus status)
         {
             SetStatusModel statusBody = new(myPlayer.ProfileId, status);
@@ -1103,7 +1176,6 @@ namespace Fika.Core.Coop.GameMode
         /// <summary>
         /// Bot System Starter -> Countdown
         /// </summary>
-        /// <param name="startDelay"></param>
         /// <param name="controllerSettings"></param>
         /// <param name="spawnSystem"></param>
         /// <param name="runCallback"></param>
@@ -1111,7 +1183,7 @@ namespace Fika.Core.Coop.GameMode
         public override IEnumerator vmethod_4(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem, Callback runCallback)
         {
 #if DEBUG
-            Logger.LogWarning("CoopGame::vmethod_4");
+            Logger.LogWarning("vmethod_4");
 #endif
 
             if (!isServer)
@@ -1295,6 +1367,11 @@ namespace Fika.Core.Coop.GameMode
             yield break;
         }
 
+        /// <summary>
+        /// Triggers when the <see cref="FikaPlugin.DynamicAIRate"/> setting is changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DynamicAIRate_SettingChanged(object sender, EventArgs e)
         {
             if (DynamicAI != null)
@@ -1303,6 +1380,11 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Triggers when the <see cref="FikaPlugin.DynamicAI"/> setting is changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DynamicAI_SettingChanged(object sender, EventArgs e)
         {
             if (DynamicAI != null)
@@ -1311,6 +1393,9 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Sets up all the <see cref="BorderZone"/>s on the map
+        /// </summary>
         private void SetupBorderzones()
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
@@ -1336,6 +1421,13 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Triggered when a <see cref="BorderZone"/> triggers (only runs on host)
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="zone"></param>
+        /// <param name="arg3"></param>
+        /// <param name="arg4"></param>
         private void OnBorderZoneShot(GInterface106 player, BorderZone zone, float arg3, bool arg4)
         {
             BorderZonePacket packet = new()
@@ -1346,6 +1438,10 @@ namespace Fika.Core.Coop.GameMode
             Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
         }
 
+        /// <summary>
+        /// Triggers when a <see cref="MineDirectional"/> explodes
+        /// </summary>
+        /// <param name="directional"></param>
         private void OnMineExplode(MineDirectional directional)
         {
             if (!directional.gameObject.active)
@@ -1367,6 +1463,9 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Sets up <see cref="HealthControllerClass"/> events and all <see cref="ExfiltrationPoint"/>s
+        /// </summary>
         public override void vmethod_5()
         {
             GameTimer.Start(null, null);
@@ -1381,7 +1480,7 @@ namespace Fika.Core.Coop.GameMode
 
             InfiltrationPoint = spawnPoint.Infiltration;
             Profile_0.Info.EntryPoint = InfiltrationPoint;
-            Logger.LogDebug("SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint);
+            Logger.LogInfo("SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint);
 
             if (!isServer)
             {
@@ -1426,7 +1525,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 catch (Exception)
                 {
-                    Logger.LogError("CoopGame::vmethod_5: Exception thrown during BTR init, check logs.");
+                    Logger.LogError("vmethod_5: Exception thrown during BTR init, check logs.");
                 }
             }
 
@@ -1435,11 +1534,20 @@ namespace Fika.Core.Coop.GameMode
             ConsoleScreen.ApplyStartCommands();
         }
 
+        /// <summary>
+        /// Updates a <see cref="ExfiltrationPoint"/> from the server
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="enable"></param>
         public void UpdateExfilPointFromServer(ExfiltrationPoint point, bool enable)
         {
             exfilManager.UpdateExfilPointFromServer(point, enable);
         }
 
+        /// <summary>
+        /// Resets all <see cref="ExfiltrationPoint"/>s from the server
+        /// </summary>
+        /// <param name="points"></param>
         public void ResetExfilPointsFromServer(ExfiltrationPoint[] points)
         {
             Dictionary<string, ExitTimerPanel> currentExfils = Traverse.Create(GameUi.TimerPanel).Field<Dictionary<string, ExitTimerPanel>>("dictionary_0").Value;
@@ -1451,8 +1559,6 @@ namespace Fika.Core.Coop.GameMode
 
             GameUi.TimerPanel.SetTime(GClass1304.UtcNow, Profile_0.Info.Side, GameTimer.SessionSeconds(), points);
         }
-
-        public List<int> ExtractedPlayers { get; } = [];
 
         /// <summary>
         /// When the local player successfully extracts, enable freecam, notify other players about the extract
@@ -1548,8 +1654,6 @@ namespace Fika.Core.Coop.GameMode
                 GameUi.TimerPanel.Close();
             }
 
-            player.ActiveHealthController.DiedEvent -= MainPlayerDied;
-
             if (FikaPlugin.AutoExtract.Value)
             {
                 if (!isServer)
@@ -1613,8 +1717,21 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Triggers when the main player dies
+        /// </summary>
+        /// <param name="obj"></param>
         private void HealthController_DiedEvent(EDamageType obj)
         {
+            if (timeManager != null)
+            {
+                Destroy(timeManager);
+            }
+            if (GameUi.TimerPanel != null && GameUi.TimerPanel.enabled)
+            {
+                GameUi.TimerPanel.Close();
+            }
+
             gparam_0.Player.HealthController.DiedEvent -= method_15;
             gparam_0.Player.HealthController.DiedEvent -= HealthController_DiedEvent;
 
@@ -1637,9 +1754,16 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Stops the local <see cref="CoopGame"/>
+        /// </summary>
+        /// <param name="profileId"></param>
+        /// <param name="exitStatus"></param>
+        /// <param name="exitName"></param>
+        /// <param name="delay"></param>
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
         {
-            Logger.LogDebug("CoopGame::Stop");
+            Logger.LogDebug("Stop");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
@@ -1652,7 +1776,7 @@ namespace Fika.Core.Coop.GameMode
                         myPlayer.GClass2777_0, false, true);
                     if (result.Error != null)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::Stop: Error removing dog tag!");
+                        Logger.LogError("Stop: Error removing dog tag!");
                     }
                 }
             }
@@ -1696,7 +1820,7 @@ namespace Fika.Core.Coop.GameMode
             }
             catch (Exception)
             {
-                FikaPlugin.Instance.FikaLogger.LogError("Unable to send RaidLeave request to server.");
+                Logger.LogError("Unable to send RaidLeave request to server.");
             }
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
@@ -1721,7 +1845,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                Logger.LogError("CoopGame::Stop: Could not find CoopHandler!");
+                Logger.LogError("Stop: Could not find CoopHandler!");
             }
 
             coopHandler.RunAsyncTasks = false;
@@ -1752,6 +1876,14 @@ namespace Fika.Core.Coop.GameMode
             BackendConfigAbstractClass.Config.UseSpiritPlayer = false;
         }
 
+        /// <summary>
+        /// Saves your own <see cref="CoopPlayer"/> to the server
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="exitStatus"></param>
+        /// <param name="exitName"></param>
+        /// <param name="fromDeath"></param>
+        /// <returns></returns>
         private Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
         {
             if (hasSaved)
@@ -1787,9 +1919,14 @@ namespace Fika.Core.Coop.GameMode
             return Task.CompletedTask;
         }
 
-        private void StopFromError(string profileId, ExitStatus exitStatus)
+        /// <summary>
+        /// Stops the local <see cref="CoopGame"/> when waiting for other players
+        /// </summary>
+        /// <param name="profileId"></param>
+        /// <param name="exitStatus"></param>
+        private void StopFromCancel(string profileId, ExitStatus exitStatus)
         {
-            Logger.LogInfo("CoopGame::StopFromError");
+            Logger.LogWarning("Game init was cancelled!");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
@@ -1802,7 +1939,7 @@ namespace Fika.Core.Coop.GameMode
                         myPlayer.GClass2777_0, false, true);
                     if (result.Error != null)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopGame::StopFromError: Error removing dog tag!");
+                        Logger.LogWarning("StopFromError: Error removing dog tag!");
                     }
                 }
             }
@@ -1829,7 +1966,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                Logger.LogError("CoopGame::Stop: Could not find CoopHandler!");
+                Logger.LogError("Stop: Could not find CoopHandler!");
             }
 
             coopHandler.RunAsyncTasks = false;
@@ -1853,7 +1990,7 @@ namespace Fika.Core.Coop.GameMode
                 wavesSpawnScenario_0.Stop();
             }
 
-            ErrorExitManager stopManager = new()
+            CancelExitManager stopManager = new()
             {
                 baseLocalGame_0 = this,
                 exitStatus = exitStatus,
@@ -1886,6 +2023,10 @@ namespace Fika.Core.Coop.GameMode
             BackendConfigAbstractClass.Config.UseSpiritPlayer = false;
         }
 
+        /// <summary>
+        /// Toggles the <see cref="FikaDebug"/> menu
+        /// </summary>
+        /// <param name="enabled"></param>
         public void ToggleDebug(bool enabled)
         {
             if (fikaDebug != null)
@@ -1894,6 +2035,9 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        /// <summary>
+        /// Cleans up after the <see cref="CoopGame"/> stops
+        /// </summary>
         public override void CleanUp()
         {
             foreach (Player player in dictionary_0.Values)
@@ -1914,9 +2058,12 @@ namespace Fika.Core.Coop.GameMode
             dictionary_0.Clear();
         }
 
+        /// <summary>
+        /// Disposes of the <see cref="CoopGame"/>
+        /// </summary>
         public override void Dispose()
         {
-            Logger.LogDebug("CoopGame::Dispose()");
+            Logger.LogDebug("Dispose()");
 
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
@@ -1974,6 +2121,14 @@ namespace Fika.Core.Coop.GameMode
             base.Dispose();
         }
 
+        /// <summary>
+        /// Used to manage the stopping of the <see cref="CoopGame"/> gracefully
+        /// </summary>
+        /// <param name="localGame"></param>
+        /// <param name="exitStatus"></param>
+        /// <param name="exitName"></param>
+        /// <param name="delay"></param>
+        /// <param name="localPlayer"></param>
         private class ExitManager(CoopGame localGame, ExitStatus exitStatus, string exitName, float delay, CoopPlayer localPlayer)
         {
             private readonly CoopGame localGame = localGame;
@@ -2013,7 +2168,10 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        private class ErrorExitManager : Class1386
+        /// <summary>
+        /// Used to manage the stopping of the <see cref="CoopGame"/> gracefully when cancelling
+        /// </summary>
+        private class CancelExitManager : Class1386
         {
             public void ExitOverride()
             {
@@ -2040,7 +2198,7 @@ namespace Fika.Core.Coop.GameMode
 
         public new void method_6(string backendUrl, string locationId, int variantId)
         {
-            Logger.LogDebug("CoopGame::method_6");
+            Logger.LogDebug("method_6");
             return;
         }
     }
