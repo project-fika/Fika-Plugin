@@ -31,7 +31,7 @@ using static Fika.Core.Networking.FikaSerialization;
 namespace Fika.Core.Coop.Players
 {
     /// <summary>
-    /// CoopPlayer is the LocalPlayer there can only be one CoopPlayer in every game and that is yourself.
+    /// <see cref="CoopPlayer"/> is the <see cref="LocalPlayer"/>, there can only be one <see cref="CoopPlayer"/> in every game and that is always yourself.
     /// </summary>
     public class CoopPlayer : LocalPlayer
     {

@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Components
 {
+    /// <summary>
+    /// Used to ping the backend every 30 seconds to keep the session alive
+    /// </summary>
     public class FikaPinger : MonoBehaviour
     {
         private Coroutine pingRoutine;
