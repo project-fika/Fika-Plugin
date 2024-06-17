@@ -799,7 +799,6 @@ namespace Fika.Core.Networking
                             resp.Put(data);
                             _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
                             NetManagerUtils.StopServerStunQuery();
-                            EFT.UI.ConsoleScreen.Log("received fika.keepalive");
                             break;
 
                         default:
