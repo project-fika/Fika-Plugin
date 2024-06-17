@@ -113,9 +113,8 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true
             };
-           
             
-            if (FikaPlugin.UseUPnP.Value)
+            if (FikaPlugin.UseUPnP.Value && !FikaPlugin.NatPunch.Value)
             {
                 bool upnpFailed = false;
 
@@ -161,17 +160,13 @@ namespace Fika.Core.Networking
 
             if (FikaPlugin.NatPunch.Value)
             {
-                var stunIpEndPoint = NatPunchUtils.CreateStunEndPoint();
-
-                NatPunchServer = new FikaNatPunchServer(_netServer, stunIpEndPoint);
+                NatPunchServer = new FikaNatPunchServer(_netServer);
                 NatPunchServer.Connect();
 
                 if(!NatPunchServer.Connected)
                 {
                     Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Error when trying to connect to FikaNatPunchRelayService. Please ensure FikaNatPunchRelayService is enabled and the port is open.");
                 }
-
-                _netServer.Start(NatPunchServer.StunIpEndPoint.Local.Port);
             }
             else
             {
@@ -186,7 +181,15 @@ namespace Fika.Core.Networking
             }
 
             logger.LogInfo("Started Fika Server");
-            NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
+
+            string serverStartedMessage;
+
+            if (FikaPlugin.NatPunch.Value)
+                serverStartedMessage = "Server started with Nat Punching enabled.";
+            else
+                serverStartedMessage = $"Server started on port {_netServer.LocalPort}.";
+
+            NotificationManagerClass.DisplayMessageNotification(serverStartedMessage,
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
             string[] Ips = [];
@@ -206,7 +209,7 @@ namespace Fika.Core.Networking
                 iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            SetHostRequest body = new(Ips, Port);
+            SetHostRequest body = new(Ips, Port, FikaPlugin.NatPunch.Value);
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
@@ -780,16 +783,28 @@ namespace Fika.Core.Networking
             {
                 if (reader.TryGetString(out string data))
                 {
-                    if (data == "fika.hello")
+                    NetDataWriter resp;
+
+                    switch (data)
                     {
-                        NetDataWriter resp = new();
-                        resp.Put(data);
-                        _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-                        logger.LogInfo("PingingRequest: Correct ping query, sending response");
-                    }
-                    else
-                    {
-                        logger.LogError("PingingRequest: Data was not as expected");
+                        case "fika.hello":
+                            resp = new();
+                            resp.Put(data);
+                            _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                            logger.LogInfo("PingingRequest: Correct ping query, sending response");
+                            break;
+
+                        case "fika.keepalive":
+                            resp = new();
+                            resp.Put(data);
+                            _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                            NetManagerUtils.StopServerStunQuery();
+                            EFT.UI.ConsoleScreen.Log("received fika.keepalive");
+                            break;
+
+                        default:
+                            logger.LogError("PingingRequest: Data was not as expected");
+                            break;
                     }
                 }
                 else

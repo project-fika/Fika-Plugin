@@ -36,6 +36,20 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
+        public static void CreatePingingClient()
+        {
+            if (FikaGameObject == null)
+            {
+                FikaGameObject = new GameObject("FikaGameObject");
+                Object.DontDestroyOnLoad(FikaGameObject);
+                logger.LogInfo("FikaGameObject has been created!");
+            }
+
+            FikaPingingClient pingingClient = FikaGameObject.AddComponent<FikaPingingClient>();
+            Singleton<FikaPingingClient>.Create(pingingClient);
+            logger.LogInfo("FikaPingingClient has started!");
+        }
+
         public static void DestroyNetManager(bool isServer)
         {
             if (FikaGameObject != null)
@@ -52,6 +66,17 @@ namespace Fika.Core.Coop.Utils
                     Singleton<FikaClient>.TryRelease(Singleton<FikaClient>.Instance);
                     logger.LogInfo("Destroyed FikaClient");
                 }
+            }
+        }
+
+        public static void DestroyPingingClient()
+        {
+            if(FikaGameObject != null)
+            {
+                Singleton<FikaPingingClient>.Instance.NetClient.Stop();
+                Singleton<FikaPingingClient>.Instance.StopKeepAliveRoutine();
+                Singleton<FikaPingingClient>.TryRelease(Singleton<FikaPingingClient>.Instance);
+                logger.LogInfo("Destroyed FikaPingingClient");
             }
         }
 
@@ -118,6 +143,27 @@ namespace Fika.Core.Coop.Utils
                 else
                 {
                     logger.LogError("StopPinger: Could not find FikaPinger!");
+                }
+            }
+        }
+
+        public static void StartServerStunQuery()
+        {
+            if (FikaGameObject != null)
+            {
+                FikaServerStunQuery fikaServerStunQuery = FikaGameObject.AddComponent<FikaServerStunQuery>();
+                fikaServerStunQuery.StartServerStunQueryRoutine();
+            }
+        }
+
+        public static void StopServerStunQuery()
+        {
+            if (FikaGameObject != null)
+            {
+                FikaServerStunQuery fikaServerStunQuery = FikaGameObject.GetComponent<FikaServerStunQuery>();
+                if (fikaServerStunQuery != null)
+                {
+                    Object.Destroy(fikaServerStunQuery);
                 }
             }
         }

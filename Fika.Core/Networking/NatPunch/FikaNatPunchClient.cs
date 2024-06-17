@@ -23,8 +23,6 @@ namespace Fika.Core.Networking.NatPunch
         private WebSocket _webSocket;
         private TaskCompletionSource<string> _receiveTaskCompletion;
 
-        public StunIpEndPoint StunIpEndPoint { get; set; }
-
         public FikaNatPunchClient()
         {
             Host = $"ws:{RequestHandler.Host.Split(':')[1]}:{FikaPlugin.NatPunchPort.Value}";
@@ -40,6 +38,7 @@ namespace Fika.Core.Networking.NatPunch
             _webSocket.OnOpen += WebSocket_OnOpen;
             _webSocket.OnError += WebSocket_OnError;
             _webSocket.OnMessage += WebSocket_OnMessage;
+            _webSocket.OnClose += WebSocket_OnClose;
         }
 
         public void Connect()
@@ -83,6 +82,11 @@ namespace Fika.Core.Networking.NatPunch
         {
             EFT.UI.ConsoleScreen.LogError($"Websocket error {e}");
             _webSocket.Close();
+        }
+
+        private void WebSocket_OnClose(object sender, CloseEventArgs e)
+        {
+            EFT.UI.ConsoleScreen.Log($"Disconnected from FikaNatPunchService as client");
         }
 
         private void Send<T1>(T1 o)

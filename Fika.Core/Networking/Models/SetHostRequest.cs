@@ -15,11 +15,15 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "port")]
         public int Port;
 
-        public SetHostRequest(string[] ips, int port)
+        [DataMember(Name = "natPunch")]
+        public bool NatPunch;
+
+        public SetHostRequest(string[] ips, int port, bool natPunch)
         {
             ServerId = CoopHandler.GetServerId();
             Ips = ips;
             Port = port;
+            NatPunch = natPunch;
         }
     }
 }

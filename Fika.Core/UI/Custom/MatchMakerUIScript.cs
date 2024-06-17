@@ -209,8 +209,11 @@ namespace Fika.Core.UI.Custom
 
             NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
-            FikaPingingClient pingingClient = new(serverId);
-            if (pingingClient.Init())
+            NetManagerUtils.CreatePingingClient();
+
+            var pingingClient = Singleton<FikaPingingClient>.Instance;
+
+            if (pingingClient.Init(serverId))
             {
                 int attempts = 0;
                 bool success;
@@ -221,7 +224,7 @@ namespace Fika.Core.UI.Custom
                 {
                     attempts++;
 
-                    pingingClient.PingEndPoint();
+                    pingingClient.PingEndPoint("fika.hello");
                     pingingClient.NetClient.PollEvents();
                     success = pingingClient.Received;
 
@@ -249,8 +252,14 @@ namespace Fika.Core.UI.Custom
                 ConsoleScreen.Log("ERROR");
             }
 
-            pingingClient.NetClient?.Stop();
-            pingingClient = null;
+            if(FikaBackendUtils.IsHostNatPunch)
+            {
+                pingingClient.StartKeepAliveRoutine();
+            }
+            else
+            {
+                NetManagerUtils.DestroyPingingClient();
+            }
 
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {

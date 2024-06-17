@@ -858,7 +858,17 @@ namespace Fika.Core.Coop.GameMode
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1456(), isServer ? 0 : 1000, statisticsManager);
 
+            if(FikaBackendUtils.IsHostNatPunch)
+            {
+                NetManagerUtils.DestroyPingingClient();
+            }
+            
             await NetManagerUtils.InitNetManager(isServer);
+
+            if (FikaPlugin.NatPunch.Value)
+            {
+                NetManagerUtils.StartServerStunQuery();
+            }
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {

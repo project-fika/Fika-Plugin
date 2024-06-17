@@ -30,6 +30,7 @@ namespace Fika.Core.Coop.Utils
         public static string RemoteIp;
         public static int RemotePort;
         public static int LocalPort = 0;
+        public static bool IsHostNatPunch = false;
         private static string groupId;
 
         public static MatchmakerTimeHasCome.GClass3187 ScreenController;
@@ -76,7 +77,7 @@ namespace Fika.Core.Coop.Utils
         public static void CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
         {
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var body = new CreateMatch(profileId, hostUsername, timestamp, raidSettings, HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime, FikaPlugin.NatPunch.Value);
+            var body = new CreateMatch(profileId, hostUsername, timestamp, raidSettings, HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
             FikaRequestHandler.RaidCreate(body);
 

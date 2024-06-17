@@ -21,12 +21,20 @@ namespace Fika.Core.Networking.NatPunch
                 return _webSocket.ReadyState == WebSocketState.Open ? true : false;
             }
         }
-        public StunIpEndPoint StunIpEndPoint { get; set; }
+        private StunIpEndPoint _stunIpEndPoint;
+        public StunIpEndPoint StunIpEndpoint { 
+            get { 
+                return _stunIpEndPoint; 
+            } 
+            set { 
+                _stunIpEndPoint = value; 
+            } 
+        }
 
         private WebSocket _webSocket;
         private NetManager _netManager;
 
-        public FikaNatPunchServer(NetManager netManager, StunIpEndPoint stunIpEndPoint)
+        public FikaNatPunchServer(NetManager netManager)
         {
             Host = $"ws:{RequestHandler.Host.Split(':')[1]}:{FikaPlugin.NatPunchPort.Value}";
             SessionId = RequestHandler.SessionId;
@@ -41,10 +49,9 @@ namespace Fika.Core.Networking.NatPunch
             _webSocket.OnOpen += WebSocket_OnOpen;
             _webSocket.OnError += WebSocket_OnError;
             _webSocket.OnMessage += WebSocket_OnMessage;
+            _webSocket.OnClose += WebSocket_OnClose;
 
             _netManager = netManager;
-
-            StunIpEndPoint = stunIpEndPoint;
         }
 
         public void Connect()
@@ -79,6 +86,11 @@ namespace Fika.Core.Networking.NatPunch
             _webSocket.Close();
         }
 
+        private void WebSocket_OnClose(object sender, CloseEventArgs e)
+        {
+            EFT.UI.ConsoleScreen.Log($"Disconnected from FikaNatPunchService as server");
+        }
+
         private void ProcessMessage(string data)
         {
             var msgObj = GetRequestObject(data);
@@ -89,13 +101,13 @@ namespace Fika.Core.Networking.NatPunch
                 case "GetHostStunRequest":
                     var getHostStunRequest = (GetHostStunRequest)msgObj;
 
-                    if (StunIpEndPoint != null)
+                    if (_stunIpEndPoint != null)
                     {
                         IPEndPoint clientIpEndPoint = new IPEndPoint(IPAddress.Parse(getHostStunRequest.StunIp), getHostStunRequest.StunPort);
 
                         NatPunchUtils.PunchNat(_netManager, clientIpEndPoint);
 
-                        SendHostStun(getHostStunRequest.SessionId, StunIpEndPoint);
+                        SendHostStun(getHostStunRequest.SessionId, _stunIpEndPoint);
                     }
                     break;
             }
