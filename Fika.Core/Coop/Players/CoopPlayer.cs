@@ -107,6 +107,8 @@ namespace Fika.Core.Coop.Players
 
             player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
 
+            player.SetupMainPlayer();
+
             return player;
         }
 
@@ -879,6 +881,7 @@ namespace Fika.Core.Coop.Players
             // Setup own dog tag
             if (Side != EPlayerSide.Savage)
             {
+                FikaPlugin.Instance.FikaLogger.LogInfo("Setting up DogTag");
                 if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
                     GStruct414<GClass2801> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
@@ -894,7 +897,16 @@ namespace Fika.Core.Coop.Players
                 {
                     Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
 
-                    Equipment.GetSlot(EquipmentSlot.Dogtag).Add(item, false);
+                    Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
+                    ItemFilter[] filters = dogtagSlot.Filters; // We need to temporarily remove and then re-add these as BSG did not include the new dog tags in their ItemFilter[]
+                    dogtagSlot.Filters = null;
+                    GStruct416<int> addResult = dogtagSlot.Add(item, false);                    
+                    dogtagSlot.Filters = filters;
+
+                    if (addResult.Error != null)
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogError("CoopPlayer::SetupMainPlayer: Error adding dog tag to slot: " + addResult.Error);
+                    }
 
                     DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
                     if (dogtagComponent != null)
@@ -906,6 +918,10 @@ namespace Fika.Core.Coop.Players
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
                     }
+                }
+                else
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError("Could not get templateId for DogTag!");
                 }
             }
 
@@ -925,7 +941,9 @@ namespace Fika.Core.Coop.Players
 
         private string GetDogTagTemplateId()
         {
-            if (Profile.Side is EPlayerSide.Usec)
+            //return Profile.Side == EPlayerSide.Usec ? "6662ea05f6259762c56f3189" : "59f32bb586f774757e1e8442";
+
+            if (Side is EPlayerSide.Usec)
             {
                 switch (Profile.Info.MemberCategory)
                 {
@@ -937,7 +955,7 @@ namespace Fika.Core.Coop.Players
                         return "6662ea05f6259762c56f3189";
                 }
             }
-            else if (Profile.Side is EPlayerSide.Bear)
+            else if (Side is EPlayerSide.Bear)
             {
                 switch (Profile.Info.MemberCategory)
                 {
