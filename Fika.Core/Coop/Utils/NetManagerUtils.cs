@@ -13,13 +13,18 @@ namespace Fika.Core.Coop.Utils
         private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
         public static GameObject FikaGameObject;
 
+        public static void CreateFikaGameObject()
+        {
+            FikaGameObject = new GameObject("FikaGameObject");
+            Object.DontDestroyOnLoad(FikaGameObject);
+            logger.LogInfo("FikaGameObject has been created!");
+        }
+        
         public static void CreateNetManager(bool isServer)
         {
             if (FikaGameObject == null)
             {
-                FikaGameObject = new GameObject("FikaGameObject");
-                Object.DontDestroyOnLoad(FikaGameObject);
-                logger.LogInfo("FikaGameObject has been created!");
+                CreateFikaGameObject();
             }
 
             if (isServer)
@@ -40,9 +45,7 @@ namespace Fika.Core.Coop.Utils
         {
             if (FikaGameObject == null)
             {
-                FikaGameObject = new GameObject("FikaGameObject");
-                Object.DontDestroyOnLoad(FikaGameObject);
-                logger.LogInfo("FikaGameObject has been created!");
+                CreateFikaGameObject();
             }
 
             FikaPingingClient pingingClient = FikaGameObject.AddComponent<FikaPingingClient>();
