@@ -199,7 +199,7 @@ namespace Fika.Core.Networking
 
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+                if (MyPlayer.GClass3227_0 is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestItemPacket(ref packet);
                 }
@@ -213,7 +213,7 @@ namespace Fika.Core.Networking
 
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.GClass3227_0 is CoopSharedQuestController sharedQuestController)
+                if (MyPlayer.GClass3227_0 is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestPacket(ref packet);
                 }

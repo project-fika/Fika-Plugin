@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public sealed class CoopSharedQuestController(Profile profile, InventoryControllerClass inventoryController,
+    public sealed class CoopClientSharedQuestController(Profile profile, InventoryControllerClass inventoryController,
         IQuestActions session, CoopPlayer player, bool fromServer = true) : GClass3229(profile, inventoryController, session, fromServer)
     {
         private readonly CoopPlayer player = player;
