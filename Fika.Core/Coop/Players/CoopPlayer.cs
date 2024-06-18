@@ -67,14 +67,14 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            GClass3229 questController;
+            CoopClientQuestController questController;
             if (FikaPlugin.QuestSharing.Value)
             {
                 questController = new CoopClientSharedQuestController(profile, inventoryController, session, player);
             }
             else
             {
-                questController = new GClass3229(profile, inventoryController, session, true);
+                questController = new CoopClientQuestController(profile, inventoryController, session, true);
             }
             questController.Init();
             questController.Run();
