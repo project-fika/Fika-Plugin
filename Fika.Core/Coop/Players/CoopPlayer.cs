@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.HealthSystem;
@@ -13,9 +14,9 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using System;
@@ -30,10 +31,11 @@ using static Fika.Core.Networking.FikaSerialization;
 namespace Fika.Core.Coop.Players
 {
     /// <summary>
-    /// CoopPlayer is the LocalPlayer there can only be one CoopPlayer in every game and that is yourself.
+    /// <see cref="CoopPlayer"/> is the <see cref="LocalPlayer"/>, there can only be one <see cref="CoopPlayer"/> in every game and that is always yourself.
     /// </summary>
     public class CoopPlayer : LocalPlayer
     {
+        #region Fields and Properties
         public PacketReceiver PacketReceiver;
         public IPacketSender PacketSender;
         private DateTime lastPingTime;
@@ -47,6 +49,7 @@ namespace Fika.Core.Coop.Players
         public int NetId;
         public bool IsObservedAI = false;
         public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+        #endregion
 
         public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
@@ -64,7 +67,15 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            CoopClientQuestController questController = new(profile, inventoryController, session, true);
+            GClass3229 questController;
+            if (FikaPlugin.QuestSharing.Value)
+            {
+                questController = new CoopClientSharedQuestController(profile, inventoryController, session, player);
+            }
+            else
+            {
+                questController = new GClass3229(profile, inventoryController, session, true);
+            }
             questController.Init();
             questController.Run();
 
@@ -72,11 +83,11 @@ namespace Fika.Core.Coop.Players
             achievementsController.Init();
             achievementsController.Run();
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
             }
-            else if (MatchmakerAcceptPatches.IsClient)
+            else if (FikaBackendUtils.IsClient)
             {
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
@@ -90,7 +101,7 @@ namespace Fika.Core.Coop.Players
 
             foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
             {
-                player.GClass2776_0.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+                player.GClass2777_0.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
             }
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
@@ -102,12 +113,14 @@ namespace Fika.Core.Coop.Players
 
             player._animators[0].enabled = true;
 
-            player.Profile.Info.MainProfileNickname = MatchmakerAcceptPatches.PMCName;
+            player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
+
+            player.SetupMainPlayer();
 
             return player;
         }
 
-        public override void OnSkillLevelChanged(GClass1777 skill)
+        public override void OnSkillLevelChanged(GClass1778 skill)
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format("SkillLevelUpMessage".Localized(null),
                 skill.Id.ToString().Localized(null),
@@ -130,7 +143,7 @@ namespace Fika.Core.Coop.Players
         public override void BtrInteraction(BTRSide btr, byte placeId, EInteractionType interaction)
         {
             base.BtrInteraction(btr, placeId, interaction);
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 BTRInteractionPacket packet = new(NetId)
                 {
@@ -141,7 +154,7 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Writer.Reset();
                 PacketSender.Client.SendData(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
             }
-            else if (MatchmakerAcceptPatches.IsServer)
+            else if (FikaBackendUtils.IsServer)
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
@@ -215,19 +228,44 @@ namespace Fika.Core.Coop.Players
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
         }
 
-        public override GClass1687 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
-            if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
+            if (damageInfo.DamageType is not EDamageType.Sniper or EDamageType.Landmine)
             {
-                return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+                return null;
             }
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is CoopBot)
+            if (damageInfo.Player != null && damageInfo.Player.iPlayer is not CoopBot)
             {
-                return base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+                return null;
             }
 
-            return null;
+            ActiveHealthController activeHealthController = ActiveHealthController;
+            if (activeHealthController != null && !activeHealthController.IsAlive)
+            {
+                return null;
+            }
+            bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+            float damage = damageInfo.Damage;
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            GClass1688 gclass = new()
+            {
+                PoV = PointOfView,
+                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
+                Material = materialType
+            };
+            ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
+            ShotReactions(damageInfo, bodyPartType);
+            float num = damage - damageInfo.Damage;
+            ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, gclass.Material);
+
+            if (list != null)
+            {
+                QueueArmorDamagePackets([.. list]);
+            }
+
+            return gclass;
         }
 
         public override void Proceed(bool withNetwork, Callback<GInterface137> callback, bool scheduled = true)
@@ -294,7 +332,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(GrenadeClass throwWeap, Callback<IGrenadeController> callback, bool scheduled = true)
+        public override void Proceed(GrenadeClass throwWeap, Callback<GInterface145> callback, bool scheduled = true)
         {
             QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
@@ -383,12 +421,12 @@ namespace Fika.Core.Coop.Players
 
         public void ClientApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
         {
-            _ = base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, GStruct390.EMPTY_SHOT_ID);
+            _ = base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, GStruct389.EMPTY_SHOT_ID);
         }
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            GStruct164[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, GStruct164>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
+            FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, FirearmLightStateStruct>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
 
             if (PacketSender != null)
             {
@@ -464,7 +502,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass2984 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass2985 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -489,7 +527,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = door.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Execute,
-                    ItemId = (interactionResult is GClass2984 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass2985 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -511,7 +549,7 @@ namespace Fika.Core.Coop.Players
             Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
         }
 
-        public HealthSyncPacket SetupDeathPacket(GStruct347 packet)
+        public HealthSyncPacket SetupDeathPacket(GStruct346 packet)
         {
             float num = EFTHardSettings.Instance.HIT_FORCE;
             num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
@@ -798,11 +836,11 @@ namespace Fika.Core.Coop.Players
                     };
 
                     PacketSender.Writer.Reset();
-                    if (MatchmakerAcceptPatches.IsServer)
+                    if (FikaBackendUtils.IsServer)
                     {
                         PacketSender.Server.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
-                    else if (MatchmakerAcceptPatches.IsClient)
+                    else if (FikaBackendUtils.IsClient)
                     {
                         PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     }
@@ -843,36 +881,55 @@ namespace Fika.Core.Coop.Players
             _openAction = null;
         }
 
-        protected virtual void Start()
+        public void SetupMainPlayer()
         {
+            // Set own group id
             Profile.Info.GroupId = "Fika";
 
+            // Setup own dog tag
             if (Side != EPlayerSide.Savage)
             {
+                FikaPlugin.Instance.FikaLogger.LogInfo("Setting up DogTag");
                 if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct415<GClass2800> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
+                    GStruct414<GClass2801> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
                     if (result.Error != null)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::Start: Error removing dog tag!");
+                        FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::SetupMainPlayer: Error removing dog tag!");
                     }
                 }
 
-                string templateId = Side == EPlayerSide.Usec ? "59f32c3b86f77472a31742f0" : "59f32bb586f774757e1e8442";
+                string templateId = GetDogTagTemplateId();
 
-                Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
-
-                Equipment.GetSlot(EquipmentSlot.Dogtag).Add(item, false);
-
-                DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
-                if (dogtagComponent != null)
+                if (!string.IsNullOrEmpty(templateId))
                 {
-                    dogtagComponent.ProfileId = ProfileId;
-                    dogtagComponent.GroupId = Profile.Info.GroupId;
+                    Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
+
+                    Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
+                    ItemFilter[] filters = dogtagSlot.Filters; // We need to temporarily remove and then re-add these as BSG did not include the new dog tags in their ItemFilter[]
+                    dogtagSlot.Filters = null;
+                    GStruct416<int> addResult = dogtagSlot.Add(item, false);
+                    dogtagSlot.Filters = filters;
+
+                    if (addResult.Error != null)
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogError("CoopPlayer::SetupMainPlayer: Error adding dog tag to slot: " + addResult.Error);
+                    }
+
+                    DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
+                    if (dogtagComponent != null)
+                    {
+                        dogtagComponent.ProfileId = ProfileId;
+                        dogtagComponent.GroupId = Profile.Info.GroupId;
+                    }
+                    else
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
+                    }
                 }
                 else
                 {
-                    FikaPlugin.Instance.FikaLogger.LogWarning("Unable to find DogTagComponent");
+                    FikaPlugin.Instance.FikaLogger.LogError("Could not get templateId for DogTag!");
                 }
             }
 
@@ -880,12 +937,46 @@ namespace Fika.Core.Coop.Players
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Location_0.Name.ToLower() == "laboratory")
             {
-                Item accessCardItem = Profile.Inventory.AllRealPlayerItems.FirstOrDefault(x => x.TemplateId == "5c94bbff86f7747ee735c08f");
-                if (accessCardItem != null)
+                foreach (Item item in Profile.Inventory.AllRealPlayerItems)
                 {
-                    InteractionsHandlerClass.Remove(accessCardItem, _inventoryController, false, true);
+                    if (item.TemplateId == "5c94bbff86f7747ee735c08f")
+                    {
+                        InteractionsHandlerClass.Remove(item, _inventoryController, false, true);
+                    }
                 }
             }
+        }
+
+        private string GetDogTagTemplateId()
+        {
+            //return Profile.Side == EPlayerSide.Usec ? "6662ea05f6259762c56f3189" : "59f32bb586f774757e1e8442";
+
+            if (Side is EPlayerSide.Usec)
+            {
+                switch (Profile.Info.MemberCategory)
+                {
+                    case EMemberCategory.Default:
+                        return "59f32c3b86f77472a31742f0";
+                    case EMemberCategory.UniqueId:
+                        return "6662e9f37fa79a6d83730fa0";
+                    case EMemberCategory.Unheard:
+                        return "6662ea05f6259762c56f3189";
+                }
+            }
+            else if (Side is EPlayerSide.Bear)
+            {
+                switch (Profile.Info.MemberCategory)
+                {
+                    case EMemberCategory.Default:
+                        return "59f32bb586f774757e1e8442";
+                    case EMemberCategory.UniqueId:
+                        return "6662e9aca7e0b43baa3d5f74";
+                    case EMemberCategory.Unheard:
+                        return "6662e9cda7e0b43baa3d5f76";
+                }
+            }
+
+            return string.Empty;
         }
 
         public virtual void HandleCommonPacket(in CommonPlayerPacket packet)
@@ -1042,7 +1133,7 @@ namespace Fika.Core.Coop.Players
                     using BinaryReader binaryReader = new(memoryStream);
                     try
                     {
-                        GStruct412 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
+                        GStruct411 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
 
                         InventoryOperationHandler opHandler = new(result);
 
@@ -1050,9 +1141,9 @@ namespace Fika.Core.Coop.Players
 
                         // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
                         // Unknown what problems this might cause so far.
-                        if (result.Value is GClass2877 unloadOperation)
+                        if (result.Value is GClass2878 unloadOperation)
                         {
-                            if (unloadOperation.InternalOperation is GClass2888 internalSplitOperation)
+                            if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
                             {
                                 Item item = internalSplitOperation.To.Item;
                                 if (item != null)
@@ -1074,7 +1165,7 @@ namespace Fika.Core.Coop.Players
                         }
 
                         // TODO: Same as above.
-                        if (result.Value is GClass2888 splitOperation)
+                        if (result.Value is SplitOperationClass splitOperation)
                         {
                             Item item = splitOperation.To.Item;
                             if (item != null)
@@ -1093,23 +1184,11 @@ namespace Fika.Core.Coop.Players
                                 FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
                             }
                         }
-
-                        /*// Fix for folding not replicating
-                        if (result.Value is GClass2858 foldOperation)
-                        {
-                            if (HandsController is CoopObservedFirearmController observedFirearmController)
-                            {
-                                if (observedFirearmController.Weapon != null && observedFirearmController.Weapon.Foldable != null)
-                                {
-                                    observedFirearmController.InitiateOperation<FirearmController.Class1020>().Start(foldOperation, null);
-                                }
-                            }
-                        }*/
                     }
                     catch (Exception exception)
                     {
                         FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-                        if (MatchmakerAcceptPatches.IsServer)
+                        if (FikaBackendUtils.IsServer)
                         {
                             OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
                             Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
@@ -1119,7 +1198,7 @@ namespace Fika.Core.Coop.Players
                 else
                 {
                     FikaPlugin.Instance.FikaLogger.LogError("ItemControllerExecutePacket: inventory was null!");
-                    if (MatchmakerAcceptPatches.IsServer)
+                    if (FikaBackendUtils.IsServer)
                     {
                         OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
                         Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
@@ -1267,26 +1346,48 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public virtual void HandleDamagePacket(DamagePacket packet)
+        public void QueueArmorDamagePackets(ArmorComponent[] armorComponents)
+        {
+            int amount = armorComponents.Length;
+            if (amount > 0)
+            {
+                string[] ids = new string[amount];
+                float[] durabilities = new float[amount];
+
+                for (int i = 0; i < amount; i++)
+                {
+                    ids[i] = armorComponents[i].Item.Id;
+                    durabilities[i] = armorComponents[i].Repairable.Durability;
+                }
+
+                PacketSender.ArmorDamagePackets.Enqueue(new()
+                {
+                    ItemIds = ids,
+                    Durabilities = durabilities,
+                });
+            }
+        }
+
+        public virtual void HandleDamagePacket(ref DamagePacket packet)
         {
             DamageInfo damageInfo = new()
             {
-                Damage = packet.DamageInfo.Damage,
-                DamageType = packet.DamageInfo.DamageType,
-                BodyPartColliderType = packet.DamageInfo.ColliderType,
-                HitPoint = packet.DamageInfo.Point,
-                HitNormal = packet.DamageInfo.HitNormal,
-                Direction = packet.DamageInfo.Direction,
-                PenetrationPower = packet.DamageInfo.PenetrationPower,
-                BlockedBy = packet.DamageInfo.BlockedBy,
-                DeflectedBy = packet.DamageInfo.DeflectedBy,
-                SourceId = packet.DamageInfo.SourceId,
-                ArmorDamage = packet.DamageInfo.ArmorDamage
+                Damage = packet.Damage,
+                DamageType = packet.DamageType,
+                BodyPartColliderType = packet.ColliderType,
+                HitPoint = packet.Point,
+                HitNormal = packet.HitNormal,
+                Direction = packet.Direction,
+                PenetrationPower = packet.PenetrationPower,
+                BlockedBy = packet.BlockedBy,
+                DeflectedBy = packet.DeflectedBy,
+                SourceId = packet.SourceId,
+                ArmorDamage = packet.ArmorDamage
             };
 
-            if (!string.IsNullOrEmpty(packet.DamageInfo.ProfileId))
+            if (!string.IsNullOrEmpty(packet.ProfileId))
             {
-                GInterface106 player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.DamageInfo.ProfileId);
+                GInterface106 player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
 
                 if (player != null)
                 {
@@ -1300,13 +1401,48 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
-                if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.DamageInfo.ProfileId).HandsController.Item is Weapon weapon)
+                if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
                 {
                     damageInfo.Weapon = weapon;
                 }
             }
 
-            ClientApplyShot(damageInfo, packet.DamageInfo.BodyPartType, packet.DamageInfo.ColliderType, packet.DamageInfo.ArmorPlateCollider);
+            ShotReactions(damageInfo, packet.BodyPartType);
+            ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
+            ClientApplyDamageInfo(damageInfo, packet.BodyPartType, packet.ColliderType, packet.Absorbed);
+            //ClientApplyShot(damageInfo, packet.BodyPartType, packet.ColliderType, packet.ArmorPlateCollider);
+        }
+
+        public void HandleArmorDamagePacket(ref ArmorDamagePacket packet)
+        {
+            for (int i = 0; i < packet.ItemIds.Length; i++)
+            {
+                _preAllocatedArmorComponents.Clear();
+                Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
+                foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
+                {
+                    if (armorComponent.Item.Id == packet.ItemIds[i])
+                    {
+                        armorComponent.Repairable.Durability = packet.Durabilities[i];
+                        armorComponent.Buff.TryDisableComponent(armorComponent.Repairable.Durability);
+                        armorComponent.Item.RaiseRefreshEvent(false, false);
+                        return;
+                    }
+                }
+                GStruct416<Item> gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemIds[i]);
+                if (gstruct.Failed)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError("HandleArmorDamagePacket: " + gstruct.Error);
+                    return;
+                }
+                ArmorComponent itemComponent = gstruct.Value.GetItemComponent<ArmorComponent>();
+                if (itemComponent != null)
+                {
+                    itemComponent.Repairable.Durability = packet.Durabilities[i];
+                    itemComponent.Buff.TryDisableComponent(itemComponent.Repairable.Durability);
+                    itemComponent.Item.RaiseRefreshEvent(false, false);
+                }
+            }
         }
 
         public virtual void SetupDogTag()
@@ -1396,15 +1532,32 @@ namespace Fika.Core.Coop.Players
             });
         }
 
-        public Item FindItem(string itemId)
+        public Item FindItem(string itemId, bool questItem = false)
         {
+            if (questItem)
+            {
+                //List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
+                foreach (GInterface12 lootItem in Singleton<GameWorld>.Instance.LootList)
+                {
+                    if (lootItem is LootItem observedLootItem)
+                    {
+                        if (observedLootItem.Item.TemplateId == itemId)
+                        {
+                            return observedLootItem.Item;
+                        }
+                    }
+                }
+                FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the world at all.");
+                return null;
+            }
+
             Item item = Inventory.Equipment.FindItem(itemId);
             if (item != null)
             {
                 return item;
             }
 
-            GStruct417<Item> itemResult = FindItemById(itemId);
+            GStruct416<Item> itemResult = FindItemById(itemId);
             if (itemResult.Error != null)
             {
                 FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
@@ -1416,7 +1569,7 @@ namespace Fika.Core.Coop.Players
         private class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct417<GClass2984> unlockResult;
+            public GStruct416<GClass2985> unlockResult;
 
             internal void HandleKeyEvent()
             {
@@ -1424,9 +1577,9 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class InventoryOperationHandler(GStruct412 opResult)
+        private class InventoryOperationHandler(GStruct411 opResult)
         {
-            public readonly GStruct412 opResult = opResult;
+            public readonly GStruct411 opResult = opResult;
 
             internal void HandleResult(IResult result)
             {
@@ -1727,7 +1880,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly GrenadeClass throwWeap = throwWeap;
-            public Process<QuickGrenadeThrowController, IGrenadeController> process;
+            public Process<QuickGrenadeThrowController, GInterface145> process;
             public Action confirmCallback;
 
             internal CoopClientQuickGrenadeController ReturnController()

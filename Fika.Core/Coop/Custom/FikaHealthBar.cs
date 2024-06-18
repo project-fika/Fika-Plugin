@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Custom
         {
             currentPlayer = GetComponent<ObservedCoopPlayer>();
             mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            CreateHealthBar();            
+            CreateHealthBar();
         }
 
         protected void Update()
@@ -114,12 +114,12 @@ namespace Fika.Core.Coop.Custom
 
             float alpha = 1f;
             float halfMaxDistanceToShow = maxDistanceToShow / 2;
-            float lerpValue = Mathf.Clamp01((sqrDistance - halfMaxDistanceToShow) / (halfMaxDistanceToShow));
+            float lerpValue = Mathf.Clamp01((sqrDistance - halfMaxDistanceToShow) / halfMaxDistanceToShow);
             alpha = Mathf.LerpUnclamped(alpha, 0, lerpValue);
             float namePlateScaleMult = Mathf.LerpUnclamped(1f, 0.5f, lerpValue);
             namePlateScaleMult = Mathf.Clamp(namePlateScaleMult * FikaPlugin.NamePlateScale.Value, FikaPlugin.MinimumNamePlateScale.Value * FikaPlugin.NamePlateScale.Value, FikaPlugin.NamePlateScale.Value);
 
-            playerPlate.ScalarObjectScreen.transform.localScale = (Vector3.one / processedDistance) * namePlateScaleMult;
+            playerPlate.ScalarObjectScreen.transform.localScale = Vector3.one / processedDistance * namePlateScaleMult;
 
             alpha *= opacityMultiplier;
             alpha *= distFromCenterMultiplier;
@@ -232,7 +232,7 @@ namespace Fika.Core.Coop.Custom
                     playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
                     playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
                 }
-                int healthNumberPercentage = (int)Math.Round((currentHealth / maxHealth) * 100);
+                int healthNumberPercentage = (int)Math.Round(currentHealth / maxHealth * 100);
                 playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
             }
             else

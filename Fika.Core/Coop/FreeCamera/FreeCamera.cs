@@ -3,6 +3,7 @@ using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -25,6 +26,7 @@ namespace Fika.Core.Coop.FreeCamera
         private bool isFollowing = false;
         private bool leftMode = false;
         private bool disableInput = false;
+        private bool showOverlay;
 
         private KeyCode forwardKey = KeyCode.W;
         private KeyCode backKey = KeyCode.S;
@@ -46,6 +48,33 @@ namespace Fika.Core.Coop.FreeCamera
 
                 relUpKey = KeyCode.E;
                 relDownKey = KeyCode.A;
+            }
+
+            showOverlay = FikaPlugin.KeybindOverlay.Value;
+            FikaPlugin.KeybindOverlay.SettingChanged += KeybindOverlay_SettingChanged;
+        }
+
+        private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
+        {
+            showOverlay = FikaPlugin.KeybindOverlay.Value;
+        }
+
+        protected void OnGUI()
+        {
+            if (IsActive && showOverlay)
+            {
+                Rect rect = new(20, 20, 800, 800);
+                GUI.Label(rect, $"Left/Right Mouse Button: Jump between players");
+                rect.y += 15;
+                GUI.Label(rect, $"CTRL/Spacebar + Left/Right Mouse Button: Jump and spectate in 3rd person or head cam");
+                rect.y += 15;
+                GUI.Label(rect, $"T: Teleport to cam position");
+                rect.y += 15;
+                GUI.Label(rect, $"N: Toggle nightvision/thermals");
+                rect.y += 15;
+                GUI.Label(rect, $"HOME: Disable input");
+                rect.y += 15;
+                GUI.Label(rect, $"Shift + Ctrl: Turbo Speed");
             }
         }
 
@@ -273,22 +302,22 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
             {
-                transform.position += (-transform.right * (movementSpeed * Time.deltaTime));
+                transform.position += -transform.right * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
             {
-                transform.position += (transform.right * (movementSpeed * Time.deltaTime));
+                transform.position += transform.right * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
             {
-                transform.position += (transform.forward * (movementSpeed * Time.deltaTime));
+                transform.position += transform.forward * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
             {
-                transform.position += (-transform.forward * (movementSpeed * Time.deltaTime));
+                transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
             }
 
             // Teleportation
@@ -311,22 +340,22 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 if (Input.GetKey(relUpKey))
                 {
-                    transform.position += (transform.up * (movementSpeed * Time.deltaTime));
+                    transform.position += transform.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(relDownKey))
                 {
-                    transform.position += (-transform.up * (movementSpeed * Time.deltaTime));
+                    transform.position += -transform.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
                 {
-                    transform.position += (Vector3.up * (movementSpeed * Time.deltaTime));
+                    transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
                 {
-                    transform.position += (-Vector3.up * (movementSpeed * Time.deltaTime));
+                    transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
                 }
             }
 

@@ -2,7 +2,7 @@
 using EFT.Airdrop;
 using EFT.Interactive;
 using EFT.SynchronizableObjects;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -153,7 +153,7 @@ namespace Fika.Core.Coop.Airdrops
                 Volume = surfaceSet.LandingSoundBank.BaseVolume
             });
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 AddNavMeshObstacle();
             }

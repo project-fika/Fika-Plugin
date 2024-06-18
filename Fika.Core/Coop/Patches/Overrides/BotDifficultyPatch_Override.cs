@@ -1,5 +1,5 @@
 ﻿using EFT;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Patches.Overrides
         [PatchPrefix]
         private static bool PatchPrefix(ref string __result, BotDifficulty botDifficulty, WildSpawnType role)
         {
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 __result = RequestHandler.GetJson($"/singleplayer/settings/bot/difficulty/{role}/{botDifficulty}");
                 bool resultIsNullEmpty = string.IsNullOrWhiteSpace(__result);

@@ -1,4 +1,4 @@
-﻿using Fika.Core.Coop.Matchmaker;
+﻿using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
@@ -30,12 +30,12 @@ namespace Fika.Core.Coop.Patches.Overrides
 
             delayed?.Clear();
 
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 foreach (WaveInfo wave in __result)
                 {
                     var json = RequestHandler.GetJson($"/singleplayer/settings/bot/limit/{wave.Role}");
-                    wave.Limit = (string.IsNullOrWhiteSpace(json))
+                    wave.Limit = string.IsNullOrWhiteSpace(json)
                         ? 30
                         : Convert.ToInt32(json);
                 }

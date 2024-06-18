@@ -2,7 +2,7 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
@@ -30,7 +30,7 @@ namespace Fika.Core.UI.Custom
         public DefaultUIButton AcceptButton { get; internal set; }
         public GameObject NewBackButton { get; internal set; }
 
-        private string ProfileId => MatchmakerAcceptPatches.Profile.ProfileId;
+        private string ProfileId => FikaBackendUtils.Profile.ProfileId;
 
         private float _lastRefreshed;
 
@@ -151,8 +151,8 @@ namespace Fika.Core.UI.Custom
                         return;
                     }
                 }
-                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                MatchmakerAcceptPatches.CreateMatch(MatchmakerAcceptPatches.Profile.ProfileId, MatchmakerAcceptPatches.PMCName, RaidSettings);
+                FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
+                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
                 AcceptButton.OnClick.Invoke();
                 DestroyThis();
             });
@@ -252,12 +252,11 @@ namespace Fika.Core.UI.Custom
             pingingClient.NetClient?.Stop();
             pingingClient = null;
 
-            if (MatchmakerAcceptPatches.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
+            if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
-                MatchmakerAcceptPatches.SetGroupId(result.ServerId);
-                MatchmakerAcceptPatches.SetTimestamp(result.Timestamp);
-                MatchmakerAcceptPatches.MatchingType = EMatchmakerType.GroupPlayer;
-                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
+                FikaBackendUtils.SetGroupId(result.ServerId);
+                FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
+                FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
                 DestroyThis();
 

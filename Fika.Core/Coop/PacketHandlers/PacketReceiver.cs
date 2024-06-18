@@ -1,9 +1,8 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
-using EFT.UI;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +19,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public PlayerStatePacket NewState { get; set; }
         public Queue<WeaponPacket> FirearmPackets { get; private set; } = new(50);
         public Queue<DamagePacket> DamagePackets { get; private set; } = new(50);
+        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; private set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; private set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; private set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; private set; } = new(50);
@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void Start()
         {
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 Server = Singleton<FikaServer>.Instance;
             }
@@ -70,7 +70,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     for (int i = 0; i < healthSyncPackets; i++)
                     {
                         HealthSyncPacket packet = HealthSyncPackets.Dequeue();
-                        if (packet.Packet.SyncType == GStruct347.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
+                        if (packet.Packet.SyncType == GStruct346.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
                         {
                             observedPlayer.SetAggressor(packet.KillerId, packet.KillerWeaponId);
                             observedPlayer.SetInventory(packet.Equipment);
@@ -100,12 +100,22 @@ namespace Fika.Core.Coop.PacketHandlers
                     player.HandleWeaponPacket(FirearmPackets.Dequeue());
                 }
             }
-            int healthPackets = DamagePackets.Count;
-            if (healthPackets > 0)
+            int damagePackets = DamagePackets.Count;
+            if (damagePackets > 0)
             {
-                for (int i = 0; i < healthPackets; i++)
+                for (int i = 0; i < damagePackets; i++)
                 {
-                    player.HandleDamagePacket(DamagePackets.Dequeue());
+                    DamagePacket damagePacket = DamagePackets.Dequeue();
+                    player.HandleDamagePacket(ref damagePacket);
+                }
+            }
+            int armorDamagePackets = ArmorDamagePackets.Count;
+            if (armorDamagePackets > 0)
+            {
+                for (int i = 0; i < armorDamagePackets; i++)
+                {
+                    ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                    player.HandleArmorDamagePacket(ref armorDamagePacket);
                 }
             }
             int inventoryPackets = InventoryPackets.Count;

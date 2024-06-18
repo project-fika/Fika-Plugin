@@ -38,9 +38,9 @@ namespace Fika.Core.Coop.Custom
 
             resetCounter = FikaPlugin.DynamicAIRate.Value switch
             {
-                FikaPlugin.DynamicAIRates.Low => 600,
-                FikaPlugin.DynamicAIRates.Medium => 300,
-                FikaPlugin.DynamicAIRates.High => 120,
+                FikaPlugin.EDynamicAIRates.Low => 600,
+                FikaPlugin.EDynamicAIRates.Medium => 300,
+                FikaPlugin.EDynamicAIRates.High => 120,
                 _ => 300,
             };
 
@@ -206,13 +206,13 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        internal void RateChanged(FikaPlugin.DynamicAIRates value)
+        internal void RateChanged(FikaPlugin.EDynamicAIRates value)
         {
             resetCounter = value switch
             {
-                FikaPlugin.DynamicAIRates.Low => 600,
-                FikaPlugin.DynamicAIRates.Medium => 300,
-                FikaPlugin.DynamicAIRates.High => 120,
+                FikaPlugin.EDynamicAIRates.Low => 600,
+                FikaPlugin.EDynamicAIRates.Medium => 300,
+                FikaPlugin.EDynamicAIRates.High => 120,
                 _ => 300,
             };
         }

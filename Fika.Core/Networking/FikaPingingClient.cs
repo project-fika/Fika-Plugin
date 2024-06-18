@@ -1,5 +1,5 @@
 ﻿using BepInEx.Logging;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using LiteNetLib;
@@ -109,8 +109,8 @@ namespace Fika.Core.Networking
                 if (result == "fika.hello")
                 {
                     Received = true;
-                    MatchmakerAcceptPatches.RemoteIp = remoteEndPoint.Address.ToString();
-                    MatchmakerAcceptPatches.RemotePort = remoteEndPoint.Port;
+                    FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
+                    FikaBackendUtils.RemotePort = remoteEndPoint.Port;
                 }
                 else
                 {

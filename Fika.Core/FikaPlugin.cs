@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using EFT.UI;
@@ -7,7 +6,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.Airdrops.Utils;
 using Fika.Core.Coop.FreeCamera.Patches;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Airdrop;
 using Fika.Core.Coop.Patches.LocalGame;
@@ -20,6 +18,7 @@ using Fika.Core.SPTSupport.Scav;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
+using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
 using SPT.Custom.Airdrops.Patches;
 using SPT.Custom.BTR.Patches;
@@ -36,7 +35,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace Fika.Core
@@ -54,18 +52,8 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        /// <summary>
-        /// Stores the Instance of this Plugin
-        /// </summary>
         public static FikaPlugin Instance;
         public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
-        /// <summary>
-        /// If any mod dependencies fail, show an error. This is a flag to say it has occurred.
-        /// </summary>
-        private bool ShownDependencyError { get; set; }
-        /// <summary>
-        /// This is the Official EFT Version defined by BSG
-        /// </summary>
         public static string EFTVersionMajor { get; internal set; }
         public ManualLogSource FikaLogger { get => Logger; }
         public BotDifficulties BotDifficulties;
@@ -103,6 +91,9 @@ namespace Fika.Core
         // Hidden
         public static ConfigEntry<bool> AcceptedTOS { get; set; }
 
+        //Advanced
+        public static ConfigEntry<bool> OfficialVersion { get; set; }
+
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
@@ -110,6 +101,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+        public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
 
         // Coop | Name Plates
         public static ConfigEntry<bool> UseNamePlates { get; set; }
@@ -124,6 +116,10 @@ namespace Fika.Core
         public static ConfigEntry<float> MaxDistanceToShow { get; set; }
         public static ConfigEntry<float> MinimumOpacity { get; set; }
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
+
+        // Coop | Quest Sharing
+        public static ConfigEntry<bool> QuestSharing {  get; set; }
+        public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
 
         // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
@@ -140,15 +136,16 @@ namespace Fika.Core
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
         public static ConfigEntry<bool> AZERTYMode { get; set; }
+        public static ConfigEntry<bool> KeybindOverlay { get; set; }
 
         // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
-        public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
+        public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
         public static ConfigEntry<bool> CullPlayers { get; set; }
         public static ConfigEntry<float> CullingRange { get; set; }
 
-        // Performance | Bot Limits            
+        // Performance | Bot Limits
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
         public static ConfigEntry<bool> DespawnFurthest { get; set; }
         public static ConfigEntry<float> DespawnMinimumDistance { get; set; }
@@ -193,11 +190,11 @@ namespace Fika.Core
         protected void Awake()
         {
             Instance = this;
-            LogDependencyErrors();
 
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
+            new FikaVersionLabelUpdate_Patch().Enable();
             new DisableReadyButton_Patch().Enable();
             new DisableInsuranceReadyButton_Patch().Enable();
             new DisableMatchSettingsReadyButton_Patch().Enable();
@@ -206,7 +203,6 @@ namespace Fika.Core
             new NonWaveSpawnScenario_Patch().Enable();
             new WaveSpawnScenario_Patch().Enable();
             new WeatherNode_Patch().Enable();
-            new EnvironmentUIRoot_Patch().Enable();
             new MatchmakerAcceptScreen_Awake_Patch().Enable();
             new MatchmakerAcceptScreen_Show_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
@@ -214,10 +210,11 @@ namespace Fika.Core
             new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
             new BaseLocalGame_method_6_Patch().Enable();
-
+            new DisconnectButton_Patch().Enable();
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
+            OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
 
             DisableSPTPatches();
             EnableOverridePatches();
@@ -275,6 +272,9 @@ namespace Fika.Core
 
             AcceptedTOS = Config.Bind("Hidden", "Accepted TOS", false, new ConfigDescription("Has accepted TOS", tags: new ConfigurationManagerAttributes() { Browsable = false }));
 
+            // Advanced
+            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
+
             // Coop
 
             ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
@@ -288,6 +288,8 @@ namespace Fika.Core
             FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 2 }));
 
             ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+            ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.Backspace), new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Name Plates
 
@@ -314,6 +316,12 @@ namespace Fika.Core
             MinimumOpacity = Config.Bind("Coop | Name Plates", "Minimum Opacity", 0.1f, new ConfigDescription("The minimum opacity of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
 
             MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
+
+            // Coop | Quest Sharing
+
+            QuestSharing = Config.Bind("Coop | Quest Sharing", "Quest Sharing", false, new ConfigDescription("Toggle to enable the quest sharing system. Cannot be toggled mid-raid.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+
+            QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
             // Coop | Custom
 
@@ -343,13 +351,15 @@ namespace Fika.Core
 
             AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false, "If free camera should use AZERTY keys for input.");
 
+            KeybindOverlay = Config.Bind("Coop | Debug", "Keybind Overlay", true, "If an overlay with all free cam keybinds should show.");
+
             // Performance
 
             DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
             DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", DynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
             CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
@@ -408,6 +418,11 @@ namespace Fika.Core
             StomachDamageMultiplier = Config.Bind("Gameplay", "Stomach Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the stomach collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
             DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false, new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+        }
+
+        private void OfficialVersion_SettingChanged(object sender, EventArgs e)
+        {
+            FikaVersionLabel_Patch.UpdateVersionLabel();
         }
 
         private string[] GetLocalAddresses()
@@ -483,36 +498,22 @@ namespace Fika.Core
             new FikaAirdropFlare_Patch().Enable();
         }
 
-        private void LogDependencyErrors()
-        {
-            // Skip if we've already shown the message, or there are no errors
-            if (ShownDependencyError || Chainloader.DependencyErrors.Count == 0)
-            {
-                return;
-            }
-
-            StringBuilder stringBuilder = new();
-            stringBuilder.AppendLine("Errors occurred during plugin loading");
-            stringBuilder.AppendLine("-------------------------------------");
-            stringBuilder.AppendLine();
-            foreach (string error in Chainloader.DependencyErrors)
-            {
-                stringBuilder.AppendLine(error);
-                stringBuilder.AppendLine();
-            }
-            string errorMessage = stringBuilder.ToString();
-
-            // Show an error in the BepInEx console/log file
-            Logger.LogError(errorMessage);
-
-            ShownDependencyError = true;
-        }
-
-        public enum DynamicAIRates
+        public enum EDynamicAIRates
         {
             Low,
             Medium,
             High
+        }
+
+        [Flags]
+        public enum EQuestSharingTypes
+        {
+            Kill = 1,
+            Hit = 2,
+            Location = 4,
+            PlaceBeacon = 8,
+
+            All = Kill | Hit | Location | PlaceBeacon
         }
     }
 }

@@ -115,7 +115,7 @@ namespace Fika.Core.Coop.BTR
         // Find `BTRControllerClass.method_9(PathDestination currentDestinationPoint, bool lastRoutePoint)`
         private bool IsUpdateTaxiPriceMethod(MethodInfo method)
         {
-            return (method.GetParameters().Length == 2 && method.GetParameters()[0].ParameterType == typeof(PathDestination));
+            return method.GetParameters().Length == 2 && method.GetParameters()[0].ParameterType == typeof(PathDestination);
         }
 
         private void Update()
@@ -176,7 +176,7 @@ namespace Fika.Core.Coop.BTR
                             weaponPrefab.transform.SetPositionAndRotation(turretView.GunRoot.position, turretView.GunRoot.rotation);
                             weaponTransform.SetPositionAndRotation(turretView.GunRoot.position, turretView.GunRoot.rotation);
 
-                            string[] gunModsToDisable = Traverse.Create(turretView).Field("_gunModsToDisable").GetValue<string[]>();
+                            string[] gunModsToDisable = Traverse.Create(turretView).Field<string[]>("_gunModsToDisable").Value;
                             if (gunModsToDisable != null)
                             {
                                 foreach (Transform child in weaponTransform)

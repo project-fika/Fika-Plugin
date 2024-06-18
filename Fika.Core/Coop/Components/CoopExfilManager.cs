@@ -2,8 +2,8 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -99,9 +99,9 @@ namespace Fika.Core.Coop.Components
                 exfiltrationPoint.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
                 exfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
                 game.UpdateExfiltrationUi(exfiltrationPoint, false, true);
-                if (FikaPlugin.Instance.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < MatchmakerAcceptPatches.HostExpectedNumberOfPlayers)
+                if (FikaPlugin.Instance.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < FikaBackendUtils.HostExpectedNumberOfPlayers)
                 {
-                    exfiltrationPoint.Settings.PlayersCount = MatchmakerAcceptPatches.HostExpectedNumberOfPlayers;
+                    exfiltrationPoint.Settings.PlayersCount = FikaBackendUtils.HostExpectedNumberOfPlayers;
                 }
             }
 
@@ -204,11 +204,11 @@ namespace Fika.Core.Coop.Components
                     NetDataWriter writer = mainPlayer.PacketSender.Writer;
                     writer.Reset();
 
-                    if (MatchmakerAcceptPatches.IsServer)
+                    if (FikaBackendUtils.IsServer)
                     {
                         mainPlayer.PacketSender.Server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
                     }
-                    else if (MatchmakerAcceptPatches.IsClient)
+                    else if (FikaBackendUtils.IsClient)
                     {
                         mainPlayer.PacketSender.Client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
                     }
