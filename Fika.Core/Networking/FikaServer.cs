@@ -862,7 +862,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
-                foreach (KeyValuePair<string, GClass3241> taskConditionCounter in player.Profile.TaskConditionCounters)
+                foreach (KeyValuePair<string, GClass3242> taskConditionCounter in player.Profile.TaskConditionCounters)
                 {
                     if (taskConditionCounter.Key == packet.ConditionId)
                     {
@@ -951,10 +951,10 @@ namespace Fika.Core.Networking
 
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray();
 
-            Profile.GClass1767 health = playerToUse.NetworkHealthController.Store(null);
-            GClass2430.GClass2433[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
+            Profile.GClass1768 health = playerToUse.NetworkHealthController.Store(null);
+            GClass2431.GClass2434[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
 
-            foreach (GClass2430.GClass2433 effect in effects)
+            foreach (GClass2431.GClass2434 effect in effects)
             {
                 if (!effect.Active)
                 {
@@ -968,7 +968,7 @@ namespace Fika.Core.Networking
 
                 if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface250)
                 {
-                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.GClass1767.GClass1768 { Time = -1f, ExtraData = effect.StoreObj });
+                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.GClass1768.GClass1769 { Time = -1f, ExtraData = effect.StoreObj });
                 }
             }
 

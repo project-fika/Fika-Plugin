@@ -319,11 +319,11 @@ namespace Fika.Core.UI.Custom
                     }
                     if (entry.Status == LobbyEntry.ELobbyStatus.REJOIN)
                     {
-                        MatchmakerAcceptPatches.IsReconnect = true;
+                        FikaBackendUtils.IsReconnect = true;
                     }
                     else
                     {
-                        MatchmakerAcceptPatches.IsReconnect = false;
+                        FikaBackendUtils.IsReconnect = false;
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);

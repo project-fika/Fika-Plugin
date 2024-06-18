@@ -1811,12 +1811,12 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger.LogDebug("Stop");
 
-            if (MatchmakerAcceptPatches.IsReconnect)
+            if (FikaBackendUtils.IsReconnect)
             {
-                MatchmakerAcceptPatches.IsReconnect = false;
-                MatchmakerAcceptPatches.ReconnectPacket = null;
-                MatchmakerAcceptPatches.SpawnedPlayersComplete = false;
-                MatchmakerAcceptPatches.ReconnectPacketRecieved = false;
+                FikaBackendUtils.IsReconnect = false;
+                FikaBackendUtils.ReconnectPacket = null;
+                FikaBackendUtils.SpawnedPlayersComplete = false;
+                FikaBackendUtils.ReconnectPacketRecieved = false;
             }
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;

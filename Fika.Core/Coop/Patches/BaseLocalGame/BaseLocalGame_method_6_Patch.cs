@@ -1,7 +1,7 @@
 using System.Reflection;
 using SPT.Reflection.Patching;
 using EFT;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 
 namespace Fika.Core.Coop.Patches
 {
@@ -15,9 +15,9 @@ namespace Fika.Core.Coop.Patches
         [PatchPrefix]
         public static bool PatchPrefix(ref LocationSettingsClass.Location location)
         {
-            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+            if (FikaBackendUtils.IsClient && FikaBackendUtils.IsReconnect)
             {
-                location.Loot = MatchmakerAcceptPatches.ReconnectPacket.Value.Items;
+                location.Loot = FikaBackendUtils.ReconnectPacket.Value.Items;
             }
 
             return true;

@@ -249,7 +249,7 @@ namespace Fika.Core.Networking
             writer.Put(worldInteractiveObject as Door is Door door ? door.IsBroken : false);
         }
 
-        public static WorldInteractiveObject.GStruct385 GetInteractiveObjectState(this NetDataReader reader)
+        public static WorldInteractiveObject.GStruct384 GetInteractiveObjectState(this NetDataReader reader)
         {
             return new()
             {

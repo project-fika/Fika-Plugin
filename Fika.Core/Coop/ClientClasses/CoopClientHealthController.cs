@@ -37,11 +37,10 @@ namespace Fika.Core.Coop.ClientClasses
         /// </summary>
         public void SyncBodyPartsState()
         {
-            foreach (EBodyPart bodyPart in GClass2476.RealBodyParts)
+            foreach (EBodyPart bodyPart in GClass2477.RealBodyParts)
             {
                 if (GetBodyPartHealth(bodyPart, true).AtMinimum)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogWarning("ANUS: " + bodyPart.ToString());
                     DestroyBodyPart(bodyPart, EDamageType.Undefined);
                 }
             }

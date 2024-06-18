@@ -189,7 +189,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+            if (FikaBackendUtils.IsClient && FikaBackendUtils.IsReconnect)
             {
                 FikaPlugin.Instance.FikaLogger.LogInfo($"OnSyncNetIdPacketReceived: Client is reconnecting, ignore Sync.");
                 return;
@@ -229,7 +229,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            if (MatchmakerAcceptPatches.IsClient && MatchmakerAcceptPatches.IsReconnect)
+            if (FikaBackendUtils.IsClient && FikaBackendUtils.IsReconnect)
             {
                 FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Client is reconnecting, ignore assignment.");
                 return;
@@ -880,14 +880,14 @@ namespace Fika.Core.Networking
         private void OnReconnectResponsePacketReceived(ReconnectResponsePacket packet)
         {
             // if another packet tries to come in after another, return to stop double processing
-            if (MatchmakerAcceptPatches.ReconnectPacketRecieved)
+            if (FikaBackendUtils.ReconnectPacketRecieved)
             {
                 return;
             }
 
-            MatchmakerAcceptPatches.IsReconnect = true;
-            MatchmakerAcceptPatches.ReconnectPacket = packet;
-            MatchmakerAcceptPatches.ReconnectPacketRecieved = true;
+            FikaBackendUtils.IsReconnect = true;
+            FikaBackendUtils.ReconnectPacket = packet;
+            FikaBackendUtils.ReconnectPacketRecieved = true;
 
             StartCoroutine(SyncClientToHost(packet));
         }
@@ -909,9 +909,9 @@ namespace Fika.Core.Networking
                 yield return new WaitUntil(() => Singleton<GameWorld>.Instantiated);
             }
 
-            while (!MatchmakerAcceptPatches.SpawnedPlayersComplete)
+            while (!FikaBackendUtils.SpawnedPlayersComplete)
             {
-                yield return new WaitUntil(() => MatchmakerAcceptPatches.SpawnedPlayersComplete);
+                yield return new WaitUntil(() => FikaBackendUtils.SpawnedPlayersComplete);
             }
 
             ClientGameWorld gameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
@@ -921,7 +921,7 @@ namespace Fika.Core.Networking
             WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
             for (int i = 0; i < packet.InteractiveObjectAmount; i++)
             {
-                WorldInteractiveObject.GStruct385 packetInteractiveObject = packet.InteractiveObjects[i];
+                WorldInteractiveObject.GStruct384 packetInteractiveObject = packet.InteractiveObjects[i];
                 // find interactive object with id
                 WorldInteractiveObject interactiveObject = interactiveObjects.FirstOrDefault(x => x.Id == packetInteractiveObject.Id);
                 interactiveObject?.SetFromStatusInfo(packetInteractiveObject);
@@ -958,7 +958,7 @@ namespace Fika.Core.Networking
             // TODO: Smokes do spawn on the ground, but no visible smoke effect shows, im using BSG's method of doing this currently, so this might be a BSG thing.
             // Decide if to fix or not.
 
-            if (MatchmakerAcceptPatches.ReconnectPacket.Value.InitAirdrop)
+            if (FikaBackendUtils.ReconnectPacket.Value.InitAirdrop)
             {
                 // ask for airdrop params and loot
 

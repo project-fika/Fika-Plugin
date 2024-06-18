@@ -1,7 +1,7 @@
 using Comfort.Common;
 using EFT;
 using EFT.Quests;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify)
         {
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 ConditionChangePacket packet = new(_fikaClient.MyPlayer.NetId, condition.id, condition.value);
                 _fikaClient.SendData(_fikaClient.DataWriter, ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);

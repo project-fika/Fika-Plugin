@@ -18,7 +18,7 @@ namespace Fika.Core.Networking
         public float PoseLevel;
         public bool IsProne = isProne;
         public int InteractiveObjectAmount;
-        public WorldInteractiveObject.GStruct385[] InteractiveObjects;
+        public WorldInteractiveObject.GStruct384[] InteractiveObjects;
         public int WindowBreakerAmount;
         public WindowBreaker[] Windows;
         public int LightAmount;
@@ -43,7 +43,7 @@ namespace Fika.Core.Networking
 
             if (InteractiveObjectAmount > 0)
             {
-                InteractiveObjects = new WorldInteractiveObject.GStruct385[InteractiveObjectAmount];
+                InteractiveObjects = new WorldInteractiveObject.GStruct384[InteractiveObjectAmount];
                 for (int i = 0; i < InteractiveObjectAmount; i++)
                 {
                     InteractiveObjects[i] = reader.GetInteractiveObjectState();
