@@ -91,6 +91,9 @@ namespace Fika.Core
         // Hidden
         public static ConfigEntry<bool> AcceptedTOS { get; set; }
 
+        //Advanced
+        public static ConfigEntry<bool> OfficialVersion { get; set; }
+
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
@@ -188,6 +191,7 @@ namespace Fika.Core
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
+            new FikaVersionLabelUpdate_Patch().Enable();
             new DisableReadyButton_Patch().Enable();
             new DisableInsuranceReadyButton_Patch().Enable();
             new DisableMatchSettingsReadyButton_Patch().Enable();
@@ -206,7 +210,8 @@ namespace Fika.Core
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-
+            OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
+            
             DisableSPTPatches();
             EnableOverridePatches();
 
@@ -263,6 +268,9 @@ namespace Fika.Core
 
             AcceptedTOS = Config.Bind("Hidden", "Accepted TOS", false, new ConfigDescription("Has accepted TOS", tags: new ConfigurationManagerAttributes() { Browsable = false }));
 
+            // Advanced
+            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            
             // Coop
 
             ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
@@ -400,6 +408,11 @@ namespace Fika.Core
             StomachDamageMultiplier = Config.Bind("Gameplay", "Stomach Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the stomach collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
             DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false, new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+        }
+        
+        private void OfficialVersion_SettingChanged(object sender, EventArgs e)
+        {
+            FikaVersionLabel_Patch.UpdateVersionLabel();
         }
 
         private string[] GetLocalAddresses()
