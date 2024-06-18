@@ -19,7 +19,7 @@ namespace Fika.Core.EssentialPatches
 
         private static string fikaVersion;
 
-        private static string officalVersion;
+        private static string officialVersion;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -47,7 +47,7 @@ namespace Fika.Core.EssentialPatches
 
             versionNumberTraverse = Traverse.Create(__result);
 
-            officalVersion = (string)versionNumberTraverse.Field("Major").GetValue();
+            officialVersion = (string)versionNumberTraverse.Field("Major").GetValue();
             
             UpdateVersionLabel();
         }
@@ -57,8 +57,8 @@ namespace Fika.Core.EssentialPatches
             Traverse preloaderUiTraverse= Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
             if (FikaPlugin.OfficialVersion.Value)
             {
-                preloaderUiTraverse.Field("string_2").SetValue($"{officalVersion} Beta version");
-                versionNumberTraverse.Field("Major").SetValue(officalVersion);
+                preloaderUiTraverse.Field("string_2").SetValue($"{officialVersion} Beta version");
+                versionNumberTraverse.Field("Major").SetValue(officialVersion);
             }
             else
             {
