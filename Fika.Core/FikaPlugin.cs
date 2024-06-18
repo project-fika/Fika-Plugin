@@ -269,7 +269,7 @@ namespace Fika.Core
             AcceptedTOS = Config.Bind("Hidden", "Accepted TOS", false, new ConfigDescription("Has accepted TOS", tags: new ConfigurationManagerAttributes() { Browsable = false }));
 
             // Advanced
-            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Show official version instead of fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
+            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
             
             // Coop
 

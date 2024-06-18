@@ -3,7 +3,6 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
-using System.Linq;
 using System.Reflection;
 using Fika.Core.EssentialPatches;
 
@@ -79,8 +78,9 @@ namespace Fika.Core.Coop.Utils
         public static void CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
         {
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-            var raidCode = GenerateRaidCode(6);
-            var body = new CreateMatch(raidCode, profileId, hostUsername, timestamp, raidSettings, HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
+            string raidCode = GenerateRaidCode(6);
+            CreateMatch body = new CreateMatch(raidCode, profileId, hostUsername, timestamp, raidSettings,
+                HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
             FikaRequestHandler.RaidCreate(body);
 
@@ -92,10 +92,16 @@ namespace Fika.Core.Coop.Utils
 
         private static string GenerateRaidCode(int length)
         {
-            var random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
+            Random random = new Random();
+            char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
+            string raidCode = "";
+            for (int i = 0; i < length; i++)
+            {
+                int charIndex = random.Next(chars.Length);
+                raidCode += chars[charIndex];
+            }
+
+            return raidCode;
         }
     }
 }
