@@ -3,6 +3,7 @@ using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -12,8 +13,25 @@ namespace Fika.Core.Coop.ClientClasses
     {
         private readonly CoopPlayer player = player;
         private readonly List<string> lastFromNetwork = [];
-        private readonly List<string> acceptedTypes = ["Kill", "Hit", "InZone", "Location"];
+        private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
+
+        public override void Init()
+        {
+            base.Init();
+            foreach (FikaPlugin.EQuestSharingTypes shareType in (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes)))
+            {
+                if (shareType == FikaPlugin.EQuestSharingTypes.All)
+                {
+                    return;
+                }
+
+                if (FikaPlugin.QuestTypesToShareAndReceive.Value.HasFlag(shareType))
+                {
+                    acceptedTypes.Add(shareType.ToString());
+                }
+            }
+        }
 
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
         {
@@ -52,7 +70,7 @@ namespace Fika.Core.Coop.ClientClasses
             if (conditional is GClass1258 quest)
             {
                 GClass3242 counter = quest.ConditionCountersManager.GetCounter(condition.id);
-                if (counter != null)
+                if (counter != null && acceptedTypes.Contains(counter.Type))
                 {
                     QuestConditionPacket packet = new(player.Profile.Info.MainProfileNickname, counter.Id, counter.SourceId);
 #if DEBUG
@@ -73,10 +91,10 @@ namespace Fika.Core.Coop.ClientClasses
                     GClass3242 counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                     if (counter != null)
                     {
-                        /*if (!acceptedTypes.Contains(counter.Type))
+                        if (!acceptedTypes.Contains(counter.Type))
                         {
                             return;
-                        }*/
+                        }
 
                         counter.Value++;
                         NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",

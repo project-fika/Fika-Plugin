@@ -117,6 +117,10 @@ namespace Fika.Core
         public static ConfigEntry<float> MinimumOpacity { get; set; }
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
 
+        // Coop | Quest Sharing
+        public static ConfigEntry<bool> QuestSharing {  get; set; }
+        public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
+
         // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
         public static ConfigEntry<KeyboardShortcut> PingButton { get; set; }
@@ -137,7 +141,7 @@ namespace Fika.Core
         // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
-        public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
+        public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
         public static ConfigEntry<bool> CullPlayers { get; set; }
         public static ConfigEntry<float> CullingRange { get; set; }
 
@@ -181,7 +185,6 @@ namespace Fika.Core
         public bool AllowItemSending;
         public string[] BlacklistedItems;
         public bool ForceSaveOnDeath;
-        public bool QuestSharing;
         #endregion
 
         protected void Awake()
@@ -313,6 +316,12 @@ namespace Fika.Core
 
             MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
 
+            // Coop | Quest Sharing
+
+            QuestSharing = Config.Bind("Coop | Quest Sharing", "Quest Sharing", false, new ConfigDescription("Toggle to enable the quest sharing system. Cannot be toggled mid-raid.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            
+            QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+
             // Coop | Custom
 
             UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
@@ -349,7 +358,7 @@ namespace Fika.Core
 
             DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", DynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
             CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
@@ -488,11 +497,22 @@ namespace Fika.Core
             new FikaAirdropFlare_Patch().Enable();
         }
 
-        public enum DynamicAIRates
+        public enum EDynamicAIRates
         {
             Low,
             Medium,
             High
+        }
+
+        [Flags]
+        public enum EQuestSharingTypes
+        {
+            Kill = 1,
+            Hit = 2,
+            Location = 4,
+            PlaceBeacon = 8,
+
+            All = Kill | Hit | Location | PlaceBeacon
         }
     }
 }
