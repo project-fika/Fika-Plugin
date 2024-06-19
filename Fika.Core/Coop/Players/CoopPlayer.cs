@@ -230,16 +230,21 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
-            if (damageInfo.DamageType is not EDamageType.Sniper or EDamageType.Landmine)
+            if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
             {
-                return null;
+                return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is not CoopBot)
+            if (damageInfo.Player != null && damageInfo.Player.iPlayer is CoopBot)
             {
-                return null;
+                return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
+            return null;
+        }
+
+        private GClass1688 SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+        {
             ActiveHealthController activeHealthController = ActiveHealthController;
             if (activeHealthController != null && !activeHealthController.IsAlive)
             {

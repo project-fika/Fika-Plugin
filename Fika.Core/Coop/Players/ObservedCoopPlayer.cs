@@ -300,9 +300,10 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
+            ShotReactions(damageInfo, bodyPartType);
+
             if (damageInfo.DamageType == EDamageType.Sniper && FikaBackendUtils.IsServer)
             {
-                ShotReactions(damageInfo, bodyPartType);
                 PacketSender.DamagePackets.Enqueue(new()
                 {
                     Damage = damageInfo.Damage,
@@ -358,7 +359,6 @@ namespace Fika.Core.Coop.Players
                         damageInfo.DidArmorDamage = num;
                     }
                     damageInfo.DidBodyDamage = damageInfo.Damage;
-                    ShotReactions(damageInfo, bodyPartType);
                     ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
                     PacketSender.DamagePackets.Enqueue(new()
@@ -393,11 +393,8 @@ namespace Fika.Core.Coop.Players
                 }
                 return null;
             }
-            else
-            {
-                ShotReactions(damageInfo, bodyPartType);
-                return null;
-            }
+
+            return null;
         }
 
         public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
