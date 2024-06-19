@@ -63,18 +63,18 @@ namespace Fika.Core.Coop.FreeCamera
         {
             if (IsActive && showOverlay)
             {
-                Rect rect = new(20, 20, 800, 800);
-                GUI.Label(rect, $"Left/Right Mouse Button: Jump between players");
-                rect.y += 15;
-                GUI.Label(rect, $"CTRL/Spacebar + Left/Right Mouse Button: Jump and spectate in 3rd person or head cam");
-                rect.y += 15;
-                GUI.Label(rect, $"T: Teleport to cam position");
-                rect.y += 15;
-                GUI.Label(rect, $"N: Toggle nightvision/thermals");
-                rect.y += 15;
-                GUI.Label(rect, $"HOME: Disable input");
-                rect.y += 15;
-                GUI.Label(rect, $"Shift + Ctrl: Turbo Speed");
+                GUILayout.BeginArea(new Rect(5, 5, 800, 800));
+                GUILayout.BeginVertical();
+
+                GUILayout.Label($"Left/Right Mouse Button: Jump between players");
+                GUILayout.Label($"CTRL/Spacebar + Left/Right Mouse Button: Jump and spectate in 3rd person or head cam");
+                GUILayout.Label($"T: Teleport to cam position");
+                GUILayout.Label($"N: Toggle nightvision/thermals");
+                GUILayout.Label($"HOME: Disable input");
+                GUILayout.Label($"Shift + Ctrl: Turbo Speed");
+
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
             }
         }
 
