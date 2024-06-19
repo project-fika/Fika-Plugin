@@ -613,14 +613,4 @@ namespace Fika.Core.Coop.Components
             });
         }
     }
-
-    public enum ESpawnState
-    {
-        None = 0,
-        Loading = 1,
-        Spawning = 2,
-        Spawned = 3,
-        Ignore = 98,
-        Error = 99,
-    }
 }
