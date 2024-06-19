@@ -235,7 +235,7 @@ namespace Fika.Core.Coop.Players
                 return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is CoopBot)
+            if (damageInfo.Player?.iPlayer is CoopBot)
             {
                 return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
