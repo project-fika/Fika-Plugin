@@ -40,9 +40,6 @@ namespace Fika.Core.Coop.BTR
         private BTRDataPacket btrDataPacket = default;
         private bool btrBotShooterInitialized = false;
 
-        private Coroutine _coverFireTimerCoroutine;
-
-        private Coroutine _shootingTargetCoroutine;
         private BTRTurretServer btrTurretServer;
         private bool isTurretInDefaultRotation;
         private BulletClass btrMachineGunAmmo;
@@ -463,9 +460,6 @@ namespace Fika.Core.Coop.BTR
             {
                 return;
             }
-
-            StaticManager.KillCoroutine(ref _shootingTargetCoroutine);
-            StaticManager.KillCoroutine(ref _coverFireTimerCoroutine);
 
             if (TraderServicesManager.Instance != null)
             {
