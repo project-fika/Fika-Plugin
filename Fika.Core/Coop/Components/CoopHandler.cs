@@ -511,7 +511,7 @@ namespace Fika.Core.Coop.Components
 
             Logger.LogDebug($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 
-            SetWeaponInHandsOfNewPlayer(otherPlayer, () => { });
+            SetWeaponInHandsOfNewPlayer(otherPlayer);
 
             return otherPlayer;
         }
@@ -559,13 +559,13 @@ namespace Fika.Core.Coop.Components
         /// <summary>
         /// Attempts to set up the New Player with the current weapon after spawning
         /// </summary>
-        /// <param name="person">The player to set the item on</param>
-        public void SetWeaponInHandsOfNewPlayer(Player person, Action successCallback)
+        /// <param name="player">The player to set the item on</param>
+        public void SetWeaponInHandsOfNewPlayer(Player player)
         {
-            EquipmentClass equipment = person.Profile.Inventory.Equipment;
+            EquipmentClass equipment = player.Profile.Inventory.Equipment;
             if (equipment == null)
             {
-                Logger.LogError($"SetWeaponInHandsOfNewPlayer: {person.Profile.ProfileId} has no Equipment!");
+                Logger.LogError($"SetWeaponInHandsOfNewPlayer: {player.Profile.Nickname}, {player.Profile.ProfileId} has no Equipment!");
             }
             Item item = null;
 
@@ -591,24 +591,14 @@ namespace Fika.Core.Coop.Components
 
             if (item == null)
             {
-                Logger.LogError($"SetWeaponInHandsOfNewPlayer:Unable to find any weapon for {person.Profile.ProfileId}");
+                Logger.LogError($"SetWeaponInHandsOfNewPlayer: Unable to find any weapon for {player.Profile.Nickname}, {player.Profile.ProfileId}");
             }
 
-            person.SetItemInHands(item, (IResult) =>
+            player.SetItemInHands(item, (IResult) =>
             {
                 if (IResult.Failed == true)
                 {
-                    Logger.LogError($"SetWeaponInHandsOfNewPlayer:Unable to set item {item} in hands for {person.Profile.ProfileId}");
-                }
-
-                if (IResult.Succeed == true)
-                {
-                    successCallback?.Invoke();
-                }
-
-                if (person.TryGetItemInHands<Item>() != null)
-                {
-                    successCallback?.Invoke();
+                    Logger.LogError($"SetWeaponInHandsOfNewPlayer: Unable to set item {item} in hands for {player.Profile.Nickname}, {player.Profile.ProfileId}");
                 }
             });
         }
