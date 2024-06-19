@@ -437,7 +437,7 @@ namespace Fika.Core.Coop.BTR
 
         private IEnumerator CoverFireTimer(float time)
         {
-            yield return new WaitForSecondsRealtime(time);
+            yield return new WaitForSeconds(time);
             botEventHandler.StopTraderServiceBtrSupport();
         }
 
