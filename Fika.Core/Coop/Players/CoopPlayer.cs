@@ -263,6 +263,10 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             float num = damage - damageInfo.Damage;
+            if (num > 0)
+            {
+                damageInfo.DidArmorDamage = num;
+            }
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, gclass.Material);
 
             if (list != null)
