@@ -533,13 +533,18 @@ namespace Fika.Core.Coop.BTR
 
             btrServerSide.turnCheckerObject.GetComponent<Renderer>().enabled = false; // Disables the red debug sphere
 
-            // Something is colliding with each other. We disabled the Main exterior collider on server objects
-            // and changed the layer of the Client exterior collider to be highPolyCollider to stop it twerking. Needs Proper fix
-            MeshCollider[] servercolliders = btrServerSide.transform.GetComponentsInChildren<MeshCollider>();
-            MeshCollider[] clientcolliders = btrClientSide.transform.GetComponentsInChildren<MeshCollider>();
+            // For some reason the client BTR collider is disabled but the server collider is enabled.
+            // Initially we assumed there was a reason for this so it was left as is.
+            // Turns out disabling the server collider in favour of the client collider fixes the "BTR doing a wheelie" bug,
+            // while preventing the player from walking through the BTR.
+            const string exteriorColliderName = "BTR_82_exterior_COLLIDER";
+            Collider serverExteriorCollider = btrServerSide.GetComponentsInChildren<Collider>(true)
+                .First(x => x.gameObject.name == exteriorColliderName);
+            Collider clientExteriorCollider = btrClientSide.GetComponentsInChildren<Collider>(true)
+                .First(x => x.gameObject.name == exteriorColliderName);
 
-            clientcolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").gameObject.layer = LayerMask.NameToLayer("HighPolyCollider");
-            servercolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").enabled = false;
+            serverExteriorCollider.gameObject.SetActive(false);
+            clientExteriorCollider.gameObject.SetActive(true);
         }
 
         private void UpdateTarget()
@@ -607,7 +612,7 @@ namespace Fika.Core.Coop.BTR
         {
             isShooting = true;
 
-            yield return new WaitForSecondsRealtime(machineGunAimDelay);
+            yield return new WaitForSeconds(machineGunAimDelay);
             if (currentTarget?.Person == null || currentTarget?.IsVisible == false || !btrBotShooter.BotBtrData.CanShoot())
             {
                 isShooting = false;
@@ -633,11 +638,11 @@ namespace Fika.Core.Coop.BTR
                 firearmController.method_54(weaponSoundPlayer, btrMachineGunAmmo, machineGunMuzzle.position, aimDirection, false);
                 burstCount--;
                 shotQueue.Enqueue(new(machineGunMuzzle.position, aimDirection));
-                yield return new WaitForSecondsRealtime(0.092308f); // 650 RPM
+                yield return new WaitForSeconds(0.092308f); // 650 RPM
             }
 
             float waitTime = Random.Range(machineGunRecoveryTime.x, machineGunRecoveryTime.y);
-            yield return new WaitForSecondsRealtime(waitTime);
+            yield return new WaitForSeconds(waitTime);
 
             isShooting = false;
         }

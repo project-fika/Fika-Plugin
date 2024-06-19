@@ -237,7 +237,7 @@ namespace Fika.Core.Coop.BTR
         {
             // Initial setup
             botEventHandler = Singleton<BotEventHandler>.Instance;
-            var botsController = Singleton<IBotGame>.Instance.BotsController;
+            BotsController botsController = Singleton<IBotGame>.Instance.BotsController;
             btrBotService = botsController.BotTradersServices.BTRServices;
             btrController.method_3(); // spawns server-side BTR game object
             //botsController.BotSpawner.SpawnBotBTR(); // spawns the scav bot which controls the BTR's turret
@@ -272,7 +272,7 @@ namespace Fika.Core.Coop.BTR
 
             // Initialise turret variables
             btrTurretServer = btrServerSide.BTRTurret;
-            var btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
+            Transform btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
             isTurretInDefaultRotation = btrTurretServer.targetTransform == btrTurretDefaultTargetTransform
                 && btrTurretServer.targetPosition == btrTurretServer.defaultAimingPosition;
             btrMachineGunAmmo = (BulletClass)BTRUtil.CreateItem(BTRUtil.BTRMachineGunAmmoTplId);
@@ -284,7 +284,7 @@ namespace Fika.Core.Coop.BTR
 
         private void ConfigureSettingsFromServer()
         {
-            var serverConfig = BTRUtil.GetConfigFromServer();
+            SPT.Custom.BTR.Models.BTRConfigModel serverConfig = BTRUtil.GetConfigFromServer();
 
             btrServerSide.moveSpeed = serverConfig.MoveSpeed;
             btrServerSide.pauseDurationRange.x = serverConfig.PointWaitTime.Min;
@@ -396,13 +396,18 @@ namespace Fika.Core.Coop.BTR
 
             btrServerSide.turnCheckerObject.GetComponent<Renderer>().enabled = false; // Disables the red debug sphere
 
-            // Something is colliding with each other. We disabled the Main exterior collider on server objects
-            // and changed the layer of the Client exterior collider to be highPolyCollider to stop it twerking. Needs Proper fix
-            MeshCollider[] servercolliders = btrServerSide.transform.GetComponentsInChildren<MeshCollider>();
-            MeshCollider[] clientcolliders = btrClientSide.transform.GetComponentsInChildren<MeshCollider>();
+            // For some reason the client BTR collider is disabled but the server collider is enabled.
+            // Initially we assumed there was a reason for this so it was left as is.
+            // Turns out disabling the server collider in favour of the client collider fixes the "BTR doing a wheelie" bug,
+            // while preventing the player from walking through the BTR.
+            const string exteriorColliderName = "BTR_82_exterior_COLLIDER";
+            Collider serverExteriorCollider = btrServerSide.GetComponentsInChildren<Collider>(true)
+                .First(x => x.gameObject.name == exteriorColliderName);
+            Collider clientExteriorCollider = btrClientSide.GetComponentsInChildren<Collider>(true)
+                .First(x => x.gameObject.name == exteriorColliderName);
 
-            clientcolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").gameObject.layer = LayerMask.NameToLayer("HighPolyCollider");
-            servercolliders.FirstOrDefault(x => x.gameObject.name == "BTR_82_exterior_COLLIDER").enabled = false;
+            serverExteriorCollider.gameObject.SetActive(false);
+            clientExteriorCollider.gameObject.SetActive(true);
         }
 
         public void ClientInteraction(Player player, PlayerInteractPacket packet)
