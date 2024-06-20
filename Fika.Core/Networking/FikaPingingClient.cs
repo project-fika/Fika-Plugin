@@ -107,6 +107,7 @@ namespace Fika.Core.Networking
             if (localStunEndPoint == null)
             {
                 _logger.LogError("Nat Punch Request failed: Stun Endpoint is null.");
+                return;
             }    
 
             GetHostStunRequest getStunRequest = new GetHostStunRequest(serverId, RequestHandler.SessionId, localStunEndPoint.Remote.Address.ToString(), localStunEndPoint.Remote.Port);
