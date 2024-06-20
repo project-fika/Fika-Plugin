@@ -274,7 +274,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
             {
-                coopHandler.ServerId = FikaBackendUtils.GetGroupId();
+                coopHandler.ServerId = FikaBackendUtils.GetServerId();
             }
             else
             {

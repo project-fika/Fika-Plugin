@@ -21,13 +21,9 @@ namespace Fika.Core.UI.Custom
     internal class MatchMakerUIScript : MonoBehaviour
     {
         private MatchMakerUI fikaMatchMakerUi;
-        public RaidSettings RaidSettings { get; set; }
         private LobbyEntry[] Matches { get; set; }
         private List<GameObject> MatchesListObjects { get; set; } = [];
         private bool StopQuery = false;
-
-        public DefaultUIButton BackButton { get; internal set; }
-        public DefaultUIButton AcceptButton { get; internal set; }
         public GameObject NewBackButton { get; internal set; }
 
         private string ProfileId => FikaBackendUtils.Profile.ProfileId;
@@ -152,7 +148,7 @@ namespace Fika.Core.UI.Custom
                     }
                 }
                 FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
+                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PmcName, RaidSettings);
                 AcceptButton.OnClick.Invoke();
                 DestroyThis();
             });

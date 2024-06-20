@@ -113,7 +113,7 @@ namespace Fika.Core.Coop.Players
 
             player._animators[0].enabled = true;
 
-            player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
+            player.Profile.Info.MainProfileNickname = FikaBackendUtils.PmcName;
 
             player.SetupMainPlayer();
 

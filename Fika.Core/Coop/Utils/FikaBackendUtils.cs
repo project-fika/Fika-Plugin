@@ -4,25 +4,20 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
 using System.Reflection;
+using Fika.Core.EssentialPatches;
 
 namespace Fika.Core.Coop.Utils
 {
-    public enum EMatchmakerType
-    {
-        Single = 0,
-        GroupPlayer = 1,
-        GroupLeader = 2
-    }
-
     public static class FikaBackendUtils
     {
         public static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
         public static Profile Profile;
-        public static string PMCName;
-        public static EMatchmakerType MatchingType = EMatchmakerType.Single;
-        public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
-        public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
-        public static bool IsSinglePlayer => MatchingType == EMatchmakerType.Single;
+        public static string PmcName;
+        public static EMatchingType MatchingType = EMatchingType.Single;
+        public static bool IsServer => Profile.ProfileId == _serverId;
+        public static bool IsClient => MatchingType is EMatchingType.GroupPlayer or EMatchingType.GroupLeader;
+        public static bool IsSinglePlayer => MatchingType == EMatchingType.Single;
+        
         public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         public static MatchMakerGroupPreview MatchMakerGroupPreview;
         public static int HostExpectedNumberOfPlayers = 1;
@@ -31,29 +26,29 @@ namespace Fika.Core.Coop.Utils
         public static int RemotePort;
         public static int LocalPort = 0;
         public static bool IsHostNatPunch = false;
-        private static string groupId;
-        private static string raidCode;
+        private static string _serverId;
+        private static string _raidCode;
 
-        public static MatchmakerTimeHasCome.TimeHasComeScreenClass ScreenController;
+        public static MatchmakerTimeHasCome.GClass3187 ScreenController;
 
-        public static string GetGroupId()
+        public static string GetServerId()
         {
-            return groupId;
+            return _serverId;
         }
 
-        public static void SetGroupId(string newId)
+        public static void SetServerId(string newId)
         {
-            groupId = newId;
+            _serverId = newId;
         }
 
         public static void SetRaidCode(string newCode)
         {
-            raidCode = newCode;
+            _raidCode = newCode;
         }
 
         public static string GetRaidCode()
         {
-            return raidCode;
+            return _raidCode;
         }
 
         public static bool JoinMatch(string profileId, string serverId, out CreateMatch result, out string errorMessage)
@@ -96,8 +91,8 @@ namespace Fika.Core.Coop.Utils
 
             FikaRequestHandler.RaidCreate(body);
 
-            SetGroupId(profileId);
-            MatchingType = EMatchmakerType.GroupLeader;
+            SetServerId(profileId);
+            MatchingType = EMatchingType.GroupLeader;
 
             SetRaidCode(raidCode);
         }

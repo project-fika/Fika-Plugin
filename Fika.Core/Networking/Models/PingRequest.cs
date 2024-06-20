@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Http.Models
 
         public PingRequest()
         {
-            ServerId = FikaBackendUtils.GetGroupId();
+            ServerId = FikaBackendUtils.GetServerId();
         }
     }
 }

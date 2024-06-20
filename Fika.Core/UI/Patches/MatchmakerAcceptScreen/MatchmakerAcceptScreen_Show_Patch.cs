@@ -33,10 +33,11 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
                 raidSettings.RaidMode = ERaidMode.Local;
             }
 
-            MatchMakerUIScript newMatchMaker = MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
-            newMatchMaker.RaidSettings = raidSettings;
-            newMatchMaker.AcceptButton = ____acceptButton;
-            newMatchMaker.BackButton = ____backButton;
+            MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
+            
+            FikaMatchingUtils.RaidSettings = raidSettings;
+            FikaMatchingUtils.AcceptButton = ____acceptButton;
+            FikaMatchingUtils.BackButton = ____backButton;
         }
 
         [PatchPostfix]
@@ -44,7 +45,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
         {
             FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
             FikaBackendUtils.Profile = ___profile_0;
-            FikaBackendUtils.PMCName = session.Profile.Nickname;
+            FikaBackendUtils.PmcName = session.Profile.Nickname;
         }
     }
 

@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.Custom
         protected void Awake()
         {
             windowRect = new(20, Screen.height - 260, 600, 250);
-            nickname = FikaBackendUtils.PMCName;
+            nickname = FikaBackendUtils.PmcName;
             chatText = string.Empty;
             textField = string.Empty;
             show = false;
