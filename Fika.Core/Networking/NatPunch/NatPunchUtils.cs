@@ -89,8 +89,6 @@ namespace Fika.Core.Networking.NatPunch
 
                 netManager.Start(stunIpEndPoint.Local.Port);
 
-                ConsoleScreen.Log($"Remote IP set: {stunIpEndPoint.Remote}");
-
                 await Task.Delay(TimeSpan.FromSeconds(60));
             }
         }

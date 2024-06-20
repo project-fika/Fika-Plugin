@@ -188,7 +188,18 @@ namespace Fika.Core.Networking
 
             logger.LogInfo("Started Fika Server");
 
-            NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
+            string serverStartedMessage;
+
+            if(FikaPlugin.UseNatPunching.Value)
+            {
+                serverStartedMessage = "Server started using Nat Punching.";
+            }
+            else
+            {
+                serverStartedMessage = $"Server started on port {_netServer.LocalPort}.";
+            }
+            
+            NotificationManagerClass.DisplayMessageNotification(serverStartedMessage,
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
             string[] Ips = [];

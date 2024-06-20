@@ -108,7 +108,6 @@ namespace Fika.Core.Networking.NatPunch
                     {
                         IPEndPoint clientIpEndPoint = new IPEndPoint(IPAddress.Parse(getHostStunRequest.StunIp), getHostStunRequest.StunPort);
 
-                        EFT.UI.ConsoleScreen.Log($"punching this bad boy:{clientIpEndPoint}");
                         NatPunchUtils.PunchNat(_netManager, clientIpEndPoint);
 
                         SendHostStun(getHostStunRequest.SessionId, _stunIpEndPoint);
