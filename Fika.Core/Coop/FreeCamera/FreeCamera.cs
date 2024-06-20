@@ -29,6 +29,7 @@ namespace Fika.Core.Coop.FreeCamera
         private bool showOverlay;
         private NightVision nightVision;
         private ThermalVision thermalVision;
+        private FreeCameraController freeCameraController;
 
         private KeyCode forwardKey = KeyCode.W;
         private KeyCode backKey = KeyCode.S;
@@ -57,6 +58,8 @@ namespace Fika.Core.Coop.FreeCamera
 
             nightVision = CameraClass.Instance.NightVision;
             thermalVision = CameraClass.Instance.ThermalVision;
+
+            freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
         }
 
         private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
@@ -88,6 +91,7 @@ namespace Fika.Core.Coop.FreeCamera
                 GUILayout.Label($"Spacebar + Left/Right Mouse Button: Jump and spectate in head cam");
                 GUILayout.Label($"T: Teleport to cam position");
                 GUILayout.Label($"N: {visionText}");
+                GUILayout.Label($"M: Disable culling");
                 GUILayout.Label($"HOME: {(disableInput ? "Enable Input" : "Disable Input")}");
                 GUILayout.Label($"Shift + Ctrl: Turbo Speed");
 
@@ -103,11 +107,11 @@ namespace Fika.Core.Coop.FreeCamera
                 return;
             }
 
+            // Toggle input
             if (Input.GetKeyDown(KeyCode.Home))
             {
                 disableInput = !disableInput;
-                string status = disableInput == true ? "disabled" : "enabled";
-                NotificationManagerClass.DisplayMessageNotification($"Free cam input is now {status}.");
+                NotificationManagerClass.DisplayMessageNotification($"Free cam input is now {(disableInput ? "disabled" : "enabled")}.");
             }
 
             if (disableInput)
@@ -289,9 +293,19 @@ namespace Fika.Core.Coop.FreeCamera
                 }
             }
 
+            // Toggle vision
             if (Input.GetKeyDown(KeyCode.N))
             {
                 ToggleVision();
+            }
+
+            // Disable culling
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                if (freeCameraController != null)
+                {
+                    freeCameraController.DisableAllCullingObjects(); 
+                }
             }
 
             if (isFollowing)

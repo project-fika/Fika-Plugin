@@ -46,6 +46,7 @@ namespace Fika.Core.Coop.FreeCamera
         private bool deathFadeEnabled;
         private DisablerCullingObjectBase[] allCullingObjects;
         private List<PerfectCullingBakeGroup> previouslyActiveBakeGroups;
+        private bool hasEnabledCulling = false;
 
         protected void Awake()
         {
@@ -368,7 +369,29 @@ namespace Fika.Core.Coop.FreeCamera
 
             _gamePlayerOwner.enabled = false;
             _freeCamScript.SetActive(true);
+        }
 
+        /// <summary>
+        /// A helper method to reset the player view back to First Person
+        /// </summary>
+        /// <param name="localPlayer"></param>
+        private void SetPlayerToFirstPersonMode(Player localPlayer)
+        {
+            // re-enable _gamePlayerOwner
+            _gamePlayerOwner.enabled = true;
+            _freeCamScript.SetActive(false);
+
+            localPlayer.PointOfView = EPointOfView.FirstPerson;
+            CameraClass.Instance.SetOcclusionCullingEnabled(true);
+
+            if (hasEnabledCulling)
+            {
+                EnableAllCullingObjects();
+            }
+        }
+
+        public void DisableAllCullingObjects()
+        {
             int count = 0;
             foreach (DisablerCullingObjectBase cullingObject in allCullingObjects)
             {
@@ -379,7 +402,9 @@ namespace Fika.Core.Coop.FreeCamera
                 count++;
                 cullingObject.SetComponentsEnabled(true);
             }
-            FikaPlugin.Instance.FikaLogger.LogDebug($"Enabled {count} Culling Triggers.");
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogWarning($"Enabled {count} Culling Triggers.");
+#endif
 
             PerfectCullingAdaptiveGrid perfectCullingAdaptiveGrid = FindObjectOfType<PerfectCullingAdaptiveGrid>();
             if (perfectCullingAdaptiveGrid != null)
@@ -404,21 +429,12 @@ namespace Fika.Core.Coop.FreeCamera
                     }
                 }
             }
+
+            hasEnabledCulling = true;
         }
 
-        /// <summary>
-        /// A helper method to reset the player view back to First Person
-        /// </summary>
-        /// <param name="localPlayer"></param>
-        private void SetPlayerToFirstPersonMode(Player localPlayer)
+        public void EnableAllCullingObjects()
         {
-            // re-enable _gamePlayerOwner
-            _gamePlayerOwner.enabled = true;
-            _freeCamScript.SetActive(false);
-
-            localPlayer.PointOfView = EPointOfView.FirstPerson;
-            CameraClass.Instance.SetOcclusionCullingEnabled(true);
-
             int count = 0;
             foreach (DisablerCullingObjectBase cullingObject in allCullingObjects)
             {
@@ -429,7 +445,9 @@ namespace Fika.Core.Coop.FreeCamera
                 count++;
                 cullingObject.SetComponentsEnabled(false);
             }
-            FikaPlugin.Instance.FikaLogger.LogDebug($"Disabled {count} Culling Triggers.");
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogWarning($"Disabled {count} Culling Triggers.");
+#endif
 
             PerfectCullingAdaptiveGrid perfectCullingAdaptiveGrid = FindObjectOfType<PerfectCullingAdaptiveGrid>();
             if (perfectCullingAdaptiveGrid != null)
@@ -456,6 +474,8 @@ namespace Fika.Core.Coop.FreeCamera
                     }
                 }
             }
+
+            hasEnabledCulling = false;
         }
 
         /// <summary>
