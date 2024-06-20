@@ -90,7 +90,7 @@ namespace Fika.Core.Coop.Utils
             FikaVersionLabelUpdate_Patch.raidCode = raidCode;
         }
 
-        private static string GenerateRaidCode(int length)
+        public static string GenerateRaidCode(int length)
         {
             Random random = new Random();
             char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
