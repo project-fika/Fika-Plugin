@@ -120,6 +120,11 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
+        public override GClass681 CreatePhysical()
+        {
+            return FikaPlugin.Instance.UseInertia ? new GClass682() : new NoInertiaPhysical();
+        }
+
         public override void OnSkillLevelChanged(GClass1778 skill)
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format("SkillLevelUpMessage".Localized(null),
@@ -573,7 +578,6 @@ namespace Fika.Core.Coop.Players
             {
                 Packet = packet,
                 KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
-                KillerWeaponId = LastDamageInfo.Weapon?.Id,
                 RagdollPacket = new()
                 {
                     BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
@@ -1410,6 +1414,7 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
+                // TODO: Fix this and consistently get the correct data...
                 if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
                 {
                     damageInfo.Weapon = weapon;

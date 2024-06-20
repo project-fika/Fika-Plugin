@@ -1334,7 +1334,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void SetAggressor(string killerId, string weaponId)
+        public void SetAggressor(string killerId)
         {
             Player killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
             if (killer != null)

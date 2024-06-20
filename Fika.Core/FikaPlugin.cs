@@ -185,6 +185,7 @@ namespace Fika.Core
         public bool AllowItemSending;
         public string[] BlacklistedItems;
         public bool ForceSaveOnDeath;
+        public bool UseInertia;
         #endregion
 
         protected void Awake()
