@@ -93,12 +93,8 @@ namespace Fika.Core.Networking
 
         public async void NatPunchRequest(string serverId)
         {
-            EFT.UI.ConsoleScreen.Log($"start of nat punch request");
-
             FikaNatPunchClient fikaNatPunchClient = new FikaNatPunchClient();
             fikaNatPunchClient.Connect();
-
-            EFT.UI.ConsoleScreen.Log($"connecting");
 
             if (!fikaNatPunchClient.Connected)
             {
@@ -110,20 +106,15 @@ namespace Fika.Core.Networking
 
             if (localStunEndPoint == null)
             {
-                _logger.LogError("Failed to CreateStunEndPoint.");
+                _logger.LogError("Nat Punch Request failed: Stun Endpoint is null.");
             }    
 
-            EFT.UI.ConsoleScreen.Log($"requesting punch");
             GetHostStunRequest getStunRequest = new GetHostStunRequest(serverId, RequestHandler.SessionId, localStunEndPoint.Remote.Address.ToString(), localStunEndPoint.Remote.Port);
             GetHostStunResponse getStunResponse = await fikaNatPunchClient.GetHostStun(getStunRequest);
 
-            EFT.UI.ConsoleScreen.Log($"punch request done");
             fikaNatPunchClient.Close();
 
-            EFT.UI.ConsoleScreen.Log($"connection closed");
             remoteStunEndPoint = new IPEndPoint(IPAddress.Parse(getStunResponse.StunIp), getStunResponse.StunPort);
-
-            EFT.UI.ConsoleScreen.Log($"received: {remoteStunEndPoint}");
 
             localPort = localStunEndPoint.Local.Port;
         }
