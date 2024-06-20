@@ -2055,6 +2055,8 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
             dictionary_0.Clear();
+            // Reset MatchingType to Single when the game ends.
+            FikaBackendUtils.MatchingType = EMatchmakerType.Single;
         }
 
         /// <summary>
