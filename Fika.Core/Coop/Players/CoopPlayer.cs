@@ -120,6 +120,11 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
+        public override GClass681 CreatePhysical()
+        {
+            return FikaPlugin.Instance.UseInertia ? new GClass682() : new NoInertiaPhysical();
+        }
+
         public override void OnSkillLevelChanged(GClass1778 skill)
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format("SkillLevelUpMessage".Localized(null),
@@ -235,7 +240,7 @@ namespace Fika.Core.Coop.Players
                 return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is CoopBot)
+            if (damageInfo.Player?.iPlayer is CoopBot)
             {
                 return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
@@ -263,6 +268,10 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             float num = damage - damageInfo.Damage;
+            if (num > 0)
+            {
+                damageInfo.DidArmorDamage = num;
+            }
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, gclass.Material);
 
             if (list != null)
@@ -569,7 +578,6 @@ namespace Fika.Core.Coop.Players
             {
                 Packet = packet,
                 KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
-                KillerWeaponId = LastDamageInfo.Weapon?.Id,
                 RagdollPacket = new()
                 {
                     BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
@@ -1406,6 +1414,7 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
+                // TODO: Fix this and consistently get the correct data...
                 if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
                 {
                     damageInfo.Weapon = weapon;
