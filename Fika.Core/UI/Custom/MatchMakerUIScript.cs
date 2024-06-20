@@ -6,6 +6,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.NatPunch;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using System;
@@ -209,8 +210,11 @@ namespace Fika.Core.UI.Custom
 
             NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
-            FikaPingingClient pingingClient = new(serverId);
-            if (pingingClient.Init())
+            NetManagerUtils.CreatePingingClient();
+
+            var pingingClient = Singleton<FikaPingingClient>.Instance;
+
+            if (pingingClient.Init(serverId))
             {
                 int attempts = 0;
                 bool success;
@@ -221,7 +225,7 @@ namespace Fika.Core.UI.Custom
                 {
                     attempts++;
 
-                    pingingClient.PingEndPoint();
+                    pingingClient.PingEndPoint("fika.hello");
                     pingingClient.NetClient.PollEvents();
                     success = pingingClient.Received;
 
@@ -249,14 +253,20 @@ namespace Fika.Core.UI.Custom
                 ConsoleScreen.Log("ERROR");
             }
 
-            pingingClient.NetClient?.Stop();
-            pingingClient = null;
-
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
                 FikaBackendUtils.SetGroupId(result.ServerId);
                 FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
+
+                if (FikaBackendUtils.IsHostNatPunch)
+                {
+                    pingingClient.StartKeepAliveRoutine();
+                }
+                else
+                {
+                    NetManagerUtils.DestroyPingingClient();
+                }
 
                 DestroyThis();
 
@@ -264,6 +274,8 @@ namespace Fika.Core.UI.Custom
             }
             else
             {
+                NetManagerUtils.DestroyPingingClient();
+
                 Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage, ErrorScreen.EButtonType.OkButton, 15, null, null);
             }
         }

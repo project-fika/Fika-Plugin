@@ -11,10 +11,14 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "port")]
         public int Port;
 
-        public GetHostResponse(string[] ips, int port)
+        [DataMember(Name = "natPunch")]
+        public bool NatPunch;
+
+        public GetHostResponse(string[] ips, int port, bool natPunch)
         {
             Ips = ips;
             Port = port;
+            NatPunch = natPunch;
         }
     }
 }

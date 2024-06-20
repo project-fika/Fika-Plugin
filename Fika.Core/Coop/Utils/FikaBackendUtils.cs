@@ -30,6 +30,8 @@ namespace Fika.Core.Coop.Utils
         public static WeatherClass[] Nodes = null;
         public static string RemoteIp;
         public static int RemotePort;
+        public static int LocalPort = 0;
+        public static bool IsHostNatPunch = false;
         private static string groupId;
 
         public static MatchmakerTimeHasCome.GClass3187 ScreenController;
