@@ -31,7 +31,11 @@ namespace Fika.Core.UI.Models
         [DataMember(Name = "useInertia")]
         public bool UseInertia;
 
-        public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia)
+        [DataMember(Name = "sharedQuestProgression")]
+        public bool SharedQuestProgression;
+
+        public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
+            bool sharedQuestProgression)
         {
             UseBTR = useBTR;
             FriendlyFire = friendlyFire;
@@ -41,9 +45,10 @@ namespace Fika.Core.UI.Models
             BlacklistedItems = blacklistedItems;
             ForceSaveOnDeath = forceSaveOnDeath;
             UseInertia = useInertia;
+            SharedQuestProgression = sharedQuestProgression;
         }
 
-        public new void ToString()
+        public void LogValues()
         {
             FikaPlugin.Instance.FikaLogger.LogInfo("Received config from server:");
             FieldInfo[] fields = typeof(ClientConfigModel).GetFields();

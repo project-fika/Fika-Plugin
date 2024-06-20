@@ -118,7 +118,6 @@ namespace Fika.Core
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
 
         // Coop | Quest Sharing
-        public static ConfigEntry<bool> QuestSharing {  get; set; }
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
 
         // Coop | Custom
@@ -186,6 +185,7 @@ namespace Fika.Core
         public string[] BlacklistedItems;
         public bool ForceSaveOnDeath;
         public bool UseInertia;
+        public bool SharedQuestProgression;
         #endregion
 
         protected void Awake()
@@ -263,8 +263,9 @@ namespace Fika.Core
             BlacklistedItems = clientConfig.BlacklistedItems;
             ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
             UseInertia = clientConfig.UseInertia;
+            SharedQuestProgression = clientConfig.SharedQuestProgression;
 
-            clientConfig.ToString();
+            clientConfig.LogValues();
         }
 
         private void SetupConfig()
@@ -319,8 +320,6 @@ namespace Fika.Core
             MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Quest Sharing
-
-            QuestSharing = Config.Bind("Coop | Quest Sharing", "Quest Sharing", false, new ConfigDescription("Toggle to enable the quest sharing system. Cannot be toggled mid-raid.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
             
             QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
