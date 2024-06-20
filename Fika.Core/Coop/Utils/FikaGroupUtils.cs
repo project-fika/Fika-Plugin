@@ -10,11 +10,32 @@ public static class FikaGroupUtils
     {
         get
         {
-            if (GroupController?.Group == null) return true;
-            if (GroupController?.GroupPlayers == null) return true;
-            if (GroupController.GroupPlayers.Count <= 1) return true;
-            if (GroupController?.Group?.Owner?.Value?.Id == null) return true;
+            if (GroupController?.Group == null)
+            {
+                return true;
+            }
+
+            if (GroupController?.GroupPlayers == null)
+            {
+                return true;
+            }
+
+            if (GroupController.GroupPlayers.Count <= 1)
+            {
+                return true;
+            }
+
+            if (GroupController?.Group?.Owner?.Value?.Id == null)
+            {
+                return true;
+            }
+            
             return GroupController.Group.Owner.Value.Id == FikaBackendUtils.Profile.ProfileId || GroupController.IsLeader;
         }
+    }
+
+    public static void GroupJoinMatch(string profileId, string serverId)
+    {
+        FikaBackendUtils.MatchMakerUIScript.JoinMatchCoroutine(profileId, serverId);
     }
 }

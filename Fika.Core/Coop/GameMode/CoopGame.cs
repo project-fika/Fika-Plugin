@@ -268,9 +268,9 @@ namespace Fika.Core.Coop.GameMode
             coopHandler = CoopHandler.CoopHandlerParent.AddComponent<CoopHandler>();
             coopHandler.LocalGameInstance = this;
 
-            if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
+            if (!string.IsNullOrEmpty(FikaBackendUtils.GetServerId()))
             {
-                coopHandler.ServerId = FikaBackendUtils.GetGroupId();
+                coopHandler.ServerId = FikaBackendUtils.GetServerId();
             }
             else
             {
@@ -885,7 +885,7 @@ namespace Fika.Core.Coop.GameMode
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
             coopPlayer.SetupMainPlayer();
 
-            PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
+            PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetServerId());
             await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             myPlayer.SpawnPoint = spawnPoint;

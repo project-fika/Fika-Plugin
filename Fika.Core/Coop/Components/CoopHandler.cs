@@ -83,7 +83,7 @@ namespace Fika.Core.Coop.Components
             CoopHandler coopGC = GetCoopHandler();
             if (coopGC == null)
             {
-                return FikaBackendUtils.GetGroupId();
+                return FikaBackendUtils.GetServerId();
             }
 
             return coopGC.ServerId;

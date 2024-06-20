@@ -33,10 +33,12 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
                 raidSettings.RaidMode = ERaidMode.Local;
             }
 
-            MatchMakerUIScript newMatchMaker = MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
-            newMatchMaker.RaidSettings = raidSettings;
-            newMatchMaker.AcceptButton = ____acceptButton;
-            newMatchMaker.BackButton = ____backButton;
+            MatchMakerUIScript matchMakerUIScript = MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
+            matchMakerUIScript.AcceptButton = ____acceptButton;
+            matchMakerUIScript.BackButton = ____backButton;
+            
+            FikaBackendUtils.RaidSettings = raidSettings;
+            FikaBackendUtils.MatchMakerUIScript = matchMakerUIScript;
         }
 
         [PatchPostfix]
