@@ -106,6 +106,13 @@ public static class FikaMatchingUtils
         FikaBackendUtils.MatchingType = EMatchingType.GroupLeader;
     }
     
+    public static void CreateTempMatch(string profileId, string hostUsername, RaidSettings raidSettings)
+    {
+        var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+        var body = new CreateMatch(profileId, hostUsername, timestamp, raidSettings, raidSettings.Side, raidSettings.SelectedDateTime, true);
+        FikaRequestHandler.RaidCreate(body);
+    }
+    
     private static void DetermineMatchingType(string profileId, string _serverId)
     {
         if (FikaGroupUtils.GroupController != null)
