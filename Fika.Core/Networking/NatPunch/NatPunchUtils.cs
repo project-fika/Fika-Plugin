@@ -29,8 +29,8 @@ namespace Fika.Core.Networking.NatPunch
 
         public static StunIPEndPoint CreateStunEndPoint(int localPort = 0)
         {
-            var stunUdpClient = new UdpClient();
-            var stunQueryResult = new STUNQueryResult();
+            UdpClient stunUdpClient = new();
+            STUNQueryResult stunQueryResult = new();
 
             try
             {
@@ -42,13 +42,13 @@ namespace Fika.Core.Networking.NatPunch
                 IPAddress stunIp = Array.Find(Dns.GetHostEntry("stun.l.google.com").AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
                 int stunPort = 19302;
 
-                IPEndPoint stunQueryIpEndPoint = new IPEndPoint(stunIp, stunPort);
+                IPEndPoint stunQueryIpEndPoint = new(stunIp, stunPort);
 
                 stunQueryResult = STUNClient.Query(stunUdpClient.Client, stunQueryIpEndPoint, STUNQueryType.ExactNAT, NATTypeDetectionRFC.Rfc3489);
 
                 if (stunQueryResult.PublicEndPoint != null)
                 {
-                    var stunIpEndPointResult = new StunIPEndPoint((IPEndPoint)stunUdpClient.Client.LocalEndPoint, stunQueryResult.PublicEndPoint);
+                    StunIPEndPoint stunIpEndPointResult = new((IPEndPoint)stunUdpClient.Client.LocalEndPoint, stunQueryResult.PublicEndPoint);
                     return stunIpEndPointResult;
                 }
             }
@@ -96,7 +96,7 @@ namespace Fika.Core.Networking.NatPunch
         public static void PunchNat(NetManager netManager, IPEndPoint endPoint)
         {
             // bogus punch data
-            var resp = new NetDataWriter();
+            NetDataWriter resp = new();
             resp.Put("fika.punchnat");
 
             // send a couple of packets to punch a hole

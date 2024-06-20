@@ -1,12 +1,12 @@
-﻿using LiteNetLib;
+﻿using BepInEx.Logging;
+using Fika.Core.Networking.Http.Models;
+using LiteNetLib;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SPT.Common.Http;
 using System;
 using System.Net;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using SPT.Common.Http;
 using WebSocketSharp;
-using Fika.Core.Networking.Http.Models;
-using BepInEx.Logging;
 
 namespace Fika.Core.Networking.NatPunch
 {
@@ -21,17 +21,20 @@ namespace Fika.Core.Networking.NatPunch
         {
             get
             {
-                return _webSocket.ReadyState == WebSocketState.Open ? true : false;
+                return _webSocket.ReadyState == WebSocketState.Open;
             }
         }
         private StunIPEndPoint _stunIpEndPoint;
-        public StunIPEndPoint StunIPEndpoint { 
-            get { 
-                return _stunIpEndPoint; 
-            } 
-            set { 
-                _stunIpEndPoint = value; 
-            } 
+        public StunIPEndPoint StunIPEndpoint
+        {
+            get
+            {
+                return _stunIpEndPoint;
+            }
+            set
+            {
+                _stunIpEndPoint = value;
+            }
         }
 
         private WebSocket _webSocket;
@@ -75,10 +78,14 @@ namespace Fika.Core.Networking.NatPunch
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
         {
             if (e == null)
+            {
                 return;
+            }
 
             if (string.IsNullOrEmpty(e.Data))
+            {
                 return;
+            }
 
             ProcessMessage(e.Data);
         }
@@ -96,13 +103,13 @@ namespace Fika.Core.Networking.NatPunch
 
         private void ProcessMessage(string data)
         {
-            var msgObj = GetRequestObject(data);
-            var msgObjType = msgObj.GetType().Name;
+            object msgObj = GetRequestObject(data);
+            string msgObjType = msgObj.GetType().Name;
 
             switch (msgObjType)
             {
                 case "GetHostStunRequest":
-                    var getHostStunRequest = (GetHostStunRequest)msgObj;
+                    GetHostStunRequest getHostStunRequest = (GetHostStunRequest)msgObj;
 
                     if (_stunIpEndPoint != null)
                     {
@@ -118,7 +125,7 @@ namespace Fika.Core.Networking.NatPunch
 
         private void Send<T1>(T1 o)
         {
-            var data = JsonConvert.SerializeObject(o);
+            string data = JsonConvert.SerializeObject(o);
             _webSocket.Send(data);
         }
 
@@ -133,20 +140,18 @@ namespace Fika.Core.Networking.NatPunch
                 throw new NullReferenceException("requestType");
             }
 
-            var requestType = obj["requestType"].ToString();
+            string requestType = obj["requestType"].ToString();
 
-            switch (requestType)
+            return requestType switch
             {
-                case "GetHostStunRequest":
-                    return JsonConvert.DeserializeObject<GetHostStunRequest>(data);
-                default:
-                    throw new ArgumentException("Invalid requestType received!");
-            }
+                "GetHostStunRequest" => (object)JsonConvert.DeserializeObject<GetHostStunRequest>(data),
+                _ => throw new ArgumentException("Invalid requestType received!"),
+            };
         }
 
         public void SendHostStun(string clientId, StunIPEndPoint stunIpEndPoint)
         {
-            var getHostStunResponse = new GetHostStunResponse(clientId, stunIpEndPoint.Remote.Address.ToString(), stunIpEndPoint.Remote.Port);
+            GetHostStunResponse getHostStunResponse = new GetHostStunResponse(clientId, stunIpEndPoint.Remote.Address.ToString(), stunIpEndPoint.Remote.Port);
             Send(getHostStunResponse);
         }
     }

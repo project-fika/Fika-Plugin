@@ -1,10 +1,10 @@
-﻿using WebSocketSharp;
-using System;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
+﻿using BepInEx.Logging;
 using Fika.Core.Networking.Http.Models;
+using Newtonsoft.Json;
 using SPT.Common.Http;
-using BepInEx.Logging;
+using System;
+using System.Threading.Tasks;
+using WebSocketSharp;
 
 namespace Fika.Core.Networking.NatPunch
 {
@@ -14,11 +14,11 @@ namespace Fika.Core.Networking.NatPunch
         public string Host { get; set; }
         public string Url { get; set; }
         public string SessionId { get; set; }
-        public bool Connected 
+        public bool Connected
         {
             get
             {
-                return _webSocket.ReadyState == WebSocketState.Open ? true : false;
+                return _webSocket.ReadyState == WebSocketState.Open;
             }
         }
 
@@ -46,7 +46,9 @@ namespace Fika.Core.Networking.NatPunch
         public void Connect()
         {
             if (_webSocket.ReadyState == WebSocketState.Open)
+            {
                 return;
+            }
 
             _webSocket.Connect();
         }
@@ -64,16 +66,24 @@ namespace Fika.Core.Networking.NatPunch
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
         {
             if (_receiveTaskCompletion == null)
+            {
                 return;
+            }
 
             if (_receiveTaskCompletion.Task.Status == TaskStatus.RanToCompletion)
+            {
                 return;
+            }
 
             if (e == null)
+            {
                 return;
+            }
 
             if (string.IsNullOrEmpty(e.Data))
+            {
                 return;
+            }
 
             _receiveTaskCompletion.SetResult(e.Data);
         }
@@ -90,15 +100,15 @@ namespace Fika.Core.Networking.NatPunch
         }
 
         private void Send<T1>(T1 o)
-        {           
-            var data = JsonConvert.SerializeObject(o);
+        {
+            string data = JsonConvert.SerializeObject(o);
             _webSocket.Send(data);
         }
 
         private async Task<T2> Receive<T2>()
         {
-            var data = await _receiveTaskCompletion.Task;
-            var obj = JsonConvert.DeserializeObject<T2>(data);
+            string data = await _receiveTaskCompletion.Task;
+            T2 obj = JsonConvert.DeserializeObject<T2>(data);
 
             return obj;
         }
@@ -109,14 +119,14 @@ namespace Fika.Core.Networking.NatPunch
 
             Send<T1>(o);
 
-            var data = await Receive<T2>();
+            T2 data = await Receive<T2>();
 
             return data;
         }
 
         public async Task<GetHostStunResponse> GetHostStun(GetHostStunRequest getHostStunRequest)
         {
-            var result = await SendAndReceiveAsync<GetHostStunRequest, GetHostStunResponse>(getHostStunRequest);
+            GetHostStunResponse result = await SendAndReceiveAsync<GetHostStunRequest, GetHostStunResponse>(getHostStunRequest);
 
             return result;
         }
