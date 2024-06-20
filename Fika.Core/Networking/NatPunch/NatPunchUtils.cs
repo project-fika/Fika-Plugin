@@ -2,30 +2,32 @@
 using LiteNetLib;
 using STUN;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using System.Net;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using EFT.UI;
+using BepInEx.Logging;
 
 namespace Fika.Core.Networking.NatPunch
 {
-    public class StunIpEndPoint
+    public class StunIPEndPoint
     {
         public IPEndPoint Local { get; set; }
         public IPEndPoint Remote { get; set; }
 
-        public StunIpEndPoint(IPEndPoint localIpEndPoint, IPEndPoint remoteIpEndPoint)
+        public StunIPEndPoint(IPEndPoint localIPEndPoint, IPEndPoint remoteIPEndPoint)
         {
-            Local = localIpEndPoint;
-            Remote = remoteIpEndPoint;
+            Local = localIPEndPoint;
+            Remote = remoteIPEndPoint;
         }
     }
 
     public static class NatPunchUtils
     {
-        public static StunIpEndPoint CreateStunEndPoint(int localPort = 0)
+        private static ManualLogSource logger = Logger.CreateLogSource("Fika.NatPunchUtils");
+
+        public static StunIPEndPoint CreateStunEndPoint(int localPort = 0)
         {
             var stunUdpClient = new UdpClient();
             var stunQueryResult = new STUNQueryResult();
@@ -33,24 +35,26 @@ namespace Fika.Core.Networking.NatPunch
             try
             {
                 if (localPort > 0)
+                {
                     stunUdpClient.Client.Bind(new IPEndPoint(IPAddress.Any, localPort));
+                }
 
                 IPAddress stunIp = Array.Find(Dns.GetHostEntry("stun.l.google.com").AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
                 int stunPort = 19302;
 
-                var stunQueryIpEndPoint = new IPEndPoint(stunIp, stunPort);
+                IPEndPoint stunQueryIpEndPoint = new IPEndPoint(stunIp, stunPort);
 
                 stunQueryResult = STUNClient.Query(stunUdpClient.Client, stunQueryIpEndPoint, STUNQueryType.ExactNAT, NATTypeDetectionRFC.Rfc3489);
 
                 if (stunQueryResult.PublicEndPoint != null)
                 {
-                    var stunIpEndPointResult = new StunIpEndPoint((IPEndPoint)stunUdpClient.Client.LocalEndPoint, stunQueryResult.PublicEndPoint);
+                    var stunIpEndPointResult = new StunIPEndPoint((IPEndPoint)stunUdpClient.Client.LocalEndPoint, stunQueryResult.PublicEndPoint);
                     return stunIpEndPointResult;
                 }
             }
             catch (Exception ex)
             {
-                EFT.UI.ConsoleScreen.LogError($"Error during STUN query: {ex.Message}");
+               logger.LogError($"Error during STUN query: {ex.Message}");
             }
             finally
             {
@@ -58,6 +62,37 @@ namespace Fika.Core.Networking.NatPunch
             }
 
             return null;
+        }
+
+        public static async void StunQueryRoutine(NetManager netManager, FikaNatPunchServer fikaNatPunchServer, CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                netManager.Stop();
+
+                int localPort = 0;
+
+                StunIPEndPoint currentStunIpEndPoint = fikaNatPunchServer.StunIPEndpoint;
+
+                if (currentStunIpEndPoint != null)
+                    localPort = currentStunIpEndPoint.Local.Port;
+
+                StunIPEndPoint stunIpEndPoint = CreateStunEndPoint(localPort);
+
+                if(stunIpEndPoint == null)
+                {
+                    logger.LogError("Error during STUN query routine: Stun Endpoint is null.");
+                    break;
+                }
+
+                fikaNatPunchServer.StunIPEndpoint = stunIpEndPoint;
+
+                netManager.Start(stunIpEndPoint.Local.Port);
+
+                ConsoleScreen.Log($"Remote IP set: {stunIpEndPoint.Remote}");
+
+                await Task.Delay(TimeSpan.FromSeconds(60));
+            }
         }
 
         public static void PunchNat(NetManager netManager, IPEndPoint endPoint)

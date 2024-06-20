@@ -9,7 +9,6 @@ using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
-using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -29,6 +28,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.NatPunch;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using HarmonyLib;
@@ -858,17 +858,7 @@ namespace Fika.Core.Coop.GameMode
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1456(), isServer ? 0 : 1000, statisticsManager);
 
-            if(FikaBackendUtils.IsHostNatPunch)
-            {
-                NetManagerUtils.DestroyPingingClient();
-            }
-            
             await NetManagerUtils.InitNetManager(isServer);
-
-            if (FikaPlugin.NatPunch.Value)
-            {
-                NetManagerUtils.StartServerStunQuery();
-            }
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
@@ -935,9 +925,14 @@ namespace Fika.Core.Coop.GameMode
 
             await WaitForPlayers();
 
-            if (isServer && FikaPlugin.NatPunch.Value)
+            if(isServer && FikaPlugin.UseNatPunching.Value)
             {
-                Singleton<FikaServer>.Instance.NatPunchServer.Close();
+                FikaNatPunchServer natPunchServer = Singleton<FikaServer>.Instance.FikaNatPunchServer;
+                
+                if (natPunchServer != null && natPunchServer.Connected)
+                {
+                    natPunchServer.Close();
+                }
             }
 
             fikaDebug = gameObject.AddComponent<FikaDebug>();

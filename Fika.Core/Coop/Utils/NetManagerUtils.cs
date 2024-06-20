@@ -76,8 +76,8 @@ namespace Fika.Core.Coop.Utils
         {
             if(FikaGameObject != null)
             {
-                Singleton<FikaPingingClient>.Instance.NetClient.Stop();
                 Singleton<FikaPingingClient>.Instance.StopKeepAliveRoutine();
+                Singleton<FikaPingingClient>.Instance.NetClient.Stop();
                 Singleton<FikaPingingClient>.TryRelease(Singleton<FikaPingingClient>.Instance);
                 logger.LogInfo("Destroyed FikaPingingClient");
             }
@@ -146,27 +146,6 @@ namespace Fika.Core.Coop.Utils
                 else
                 {
                     logger.LogError("StopPinger: Could not find FikaPinger!");
-                }
-            }
-        }
-
-        public static void StartServerStunQuery()
-        {
-            if (FikaGameObject != null)
-            {
-                FikaServerStunQuery fikaServerStunQuery = FikaGameObject.AddComponent<FikaServerStunQuery>();
-                fikaServerStunQuery.StartServerStunQueryRoutine();
-            }
-        }
-
-        public static void StopServerStunQuery()
-        {
-            if (FikaGameObject != null)
-            {
-                FikaServerStunQuery fikaServerStunQuery = FikaGameObject.GetComponent<FikaServerStunQuery>();
-                if (fikaServerStunQuery != null)
-                {
-                    Object.Destroy(fikaServerStunQuery);
                 }
             }
         }

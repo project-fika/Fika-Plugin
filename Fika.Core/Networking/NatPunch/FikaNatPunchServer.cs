@@ -6,11 +6,14 @@ using Newtonsoft.Json;
 using SPT.Common.Http;
 using WebSocketSharp;
 using Fika.Core.Networking.Http.Models;
+using BepInEx.Logging;
 
 namespace Fika.Core.Networking.NatPunch
 {
     public class FikaNatPunchServer
     {
+        private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.NatPunchServer");
+
         public string Host { get; set; }
         public string Url { get; set; }
         public string SessionId { get; set; }
@@ -21,8 +24,8 @@ namespace Fika.Core.Networking.NatPunch
                 return _webSocket.ReadyState == WebSocketState.Open ? true : false;
             }
         }
-        private StunIpEndPoint _stunIpEndPoint;
-        public StunIpEndPoint StunIpEndpoint { 
+        private StunIPEndPoint _stunIpEndPoint;
+        public StunIPEndPoint StunIPEndpoint { 
             get { 
                 return _stunIpEndPoint; 
             } 
@@ -36,9 +39,9 @@ namespace Fika.Core.Networking.NatPunch
 
         public FikaNatPunchServer(NetManager netManager)
         {
-            Host = $"ws:{RequestHandler.Host.Split(':')[1]}:{FikaPlugin.NatPunchPort.Value}";
+            Host = RequestHandler.Host.Replace("http", "ws");
             SessionId = RequestHandler.SessionId;
-            Url = $"{Host}/{SessionId}?";
+            Url = $"{Host}/fika/natpunchrelayservice/{SessionId}?";
 
             _webSocket = new WebSocket(Url)
             {
@@ -66,7 +69,7 @@ namespace Fika.Core.Networking.NatPunch
 
         private void WebSocket_OnOpen(object sender, EventArgs e)
         {
-            EFT.UI.ConsoleScreen.Log("Connected to FikaNatPunchService as server");
+            logger.LogInfo("Connected to FikaNatPunchRelayService as server");
         }
 
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
@@ -82,13 +85,13 @@ namespace Fika.Core.Networking.NatPunch
 
         private void WebSocket_OnError(object sender, ErrorEventArgs e)
         {
-            EFT.UI.ConsoleScreen.LogError($"Websocket error: {e}");
+            logger.LogError($"FikaNatPunchServer Websocket error: {e.Message}");
             _webSocket.Close();
         }
 
         private void WebSocket_OnClose(object sender, CloseEventArgs e)
         {
-            EFT.UI.ConsoleScreen.Log($"Disconnected from FikaNatPunchService as server");
+            logger.LogInfo($"Disconnected from FikaNatPunchService as server");
         }
 
         private void ProcessMessage(string data)
@@ -105,6 +108,7 @@ namespace Fika.Core.Networking.NatPunch
                     {
                         IPEndPoint clientIpEndPoint = new IPEndPoint(IPAddress.Parse(getHostStunRequest.StunIp), getHostStunRequest.StunPort);
 
+                        EFT.UI.ConsoleScreen.Log($"punching this bad boy:{clientIpEndPoint}");
                         NatPunchUtils.PunchNat(_netManager, clientIpEndPoint);
 
                         SendHostStun(getHostStunRequest.SessionId, _stunIpEndPoint);
@@ -141,7 +145,7 @@ namespace Fika.Core.Networking.NatPunch
             }
         }
 
-        public void SendHostStun(string clientId, StunIpEndPoint stunIpEndPoint)
+        public void SendHostStun(string clientId, StunIPEndPoint stunIpEndPoint)
         {
             var getHostStunResponse = new GetHostStunResponse(clientId, stunIpEndPoint.Remote.Address.ToString(), stunIpEndPoint.Remote.Port);
             Send(getHostStunResponse);

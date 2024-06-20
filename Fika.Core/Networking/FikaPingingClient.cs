@@ -1,6 +1,4 @@
 ﻿using BepInEx.Logging;
-using Comfort.Common;
-using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
@@ -26,6 +24,7 @@ namespace Fika.Core.Networking
         private int localPort = 0;
         public bool Received = false;
         private Coroutine keepAliveRoutine;
+        private Task natPunchRequestTask;
 
         public bool Init(string serverId)
         {
@@ -36,6 +35,8 @@ namespace Fika.Core.Networking
 
             GetHostRequest body = new(serverId);
             GetHostResponse result = FikaRequestHandler.GetHost(body);
+
+            FikaBackendUtils.IsHostNatPunch = result.NatPunch;
 
             string ip = result.Ips[0];
             string localIp = null;
@@ -63,37 +64,9 @@ namespace Fika.Core.Networking
                 localEndPoint = new(IPAddress.Parse(localIp), port);
             }
 
-            if (result.NatPunch)
+            if (FikaBackendUtils.IsHostNatPunch)
             {
-                FikaBackendUtils.IsHostNatPunch = true;
-
-                var localStunEndPoint = NatPunchUtils.CreateStunEndPoint();
-
-                var natPunchTask = Task.Run(async () =>
-                {
-                    FikaNatPunchClient fikaNatPunchClient = new FikaNatPunchClient();
-                    fikaNatPunchClient.Connect();
-
-                    if (!fikaNatPunchClient.Connected)
-                        return false;
-
-                    GetHostStunRequest getStunRequest = new GetHostStunRequest(serverId, RequestHandler.SessionId, localStunEndPoint.Remote.Address.ToString(), localStunEndPoint.Remote.Port);
-                    GetHostStunResponse getStunResponse = await fikaNatPunchClient.GetHostStun(getStunRequest);
-
-                    fikaNatPunchClient.Close();
-
-                    remoteStunEndPoint = new IPEndPoint(IPAddress.Parse(getStunResponse.StunIp), getStunResponse.StunPort);
-                    localPort = localStunEndPoint.Local.Port;
-
-                    return true;
-                });
-
-                var natPunchSuccess = natPunchTask.Result;
-
-                if (!natPunchSuccess)
-                {
-                    Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Error when trying to connect to FikaNatPunchRelayService. Please ensure FikaNatPunchRelayService is enabled and the port is open.");
-                }
+                natPunchRequestTask = Task.Run(() => NatPunchRequest(serverId));
             }
 
             NetClient.Start(localPort);
@@ -112,10 +85,47 @@ namespace Fika.Core.Networking
                 NetClient.SendUnconnectedMessage(writer, localEndPoint);
             }
 
-            if (remoteStunEndPoint != null)
+            if (remoteStunEndPoint != null && natPunchRequestTask.IsCompleted)
             {
                 NetClient.SendUnconnectedMessage(writer, remoteStunEndPoint);
             }
+        }
+
+        public async void NatPunchRequest(string serverId)
+        {
+            EFT.UI.ConsoleScreen.Log($"start of nat punch request");
+
+            FikaNatPunchClient fikaNatPunchClient = new FikaNatPunchClient();
+            fikaNatPunchClient.Connect();
+
+            EFT.UI.ConsoleScreen.Log($"connecting");
+
+            if (!fikaNatPunchClient.Connected)
+            {
+                _logger.LogError("Unable to connect to NatPunchRelayService.");
+                return;
+            }
+
+            StunIPEndPoint localStunEndPoint = NatPunchUtils.CreateStunEndPoint();
+
+            if (localStunEndPoint == null)
+            {
+                _logger.LogError("Failed to CreateStunEndPoint.");
+            }    
+
+            EFT.UI.ConsoleScreen.Log($"requesting punch");
+            GetHostStunRequest getStunRequest = new GetHostStunRequest(serverId, RequestHandler.SessionId, localStunEndPoint.Remote.Address.ToString(), localStunEndPoint.Remote.Port);
+            GetHostStunResponse getStunResponse = await fikaNatPunchClient.GetHostStun(getStunRequest);
+
+            EFT.UI.ConsoleScreen.Log($"punch request done");
+            fikaNatPunchClient.Close();
+
+            EFT.UI.ConsoleScreen.Log($"connection closed");
+            remoteStunEndPoint = new IPEndPoint(IPAddress.Parse(getStunResponse.StunIp), getStunResponse.StunPort);
+
+            EFT.UI.ConsoleScreen.Log($"received: {remoteStunEndPoint}");
+
+            localPort = localStunEndPoint.Local.Port;
         }
 
         public void StartKeepAliveRoutine()
@@ -126,7 +136,9 @@ namespace Fika.Core.Networking
         public void StopKeepAliveRoutine()
         {
             if(keepAliveRoutine != null)
+            {
                 StopCoroutine(keepAliveRoutine);
+            }
         }
 
         public IEnumerator KeepAlive()
@@ -162,8 +174,6 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
-            _logger.LogInfo("Received response from server, parsing...");
-
             if (reader.TryGetString(out string result))
             {
                 switch(result)

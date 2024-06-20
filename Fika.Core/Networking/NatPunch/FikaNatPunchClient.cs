@@ -4,11 +4,13 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Fika.Core.Networking.Http.Models;
 using SPT.Common.Http;
+using BepInEx.Logging;
 
 namespace Fika.Core.Networking.NatPunch
 {
     public class FikaNatPunchClient
     {
+        private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.NatPunchClient");
         public string Host { get; set; }
         public string Url { get; set; }
         public string SessionId { get; set; }
@@ -25,9 +27,9 @@ namespace Fika.Core.Networking.NatPunch
 
         public FikaNatPunchClient()
         {
-            Host = $"ws:{RequestHandler.Host.Split(':')[1]}:{FikaPlugin.NatPunchPort.Value}";
+            Host = RequestHandler.Host.Replace("http", "ws");
             SessionId = RequestHandler.SessionId;
-            Url = $"{Host}/{SessionId}?";
+            Url = $"{Host}/fika/natpunchrelayservice/{SessionId}?";
 
             _webSocket = new WebSocket(Url)
             {
@@ -47,8 +49,6 @@ namespace Fika.Core.Networking.NatPunch
                 return;
 
             _webSocket.Connect();
-
-            
         }
 
         public void Close()
@@ -58,7 +58,7 @@ namespace Fika.Core.Networking.NatPunch
 
         private void WebSocket_OnOpen(object sender, EventArgs e)
         {
-            EFT.UI.ConsoleScreen.Log("Connected to FikaNatPunchService as client");
+            logger.LogInfo("Connected to FikaNatPunchRelayService as client");
         }
 
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
@@ -80,13 +80,13 @@ namespace Fika.Core.Networking.NatPunch
 
         private void WebSocket_OnError(object sender, ErrorEventArgs e)
         {
-            EFT.UI.ConsoleScreen.LogError($"Websocket error {e}");
+            logger.LogError($"FikaNatPunchClient Websocket error: {e.Message}");
             _webSocket.Close();
         }
 
         private void WebSocket_OnClose(object sender, CloseEventArgs e)
         {
-            EFT.UI.ConsoleScreen.Log($"Disconnected from FikaNatPunchService as client");
+            logger.LogInfo($"Disconnected from FikaNatPunchService as client");
         }
 
         private void Send<T1>(T1 o)
