@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Airdrops;
 using Fika.Core.Coop.Airdrops.Models;
@@ -9,10 +10,13 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Coop.Airdrops
@@ -316,7 +320,12 @@ namespace Coop.Airdrops
 
         private void SetDistanceToDrop()
         {
-            AirdropParameters.DistanceToDrop = Vector3.Distance(new Vector3(AirdropParameters.RandomAirdropPoint.x, AirdropParameters.DropHeight, AirdropParameters.RandomAirdropPoint.z),
+            AirdropParameters.DistanceToDrop = Vector3.Distance(
+                new Vector3(
+                    AirdropParameters.RandomAirdropPoint.x,
+                    AirdropParameters.DropHeight,
+                    AirdropParameters.RandomAirdropPoint.z
+                ),
                 airdropPlane.transform.position);
         }
 

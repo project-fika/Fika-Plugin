@@ -96,7 +96,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectResponsePacket>(OnReconnectResponsePacketReceived);
-            packetProcessor.SubscribeNetSerializable<ReconnectAirdropPacket>(OnReconnectAirdropPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
@@ -952,8 +951,9 @@ namespace Fika.Core.Networking
             // -------------------  Anything that needs to come after player spawns  -------------------------------
             while (coopGame.Status != GameStatus.Started)
             {
-                yield return null;
+                yield return new WaitUntil(() => coopGame.Status == GameStatus.Started);
             }
+
             gameWorld.OnSmokeGrenadesDeserialized(smokes);
             // TODO: Smokes do spawn on the ground, but no visible smoke effect shows, im using BSG's method of doing this currently, so this might be a BSG thing.
             // Decide if to fix or not.

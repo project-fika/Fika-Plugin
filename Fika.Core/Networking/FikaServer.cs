@@ -940,10 +940,9 @@ namespace Fika.Core.Networking
                 logger.LogError($"Player was not found");
             }
 
-            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>().Where(x => x.DoorState != x.InitialDoorState
-                && x.DoorState != EDoorState.Interacting && x.DoorState != EDoorState.Interacting).ToArray();
+            WorldInteractiveObject[] interactiveObjects = [.. coopHandler.ListOfInteractiveObjects.Values];
 
-            WindowBreaker[] windows = ClientgameWorld?.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
+            WindowBreaker[] windows = ClientgameWorld.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
 
             LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
 
@@ -952,7 +951,7 @@ namespace Fika.Core.Networking
             LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray();
 
             Profile.GClass1768 health = playerToUse.NetworkHealthController.Store(null);
-            GClass2431.GClass2434[] effects = playerToUse.NetworkHealthController.IReadOnlyList_0.ToArray();
+            GClass2431.GClass2434[] effects = [.. playerToUse.NetworkHealthController.IReadOnlyList_0];
 
             foreach (GClass2431.GClass2434 effect in effects)
             {
