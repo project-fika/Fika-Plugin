@@ -111,7 +111,12 @@ namespace Fika.Core.Networking
                 EnableStatistics = true
             };
 
-            _netClient.Start();
+            if (FikaBackendUtils.IsHostNatPunch)
+            {
+                NetManagerUtils.DestroyPingingClient();
+            }
+
+            _netClient.Start(FikaBackendUtils.LocalPort);
 
             string ip = FikaBackendUtils.RemoteIp;
             int port = FikaBackendUtils.RemotePort;

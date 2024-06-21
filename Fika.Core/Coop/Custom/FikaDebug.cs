@@ -141,22 +141,23 @@ namespace Fika.Core.Coop.Custom
 
         private void DrawWindow(int windowId)
         {
-            Rect rect = new(5, 15, 150, 25);
-            GUI.Label(rect, $"Alive Players: {alivePlayers.Count}");
-            rect.y += 15;
-            GUI.Label(rect, $"Alive Bots: {aliveBots.Count}");
+            GUILayout.BeginArea(new(5, 15, 150, 150));
+            GUILayout.BeginVertical();
+
+            GUILayout.Label($"Alive Players: {alivePlayers.Count}");
+            GUILayout.Label($"Alive Bots: {aliveBots.Count}");
             if (isServer)
             {
-                rect.y += 15;
-                GUI.Label(rect, $"Clients: {Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount}");
+                GUILayout.Label($"Clients: {Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount}");
             }
             else
             {
-                rect.y += 15;
-                GUI.Label(rect, $"Ping: {Ping}");
-                rect.y += 15;
-                GUI.Label(rect, $"RTT: {RTT}");
+                GUILayout.Label($"Ping: {Ping}");
+                GUILayout.Label($"RTT: {RTT}");
             }
+
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
         }
     }
 }

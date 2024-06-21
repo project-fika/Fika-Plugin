@@ -17,6 +17,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.NatPunch;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
@@ -74,6 +75,8 @@ namespace Fika.Core.Networking
             }
         }
         private FikaChat fikaChat;
+        public FikaNatPunchServer FikaNatPunchServer;
+        private CancellationTokenSource StunQueryRoutineCts;
 
         public async Task Init()
         {
@@ -115,8 +118,8 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true
             };
-
-            if (FikaPlugin.UseUPnP.Value)
+            
+            if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
             {
                 bool upnpFailed = false;
 
@@ -160,17 +163,47 @@ namespace Fika.Core.Networking
                 }
             }
 
-            if (FikaPlugin.ForceBindIP.Value != "Disabled")
+            if(FikaPlugin.UseNatPunching.Value)
             {
-                _netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
+                FikaNatPunchServer = new FikaNatPunchServer(_netServer);
+                FikaNatPunchServer.Connect();
+
+                if (FikaNatPunchServer.Connected)
+                {
+                    StunQueryRoutineCts = new CancellationTokenSource();
+                    Task stunQueryRoutine = Task.Run(() => NatPunchUtils.StunQueryRoutine(_netServer, FikaNatPunchServer, StunQueryRoutineCts.Token));
+                }
+                else
+                {
+                    logger.LogError("Unable to connect to FikaNatPunchRelayService.");
+                }
             }
             else
             {
-                _netServer.Start(Port);
+                if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                {
+                    _netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
+                }
+                else
+                {
+                    _netServer.Start(Port);
+                }
             }
 
             logger.LogInfo("Started Fika Server");
-            NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
+
+            string serverStartedMessage;
+
+            if(FikaPlugin.UseNatPunching.Value)
+            {
+                serverStartedMessage = "Server started using Nat Punching.";
+            }
+            else
+            {
+                serverStartedMessage = $"Server started on port {_netServer.LocalPort}.";
+            }
+            
+            NotificationManagerClass.DisplayMessageNotification(serverStartedMessage,
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
             string[] Ips = [];
@@ -190,7 +223,7 @@ namespace Fika.Core.Networking
                 iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            SetHostRequest body = new(Ips, Port);
+            SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value);
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
@@ -764,16 +797,31 @@ namespace Fika.Core.Networking
             {
                 if (reader.TryGetString(out string data))
                 {
-                    if (data == "fika.hello")
+                    NetDataWriter resp;
+
+                    switch (data)
                     {
-                        NetDataWriter resp = new();
-                        resp.Put(data);
-                        _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-                        logger.LogInfo("PingingRequest: Correct ping query, sending response");
-                    }
-                    else
-                    {
-                        logger.LogError("PingingRequest: Data was not as expected");
+                        case "fika.hello":
+                            resp = new();
+                            resp.Put(data);
+                            _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                            logger.LogInfo("PingingRequest: Correct ping query, sending response");
+                            break;
+
+                        case "fika.keepalive":
+                            resp = new();
+                            resp.Put(data);
+                            _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                            
+                            if(!StunQueryRoutineCts.IsCancellationRequested)
+                            {
+                                StunQueryRoutineCts.Cancel();
+                            }
+                            break;
+
+                        default:
+                            logger.LogError("PingingRequest: Data was not as expected");
+                            break;
                     }
                 }
                 else

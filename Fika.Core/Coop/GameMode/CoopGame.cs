@@ -9,7 +9,6 @@ using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
-using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -29,6 +28,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.NatPunch;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using HarmonyLib;
@@ -946,6 +946,16 @@ namespace Fika.Core.Coop.GameMode
 
             coopHandler.StartSpawning = true;
             await WaitForPlayers();
+
+            if(isServer && FikaPlugin.UseNatPunching.Value)
+            {
+                FikaNatPunchServer natPunchServer = Singleton<FikaServer>.Instance.FikaNatPunchServer;
+                
+                if (natPunchServer != null && natPunchServer.Connected)
+                {
+                    natPunchServer.Close();
+                }
+            }
 
             fikaDebug = gameObject.AddComponent<FikaDebug>();
 
@@ -2110,6 +2120,8 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
             dictionary_0.Clear();
+            // Reset MatchingType to Single when the game ends.
+            FikaBackendUtils.MatchingType = EMatchmakerType.Single;
         }
 
         /// <summary>

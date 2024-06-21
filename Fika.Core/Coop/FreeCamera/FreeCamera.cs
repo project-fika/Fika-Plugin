@@ -27,6 +27,9 @@ namespace Fika.Core.Coop.FreeCamera
         private bool leftMode = false;
         private bool disableInput = false;
         private bool showOverlay;
+        private NightVision nightVision;
+        private ThermalVision thermalVision;
+        private FreeCameraController freeCameraController;
 
         private KeyCode forwardKey = KeyCode.W;
         private KeyCode backKey = KeyCode.S;
@@ -52,6 +55,11 @@ namespace Fika.Core.Coop.FreeCamera
 
             showOverlay = FikaPlugin.KeybindOverlay.Value;
             FikaPlugin.KeybindOverlay.SettingChanged += KeybindOverlay_SettingChanged;
+
+            nightVision = CameraClass.Instance.NightVision;
+            thermalVision = CameraClass.Instance.ThermalVision;
+
+            freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
         }
 
         private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
@@ -63,18 +71,32 @@ namespace Fika.Core.Coop.FreeCamera
         {
             if (IsActive && showOverlay)
             {
-                Rect rect = new(20, 20, 800, 800);
-                GUI.Label(rect, $"Left/Right Mouse Button: Jump between players");
-                rect.y += 15;
-                GUI.Label(rect, $"CTRL/Spacebar + Left/Right Mouse Button: Jump and spectate in 3rd person or head cam");
-                rect.y += 15;
-                GUI.Label(rect, $"T: Teleport to cam position");
-                rect.y += 15;
-                GUI.Label(rect, $"N: Toggle nightvision/thermals");
-                rect.y += 15;
-                GUI.Label(rect, $"HOME: Disable input");
-                rect.y += 15;
-                GUI.Label(rect, $"Shift + Ctrl: Turbo Speed");
+                string visionText = "Enable nightvision";
+
+                if (nightVision != null && nightVision.On)
+                {
+                    visionText = "Enable thermals";
+                }
+
+                if (thermalVision != null && thermalVision.On)
+                {
+                    visionText = "Disable thermals";
+                }
+
+                GUILayout.BeginArea(new Rect(5, 5, 800, 800));
+                GUILayout.BeginVertical();
+
+                GUILayout.Label($"Left/Right Mouse Button: Jump between players");
+                GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
+                GUILayout.Label($"Spacebar + Left/Right Mouse Button: Jump and spectate in head cam");
+                GUILayout.Label($"T: Teleport to cam position");
+                GUILayout.Label($"N: {visionText}");
+                GUILayout.Label($"M: Disable culling");
+                GUILayout.Label($"HOME: {(disableInput ? "Enable Input" : "Disable Input")}");
+                GUILayout.Label($"Shift + Ctrl: Turbo Speed");
+
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
             }
         }
 
@@ -85,11 +107,11 @@ namespace Fika.Core.Coop.FreeCamera
                 return;
             }
 
+            // Toggle input
             if (Input.GetKeyDown(KeyCode.Home))
             {
                 disableInput = !disableInput;
-                string status = disableInput == true ? "disabled" : "enabled";
-                NotificationManagerClass.DisplayMessageNotification($"Free cam input is now {status}.");
+                NotificationManagerClass.DisplayMessageNotification($"Free cam input is now {(disableInput ? "disabled" : "enabled")}.");
             }
 
             if (disableInput)
@@ -110,14 +132,14 @@ namespace Fika.Core.Coop.FreeCamera
 
                 if (players.Count > 0)
                 {
-                    bool shouldFollow = Input.GetKey(KeyCode.Space);
+                    bool shouldHeadCam = Input.GetKey(KeyCode.Space);
                     bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
                     foreach (CoopPlayer player in players)
                     {
                         if (CurrentPlayer == null && players[0] != null)
                         {
                             CurrentPlayer = players[0];
-                            if (shouldFollow)
+                            if (shouldHeadCam)
                             {
                                 AttachToPlayer();
                             }
@@ -137,7 +159,7 @@ namespace Fika.Core.Coop.FreeCamera
                         if (players.Count - 1 >= nextPlayer)
                         {
                             CurrentPlayer = players[nextPlayer];
-                            if (shouldFollow)
+                            if (shouldHeadCam)
                             {
                                 AttachToPlayer();
                             }
@@ -154,7 +176,7 @@ namespace Fika.Core.Coop.FreeCamera
                         else
                         {
                             CurrentPlayer = players[0];
-                            if (shouldFollow)
+                            if (shouldHeadCam)
                             {
                                 AttachToPlayer();
                             }
@@ -271,9 +293,19 @@ namespace Fika.Core.Coop.FreeCamera
                 }
             }
 
+            // Toggle vision
             if (Input.GetKeyDown(KeyCode.N))
             {
                 ToggleVision();
+            }
+
+            // Disable culling
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                if (freeCameraController != null)
+                {
+                    freeCameraController.DisableAllCullingObjects(); 
+                }
             }
 
             if (isFollowing)
@@ -295,6 +327,7 @@ namespace Fika.Core.Coop.FreeCamera
             bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             float movementSpeed = fastMode ? 20f : 2f;
+
             if (superFastMode)
             {
                 movementSpeed *= 8;
@@ -396,9 +429,6 @@ namespace Fika.Core.Coop.FreeCamera
 
         private void ToggleVision()
         {
-            NightVision nightVision = CameraClass.Instance.NightVision;
-            ThermalVision thermalVision = CameraClass.Instance.ThermalVision;
-
             if (nightVision != null && thermalVision != null)
             {
                 if (!nightVision.On && !thermalVision.On)
@@ -449,9 +479,6 @@ namespace Fika.Core.Coop.FreeCamera
         {
             if (!status)
             {
-                NightVision nightVision = CameraClass.Instance.NightVision;
-                ThermalVision thermalVision = CameraClass.Instance.ThermalVision;
-
                 if (nightVision != null && nightVision.On)
                 {
                     nightVision.method_1(false);
@@ -480,9 +507,6 @@ namespace Fika.Core.Coop.FreeCamera
                 }
                 else if (player != null && !player.HealthController.IsAlive)
                 {
-                    NightVision nightVision = CameraClass.Instance.NightVision;
-                    ThermalVision thermalVision = CameraClass.Instance.ThermalVision;
-
                     if (nightVision != null && nightVision.On)
                     {
                         nightVision.method_1(false);

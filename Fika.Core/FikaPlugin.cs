@@ -118,7 +118,6 @@ namespace Fika.Core
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
 
         // Coop | Quest Sharing
-        public static ConfigEntry<bool> QuestSharing {  get; set; }
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
 
         // Coop | Custom
@@ -142,8 +141,8 @@ namespace Fika.Core
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
-        public static ConfigEntry<bool> CullPlayers { get; set; }
-        public static ConfigEntry<float> CullingRange { get; set; }
+        //public static ConfigEntry<bool> CullPlayers { get; set; }
+        //public static ConfigEntry<float> CullingRange { get; set; }
 
         // Performance | Bot Limits
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
@@ -168,6 +167,7 @@ namespace Fika.Core
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
+        public static ConfigEntry<bool> UseNatPunching { get; set; }
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
 
         // Gameplay
@@ -185,12 +185,15 @@ namespace Fika.Core
         public bool AllowItemSending;
         public string[] BlacklistedItems;
         public bool ForceSaveOnDeath;
+        public bool UseInertia;
+        public bool SharedQuestProgression;
         #endregion
 
         protected void Awake()
         {
             Instance = this;
 
+            GetClientConfig();
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
@@ -227,7 +230,6 @@ namespace Fika.Core
             BundleLoaderPlugin.Create();
 
             FikaAirdropUtil.GetConfigFromServer();
-            GetClientConfig();
             BotSettingsRepoClass.Init();
 
             if (AllowItemSending)
@@ -262,8 +264,10 @@ namespace Fika.Core
             AllowItemSending = clientConfig.AllowItemSending;
             BlacklistedItems = clientConfig.BlacklistedItems;
             ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
+            UseInertia = clientConfig.UseInertia;
+            SharedQuestProgression = clientConfig.SharedQuestProgression;
 
-            clientConfig.ToString();
+            clientConfig.LogValues();
         }
 
         private void SetupConfig()
@@ -319,8 +323,6 @@ namespace Fika.Core
 
             // Coop | Quest Sharing
 
-            QuestSharing = Config.Bind("Coop | Quest Sharing", "Quest Sharing", false, new ConfigDescription("Toggle to enable the quest sharing system. Cannot be toggled mid-raid.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
-
             QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
             // Coop | Custom
@@ -361,9 +363,9 @@ namespace Fika.Core
 
             DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            //CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
-            CullingRange = Config.Bind("Performance", "Culling Range", 30f, new ConfigDescription("The range at which players should be culled.", new AcceptableValueRange<float>(30f, 150f), new ConfigurationManagerAttributes() { Order = 1 }));
+            //CullingRange = Config.Bind("Performance", "Culling Range", 30f, new ConfigDescription("The range at which players should be culled.", new AcceptableValueRange<float>(30f, 150f), new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Performance | Max Bots
 
@@ -395,17 +397,19 @@ namespace Fika.Core
 
             // Network
 
-            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 5 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 6 }));
 
-            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 4 }));
+            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 5 }));
 
-            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+
+            UseNatPunching = Config.Bind("Network", "Use NAT Punching", false, new ConfigDescription("Use NAT punching as a NAT traversal method for hosting a raid. Only works with fullcone NAT type routers. UPnP, Force IP and Force Bind IP are disabled in this mode.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
             ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15, new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
 

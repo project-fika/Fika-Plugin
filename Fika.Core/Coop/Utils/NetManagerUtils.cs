@@ -13,13 +13,18 @@ namespace Fika.Core.Coop.Utils
         private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
         public static GameObject FikaGameObject;
 
+        public static void CreateFikaGameObject()
+        {
+            FikaGameObject = new GameObject("FikaGameObject");
+            Object.DontDestroyOnLoad(FikaGameObject);
+            logger.LogInfo("FikaGameObject has been created!");
+        }
+        
         public static void CreateNetManager(bool isServer)
         {
             if (FikaGameObject == null)
             {
-                FikaGameObject = new GameObject("FikaGameObject");
-                Object.DontDestroyOnLoad(FikaGameObject);
-                logger.LogInfo("FikaGameObject has been created!");
+                CreateFikaGameObject();
             }
 
             if (isServer)
@@ -34,6 +39,18 @@ namespace Fika.Core.Coop.Utils
                 Singleton<FikaClient>.Create(client);
                 logger.LogInfo("FikaClient has started!");
             }
+        }
+
+        public static void CreatePingingClient()
+        {
+            if (FikaGameObject == null)
+            {
+                CreateFikaGameObject();
+            }
+
+            FikaPingingClient pingingClient = FikaGameObject.AddComponent<FikaPingingClient>();
+            Singleton<FikaPingingClient>.Create(pingingClient);
+            logger.LogInfo("FikaPingingClient has started!");
         }
 
         public static void DestroyNetManager(bool isServer)
@@ -52,6 +69,17 @@ namespace Fika.Core.Coop.Utils
                     Singleton<FikaClient>.TryRelease(Singleton<FikaClient>.Instance);
                     logger.LogInfo("Destroyed FikaClient");
                 }
+            }
+        }
+
+        public static void DestroyPingingClient()
+        {
+            if(FikaGameObject != null)
+            {
+                Singleton<FikaPingingClient>.Instance.StopKeepAliveRoutine();
+                Singleton<FikaPingingClient>.Instance.NetClient.Stop();
+                Singleton<FikaPingingClient>.TryRelease(Singleton<FikaPingingClient>.Instance);
+                logger.LogInfo("Destroyed FikaPingingClient");
             }
         }
 

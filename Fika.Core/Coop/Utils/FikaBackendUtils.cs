@@ -31,6 +31,8 @@ namespace Fika.Core.Coop.Utils
         public static WeatherClass[] Nodes = null;
         public static string RemoteIp;
         public static int RemotePort;
+        public static int LocalPort = 0;
+        public static bool IsHostNatPunch = false;
         private static string groupId;
         private static long timestamp;
         public static bool IsReconnect = false;
@@ -96,7 +98,7 @@ namespace Fika.Core.Coop.Utils
             FikaVersionLabelUpdate_Patch.raidCode = raidCode;
         }
 
-        private static string GenerateRaidCode(int length)
+        public static string GenerateRaidCode(int length)
         {
             Random random = new Random();
             char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();

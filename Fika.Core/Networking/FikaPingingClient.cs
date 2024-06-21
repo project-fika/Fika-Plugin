@@ -2,23 +2,31 @@
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.NatPunch;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using SPT.Common.Http;
+using System.Collections;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    internal class FikaPingingClient(string serverId) : INetEventListener
+    public class FikaPingingClient : MonoBehaviour, INetEventListener
     {
         public NetManager NetClient;
-        private readonly ManualLogSource _logger = Logger.CreateLogSource("Fika.PingingClient");
-        private readonly string serverId = serverId;
+        private readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
         private IPEndPoint remoteEndPoint;
         private IPEndPoint localEndPoint;
+        private IPEndPoint remoteStunEndPoint;
+        private int localPort = 0;
         public bool Received = false;
+        private Coroutine keepAliveRoutine;
+        private Task natPunchRequestTask;
 
-        public bool Init()
+        public bool Init(string serverId)
         {
             NetClient = new(this)
             {
@@ -27,6 +35,8 @@ namespace Fika.Core.Networking
 
             GetHostRequest body = new(serverId);
             GetHostResponse result = FikaRequestHandler.GetHost(body);
+
+            FikaBackendUtils.IsHostNatPunch = result.NatPunch;
 
             string ip = result.Ips[0];
             string localIp = null;
@@ -54,25 +64,83 @@ namespace Fika.Core.Networking
                 localEndPoint = new(IPAddress.Parse(localIp), port);
             }
 
-            NetClient.Start();
+            if (FikaBackendUtils.IsHostNatPunch)
+            {
+                natPunchRequestTask = Task.Run(() => NatPunchRequest(serverId));
+            }
+
+            NetClient.Start(localPort);
 
             return true;
         }
 
-        public void PingEndPoint()
+        public void PingEndPoint(string message)
         {
-            if (Received)
-            {
-                return;
-            }
-
             NetDataWriter writer = new();
-            writer.Put("fika.hello");
+            writer.Put(message);
 
             NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
             if (localEndPoint != null)
             {
                 NetClient.SendUnconnectedMessage(writer, localEndPoint);
+            }
+
+            if (remoteStunEndPoint != null && natPunchRequestTask.IsCompleted)
+            {
+                NetClient.SendUnconnectedMessage(writer, remoteStunEndPoint);
+            }
+        }
+
+        public async void NatPunchRequest(string serverId)
+        {
+            FikaNatPunchClient fikaNatPunchClient = new FikaNatPunchClient();
+            fikaNatPunchClient.Connect();
+
+            if (!fikaNatPunchClient.Connected)
+            {
+                _logger.LogError("Unable to connect to NatPunchRelayService.");
+                return;
+            }
+
+            StunIPEndPoint localStunEndPoint = NatPunchUtils.CreateStunEndPoint();
+
+            if (localStunEndPoint == null)
+            {
+                _logger.LogError("Nat Punch Request failed: Stun Endpoint is null.");
+                return;
+            }    
+
+            GetHostStunRequest getStunRequest = new GetHostStunRequest(serverId, RequestHandler.SessionId, localStunEndPoint.Remote.Address.ToString(), localStunEndPoint.Remote.Port);
+            GetHostStunResponse getStunResponse = await fikaNatPunchClient.GetHostStun(getStunRequest);
+
+            fikaNatPunchClient.Close();
+
+            remoteStunEndPoint = new IPEndPoint(IPAddress.Parse(getStunResponse.StunIp), getStunResponse.StunPort);
+
+            localPort = localStunEndPoint.Local.Port;
+        }
+
+        public void StartKeepAliveRoutine()
+        {
+            keepAliveRoutine = StartCoroutine(KeepAlive());
+        }
+
+        public void StopKeepAliveRoutine()
+        {
+            if(keepAliveRoutine != null)
+            {
+                StopCoroutine(keepAliveRoutine);
+            }
+        }
+
+        public IEnumerator KeepAlive()
+        {
+            while(true)
+            {
+                PingEndPoint("fika.keepalive");
+                NetClient.PollEvents();
+
+                yield return new WaitForSeconds(1.0f);
             }
         }
 
@@ -98,23 +166,22 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
-            if (Received)
-            {
-                return;
-            }
-            _logger.LogInfo("Received response from server, parsing...");
-
             if (reader.TryGetString(out string result))
             {
-                if (result == "fika.hello")
+                switch(result)
                 {
-                    Received = true;
-                    FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
-                    FikaBackendUtils.RemotePort = remoteEndPoint.Port;
-                }
-                else
-                {
-                    _logger.LogError("Data was not as expected");
+                    case "fika.hello":
+                        Received = true;
+                        FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
+                        FikaBackendUtils.RemotePort = remoteEndPoint.Port;
+                        FikaBackendUtils.LocalPort = localPort;
+                        break;
+                    case "fika.keepalive":
+                        // Do nothing
+                        break;
+                    default:
+                        _logger.LogError("Data was not as expected");
+                        break;
                 }
             }
             else

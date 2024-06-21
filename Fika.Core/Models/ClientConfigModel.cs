@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.UI.Models
@@ -27,7 +28,14 @@ namespace Fika.Core.UI.Models
         [DataMember(Name = "forceSaveOnDeath")]
         public bool ForceSaveOnDeath;
 
-        public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath)
+        [DataMember(Name = "useInertia")]
+        public bool UseInertia;
+
+        [DataMember(Name = "sharedQuestProgression")]
+        public bool SharedQuestProgression;
+
+        public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
+            bool sharedQuestProgression)
         {
             UseBTR = useBTR;
             FriendlyFire = friendlyFire;
@@ -36,15 +44,32 @@ namespace Fika.Core.UI.Models
             AllowItemSending = allowItemSending;
             BlacklistedItems = blacklistedItems;
             ForceSaveOnDeath = forceSaveOnDeath;
+            UseInertia = useInertia;
+            SharedQuestProgression = sharedQuestProgression;
         }
 
-        public new void ToString()
+        public void LogValues()
         {
             FikaPlugin.Instance.FikaLogger.LogInfo("Received config from server:");
             FieldInfo[] fields = typeof(ClientConfigModel).GetFields();
             foreach (FieldInfo field in fields)
             {
                 object value = field.GetValue(this);
+                if (value is Array valueArray)
+                {
+                    string values = "";
+                    for (int i = 0; i < valueArray.Length; i++)
+                    {
+                        if (i == 0)
+                        {
+                            values = valueArray.GetValue(i).ToString();
+                            continue;
+                        }
+                        values = values + ", " + valueArray.GetValue(i).ToString();
+                    }
+                    FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
+                    continue;
+                }
                 FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + value);
             }
         }

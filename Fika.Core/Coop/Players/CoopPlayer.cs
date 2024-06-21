@@ -68,7 +68,7 @@ namespace Fika.Core.Coop.Players
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
             CoopClientQuestController questController;
-            if (FikaPlugin.QuestSharing.Value)
+            if (FikaPlugin.Instance.SharedQuestProgression)
             {
                 questController = new CoopClientSharedQuestController(profile, inventoryController, session, player);
             }
@@ -118,6 +118,11 @@ namespace Fika.Core.Coop.Players
             player.SetupMainPlayer();
 
             return player;
+        }
+
+        public override GClass681 CreatePhysical()
+        {
+            return FikaPlugin.Instance.UseInertia ? new GClass682() : new NoInertiaPhysical();
         }
 
         public override void OnSkillLevelChanged(GClass1778 skill)
@@ -230,16 +235,21 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
-            if (damageInfo.DamageType is not EDamageType.Sniper or EDamageType.Landmine)
+            if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
             {
-                return null;
+                return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is not CoopBot)
+            if (damageInfo.Player?.iPlayer is CoopBot)
             {
-                return null;
+                return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
             }
 
+            return null;
+        }
+
+        private GClass1688 SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+        {
             ActiveHealthController activeHealthController = ActiveHealthController;
             if (activeHealthController != null && !activeHealthController.IsAlive)
             {
@@ -258,6 +268,10 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             float num = damage - damageInfo.Damage;
+            if (num > 0)
+            {
+                damageInfo.DidArmorDamage = num;
+            }
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, gclass.Material);
 
             if (list != null)
@@ -564,7 +578,6 @@ namespace Fika.Core.Coop.Players
             {
                 Packet = packet,
                 KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
-                KillerWeaponId = LastDamageInfo.Weapon?.Id,
                 RagdollPacket = new()
                 {
                     BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
@@ -1401,6 +1414,7 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
+                // TODO: Fix this and consistently get the correct data...
                 if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
                 {
                     damageInfo.Weapon = weapon;

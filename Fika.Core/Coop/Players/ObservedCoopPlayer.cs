@@ -300,9 +300,10 @@ namespace Fika.Core.Coop.Players
 
         public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
+            ShotReactions(damageInfo, bodyPartType);
+
             if (damageInfo.DamageType == EDamageType.Sniper && FikaBackendUtils.IsServer)
             {
-                ShotReactions(damageInfo, bodyPartType);
                 PacketSender.DamagePackets.Enqueue(new()
                 {
                     Damage = damageInfo.Damage,
@@ -358,7 +359,6 @@ namespace Fika.Core.Coop.Players
                         damageInfo.DidArmorDamage = num;
                     }
                     damageInfo.DidBodyDamage = damageInfo.Damage;
-                    ShotReactions(damageInfo, bodyPartType);
                     ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
                     PacketSender.DamagePackets.Enqueue(new()
@@ -393,11 +393,8 @@ namespace Fika.Core.Coop.Players
                 }
                 return null;
             }
-            else
-            {
-                ShotReactions(damageInfo, bodyPartType);
-                return null;
-            }
+
+            return null;
         }
 
         public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
@@ -701,10 +698,10 @@ namespace Fika.Core.Coop.Players
             }
 
             Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= SetSoundRollOff;
-            if (FikaPlugin.CullPlayers.Value)
+            /*if (FikaPlugin.CullPlayers.Value)
             {
                 UnregisterCulling();
-            }
+            }*/
 
             base.OnDead(damageType);
         }
@@ -839,10 +836,10 @@ namespace Fika.Core.Coop.Players
                 playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
                 playerTraverse.Field("_climbAudioController").SetValue(null);
 
-                if (FikaPlugin.CullPlayers.Value)
+                /*if (FikaPlugin.CullPlayers.Value)
                 {
                     SetupCulling();
-                }
+                }*/
             }
 
             PacketReceiver = gameObject.AddComponent<PacketReceiver>();
@@ -959,7 +956,7 @@ namespace Fika.Core.Coop.Players
             followerCullingObject.enabled = true;
             followerCullingObject.CullByDistanceOnly = false;
             followerCullingObject.Init(new Func<Transform>(GetPlayerBones));
-            followerCullingObject.SetParams(EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_RADIUS, EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_SHIFT, FikaPlugin.CullingRange.Value);
+            //followerCullingObject.SetParams(EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_RADIUS, EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_SHIFT, FikaPlugin.CullingRange.Value);
             //followerCullingObject.OnVisibilityChanged += OnObservedVisibilityChanged;
 
             if (_triggerColliderSearcher != null)
@@ -1125,10 +1122,10 @@ namespace Fika.Core.Coop.Players
 
         public override void Dispose()
         {
-            if (FikaPlugin.CullPlayers.Value)
+            /*if (FikaPlugin.CullPlayers.Value)
             {
                 UnregisterCulling();
-            }
+            }*/
             base.Dispose();
         }
 
@@ -1340,7 +1337,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void SetAggressor(string killerId, string weaponId)
+        public void SetAggressor(string killerId)
         {
             Player killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
             if (killer != null)

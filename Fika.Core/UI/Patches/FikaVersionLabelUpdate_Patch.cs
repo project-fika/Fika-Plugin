@@ -2,6 +2,7 @@
 using System.Reflection;
 using EFT;
 using EFT.UI;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 
@@ -23,6 +24,12 @@ namespace Fika.Core.EssentialPatches
         [PatchPostfix]
         private static void Postfix(GameWorld __instance)
         {
+            if (FikaBackendUtils.IsSinglePlayer)
+            {
+                //Generate a new raid code
+                raidCode = FikaBackendUtils.GenerateRaidCode(6);
+            }
+
             if (!string.IsNullOrEmpty(raidCode))
             {
                 Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
@@ -34,6 +41,8 @@ namespace Fika.Core.EssentialPatches
                 // preloaderUiTraverse.Field("string_4").SetValue("PvE");
                 //Update version label
                 preloaderUiTraverse.Method("method_6").GetValue();
+
+                Logger.LogInfo($"MatchingType: {FikaBackendUtils.MatchingType}, Raid Code: {raidCode}");
             }
         }
     }
