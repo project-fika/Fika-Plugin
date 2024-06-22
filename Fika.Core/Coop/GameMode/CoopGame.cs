@@ -1335,16 +1335,7 @@ namespace Fika.Core.Coop.GameMode
             seasonTaskHandler.task = seasonHandler.Run(season);
             yield return new WaitUntil(new Func<bool>(seasonTaskHandler.method_0));
 
-            int timeBeforeDeployLocal = Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
-
-            if (timeBeforeDeployLocal < 5)
-            {
-                timeBeforeDeployLocal = 5;
-                NotificationManagerClass.DisplayWarningNotification("You have set the deploy timer too low, resetting to 5!");
-            }
-
             yield return WaitForOtherPlayers();
-
 
             int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
             if (isServer)
@@ -1411,6 +1402,7 @@ namespace Fika.Core.Coop.GameMode
             FikaAirdropsManager.ContainerCount = 0;
 
             SetupBorderzones();
+            SetupRaidCode();
 
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
@@ -1421,6 +1413,21 @@ namespace Fika.Core.Coop.GameMode
 
             yield return base.vmethod_4(controllerSettings, spawnSystem, runCallback);
             yield break;
+        }
+
+        private void SetupRaidCode()
+        {
+            string raidCode = FikaBackendUtils.GetRaidCode();
+            if (!string.IsNullOrEmpty(raidCode))
+            {
+                Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+                // Raid code
+                preloaderUiTraverse.Field("string_3").SetValue($"{raidCode}");
+                // Update version label
+                preloaderUiTraverse.Method("method_6").GetValue();
+
+                Logger.LogInfo($"MatchingType: {FikaBackendUtils.MatchingType}, Raid Code: {raidCode}");
+            }
         }
 
         /// <summary>

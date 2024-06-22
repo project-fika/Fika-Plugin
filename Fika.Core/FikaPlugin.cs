@@ -197,7 +197,6 @@ namespace Fika.Core
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
-            new FikaVersionLabelUpdate_Patch().Enable();
             new DisableReadyButton_Patch().Enable();
             new DisableInsuranceReadyButton_Patch().Enable();
             new DisableMatchSettingsReadyButton_Patch().Enable();
@@ -214,6 +213,7 @@ namespace Fika.Core
             new AbstractGame_InRaid_Patch().Enable();
             new BaseLocalGame_method_6_Patch().Enable();
             new DisconnectButton_Patch().Enable();
+            new ChangeGameModeButton_Patch().Enable();
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
@@ -485,6 +485,7 @@ namespace Fika.Core
             new DogtagPatch().Disable();
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
+            new DisablePvEPatch().Disable();
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
@@ -513,11 +514,11 @@ namespace Fika.Core
         public enum EQuestSharingTypes
         {
             Kill = 1,
-            Hit = 2,
+            Item = 2,
             Location = 4,
             PlaceBeacon = 8,
 
-            All = Kill | Hit | Location | PlaceBeacon
+            All = Kill | Item | Location | PlaceBeacon
         }
     }
 }

@@ -1555,13 +1555,13 @@ namespace Fika.Core.Coop.Players
                 {
                     if (lootItem is LootItem observedLootItem)
                     {
-                        if (observedLootItem.Item.TemplateId == itemId)
+                        if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
                         {
                             return observedLootItem.Item;
                         }
                     }
                 }
-                FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the world at all.");
+                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
                 return null;
             }
 

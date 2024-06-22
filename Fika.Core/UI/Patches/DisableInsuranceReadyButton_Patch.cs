@@ -1,9 +1,9 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using EFT.UI;
+using EFT.UI.Matchmaker;
 using SPT.Reflection.Patching;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.UI.Patches
 {
@@ -12,28 +12,18 @@ namespace Fika.Core.UI.Patches
     /// </summary>
     public class DisableInsuranceReadyButton_Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(MainMenuController).GetMethod(nameof(MainMenuController.method_42));
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(MatchmakerInsuranceScreen).GetMethod(nameof(MatchmakerInsuranceScreen.Awake));
+        }
 
         [PatchPostfix]
-        static void PatchPostfix()
+        static void Postfix(DefaultUIButton ____readyButton)
         {
-            var readyButton = GameObject.Find("ReadyButton");
+            ____readyButton.SetDisabledTooltip("Disabled with Fika");
+            ____readyButton.SetEnabledTooltip("Disabled with Fika");
 
-            if (readyButton != null)
-            {
-                readyButton.SetActive(false);
-                DefaultUIButton uiButton = readyButton.GetComponent<DefaultUIButton>();
-                if (uiButton != null)
-                {
-                    uiButton.SetDisabledTooltip("Disabled with Fika");
-                    uiButton.SetEnabledTooltip("Disabled with Fika");
-
-                    if (uiButton.Interactable == true)
-                    {
-                        uiButton.Interactable = false;
-                    }
-                }
-            }
+            ____readyButton.Interactable = false;
         }
     }
 }
