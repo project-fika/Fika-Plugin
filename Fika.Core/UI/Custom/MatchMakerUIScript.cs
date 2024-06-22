@@ -6,7 +6,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.NatPunch;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using System;

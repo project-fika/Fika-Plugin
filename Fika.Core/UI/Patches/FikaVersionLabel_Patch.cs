@@ -14,11 +14,8 @@ namespace Fika.Core.EssentialPatches
     public class FikaVersionLabel_Patch : ModulePatch
     {
         private static string versionLabel;
-
         private static Traverse versionNumberTraverse;
-
         private static string fikaVersion;
-
         private static string officialVersion;
 
         protected override MethodBase GetTargetMethod()
@@ -47,7 +44,7 @@ namespace Fika.Core.EssentialPatches
 
             versionNumberTraverse = Traverse.Create(__result);
 
-            officialVersion = (string)versionNumberTraverse.Field("Major").GetValue();
+            officialVersion = versionNumberTraverse.Field<string>("Major").Value;
             
             UpdateVersionLabel();
         }
@@ -66,13 +63,9 @@ namespace Fika.Core.EssentialPatches
                 versionNumberTraverse.Field("Major").SetValue($"{fikaVersion} {versionLabel}");
             }
 
-            //Game version
-            // preloaderUiTraverse.Field("string_2").SetValue($"Game version");
-            //Raid code
-            // preloaderUiTraverse.Field("string_3").SetValue($"Raid code");
-            //Game mode
+            // Game mode
             preloaderUiTraverse.Field("string_4").SetValue("PvE");
-            //Update version label
+            // Update version label
             preloaderUiTraverse.Method("method_6").GetValue();
         }
     }
