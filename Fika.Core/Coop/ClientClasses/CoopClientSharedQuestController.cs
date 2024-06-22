@@ -21,14 +21,27 @@ namespace Fika.Core.Coop.ClientClasses
             base.Init();
             foreach (FikaPlugin.EQuestSharingTypes shareType in (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes)))
             {
-                if (shareType == FikaPlugin.EQuestSharingTypes.All)
-                {
-                    return;
-                }
-
                 if (FikaPlugin.QuestTypesToShareAndReceive.Value.HasFlag(shareType))
                 {
-                    acceptedTypes.Add(shareType.ToString());
+                    switch (shareType)
+                    {
+                        case FikaPlugin.EQuestSharingTypes.Kill:
+                            acceptedTypes.Add("Elimination");
+                            acceptedTypes.Add(shareType.ToString());
+                            break;
+                        case FikaPlugin.EQuestSharingTypes.Item:
+                            acceptedTypes.Add("FindItem");
+                            break;
+                        case FikaPlugin.EQuestSharingTypes.Location:
+                            acceptedTypes.Add("Exploration");
+                            acceptedTypes.Add("Discover");
+                            acceptedTypes.Add("VisitPlace");
+                            acceptedTypes.Add(shareType.ToString());
+                            break;
+                        case FikaPlugin.EQuestSharingTypes.PlaceBeacon:
+                            acceptedTypes.Add(shareType.ToString());
+                            break;
+                    }
                 }
             }
         }
@@ -70,8 +83,13 @@ namespace Fika.Core.Coop.ClientClasses
             if (conditional is GClass1258 quest)
             {
                 GClass3242 counter = quest.ConditionCountersManager.GetCounter(condition.id);
-                if (counter != null && acceptedTypes.Contains(counter.Type))
+                if (counter != null)
                 {
+                    if (!ValidateQuestType(counter))
+                    {
+                        return;
+                    }
+
                     QuestConditionPacket packet = new(player.Profile.Info.MainProfileNickname, counter.Id, counter.SourceId);
 #if DEBUG
                     FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
@@ -91,7 +109,7 @@ namespace Fika.Core.Coop.ClientClasses
                     GClass3242 counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                     if (counter != null)
                     {
-                        if (!acceptedTypes.Contains(counter.Type))
+                        if (!ValidateQuestType(counter))
                         {
                             return;
                         }
@@ -125,6 +143,35 @@ namespace Fika.Core.Coop.ClientClasses
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Validates quest typing, some quests use CounterCreator which we also need to validate.
+        /// </summary>
+        /// <param name="counter">The counter to validate</param>
+        /// <returns>Returns true if the quest type is valid, returns false if not</returns>
+        internal bool ValidateQuestType(GClass3242 counter)
+        {
+            if (acceptedTypes.Contains(counter.Type))
+            {
+                return true;
+            }
+
+            if (counter.Type == "CounterCreator")
+            {
+                ConditionCounterCreator CounterCreator = (ConditionCounterCreator)counter.Template;
+
+#if DEBUG
+                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController:: ValidateQuestType: CounterCreator Type {CounterCreator.type}");
+#endif
+
+                if (acceptedTypes.Contains(CounterCreator.type.ToString()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

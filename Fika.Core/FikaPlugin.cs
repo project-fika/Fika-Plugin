@@ -512,11 +512,11 @@ namespace Fika.Core
         public enum EQuestSharingTypes
         {
             Kill = 1,
-            Hit = 2,
+            Item = 2,
             Location = 4,
             PlaceBeacon = 8,
 
-            All = Kill | Hit | Location | PlaceBeacon
+            All = Kill | Item | Location | PlaceBeacon
         }
     }
 }
