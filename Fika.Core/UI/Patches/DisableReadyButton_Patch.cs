@@ -13,28 +13,18 @@ namespace Fika.Core.UI
     /// </summary>
     public class DisableReadyButton_Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(MatchMakerSelectionLocationScreen).GetMethod("method_7", BindingFlags.Public | BindingFlags.Instance);
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(MatchMakerSelectionLocationScreen).GetMethod(nameof(MatchMakerSelectionLocationScreen.Awake));
+        }
 
         [PatchPostfix]
-        static void PatchPostfix()
+        static void Postfix(DefaultUIButton ____readyButton)
         {
-            var readyButton = GameObject.Find("ReadyButton");
+            ____readyButton.SetDisabledTooltip("Disabled with Fika");
+            ____readyButton.SetEnabledTooltip("Disabled with Fika");
 
-            if (readyButton != null)
-            {
-                readyButton.SetActive(false);
-                DefaultUIButton uiButton = readyButton.GetComponent<DefaultUIButton>();
-                if (uiButton != null)
-                {
-                    uiButton.SetDisabledTooltip("Disabled with Fika");
-                    uiButton.SetEnabledTooltip("Disabled with Fika");
-
-                    if (uiButton.Interactable == true)
-                    {
-                        uiButton.Interactable = false;
-                    }
-                }
-            }
+            ____readyButton.Interactable = false;
         }
     }
 }

@@ -4,7 +4,6 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using SPT.Reflection.Patching;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.UI
 {
@@ -13,28 +12,18 @@ namespace Fika.Core.UI
     /// </summary>
     public class DisableMatchSettingsReadyButton_Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(MatchmakerOfflineRaidScreen).GetMethod(nameof(MatchmakerOfflineRaidScreen.Awake));
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(MatchmakerOfflineRaidScreen).GetMethod(nameof(MatchmakerOfflineRaidScreen.Awake));
+        }
 
         [PatchPostfix]
-        static void PatchPostfix()
+        static void Postfix(DefaultUIButton ____readyButton)
         {
-            var readyButton = GameObject.Find("ReadyButton");
+            ____readyButton.SetDisabledTooltip("Disabled with Fika");
+            ____readyButton.SetEnabledTooltip("Disabled with Fika");
 
-            if (readyButton != null)
-            {
-                readyButton.SetActive(false);
-                DefaultUIButton uiButton = readyButton.GetComponent<DefaultUIButton>();
-                if (uiButton != null)
-                {
-                    uiButton.SetDisabledTooltip("Disabled with Fika");
-                    uiButton.SetEnabledTooltip("Disabled with Fika");
-
-                    if (uiButton.Interactable == true)
-                    {
-                        uiButton.Interactable = false;
-                    }
-                }
-            }
+            ____readyButton.Interactable = false;
         }
     }
 }
