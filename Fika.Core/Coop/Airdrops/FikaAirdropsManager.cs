@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Airdrops;
 using Fika.Core.Coop.Airdrops.Models;
@@ -10,13 +9,10 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Coop.Airdrops
@@ -157,7 +153,7 @@ namespace Coop.Airdrops
                 LookPoint = airdropPlane.newRotation
             };
 
-            airdropPacketToSend = airdropPacket;
+            FikaBackendUtils.OldAirdropPackets.Add(airdropPacket);
             NetDataWriter writer = new();
             Singleton<FikaServer>.Instance.SendDataToAll(writer, ref airdropPacket, DeliveryMethod.ReliableOrdered);
         }
@@ -302,6 +298,7 @@ namespace Coop.Airdrops
                 }
                 coopHandler.ListOfInteractiveObjects.Add(AirdropBox.Container.Id, AirdropBox.Container);
                 Logger.LogInfo($"Adding AirdropBox {AirdropBox.Container.Id} to interactive objects.");
+                FikaBackendUtils.OldAirdropBoxes.Add(AirdropBox);
             }
 
             // Get the lootData. Send to clients.
@@ -364,7 +361,7 @@ namespace Coop.Airdrops
                 ContainerId = AirdropBox.Container.Id
             };
 
-            lootPacketToSend = lootPacket;
+            FikaBackendUtils.OldLootPackets.Add(lootPacket);
             NetDataWriter writer = new();
             Singleton<FikaServer>.Instance.SendDataToAll(writer, ref lootPacket, DeliveryMethod.ReliableOrdered);
 

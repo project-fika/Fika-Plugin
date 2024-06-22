@@ -892,18 +892,11 @@ namespace Fika.Core.Networking
             FikaBackendUtils.IsReconnect = true;
             FikaBackendUtils.ReconnectPacket = packet;
             FikaBackendUtils.ReconnectPacketRecieved = true;
+            FikaBackendUtils.OldAirdropBoxes = [];
+            FikaBackendUtils.OldAirdropPackets = [];
+            FikaBackendUtils.OldLootPackets = [];
 
             StartCoroutine(SyncClientToHost(packet));
-        }
-
-        private void OnReconnectAirdropPacketReceived(ReconnectAirdropPacket packet)
-        {
-            // manager/plane/box should all be init by this point
-            FikaAirdropsManager manager = Singleton<FikaAirdropsManager>.Instance;
-
-            manager.DistanceTravelled = packet.DistanceTravelled;
-            manager.airdropPlane.transform.position = packet.PlanePosition;
-            manager.AirdropBox.transform.position = packet.BoxPosition;
         }
 
         public IEnumerator SyncClientToHost(ReconnectResponsePacket packet)
@@ -966,31 +959,15 @@ namespace Fika.Core.Networking
             if (FikaBackendUtils.ReconnectPacket.Value.InitAirdrop)
             {
                 // ask for airdrop params and loot
-
                 while (Singleton<FikaAirdropsManager>.Instance == null)
                 {
                     logger.LogError($"[CWX] Waiting on FikaAirdrops to be init");
                     yield return new WaitUntil(() => Singleton<FikaAirdropsManager>.Instance != null);
                 }
 
-                FikaAirdropsManager manager = Singleton<FikaAirdropsManager>.Instance;
-
                 ReconnectRequestPacket airdropRequestPacket = new(MyPlayer.ProfileId, EReconnectPackgeType.AirdropSetup);
                 DataWriter.Reset();
                 SendData(DataWriter, ref airdropRequestPacket, DeliveryMethod.ReliableUnordered);
-
-                while (manager.AirdropBox == null || manager.airdropPlane == null)
-                {
-                    logger.LogError($"[CWX] waiting on plane or box");
-                    yield return new WaitUntil(() =>
-                    {
-                        return manager.AirdropBox != null && manager.airdropPlane != null;
-                    });
-                }
-
-                ReconnectRequestPacket airdropPosPacket = new(MyPlayer.ProfileId, EReconnectPackgeType.AirdropPositions);
-                DataWriter.Reset();
-                SendData(DataWriter, ref airdropPosPacket, DeliveryMethod.ReliableUnordered);
             }
             else
             {

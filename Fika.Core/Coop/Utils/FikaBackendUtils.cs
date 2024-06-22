@@ -6,6 +6,8 @@ using Fika.Core.Networking.Http.Models;
 using System;
 using System.Reflection;
 using Fika.Core.EssentialPatches;
+using System.Collections.Generic;
+using Fika.Core.Coop.Airdrops;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -39,6 +41,9 @@ namespace Fika.Core.Coop.Utils
         public static bool ReconnectPacketRecieved = false;
         public static ReconnectResponsePacket? ReconnectPacket; // change to not be nullable
         public static bool SpawnedPlayersComplete = false;
+        public static List<AirdropLootPacket> OldLootPackets = [];
+        public static List<AirdropPacket> OldAirdropPackets = [];
+        public static List<FikaAirdropBox> OldAirdropBoxes = [];
 
         public static MatchmakerTimeHasCome.GClass3187 ScreenController;
 

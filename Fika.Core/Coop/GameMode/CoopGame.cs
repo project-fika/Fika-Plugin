@@ -947,10 +947,10 @@ namespace Fika.Core.Coop.GameMode
             coopHandler.StartSpawning = true;
             await WaitForPlayers();
 
-            if(isServer && FikaPlugin.UseNatPunching.Value)
+            if (isServer && FikaPlugin.UseNatPunching.Value)
             {
                 FikaNatPunchServer natPunchServer = Singleton<FikaServer>.Instance.FikaNatPunchServer;
-                
+
                 if (natPunchServer != null && natPunchServer.Connected)
                 {
                     natPunchServer.Close();
@@ -1070,6 +1070,16 @@ namespace Fika.Core.Coop.GameMode
                 await SendOrReceiveSpawnPoint();
                 FikaBackendUtils.IsReconnect = false;
                 FikaBackendUtils.ReconnectPacket = null;
+                FikaBackendUtils.SpawnedPlayersComplete = false;
+                FikaBackendUtils.ReconnectPacketRecieved = false;
+
+                if (FikaBackendUtils.OldAirdropPackets.Count > 0)
+                {
+                    // "reset" Lists to empty once game ends
+                    FikaBackendUtils.OldAirdropBoxes = [];
+                    FikaBackendUtils.OldAirdropPackets = [];
+                    FikaBackendUtils.OldAirdropBoxes = [];
+                }
             }
 
             if (!isServer)
@@ -1827,6 +1837,14 @@ namespace Fika.Core.Coop.GameMode
                 FikaBackendUtils.ReconnectPacket = null;
                 FikaBackendUtils.SpawnedPlayersComplete = false;
                 FikaBackendUtils.ReconnectPacketRecieved = false;
+            }
+
+            if (FikaBackendUtils.OldAirdropPackets.Count > 0)
+            {
+                // "reset" Lists to empty once game ends
+                FikaBackendUtils.OldAirdropBoxes = [];
+                FikaBackendUtils.OldAirdropPackets = [];
+                FikaBackendUtils.OldAirdropBoxes = [];
             }
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
