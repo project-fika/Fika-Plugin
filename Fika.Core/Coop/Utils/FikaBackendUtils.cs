@@ -4,14 +4,14 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
 using System.Reflection;
-using Fika.Core.EssentialPatches;
+using Fika.Core.UI.Custom;
 
 namespace Fika.Core.Coop.Utils
 {
     public static class FikaBackendUtils
     {
         public static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
-        public static Profile Profile;
+        public static IProfileDataContainer Profile;
         public static string PmcName;
         public static EMatchingType MatchingType = EMatchingType.Single;
         public static bool IsServer => Profile.ProfileId == _serverId;
@@ -30,6 +30,8 @@ namespace Fika.Core.Coop.Utils
         private static string _raidCode;
 
         public static MatchmakerTimeHasCome.GClass3187 ScreenController;
+        public static RaidSettings RaidSettings { get; set; }
+        public static MatchMakerUIScript MatchMakerUIScript;
 
         public static string GetServerId()
         {

@@ -18,12 +18,15 @@ using UnityEngine.UI;
 
 namespace Fika.Core.UI.Custom
 {
-    internal class MatchMakerUIScript : MonoBehaviour
+    public class MatchMakerUIScript : MonoBehaviour
     {
         private MatchMakerUI fikaMatchMakerUi;
         private LobbyEntry[] Matches { get; set; }
         private List<GameObject> MatchesListObjects { get; set; } = [];
         private bool StopQuery = false;
+
+        public DefaultUIButton BackButton { get; internal set; }
+        public DefaultUIButton AcceptButton { get; internal set; }
         public GameObject NewBackButton { get; internal set; }
 
         private string ProfileId => FikaBackendUtils.Profile.ProfileId;
@@ -93,6 +96,7 @@ namespace Fika.Core.UI.Custom
                 if (!fikaMatchMakerUi.PlayerAmountSelection.active)
                 {
                     fikaMatchMakerUi.PlayerAmountSelection.SetActive(true);
+                    fikaMatchMakerUi.PlayerAmountText.text = FikaGroupUtils.GroupSize.ToString();
                 }
                 else
                 {
@@ -148,7 +152,7 @@ namespace Fika.Core.UI.Custom
                     }
                 }
                 FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PmcName, RaidSettings);
+                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PmcName, FikaBackendUtils.RaidSettings);
                 AcceptButton.OnClick.Invoke();
                 DestroyThis();
             });
@@ -179,7 +183,7 @@ namespace Fika.Core.UI.Custom
 
         private void AutoRefresh()
         {
-            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+            Matches = FikaRequestHandler.LocationRaids(FikaBackendUtils.RaidSettings);
 
             _lastRefreshed = Time.time;
 
@@ -189,7 +193,7 @@ namespace Fika.Core.UI.Custom
         private void ManualRefresh()
         {
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+            Matches = FikaRequestHandler.LocationRaids(FikaBackendUtils.RaidSettings);
 
             _lastRefreshed = Time.time;
 
@@ -250,8 +254,8 @@ namespace Fika.Core.UI.Custom
 
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
-                FikaBackendUtils.SetGroupId(result.ServerId);
-                FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
+                FikaBackendUtils.SetServerId(result.ServerId);
+                FikaBackendUtils.MatchingType = EMatchingType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
                 if (FikaBackendUtils.IsHostNatPunch)
@@ -333,7 +337,7 @@ namespace Fika.Core.UI.Custom
                 HoverTooltipArea tooltipArea;
                 Image image = server.GetComponent<Image>();
 
-                if (RaidSettings.LocationId != entry.Location)
+                if (FikaBackendUtils.RaidSettings.LocationId != entry.Location)
                 {
                     tooltipTextGetter = new()
                     {
@@ -353,41 +357,11 @@ namespace Fika.Core.UI.Custom
                     continue;
                 }
 
-                if (RaidSettings.SelectedDateTime != entry.Time)
+                if (FikaBackendUtils.RaidSettings.SelectedDateTime != entry.Time)
                 {
                     tooltipTextGetter = new()
                     {
                         TooltipText = "Cannot join a raid that is on another time."
-                    };
-
-                    button.enabled = false;
-                    if (image != null)
-                    {
-                        image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
-                    }
-
-                    tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
-                    tooltipArea.enabled = true;
-                    tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
-
-                    continue;
-                }
-
-                if (RaidSettings.Side != entry.Side)
-                {
-                    string errorText = "Cannot join a raid that is on another map.";
-                    if (RaidSettings.Side == ESideType.Pmc)
-                    {
-                        errorText = "You cannot join a scav raid as a PMC.";
-                    }
-                    else if (RaidSettings.Side == ESideType.Savage)
-                    {
-                        errorText = "You cannot join a PMC raid as a scav.";
-                    }
-
-                    tooltipTextGetter = new()
-                    {
-                        TooltipText = errorText
                     };
 
                     button.enabled = false;
@@ -424,21 +398,6 @@ namespace Fika.Core.UI.Custom
                         }
                         break;
                     case LobbyEntry.ELobbyStatus.IN_GAME:
-                        tooltipTextGetter = new()
-                        {
-                            TooltipText = "Raid is already in progress."
-                        };
-
-                        button.enabled = false;
-                        if (image != null)
-                        {
-                            image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
-                        }
-
-                        tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
-                        tooltipArea.enabled = true;
-                        tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
-                        break;
                     case LobbyEntry.ELobbyStatus.COMPLETE:
                         tooltipTextGetter = new()
                         {
