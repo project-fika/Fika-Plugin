@@ -200,8 +200,18 @@ namespace Fika.Core.UI.Custom
             RefreshUI();
         }
 
-        private IEnumerator JoinMatch(string profileId, string serverId, Button button)
+        public void JoinMatchCoroutine(string profileId, string serverId, Button button = null)
         {
+            StartCoroutine(JoinMatch(profileId, serverId, button));
+        }
+        
+        private IEnumerator JoinMatch(string profileId, string serverId, Button button = null)
+        {
+            if (fikaMatchMakerUi.PlayerAmountSelection.active)
+            {
+                fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+            }
+            
             if (button != null)
             {
                 button.enabled = false;
@@ -324,13 +334,8 @@ namespace Fika.Core.UI.Custom
                 Button button = joinButton.GetComponent<Button>();
                 button.onClick.AddListener(() =>
                 {
-                    if (fikaMatchMakerUi.PlayerAmountSelection.active)
-                    {
-                        fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
-                    }
-
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                    StartCoroutine(JoinMatch(ProfileId, server.name, button));
+                    JoinMatchCoroutine(ProfileId, server.name, button);
                 });
 
                 TooltipTextGetter tooltipTextGetter;
