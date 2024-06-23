@@ -1,8 +1,8 @@
 ﻿using BepInEx.Logging;
+using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.NatPunch;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using SPT.Common.Http;
@@ -14,17 +14,14 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    public class FikaPingingClient : MonoBehaviour, INetEventListener
+    public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
     {
         public NetManager NetClient;
         private readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
         private IPEndPoint remoteEndPoint;
         private IPEndPoint localEndPoint;
-        private IPEndPoint remoteStunEndPoint;
-        private int localPort = 0;
         public bool Received = false;
         private Coroutine keepAliveRoutine;
-        private Task natPunchRequestTask;
 
         public bool Init(string serverId)
         {
@@ -66,10 +63,18 @@ namespace Fika.Core.Networking
 
             if (FikaBackendUtils.IsHostNatPunch)
             {
-                natPunchRequestTask = Task.Run(() => NatPunchRequest(serverId));
+                NetClient.NatPunchModule.Init(this);
             }
 
-            NetClient.Start(localPort);
+            NetClient.Start();
+
+            if (FikaBackendUtils.IsHostNatPunch)
+            {
+                string natHost = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+                int natPort = 6970;
+
+                NetClient.NatPunchModule.SendNatIntroduceRequest(natHost, natPort, $"client:{serverId}");
+            }
 
             return true;
         }
@@ -84,40 +89,6 @@ namespace Fika.Core.Networking
             {
                 NetClient.SendUnconnectedMessage(writer, localEndPoint);
             }
-
-            if (remoteStunEndPoint != null && natPunchRequestTask.IsCompleted)
-            {
-                NetClient.SendUnconnectedMessage(writer, remoteStunEndPoint);
-            }
-        }
-
-        public async void NatPunchRequest(string serverId)
-        {
-            FikaNatPunchClient fikaNatPunchClient = new FikaNatPunchClient();
-            fikaNatPunchClient.Connect();
-
-            if (!fikaNatPunchClient.Connected)
-            {
-                _logger.LogError("Unable to connect to NatPunchRelayService.");
-                return;
-            }
-
-            StunIPEndPoint localStunEndPoint = NatPunchUtils.CreateStunEndPoint();
-
-            if (localStunEndPoint == null)
-            {
-                _logger.LogError("Nat Punch Request failed: Stun Endpoint is null.");
-                return;
-            }    
-
-            GetHostStunRequest getStunRequest = new GetHostStunRequest(serverId, RequestHandler.SessionId, localStunEndPoint.Remote.Address.ToString(), localStunEndPoint.Remote.Port);
-            GetHostStunResponse getStunResponse = await fikaNatPunchClient.GetHostStun(getStunRequest);
-
-            fikaNatPunchClient.Close();
-
-            remoteStunEndPoint = new IPEndPoint(IPAddress.Parse(getStunResponse.StunIp), getStunResponse.StunPort);
-
-            localPort = localStunEndPoint.Local.Port;
         }
 
         public void StartKeepAliveRoutine()
@@ -137,6 +108,7 @@ namespace Fika.Core.Networking
         {
             while(true)
             {
+                ConsoleScreen.Log($"keepalive: {remoteEndPoint}");
                 PingEndPoint("fika.keepalive");
                 NetClient.PollEvents();
 
@@ -174,10 +146,10 @@ namespace Fika.Core.Networking
                         Received = true;
                         FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
                         FikaBackendUtils.RemotePort = remoteEndPoint.Port;
-                        FikaBackendUtils.LocalPort = localPort;
+                        FikaBackendUtils.LocalPort = NetClient.LocalPort;
                         break;
                     case "fika.keepalive":
-                        // Do nothing
+                        ConsoleScreen.Log("fika.keepalive");
                         break;
                     default:
                         _logger.LogError("Data was not as expected");
@@ -198,6 +170,34 @@ namespace Fika.Core.Networking
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
             // Do nothing
+        }
+
+        public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
+        {
+            // Do nothing
+        }
+
+        public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
+        {
+            // Do nothing
+        }
+
+        public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
+        {
+            ConsoleScreen.Log($"OnNatIntroductionResponse: {remoteEndPoint}");
+
+            NetDataWriter data = new();
+            data.Put("fika.hello");
+
+            for (int i = 0; i < 10; i++)
+            {
+                NetClient.SendUnconnectedMessage(data, localEndPoint);
+                NetClient.SendUnconnectedMessage(data, remoteEndPoint);
+            }
+
+            remoteEndPoint = natRemoteEndPoint;
+
+            StartKeepAliveRoutine();
         }
     }
 }

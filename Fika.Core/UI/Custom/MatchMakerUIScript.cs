@@ -258,11 +258,7 @@ namespace Fika.Core.UI.Custom
                 FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
-                if (FikaBackendUtils.IsHostNatPunch)
-                {
-                    pingingClient.StartKeepAliveRoutine();
-                }
-                else
+                if (!FikaBackendUtils.IsHostNatPunch)
                 {
                     NetManagerUtils.DestroyPingingClient();
                 }

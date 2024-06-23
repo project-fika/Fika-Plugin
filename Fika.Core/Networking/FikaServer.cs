@@ -17,7 +17,6 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.NatPunch;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
@@ -25,6 +24,7 @@ using Fika.Core.Networking.Packets.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
+using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,7 +38,7 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    public class FikaServer : MonoBehaviour, INetEventListener, INetLogger
+    public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener
     {
         private NetManager _netServer;
         public NetPacketProcessor packetProcessor = new();
@@ -73,8 +73,6 @@ namespace Fika.Core.Networking
             }
         }
         private FikaChat fikaChat;
-        public FikaNatPunchServer FikaNatPunchServer;
-        private CancellationTokenSource StunQueryRoutineCts;
 
         public async Task Init()
         {
@@ -112,7 +110,8 @@ namespace Fika.Core.Networking
                 IPv6Enabled = false,
                 DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
-                EnableStatistics = true
+                EnableStatistics = true,
+                NatPunchEnabled = true
             };
             
             if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
@@ -161,18 +160,15 @@ namespace Fika.Core.Networking
 
             if(FikaPlugin.UseNatPunching.Value)
             {
-                FikaNatPunchServer = new FikaNatPunchServer(_netServer);
-                FikaNatPunchServer.Connect();
+                _netServer.NatPunchModule.Init(this);
+                _netServer.Start();
 
-                if (FikaNatPunchServer.Connected)
-                {
-                    StunQueryRoutineCts = new CancellationTokenSource();
-                    Task stunQueryRoutine = Task.Run(() => NatPunchUtils.StunQueryRoutine(_netServer, FikaNatPunchServer, StunQueryRoutineCts.Token));
-                }
-                else
-                {
-                    logger.LogError("Unable to connect to FikaNatPunchRelayService.");
-                }
+                string host = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+                int port = 6970;
+
+                ConsoleScreen.Log($"send nat introduce request to {host}:{port}");
+
+                _netServer.NatPunchModule.SendNatIntroduceRequest(host, port, $"server:{RequestHandler.SessionId}");
             }
             else
             {
@@ -187,19 +183,8 @@ namespace Fika.Core.Networking
             }
 
             logger.LogInfo("Started Fika Server");
-
-            string serverStartedMessage;
-
-            if(FikaPlugin.UseNatPunching.Value)
-            {
-                serverStartedMessage = "Server started using Nat Punching.";
-            }
-            else
-            {
-                serverStartedMessage = $"Server started on port {_netServer.LocalPort}.";
-            }
             
-            NotificationManagerClass.DisplayMessageNotification(serverStartedMessage,
+            NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
             string[] Ips = [];
@@ -729,6 +714,7 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             _netServer?.PollEvents();
+            _netServer?.NatPunchModule?.PollEvents();
         }
 
         protected void OnDestroy()
@@ -808,11 +794,7 @@ namespace Fika.Core.Networking
                             resp = new();
                             resp.Put(data);
                             _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-                            
-                            if(!StunQueryRoutineCts.IsCancellationRequested)
-                            {
-                                StunQueryRoutineCts.Cancel();
-                            }
+                            ConsoleScreen.Log("fika.keepalive");
                             break;
 
                         default:
@@ -854,6 +836,30 @@ namespace Fika.Core.Networking
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
             packetProcessor.ReadAllPackets(reader, peer);
+        }
+
+        public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
+        {
+            // Do nothing
+        }
+
+        public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
+        {
+            // Do nothing
+        }
+
+        public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
+        {
+            ConsoleScreen.Log($"OnNatIntroductionResponse: {remoteEndPoint}");
+
+            NetDataWriter data = new();
+            data.Put("fika.hello");
+
+            for (int i = 0; i < 10; i++)
+            {
+                _netServer.SendUnconnectedMessage(data, localEndPoint);
+                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
+            }
         }
 
         private class InventoryOperationHandler
