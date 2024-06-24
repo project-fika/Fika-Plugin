@@ -1101,14 +1101,15 @@ namespace Fika.Core.Coop.GameMode
             {
                 FikaServer server = Singleton<FikaServer>.Instance;
 
-                if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out var groupInfo))
+                if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out var groupInfo) || groupInfo is not { Length: 2 })
                 {
                     groupInfo = [FikaGroupUtils.GroupSize, 1]; // 1 since the server is ready
+                    server.ConnectedGroups[FikaGroupUtils.GroupId] = groupInfo;
                 }
-            
+                
                 do
                 {
-                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - groupInfo[1];
+                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (groupInfo[1] + 1);
                     if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
