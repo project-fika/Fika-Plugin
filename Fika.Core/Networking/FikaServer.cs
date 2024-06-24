@@ -500,14 +500,18 @@ namespace Fika.Core.Networking
 
         private void OnInformationPacketReceived(InformationPacket packet, NetPeer peer)
         {
+            if (packet.GroupId == null) return;
+            
             ReadyClients += packet.ReadyPlayers;
 
-            if (!ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out var groupInfo))
+            if (!ConnectedGroups.TryGetValue(packet.GroupId, out var groupInfo))
             {
                 groupInfo = [packet.NumberOfPlayers, 0];
             }
 
             groupInfo[1] += packet.ReadyPlayers;
+
+            ConnectedGroups[packet.GroupId] = groupInfo;
 
             InformationPacket respondPackage = new(false)
             {

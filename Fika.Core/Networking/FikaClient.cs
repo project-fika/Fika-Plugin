@@ -600,7 +600,7 @@ namespace Fika.Core.Networking
 
         private void OnInformationPacketReceived(InformationPacket packet)
         {
-            if (!packet.IsRequest)
+            if (!packet.IsRequest && packet.GroupId != null & packet.GroupId == FikaGroupUtils.GroupId)
             {
                 ConnectedClients = packet.NumberOfPlayers;
                 ReadyClients = packet.ReadyPlayers;
