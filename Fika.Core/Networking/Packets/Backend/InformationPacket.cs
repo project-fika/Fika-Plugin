@@ -9,13 +9,14 @@ namespace Fika.Core.Networking
         public bool IsRequest = isRequest;
         public int NumberOfPlayers = 0;
         public int ReadyPlayers = 0;
-
-
+        public string GroupId = "";
+        
         public void Deserialize(NetDataReader reader)
         {
             IsRequest = reader.GetBool();
             NumberOfPlayers = reader.GetInt();
             ReadyPlayers = reader.GetInt();
+            GroupId = reader.GetString();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -23,6 +24,7 @@ namespace Fika.Core.Networking
             writer.Put(IsRequest);
             writer.Put(NumberOfPlayers);
             writer.Put(ReadyPlayers);
+            writer.Put(GroupId);
         }
     }
 }

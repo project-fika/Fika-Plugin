@@ -1,41 +1,47 @@
-namespace Fika.Core.Coop.Utils;
-
-public static class FikaGroupUtils
+namespace Fika.Core.Coop.Utils
 {
-    public static MatchmakerPlayerControllerClass GroupController { get; set; }
-    
-    public static bool InGroup => GroupController is { GroupPlayers.Count: >= 1 };
-    public static int GroupSize => InGroup ? GroupController.GroupPlayers.Count : 1;
-    public static bool IsGroupLeader
+    public static class FikaGroupUtils
     {
-        get
+        public static MatchmakerPlayerControllerClass GroupController { get; set; }
+
+        public static bool InGroup => GroupController is { GroupPlayers.Count: >= 1 };
+        public static int GroupSize => InGroup ? GroupController.GroupPlayers.Count : 1;
+
+        public static string GroupId => InGroup
+            ? GroupController.Group?.Owner?.Value?.ProfileId ?? FikaBackendUtils.Profile.ProfileId
+            : FikaBackendUtils.Profile.ProfileId;
+
+        public static bool IsGroupLeader
         {
-            if (GroupController?.Group == null)
+            get
             {
-                return true;
-            }
+                if (GroupController?.Group == null)
+                {
+                    return true;
+                }
 
-            if (GroupController?.GroupPlayers == null)
-            {
-                return true;
-            }
+                if (GroupController?.GroupPlayers == null)
+                {
+                    return true;
+                }
 
-            if (GroupController.GroupPlayers.Count <= 1)
-            {
-                return true;
-            }
+                if (GroupController.GroupPlayers.Count <= 1)
+                {
+                    return true;
+                }
 
-            if (GroupController?.Group?.Owner?.Value?.Id == null)
-            {
-                return true;
+                if (GroupController?.Group?.Owner?.Value?.Id == null)
+                {
+                    return true;
+                }
+                
+                return GroupController.Group.Owner.Value.Id == FikaBackendUtils.Profile.ProfileId || GroupController.IsLeader;
             }
-            
-            return GroupController.Group.Owner.Value.Id == FikaBackendUtils.Profile.ProfileId || GroupController.IsLeader;
         }
-    }
 
-    public static void GroupJoinMatch(string profileId, string serverId)
-    {
-        FikaBackendUtils.MatchMakerUIScript.JoinMatchCoroutine(profileId, serverId);
+        public static void GroupJoinMatch(string profileId, string serverId)
+        {
+            FikaBackendUtils.MatchMakerUIScript.JoinMatchCoroutine(profileId, serverId);
+        }
     }
 }
