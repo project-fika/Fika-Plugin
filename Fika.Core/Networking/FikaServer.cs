@@ -50,6 +50,7 @@ namespace Fika.Core.Networking
         private int Port => FikaPlugin.UDPPort.Value;
         private CoopHandler coopHandler;
         public int ReadyClients = 0;
+        public Dictionary<string, int[]> ConnectedGroups = new();
         public NetManager NetServer
         {
             get
@@ -501,10 +502,18 @@ namespace Fika.Core.Networking
         {
             ReadyClients += packet.ReadyPlayers;
 
+            if (!ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out var groupInfo))
+            {
+                groupInfo = [packet.NumberOfPlayers, 0];
+            }
+
+            groupInfo[1] += packet.ReadyPlayers;
+
             InformationPacket respondPackage = new(false)
             {
-                NumberOfPlayers = _netServer.ConnectedPeersCount,
-                ReadyPlayers = ReadyClients,
+                NumberOfPlayers = groupInfo[0],
+                ReadyPlayers = groupInfo[1],
+                GroupId = packet.GroupId
             };
 
             _dataWriter.Reset();
