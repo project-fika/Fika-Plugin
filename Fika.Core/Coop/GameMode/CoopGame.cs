@@ -729,7 +729,7 @@ namespace Fika.Core.Coop.GameMode
                     FikaServer server = Singleton<FikaServer>.Instance;
                     server.ReadyClients++;
                     
-                    if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out var groupInfo))
+                    if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out int[] groupInfo))
                     {
                         // By now we expect all members to be connected, so this code should never be run.
                         // However, to avoid causing issues it'll allow the game to continue even if something
@@ -1121,14 +1121,15 @@ namespace Fika.Core.Coop.GameMode
             {
                 FikaServer server = Singleton<FikaServer>.Instance;
 
-                if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out int[] groupInfo))
+                if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out int[] groupInfo) || groupInfo is not { Length: 2 })
                 {
                     groupInfo = [FikaGroupUtils.GroupSize, 1]; // 1 since the server is ready
+                    server.ConnectedGroups[FikaGroupUtils.GroupId] = groupInfo;
                 }
-            
+                
                 do
                 {
-                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - groupInfo[1];
+                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (groupInfo[1] + 1);
                     if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)

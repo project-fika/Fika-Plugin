@@ -3,10 +3,9 @@ namespace Fika.Core.Coop.Utils
     public static class FikaGroupUtils
     {
         public static MatchmakerPlayerControllerClass GroupController { get; set; }
-
-        public static bool InGroup => GroupController is { GroupPlayers.Count: >= 1 };
-        public static int GroupSize => InGroup ? GroupController.GroupPlayers.Count : 1;
-        public static string GroupId => GroupController.Group?.Owner?.Value?.Id ?? FikaBackendUtils.Profile.ProfileId;
+        public static bool InGroup => GroupSize > 1;
+        public static int GroupSize => GroupController?.GroupPlayers?.Count ?? 1;
+        public static string GroupId => GroupController?.Group?.Owner?.Value?.Id ?? FikaBackendUtils.Profile.ProfileId;
         
         public static bool IsGroupLeader
         {
