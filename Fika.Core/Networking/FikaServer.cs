@@ -73,6 +73,7 @@ namespace Fika.Core.Networking
             }
         }
         private FikaChat fikaChat;
+        private CancellationTokenSource natIntroduceRoutineCts;
 
         public async Task Init()
         {
@@ -163,12 +164,14 @@ namespace Fika.Core.Networking
                 _netServer.NatPunchModule.Init(this);
                 _netServer.Start();
 
+                natIntroduceRoutineCts = new CancellationTokenSource();
+
                 string host = RequestHandler.Host.Replace("http://", "").Split(':')[0];
                 int port = 6970;
 
-                ConsoleScreen.Log($"send nat introduce request to {host}:{port}");
+                IPEndPoint natServerIPEndPoint = new IPEndPoint(IPAddress.Parse(host), port);
 
-                _netServer.NatPunchModule.SendNatIntroduceRequest(host, port, $"server:{RequestHandler.SessionId}");
+                Task natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natServerIPEndPoint, natIntroduceRoutineCts.Token));
             }
             else
             {
@@ -208,6 +211,22 @@ namespace Fika.Core.Networking
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+        }
+
+        private async void NatIntroduceRoutine(IPEndPoint natServerIPEndPoint, CancellationToken ct)
+        {
+            ConsoleScreen.Log($"begin NatIntroduceRoutine");
+
+            while (!ct.IsCancellationRequested)
+            {
+                ConsoleScreen.Log($"send nat introduce request to {natServerIPEndPoint}");
+
+                _netServer.NatPunchModule.SendNatIntroduceRequest(natServerIPEndPoint, $"server:{RequestHandler.SessionId}");
+
+                await Task.Delay(TimeSpan.FromSeconds(15));
+            }
+
+            ConsoleScreen.Log($"end NatIntroduceRoutine");
         }
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet, NetPeer peer)
@@ -794,7 +813,11 @@ namespace Fika.Core.Networking
                             resp = new();
                             resp.Put(data);
                             _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-                            ConsoleScreen.Log("fika.keepalive");
+
+                            if(!natIntroduceRoutineCts.IsCancellationRequested)
+                            {
+                                natIntroduceRoutineCts.Cancel();
+                            }
                             break;
 
                         default:
@@ -850,8 +873,6 @@ namespace Fika.Core.Networking
 
         public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
         {
-            ConsoleScreen.Log($"OnNatIntroductionResponse: {remoteEndPoint}");
-
             NetDataWriter data = new();
             data.Put("fika.hello");
 
@@ -859,6 +880,8 @@ namespace Fika.Core.Networking
             {
                 _netServer.SendUnconnectedMessage(data, localEndPoint);
                 _netServer.SendUnconnectedMessage(data, remoteEndPoint);
+
+                Task.Delay(100);
             }
         }
 

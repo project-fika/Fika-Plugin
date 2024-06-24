@@ -240,14 +240,12 @@ namespace LiteNetLib
         //We got introduce and must punch
         private void OnNatIntroductionResponse(NatIntroduceResponsePacket req)
         {
-            Console.WriteLine("[NAT] introduction received");
             NetDebug.Write(NetLogLevel.Trace, "[NAT] introduction received");
 
             // send internal punch
             var punchPacket = new NatPunchPacket { Token = req.Token };
             Send(punchPacket, req.Internal);
             NetDebug.Write(NetLogLevel.Trace, $"[NAT] internal punch sent to {req.Internal}");
-            Console.WriteLine($"[NAT] internal punch sent to {req.Internal}");
 
             // hack for some routers
             _socket.Ttl = 2;
@@ -258,7 +256,6 @@ namespace LiteNetLib
             punchPacket.IsExternal = true;
             Send(punchPacket, req.External);
             NetDebug.Write(NetLogLevel.Trace, $"[NAT] external punch sent to {req.External}");
-            Console.WriteLine($"[NAT] external punch sent to {req.External}");
 
             if (UnsyncedEvents)
             {
