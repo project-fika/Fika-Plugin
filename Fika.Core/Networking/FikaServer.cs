@@ -215,18 +215,18 @@ namespace Fika.Core.Networking
 
         private async void NatIntroduceRoutine(IPEndPoint natServerIPEndPoint, CancellationToken ct)
         {
-            ConsoleScreen.Log($"begin NatIntroduceRoutine");
+            logger.LogInfo("NatIntroduceRoutine started.");
 
             while (!ct.IsCancellationRequested)
             {
-                ConsoleScreen.Log($"send nat introduce request to {natServerIPEndPoint}");
-
                 _netServer.NatPunchModule.SendNatIntroduceRequest(natServerIPEndPoint, $"server:{RequestHandler.SessionId}");
+
+                logger.LogInfo($"SendNatIntroduceRequest: {natServerIPEndPoint}");
 
                 await Task.Delay(TimeSpan.FromSeconds(15));
             }
 
-            ConsoleScreen.Log($"end NatIntroduceRoutine");
+            logger.LogInfo("NatIntroduceRoutine ended.");
         }
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet, NetPeer peer)
@@ -883,6 +883,8 @@ namespace Fika.Core.Networking
 
                 Task.Delay(100);
             }
+
+            logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
         }
 
         private class InventoryOperationHandler

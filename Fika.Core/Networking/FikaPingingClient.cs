@@ -45,7 +45,11 @@ namespace Fika.Core.Networking
                 string natHost = RequestHandler.Host.Replace("http://", "").Split(':')[0];
                 int natPort = 6970;
 
-                NetClient.NatPunchModule.SendNatIntroduceRequest(natHost, natPort, $"client:{serverId}");
+                IPEndPoint natIPEndPoint = new IPEndPoint(IPAddress.Parse(natHost), natPort);
+
+                NetClient.NatPunchModule.SendNatIntroduceRequest(natIPEndPoint, $"client:{serverId}");
+
+                _logger.LogInfo($"SendNatIntroduceRequest: {natIPEndPoint}");
             }
             else
             {
@@ -152,6 +156,7 @@ namespace Fika.Core.Networking
                         FikaBackendUtils.LocalPort = NetClient.LocalPort;
                         break;
                     case "fika.keepalive":
+                        // Do nothing
                         break;
                     default:
                         _logger.LogError("Data was not as expected");
@@ -194,10 +199,12 @@ namespace Fika.Core.Networking
 
             for (int i = 0; i < 10; i++)
             {
-                NetClient.SendUnconnectedMessage(data, natLocalEndPoint);
-                NetClient.SendUnconnectedMessage(data, natRemoteEndPoint);
+                NetClient.SendUnconnectedMessage(data, localEndPoint);
+                NetClient.SendUnconnectedMessage(data, remoteEndPoint);
                 Task.Delay(100);
             }
+
+            _logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
         }
     }
 }
