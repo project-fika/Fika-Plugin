@@ -36,9 +36,10 @@ namespace Fika.Core.Networking
 
             FikaBackendUtils.IsHostNatPunch = result.NatPunch;
 
-            if(FikaBackendUtils.IsHostNatPunch)
+            NetClient.Start();
+
+            if (FikaBackendUtils.IsHostNatPunch)
             {
-                NetClient.Start();
                 NetClient.NatPunchModule.Init(this);
 
                 string natHost = RequestHandler.Host.Replace("http://", "").Split(':')[0];
@@ -73,8 +74,6 @@ namespace Fika.Core.Networking
                 {
                     localEndPoint = new(IPAddress.Parse(localIp), port);
                 }
-
-                NetClient.Start();
             }
 
             return true;
