@@ -39,6 +39,7 @@ using UnityEngine;
 using Coop.Airdrops;
 using Fika.Core.Coop.Airdrops;
 using SPT.Custom.Airdrops;
+using HarmonyLib;
 
 namespace Fika.Core.Networking
 {
@@ -1034,10 +1035,17 @@ namespace Fika.Core.Networking
             playerToUse.Profile.Health = health;
             playerToUse.Profile.Info.EntryPoint = coopGame.InfiltrationPoint;
 
+            Vector3[] airdropLocations = new Vector3[FikaBackendUtils.OldAirdropBoxes.Count];
+            foreach (FikaAirdropBox box in FikaBackendUtils.OldAirdropBoxes)
+            {
+                airdropLocations.AddItem(box.transform.position);
+            }
+
             ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.HealthController.IsAlive, playerToUse.Transform.position,
                 playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
                 interactiveObjects, windows, lights, smokes, new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile },
-                items, gameWorld.AllPlayersEverExisted.Count(), FikaBackendUtils.OldAirdropPackets.Count > 0);
+                items, gameWorld.AllPlayersEverExisted.Count(), FikaBackendUtils.OldAirdropPackets.Count > 0, FikaBackendUtils.OldAirdropPackets.Count,
+                [.. FikaBackendUtils.OldAirdropPackets], [.. FikaBackendUtils.OldLootPackets]);
 
             _dataWriter.Reset();
             SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);

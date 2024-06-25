@@ -8,7 +8,8 @@ namespace Fika.Core.Networking
 {
     public struct ReconnectResponsePacket(int netId, bool isAlive, Vector3 position, Quaternion rotation, EPlayerPose playerPose, float poseLevel,
     bool isProne, WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes
-    , PlayerInfoPacket profile, LootItemPositionClass[] items, int playerCount, bool initAirdrop) : INetSerializable
+    , PlayerInfoPacket profile, LootItemPositionClass[] items, int playerCount, bool initAirdrop, int airdropCount
+    , AirdropPacket[] airdropPackets, AirdropLootPacket[] airdropLootPackets) : INetSerializable
     {
         public int NetId;
         public bool IsAlive;
@@ -29,6 +30,9 @@ namespace Fika.Core.Networking
         public GClass1211 Items;
         public int PlayerCount;
         public bool InitAirdrop;
+        public int AirdropCount;
+        public AirdropPacket[] AirdropPackets;
+        public AirdropLootPacket[] AirdropLootPackets;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -87,6 +91,25 @@ namespace Fika.Core.Networking
             Items = reader.GetLocationItem();
             PlayerCount = reader.GetInt();
             InitAirdrop = reader.GetBool();
+            AirdropCount = reader.GetInt();
+
+            if (AirdropCount > 0)
+            {
+                AirdropPackets = new AirdropPacket[AirdropCount];
+                for (int i = 0; i < AirdropCount; i++)
+                {
+                    AirdropPackets[i] = reader.GetAirdropPacket();
+                }
+            }
+
+            if (AirdropCount > 0)
+            {
+                AirdropLootPackets = new AirdropLootPacket[AirdropCount];
+                for (int i = 0; i < AirdropCount; i++)
+                {
+                    AirdropLootPackets[i] = reader.GetAirLootPacket();
+                }
+            }
         }
 
         public void Serialize(NetDataWriter writer)
@@ -147,6 +170,23 @@ namespace Fika.Core.Networking
 
             writer.Put(playerCount);
             writer.Put(initAirdrop);
+            writer.Put(airdropCount);
+
+            if (airdropCount > 0)
+            {
+                for (int i = 0; i < airdropCount; i++)
+                {
+                    writer.Put(airdropPackets[i]);
+                }
+            }
+
+            if (airdropCount > 0)
+            {
+                for (int i = 0; i < airdropCount; i++)
+                {
+                    writer.Put(airdropLootPackets[i]);
+                }
+            }
         }
     }
 }

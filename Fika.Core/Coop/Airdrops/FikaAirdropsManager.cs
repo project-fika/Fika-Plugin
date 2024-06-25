@@ -13,6 +13,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Coop.Airdrops
@@ -366,6 +367,33 @@ namespace Coop.Airdrops
             Singleton<FikaServer>.Instance.SendDataToAll(writer, ref lootPacket, DeliveryMethod.ReliableOrdered);
 
             yield break;
+        }
+
+        public async Task<FikaAirdropBox> BuildReconnectAirdropBoxes(AirdropPacket airdropPacket, AirdropLootPacket lootPacket)
+        {
+            FikaAirdropBox box = await FikaAirdropBox.Init(airdropPacket.Config.CrateFallSpeed);
+            factory = new FikaItemFactoryUtil();
+
+            factory.BuildClientContainer(box.Container, lootPacket.RootItem);
+
+            if (box.Container != null && CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            {
+                if (!string.IsNullOrEmpty(lootPacket.ContainerId))
+                {
+                    coopHandler.ListOfInteractiveObjects.Add(lootPacket.ContainerId, box.Container);
+                    Logger.LogInfo($"Adding AirdropBox {lootPacket.ContainerId} to interactive objects.");
+                }
+                else
+                {
+                    Logger.LogError("ContainerId received from server was empty.");
+                }
+            }
+
+            box.gameObject.SetActive(true);
+            airdropPacket.BoxPoint.y = airdropPacket.BoxPoint.y + 5f;
+            box.StartCoroutine(box.DropCrate(airdropPacket.BoxPoint));
+
+            return box;
         }
     }
 }

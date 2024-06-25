@@ -1,8 +1,10 @@
 ﻿using Comfort.Common;
+using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
+using Fika.Core.Coop.Airdrops.Models;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
@@ -330,6 +332,62 @@ namespace Fika.Core.Networking
             using BinaryReader binaryReader = new(memoryStream);
 
             return GClass1535.DeserializeLootData(Singleton<ItemFactory>.Instance, binaryReader.ReadEFTLootDataDescriptor());
+        }
+
+        public static void Put(this NetDataWriter writer, AirdropPacket packet)
+        {
+            byte[] configBytes = SimpleZlib.CompressToBytes(packet.Config.ToJson(), 4, null);
+            writer.PutByteArray(configBytes);
+            writer.Put(packet.AirdropAvailable);
+            writer.Put(packet.PlaneSpawned);
+            writer.Put(packet.BoxSpawned);
+            writer.Put(packet.DistanceTraveled);
+            writer.Put(packet.DistanceToTravel);
+            writer.Put(packet.DistanceToDrop);
+            writer.Put(packet.Timer);
+            writer.Put(packet.DropHeight);
+            writer.Put(packet.TimeToStart);
+            writer.Put(packet.BoxPoint);
+            writer.Put(packet.SpawnPoint);
+            writer.Put(packet.LookPoint);
+        }
+
+        public static AirdropPacket GetAirdropPacket(this NetDataReader reader)
+        {
+            byte[] configBytes = reader.GetByteArray();
+            return new()
+            {
+                Config = SimpleZlib.Decompress(configBytes, null).ParseJsonTo<FikaAirdropConfigModel>(),
+                AirdropAvailable = reader.GetBool(),
+                PlaneSpawned = reader.GetBool(),
+                BoxSpawned = reader.GetBool(),
+                DistanceTraveled = reader.GetFloat(),
+                DistanceToTravel = reader.GetFloat(),
+                DistanceToDrop = reader.GetFloat(),
+                Timer = reader.GetFloat(),
+                DropHeight = reader.GetInt(),
+                TimeToStart = reader.GetInt(),
+                BoxPoint = reader.GetVector3(),
+                SpawnPoint = reader.GetVector3(),
+                LookPoint = reader.GetVector3(),
+            };
+        }
+
+        public static void Put(this NetDataWriter writer, AirdropLootPacket lootPacket)
+        {
+            writer.Put(lootPacket.IsRequest);
+            writer.Put(lootPacket.ContainerId);
+            writer.PutAirdropItem(lootPacket.RootItem);
+        }
+
+        public static AirdropLootPacket GetAirLootPacket(this NetDataReader reader)
+        {
+            return new()
+            {
+                IsRequest = reader.GetBool(),
+                ContainerId = reader.GetString(),
+                RootItem = reader.GetAirdropItem()
+            };
         }
     }
 }

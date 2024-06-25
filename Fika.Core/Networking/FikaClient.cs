@@ -965,9 +965,17 @@ namespace Fika.Core.Networking
                     yield return new WaitUntil(() => Singleton<FikaAirdropsManager>.Instance != null);
                 }
 
-                ReconnectRequestPacket airdropRequestPacket = new(MyPlayer.ProfileId, EReconnectPackgeType.AirdropSetup);
-                DataWriter.Reset();
-                SendData(DataWriter, ref airdropRequestPacket, DeliveryMethod.ReliableUnordered);
+                FikaAirdropsManager manager = Singleton<FikaAirdropsManager>.Instance;
+
+                for (int i = 0; i < FikaBackendUtils.ReconnectPacket.Value.AirdropCount; i++)
+                {
+                    manager.BuildReconnectAirdropBoxes(FikaBackendUtils.ReconnectPacket.Value.AirdropPackets[i],
+                        FikaBackendUtils.ReconnectPacket.Value.AirdropLootPackets[i]);
+                }
+
+                // ReconnectRequestPacket airdropRequestPacket = new(MyPlayer.ProfileId, EReconnectPackgeType.AirdropSetup);
+                // DataWriter.Reset();
+                // SendData(DataWriter, ref airdropRequestPacket, DeliveryMethod.ReliableUnordered);
             }
             else
             {
