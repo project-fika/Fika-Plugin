@@ -39,7 +39,7 @@ namespace Fika.Core.Coop.ClientClasses
 #endif
 
             // Do not replicate picking up quest items, throws an error on the other clients            
-            if (operation is MoveOperationClass moveOperation)
+            if (operation is InventoryItemFromToClass moveOperation)
             {
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.Template.QuestItem)
