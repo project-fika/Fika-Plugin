@@ -205,7 +205,7 @@ namespace Fika.Core.Networking
                 {
                     NetClient.SendUnconnectedMessage(data, localEndPoint);
                     NetClient.SendUnconnectedMessage(data, remoteEndPoint);
-                    await Task.Delay(100);
+                    await Task.Delay(250);
                 }
             });
         }

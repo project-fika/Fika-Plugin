@@ -884,7 +884,7 @@ namespace Fika.Core.Networking
                 {
                     _netServer.SendUnconnectedMessage(data, localEndPoint);
                     _netServer.SendUnconnectedMessage(data, remoteEndPoint);
-                    await Task.Delay(100);
+                    await Task.Delay(250);
                 }
             });
         }
