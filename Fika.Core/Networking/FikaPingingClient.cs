@@ -191,20 +191,23 @@ namespace Fika.Core.Networking
 
         public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
         {
+            _logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+
             localEndPoint = natLocalEndPoint;
             remoteEndPoint = natRemoteEndPoint;
 
-            NetDataWriter data = new();
-            data.Put("fika.hello");
-
-            for (int i = 0; i < 10; i++)
+            Task.Run(async () =>
             {
-                NetClient.SendUnconnectedMessage(data, localEndPoint);
-                NetClient.SendUnconnectedMessage(data, remoteEndPoint);
-                Task.Delay(100);
-            }
+                NetDataWriter data = new();
+                data.Put("fika.hello");
 
-            _logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+                for (int i = 0; i < 20; i++)
+                {
+                    NetClient.SendUnconnectedMessage(data, localEndPoint);
+                    NetClient.SendUnconnectedMessage(data, remoteEndPoint);
+                    await Task.Delay(100);
+                }
+            });
         }
     }
 }

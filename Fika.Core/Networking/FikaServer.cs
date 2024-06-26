@@ -873,18 +873,20 @@ namespace Fika.Core.Networking
 
         public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
         {
-            NetDataWriter data = new();
-            data.Put("fika.hello");
-
-            for (int i = 0; i < 10; i++)
-            {
-                _netServer.SendUnconnectedMessage(data, localEndPoint);
-                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
-
-                Task.Delay(100);
-            }
-
             logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+
+            Task.Run(async () =>
+            {
+                NetDataWriter data = new();
+                data.Put("fika.hello");
+
+                for (int i = 0; i < 20; i++)
+                {
+                    _netServer.SendUnconnectedMessage(data, localEndPoint);
+                    _netServer.SendUnconnectedMessage(data, remoteEndPoint);
+                    await Task.Delay(100);
+                }
+            });
         }
 
         private class InventoryOperationHandler
