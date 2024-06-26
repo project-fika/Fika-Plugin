@@ -43,7 +43,7 @@ namespace Fika.Core.Networking
                 NetClient.NatPunchModule.Init(this);
 
                 string natHost = RequestHandler.Host.Replace("http://", "").Split(':')[0];
-                int natPort = 6970;
+                int natPort = FikaPlugin.NatPunchPort.Value;
 
                 IPEndPoint natIPEndPoint = new IPEndPoint(IPAddress.Parse(natHost), natPort);
 

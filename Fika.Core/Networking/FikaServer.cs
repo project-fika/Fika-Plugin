@@ -166,10 +166,10 @@ namespace Fika.Core.Networking
 
                 natIntroduceRoutineCts = new CancellationTokenSource();
 
-                string host = RequestHandler.Host.Replace("http://", "").Split(':')[0];
-                int port = 6970;
+                string natHost = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+                int natPort = FikaPlugin.NatPunchPort.Value;
 
-                IPEndPoint natServerIPEndPoint = new IPEndPoint(IPAddress.Parse(host), port);
+                IPEndPoint natServerIPEndPoint = new IPEndPoint(IPAddress.Parse(natHost), natPort);
 
                 Task natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natServerIPEndPoint, natIntroduceRoutineCts.Token));
             }
