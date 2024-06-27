@@ -959,7 +959,7 @@ namespace Fika.Core.Networking
                 // ask for airdrop params and loot
                 while (Singleton<FikaAirdropsManager>.Instance == null)
                 {
-                    logger.LogError($"[CWX] Waiting on FikaAirdrops to be init");
+                    logger.LogInfo($"Waiting on FikaAirdrops to be init");
                     yield return new WaitUntil(() => Singleton<FikaAirdropsManager>.Instance != null);
                 }
 
@@ -970,10 +970,6 @@ namespace Fika.Core.Networking
                     manager.BuildReconnectAirdropBoxes(FikaBackendUtils.ReconnectPacket.Value.AirdropPackets[i],
                         FikaBackendUtils.ReconnectPacket.Value.AirdropLootPackets[i]);
                 }
-
-                // ReconnectRequestPacket airdropRequestPacket = new(MyPlayer.ProfileId, EReconnectPackgeType.AirdropSetup);
-                // DataWriter.Reset();
-                // SendData(DataWriter, ref airdropRequestPacket, DeliveryMethod.ReliableUnordered);
             }
             else
             {

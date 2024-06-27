@@ -937,7 +937,7 @@ namespace Fika.Core.Networking
                     _ = SendClientAirdropPackets(peer);
                     break;
                 default:
-                    throw new Exception("[CWX] reconnecting player sent unknown package type");
+                    throw new Exception("reconnecting player sent unknown package type");
             }
         }
 

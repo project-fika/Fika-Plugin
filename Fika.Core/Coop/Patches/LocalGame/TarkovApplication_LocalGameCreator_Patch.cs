@@ -213,7 +213,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             if (!FikaBackendUtils.ReconnectPacket.Value.IsAlive)
             {
-                Logger.LogDebug($"Player: {profileId} was dead, returning to menu");
+                Logger.LogError($"Player: {profileId} was dead, returning to menu");
                 throw new Exception("You were dead, returning to menu");
             }
 
