@@ -953,8 +953,6 @@ namespace Fika.Core.Networking
             }
 
             gameWorld.OnSmokeGrenadesDeserialized(smokes);
-            // TODO: Smokes do spawn on the ground, but no visible smoke effect shows, im using BSG's method of doing this currently, so this might be a BSG thing.
-            // Decide if to fix or not.
 
             if (FikaBackendUtils.ReconnectPacket.Value.InitAirdrop)
             {
