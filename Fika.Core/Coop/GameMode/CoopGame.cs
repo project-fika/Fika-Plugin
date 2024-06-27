@@ -1207,7 +1207,6 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         FikaBackendUtils.ScreenController.ChangeStatus($"Loading all expected Players/Bots, {FikaBackendUtils.ReconnectPacket.Value.PlayerCount}/{Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count()}");
-                        Logger.LogError($"current count of players: {Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count()} & expected {FikaBackendUtils.ReconnectPacket.Value.PlayerCount}");
                         await Task.Delay(1000);
                     } while (Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count() < FikaBackendUtils.ReconnectPacket.Value.PlayerCount);
                 }
