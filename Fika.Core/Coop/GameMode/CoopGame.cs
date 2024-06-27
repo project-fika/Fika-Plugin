@@ -466,7 +466,7 @@ namespace Fika.Core.Coop.GameMode
                 netId = server.PopNetId();
 
                 SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile), true, true, position, netId);
-                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableUnordered);
 
                 if (server.NetServer.ConnectedPeersCount > 0)
                 {
@@ -728,7 +728,7 @@ namespace Fika.Core.Coop.GameMode
                         ReadyPlayers = server.ReadyClients
                     };
                     writer.Reset();
-                    server.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
 
                     do
                     {
@@ -741,7 +741,7 @@ namespace Fika.Core.Coop.GameMode
                         SyncNetIdPacket syncPacket = new(player.ProfileId, player.NetId);
 
                         writer.Reset();
-                        Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                        Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, DeliveryMethod.ReliableUnordered);
                     }
 
                     if (DynamicAI != null)
@@ -762,7 +762,7 @@ namespace Fika.Core.Coop.GameMode
                         ReadyPlayers = 1
                     };
                     writer.Reset();
-                    client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
 
                     do
                     {
@@ -938,7 +938,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
-                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, DeliveryMethod.ReliableUnordered);
                 }
             }
 
@@ -1498,7 +1498,7 @@ namespace Fika.Core.Coop.GameMode
                 ProfileId = player.iPlayer.ProfileId,
                 ZoneId = zone.Id
             };
-            Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         /// <summary>
@@ -1518,11 +1518,11 @@ namespace Fika.Core.Coop.GameMode
             };
             if (!isServer)
             {
-                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
             }
             else
             {
-                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
             }
         }
 
@@ -1675,11 +1675,11 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (!isServer)
                 {
-                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref genericPacket, DeliveryMethod.ReliableOrdered);
                 }
                 else
                 {
-                    Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref genericPacket, DeliveryMethod.ReliableOrdered);
                     ClearHostAI(player);
                 }
             }
