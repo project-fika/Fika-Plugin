@@ -180,23 +180,6 @@ namespace Fika.Core.Coop.Players
                 SetupDogTag();
             }
 
-            /*DeathPacket packet = new(ProfileId)
-            {
-                RagdollPacket = new()
-                {
-                    BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
-                    Direction = LastDamageInfo.Direction,
-                    Point = LastDamageInfo.HitPoint,
-                    Force = _corpseAppliedForce,
-                    OverallVelocity = Velocity
-                },
-                HasInventory = true,
-                Equipment = Inventory.Equipment
-            };
-
-            PacketSender?.Server?.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-            PacketSender?.Server?.NetServer?.TriggerUpdate();*/
-
             if (FikaPlugin.ShowNotifications.Value)
             {
                 if (IsBoss(Profile.Info.Settings.Role, out string name) && LastAggressor != null)
@@ -241,6 +224,13 @@ namespace Fika.Core.Coop.Players
                     }
                 }
             }
+
+            CoopGame coopGame = (CoopGame)Singleton<IBotGame>.Instance;
+            if (coopGame.Bots.ContainsKey(ProfileId))
+            {
+                coopGame.Bots.Remove(ProfileId);
+            }
+
             base.OnDead(damageType);
         }
 

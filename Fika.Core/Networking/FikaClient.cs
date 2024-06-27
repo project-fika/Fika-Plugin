@@ -73,7 +73,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<WeatherPacket>(OnWeatherPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<DeathPacket>(OnDeathPacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
@@ -224,14 +223,6 @@ namespace Fika.Core.Networking
                     return;
                 }
                 mineDirectional.Explosion();
-            }
-        }
-
-        private void OnDeathPacketReceived(DeathPacket packet)
-        {
-            if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-            {
-                playerToApply.HandleDeathPatchet(packet);
             }
         }
 
