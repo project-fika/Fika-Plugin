@@ -294,7 +294,7 @@ namespace Fika.Core.Networking
 
         public static void PutSmokeState(this NetDataWriter writer, Throwable smoke)
         {
-            var smokeToUse = smoke as SmokeGrenade;
+            SmokeGrenade smokeToUse = smoke as SmokeGrenade;
             GStruct35 data = smokeToUse.NetworkData;
 
             writer.Put(data.Id);

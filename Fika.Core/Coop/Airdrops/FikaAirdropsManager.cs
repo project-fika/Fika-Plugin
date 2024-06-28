@@ -31,12 +31,10 @@ namespace Coop.Airdrops
         public bool isFlareDrop;
         public FikaAirdropParametersModel AirdropParameters { get; set; }
         private ManualLogSource Logger { get; set; }
-        public float DistanceTravelled { get; set; } = 0f;
+        public float DistanceTravelled = 0f;
         public bool ClientPlaneSpawned;
         public bool ClientLootBuilt = false;
         public static int ContainerCount = 0;
-        public AirdropPacket airdropPacketToSend;
-        public AirdropLootPacket lootPacketToSend;
 
         // Client fields
         private string ContainerId;
