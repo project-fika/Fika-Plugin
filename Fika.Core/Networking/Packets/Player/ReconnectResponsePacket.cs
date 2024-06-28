@@ -6,13 +6,12 @@ using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Networking
 {
-    public struct ReconnectResponsePacket(int netId, bool isAlive, Vector3 position, Quaternion rotation, EPlayerPose playerPose, float poseLevel,
+    public struct ReconnectResponsePacket(int netId, Vector3 position, Quaternion rotation, EPlayerPose playerPose, float poseLevel,
     bool isProne, WorldInteractiveObject[] interactiveObjects, WindowBreaker[] windows, LampController[] lights, Throwable[] smokes
     , PlayerInfoPacket profile, LootItemPositionClass[] items, int playerCount, bool initAirdrop, int airdropCount
     , AirdropPacket[] airdropPackets, AirdropLootPacket[] airdropLootPackets) : INetSerializable
     {
         public int NetId;
-        public bool IsAlive;
         public Vector3 Position;
         public Quaternion Rotation;
         public EPlayerPose PlayerPose;
@@ -37,7 +36,6 @@ namespace Fika.Core.Networking
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
-            IsAlive = reader.GetBool();
             Position = reader.GetVector3();
             Rotation = reader.GetQuaternion();
             PlayerPose = (EPlayerPose)reader.GetByte();
@@ -115,7 +113,6 @@ namespace Fika.Core.Networking
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(netId);
-            writer.Put(isAlive);
             writer.Put(position);
             writer.Put(rotation);
             writer.Put((byte)playerPose);

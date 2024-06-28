@@ -211,12 +211,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 retryCount++;
             }
 
-            if (!FikaBackendUtils.ReconnectPacket.Value.IsAlive)
-            {
-                Logger.LogError($"Player: {profileId} was dead, returning to menu");
-                throw new Exception("You were dead, returning to menu");
-            }
-
             if (FikaBackendUtils.ReconnectPacket == null && retryCount == 5)
             {
                 FikaBackendUtils.ScreenController.ChangeStatus($"Failed to Reconnect...");
