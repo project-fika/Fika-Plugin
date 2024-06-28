@@ -32,7 +32,8 @@ namespace Fika.Core.UI.Patches
                 return;
             }
 
-            ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("gclass2829_0").Value;
+            // Check for GClass increments
+            ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("itemContextAbstractClass").Value;
             if (itemContext.ViewType == EItemViewType.Inventory)
             {
                 if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld)
