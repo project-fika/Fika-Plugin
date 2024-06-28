@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class NoInertiaPhysical : GClass682
+    public class NoInertiaPhysical : PlayerPhysicalClass
     {
         private CoopPlayer coopPlayer;
 
@@ -18,7 +18,7 @@ namespace Fika.Core.Coop.ClientClasses
         public override void OnWeightUpdated()
         {
             BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
-            float num = iobserverToPlayerBridge_0.Skills.StrengthBuffElite ? coopPlayer.GClass2777_0.Inventory.TotalWeightEliteSkill : coopPlayer.GClass2777_0.Inventory.TotalWeight;
+            float num = iobserverToPlayerBridge_0.Skills.StrengthBuffElite ? coopPlayer.InventoryControllerClass.Inventory.TotalWeightEliteSkill : coopPlayer.InventoryControllerClass.Inventory.TotalWeight;
             Inertia = 0.0113f;
             SprintAcceleration = 0.9887f;
             PreSprintAcceleration = 2.9853f;

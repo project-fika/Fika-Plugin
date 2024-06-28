@@ -474,7 +474,7 @@ namespace Fika.Core.Coop.Components
 
                 if (playerCollider != null && otherCollider != null)
                 {
-                    GClass649.IgnoreCollision(playerCollider, otherCollider);
+                    EFTPhysicsClass.IgnoreCollision(playerCollider, otherCollider);
                 }
             }
 

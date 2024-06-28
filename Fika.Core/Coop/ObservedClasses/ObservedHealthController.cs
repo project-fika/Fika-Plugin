@@ -5,7 +5,7 @@ using EFT.InventoryLogic;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-    public sealed class ObservedHealthController(byte[] serializedState, InventoryControllerClass inventory, SkillManager skills) : GClass2431(serializedState, inventory, skills)
+    public sealed class ObservedHealthController(byte[] serializedState, InventoryControllerClass inventory, SkillManager skills) : NetworkHealthControllerAbstractClass(serializedState, inventory, skills)
     {
         public override bool ApplyItem(Item item, EBodyPart bodyPart, float? amount = null)
         {

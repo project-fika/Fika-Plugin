@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Fika.Core.Coop.ClientClasses
 {
     public sealed class CoopClientSharedQuestController(Profile profile, InventoryControllerClass inventoryController,
-        IQuestActions session, CoopPlayer player, bool fromServer = true) : GClass3229(profile, inventoryController, session, fromServer)
+        IQuestActions session, CoopPlayer player, bool fromServer = true) : LocalQuestControllerClass(profile, inventoryController, session, fromServer)
     {
         private readonly CoopPlayer player = player;
         private readonly List<string> lastFromNetwork = [];
@@ -80,9 +80,9 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void SendQuestPacket(IConditionCounter conditional, Condition condition)
         {
-            if (conditional is GClass1258 quest)
+            if (conditional is QuestClass quest)
             {
-                GClass3242 counter = quest.ConditionCountersManager.GetCounter(condition.id);
+                TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(condition.id);
                 if (counter != null)
                 {
                     if (!ValidateQuestType(counter))
@@ -102,11 +102,11 @@ namespace Fika.Core.Coop.ClientClasses
         internal void ReceiveQuestPacket(ref QuestConditionPacket packet)
         {
             AddNetworkId(packet.Id);
-            foreach (GClass1258 quest in Quests)
+            foreach (QuestClass quest in Quests)
             {
                 if (quest.Id == packet.SourceId && quest.QuestStatus == EQuestStatus.Started)
                 {
-                    GClass3242 counter = quest.ConditionCountersManager.GetCounter(packet.Id);
+                    TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                     if (counter != null)
                     {
                         if (!ValidateQuestType(counter))
@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Item item = player.FindItem(packet.ItemId, true);
                 if (item != null)
                 {
-                    InventoryControllerClass playerInventory = player.GClass2777_0;
+                    InventoryControllerClass playerInventory = player.InventoryControllerClass;
                     GStruct414<GInterface339> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
                         playerInventory.Inventory.Equipment.ToEnumerable(),
                         InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
@@ -150,7 +150,7 @@ namespace Fika.Core.Coop.ClientClasses
         /// </summary>
         /// <param name="counter">The counter to validate</param>
         /// <returns>Returns true if the quest type is valid, returns false if not</returns>
-        internal bool ValidateQuestType(GClass3242 counter)
+        internal bool ValidateQuestType(TaskConditionCounterClass counter)
         {
             if (acceptedTypes.Contains(counter.Type))
             {

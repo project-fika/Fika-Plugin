@@ -133,7 +133,7 @@ namespace Fika.Core.Networking
         {
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.GClass3227_0 is CoopClientSharedQuestController sharedQuestController)
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestItemPacket(ref packet);
                 }
@@ -144,7 +144,7 @@ namespace Fika.Core.Networking
         {
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.GClass3227_0 is CoopClientSharedQuestController sharedQuestController)
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestPacket(ref packet);
                 }
@@ -254,7 +254,7 @@ namespace Fika.Core.Networking
                             {
                                 if (player.ProfileId == packet.ProfileId)
                                 {
-                                    GInterface106 playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(player.ProfileId);
+                                    IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(player.ProfileId);
                                     borderZone.ProcessIncomingPacket(playerBridge, true);
                                 }
                             }

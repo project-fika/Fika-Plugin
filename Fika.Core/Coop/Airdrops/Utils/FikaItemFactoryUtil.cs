@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.Airdrops.Utils
             if (itemFactory.ItemTemplates.TryGetValue(containerId, out ItemTemplate template))
             {
                 Item item = itemFactory.CreateItem(containerId, template._id, null);
-                item.Id = Singleton<GameWorld>.Instance.MainPlayer.GClass2777_0.NextId;
+                item.Id = Singleton<GameWorld>.Instance.MainPlayer.InventoryControllerClass.NextId;
                 LootItem.CreateLootContainer(container, item, "CRATE", Singleton<GameWorld>.Instance);
             }
             else

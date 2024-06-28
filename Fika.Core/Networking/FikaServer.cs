@@ -232,7 +232,7 @@ namespace Fika.Core.Networking
 
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.GClass3227_0 is CoopClientSharedQuestController sharedQuestController)
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestItemPacket(ref packet);
                 }
@@ -246,7 +246,7 @@ namespace Fika.Core.Networking
 
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.GClass3227_0 is CoopClientSharedQuestController sharedQuestController)
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestPacket(ref packet);
                 }
@@ -599,7 +599,7 @@ namespace Fika.Core.Networking
 
                     // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
                     // Unknown what problems this might cause so far.
-                    if (result.Value is GClass2878 unloadOperation)
+                    if (result.Value is UnloadOperationClass unloadOperation)
                     {
                         if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
                         {

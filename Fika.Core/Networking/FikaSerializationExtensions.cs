@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using static GClass681; // Physical struct
+using static BasePhysicalClass; // Physical struct
 
 namespace Fika.Core.Networking
 {

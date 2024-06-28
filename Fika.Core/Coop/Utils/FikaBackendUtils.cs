@@ -34,7 +34,7 @@ namespace Fika.Core.Coop.Utils
         private static string groupId;
         private static string raidCode;
 
-        public static MatchmakerTimeHasCome.GClass3187 ScreenController;
+        public static MatchmakerTimeHasCome.TimeHasComeScreenClass ScreenController;
 
         public static string GetGroupId()
         {

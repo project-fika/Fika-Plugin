@@ -14,7 +14,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        private static bool PatchPrefix(out GClass530 core, ref bool __result)
+        private static bool PatchPrefix(out CoreBotSettingsClass core, ref bool __result)
         {
             if (FikaPlugin.Instance.BotDifficulties != null)
             {
@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.Patches
                     __result = false;
                     return false;
                 }
-                core = GClass530.Create(text);
+                core = CoreBotSettingsClass.Create(text);
             }
 
             if (FikaBackendUtils.IsServer)
