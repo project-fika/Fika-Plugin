@@ -1068,6 +1068,10 @@ namespace Fika.Core.Coop.GameMode
             {
                 spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 await SendOrReceiveSpawnPoint();
+            }
+
+            if (FikaBackendUtils.IsReconnect)
+            {
                 FikaBackendUtils.IsReconnect = false;
                 FikaBackendUtils.ReconnectPacket = null;
                 FikaBackendUtils.SpawnedPlayersComplete = false;
@@ -1206,7 +1210,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus($"Loading all expected Players/Bots, {FikaBackendUtils.ReconnectPacket.Value.PlayerCount}/{Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count()}");
+                        FikaBackendUtils.ScreenController.ChangeStatus($"Loading all expected Players/Bots, {FikaBackendUtils.ReconnectPacket.Value.PlayerCount}", Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count());
                         await Task.Delay(1000);
                     } while (Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count() < FikaBackendUtils.ReconnectPacket.Value.PlayerCount);
                 }
