@@ -940,7 +940,7 @@ namespace Fika.Core.Networking
             }
 
             // smokes
-            List<GStruct35> smokes = new();
+            List<GStruct35> smokes = [];
             for (int i = 0; i < packet.SmokeAmount; i++)
             {
                 smokes.Add(packet.Smokes[i]);
