@@ -249,7 +249,7 @@ namespace Fika.Core.Coop.Components
             {
                 while (!StartSpawning)
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(250);
                 }
 
                 CoopGame coopGame = LocalGameInstance;
