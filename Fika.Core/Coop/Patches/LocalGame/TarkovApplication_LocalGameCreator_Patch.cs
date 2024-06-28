@@ -53,7 +53,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
         }
 
         [PatchPostfix]
-        public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3187 timeHasComeScreenController,
+        public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
             RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
         {
             if (FikaBackendUtils.IsSinglePlayer)
@@ -170,13 +170,13 @@ namespace Fika.Core.Coop.Patches.LocalGame
             __result = Task.WhenAll(finishTask);
         }
 
-        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.GClass3187 timeHasComeScreenController)
+        private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController)
         {
             private readonly TarkovApplication tarkovApplication = tarkovApplication;
             private readonly Profile pmcProfile = pmcProfile;
             private readonly Profile scavProfile = scavProfile;
             private readonly LocationSettingsClass.Location location = location;
-            private readonly MatchmakerTimeHasCome.GClass3187 timeHasComeScreenController = timeHasComeScreenController;
+            private readonly MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController = timeHasComeScreenController;
 
             public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
             {
@@ -185,7 +185,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             public void HandleLoadComplete(IResult error)
             {
-                using (GClass21.StartWithToken("LoadingScreen.LoadComplete"))
+                using (CounterCreatorAbstractClass.StartWithToken("LoadingScreen.LoadComplete"))
                 {
                     UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
                     MainMenuController mmc = (MainMenuController)typeof(TarkovApplication).GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(x => x.FieldType == typeof(MainMenuController)).FirstOrDefault().GetValue(tarkovApplication);

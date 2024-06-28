@@ -94,7 +94,7 @@ namespace Fika.Core.UI
             errorScreenHandler.context.OnDecline += errorScreen.method_4;
             errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
 
-            GClass767 ui = Traverse.Create(errorScreen).Field<GClass767>("UI").Value;
+            CompositeDisposableClass ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
 
             ui.AddDisposable(new Action(errorScreenHandler.method_0));
             string text = buttonType switch
@@ -125,7 +125,7 @@ namespace Fika.Core.UI
             }
             if (waitingTime > 0f)
             {
-                errorScreenTraverse.Field("coroutine_0").SetValue(errorScreen.StartCoroutine(errorScreen.method_2(GClass1304.Now.AddSeconds((double)waitingTime))));
+                errorScreenTraverse.Field("coroutine_0").SetValue(errorScreen.StartCoroutine(errorScreen.method_2(EFTDateTimeClass.Now.AddSeconds((double)waitingTime))));
             }
             return errorScreenHandler.context;
         }

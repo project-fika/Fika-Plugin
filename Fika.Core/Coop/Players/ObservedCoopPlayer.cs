@@ -38,11 +38,11 @@ namespace Fika.Core.Coop.Players
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
-        public GClass2431 NetworkHealthController
+        public NetworkHealthControllerAbstractClass NetworkHealthController
         {
-            get => HealthController as GClass2431;
+            get => HealthController as NetworkHealthControllerAbstractClass;
         }
-        private readonly GClass2170 ObservedVaultingParameters = new();
+        private readonly ObservedVaultingParametersClass ObservedVaultingParameters = new();
         public override bool CanBeSnapped => false;
         public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
         public override AbstractHandsController HandsController
@@ -120,9 +120,9 @@ namespace Fika.Core.Coop.Players
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-            Func<float> getAimingSensitivity, GInterface111 filter)
+            Func<float> getAimingSensitivity, IViewFilter filter)
         {
-            ObservedCoopPlayer player = Create<ObservedCoopPlayer>(GClass1399.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
+            ObservedCoopPlayer player = Create<ObservedCoopPlayer>(ResouceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
                 armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
                 aiControl);
 
@@ -153,9 +153,9 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
-        public override GClass681 CreatePhysical()
+        public override BasePhysicalClass CreatePhysical()
         {
-            return new GClass681();
+            return new BasePhysicalClass();
         }
 
         public override bool CheckSurface()
@@ -298,7 +298,7 @@ namespace Fika.Core.Coop.Players
             LastDamageType = damageInfo.DamageType;
         }
 
-        public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+        public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             ShotReactions(damageInfo, bodyPartType);
 
@@ -347,7 +347,7 @@ namespace Fika.Core.Coop.Players
                     float damage = damageInfo.Damage;
                     List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
                     MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
-                    GClass1688 hitInfo = new()
+                    ShotInfoClass hitInfo = new()
                     {
                         PoV = PointOfView,
                         Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),

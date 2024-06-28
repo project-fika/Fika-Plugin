@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.Utils
         public static List<AirdropPacket> OldAirdropPackets = [];
         public static List<FikaAirdropBox> OldAirdropBoxes = [];
 
-        public static MatchmakerTimeHasCome.GClass3187 ScreenController;
+        public static MatchmakerTimeHasCome.TimeHasComeScreenClass ScreenController;
 
         public static string GetGroupId()
         {

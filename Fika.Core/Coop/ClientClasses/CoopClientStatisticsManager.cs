@@ -3,7 +3,7 @@ using EFT.HealthSystem;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public sealed class CoopClientStatisticsManager(Profile profile) : GClass1802()
+    public sealed class CoopClientStatisticsManager(Profile profile) : LocationStatisticsCollectorAbstractClass()
     {
         public Profile Profile = profile;
 
@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (value > 0)
             {
-                NotificationManagerClass.DisplayNotification(new GClass2056(localizationKey1, localizationKey2, value));
+                NotificationManagerClass.DisplayNotification(new StatNotificationClass(localizationKey1, localizationKey2, value));
             }
         }
     }

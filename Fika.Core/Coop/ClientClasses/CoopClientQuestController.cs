@@ -7,7 +7,7 @@ using LiteNetLib;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class CoopClientQuestController(Profile profile, InventoryControllerClass inventoryController, IQuestActions session, bool fromServer) : GClass3229(profile, inventoryController, session, fromServer)
+    public class CoopClientQuestController(Profile profile, InventoryControllerClass inventoryController, IQuestActions session, bool fromServer) : LocalQuestControllerClass(profile, inventoryController, session, fromServer)
     {
         private FikaClient fikaClient = Singleton<FikaClient>.Instance;
 

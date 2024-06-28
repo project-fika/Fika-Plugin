@@ -679,7 +679,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             public void Process(IResult error)
             {
-                GClass1539 gridItemAddressDescriptor = (gridItemAddress == null) ? null : FromObjectAbstractClass.FromGridItemAddress(gridItemAddress);
+                GridItemAddressDescriptorClass gridItemAddressDescriptor = (gridItemAddress == null) ? null : FromObjectAbstractClass.FromGridItemAddress(gridItemAddress);
 
                 using MemoryStream memoryStream = new();
                 using BinaryWriter binaryWriter = new(memoryStream);
@@ -749,7 +749,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             public void Process(IResult error)
             {
-                GClass1539 gridItemAddressDescriptor = (placeToPutContainedAmmoMagazine == null) ? null : FromObjectAbstractClass.FromGridItemAddress(placeToPutContainedAmmoMagazine);
+                GridItemAddressDescriptorClass gridItemAddressDescriptor = (placeToPutContainedAmmoMagazine == null) ? null : FromObjectAbstractClass.FromGridItemAddress(placeToPutContainedAmmoMagazine);
 
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 

@@ -297,7 +297,7 @@ namespace Fika.Core.Coop.ObservedClasses
                                 if (Weapon.Chambers[i].ContainedItem is BulletClass bClass && !bClass.IsUsed)
                                 {
                                     bClass.IsUsed = true;
-                                    if (weaponPrefab != null && weaponPrefab.ObjectInHands is GClass1680 weaponEffectsManager)
+                                    if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
                                     {
                                         if (!bClass.AmmoTemplate.RemoveShellAfterFire)
                                         {
@@ -319,7 +319,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         else
                         {
                             Weapon.Chambers[0].RemoveItem(false);
-                            if (weaponPrefab != null && weaponPrefab.ObjectInHands is GClass1680 weaponEffectsManager)
+                            if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
                             {
                                 HandleShellEvent(weaponEffectsManager, packet, ammo, magazine);
                             }
@@ -463,7 +463,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         {
                             if (packet.ReloadMagPacket.LocationDescription.Length != 0)
                             {
-                                GClass1539 descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
+                                GridItemAddressDescriptorClass descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
                                 gridItemAddress = inventoryController.ToGridItemAddress(descriptor);
                             }
                         }
@@ -590,7 +590,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     {
                         if (packet.ReloadBarrels.LocationDescription.Length > 0)
                         {
-                            GClass1539 descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
+                            GridItemAddressDescriptorClass descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
                             gridItemAddress = inventoryController.ToGridItemAddress(descriptor);
                         }
                     }
@@ -647,7 +647,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             yield return new WaitForSeconds(0.75f);
 
-            if (weaponPrefab != null && weaponPrefab.ObjectInHands is GClass1680 weaponEffectsManager)
+            if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
             {
                 weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.33f, 0);
             }
@@ -663,7 +663,7 @@ namespace Fika.Core.Coop.ObservedClasses
             animator.SetFire(false);
         }
 
-        private void HandleShellEvent(GClass1680 weaponEffectsManager, WeaponPacket packet, BulletClass ammo, MagazineClass magazine)
+        private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, WeaponPacket packet, BulletClass ammo, MagazineClass magazine)
         {
             weaponEffectsManager.DestroyPatronInWeapon(packet.ShotInfoPacket.ChamberIndex);
             if (!ammo.AmmoTemplate.RemoveShellAfterFire)

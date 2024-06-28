@@ -55,9 +55,9 @@ namespace Fika.Core.Coop.Players
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-            Func<float> getAimingSensitivity, GInterface111 filter, int netId, IStatisticsManager statisticsManager)
+            Func<float> getAimingSensitivity, IViewFilter filter, int netId, IStatisticsManager statisticsManager)
         {
-            CoopPlayer player = Create<CoopPlayer>(GClass1399.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+            CoopPlayer player = Create<CoopPlayer>(ResouceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
@@ -101,7 +101,7 @@ namespace Fika.Core.Coop.Players
 
             foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
             {
-                player.GClass2777_0.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+                player.InventoryControllerClass.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
             }
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
@@ -120,9 +120,9 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
-        public override GClass681 CreatePhysical()
+        public override BasePhysicalClass CreatePhysical()
         {
-            return FikaPlugin.Instance.UseInertia ? new GClass682() : new NoInertiaPhysical();
+            return FikaPlugin.Instance.UseInertia ? new PlayerPhysicalClass() : new NoInertiaPhysical();
         }
 
         public override void OnSkillLevelChanged(GClass1778 skill)
@@ -233,7 +233,7 @@ namespace Fika.Core.Coop.Players
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
         }
 
-        public override GClass1688 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+        public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
             {
@@ -248,7 +248,7 @@ namespace Fika.Core.Coop.Players
             return null;
         }
 
-        private GClass1688 SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+        private ShotInfoClass SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             ActiveHealthController activeHealthController = ActiveHealthController;
             if (activeHealthController != null && !activeHealthController.IsAlive)
@@ -259,7 +259,7 @@ namespace Fika.Core.Coop.Players
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
-            GClass1688 gclass = new()
+            ShotInfoClass gclass = new()
             {
                 PoV = PointOfView,
                 Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
@@ -306,7 +306,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(Item item, Callback<GInterface147> callback, bool scheduled = true)
+        public override void Proceed(Item item, Callback<IOnHandsUseCallback> callback, bool scheduled = true)
         {
             QuickUseItemControllerHandler handler = new(this, item);
 
@@ -516,7 +516,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass2985 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -541,7 +541,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = door.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Execute,
-                    ItemId = (interactionResult is GClass2985 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -1154,7 +1154,7 @@ namespace Fika.Core.Coop.Players
 
                         // TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
                         // Unknown what problems this might cause so far.
-                        if (result.Value is GClass2878 unloadOperation)
+                        if (result.Value is UnloadOperationClass unloadOperation)
                         {
                             if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
                             {
@@ -1400,7 +1400,7 @@ namespace Fika.Core.Coop.Players
 
             if (!string.IsNullOrEmpty(packet.ProfileId))
             {
-                GInterface106 player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
+                IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
 
                 if (player != null)
                 {
@@ -1551,7 +1551,7 @@ namespace Fika.Core.Coop.Players
             if (questItem)
             {
                 //List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
-                foreach (GInterface12 lootItem in Singleton<GameWorld>.Instance.LootList)
+                foreach (IKill lootItem in Singleton<GameWorld>.Instance.LootList)
                 {
                     if (lootItem is LootItem observedLootItem)
                     {
@@ -1583,7 +1583,7 @@ namespace Fika.Core.Coop.Players
         private class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct416<GClass2985> unlockResult;
+            public GStruct416<KeyInteractionResultClass> unlockResult;
 
             internal void HandleKeyEvent()
             {
@@ -1674,7 +1674,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly Item item = item;
-            public Process<QuickUseItemController, GInterface147> process;
+            public Process<QuickUseItemController, IOnHandsUseCallback> process;
             public Action confirmCallback;
 
             internal QuickUseItemController ReturnController()
