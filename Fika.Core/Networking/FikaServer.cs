@@ -911,7 +911,7 @@ namespace Fika.Core.Networking
         {
             if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
-                foreach (KeyValuePair<string, GClass3242> taskConditionCounter in player.Profile.TaskConditionCounters)
+                foreach (KeyValuePair<string, TaskConditionCounterClass> taskConditionCounter in player.Profile.TaskConditionCounters)
                 {
                     if (taskConditionCounter.Key == packet.ConditionId)
                     {
@@ -1007,12 +1007,12 @@ namespace Fika.Core.Networking
 
             Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
 
-            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as GClass1209 is null).ToArray();
+            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as CorpseLootItemClass is null).ToArray();
 
-            Profile.GClass1768 health = playerToUse.NetworkHealthController.Store(null);
-            GClass2431.GClass2434[] effects = [.. playerToUse.NetworkHealthController.IReadOnlyList_0];
+            Profile.ProfileHealthClass health = playerToUse.NetworkHealthController.Store(null);
+            NetworkHealthControllerAbstractClass.NetworkBodyEffectsAbstractClass[] effects = [.. playerToUse.NetworkHealthController.IReadOnlyList_0];
 
-            foreach (GClass2431.GClass2434 effect in effects)
+            foreach (NetworkHealthControllerAbstractClass.NetworkBodyEffectsAbstractClass effect in effects)
             {
                 if (!effect.Active)
                 {
@@ -1026,7 +1026,7 @@ namespace Fika.Core.Networking
 
                 if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface250)
                 {
-                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.GClass1768.GClass1769 { Time = -1f, ExtraData = effect.StoreObj });
+                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.ProfileHealthClass.GClass1769 { Time = -1f, ExtraData = effect.StoreObj });
                 }
             }
 
