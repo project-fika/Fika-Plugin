@@ -166,12 +166,11 @@ namespace Fika.Core.Networking
 
                 natIntroduceRoutineCts = new CancellationTokenSource();
 
-                string natHost = RequestHandler.Host.Replace("http://", "").Split(':')[0];
-                int natPort = FikaPlugin.NatPunchPort.Value;
+                string natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
+                int natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
+                string token = $"server:{RequestHandler.SessionId}";
 
-                IPEndPoint natServerIPEndPoint = new IPEndPoint(IPAddress.Parse(natHost), natPort);
-
-                Task natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natServerIPEndPoint, natIntroduceRoutineCts.Token));
+                Task natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, natIntroduceRoutineCts.Token));
             }
             else
             {
@@ -213,15 +212,15 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
-        private async void NatIntroduceRoutine(IPEndPoint natServerIPEndPoint, CancellationToken ct)
+        private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
         {
             logger.LogInfo("NatIntroduceRoutine started.");
 
             while (!ct.IsCancellationRequested)
             {
-                _netServer.NatPunchModule.SendNatIntroduceRequest(natServerIPEndPoint, $"server:{RequestHandler.SessionId}");
+                _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
-                logger.LogInfo($"SendNatIntroduceRequest: {natServerIPEndPoint}");
+                logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
 
                 await Task.Delay(TimeSpan.FromSeconds(15));
             }

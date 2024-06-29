@@ -21,7 +21,7 @@ namespace Fika.Core.Networking
         private IPEndPoint remoteEndPoint;
         private IPEndPoint localEndPoint;
         public bool Received = false;
-        private Coroutine keepAliveRoutine;
+        private Coroutine _keepAliveRoutine;
 
         public bool Init(string serverId)
         {
@@ -42,14 +42,13 @@ namespace Fika.Core.Networking
             {
                 NetClient.NatPunchModule.Init(this);
 
-                string natHost = RequestHandler.Host.Replace("http://", "").Split(':')[0];
-                int natPort = FikaPlugin.NatPunchPort.Value;
+                string natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
+                int natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
+                string token = $"client:{serverId}";
 
-                IPEndPoint natIPEndPoint = new IPEndPoint(IPAddress.Parse(natHost), natPort);
+                NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
-                NetClient.NatPunchModule.SendNatIntroduceRequest(natIPEndPoint, $"client:{serverId}");
-
-                _logger.LogInfo($"SendNatIntroduceRequest: {natIPEndPoint}");
+                _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
             }
             else
             {
@@ -100,14 +99,14 @@ namespace Fika.Core.Networking
 
         public void StartKeepAliveRoutine()
         {
-            keepAliveRoutine = StartCoroutine(KeepAlive());
+            _keepAliveRoutine = StartCoroutine(KeepAlive());
         }
 
         public void StopKeepAliveRoutine()
         {
-            if(keepAliveRoutine != null)
+            if(_keepAliveRoutine != null)
             {
-                StopCoroutine(keepAliveRoutine);
+                StopCoroutine(_keepAliveRoutine);
             }
         }
 

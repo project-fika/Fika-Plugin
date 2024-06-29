@@ -20,6 +20,7 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
+using SPT.Common.Http;
 using SPT.Custom.Airdrops.Patches;
 using SPT.Custom.BTR.Patches;
 using SPT.Custom.Patches;
@@ -168,7 +169,6 @@ namespace Fika.Core
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
         public static ConfigEntry<bool> UseNatPunching { get; set; }
-        public static ConfigEntry<int> NatPunchPort { get; set; }
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
 
         // Gameplay
@@ -190,11 +190,19 @@ namespace Fika.Core
         public bool SharedQuestProgression;
         #endregion
 
+        #region natpunch config
+        public bool NatPunchServerEnable;
+        public string NatPunchServerIP;
+        public int NatPunchServerPort;
+        public int NatPunchServerNatIntroduceAmount;
+        #endregion
+
         protected void Awake()
         {
             Instance = this;
 
             GetClientConfig();
+            GetNatPunchServerConfig();
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
@@ -268,6 +276,18 @@ namespace Fika.Core
             SharedQuestProgression = clientConfig.SharedQuestProgression;
 
             clientConfig.LogValues();
+        }
+
+        private void GetNatPunchServerConfig()
+        {
+            NatPunchServerConfigModel natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
+
+            NatPunchServerEnable = natPunchServerConfig.Enable;
+            NatPunchServerIP = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+            NatPunchServerPort = natPunchServerConfig.Port;
+            NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
+
+            natPunchServerConfig.LogValues();
         }
 
         private void SetupConfig()
@@ -397,21 +417,19 @@ namespace Fika.Core
 
             // Network
 
-            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 7 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 6 }));
 
-            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 6 }));
+            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 5 }));
 
-            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            UseNatPunching = Config.Bind("Network", "Use NAT Punching", false, new ConfigDescription("Use NAT punching as a NAT traversal method for hosting a raid. Only works with fullcone NAT type routers and requires NatPunchServer to be running on the AKI server. UPnP, Force IP and Force Bind IP are disabled in this mode.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
-
-            NatPunchPort = Config.Bind("Network", "NAT Punch Port", 6790, new ConfigDescription("Port to use to connect to the FikaNatPunchServer.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            UseNatPunching = Config.Bind("Network", "Use NAT Punching", false, new ConfigDescription("Use NAT punching when hosting a raid. Only works with fullcone NAT type routers and requires NatPunchServer to be running on the AKI server. UPnP, Force IP and Force Bind IP are disabled with this mode.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
             ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15, new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
 
