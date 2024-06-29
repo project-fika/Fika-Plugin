@@ -1,4 +1,4 @@
-﻿using BepInEx.Logging;
+using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
 using Coop.Airdrops;
@@ -33,6 +33,7 @@ using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
@@ -465,7 +466,7 @@ namespace Fika.Core.Coop.GameMode
                 netId = server.PopNetId();
 
                 SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile), true, true, position, netId);
-                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableUnordered);
 
                 if (server.NetServer.ConnectedPeersCount > 0)
                 {
@@ -727,7 +728,7 @@ namespace Fika.Core.Coop.GameMode
                         ReadyPlayers = server.ReadyClients
                     };
                     writer.Reset();
-                    server.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
 
                     do
                     {
@@ -740,7 +741,7 @@ namespace Fika.Core.Coop.GameMode
                         SyncNetIdPacket syncPacket = new(player.ProfileId, player.NetId);
 
                         writer.Reset();
-                        Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                        Singleton<FikaServer>.Instance.SendDataToAll(writer, ref syncPacket, DeliveryMethod.ReliableUnordered);
                     }
 
                     if (DynamicAI != null)
@@ -761,7 +762,7 @@ namespace Fika.Core.Coop.GameMode
                         ReadyPlayers = 1
                     };
                     writer.Reset();
-                    client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
 
                     do
                     {
@@ -822,7 +823,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="playerId"></param>
         /// <param name="position"></param>
@@ -851,9 +852,12 @@ namespace Fika.Core.Coop.GameMode
         {
             await CreateCoopHandler();
 
+            Vector3 PosToSpawn = (FikaBackendUtils.IsClient && FikaBackendUtils.IsReconnect) ? FikaBackendUtils.ReconnectPacket.Value.Position : spawnPoint.Position;
+            Quaternion RotToSpawn = (FikaBackendUtils.IsClient && FikaBackendUtils.IsReconnect) ? FikaBackendUtils.ReconnectPacket.Value.Rotation : spawnPoint.Rotation;
+
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
-            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player",
+            LocalPlayer myPlayer = await CoopPlayer.Create(playerId, PosToSpawn, RotToSpawn, "Player",
                 "Main_", EPointOfView.FirstPerson, profile, false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1456(), isServer ? 0 : 1000, statisticsManager);
@@ -866,13 +870,26 @@ namespace Fika.Core.Coop.GameMode
                 throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
+            CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
+
+            if (FikaBackendUtils.IsClient && FikaBackendUtils.IsReconnect)
+            {
+                coopPlayer.NetId = FikaBackendUtils.ReconnectPacket.Value.NetId;
+                myPlayer.MovementContext.SetPoseLevel(FikaBackendUtils.ReconnectPacket.Value.PoseLevel, true);
+                myPlayer.MovementContext.IsInPronePose = FikaBackendUtils.ReconnectPacket.Value.IsProne;
+                CoopClientHealthController healthController = (CoopClientHealthController)myPlayer.ActiveHealthController;
+                if (healthController != null)
+                {
+                    healthController.SyncBodyPartsState();
+                }
+            }
+
             if (RaidSettings.MetabolismDisabled)
             {
                 myPlayer.HealthController.DisableMetabolism();
                 NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 
             PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
@@ -899,7 +916,7 @@ namespace Fika.Core.Coop.GameMode
                 UnityEngine.Events.UnityEvent newEvent = new();
                 newEvent.AddListener(() =>
                 {
-                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING", 
+                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
                         message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
                         ErrorScreen.EButtonType.OkButton, 15f, () =>
                         {
@@ -911,23 +928,29 @@ namespace Fika.Core.Coop.GameMode
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
             }
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
-
-            if (isServer)
+            if (!FikaBackendUtils.IsReconnect)
             {
-                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-            }
-            else
-            {
-                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
+
+                if (isServer)
+                {
+                    await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
+                }
+                else
+                {
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, DeliveryMethod.ReliableUnordered);
+                }
             }
 
+            await NetManagerUtils.SetupGameVariables(FikaBackendUtils.IsServer, coopPlayer);
+
+            coopHandler.StartSpawning = true;
             await WaitForPlayers();
 
-            if(isServer && FikaPlugin.UseNatPunching.Value)
+            if (isServer && FikaPlugin.UseNatPunching.Value)
             {
                 FikaNatPunchServer natPunchServer = Singleton<FikaServer>.Instance.FikaNatPunchServer;
-                
+
                 if (natPunchServer != null && natPunchServer.Connected)
                 {
                     natPunchServer.Close();
@@ -1047,6 +1070,22 @@ namespace Fika.Core.Coop.GameMode
                 await SendOrReceiveSpawnPoint();
             }
 
+            if (FikaBackendUtils.IsReconnect)
+            {
+                FikaBackendUtils.IsReconnect = false;
+                FikaBackendUtils.ReconnectPacket = null;
+                FikaBackendUtils.SpawnedPlayersComplete = false;
+                FikaBackendUtils.ReconnectPacketRecieved = false;
+
+                if (FikaBackendUtils.OldAirdropPackets.Count > 0)
+                {
+                    // "reset" Lists to empty once game ends
+                    FikaBackendUtils.OldAirdropBoxes = [];
+                    FikaBackendUtils.OldAirdropPackets = [];
+                    FikaBackendUtils.OldAirdropBoxes = [];
+                }
+            }
+
             if (!isServer)
             {
                 await SendOrReceiveSpawnPoint();
@@ -1142,7 +1181,7 @@ namespace Fika.Core.Coop.GameMode
                 InformationPacket packet = new(true);
                 NetDataWriter writer = new();
                 writer.Reset();
-                client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
                 do
                 {
                     numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
@@ -1163,9 +1202,20 @@ namespace Fika.Core.Coop.GameMode
                     }
                     packet = new(true);
                     writer.Reset();
-                    client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
                 } while (numbersOfPlayersToWaitFor > 0);
+
+                if (FikaBackendUtils.IsReconnect && FikaBackendUtils.IsClient)
+                {
+                    do
+                    {
+                        FikaBackendUtils.ScreenController.ChangeStatus($"Loading all expected Players/Bots, {FikaBackendUtils.ReconnectPacket.Value.PlayerCount}", Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count());
+                        await Task.Delay(1000);
+                    } while (Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count() < FikaBackendUtils.ReconnectPacket.Value.PlayerCount);
+                }
+                await Task.Delay(1000);
+                FikaBackendUtils.SpawnedPlayersComplete = true;
             }
         }
 
@@ -1451,7 +1501,7 @@ namespace Fika.Core.Coop.GameMode
                 ProfileId = player.iPlayer.ProfileId,
                 ZoneId = zone.Id
             };
-            Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         /// <summary>
@@ -1471,11 +1521,11 @@ namespace Fika.Core.Coop.GameMode
             };
             if (!isServer)
             {
-                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
             }
             else
             {
-                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
             }
         }
 
@@ -1628,11 +1678,11 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (!isServer)
                 {
-                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref genericPacket, DeliveryMethod.ReliableOrdered);
                 }
                 else
                 {
-                    Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref genericPacket, DeliveryMethod.ReliableOrdered);
                     ClearHostAI(player);
                 }
             }
@@ -1759,6 +1809,16 @@ namespace Fika.Core.Coop.GameMode
             {
                 StartCoroutine(SaveOnDeathRoutine());
             }
+
+            try
+            {
+                PlayerLeftRequest body = new(gparam_0.Player.Profile.ProfileId);
+                FikaRequestHandler.RaidLeave(body);
+            }
+            catch (Exception)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("Unable to send RaidLeave request to server.");
+            }
         }
 
         private IEnumerator SaveOnDeathRoutine()
@@ -1780,6 +1840,22 @@ namespace Fika.Core.Coop.GameMode
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
         {
             Logger.LogDebug("Stop");
+
+            if (FikaBackendUtils.IsReconnect)
+            {
+                FikaBackendUtils.IsReconnect = false;
+                FikaBackendUtils.ReconnectPacket = null;
+                FikaBackendUtils.SpawnedPlayersComplete = false;
+                FikaBackendUtils.ReconnectPacketRecieved = false;
+            }
+
+            if (FikaBackendUtils.OldAirdropPackets.Count > 0)
+            {
+                // "reset" Lists to empty once game ends
+                FikaBackendUtils.OldAirdropBoxes = [];
+                FikaBackendUtils.OldAirdropPackets = [];
+                FikaBackendUtils.OldAirdropBoxes = [];
+            }
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
@@ -1915,7 +1991,7 @@ namespace Fika.Core.Coop.GameMode
                 player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
             }
 
-            //Method taken directly from SPT, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
+            //Method taken directly from SPT, can be found in the spt-singleplayer assembly as OfflineSaveProfilePatch
             Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
 
             JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;

@@ -144,7 +144,7 @@ namespace Fika.Core
         //public static ConfigEntry<bool> CullPlayers { get; set; }
         //public static ConfigEntry<float> CullingRange { get; set; }
 
-        // Performance | Bot Limits            
+        // Performance | Bot Limits
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
         public static ConfigEntry<bool> DespawnFurthest { get; set; }
         public static ConfigEntry<float> DespawnMinimumDistance { get; set; }
@@ -211,13 +211,14 @@ namespace Fika.Core
             new BotCacher_Patch().Enable();
             new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
+            new BaseLocalGame_method_6_Patch().Enable();
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
             OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
-            
+
             DisableSPTPatches();
             EnableOverridePatches();
 
@@ -277,7 +278,7 @@ namespace Fika.Core
 
             // Advanced
             OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
-            
+
             // Coop
 
             ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
@@ -321,7 +322,7 @@ namespace Fika.Core
             MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Quest Sharing
-            
+
             QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
             // Coop | Custom
@@ -422,7 +423,7 @@ namespace Fika.Core
 
             DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false, new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
         }
-        
+
         private void OfficialVersion_SettingChanged(object sender, EventArgs e)
         {
             FikaVersionLabel_Patch.UpdateVersionLabel();

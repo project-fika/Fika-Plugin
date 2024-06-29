@@ -31,5 +31,19 @@ namespace Fika.Core.Coop.ClientClasses
                 Packet = packet
             });
         }
+
+        /// <summary>
+        /// Used for reconnecting only
+        /// </summary>
+        public void SyncBodyPartsState()
+        {
+            foreach (EBodyPart bodyPart in GClass2477.RealBodyParts)
+            {
+                if (GetBodyPartHealth(bodyPart, true).AtMinimum)
+                {
+                    DestroyBodyPart(bodyPart, EDamageType.Undefined);
+                }
+            }
+        }
     }
 }

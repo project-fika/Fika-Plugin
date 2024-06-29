@@ -13,6 +13,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Coop.Airdrops
@@ -24,13 +25,13 @@ namespace Coop.Airdrops
     /// </summary>
     public class FikaAirdropsManager : MonoBehaviour
     {
-        private FikaAirdropPlane airdropPlane;
-        private FikaAirdropBox AirdropBox;
+        public FikaAirdropPlane airdropPlane;
+        public FikaAirdropBox AirdropBox;
         private FikaItemFactoryUtil factory;
         public bool isFlareDrop;
         public FikaAirdropParametersModel AirdropParameters { get; set; }
         private ManualLogSource Logger { get; set; }
-        float distanceTravelled = 0;
+        public float DistanceTravelled = 0f;
         public bool ClientPlaneSpawned;
         public bool ClientLootBuilt = false;
         public static int ContainerCount = 0;
@@ -150,6 +151,8 @@ namespace Coop.Airdrops
                 SpawnPoint = airdropPlane.newPosition,
                 LookPoint = airdropPlane.newRotation
             };
+
+            FikaBackendUtils.OldAirdropPackets.Add(airdropPacket);
             NetDataWriter writer = new();
             Singleton<FikaServer>.Instance.SendDataToAll(writer, ref airdropPacket, DeliveryMethod.ReliableOrdered);
         }
@@ -234,15 +237,15 @@ namespace Coop.Airdrops
                 }
             }
 
-            if (distanceTravelled >= AirdropParameters.DistanceToDrop && !AirdropParameters.BoxSpawned)
+            if (DistanceTravelled >= AirdropParameters.DistanceToDrop && !AirdropParameters.BoxSpawned)
             {
                 StartBox();
             }
 
-            if (distanceTravelled < AirdropParameters.DistanceToTravel)
+            if (DistanceTravelled < AirdropParameters.DistanceToTravel)
             {
-                distanceTravelled += Time.deltaTime * AirdropParameters.Config.PlaneSpeed;
-                float distanceToDrop = AirdropParameters.DistanceToDrop - distanceTravelled;
+                DistanceTravelled += Time.deltaTime * AirdropParameters.Config.PlaneSpeed;
+                float distanceToDrop = AirdropParameters.DistanceToDrop - DistanceTravelled;
                 airdropPlane.ManualUpdate(distanceToDrop);
             }
             else
@@ -294,6 +297,7 @@ namespace Coop.Airdrops
                 }
                 coopHandler.ListOfInteractiveObjects.Add(AirdropBox.Container.Id, AirdropBox.Container);
                 Logger.LogInfo($"Adding AirdropBox {AirdropBox.Container.Id} to interactive objects.");
+                FikaBackendUtils.OldAirdropBoxes.Add(AirdropBox);
             }
 
             // Get the lootData. Send to clients.
@@ -312,7 +316,12 @@ namespace Coop.Airdrops
 
         private void SetDistanceToDrop()
         {
-            AirdropParameters.DistanceToDrop = Vector3.Distance(new Vector3(AirdropParameters.RandomAirdropPoint.x, AirdropParameters.DropHeight, AirdropParameters.RandomAirdropPoint.z),
+            AirdropParameters.DistanceToDrop = Vector3.Distance(
+                new Vector3(
+                    AirdropParameters.RandomAirdropPoint.x,
+                    AirdropParameters.DropHeight,
+                    AirdropParameters.RandomAirdropPoint.z
+                ),
                 airdropPlane.transform.position);
         }
 
@@ -351,10 +360,38 @@ namespace Coop.Airdrops
                 ContainerId = AirdropBox.Container.Id
             };
 
+            FikaBackendUtils.OldLootPackets.Add(lootPacket);
             NetDataWriter writer = new();
             Singleton<FikaServer>.Instance.SendDataToAll(writer, ref lootPacket, DeliveryMethod.ReliableOrdered);
 
             yield break;
+        }
+
+        public async Task<FikaAirdropBox> BuildReconnectAirdropBoxes(AirdropPacket airdropPacket, AirdropLootPacket lootPacket)
+        {
+            FikaAirdropBox box = await FikaAirdropBox.Init(airdropPacket.Config.CrateFallSpeed);
+            factory = new FikaItemFactoryUtil();
+
+            factory.BuildClientContainer(box.Container, lootPacket.RootItem);
+
+            if (box.Container != null && CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            {
+                if (!string.IsNullOrEmpty(lootPacket.ContainerId))
+                {
+                    coopHandler.ListOfInteractiveObjects.Add(lootPacket.ContainerId, box.Container);
+                    Logger.LogInfo($"Adding AirdropBox {lootPacket.ContainerId} to interactive objects.");
+                }
+                else
+                {
+                    Logger.LogError("ContainerId received from server was empty.");
+                }
+            }
+
+            box.gameObject.SetActive(true);
+            airdropPacket.BoxPoint.y = airdropPacket.BoxPoint.y + 5f;
+            box.StartCoroutine(box.DropCrate(airdropPacket.BoxPoint));
+
+            return box;
         }
     }
 }

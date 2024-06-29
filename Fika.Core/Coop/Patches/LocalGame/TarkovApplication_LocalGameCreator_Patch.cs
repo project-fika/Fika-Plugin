@@ -7,6 +7,7 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using SPT.Reflection.Patching;
@@ -14,6 +15,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using LiteNetLib;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {
@@ -93,8 +96,32 @@ namespace Fika.Core.Coop.Patches.LocalGame
             }
 
             ISession session = CurrentSession;
-
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
+
+            if (FikaBackendUtils.IsReconnect)
+            {
+                await NetManagerUtils.InitNetManager(FikaBackendUtils.IsServer);
+                profile = await GetReconnectProfile(profile.Id);
+
+                // Load bundles of this new profile, Game originally does this in method_38 which is before this
+                await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
+                PoolManager.AssemblyType.Local, profile.GetAllPrefabPaths(true).ToArray(),
+                JobPriority.General).ContinueWith(x =>
+                {
+                    if (x.IsCompleted)
+                    {
+                        Logger.LogDebug($"SpawnPlayer::{profile.Info.Nickname}::Load Complete");
+                    }
+                    else if (x.IsFaulted)
+                    {
+                        Logger.LogError($"SpawnPlayer::{profile.Info.Nickname}::Load Failed");
+                    }
+                    else if (x.IsCanceled)
+                    {
+                        Logger.LogError($"SpawnPlayer::{profile.Info.Nickname}::Load Cancelled");
+                    }
+                });
+            }
 
             profile.Inventory.Stash = null;
             profile.Inventory.QuestStashItems = null;
@@ -168,6 +195,31 @@ namespace Fika.Core.Coop.Patches.LocalGame
                     FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(gameWorld));
                 }
             }
+        }
+
+        private static async Task<Profile> GetReconnectProfile(string profileId)
+        {
+            ReconnectRequestPacket reconnectPacket = new(profileId, EReconnectPackgeType.Everything);
+            FikaBackendUtils.ScreenController.ChangeStatus($"Sending Reconnect Request...");
+
+            int retryCount = 0;
+            while (FikaBackendUtils.ReconnectPacket == null && retryCount < 5)
+            {
+                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref reconnectPacket, DeliveryMethod.ReliableUnordered);
+                FikaBackendUtils.ScreenController.ChangeStatus($"Requests Sent for reconnect... {retryCount + 1}");
+                await Task.Delay(3000);
+                retryCount++;
+            }
+
+            if (FikaBackendUtils.ReconnectPacket == null && retryCount == 5)
+            {
+                FikaBackendUtils.ScreenController.ChangeStatus($"Failed to Reconnect...");
+                throw new Exception("Failed to Reconnect");
+            }
+
+            FikaBackendUtils.ScreenController.ChangeStatus($"Reconnecting to host...");
+
+            return FikaBackendUtils.ReconnectPacket.Value.Profile.Profile;
         }
     }
 }

@@ -67,19 +67,19 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            LocalQuestControllerClass questController;
+            CoopClientQuestController questController;
             if (FikaPlugin.Instance.SharedQuestProgression)
             {
                 questController = new CoopClientSharedQuestController(profile, inventoryController, session, player);
             }
             else
             {
-                questController = new LocalQuestControllerClass(profile, inventoryController, session, true);
+                questController = new CoopClientQuestController(profile, inventoryController, session, true);
             }
             questController.Init();
             questController.Run();
 
-            AchievementControllerClass achievementsController = new(profile, inventoryController, session, true);
+            CoopClientAchievementController achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
 
@@ -921,7 +921,7 @@ namespace Fika.Core.Coop.Players
                     Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
                     ItemFilter[] filters = dogtagSlot.Filters; // We need to temporarily remove and then re-add these as BSG did not include the new dog tags in their ItemFilter[]
                     dogtagSlot.Filters = null;
-                    GStruct416<int> addResult = dogtagSlot.Add(item, false);                    
+                    GStruct416<int> addResult = dogtagSlot.Add(item, false);
                     dogtagSlot.Filters = filters;
 
                     if (addResult.Error != null)

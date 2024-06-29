@@ -26,6 +26,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,8 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Fika.Core.Coop.Airdrops;
+using HarmonyLib;
 
 namespace Fika.Core.Networking
 {
@@ -99,6 +102,8 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectRequestPacket, NetPeer>(OnReconnectRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ConditionChangePacket, NetPeer>(OnConditionChangedPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
@@ -114,7 +119,7 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true
             };
-            
+
             if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
             {
                 bool upnpFailed = false;
@@ -159,7 +164,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            if(FikaPlugin.UseNatPunching.Value)
+            if (FikaPlugin.UseNatPunching.Value)
             {
                 FikaNatPunchServer = new FikaNatPunchServer(_netServer);
                 FikaNatPunchServer.Connect();
@@ -190,7 +195,7 @@ namespace Fika.Core.Networking
 
             string serverStartedMessage;
 
-            if(FikaPlugin.UseNatPunching.Value)
+            if (FikaPlugin.UseNatPunching.Value)
             {
                 serverStartedMessage = "Server started using Nat Punching.";
             }
@@ -198,7 +203,7 @@ namespace Fika.Core.Networking
             {
                 serverStartedMessage = $"Server started on port {_netServer.LocalPort}.";
             }
-            
+
             NotificationManagerClass.DisplayMessageNotification(serverStartedMessage,
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
@@ -705,7 +710,7 @@ namespace Fika.Core.Networking
             CoopGame game = coopHandler.LocalGameInstance;
             if (game != null)
             {
-                GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks);
+                GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks, game.GameTimer.StartDateTime.Value.Ticks);
                 _dataWriter.Reset();
                 SendDataToPeer(peer, _dataWriter, ref gameTimerPacket, DeliveryMethod.ReliableOrdered);
             }
@@ -808,8 +813,8 @@ namespace Fika.Core.Networking
                             resp = new();
                             resp.Put(data);
                             _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-                            
-                            if(!StunQueryRoutineCts.IsCancellationRequested)
+
+                            if (!StunQueryRoutineCts.IsCancellationRequested)
                             {
                                 StunQueryRoutineCts.Cancel();
                             }
@@ -900,6 +905,148 @@ namespace Fika.Core.Networking
                 writer.Reset();
                 server.SendDataToPeer(peer, writer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
             }
+        }
+
+        private void OnConditionChangedPacketReceived(ConditionChangePacket packet, NetPeer peer)
+        {
+            if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            {
+                foreach (KeyValuePair<string, TaskConditionCounterClass> taskConditionCounter in player.Profile.TaskConditionCounters)
+                {
+                    if (taskConditionCounter.Key == packet.ConditionId)
+                    {
+                        taskConditionCounter.Value.Value = (int)packet.ConditionValue;
+                    }
+                }
+            }
+        }
+
+        private void OnReconnectRequestPacketReceived(ReconnectRequestPacket packet, NetPeer peer)
+        {
+            logger.LogError($"Player Wanting to reconnect {packet.ProfileId}");
+
+            switch (packet.PackageType)
+            {
+                case EReconnectPackgeType.Everything:
+                    logger.LogError($"Reconnecting player requesting eveything");
+                    StartCoroutine(SyncClientToHost(packet, peer));
+                    break;
+                case EReconnectPackgeType.AirdropSetup:
+                    _ = SendClientAirdropPackets(peer);
+                    break;
+                default:
+                    throw new Exception("reconnecting player sent unknown package type");
+            }
+        }
+
+        private async Task SendClientAirdropPackets(NetPeer peer)
+        {
+            logger.LogError($"Reconnecting player requesting airdrops");
+            // send airdrop data
+
+            if (FikaBackendUtils.OldAirdropPackets.Count == 0)
+            {
+                // no recorded airdrops
+                return;
+            }
+
+            for (int i = 0; i < FikaBackendUtils.OldAirdropBoxes.Count; i++)
+            {
+                FikaAirdropBox box = FikaBackendUtils.OldAirdropBoxes.ElementAt(i);
+                AirdropPacket airPacket = FikaBackendUtils.OldAirdropPackets.ElementAt(i);
+                AirdropLootPacket lootPacket = FikaBackendUtils.OldLootPackets.ElementAt(i);
+
+                // edit airdrop config for boxes current height - allow some give way otherwise it clips the floor
+                airPacket.DropHeight = (int)box.transform.position.y + 5;
+
+                // send airdrop config
+                _dataWriter.Reset();
+                SendDataToPeer(peer, _dataWriter, ref airPacket, DeliveryMethod.ReliableOrdered);
+
+                // send loot packet
+                await Task.Delay(500);
+                _dataWriter.Reset();
+                SendDataToPeer(peer, _dataWriter, ref lootPacket, DeliveryMethod.ReliableOrdered);
+
+                // wait 2 seconds between?
+                await Task.Delay(2000);
+            }
+        }
+
+        public IEnumerator SyncClientToHost(ReconnectRequestPacket packet, NetPeer peer)
+        {
+            while (!Singleton<GameWorld>.Instantiated)
+            {
+                yield return new WaitUntil(() => Singleton<GameWorld>.Instantiated);
+            }
+
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            ClientGameWorld ClientgameWorld = Singleton<GameWorld>.Instance as ClientGameWorld;
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            ObservedCoopPlayer playerToUse = null;
+
+            foreach (CoopPlayer coopPlayer in Players.Values)
+            {
+                if (coopPlayer.ProfileId == packet.ProfileId)
+                {
+                    playerToUse = (ObservedCoopPlayer)coopPlayer;
+                }
+            }
+
+            if (playerToUse == null)
+            {
+                logger.LogError($"Player was not found");
+            }
+
+            WorldInteractiveObject[] interactiveObjects = [.. coopHandler.ListOfInteractiveObjects.Values];
+
+            WindowBreaker[] windows = ClientgameWorld.Windows.Where(x => x.AvailableToSync && x.IsDamaged).ToArray();
+
+            LampController[] lights = LocationScene.GetAllObjects<LampController>(false).ToArray();
+
+            Throwable[] smokes = ClientgameWorld.Grenades.Where(x => x as SmokeGrenade is not null).ToArray();
+
+            LootItemPositionClass[] items = gameWorld.GetJsonLootItems().Where(x => x as CorpseLootItemClass is null).ToArray();
+
+            Profile.ProfileHealthClass health = playerToUse.NetworkHealthController.Store(null);
+            NetworkHealthControllerAbstractClass.NetworkBodyEffectsAbstractClass[] effects = [.. playerToUse.NetworkHealthController.IReadOnlyList_0];
+
+            foreach (NetworkHealthControllerAbstractClass.NetworkBodyEffectsAbstractClass effect in effects)
+            {
+                if (!effect.Active)
+                {
+                    continue;
+                }
+
+                if (health.BodyParts[effect.BodyPart].Effects == null)
+                {
+                    health.BodyParts[effect.BodyPart].Effects = [];
+                }
+
+                if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface250)
+                {
+                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.ProfileHealthClass.GClass1769 { Time = -1f, ExtraData = effect.StoreObj });
+                }
+            }
+
+            playerToUse.Profile.Health = health;
+            playerToUse.Profile.Info.EntryPoint = coopGame.InfiltrationPoint;
+
+            Vector3[] airdropLocations = new Vector3[FikaBackendUtils.OldAirdropBoxes.Count];
+            foreach (FikaAirdropBox box in FikaBackendUtils.OldAirdropBoxes)
+            {
+                airdropLocations.AddItem(box.transform.position);
+            }
+
+            ReconnectResponsePacket responsePacket = new(playerToUse.NetId, playerToUse.Transform.position,
+                playerToUse.Transform.rotation, playerToUse.Pose, playerToUse.PoseLevel, playerToUse.IsInPronePose,
+                interactiveObjects, windows, lights, smokes, new FikaSerialization.PlayerInfoPacket() { Profile = playerToUse.Profile },
+                items, gameWorld.AllPlayersEverExisted.Count(), FikaBackendUtils.OldAirdropPackets.Count > 0, FikaBackendUtils.OldAirdropPackets.Count,
+                [.. FikaBackendUtils.OldAirdropPackets], [.. FikaBackendUtils.OldLootPackets]);
+
+            _dataWriter.Reset();
+            SendDataToPeer(peer, _dataWriter, ref responsePacket, DeliveryMethod.ReliableUnordered);
         }
     }
 }

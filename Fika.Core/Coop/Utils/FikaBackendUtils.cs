@@ -1,8 +1,11 @@
 ﻿using EFT;
 using EFT.UI.Matchmaker;
+using Fika.Core.Coop.Airdrops;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Utils
@@ -32,7 +35,15 @@ namespace Fika.Core.Coop.Utils
         public static int LocalPort = 0;
         public static bool IsHostNatPunch = false;
         private static string groupId;
+        private static long timestamp;
         private static string raidCode;
+        public static bool IsReconnect = false;
+        public static bool ReconnectPacketRecieved = false;
+        public static ReconnectResponsePacket? ReconnectPacket; // change to not be nullable
+        public static bool SpawnedPlayersComplete = false;
+        public static List<AirdropLootPacket> OldLootPackets = [];
+        public static List<AirdropPacket> OldAirdropPackets = [];
+        public static List<FikaAirdropBox> OldAirdropBoxes = [];
 
         public static MatchmakerTimeHasCome.TimeHasComeScreenClass ScreenController;
 

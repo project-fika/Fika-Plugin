@@ -328,6 +328,14 @@ namespace Fika.Core.UI.Custom
                     {
                         fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
                     }
+                    if (entry.Status == LobbyEntry.ELobbyStatus.REJOIN)
+                    {
+                        FikaBackendUtils.IsReconnect = true;
+                    }
+                    else
+                    {
+                        FikaBackendUtils.IsReconnect = false;
+                    }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                     StartCoroutine(JoinMatch(ProfileId, server.name, button));
@@ -426,6 +434,16 @@ namespace Fika.Core.UI.Custom
                             tooltipArea.enabled = true;
                             tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
                         }
+                        break;
+                    case LobbyEntry.ELobbyStatus.REJOIN:
+                        tooltipTextGetter = new()
+                        {
+                            TooltipText = "Click to Rejoin raid."
+                        };
+
+                        tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                        tooltipArea.enabled = true;
+                        tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
                         break;
                     case LobbyEntry.ELobbyStatus.IN_GAME:
                         tooltipTextGetter = new()
