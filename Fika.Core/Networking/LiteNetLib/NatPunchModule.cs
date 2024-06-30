@@ -282,8 +282,6 @@ namespace LiteNetLib
             //Read info
             NetDebug.Write(NetLogLevel.Trace, $"[NAT] punch received from {senderEndPoint} - additional info: {req.Token}");
 
-            Console.WriteLine($"[NAT] punch received from {senderEndPoint} - additional info: {req.Token}");
-
             //Release punch success to client; enabling him to Connect() to Sender if token is ok
             if (UnsyncedEvents)
             {
