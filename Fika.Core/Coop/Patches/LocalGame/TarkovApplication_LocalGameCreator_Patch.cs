@@ -14,6 +14,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Fika.Core.Networking;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {
@@ -106,6 +108,94 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             if (!isServer)
             {
+                timeHasComeScreenController.ChangeStatus("Connecting to host...");
+
+                var attempts = 0;
+                var delay = 500; // ms
+                var maxAttempts = 600; // 5 minutes
+                var connected = false;
+                
+                do
+                {
+                    try
+                    {
+                        GetHostRequest body = new(FikaBackendUtils.GetServerId());
+                        GetHostResponse result = FikaRequestHandler.GetHost(body);
+
+                        if (result.Ips is { Length: > 0 })
+                        {
+                            connected = true;
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        // keep trying
+                    }
+
+                    await Task.Delay(delay); // try every half second for 5 minutes
+                    attempts++;
+                } while (attempts < maxAttempts);
+
+                if (!connected)
+                {
+                    timeHasComeScreenController.method_7(); // Abort
+                    
+                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                        "ERROR CONNECTING",
+                        "Unable to connect to the host. Make sure they are still in-raid.",
+                        ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                    FikaPlugin.Instance.FikaLogger.LogError("Unable to connect to the host");
+                    return;
+                }
+
+                NetManagerUtils.CreatePingingClient();
+
+                var pingingClient = Singleton<FikaPingingClient>.Instance;
+
+                if (pingingClient.Init(FikaBackendUtils.GetServerId()))
+                {
+                    attempts = 0;
+                    bool success;
+                    
+                    do
+                    {
+                        attempts++;
+                        
+                        pingingClient.PingEndPoint("fika.hello");
+                        pingingClient.NetClient.PollEvents();
+                        success = pingingClient.Received;
+
+                        await Task.Delay(100);
+                    } while (!success && attempts < 50);
+
+                    if (!success)
+                    {
+                        timeHasComeScreenController.method_7(); // Abort
+                        
+                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                            "ERROR CONNECTING",
+                            "Unable to connect to the server. Make sure that all ports are open and that all settings are configured correctly.",
+                            ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                        FikaPlugin.Instance.FikaLogger.LogError("Unable to connect to the session!");
+                        
+                        NetManagerUtils.DestroyPingingClient();
+
+                        return;
+                    }
+                }
+                
+                if (FikaBackendUtils.IsHostNatPunch)
+                {
+                    pingingClient.StartKeepAliveRoutine();
+                }
+                else
+                {
+                    NetManagerUtils.DestroyPingingClient();
+                }
+                
                 timeHasComeScreenController.ChangeStatus("Joining coop game...");
 
                 RaidSettingsRequest data = new();

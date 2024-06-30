@@ -159,9 +159,12 @@ namespace Fika.Core.UI.Custom
 
             fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
 
-            AcceptButton.gameObject.SetActive(false);
-            AcceptButton.enabled = false;
-            AcceptButton.Interactable = false;
+            if (FikaGroupUtils.IsGroupLeader)
+            {
+                AcceptButton.gameObject.SetActive(false);
+                AcceptButton.enabled = false;
+                AcceptButton.Interactable = false;
+            }
 
             NewBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
             UnityEngine.Events.UnityEvent newEvent = new();
@@ -216,66 +219,12 @@ namespace Fika.Core.UI.Custom
             {
                 button.enabled = false;
             }
-
-            NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
-
-            NetManagerUtils.CreatePingingClient();
-
-            var pingingClient = Singleton<FikaPingingClient>.Instance;
-
-            if (pingingClient.Init(serverId))
-            {
-                int attempts = 0;
-                bool success;
-
-                FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
-
-                do
-                {
-                    attempts++;
-
-                    pingingClient.PingEndPoint("fika.hello");
-                    pingingClient.NetClient.PollEvents();
-                    success = pingingClient.Received;
-
-                    yield return new WaitForSeconds(0.1f);
-                } while (!success && attempts < 50);
-
-                if (!success)
-                {
-                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR CONNECTING",
-                    "Unable to connect to the server. Make sure that all ports are open and that all settings are configured correctly.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
-
-                    FikaPlugin.Instance.FikaLogger.LogError("Unable to connect to the session!");
-
-                    if (button != null)
-                    {
-                        button.enabled = true;
-                    }
-                    yield break;
-                }
-            }
-            else
-            {
-                ConsoleScreen.Log("ERROR");
-            }
-
+            
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
                 FikaBackendUtils.SetServerId(result.ServerId);
                 FikaBackendUtils.MatchingType = EMatchingType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
-
-                if (FikaBackendUtils.IsHostNatPunch)
-                {
-                    pingingClient.StartKeepAliveRoutine();
-                }
-                else
-                {
-                    NetManagerUtils.DestroyPingingClient();
-                }
 
                 DestroyThis();
 
@@ -283,10 +232,10 @@ namespace Fika.Core.UI.Custom
             }
             else
             {
-                NetManagerUtils.DestroyPingingClient();
-
                 Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage, ErrorScreen.EButtonType.OkButton, 15, null, null);
             }
+
+            yield break;
         }
 
         private void RefreshUI()
