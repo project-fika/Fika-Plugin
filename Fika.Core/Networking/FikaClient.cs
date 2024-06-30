@@ -602,8 +602,8 @@ namespace Fika.Core.Networking
         {
             if (!packet.IsRequest && packet.GroupId != null & packet.GroupId == FikaGroupUtils.GroupId)
             {
-                ConnectedClients = packet.NumberOfPlayers;
-                ReadyClients = packet.ReadyPlayers;
+                ConnectedClients = packet.Connected;
+                ReadyClients = packet.Ready;
             }
         }
 
