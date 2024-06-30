@@ -201,12 +201,16 @@ namespace Fika.Core
             new DisableInsuranceReadyButton_Patch().Enable();
             new DisableMatchSettingsReadyButton_Patch().Enable();
             new TarkovApplication_LocalGameCreator_Patch().Enable();
+            new TarkovApplication_NetworkGameCreator_Patch().Enable();
+            new MenuScreen_Patch().Enable();
             new DeathFade_Patch().Enable();
             new NonWaveSpawnScenario_Patch().Enable();
             new WaveSpawnScenario_Patch().Enable();
             new WeatherNode_Patch().Enable();
             new MatchmakerAcceptScreen_Awake_Patch().Enable();
             new MatchmakerAcceptScreen_Show_Patch().Enable();
+            new MatchmakerOfflineRaidScreen_Patch().Enable();
+            new MatchmakerPlayerController_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
             new BotCacher_Patch().Enable();
             new InventoryScroll_Patch().Enable();
