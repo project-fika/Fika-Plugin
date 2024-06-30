@@ -34,6 +34,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Fika.Core.Models;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -49,8 +50,7 @@ namespace Fika.Core.Networking
         public string MyExternalIP { get; private set; } = NetUtils.GetLocalIp(LocalAddrType.IPv4);
         private int Port => FikaPlugin.UDPPort.Value;
         private CoopHandler coopHandler;
-        public int ReadyClients = 0;
-        public Dictionary<string, int[]> ConnectedGroups = new();
+        public readonly Dictionary<string, ServerGroup> Groups = new();
         public NetManager NetServer
         {
             get
@@ -511,21 +511,20 @@ namespace Fika.Core.Networking
                 return;
             };
             
-            ReadyClients += packet.ReadyPlayers;
-
-            if (!ConnectedGroups.TryGetValue(packet.GroupId, out int[] groupInfo))
+            if (!Groups.TryGetValue(packet.GroupId, out ServerGroup groupInfo))
             {
-                groupInfo = [packet.NumberOfPlayers, 0];
+                groupInfo = new ServerGroup();
             }
 
-            groupInfo[1] += packet.ReadyPlayers;
-
-            ConnectedGroups[packet.GroupId] = groupInfo;
+            groupInfo.ConnectedClients += packet.Connected;
+            groupInfo.ReadyClients += packet.Ready;
+            
+            Groups[packet.GroupId] = groupInfo;
 
             InformationPacket respondPackage = new(false)
             {
-                NumberOfPlayers = groupInfo[0],
-                ReadyPlayers = groupInfo[1],
+                Connected = groupInfo.ConnectedClients,
+                Ready = groupInfo.ReadyClients,
                 GroupId = packet.GroupId
             };
 

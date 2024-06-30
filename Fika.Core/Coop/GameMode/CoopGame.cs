@@ -45,6 +45,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Fika.Core.Models;
 using UnityEngine;
 
 namespace Fika.Core.Coop.GameMode
@@ -709,7 +710,7 @@ namespace Fika.Core.Coop.GameMode
 
                 FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
 
-                int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+                int expectedPlayers = (isServer ? FikaBackendUtils.HostExpectedNumberOfPlayers : FikaGroupUtils.GroupSize) - 1;
 
                 if (isServer)
                 {
@@ -729,18 +730,11 @@ namespace Fika.Core.Coop.GameMode
                     FikaServer server = Singleton<FikaServer>.Instance;
                     server.ReadyClients++;
                     
-                    if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out int[] groupInfo))
-                    {
-                        // By now we expect all members to be connected, so this code should never be run.
-                        // However, to avoid causing issues it'll allow the game to continue even if something
-                        // has gone wrong.
-                        groupInfo = [FikaGroupUtils.GroupSize, FikaGroupUtils.GroupSize];
-                    }
+                    ServerGroup groupInfo = server.Groups[FikaGroupUtils.GroupId]; 
                     
                     InformationPacket packet = new()
                     {
-                        NumberOfPlayers = groupInfo[0],
-                        ReadyPlayers = groupInfo[1],
+                        Ready = 1,
                         GroupId = FikaGroupUtils.GroupId
                     };
                     writer.Reset();
@@ -748,9 +742,15 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
+                        groupInfo = server.Groups[FikaGroupUtils.GroupId];
+                        if (groupInfo.ReadyClients >= expectedPlayers)
+                        {
+                            break;
+                        }
+                        
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", groupInfo.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
-                    } while (server.ReadyClients < expectedPlayers);
+                    } while (groupInfo.ReadyClients < expectedPlayers);
 
                     foreach (CoopPlayer player in coopHandler.Players.Values)
                     {
@@ -773,9 +773,9 @@ namespace Fika.Core.Coop.GameMode
                     } while (coopHandler.HumanPlayers < expectedPlayers);
 
                     FikaClient client = Singleton<FikaClient>.Instance;
-                    InformationPacket packet = new(true)
+                    InformationPacket packet = new()
                     {
-                        ReadyPlayers = 1,
+                        Ready = 1,
                         GroupId = FikaGroupUtils.GroupId
                     };
                     writer.Reset();
@@ -784,6 +784,14 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
+
+                        packet = new(true)
+                        {
+                            GroupId = FikaGroupUtils.GroupId
+                        };
+                        writer.Reset();
+                        client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        
                         yield return new WaitForEndOfFrame();
                     } while (client.ReadyClients < expectedPlayers);
                 }
@@ -1117,19 +1125,24 @@ namespace Fika.Core.Coop.GameMode
             }
             int numbersOfPlayersToWaitFor = 0;
 
+            int expectedPlayers = isServer ? FikaBackendUtils.HostExpectedNumberOfPlayers : FikaGroupUtils.GroupSize;
+
             if (isServer)
             {
                 FikaServer server = Singleton<FikaServer>.Instance;
 
-                if (!server.ConnectedGroups.TryGetValue(FikaGroupUtils.GroupId, out int[] groupInfo) || groupInfo is not { Length: 2 })
+                // In case the group info isn't already setup
+                if (!server.Groups.TryGetValue(FikaGroupUtils.GroupId, out ServerGroup groupInfo))
                 {
-                    groupInfo = [FikaGroupUtils.GroupSize, 1]; // 1 since the server is ready
-                    server.ConnectedGroups[FikaGroupUtils.GroupId] = groupInfo;
+                    groupInfo = new ServerGroup();
+                    server.Groups[FikaGroupUtils.GroupId] = groupInfo;
                 }
                 
                 do
                 {
-                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (groupInfo[1] + 1);
+                    // Wait for all other clients to be "Connected"
+                    groupInfo = server.Groups[FikaGroupUtils.GroupId];
+                    numbersOfPlayersToWaitFor = expectedPlayers - (groupInfo.ConnectedClients + 1);
                     if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
@@ -1180,6 +1193,7 @@ namespace Fika.Core.Coop.GameMode
 
                 InformationPacket packet = new(true)
                 {
+                    Connected = 1,
                     GroupId = FikaGroupUtils.GroupId
                 };
                 NetDataWriter writer = new();
@@ -1187,7 +1201,7 @@ namespace Fika.Core.Coop.GameMode
                 client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 do
                 {
-                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
+                    numbersOfPlayersToWaitFor = expectedPlayers - (client.ConnectedClients + 1);
                     if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
