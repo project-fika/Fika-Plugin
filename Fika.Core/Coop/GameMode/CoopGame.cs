@@ -723,11 +723,13 @@ namespace Fika.Core.Coop.GameMode
 
                     FikaServer server = Singleton<FikaServer>.Instance;
                     
-                    var groupInfo = server.Groups[FikaGroupUtils.GroupId]; 
+                    server.Groups[FikaGroupUtils.GroupId].ReadyClients++;
+                    var groupInfo = server.Groups[FikaGroupUtils.GroupId];
                     
                     InformationPacket packet = new()
                     {
-                        Ready = 1,
+                        Ready = groupInfo.ReadyClients,
+                        Connected = groupInfo.ConnectedClients,
                         GroupId = FikaGroupUtils.GroupId
                     };
                     writer.Reset();
@@ -736,11 +738,6 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         groupInfo = server.Groups[FikaGroupUtils.GroupId];
-                        if (groupInfo.ReadyClients >= expectedPlayers)
-                        {
-                            break;
-                        }
-                        
                         FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", groupInfo.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (groupInfo.ReadyClients < expectedPlayers);
@@ -776,15 +773,9 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        FikaPlugin.Instance.FikaLogger.LogInfo($"Ready players: {client.ReadyClients}");
-
-                        if (client.ReadyClients >= expectedPlayers)
-                        {
-                            break;
-                        }
-                        
                         FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
                         
+                        // Request update on ready clients
                         packet = new(true)
                         {
                             GroupId = FikaGroupUtils.GroupId
