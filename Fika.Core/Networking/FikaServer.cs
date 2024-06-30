@@ -813,7 +813,7 @@ namespace Fika.Core.Networking
                             resp.Put(data);
                             _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
 
-                            if(!natIntroduceRoutineCts.IsCancellationRequested)
+                            if (!natIntroduceRoutineCts.IsCancellationRequested)
                             {
                                 natIntroduceRoutineCts.Cancel();
                             }
