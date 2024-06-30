@@ -140,5 +140,10 @@ namespace Fika.Core.Networking.Http
         {
             return await PostJsonAsync<RaidSettingsRequest, RaidSettingsResponse>("/fika/raid/getsettings", data);
         }
+        
+        public static RaidGroupResponse GetGroupRaid()
+        {
+            return GetJson<RaidGroupResponse>("/fika/raid/group");
+        }
     }
 }
