@@ -226,7 +226,6 @@ namespace Fika.Core.Coop.Components
                 {
                     coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.MyExitLocation : null, 0);
                 }
-                return;
             }
         }
 
@@ -348,7 +347,9 @@ namespace Fika.Core.Coop.Components
                     if (botController != null)
                     {
                         // Start Coroutine as botController might need a while to start sometimes...
+#if DEBUG
                         Logger.LogInfo("Starting AddClientToBotEnemies routine.");
+#endif
                         StartCoroutine(AddClientToBotEnemies(botController, otherPlayer));
                     }
                     else
@@ -519,8 +520,10 @@ namespace Fika.Core.Coop.Components
         private IEnumerator AddClientToBotEnemies(BotsController botController, LocalPlayer playerToAdd)
         {
             CoopGame coopGame = LocalGameInstance;
-
+            
+#if DEBUG
             Logger.LogInfo($"AddClientToBotEnemies: " + playerToAdd.Profile.Nickname);
+#endif
 
             while (coopGame.Status != GameStatus.Running && !botController.IsEnable)
             {
@@ -531,29 +534,12 @@ namespace Fika.Core.Coop.Components
             {
                 yield return null;
             }
-
+            
+#if DEBUG
             Logger.LogInfo($"Adding Client {playerToAdd.Profile.Nickname} to enemy list");
+#endif
+
             botController.AddActivePLayer(playerToAdd);
-
-            bool found = false;
-
-            for (int i = 0; i < botController.BotSpawner.PlayersCount; i++)
-            {
-                if (botController.BotSpawner.GetPlayer(i) == playerToAdd)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                Logger.LogInfo($"Verified that {playerToAdd.Profile.Nickname} was added to the enemy list.");
-            }
-            else
-            {
-                Logger.LogInfo($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
-            }
         }
 
         /// <summary>

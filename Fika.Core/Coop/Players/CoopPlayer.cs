@@ -909,9 +909,6 @@ namespace Fika.Core.Coop.Players
 
         public void SetupMainPlayer()
         {
-            // Set own group id
-            Profile.Info.GroupId = "Fika";
-
             // Setup own dog tag
             if (Side != EPlayerSide.Savage)
             {
@@ -946,7 +943,7 @@ namespace Fika.Core.Coop.Players
                     if (dogtagComponent != null)
                     {
                         dogtagComponent.ProfileId = ProfileId;
-                        dogtagComponent.GroupId = Profile.Info.GroupId;
+                        dogtagComponent.GroupId = FikaGroupUtils.GroupId;
                     }
                     else
                     {
@@ -1499,7 +1496,7 @@ namespace Fika.Core.Coop.Players
                         dogtagComponent.Time = DateTime.Now;
                         dogtagComponent.Status = "Killed by ";
                         dogtagComponent.WeaponName = LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.Name : "Unknown";
-                        dogtagComponent.GroupId = GroupId;
+                        dogtagComponent.GroupId = FikaGroupUtils.GroupId;
                     }
                 }
             }

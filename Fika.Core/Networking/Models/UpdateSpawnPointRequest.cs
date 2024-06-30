@@ -12,10 +12,14 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "name")]
         public string Name;
 
-        public UpdateSpawnPointRequest(string name)
+        [DataMember(Name = "groupId")]
+        public string GroupId;
+
+        public UpdateSpawnPointRequest(string name, string groupId = "")
         {
             ServerId = CoopHandler.GetServerId();
             Name = name;
+            GroupId = groupId;
         }
     }
 }
