@@ -151,5 +151,10 @@ namespace Fika.Core.Networking.Http
         {
             return await GetJsonAsync<JObject>("/fika/profile/download");
         }
+        
+        public static RaidGroupResponse GetGroupRaid()
+        {
+            return GetJson<RaidGroupResponse>("/fika/raid/group");
+        }
     }
 }
