@@ -641,11 +641,11 @@ namespace Fika.Core.Coop.Players
                     string nickname = !string.IsNullOrEmpty(Profile.Info.MainProfileNickname) ? Profile.Info.MainProfileNickname : Profile.Nickname;
                     if (damageType != EDamageType.Undefined)
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{nickname}' has died from '{("DamageType_" + damageType.ToString()).Localized()}'");
+                        NotificationManagerClass.DisplayWarningNotification($"{nickname} has died from '{("DamageType_" + damageType.ToString()).Localized()}'");
                     }
                     else
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{nickname}' has died");
+                        NotificationManagerClass.DisplayWarningNotification($"{nickname} has died");
                     }
                 }
                 if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
@@ -863,7 +863,7 @@ namespace Fika.Core.Coop.Players
 
                 if (FikaPlugin.ShowNotifications.Value)
                 {
-                    NotificationManagerClass.DisplayMessageNotification($"Group member '{(Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname)}' has spawned",
+                    NotificationManagerClass.DisplayMessageNotification($"{(Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname)} has spawned",
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
                 }
 

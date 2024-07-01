@@ -418,7 +418,7 @@ namespace Fika.Core.Networking
                                 if (FikaPlugin.ShowNotifications.Value)
                                 {
                                     string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
+                                    NotificationManagerClass.DisplayMessageNotification($"{nickname} has extracted.",
                                                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                                 }
                             }
@@ -600,7 +600,8 @@ namespace Fika.Core.Networking
 
         private void OnInformationPacketReceived(InformationPacket packet)
         {
-            if (!packet.IsRequest && packet.GroupId != null & packet.GroupId == FikaGroupUtils.GroupId)
+            var groupId =  FikaGroupUtils.GroupSize > 1 ? FikaGroupUtils.GroupId : "solo";
+            if (!packet.IsRequest && packet.GroupId != null & packet.GroupId == groupId)
             {
                 ConnectedClients = packet.Connected;
                 ReadyClients = packet.Ready;
