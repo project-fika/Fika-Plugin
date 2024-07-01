@@ -447,7 +447,7 @@ namespace Fika.Core.Networking
                         if (FikaPlugin.ShowNotifications.Value)
                         {
                             string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                            NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
+                            NotificationManagerClass.DisplayMessageNotification($"'{nickname}' has extracted.",
                                             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                         }
                     }
@@ -860,8 +860,13 @@ namespace Fika.Core.Networking
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
+#if DEBUG
             logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
-            NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
+#endif
+            if (FikaPlugin.ShowNotifications.Value)
+            {
+                NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
+            }
             if (_netServer.ConnectedPeersCount == 0)
             {
                 timeSinceLastPeerDisconnected = DateTime.Now;
