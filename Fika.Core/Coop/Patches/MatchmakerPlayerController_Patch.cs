@@ -11,7 +11,7 @@ namespace Fika.Core.Coop.Patches
         protected override MethodBase GetTargetMethod() => typeof(MatchmakerPlayerControllerClass).GetMethod("NotificationReceivedHandler");
 
         [PatchPrefix]
-        private static bool PatchPrefix(MatchmakerPlayerControllerClass __instance, NotificationClass notification)
+        private static bool PatchPrefix(MatchmakerPlayerControllerClass __instance, NotificationAbstractClass notification)
         {
             return notification switch
             {
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPostfix]
-        private static void PostPrefix(MatchmakerPlayerControllerClass __instance, NotificationClass notification)
+        private static void PostPrefix(MatchmakerPlayerControllerClass __instance, NotificationAbstractClass notification)
         {
             if (notification is not GClass2020)
             {

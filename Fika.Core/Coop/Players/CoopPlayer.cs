@@ -58,7 +58,7 @@ namespace Fika.Core.Coop.Players
             Func<float> getAimingSensitivity, IViewFilter filter, int netId, IStatisticsManager statisticsManager)
         {
             CoopPlayer player = Create<CoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
-                        bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
+                bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
             player.NetId = netId;
@@ -67,7 +67,7 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            LocalQuestControllerClass questController;
+            AbstractQuestControllerClass questController;
             if (FikaPlugin.Instance.SharedQuestProgression)
             {
                 questController = new CoopClientSharedQuestController(profile, inventoryController, session, player);

@@ -94,7 +94,7 @@ namespace Fika.Core.UI
             errorScreenHandler.context.OnDecline += errorScreen.method_4;
             errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
 
-            CompositeDisposableClass ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
+            AddViewList ui = Traverse.Create(errorScreen).Field<AddViewList>("UI").Value;
 
             ui.AddDisposable(new Action(errorScreenHandler.method_0));
             string text = buttonType switch
