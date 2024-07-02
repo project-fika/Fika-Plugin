@@ -57,8 +57,8 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, IViewFilter filter, int netId, IStatisticsManager statisticsManager)
         {
-            CoopPlayer player = Create<CoopPlayer>(ResouceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
-                bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
+            CoopPlayer player = Create<CoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+                        bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
             player.NetId = netId;
@@ -1551,7 +1551,7 @@ namespace Fika.Core.Coop.Players
             if (questItem)
             {
                 //List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
-                foreach (IKill lootItem in Singleton<GameWorld>.Instance.LootList)
+                foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
                 {
                     if (lootItem is LootItem observedLootItem)
                     {

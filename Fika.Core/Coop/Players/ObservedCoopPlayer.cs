@@ -122,7 +122,7 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, IViewFilter filter)
         {
-            ObservedCoopPlayer player = Create<ObservedCoopPlayer>(ResouceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
+            ObservedCoopPlayer player = Create<ObservedCoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
                 armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
                 aiControl);
 

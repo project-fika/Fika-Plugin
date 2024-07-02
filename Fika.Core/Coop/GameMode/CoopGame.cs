@@ -1807,7 +1807,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                StartCoroutine(SaveOnDeathRoutine());
+                Task.Run(() => SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true));
             }
 
             try
@@ -1818,15 +1818,6 @@ namespace Fika.Core.Coop.GameMode
             catch (Exception)
             {
                 FikaPlugin.Instance.FikaLogger.LogError("Unable to send RaidLeave request to server.");
-            }
-        }
-
-        private IEnumerator SaveOnDeathRoutine()
-        {
-            Task saveTask = SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true);
-            while (!saveTask.IsCompleted)
-            {
-                yield return null;
             }
         }
 
@@ -1976,11 +1967,11 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="exitName"></param>
         /// <param name="fromDeath"></param>
         /// <returns></returns>
-        private Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
+        private async Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
         {
             if (hasSaved)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             if (fromDeath)
@@ -1994,9 +1985,10 @@ namespace Fika.Core.Coop.GameMode
             //Method taken directly from SPT, can be found in the spt-singleplayer assembly as OfflineSaveProfilePatch
             Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
 
-            JsonConverter[] Converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;
+            JsonConverter[] converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;
+            converters = [.. converters, new NotesJsonConverter()];
 
-            SaveProfileRequest SaveRequest = new()
+            SaveProfileRequest saveRequest = new()
             {
                 Exit = exitStatus.ToString().ToLowerInvariant(),
                 Profile = player.Profile,
@@ -2005,10 +1997,8 @@ namespace Fika.Core.Coop.GameMode
                 IsPlayerScav = player.Side is EPlayerSide.Savage
             };
 
-            RequestHandler.PutJson("/raid/profile/save", SaveRequest.ToJson(Converters.AddItem(new NotesJsonConverter()).ToArray()));
-
+            await RequestHandler.PutJsonAsync("/raid/profile/save", saveRequest.ToJson(converters));
             hasSaved = true;
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -2255,7 +2245,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 Callback<ExitStatus, TimeSpan, MetricsClass> endCallback = Traverse.Create(localGame).Field<Callback<ExitStatus, TimeSpan, MetricsClass>>("callback_0").Value;
 
-                localGame.SavePlayer(localPlayer, exitStatus, exitName, false);
+                Task.Run(() => localGame.SavePlayer(localPlayer, exitStatus, exitName, false));
 
                 endCallback(new Result<ExitStatus, TimeSpan, MetricsClass>(exitStatus, EFTDateTimeClass.Now - localGame.dateTime_0, new MetricsClass()));
                 UIEventSystem.Instance.Enable();

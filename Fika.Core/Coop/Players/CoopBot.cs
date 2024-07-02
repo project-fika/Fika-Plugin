@@ -41,7 +41,7 @@ namespace Fika.Core.Coop.Players
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, IViewFilter filter)
         {
-            CoopBot player = Create<CoopBot>(ResouceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+            CoopBot player = Create<CoopBot>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
 
             player.IsYourPlayer = false;
