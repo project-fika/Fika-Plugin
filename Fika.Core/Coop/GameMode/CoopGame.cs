@@ -1070,22 +1070,6 @@ namespace Fika.Core.Coop.GameMode
                 await SendOrReceiveSpawnPoint();
             }
 
-            if (FikaBackendUtils.IsReconnect)
-            {
-                FikaBackendUtils.IsReconnect = false;
-                FikaBackendUtils.ReconnectPacket = null;
-                FikaBackendUtils.SpawnedPlayersComplete = false;
-                FikaBackendUtils.ReconnectPacketRecieved = false;
-
-                if (FikaBackendUtils.OldAirdropPackets.Count > 0)
-                {
-                    // "reset" Lists to empty once game ends
-                    FikaBackendUtils.OldAirdropBoxes = [];
-                    FikaBackendUtils.OldAirdropPackets = [];
-                    FikaBackendUtils.OldAirdropBoxes = [];
-                }
-            }
-
             if (!isServer)
             {
                 await SendOrReceiveSpawnPoint();

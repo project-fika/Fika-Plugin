@@ -645,7 +645,7 @@ namespace Fika.Core.Coop.Players
                     }
                     else
                     {
-                        if (FikaBackendUtils.SpawnedPlayersComplete)
+                        if (!FikaBackendUtils.IsReconnect)
                         {
                             NotificationManagerClass.DisplayWarningNotification($"Group member '{Profile.Nickname}' has died");
                         }
