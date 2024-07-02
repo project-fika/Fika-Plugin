@@ -5,7 +5,7 @@ using Fika.Core.Coop.Utils;
 
 namespace Fika.Core.Coop.Patches
 {
-    internal class BaseLocalGame_method_6_Patch : ModulePatch
+    internal class BaseLocalGame_method_11_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
