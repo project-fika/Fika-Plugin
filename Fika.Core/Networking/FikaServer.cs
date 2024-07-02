@@ -1024,9 +1024,14 @@ namespace Fika.Core.Networking
                     health.BodyParts[effect.BodyPart].Effects = [];
                 }
 
-                if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface250)
+                if (!health.BodyParts[effect.BodyPart].Effects.ContainsKey(effect.GetType().Name) && effect is GInterface251)
                 {
-                    health.BodyParts[effect.BodyPart].Effects.Add(effect.GetType().Name, new Profile.ProfileHealthClass.GClass1769 { Time = -1f, ExtraData = effect.StoreObj });
+                    health.BodyParts[effect.BodyPart].Effects.Add(
+                        effect.GetType().Name, 
+                        new Profile.ProfileHealthClass.GClass1769
+                        {
+                            // Time = -1f, ExtraData = effect.StoreObj TODO:  needs fixing - breaks etc are not synced - in the works with the remapper to become public again
+                        });
                 }
             }
 
