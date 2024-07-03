@@ -117,9 +117,9 @@ namespace Fika.Headless
                 }
             }
 
-            // Keep headless client high up in the air
+            // Keep dedicated client underground - putting the client high up in the air seems to mess with AI/spawn mods
             BifacialTransform localPlayerTransform = localPlayer.Transform;
-            localPlayerTransform.position = localPlayerTransform.position.WithY(300000f);
+            localPlayerTransform.position = localPlayerTransform.position.WithY(-50f);
         }
 
         public void OnFikaStartRaid(StartDedicatedRequest request)
@@ -300,7 +300,7 @@ namespace Fika.Headless
                     await FikaRequestHandler.SetDedicatedStatus(setDedicatedStatusRequest);
                 });
 
-                yield return new WaitForSeconds(5.0f);
+                yield return new WaitForSeconds(15.0f);
             }
         }
 
