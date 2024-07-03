@@ -1194,13 +1194,22 @@ namespace Fika.Core.Coop.GameMode
                 {
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus($"Loading all expected Players/Bots, {FikaBackendUtils.ReconnectPacket.Value.PlayerCount}", Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count());
-                        await Task.Delay(1000);
+                        FikaBackendUtils.ScreenController.ChangeStatus($"Loading all expected Players/Bots", GetStatusFloatForReconnect());
+                        await Task.Delay(500);
                     } while (Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count() < FikaBackendUtils.ReconnectPacket.Value.PlayerCount);
                 }
-                await Task.Delay(1000);
+                await Task.Delay(500);
                 FikaBackendUtils.SpawnedPlayersComplete = true;
             }
+        }
+
+        /// <summary>
+        /// Method to get a value to use for the progress of the ChangeStatus method
+        /// </summary>
+        private float GetStatusFloatForReconnect()
+        {
+            return (Singleton<GameWorld>.Instance.AllPlayersEverExisted.Count() /
+                FikaBackendUtils.ReconnectPacket.Value.PlayerCount) * 100;
         }
 
         /// <summary>
