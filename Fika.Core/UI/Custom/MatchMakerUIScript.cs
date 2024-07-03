@@ -80,6 +80,7 @@ namespace Fika.Core.UI.Custom
             fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
             fikaMatchMakerUi.transform.parent = transform;
             fikaMatchMakerUi.GetComponent<Canvas>().sortingOrder = 100; // Might wanna do this directly in the SDK later
+            GetComponentInChildren<Toggle>().isOn = false; // TODO: Need to reference the dedicated toggle properly.
 
             if (fikaMatchMakerUi.RaidGroupDefaultToClone.active)
             {
