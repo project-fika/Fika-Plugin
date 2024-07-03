@@ -234,6 +234,11 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public override void ShowHelloNotification(string sender)
+        {
+            // Do nothing
+        }
+
         public override void UpdateTick()
         {
             base.UpdateTick();
