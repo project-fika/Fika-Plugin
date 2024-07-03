@@ -1,8 +1,10 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.UI;
+using EFT.UI.Matchmaker;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Models;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
@@ -18,9 +20,9 @@ using UnityEngine.UI;
 
 namespace Fika.Core.UI.Custom
 {
-    internal class MatchMakerUIScript : MonoBehaviour
+    public class MatchMakerUIScript : MonoBehaviour
     {
-        private MatchMakerUI fikaMatchMakerUi;
+        public MatchMakerUI fikaMatchMakerUi;
         public RaidSettings RaidSettings { get; set; }
         private LobbyEntry[] Matches { get; set; }
         private List<GameObject> MatchesListObjects { get; set; } = [];
@@ -102,50 +104,87 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            fikaMatchMakerUi.StartButton.onClick.AddListener(() =>
+            fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
             {
-                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                if (FikaPlugin.ForceIP.Value != "")
+                var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+                var session = tarkovApplication.Session;
+                if (!GetComponentInChildren<Toggle>().isOn)
                 {
-                    // We need to handle DNS entries as well
-                    string ip = FikaPlugin.ForceIP.Value;
-                    try
+                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+                    if (FikaPlugin.ForceIP.Value != "")
                     {
-                        IPAddress[] dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
-                        if (dnsAddress.Length > 0)
+                        // We need to handle DNS entries as well
+                        string ip = FikaPlugin.ForceIP.Value;
+                        try
                         {
-                            ip = dnsAddress[0].ToString();
+                            IPAddress[] dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
+                            if (dnsAddress.Length > 0)
+                            {
+                                ip = dnsAddress[0].ToString();
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+
+                        if (!IPAddress.TryParse(ip, out _))
+                        {
+                            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
+                                $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
+                                ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                            return;
                         }
                     }
-                    catch
+                    if (FikaPlugin.ForceBindIP.Value != "Disabled")
                     {
-
+                        if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
+                        {
+                            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
+                                $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
+                                ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                            return;
+                        }
                     }
-
-                    if (!IPAddress.TryParse(ip, out _))
-                    {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR FORCING IP",
-                    $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
-                        return;
-                    }
+                    MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
+                    MatchmakerAcceptPatches.CreateMatch(MatchmakerAcceptPatches.Profile.ProfileId, MatchmakerAcceptPatches.PMCName, RaidSettings);
+                    AcceptButton.OnClick.Invoke();
+                    DestroyThis();
                 }
-                if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                else
                 {
-                    if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
+                    NotificationManagerClass.DisplaySingletonWarningNotification("Sending to dedicated host");
+                    var raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
+
+                    StartDedicatedRequest request = new StartDedicatedRequest
                     {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR BINDING",
-                    $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
-                        return;
+                        ExpectedNumPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text),
+                        Time = raidSettings.SelectedDateTime,
+                        LocationId = raidSettings.SelectedLocation._Id,
+                        SpawnPlace = raidSettings.PlayersSpawnPlace,
+                        MetabolismDisabled = raidSettings.MetabolismDisabled,
+                        BotSettings = raidSettings.BotSettings,
+                        Side = raidSettings.Side,
+                        TimeAndWeatherSettings = raidSettings.TimeAndWeatherSettings,
+                        WavesSettings = raidSettings.WavesSettings
+                    };
+
+                    DestroyThis();
+                    var response = await FikaRequestHandler.StartDedicated(request);
+                    if (response.Error is not null)
+                    {
+                        PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error, () =>
+                        {
+                            var acceptScreen = FindObjectOfType<MatchMakerAcceptScreen>();
+                            var controller = Traverse.Create(acceptScreen).Field<MatchMakerAcceptScreen.GClass3150>("ScreenController").Value;
+                            controller.CloseScreen();
+                        });
+                    }
+                    else
+                    {
+                        ConsoleScreen.Log($"We should join match: {response.MatchId}");
                     }
                 }
-                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                MatchmakerAcceptPatches.CreateMatch(MatchmakerAcceptPatches.Profile.ProfileId, MatchmakerAcceptPatches.PMCName, RaidSettings);
-                AcceptButton.OnClick.Invoke();
-                DestroyThis();
             });
 
             fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
@@ -180,7 +219,7 @@ namespace Fika.Core.UI.Custom
             RefreshUI();
         }
 
-        private IEnumerator JoinMatch(string profileId, string serverId, Button button)
+        public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action successCallback)
         {
             if (button != null)
             {
@@ -239,9 +278,11 @@ namespace Fika.Core.UI.Custom
                 MatchmakerAcceptPatches.MatchingType = EMatchmakerType.GroupPlayer;
                 MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
-                DestroyThis();
+                //DestroyThis();
 
-                AcceptButton.OnClick.Invoke();
+                //AcceptButton.OnClick.Invoke();
+
+                successCallback?.Invoke();
             }
             else
             {
@@ -300,7 +341,12 @@ namespace Fika.Core.UI.Custom
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                    StartCoroutine(JoinMatch(ProfileId, server.name, button));
+                    //StartCoroutine(JoinMatch(ProfileId, server.name, button));
+                    StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
+                    {
+                        this.DestroyThis();
+                        this.AcceptButton.OnClick.Invoke();
+                    }));
                 });
 
                 TooltipTextGetter tooltipTextGetter;

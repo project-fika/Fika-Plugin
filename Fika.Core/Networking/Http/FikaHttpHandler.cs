@@ -140,5 +140,15 @@ namespace Fika.Core.Networking.Http
         {
             return await PostJsonAsync<RaidSettingsRequest, RaidSettingsResponse>("/fika/raid/getsettings", data);
         }
+
+        public static async Task<StartDedicatedResponse> StartDedicated(StartDedicatedRequest request)
+        {
+            return await PostJsonAsync<StartDedicatedRequest, StartDedicatedResponse>("/fika/raid/dedicated/start", request);
+        }
+
+        public static async Task<SetDedicatedStatusResponse> SetDedicatedStatus(SetDedicatedStatusRequest request)
+        {
+            return await PostJsonAsync<SetDedicatedStatusRequest, SetDedicatedStatusResponse>("/fika/raid/dedicated/status", request);
+        }
     }
 }

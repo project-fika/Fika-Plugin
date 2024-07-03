@@ -1,9 +1,11 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using Aki.Common.Http;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
+using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -705,12 +707,40 @@ namespace Fika.Core.Networking
         }
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
-        {
+        {           
             serverLogger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
             NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
             if (_netServer.ConnectedPeersCount == 0)
             {
                 timeSinceLastPeerDisconnected = DateTime.Now;
+            }
+
+            if(MatchmakerAcceptPatches.IsHeadless)
+            {
+                if(_netServer.ConnectedPeersCount == 0)
+                {
+                    foreach (var profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
+                    {
+                        if (profile is null)
+                        {
+                            continue;
+                        }
+
+                        if (profile.ProfileId == RequestHandler.SessionId)
+                        {
+                            foreach (var bodyPartHealth in profile.Health.BodyParts.Values)
+                            {
+                                bodyPartHealth.Effects.Clear();
+                                bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
+                            }
+                        }
+                    }
+
+                    // End the raid
+                    Singleton<IFikaGame>.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId,
+                            Singleton<IFikaGame>.Instance.MyExitStatus,
+                            Singleton<IFikaGame>.Instance.MyExitLocation, 0);
+                }
             }
         }
 
