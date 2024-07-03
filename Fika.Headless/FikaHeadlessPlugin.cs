@@ -304,7 +304,7 @@ namespace Fika.Headless
             }
         }
 
-        public void StartSetDedicatedPingRoutine()
+        public void StartSetDedicatedStatusRoutine()
         {
             setDedicatedStatusRoutine = StartCoroutine(SetDedicatedStatus());
         }
