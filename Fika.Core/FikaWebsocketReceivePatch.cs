@@ -61,7 +61,7 @@ namespace Fika.Core
 
                     if (matchId is not null)
                     {
-                        Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestCompleted);
+                        //Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestCompleted);
                         TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
                         tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, () =>
                         {
