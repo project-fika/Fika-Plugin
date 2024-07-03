@@ -26,7 +26,7 @@ namespace Fika.Core.Coop.Matchmaker
         public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
         public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
         public static bool IsSinglePlayer => MatchingType == EMatchmakerType.Single;
-        public static bool IsHeadless { get; set; } = false;
+        public static bool IsDedicated { get; set; } = false;
         public static PlayersRaidReadyPanel PlayersRaidReadyPanel { get; set; }
         public static MatchMakerGroupPreview MatchMakerGroupPreview { get; set; }
         public static int HostExpectedNumberOfPlayers { get; set; } = 1;

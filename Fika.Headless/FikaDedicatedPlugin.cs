@@ -25,12 +25,12 @@ using System.Threading.Tasks;
 
 namespace Fika.Headless
 {
-    [BepInPlugin("com.project-fika.headless", "Headless", "1.0.0")]
+    [BepInPlugin("com.project-fika.dedicated", "Dedicated", "1.0.0")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("com.spt-aki.custom", BepInDependency.DependencyFlags.HardDependency)]
-    public class FikaHeadlessPlugin : BaseUnityPlugin
+    public class FikaDedicatedPlugin : BaseUnityPlugin
     {        
-        public static FikaHeadlessPlugin Instance { get; private set; }
+        public static FikaDedicatedPlugin Instance { get; private set; }
         private static FieldInfo _hydrationField = typeof(ActiveHealthController).GetField("healthValue_1", BindingFlags.NonPublic | BindingFlags.Instance);
         private static FieldInfo _energyField = typeof(ActiveHealthController).GetField("healthValue_0", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -284,7 +284,7 @@ namespace Fika.Headless
             Logger.LogInfo($"Starting with: {JsonConvert.SerializeObject(request)}");
             MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = request.ExpectedNumPlayers + 1;
             MatchmakerAcceptPatches.CreateMatch(session.Profile.ProfileId, session.Profile.Info.Nickname, raidSettings);
-            MatchmakerAcceptPatches.IsHeadless = true;
+            MatchmakerAcceptPatches.IsDedicated = true;
 
             fikaMatchMakerScript.AcceptButton.OnClick.Invoke();
         }

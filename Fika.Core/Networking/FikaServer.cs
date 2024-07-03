@@ -715,7 +715,7 @@ namespace Fika.Core.Networking
                 timeSinceLastPeerDisconnected = DateTime.Now;
             }
 
-            if(MatchmakerAcceptPatches.IsHeadless)
+            if(MatchmakerAcceptPatches.IsDedicated)
             {
                 if(_netServer.ConnectedPeersCount == 0)
                 {

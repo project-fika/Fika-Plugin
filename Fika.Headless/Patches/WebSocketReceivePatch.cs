@@ -35,15 +35,14 @@ namespace Fika.Headless.Patches
                 jsonObject.Remove("type");
                 string text2 = type;
                 string text3 = text2;
-                if (!(text3 == "fikaHeadlessStartRaid"))
+                if (!(text3 == "fikaDedicatedStartRaid"))
                 {
                     flag2 = true;
                 }
                 else
                 {
-                    ConsoleScreen.Log("received fikaHeadlessStartRaid");
                     StartDedicatedRequest request = jsonObject.ToObject<StartDedicatedRequest>();
-                    FikaHeadlessPlugin.Instance.OnFikaStartRaid(request);
+                    FikaDedicatedPlugin.Instance.OnFikaStartRaid(request);
                     flag2 = false;
                 }
             }

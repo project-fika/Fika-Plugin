@@ -38,13 +38,12 @@ namespace Fika.Core
                 jsonObject.Remove("type");
                 string text2 = type;
                 string text3 = text2;
-                if (!(text3 == "fikaJoinMatch"))
+                if (!(text3 == "fikaDedicatedJoinMatch"))
                 {
                     flag2 = true;
                 }
                 else
                 {
-                    ConsoleScreen.Log("received fikaJoinMatch");
                     string matchId = jsonObject.Value<string>("matchId");
                     MatchMakerAcceptScreen matchMakerAcceptScreen = GameObject.FindObjectOfType<MatchMakerAcceptScreen>();
                     if (matchMakerAcceptScreen == null)
