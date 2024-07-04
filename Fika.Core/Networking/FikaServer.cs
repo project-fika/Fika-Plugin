@@ -1030,7 +1030,7 @@ namespace Fika.Core.Networking
                         effect.GetType().Name, 
                         new Profile.ProfileHealthClass.GClass1769
                         {
-                            // Time = -1f, ExtraData = effect.StoreObj TODO:  needs fixing - breaks etc are not synced - in the works with the remapper to become public again
+                            Time = -1f, ExtraData = effect.StoreObj
                         });
                 }
             }
