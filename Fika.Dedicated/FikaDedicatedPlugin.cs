@@ -184,6 +184,10 @@ namespace Fika.Headless
                 sideSelectionScreen.method_13;
             targetFactionCallback(true); // select scav/pmc
             yield return null;
+
+            //sideSelectionScreen.UpdateSideSelection(request.Side);
+            sideSelectionScreen.method_11(request.Side);
+
             sideSelectionScreen.method_17(); // faction selection screen -> location selection screen
             yield return null;
 
