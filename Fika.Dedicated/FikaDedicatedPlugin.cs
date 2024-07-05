@@ -188,6 +188,8 @@ namespace Fika.Headless
             //sideSelectionScreen.UpdateSideSelection(request.Side);
             sideSelectionScreen.method_11(request.Side);
 
+            yield return null;
+
             sideSelectionScreen.method_17(); // faction selection screen -> location selection screen
             yield return null;
 
