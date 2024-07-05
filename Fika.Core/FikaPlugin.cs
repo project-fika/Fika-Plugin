@@ -20,6 +20,7 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
+using SPT.Common.Http;
 using SPT.Custom.Airdrops.Patches;
 using SPT.Custom.BTR.Patches;
 using SPT.Custom.Patches;
@@ -189,11 +190,19 @@ namespace Fika.Core
         public bool SharedQuestProgression;
         #endregion
 
+        #region natpunch config
+        public bool NatPunchServerEnable;
+        public string NatPunchServerIP;
+        public int NatPunchServerPort;
+        public int NatPunchServerNatIntroduceAmount;
+        #endregion
+
         protected void Awake()
         {
             Instance = this;
 
             GetClientConfig();
+            GetNatPunchServerConfig();
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
@@ -267,6 +276,18 @@ namespace Fika.Core
             SharedQuestProgression = clientConfig.SharedQuestProgression;
 
             clientConfig.LogValues();
+        }
+
+        private void GetNatPunchServerConfig()
+        {
+            NatPunchServerConfigModel natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
+
+            NatPunchServerEnable = natPunchServerConfig.Enable;
+            NatPunchServerIP = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+            NatPunchServerPort = natPunchServerConfig.Port;
+            NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
+
+            natPunchServerConfig.LogValues();
         }
 
         private void SetupConfig()
@@ -408,7 +429,7 @@ namespace Fika.Core
 
             UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            UseNatPunching = Config.Bind("Network", "Use NAT Punching", false, new ConfigDescription("Use NAT punching as a NAT traversal method for hosting a raid. Only works with fullcone NAT type routers. UPnP, Force IP and Force Bind IP are disabled in this mode.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            UseNatPunching = Config.Bind("Network", "Use NAT Punching", false, new ConfigDescription("Use NAT punching when hosting a raid. Only works with fullcone NAT type routers and requires NatPunchServer to be running on the AKI server. UPnP, Force IP and Force Bind IP are disabled with this mode.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
             ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15, new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
 

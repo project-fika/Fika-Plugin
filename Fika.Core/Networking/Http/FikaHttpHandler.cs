@@ -76,6 +76,11 @@ namespace Fika.Core.Networking.Http
             return GetJson<ClientConfigModel>("/fika/client/config");
         }
 
+        public static NatPunchServerConfigModel GetNatPunchServerConfig()
+        {
+            return GetJson<NatPunchServerConfigModel>("/fika/natpunchserver/config");
+        }
+
         public static async Task UpdatePing(PingRequest data)
         {
             await PutJsonAsync("/fika/update/ping", data);
