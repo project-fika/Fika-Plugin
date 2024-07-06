@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
         [PatchPrefix]
         public static bool PatchPrefix(WavesSpawnScenario __instance)
         {
-            var result = FikaBackendUtils.IsServer;
+            bool result = FikaBackendUtils.IsServer;
             typeof(WavesSpawnScenario).GetProperty(nameof(WavesSpawnScenario.Enabled)).SetValue(__instance, result);
             return result;
         }

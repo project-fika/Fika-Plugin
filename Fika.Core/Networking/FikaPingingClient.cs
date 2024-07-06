@@ -1,11 +1,9 @@
 ﻿using BepInEx.Logging;
-using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using SPT.Common.Http;
 using System.Collections;
 using System.Net;
 using System.Net.Sockets;
@@ -104,7 +102,7 @@ namespace Fika.Core.Networking
 
         public void StopKeepAliveRoutine()
         {
-            if(_keepAliveRoutine != null)
+            if (_keepAliveRoutine != null)
             {
                 StopCoroutine(_keepAliveRoutine);
             }
@@ -112,7 +110,7 @@ namespace Fika.Core.Networking
 
         public IEnumerator KeepAlive()
         {
-            while(true)
+            while (true)
             {
                 PingEndPoint("fika.keepalive");
                 NetClient.PollEvents();
@@ -146,7 +144,7 @@ namespace Fika.Core.Networking
         {
             if (reader.TryGetString(out string result))
             {
-                switch(result)
+                switch (result)
                 {
                     case "fika.hello":
                         Received = true;

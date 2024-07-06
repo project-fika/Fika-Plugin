@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.Patches.Overrides
 
         private static bool IsTargetMethod(MethodInfo mi)
         {
-            var parameters = mi.GetParameters();
+            ParameterInfo[] parameters = mi.GetParameters();
             return parameters.Length == 3 && parameters[0].Name == "maxCount" && parameters[1].Name == "botPresets" && parameters[2].Name == "botScatterings";
         }
 

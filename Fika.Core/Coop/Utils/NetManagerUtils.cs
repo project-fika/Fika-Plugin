@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Utils
             Object.DontDestroyOnLoad(FikaGameObject);
             logger.LogInfo("FikaGameObject has been created!");
         }
-        
+
         public static void CreateNetManager(bool isServer)
         {
             if (FikaGameObject == null)
@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.Utils
 
         public static void DestroyPingingClient()
         {
-            if(FikaGameObject != null)
+            if (FikaGameObject != null)
             {
                 Singleton<FikaPingingClient>.Instance.StopKeepAliveRoutine();
                 Singleton<FikaPingingClient>.Instance.NetClient.Stop();

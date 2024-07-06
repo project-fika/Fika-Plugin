@@ -1,6 +1,4 @@
-﻿using Fika.Core.Coop.Components;
-using SPT.Common.Http;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Http.Models
 {

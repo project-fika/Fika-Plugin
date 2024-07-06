@@ -114,7 +114,7 @@ namespace Fika.Core.Networking
                 EnableStatistics = true,
                 NatPunchEnabled = true
             };
-            
+
             if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
             {
                 bool upnpFailed = false;
@@ -159,7 +159,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            if(FikaPlugin.UseNatPunching.Value)
+            if (FikaPlugin.UseNatPunching.Value)
             {
                 _netServer.NatPunchModule.Init(this);
                 _netServer.Start();
@@ -185,7 +185,7 @@ namespace Fika.Core.Networking
             }
 
             logger.LogInfo("Started Fika Server");
-            
+
             NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 

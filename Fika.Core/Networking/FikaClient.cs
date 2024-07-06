@@ -210,7 +210,7 @@ namespace Fika.Core.Networking
             FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Assigned NetId {packet.NetId} to my own client.");
             MyPlayer.NetId = packet.NetId;
             int i = -1;
-            foreach (var player in Players)
+            foreach (KeyValuePair<int, CoopPlayer> player in Players)
             {
                 if (player.Value == MyPlayer)
                 {

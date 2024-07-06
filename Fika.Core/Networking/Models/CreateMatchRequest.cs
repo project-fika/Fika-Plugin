@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Http.Models
     {
         [DataMember(Name = "raidCode")]
         public string RaidCode;
-        
+
         [DataMember(Name = "serverId")]
         public string ServerId;
 

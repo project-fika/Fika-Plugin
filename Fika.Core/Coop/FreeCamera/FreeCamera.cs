@@ -304,7 +304,7 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 if (freeCameraController != null)
                 {
-                    freeCameraController.DisableAllCullingObjects(); 
+                    freeCameraController.DisableAllCullingObjects();
                 }
             }
 

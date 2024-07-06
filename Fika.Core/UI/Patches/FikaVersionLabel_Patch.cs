@@ -38,20 +38,20 @@ namespace Fika.Core.EssentialPatches
 
             fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();
 
-            Traverse preloaderUiTraverse= Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+            Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
 
             preloaderUiTraverse.Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
 
             versionNumberTraverse = Traverse.Create(__result);
 
             officialVersion = versionNumberTraverse.Field<string>("Major").Value;
-            
+
             UpdateVersionLabel();
         }
 
         public static void UpdateVersionLabel()
         {
-            Traverse preloaderUiTraverse= Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+            Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
             if (FikaPlugin.OfficialVersion.Value)
             {
                 preloaderUiTraverse.Field("string_2").SetValue($"{officialVersion} Beta version");

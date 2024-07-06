@@ -34,7 +34,7 @@ namespace Fika.Core.Coop.Patches.Overrides
             {
                 foreach (WaveInfo wave in __result)
                 {
-                    var json = RequestHandler.GetJson($"/singleplayer/settings/bot/limit/{wave.Role}");
+                    string json = RequestHandler.GetJson($"/singleplayer/settings/bot/limit/{wave.Role}");
                     wave.Limit = string.IsNullOrWhiteSpace(json)
                         ? 30
                         : Convert.ToInt32(json);

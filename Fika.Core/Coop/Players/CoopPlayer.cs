@@ -921,7 +921,7 @@ namespace Fika.Core.Coop.Players
                     Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
                     ItemFilter[] filters = dogtagSlot.Filters; // We need to temporarily remove and then re-add these as BSG did not include the new dog tags in their ItemFilter[]
                     dogtagSlot.Filters = null;
-                    GStruct416<int> addResult = dogtagSlot.Add(item, false);                    
+                    GStruct416<int> addResult = dogtagSlot.Add(item, false);
                     dogtagSlot.Filters = filters;
 
                     if (addResult.Error != null)

@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.Airdrops
 
             transform.position = new Vector3(pointOnCircle.x, dropHeight, pointOnCircle.y);
             newPosition = transform.position;
-            Vector3 lookPoint = new Vector3(airdropPoint.x, dropHeight, airdropPoint.z);
+            Vector3 lookPoint = new(airdropPoint.x, dropHeight, airdropPoint.z);
             transform.LookAt(lookPoint);
             newRotation = lookPoint;
         }

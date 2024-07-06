@@ -845,8 +845,6 @@ namespace Fika.Core.Coop.Players
             {
                 Profile.Info.GroupId = "Fika";
 
-                var asd = Side;
-
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
                 IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;

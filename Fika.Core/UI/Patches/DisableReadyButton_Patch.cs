@@ -4,7 +4,6 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using SPT.Reflection.Patching;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.UI
 {

@@ -79,7 +79,7 @@ namespace Fika.Core.Coop.Airdrops
             IEasyAssets easyAssets = Singleton<PoolManager>.Instance.EasyAssets;
             await easyAssets.Retain(AIRDROP_SOUNDS_PATH, null, null).LoadingJob;
 
-            Dictionary<BaseBallistic.ESurfaceSound, AirdropSurfaceSet> soundsDictionary = new Dictionary<BaseBallistic.ESurfaceSound, AirdropSurfaceSet>();
+            Dictionary<BaseBallistic.ESurfaceSound, AirdropSurfaceSet> soundsDictionary = new();
             AirdropSurfaceSet[] sets = easyAssets.GetAsset<AirdropSounds>(AIRDROP_SOUNDS_PATH).Sets;
             foreach (AirdropSurfaceSet set in sets)
             {
@@ -171,7 +171,7 @@ namespace Fika.Core.Coop.Airdrops
 
         private bool RaycastBoxDistance(LayerMask layerMask, out RaycastHit hitInfo, Vector3 origin)
         {
-            Ray ray = new Ray(origin, Vector3.down);
+            Ray ray = new(origin, Vector3.down);
 
             bool raycast = Physics.Raycast(ray, out hitInfo, Mathf.Infinity, layerMask);
             if (!raycast) return false;

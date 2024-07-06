@@ -263,7 +263,7 @@ namespace Fika.Core.Coop.BTR
         {
             // Initial setup
             botEventHandler = Singleton<BotEventHandler>.Instance;
-            var botsController = Singleton<IBotGame>.Instance.BotsController;
+            BotsController botsController = Singleton<IBotGame>.Instance.BotsController;
             btrBotService = botsController.BotTradersServices.BTRServices;
             btrController.method_3(); // spawns server-side BTR game object
             botsController.BotSpawner.SpawnBotBTR(); // spawns the scav bot which controls the BTR's turret
@@ -620,7 +620,7 @@ namespace Fika.Core.Coop.BTR
             }
 
             Transform machineGunMuzzle = btrTurretServer.machineGunLaunchPoint;
-            var ballisticCalculator = gameWorld.SharedBallisticsCalculator;
+            ISharedBallisticsCalculator ballisticCalculator = gameWorld.SharedBallisticsCalculator;
 
             int burstMin = Mathf.FloorToInt(machineGunBurstCount.x);
             int burstMax = Mathf.FloorToInt(machineGunBurstCount.y);

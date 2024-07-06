@@ -211,7 +211,7 @@ namespace Fika.Core.UI.Custom
 
             NetManagerUtils.CreatePingingClient();
 
-            var pingingClient = Singleton<FikaPingingClient>.Instance;
+            FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
 
             if (pingingClient.Init(serverId))
             {

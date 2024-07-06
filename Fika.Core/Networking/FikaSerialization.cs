@@ -510,7 +510,7 @@ namespace Fika.Core.Networking
 
             public static CylinderMagPacket Deserialize(NetDataReader reader)
             {
-                CylinderMagPacket packet = new CylinderMagPacket();
+                CylinderMagPacket packet = new();
                 packet.Changed = reader.GetBool();
                 if (packet.Changed)
                 {
@@ -885,7 +885,7 @@ namespace Fika.Core.Networking
 
             public static SearchPacket Deserialize(NetDataReader reader)
             {
-                SearchPacket packet = new SearchPacket()
+                SearchPacket packet = new()
                 {
                     IsStop = reader.GetBool(),
                     ItemId = reader.GetString(),
