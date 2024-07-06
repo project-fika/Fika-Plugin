@@ -1,9 +1,10 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public NetDataWriter Writer { get; set; } = new();
         public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
         public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
+        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
@@ -28,7 +30,7 @@ namespace Fika.Core.Coop.PacketHandlers
         protected void Awake()
         {
             player = GetComponent<ObservedCoopPlayer>();
-            isServer = MatchmakerAcceptPatches.IsServer;
+            isServer = FikaBackendUtils.IsServer;
             if (isServer)
             {
                 Server = Singleton<FikaServer>.Instance;
@@ -37,6 +39,21 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 Client = Singleton<FikaClient>.Instance;
             }
+        }
+
+        public void Init()
+        {
+
+        }
+
+        public void SendQuestPacket(ref QuestConditionPacket packet)
+        {
+
+        }
+
+        public void SendQuestItemPacket(ref QuestItemPacket packet)
+        {
+
         }
 
         protected void Update()
@@ -50,26 +67,44 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 if (isServer)
                 {
-                    int healthPackets = DamagePackets.Count;
-                    for (int i = 0; i < healthPackets; i++)
+                    int damagePackets = DamagePackets.Count;
+                    for (int i = 0; i < damagePackets; i++)
                     {
-                        DamagePacket healthPacket = DamagePackets.Dequeue();
-                        healthPacket.NetId = player.NetId;
+                        DamagePacket damagePacket = DamagePackets.Dequeue();
+                        damagePacket.NetId = player.NetId;
 
                         Writer.Reset();
-                        Server.SendDataToAll(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                        Server.SendDataToAll(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+                    }
+                    int armorDamagePackets = ArmorDamagePackets.Count;
+                    for (int i = 0; i < armorDamagePackets; i++)
+                    {
+                        ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                        armorDamagePacket.NetId = player.NetId;
+
+                        Writer.Reset();
+                        Server.SendDataToAll(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
                     }
                 }
                 else
                 {
-                    int healthPackets = DamagePackets.Count;
-                    for (int i = 0; i < healthPackets; i++)
+                    int damagePackets = DamagePackets.Count;
+                    for (int i = 0; i < damagePackets; i++)
                     {
-                        DamagePacket healthPacket = DamagePackets.Dequeue();
-                        healthPacket.NetId = player.NetId;
+                        DamagePacket damagePacket = DamagePackets.Dequeue();
+                        damagePacket.NetId = player.NetId;
 
                         Writer.Reset();
-                        Client.SendData(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                        Client.SendData(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+                    }
+                    int armorDamagePackets = ArmorDamagePackets.Count;
+                    for (int i = 0; i < armorDamagePackets; i++)
+                    {
+                        ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                        armorDamagePacket.NetId = player.NetId;
+
+                        Writer.Reset();
+                        Client.SendData(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
                     }
                 }
             }

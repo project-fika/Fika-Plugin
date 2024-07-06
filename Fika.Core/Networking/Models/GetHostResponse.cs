@@ -5,16 +5,20 @@ namespace Fika.Core.Networking.Http.Models
     [DataContract]
     public struct GetHostResponse
     {
-        [DataMember(Name = "ip")]
-        public string Ip;
+        [DataMember(Name = "ips")]
+        public string[] Ips;
 
         [DataMember(Name = "port")]
         public int Port;
 
-        public GetHostResponse(string ip, int port)
+        [DataMember(Name = "natPunch")]
+        public bool NatPunch;
+
+        public GetHostResponse(string[] ips, int port, bool natPunch)
         {
-            Ip = ip;
+            Ips = ips;
             Port = port;
+            NatPunch = natPunch;
         }
     }
 }

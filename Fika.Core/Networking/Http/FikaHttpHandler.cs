@@ -1,10 +1,10 @@
-using Aki.Common.Http;
 using EFT;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
+using SPT.Common.Http;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,6 +74,11 @@ namespace Fika.Core.Networking.Http
         public static ClientConfigModel GetClientConfig()
         {
             return GetJson<ClientConfigModel>("/fika/client/config");
+        }
+
+        public static NatPunchServerConfigModel GetNatPunchServerConfig()
+        {
+            return GetJson<NatPunchServerConfigModel>("/fika/natpunchserver/config");
         }
 
         public static async Task UpdatePing(PingRequest data)

@@ -1,6 +1,6 @@
-﻿using Aki.Reflection.Patching;
-using EFT;
-using Fika.Core.Coop.Matchmaker;
+﻿using EFT;
+using Fika.Core.Coop.Utils;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches.LocalGame
@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
         [PatchPrefix]
         public static bool PatchPrefix(NonWavesSpawnScenario __instance)
         {
-            var result = MatchmakerAcceptPatches.IsServer;
+            bool result = FikaBackendUtils.IsServer;
             typeof(NonWavesSpawnScenario).GetProperty(nameof(NonWavesSpawnScenario.Enabled)).SetValue(__instance, result);
             return result;
         }

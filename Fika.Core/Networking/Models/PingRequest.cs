@@ -1,4 +1,4 @@
-using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Utils;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Http.Models
@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Http.Models
 
         public PingRequest()
         {
-            ServerId = CoopHandler.GetServerId();
+            ServerId = FikaBackendUtils.GetGroupId();
         }
     }
 }

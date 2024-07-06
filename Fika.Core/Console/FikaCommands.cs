@@ -4,13 +4,14 @@ using EFT.Console.Core;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 
 namespace Fika.Core.Console
 {
     public class FikaCommands
     {
+#if DEBUG
         [ConsoleCommand("bring", "", null, "Teleports all AI to yourself as the host", [])]
         public static void Bring()
         {
@@ -30,7 +31,7 @@ namespace Fika.Core.Console
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (MatchmakerAcceptPatches.IsServer)
+                if (FikaBackendUtils.IsServer)
                 {
                     int count = 0;
                     foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -56,7 +57,7 @@ namespace Fika.Core.Console
         }
 
         [ConsoleCommand("god", "", null, "Set god mode on/off", [])]
-        public static void God(bool state)
+        public static void God([ConsoleArgument(false, "true or false to toggle god mode")] bool state)
         {
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
@@ -89,6 +90,27 @@ namespace Fika.Core.Console
             {
                 ConsoleScreen.LogWarning("Could not find CoopHandler.");
             }
+        }
+#endif
+
+        [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
+        public static void Debug(bool state)
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            if (coopGame == null)
+            {
+                ConsoleScreen.LogWarning("You are not in a game.");
+                return;
+            }
+
+            if (coopGame.Status != GameStatus.Started)
+            {
+                ConsoleScreen.LogWarning("Game is not running.");
+                return;
+            }
+
+            coopGame.ToggleDebug(state);
         }
 
         [ConsoleCommand("clear", "", null, "Clears the console output", [])]

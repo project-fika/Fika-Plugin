@@ -1,32 +1,34 @@
-﻿using Aki.Custom.Airdrops.Patches;
-using Aki.Custom.BTR.Patches;
-using Aki.Custom.Patches;
-using Aki.SinglePlayer.Patches.MainMenu;
-using Aki.SinglePlayer.Patches.Progression;
-using Aki.SinglePlayer.Patches.Quests;
-using Aki.SinglePlayer.Patches.RaidFix;
-using BepInEx;
-using BepInEx.Bootstrap;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using EFT.UI;
-using Fika.Core.AkiSupport.Airdrops.Utils;
-using Fika.Core.AkiSupport.Overrides;
-using Fika.Core.AkiSupport.Scav;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
+using Fika.Core.Coop.Airdrops.Utils;
 using Fika.Core.Coop.FreeCamera.Patches;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Patches;
+using Fika.Core.Coop.Patches.Airdrop;
 using Fika.Core.Coop.Patches.LocalGame;
+using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.World;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
+using Fika.Core.SPTSupport.Scav;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
+using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
+using SPT.Common.Http;
+using SPT.Custom.Airdrops.Patches;
+using SPT.Custom.BTR.Patches;
+using SPT.Custom.Patches;
+using SPT.SinglePlayer.Patches.MainMenu;
+using SPT.SinglePlayer.Patches.Progression;
+using SPT.SinglePlayer.Patches.Quests;
+using SPT.SinglePlayer.Patches.RaidFix;
+using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +36,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace Fika.Core
@@ -46,24 +47,14 @@ namespace Fika.Core
     /// </summary>
     [BepInPlugin("com.fika.core", "Fika.Core", "0.9.8906")]
     [BepInProcess("EscapeFromTarkov.exe")]
-    [BepInDependency("com.spt-aki.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
-    [BepInDependency("com.spt-aki.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
-    [BepInDependency("com.spt-aki.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
-    [BepInDependency("com.spt-aki.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-singleplayer, that way we can disable its patches
+    [BepInDependency("com.SPT.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
+    [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after aki-custom, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        /// <summary>
-        /// Stores the Instance of this Plugin
-        /// </summary>
         public static FikaPlugin Instance;
         public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
-        /// <summary>
-        /// If any mod dependencies fail, show an error. This is a flag to say it has occurred.
-        /// </summary>
-        private bool ShownDependencyError { get; set; }
-        /// <summary>
-        /// This is the Official EFT Version defined by BSG
-        /// </summary>
         public static string EFTVersionMajor { get; internal set; }
         public ManualLogSource FikaLogger { get => Logger; }
         public BotDifficulties BotDifficulties;
@@ -101,6 +92,9 @@ namespace Fika.Core
         // Hidden
         public static ConfigEntry<bool> AcceptedTOS { get; set; }
 
+        //Advanced
+        public static ConfigEntry<bool> OfficialVersion { get; set; }
+
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
@@ -108,6 +102,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+        public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
 
         // Coop | Name Plates
         public static ConfigEntry<bool> UseNamePlates { get; set; }
@@ -115,12 +110,16 @@ namespace Fika.Core
         public static ConfigEntry<bool> UseHealthNumber { get; set; }
         public static ConfigEntry<bool> UsePlateFactionSide { get; set; }
         public static ConfigEntry<bool> HideNamePlateInOptic { get; set; }
+        public static ConfigEntry<bool> NamePlateUseOpticZoom { get; set; }
         public static ConfigEntry<bool> DecreaseOpacityNotLookingAt { get; set; }
         public static ConfigEntry<float> NamePlateScale { get; set; }
         public static ConfigEntry<float> OpacityInADS { get; set; }
         public static ConfigEntry<float> MaxDistanceToShow { get; set; }
         public static ConfigEntry<float> MinimumOpacity { get; set; }
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
+
+        // Coop | Quest Sharing
+        public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
 
         // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
@@ -130,17 +129,21 @@ namespace Fika.Core
         public static ConfigEntry<int> PingTime { get; set; }
         public static ConfigEntry<bool> PlayPingAnimation { get; set; }
         public static ConfigEntry<bool> ShowPingDuringOptics { get; set; }
+        public static ConfigEntry<bool> PingUseOpticZoom { get; set; }
+        public static ConfigEntry<bool> PingScaleWithDistance { get; set; }
+        public static ConfigEntry<float> PingMinimumOpacity { get; set; }
 
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
         public static ConfigEntry<bool> AZERTYMode { get; set; }
+        public static ConfigEntry<bool> KeybindOverlay { get; set; }
 
         // Performance
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
-        public static ConfigEntry<DynamicAIRates> DynamicAIRate { get; set; }
-        public static ConfigEntry<bool> CullPlayers { get; set; }
-        public static ConfigEntry<float> CullingRange { get; set; }
+        public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
+        //public static ConfigEntry<bool> CullPlayers { get; set; }
+        //public static ConfigEntry<float> CullingRange { get; set; }
 
         // Performance | Bot Limits            
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
@@ -165,6 +168,7 @@ namespace Fika.Core
         public static ConfigEntry<float> AutoRefreshRate { get; set; }
         public static ConfigEntry<int> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
+        public static ConfigEntry<bool> UseNatPunching { get; set; }
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
 
         // Gameplay
@@ -180,14 +184,25 @@ namespace Fika.Core
         public bool DynamicVExfils;
         public bool AllowFreeCam;
         public bool AllowItemSending;
+        public string[] BlacklistedItems;
         public bool ForceSaveOnDeath;
+        public bool UseInertia;
+        public bool SharedQuestProgression;
+        #endregion
+
+        #region natpunch config
+        public bool NatPunchServerEnable;
+        public string NatPunchServerIP;
+        public int NatPunchServerPort;
+        public int NatPunchServerNatIntroduceAmount;
         #endregion
 
         protected void Awake()
         {
             Instance = this;
-            LogDependencyErrors();
 
+            GetClientConfig();
+            GetNatPunchServerConfig();
             SetupConfig();
 
             new FikaVersionLabel_Patch().Enable();
@@ -199,16 +214,18 @@ namespace Fika.Core
             new NonWaveSpawnScenario_Patch().Enable();
             new WaveSpawnScenario_Patch().Enable();
             new WeatherNode_Patch().Enable();
-            new EnvironmentUIRoot_Patch().Enable();
             new MatchmakerAcceptScreen_Awake_Patch().Enable();
             new MatchmakerAcceptScreen_Show_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
             new BotCacher_Patch().Enable();
             new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
+            new DisconnectButton_Patch().Enable();
+            new ChangeGameModeButton_Patch().Enable();
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
+            OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
 
             DisableSPTPatches();
             EnableOverridePatches();
@@ -221,8 +238,7 @@ namespace Fika.Core
             BundleLoaderPlugin.Create();
 
             FikaAirdropUtil.GetConfigFromServer();
-            GetClientConfig();
-            BotSettingsRepoClass.Init();
+            BotSettingsRepoAbstractClass.Init();
 
             if (AllowItemSending)
             {
@@ -235,11 +251,6 @@ namespace Fika.Core
             StartCoroutine(RunModHandler());
         }
 
-        private void Config_SettingChanged(object sender, SettingChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Coroutine to ensure all mods are loaded by waiting 5 seconds
         /// </summary>
@@ -247,7 +258,7 @@ namespace Fika.Core
         private IEnumerator RunModHandler()
         {
             yield return new WaitForSeconds(5);
-            ModHandler.Run();
+            ModHandler.VerifyMods();
         }
 
         private void GetClientConfig()
@@ -259,9 +270,24 @@ namespace Fika.Core
             DynamicVExfils = clientConfig.DynamicVExfils;
             AllowFreeCam = clientConfig.AllowFreeCam;
             AllowItemSending = clientConfig.AllowItemSending;
+            BlacklistedItems = clientConfig.BlacklistedItems;
             ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
+            UseInertia = clientConfig.UseInertia;
+            SharedQuestProgression = clientConfig.SharedQuestProgression;
 
-            clientConfig.ToString();
+            clientConfig.LogValues();
+        }
+
+        private void GetNatPunchServerConfig()
+        {
+            NatPunchServerConfigModel natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
+
+            NatPunchServerEnable = natPunchServerConfig.Enable;
+            NatPunchServerIP = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+            NatPunchServerPort = natPunchServerConfig.Port;
+            NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
+
+            natPunchServerConfig.LogValues();
         }
 
         private void SetupConfig()
@@ -269,6 +295,9 @@ namespace Fika.Core
             // Hidden
 
             AcceptedTOS = Config.Bind("Hidden", "Accepted TOS", false, new ConfigDescription("Has accepted TOS", tags: new ConfigurationManagerAttributes() { Browsable = false }));
+
+            // Advanced
+            OfficialVersion = Config.Bind("Advanced", "Official Version", false, new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
 
             // Coop
 
@@ -284,17 +313,21 @@ namespace Fika.Core
 
             ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
+            ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.Backspace), new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+
             // Coop | Name Plates
 
-            UseNamePlates = Config.Bind("Coop | Name Plates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+            UseNamePlates = Config.Bind("Coop | Name Plates", "Show Player Name Plates", false, new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
 
-            HideHealthBar = Config.Bind("Coop | Name Plates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+            HideHealthBar = Config.Bind("Coop | Name Plates", "Hide Health Bar", false, new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-            UseHealthNumber = Config.Bind("Coop | Name Plates", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            UseHealthNumber = Config.Bind("Coop | Name Plates", "Show HP% instead of bar", false, new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-            UsePlateFactionSide = Config.Bind("Coop | Name Plates", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            UsePlateFactionSide = Config.Bind("Coop | Name Plates", "Show Player Faction Icon", true, new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            HideNamePlateInOptic = Config.Bind("Coop | Name Plates", "Hide Name Plate in Optic", true, new ConfigDescription("Hides the name plate when viewing through PiP scopes since it's kinda janky.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            HideNamePlateInOptic = Config.Bind("Coop | Name Plates", "Hide Name Plate in Optic", true, new ConfigDescription("Hides the name plate when viewing through PiP scopes.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+
+            NamePlateUseOpticZoom = Config.Bind("Coop | Name Plates", "Name Plates Use Optic Zoom", true, new ConfigDescription("If name plate location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 6, IsAdvanced = true }));
 
             DecreaseOpacityNotLookingAt = Config.Bind("Coop | Name Plates", "Decrease Opacity In Peripheral", true, new ConfigDescription("Decreases the opacity of the name plates when not looking at a player.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
@@ -308,21 +341,31 @@ namespace Fika.Core
 
             MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
 
+            // Coop | Quest Sharing
+
+            QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+
             // Coop | Custom
 
-            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false, new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U), new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white, new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 4 }));
+            PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f, new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 6 }));
 
-            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 3 }));
+            PingTime = Config.Bind("Coop | Custom", "Ping Time", 3, new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 5 }));
 
-            PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false, new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false, new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+            ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false, new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+
+            PingUseOpticZoom = Config.Bind("Coop | Custom", "Ping Use Optic Zoom", true, new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
+
+            PingScaleWithDistance = Config.Bind("Coop | Custom", "Ping Scale With Distance", true, new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 1, IsAdvanced = true }));
+
+            PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f, new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 0, IsAdvanced = true }));
 
             // Coop | Debug
 
@@ -330,17 +373,19 @@ namespace Fika.Core
 
             AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false, "If free camera should use AZERTY keys for input.");
 
+            KeybindOverlay = Config.Bind("Coop | Debug", "Keybind Overlay", true, "If an overlay with all free cam keybinds should show.");
+
             // Performance
 
             DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
             DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", DynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            //CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
-            CullingRange = Config.Bind("Performance", "Culling Range", 30f, new ConfigDescription("The range at which players should be culled.", new AcceptableValueRange<float>(30f, 150f), new ConfigurationManagerAttributes() { Order = 1 }));
+            //CullingRange = Config.Bind("Performance", "Culling Range", 30f, new ConfigDescription("The range at which players should be culled.", new AcceptableValueRange<float>(30f, 150f), new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Performance | Max Bots
 
@@ -372,29 +417,36 @@ namespace Fika.Core
 
             // Network
 
-            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+            NativeSockets = Config.Bind(section: "Network", "Native Sockets", false, new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            ForceIP = Config.Bind("Network", "Force IP", "", new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 5 }));
+            ForceBindIP = Config.Bind("Network", "Force Bind IP", "", new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 6 }));
 
-            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 4 }));
+            AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f, new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 5 }));
 
-            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            UDPPort = Config.Bind("Network", "UDP Port", 25565, new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+            UseUPnP = Config.Bind("Network", "Use UPnP", false, new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+
+            UseNatPunching = Config.Bind("Network", "Use NAT Punching", false, new ConfigDescription("Use NAT punching when hosting a raid. Only works with fullcone NAT type routers and requires NatPunchServer to be running on the AKI server. UPnP, Force IP and Force Bind IP are disabled with this mode.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
             ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15, new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Gameplay
 
-            HeadDamageMultiplier = Config.Bind("Gameplay", "Head Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the head collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
+            HeadDamageMultiplier = Config.Bind("Gameplay", "Head Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the head collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-            ArmpitDamageMultiplier = Config.Bind("Gameplay", "Armpit Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the armpits collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 3 }));
+            ArmpitDamageMultiplier = Config.Bind("Gameplay", "Armpit Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the armpits collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 3 }));
 
-            StomachDamageMultiplier = Config.Bind("Gameplay", "Stomach Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the stomach collider. 0.2 = 20%", new AcceptableValueRange<float>(0.2f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
+            StomachDamageMultiplier = Config.Bind("Gameplay", "Stomach Damage Multiplier", 1f, new ConfigDescription("X multiplier to damage taken on the stomach collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
             DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false, new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+        }
+
+        private void OfficialVersion_SettingChanged(object sender, EventArgs e)
+        {
+            FikaVersionLabel_Patch.UpdateVersionLabel();
         }
 
         private string[] GetLocalAddresses()
@@ -452,6 +504,8 @@ namespace Fika.Core
             new ArmorDamageCounterPatch().Disable();
             new DogtagPatch().Disable();
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
+            new ScavRepAdjustmentPatch().Disable();
+            new DisablePvEPatch().Disable();
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
@@ -469,36 +523,22 @@ namespace Fika.Core
             new FikaAirdropFlare_Patch().Enable();
         }
 
-        private void LogDependencyErrors()
-        {
-            // Skip if we've already shown the message, or there are no errors
-            if (ShownDependencyError || Chainloader.DependencyErrors.Count == 0)
-            {
-                return;
-            }
-
-            StringBuilder stringBuilder = new();
-            stringBuilder.AppendLine("Errors occurred during plugin loading");
-            stringBuilder.AppendLine("-------------------------------------");
-            stringBuilder.AppendLine();
-            foreach (string error in Chainloader.DependencyErrors)
-            {
-                stringBuilder.AppendLine(error);
-                stringBuilder.AppendLine();
-            }
-            string errorMessage = stringBuilder.ToString();
-
-            // Show an error in the BepInEx console/log file
-            Logger.LogError(errorMessage);
-
-            ShownDependencyError = true;
-        }
-
-        public enum DynamicAIRates
+        public enum EDynamicAIRates
         {
             Low,
             Medium,
             High
+        }
+
+        [Flags]
+        public enum EQuestSharingTypes
+        {
+            Kill = 1,
+            Item = 2,
+            Location = 4,
+            PlaceBeacon = 8,
+
+            All = Kill | Item | Location | PlaceBeacon
         }
     }
 }

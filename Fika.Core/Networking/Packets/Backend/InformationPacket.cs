@@ -9,7 +9,6 @@ namespace Fika.Core.Networking
         public bool IsRequest = isRequest;
         public int NumberOfPlayers = 0;
         public int ReadyPlayers = 0;
-        public bool ForceStart = false;
 
 
         public void Deserialize(NetDataReader reader)
@@ -17,7 +16,6 @@ namespace Fika.Core.Networking
             IsRequest = reader.GetBool();
             NumberOfPlayers = reader.GetInt();
             ReadyPlayers = reader.GetInt();
-            ForceStart = reader.GetBool();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -25,7 +23,6 @@ namespace Fika.Core.Networking
             writer.Put(IsRequest);
             writer.Put(NumberOfPlayers);
             writer.Put(ReadyPlayers);
-            writer.Put(ForceStart);
         }
     }
 }

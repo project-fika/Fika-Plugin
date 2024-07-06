@@ -2,7 +2,7 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
@@ -30,7 +30,7 @@ namespace Fika.Core.UI.Custom
         public DefaultUIButton AcceptButton { get; internal set; }
         public GameObject NewBackButton { get; internal set; }
 
-        private string ProfileId => MatchmakerAcceptPatches.Profile.ProfileId;
+        private string ProfileId => FikaBackendUtils.Profile.ProfileId;
 
         private float _lastRefreshed;
 
@@ -68,7 +68,9 @@ namespace Fika.Core.UI.Custom
         {
             StopQuery = true;
             if (NewBackButton != null)
+            {
                 Destroy(NewBackButton);
+            }
         }
 
         private void CreateMatchMakerUI()
@@ -102,6 +104,15 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
+            fikaMatchMakerUi.CloseButton.onClick.AddListener(() =>
+            {
+                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+                if (fikaMatchMakerUi.PlayerAmountSelection.active)
+                {
+                    fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+                }
+            });
+
             fikaMatchMakerUi.StartButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
@@ -124,10 +135,9 @@ namespace Fika.Core.UI.Custom
 
                     if (!IPAddress.TryParse(ip, out _))
                     {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR FORCING IP",
-                    $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
+                            $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
+                            ErrorScreen.EButtonType.OkButton, 10f, null, null);
                         return;
                     }
                 }
@@ -135,15 +145,14 @@ namespace Fika.Core.UI.Custom
                 {
                     if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
                     {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR BINDING",
-                    $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
+                            $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
+                            ErrorScreen.EButtonType.OkButton, 10f, null, null);
                         return;
                     }
                 }
-                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                MatchmakerAcceptPatches.CreateMatch(MatchmakerAcceptPatches.Profile.ProfileId, MatchmakerAcceptPatches.PMCName, RaidSettings);
+                FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
+                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
                 AcceptButton.OnClick.Invoke();
                 DestroyThis();
             });
@@ -165,9 +174,20 @@ namespace Fika.Core.UI.Custom
             Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
             if (!NewBackButton.active)
+            {
                 NewBackButton.SetActive(true);
+            }
 
             BackButton.gameObject.SetActive(false);
+        }
+
+        private void AutoRefresh()
+        {
+            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+
+            _lastRefreshed = Time.time;
+
+            RefreshUI();
         }
 
         private void ManualRefresh()
@@ -189,8 +209,11 @@ namespace Fika.Core.UI.Custom
 
             NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
-            FikaPingingClient pingingClient = new(serverId);
-            if (pingingClient.Init())
+            NetManagerUtils.CreatePingingClient();
+
+            FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
+
+            if (pingingClient.Init(serverId))
             {
                 int attempts = 0;
                 bool success;
@@ -201,7 +224,7 @@ namespace Fika.Core.UI.Custom
                 {
                     attempts++;
 
-                    pingingClient.PingEndPoint();
+                    pingingClient.PingEndPoint("fika.hello");
                     pingingClient.NetClient.PollEvents();
                     success = pingingClient.Received;
 
@@ -229,15 +252,20 @@ namespace Fika.Core.UI.Custom
                 ConsoleScreen.Log("ERROR");
             }
 
-            pingingClient.NetClient?.Stop();
-            pingingClient = null;
-
-            if (MatchmakerAcceptPatches.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
+            if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
-                MatchmakerAcceptPatches.SetGroupId(result.ServerId);
-                MatchmakerAcceptPatches.SetTimestamp(result.Timestamp);
-                MatchmakerAcceptPatches.MatchingType = EMatchmakerType.GroupPlayer;
-                MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
+                FikaBackendUtils.SetGroupId(result.ServerId);
+                FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
+                FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
+
+                if (FikaBackendUtils.IsHostNatPunch)
+                {
+                    pingingClient.StartKeepAliveRoutine();
+                }
+                else
+                {
+                    NetManagerUtils.DestroyPingingClient();
+                }
 
                 DestroyThis();
 
@@ -245,6 +273,8 @@ namespace Fika.Core.UI.Custom
             }
             else
             {
+                NetManagerUtils.DestroyPingingClient();
+
                 Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage, ErrorScreen.EButtonType.OkButton, 15, null, null);
             }
         }
@@ -442,7 +472,7 @@ namespace Fika.Core.UI.Custom
         {
             while (!StopQuery)
             {
-                ManualRefresh();
+                AutoRefresh();
 
                 while (Time.time < _lastRefreshed + FikaPlugin.AutoRefreshRate.Value)
                 {

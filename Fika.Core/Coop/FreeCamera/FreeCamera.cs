@@ -1,7 +1,9 @@
-﻿using Comfort.Common;
+﻿using BSG.CameraEffects;
+using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -22,7 +24,12 @@ namespace Fika.Core.Coop.FreeCamera
         public bool IsActive = false;
         private CoopPlayer CurrentPlayer;
         private bool isFollowing = false;
+        private bool leftMode = false;
         private bool disableInput = false;
+        private bool showOverlay;
+        private NightVision nightVision;
+        private ThermalVision thermalVision;
+        private FreeCameraController freeCameraController;
 
         private KeyCode forwardKey = KeyCode.W;
         private KeyCode backKey = KeyCode.S;
@@ -45,6 +52,52 @@ namespace Fika.Core.Coop.FreeCamera
                 relUpKey = KeyCode.E;
                 relDownKey = KeyCode.A;
             }
+
+            showOverlay = FikaPlugin.KeybindOverlay.Value;
+            FikaPlugin.KeybindOverlay.SettingChanged += KeybindOverlay_SettingChanged;
+
+            nightVision = CameraClass.Instance.NightVision;
+            thermalVision = CameraClass.Instance.ThermalVision;
+
+            freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
+        }
+
+        private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
+        {
+            showOverlay = FikaPlugin.KeybindOverlay.Value;
+        }
+
+        protected void OnGUI()
+        {
+            if (IsActive && showOverlay)
+            {
+                string visionText = "Enable nightvision";
+
+                if (nightVision != null && nightVision.On)
+                {
+                    visionText = "Enable thermals";
+                }
+
+                if (thermalVision != null && thermalVision.On)
+                {
+                    visionText = "Disable thermals";
+                }
+
+                GUILayout.BeginArea(new Rect(5, 5, 800, 800));
+                GUILayout.BeginVertical();
+
+                GUILayout.Label($"Left/Right Mouse Button: Jump between players");
+                GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
+                GUILayout.Label($"Spacebar + Left/Right Mouse Button: Jump and spectate in head cam");
+                GUILayout.Label($"T: Teleport to cam position");
+                GUILayout.Label($"N: {visionText}");
+                GUILayout.Label($"M: Disable culling");
+                GUILayout.Label($"HOME: {(disableInput ? "Enable Input" : "Disable Input")}");
+                GUILayout.Label($"Shift + Ctrl: Turbo Speed");
+
+                GUILayout.EndVertical();
+                GUILayout.EndArea();
+            }
         }
 
         protected void Update()
@@ -54,11 +107,11 @@ namespace Fika.Core.Coop.FreeCamera
                 return;
             }
 
+            // Toggle input
             if (Input.GetKeyDown(KeyCode.Home))
             {
                 disableInput = !disableInput;
-                string status = disableInput == true ? "disabled" : "enabled";
-                NotificationManagerClass.DisplayMessageNotification($"Free cam input is now {status}.");
+                NotificationManagerClass.DisplayMessageNotification($"Free cam input is now {(disableInput ? "disabled" : "enabled")}.");
             }
 
             if (disableInput)
@@ -79,14 +132,14 @@ namespace Fika.Core.Coop.FreeCamera
 
                 if (players.Count > 0)
                 {
-                    bool shouldFollow = Input.GetKey(KeyCode.Space);
+                    bool shouldHeadCam = Input.GetKey(KeyCode.Space);
                     bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
                     foreach (CoopPlayer player in players)
                     {
                         if (CurrentPlayer == null && players[0] != null)
                         {
                             CurrentPlayer = players[0];
-                            if (shouldFollow)
+                            if (shouldHeadCam)
                             {
                                 AttachToPlayer();
                             }
@@ -106,7 +159,7 @@ namespace Fika.Core.Coop.FreeCamera
                         if (players.Count - 1 >= nextPlayer)
                         {
                             CurrentPlayer = players[nextPlayer];
-                            if (shouldFollow)
+                            if (shouldHeadCam)
                             {
                                 AttachToPlayer();
                             }
@@ -123,7 +176,7 @@ namespace Fika.Core.Coop.FreeCamera
                         else
                         {
                             CurrentPlayer = players[0];
-                            if (shouldFollow)
+                            if (shouldHeadCam)
                             {
                                 AttachToPlayer();
                             }
@@ -240,14 +293,41 @@ namespace Fika.Core.Coop.FreeCamera
                 }
             }
 
+            // Toggle vision
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                ToggleVision();
+            }
+
+            // Disable culling
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                if (freeCameraController != null)
+                {
+                    freeCameraController.DisableAllCullingObjects();
+                }
+            }
+
             if (isFollowing)
             {
+                if (CurrentPlayer != null)
+                {
+                    if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
+                    {
+                        SetLeftShoulderMode(true);
+                    }
+                    else if (!CurrentPlayer.MovementContext.LeftStanceEnabled && leftMode)
+                    {
+                        SetLeftShoulderMode(false);
+                    }
+                }
                 return;
             }
 
             bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
             float movementSpeed = fastMode ? 20f : 2f;
+
             if (superFastMode)
             {
                 movementSpeed *= 8;
@@ -255,22 +335,22 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
             {
-                transform.position += (-transform.right * (movementSpeed * Time.deltaTime));
+                transform.position += -transform.right * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
             {
-                transform.position += (transform.right * (movementSpeed * Time.deltaTime));
+                transform.position += transform.right * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
             {
-                transform.position += (transform.forward * (movementSpeed * Time.deltaTime));
+                transform.position += transform.forward * (movementSpeed * Time.deltaTime);
             }
 
             if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
             {
-                transform.position += (-transform.forward * (movementSpeed * Time.deltaTime));
+                transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
             }
 
             // Teleportation
@@ -293,28 +373,78 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 if (Input.GetKey(relUpKey))
                 {
-                    transform.position += (transform.up * (movementSpeed * Time.deltaTime));
+                    transform.position += transform.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(relDownKey))
                 {
-                    transform.position += (-transform.up * (movementSpeed * Time.deltaTime));
+                    transform.position += -transform.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
                 {
-                    transform.position += (Vector3.up * (movementSpeed * Time.deltaTime));
+                    transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
                 }
 
                 if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
                 {
-                    transform.position += (-Vector3.up * (movementSpeed * Time.deltaTime));
+                    transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
                 }
             }
 
             float newRotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * 3f;
             float newRotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * 3f;
             transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
+        }
+
+        private void SetLeftShoulderMode(bool enabled)
+        {
+            if (enabled)
+            {
+                // Use different coordinates for headcam
+                if (transform.localPosition.z == -0.17f)
+                {
+                    transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
+                }
+                else
+                {
+                    transform.localPosition = new(-transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
+                }
+                leftMode = true;
+
+                return;
+            }
+
+            // Use different coordinates for headcam
+            if (transform.localPosition.z == 0.17f)
+            {
+                transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
+            }
+            else
+            {
+                transform.localPosition = new(-transform.localPosition.x, transform.localPosition.y, transform.localPosition.z);
+            }
+            leftMode = false;
+        }
+
+        private void ToggleVision()
+        {
+            if (nightVision != null && thermalVision != null)
+            {
+                if (!nightVision.On && !thermalVision.On)
+                {
+                    nightVision.On = true;
+                }
+                else if (nightVision.On && !thermalVision.On)
+                {
+                    nightVision.On = false;
+                    thermalVision.On = true;
+                }
+                else if (thermalVision.On)
+                {
+                    thermalVision.On = false;
+                }
+            }
         }
 
         public void JumpToPlayer()
@@ -324,6 +454,7 @@ namespace Fika.Core.Coop.FreeCamera
             if (isFollowing)
             {
                 isFollowing = false;
+                leftMode = false;
                 transform.parent = null;
             }
         }
@@ -346,8 +477,51 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void SetActive(bool status)
         {
+            if (!status)
+            {
+                if (nightVision != null && nightVision.On)
+                {
+                    nightVision.method_1(false);
+                }
+
+                if (thermalVision != null && thermalVision.On)
+                {
+                    thermalVision.method_1(false);
+                }
+            }
+
+            if (status)
+            {
+                Player player = Singleton<GameWorld>.Instance.MainPlayer;
+                if (player != null && player.HealthController.IsAlive)
+                {
+                    if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
+                    {
+                        player.NightVisionObserver.Component.Togglable.ForceToggle(false);
+                    }
+
+                    if (player.ThermalVisionObserver.Component != null && player.ThermalVisionObserver.Component.Togglable.On)
+                    {
+                        player.ThermalVisionObserver.Component.Togglable.ForceToggle(false);
+                    }
+                }
+                else if (player != null && !player.HealthController.IsAlive)
+                {
+                    if (nightVision != null && nightVision.On)
+                    {
+                        nightVision.method_1(false);
+                    }
+
+                    if (thermalVision != null && thermalVision.On)
+                    {
+                        thermalVision.method_1(false);
+                    }
+                }
+            }
+
             IsActive = status;
             isFollowing = false;
+            leftMode = false;
             transform.parent = null;
         }
 

@@ -83,13 +83,13 @@ public static class PingFactory
                 screenScale = outputWidth / inputWidth;
             }
 
-            if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint))
+            if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value))
             {
                 float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
 
                 if (distanceToCenter < 200)
                 {
-                    image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, Mathf.Max(0.05f, distanceToCenter / 200));
+                    image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200));
                 }
                 else
                 {
@@ -108,7 +108,16 @@ public static class PingFactory
 
             float distance = Mathf.Clamp(Vector3.Distance(CameraClass.Instance.Camera.transform.position, transform.position) / 100, 0.4f, 0.6f);
             float pingSize = FikaPlugin.PingSize.Value;
-            image.rectTransform.localScale = new Vector3(pingSize, pingSize, pingSize) * distance;
+            Vector3 scaledSize = new(pingSize, pingSize, pingSize);
+            if (FikaPlugin.PingScaleWithDistance.Value == true)
+            {
+                scaledSize *= distance;
+            }
+            else
+            {
+                scaledSize *= 0.5f;
+            }
+            image.rectTransform.localScale = scaledSize;
         }
     }
 

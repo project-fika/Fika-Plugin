@@ -1,7 +1,4 @@
-﻿using Aki.Custom.BTR;
-using Aki.Custom.BTR.Utils;
-using Aki.SinglePlayer.Utils.TraderServices;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.GlobalEvents;
@@ -13,6 +10,9 @@ using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using SPT.Custom.BTR;
+using SPT.Custom.BTR.Utils;
+using SPT.SinglePlayer.Utils.TraderServices;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,6 +24,9 @@ using Random = UnityEngine.Random;
 
 namespace Fika.Core.Coop.BTR
 {
+    /// <summary>
+    /// Based on <see href="https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/BTR/BTRManager.cs"/>
+    /// </summary>
     internal class FikaBTRManager_Host : MonoBehaviour
     {
         private GameWorld gameWorld;
@@ -108,7 +111,7 @@ namespace Fika.Core.Coop.BTR
             }
             catch
             {
-                btrLogger.LogError("[AKI-BTR] Unable to spawn BTR. Check logs.");
+                btrLogger.LogError("[SPT-BTR] Unable to spawn BTR. Check logs.");
                 Destroy(this);
                 throw;
             }
@@ -223,7 +226,7 @@ namespace Fika.Core.Coop.BTR
         // Find `BTRControllerClass.method_9(PathDestination currentDestinationPoint, bool lastRoutePoint)`
         private bool IsUpdateTaxiPriceMethod(MethodInfo method)
         {
-            return (method.GetParameters().Length == 2 && method.GetParameters()[0].ParameterType == typeof(PathDestination));
+            return method.GetParameters().Length == 2 && method.GetParameters()[0].ParameterType == typeof(PathDestination);
         }
 
         private void Update()
@@ -260,7 +263,7 @@ namespace Fika.Core.Coop.BTR
         {
             // Initial setup
             botEventHandler = Singleton<BotEventHandler>.Instance;
-            var botsController = Singleton<IBotGame>.Instance.BotsController;
+            BotsController botsController = Singleton<IBotGame>.Instance.BotsController;
             btrBotService = botsController.BotTradersServices.BTRServices;
             btrController.method_3(); // spawns server-side BTR game object
             botsController.BotSpawner.SpawnBotBTR(); // spawns the scav bot which controls the BTR's turret
@@ -278,12 +281,12 @@ namespace Fika.Core.Coop.BTR
             // Get config from server and initialise respective settings
             ConfigureSettingsFromServer();
 
-            var btrMapConfig = btrController.MapPathsConfiguration;
+            MapPathConfig btrMapConfig = btrController.MapPathsConfiguration;
             btrServerSide.CurrentPathConfig = btrMapConfig.PathsConfiguration.pathsConfigurations.RandomElement();
             btrServerSide.Initialization(btrMapConfig);
             btrController.method_14(); // creates and assigns the BTR a fake stash
 
-            DisableServerSideRenderers();
+            DisableServerSideObjects();
 
             gameWorld.MainPlayer.OnBtrStateChanged += HandleBtrDoorState;
 
@@ -297,7 +300,7 @@ namespace Fika.Core.Coop.BTR
 
             // Initialise turret variables
             btrTurretServer = btrServerSide.BTRTurret;
-            var btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
+            Transform btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
             isTurretInDefaultRotation = btrTurretServer.targetTransform == btrTurretDefaultTargetTransform
                 && btrTurretServer.targetPosition == btrTurretServer.defaultAimingPosition;
             btrMachineGunAmmo = (BulletClass)BTRUtil.CreateItem(BTRUtil.BTRMachineGunAmmoTplId);
@@ -311,7 +314,7 @@ namespace Fika.Core.Coop.BTR
 
         private void ConfigureSettingsFromServer()
         {
-            var serverConfig = BTRUtil.GetConfigFromServer();
+            SPT.Custom.BTR.Models.BTRConfigModel serverConfig = BTRUtil.GetConfigFromServer();
 
             btrServerSide.moveSpeed = serverConfig.MoveSpeed;
             btrServerSide.pauseDurationRange.x = serverConfig.PointWaitTime.Min;
@@ -327,7 +330,7 @@ namespace Fika.Core.Coop.BTR
         {
             btrBotShooter = btrController.BotShooterBtr;
             firearmController = btrBotShooter.GetComponent<Player.FirearmController>();
-            var weaponPrefab = (WeaponPrefab)AccessTools.Field(firearmController.GetType(), "weaponPrefab_0").GetValue(firearmController);
+            WeaponPrefab weaponPrefab = (WeaponPrefab)AccessTools.Field(firearmController.GetType(), "weaponPrefab_0").GetValue(firearmController);
             weaponSoundPlayer = weaponPrefab.GetComponent<WeaponSoundPlayer>();
 
             btrBotService.Reset(); // Player will be added to Neutrals list and removed from Enemies list
@@ -434,7 +437,7 @@ namespace Fika.Core.Coop.BTR
 
         private IEnumerator CoverFireTimer(float time)
         {
-            yield return new WaitForSecondsRealtime(time);
+            yield return new WaitForSeconds(time);
             botEventHandler.StopTraderServiceBtrSupport();
         }
 
@@ -470,7 +473,7 @@ namespace Fika.Core.Coop.BTR
             }
             catch
             {
-                btrLogger.LogError("[AKI-BTR] lastInteractedBtrSide is null when it shouldn't be. Check logs.");
+                btrLogger.LogError("[SPT-BTR] lastInteractedBtrSide is null when it shouldn't be. Check logs.");
                 throw;
             }
         }
@@ -481,8 +484,8 @@ namespace Fika.Core.Coop.BTR
             btrDataPacket.rotation = btrServerSide.transform.rotation;
             if (btrTurretServer != null && btrTurretServer.gunsBlockRoot != null)
             {
-                btrDataPacket.turretRotation = btrTurretServer.transform.rotation;
-                btrDataPacket.gunsBlockRotation = btrTurretServer.gunsBlockRoot.rotation;
+                btrDataPacket.turretRotation = btrTurretServer.transform.localEulerAngles.y;
+                btrDataPacket.gunsBlockRotation = btrTurretServer.gunsBlockRoot.localEulerAngles.x;
             }
             btrDataPacket.State = (byte)btrServerSide.BtrState;
             btrDataPacket.RouteState = (byte)btrServerSide.VehicleRouteState;
@@ -520,15 +523,28 @@ namespace Fika.Core.Coop.BTR
             return btrDataPacket;
         }
 
-        private void DisableServerSideRenderers()
+        private void DisableServerSideObjects()
         {
-            var meshRenderers = btrServerSide.transform.GetComponentsInChildren<MeshRenderer>();
-            foreach (var renderer in meshRenderers)
+            MeshRenderer[] meshRenderers = btrServerSide.transform.GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer renderer in meshRenderers)
             {
                 renderer.enabled = false;
             }
 
             btrServerSide.turnCheckerObject.GetComponent<Renderer>().enabled = false; // Disables the red debug sphere
+
+            // For some reason the client BTR collider is disabled but the server collider is enabled.
+            // Initially we assumed there was a reason for this so it was left as is.
+            // Turns out disabling the server collider in favour of the client collider fixes the "BTR doing a wheelie" bug,
+            // while preventing the player from walking through the BTR.
+            const string exteriorColliderName = "BTR_82_exterior_COLLIDER";
+            Collider serverExteriorCollider = btrServerSide.GetComponentsInChildren<Collider>(true)
+                .First(x => x.gameObject.name == exteriorColliderName);
+            Collider clientExteriorCollider = btrClientSide.GetComponentsInChildren<Collider>(true)
+                .First(x => x.gameObject.name == exteriorColliderName);
+
+            serverExteriorCollider.gameObject.SetActive(false);
+            clientExteriorCollider.gameObject.SetActive(true);
         }
 
         private void UpdateTarget()
@@ -596,7 +612,7 @@ namespace Fika.Core.Coop.BTR
         {
             isShooting = true;
 
-            yield return new WaitForSecondsRealtime(machineGunAimDelay);
+            yield return new WaitForSeconds(machineGunAimDelay);
             if (currentTarget?.Person == null || currentTarget?.IsVisible == false || !btrBotShooter.BotBtrData.CanShoot())
             {
                 isShooting = false;
@@ -604,7 +620,7 @@ namespace Fika.Core.Coop.BTR
             }
 
             Transform machineGunMuzzle = btrTurretServer.machineGunLaunchPoint;
-            var ballisticCalculator = gameWorld.SharedBallisticsCalculator;
+            ISharedBallisticsCalculator ballisticCalculator = gameWorld.SharedBallisticsCalculator;
 
             int burstMin = Mathf.FloorToInt(machineGunBurstCount.x);
             int burstMax = Mathf.FloorToInt(machineGunBurstCount.y);
@@ -622,11 +638,11 @@ namespace Fika.Core.Coop.BTR
                 firearmController.method_54(weaponSoundPlayer, btrMachineGunAmmo, machineGunMuzzle.position, aimDirection, false);
                 burstCount--;
                 shotQueue.Enqueue(new(machineGunMuzzle.position, aimDirection));
-                yield return new WaitForSecondsRealtime(0.092308f); // 650 RPM
+                yield return new WaitForSeconds(0.092308f); // 650 RPM
             }
 
             float waitTime = Random.Range(machineGunRecoveryTime.x, machineGunRecoveryTime.y);
-            yield return new WaitForSecondsRealtime(waitTime);
+            yield return new WaitForSeconds(waitTime);
 
             isShooting = false;
         }
@@ -649,7 +665,7 @@ namespace Fika.Core.Coop.BTR
                 BTRView btrView = gameWorld.BtrController.BtrView;
                 if (btrView == null)
                 {
-                    btrLogger.LogError("[AKI-BTR] BTRInteractionPatch - btrView is null");
+                    btrLogger.LogError("[SPT-BTR] BTRInteractionPatch - btrView is null");
                     return false;
                 }
 
@@ -668,7 +684,7 @@ namespace Fika.Core.Coop.BTR
                 BTRView btrView = gameWorld.BtrController.BtrView;
                 if (btrView == null)
                 {
-                    btrLogger.LogError("[AKI-BTR] BTRInteractionPatch - btrView is null");
+                    btrLogger.LogError("[SPT-BTR] BTRInteractionPatch - btrView is null");
                     return;
                 }
 
@@ -736,13 +752,13 @@ namespace Fika.Core.Coop.BTR
 
             if (btrClientSide != null)
             {
-                Debug.LogWarning("[AKI-BTR] BTRManager - Destroying btrClientSide");
+                Debug.LogWarning("[SPT-BTR] BTRManager - Destroying btrClientSide");
                 Destroy(btrClientSide.gameObject);
             }
 
             if (btrServerSide != null)
             {
-                Debug.LogWarning("[AKI-BTR] BTRManager - Destroying btrServerSide");
+                Debug.LogWarning("[SPT-BTR] BTRManager - Destroying btrServerSide");
                 Destroy(btrServerSide.gameObject);
             }
         }

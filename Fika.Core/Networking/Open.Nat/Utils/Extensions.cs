@@ -149,9 +149,11 @@ namespace Open.Nat
         public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
         {
 #if DEBUG
-			return await task;
+            return await task;
 #endif
+#pragma warning disable CS0162 // Unreachable code detected
             var timeoutCancellationTokenSource = new CancellationTokenSource();
+#pragma warning restore CS0162 // Unreachable code detected
 
             Task completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
             if (completedTask == task)

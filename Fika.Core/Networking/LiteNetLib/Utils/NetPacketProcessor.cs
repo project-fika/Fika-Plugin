@@ -265,7 +265,7 @@ namespace LiteNetLib.Utils
                 }
                 catch
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError("Error when deserializing " + nameof(reference) + " packet.");
+                    FikaPlugin.Instance.FikaLogger.LogError("Error when deserializing " + reference.GetType().Name + " packet.");
                 }
                 onReceive(reference, (TUserData)userData);
             };
@@ -283,7 +283,7 @@ namespace LiteNetLib.Utils
                 }
                 catch
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError("Error when deserializing " + nameof(reference) + " packet.");
+                    FikaPlugin.Instance.FikaLogger.LogError("Error when deserializing " + reference.GetType().Name + " packet.");
                 }
                 onReceive(reference);
             };

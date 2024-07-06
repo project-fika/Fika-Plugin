@@ -6,7 +6,6 @@ using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Custom
@@ -39,9 +38,9 @@ namespace Fika.Core.Coop.Custom
 
             resetCounter = FikaPlugin.DynamicAIRate.Value switch
             {
-                FikaPlugin.DynamicAIRates.Low => 600,
-                FikaPlugin.DynamicAIRates.Medium => 300,
-                FikaPlugin.DynamicAIRates.High => 120,
+                FikaPlugin.EDynamicAIRates.Low => 600,
+                FikaPlugin.EDynamicAIRates.Medium => 300,
+                FikaPlugin.EDynamicAIRates.High => 120,
                 _ => 300,
             };
 
@@ -159,6 +158,7 @@ namespace Fika.Core.Coop.Custom
             }
 
             int notInRange = 0;
+            float range = FikaPlugin.DynamicAIRange.Value;
 
             foreach (CoopPlayer humanPlayer in humanPlayers)
             {
@@ -175,7 +175,6 @@ namespace Fika.Core.Coop.Custom
                 }
 
                 float distance = Vector3.SqrMagnitude(bot.Position - humanPlayer.Position);
-                float range = FikaPlugin.DynamicAIRange.Value;
 
                 if (distance > range * range)
                 {
@@ -207,13 +206,13 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        internal void RateChanged(FikaPlugin.DynamicAIRates value)
+        internal void RateChanged(FikaPlugin.EDynamicAIRates value)
         {
             resetCounter = value switch
             {
-                FikaPlugin.DynamicAIRates.Low => 600,
-                FikaPlugin.DynamicAIRates.Medium => 300,
-                FikaPlugin.DynamicAIRates.High => 120,
+                FikaPlugin.EDynamicAIRates.Low => 600,
+                FikaPlugin.EDynamicAIRates.Medium => 300,
+                FikaPlugin.EDynamicAIRates.High => 120,
                 _ => 300,
             };
         }

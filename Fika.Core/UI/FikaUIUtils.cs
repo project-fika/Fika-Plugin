@@ -39,12 +39,12 @@ namespace Fika.Core.UI
             return text;
         }
 
-        public static GClass3085 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
+        public static GClass3107 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
             ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
         {
             Traverse preloaderUiTraverse = Traverse.Create(preloaderUI);
 
-            PreloaderUI.Class2561 messageHandler = new()
+            PreloaderUI.Class2594 messageHandler = new()
             {
                 preloaderUI_0 = preloaderUI,
                 acceptCallback = acceptCallback,
@@ -54,7 +54,7 @@ namespace Fika.Core.UI
             if (!AsyncWorker.CheckIsMainThread())
             {
                 FikaPlugin.Instance.FikaLogger.LogError("You are trying to show error screen from non-main thread!");
-                return new GClass3085();
+                return new GClass3107();
             }
 
             ErrorScreen errorScreenTemplate = preloaderUiTraverse.Field("_criticalErrorScreenTemplate").GetValue<ErrorScreen>();
@@ -65,19 +65,19 @@ namespace Fika.Core.UI
             return messageHandler.errorScreen.ShowFikaMessage(header, message, new Action(messageHandler.method_1), waitingTime, new Action(messageHandler.method_2), buttonType, true);
         }
 
-        public static GClass3087 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
+        public static GClass3109 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
             Action closeManuallyCallback = null, float waitingTime = 0f, Action timeOutCallback = null,
             ErrorScreen.EButtonType buttonType = ErrorScreen.EButtonType.OkButton, bool removeHtml = true)
         {
             Traverse errorScreenTraverse = Traverse.Create(errorScreen);
 
-            ErrorScreen.Class2352 errorScreenHandler = new()
+            ErrorScreen.Class2382 errorScreenHandler = new()
             {
                 errorScreen_0 = errorScreen
             };
             if (!MonoBehaviourSingleton<PreloaderUI>.Instance.CanShowErrorScreen)
             {
-                return new GClass3087();
+                return new GClass3109();
             }
             if (removeHtml)
             {
@@ -89,12 +89,12 @@ namespace Fika.Core.UI
             errorScreenTraverse.Field("action_1").SetValue(action_1);
             MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
 
-            errorScreenHandler.context = (GClass3087)baseShow.Invoke(errorScreen, [closeManuallyCallback]);
+            errorScreenHandler.context = (GClass3109)baseShow.Invoke(errorScreen, [closeManuallyCallback]);
             errorScreenHandler.context.OnAccept += errorScreen.method_3;
             errorScreenHandler.context.OnDecline += errorScreen.method_4;
             errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
 
-            GClass767 ui = Traverse.Create(errorScreen).Field("UI").GetValue<GClass767>();
+            CompositeDisposableClass ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
 
             ui.AddDisposable(new Action(errorScreenHandler.method_0));
             string text = buttonType switch
@@ -115,7 +115,7 @@ namespace Fika.Core.UI
             string string_1 = message.SubstringIfNecessary(500);
             errorScreenTraverse.Field("string_1").SetValue(string_1);
 
-            TextMeshProUGUI errorDescription = Traverse.Create(errorScreen).Field("_errorDescription").GetValue<TextMeshProUGUI>();
+            TextMeshProUGUI errorDescription = Traverse.Create(errorScreen).Field<TextMeshProUGUI>("_errorDescription").Value;
             errorDescription.text = string_1;
 
             Coroutine coroutine_0 = errorScreenTraverse.Field("coroutine_0").GetValue<Coroutine>();
@@ -125,7 +125,7 @@ namespace Fika.Core.UI
             }
             if (waitingTime > 0f)
             {
-                errorScreenTraverse.Field("coroutine_0").SetValue(errorScreen.StartCoroutine(errorScreen.method_2(GClass1296.Now.AddSeconds((double)waitingTime))));
+                errorScreenTraverse.Field("coroutine_0").SetValue(errorScreen.StartCoroutine(errorScreen.method_2(EFTDateTimeClass.Now.AddSeconds((double)waitingTime))));
             }
             return errorScreenHandler.context;
         }

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using static GClass681; // Physical struct
+using static BasePhysicalClass; // Physical struct
 
 namespace Fika.Core.Networking
 {
@@ -107,11 +107,11 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Serializes a <see cref="GStruct35"/> (Physical) struct
+        /// Serializes a <see cref="GStruct36"/> (Physical) struct
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="physical"></param>
-        public static void Put(this NetDataWriter writer, GStruct35 physical)
+        public static void Put(this NetDataWriter writer, GStruct36 physical)
         {
             writer.Put(physical.StaminaExhausted);
             writer.Put(physical.OxygenExhausted);
@@ -119,13 +119,13 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Deserializes a <see cref="GStruct35"/> (Physical) struct
+        /// Deserializes a <see cref="GStruct36"/> (Physical) struct
         /// </summary>
         /// <param name="reader"></param>
-        /// <returns>A <see cref="GStruct35"/> (Physical)</returns>
-        public static GStruct35 GetPhysical(this NetDataReader reader)
+        /// <returns>A <see cref="GStruct36"/> (Physical)</returns>
+        public static GStruct36 GetPhysical(this NetDataReader reader)
         {
-            return new GStruct35() { StaminaExhausted = reader.GetBool(), OxygenExhausted = reader.GetBool(), HandsExhausted = reader.GetBool() };
+            return new GStruct36() { StaminaExhausted = reader.GetBool(), OxygenExhausted = reader.GetBool(), HandsExhausted = reader.GetBool() };
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace Fika.Core.Networking
         {
             using MemoryStream memoryStream = new();
             using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.Write(GClass1524.SerializeItem(item));
+            binaryWriter.Write(GClass1535.SerializeItem(item));
             writer.PutByteArray(memoryStream.ToArray());
         }
 
@@ -202,12 +202,12 @@ namespace Fika.Core.Networking
             using MemoryStream memoryStream = new(reader.GetByteArray());
             using BinaryReader binaryReader = new(memoryStream);
 
-            Item item = GClass1524.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+            Item item = GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
 
             ContainerCollection[] containerCollections = [item as ContainerCollection];
             ResourceKey[] resourceKeys = containerCollections.GetAllItemsFromCollections()
-                .Concat(containerCollections.Where(new Func<Item, bool>(AirdropSynchronizableObject.Class1802.class1802_0.method_2)))
-                .SelectMany(new Func<Item, IEnumerable<ResourceKey>>(AirdropSynchronizableObject.Class1802.class1802_0.method_3))
+                .Concat(containerCollections.Where(new Func<Item, bool>(AirdropSynchronizableObject.Class1832.class1832_0.method_2)))
+                .SelectMany(new Func<Item, IEnumerable<ResourceKey>>(AirdropSynchronizableObject.Class1832.class1832_0.method_3))
                 .ToArray();
             Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online, resourceKeys, JobPriority.Immediate, null, default);
 
@@ -223,7 +223,7 @@ namespace Fika.Core.Networking
         {
             using MemoryStream memoryStream = new();
             using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.Write(GClass1524.SerializeItem(item));
+            binaryWriter.Write(GClass1535.SerializeItem(item));
             writer.PutByteArray(memoryStream.ToArray());
         }
 
@@ -237,7 +237,7 @@ namespace Fika.Core.Networking
             using MemoryStream memoryStream = new(reader.GetByteArray());
             using BinaryReader binaryReader = new(memoryStream);
 
-            return GClass1524.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+            return GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
         }
     }
 }

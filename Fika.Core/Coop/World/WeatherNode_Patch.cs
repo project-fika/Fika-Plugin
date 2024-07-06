@@ -1,25 +1,25 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.Reflection.Patching;
 using EFT.Weather;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.World
 {
     internal class WeatherNode_Patch : ModulePatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(WeatherController).GetMethod(nameof(WeatherController.method_4));
+        protected override MethodBase GetTargetMethod() => typeof(WeatherController).GetMethod(nameof(WeatherController.method_0));
 
         [PatchPostfix]
         public static void Postfix(WeatherController __instance, WeatherClass[] nodes)
         {
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 return;
             }
 
-            MatchmakerAcceptPatches.Nodes = nodes;
+            FikaBackendUtils.Nodes = nodes;
         }
     }
 }

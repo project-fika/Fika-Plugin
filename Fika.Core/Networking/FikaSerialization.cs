@@ -7,7 +7,7 @@ using LiteNetLib.Utils;
 using System;
 using UnityEngine;
 
-// GClass2800
+// GClass2801
 
 namespace Fika.Core.Networking
 {
@@ -17,14 +17,14 @@ namespace Fika.Core.Networking
 
         /*public class AddressUtils
         {
-            public static void SerializeGridItemAddressDescriptor(NetDataWriter writer, GClass1528 gridItemAddressDescriptor)
+            public static void SerializeGridItemAddressDescriptor(NetDataWriter writer, GridItemAddressDescriptorClass gridItemAddressDescriptor)
             {
                 SerializeLocationInGrid(writer, gridItemAddressDescriptor.LocationInGrid);
             }
 
-            public static GClass1528 DeserializeGridItemAddressDescriptor(NetDataReader reader)
+            public static GridItemAddressDescriptorClass DeserializeGridItemAddressDescriptor(NetDataReader reader)
             {
-                return new GClass1528()
+                return new GridItemAddressDescriptorClass()
                 {
                     LocationInGrid = DeserializeLocationInGrid(reader),
                     Container = DeserializeContainerDescriptor(reader)
@@ -227,13 +227,13 @@ namespace Fika.Core.Networking
             {
                 GClass1489 inventoryDescriptor = new GClass1489()
                 {
-                    Equipment = GClass1524.SerializeItem(inventory.Equipment),
-                    Stash = GClass1524.SerializeItem(inventory.Stash),
-                    QuestRaidItems = GClass1524.SerializeItem(inventory.QuestRaidItems),
-                    QuestStashItems = GClass1524.SerializeItem(inventory.QuestStashItems),
-                    SortingTable = GClass1524.SerializeItem(inventory.SortingTable),
-                    FastAccess = GClass1524.SerializeFastAccess(inventory.FastAccess),
-                    DiscardLimits = GClass1524.SerializeDiscardLimits(inventory.DiscardLimits)
+                    Equipment = GClass1534.SerializeItem(inventory.Equipment),
+                    Stash = GClass1534.SerializeItem(inventory.Stash),
+                    QuestRaidItems = GClass1534.SerializeItem(inventory.QuestRaidItems),
+                    QuestStashItems = GClass1534.SerializeItem(inventory.QuestStashItems),
+                    SortingTable = GClass1534.SerializeItem(inventory.SortingTable),
+                    FastAccess = GClass1534.SerializeFastAccess(inventory.FastAccess),
+                    DiscardLimits = GClass1534.SerializeDiscardLimits(inventory.DiscardLimits)
                 };
                 GClass1081 polyWriter = new();
                 polyWriter.WriteEFTInventoryDescriptor(inventoryDescriptor);
@@ -244,14 +244,14 @@ namespace Fika.Core.Networking
             {
                 using MemoryStream memoryStream = new(inventoryBytes);
                 BinaryReader polyReader = new(memoryStream);
-                Inventory inventory = GClass1524.DeserializeInventory(Singleton<ItemFactory>.Instance, polyReader.ReadEFTInventoryDescriptor());
+                Inventory inventory = GClass1534.DeserializeInventory(Singleton<ItemFactory>.Instance, polyReader.ReadEFTInventoryDescriptor());
                 return inventory;
             }
         }*/
 
-        public struct PlayerInfoPacket()
+        public struct PlayerInfoPacket(Profile profile)
         {
-            public Profile Profile;
+            public Profile Profile = profile;
 
             public static void Serialize(NetDataWriter writer, PlayerInfoPacket packet)
             {
@@ -262,10 +262,7 @@ namespace Fika.Core.Networking
             public static PlayerInfoPacket Deserialize(NetDataReader reader)
             {
                 byte[] profileBytes = reader.GetByteArray();
-                PlayerInfoPacket packet = new()
-                {
-                    Profile = SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>()
-                };
+                PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>());
                 return packet;
             }
         }
@@ -273,14 +270,16 @@ namespace Fika.Core.Networking
         public struct LightStatesPacket
         {
             public int Amount;
-            public GStruct163[] LightStates;
+            public FirearmLightStateStruct[] LightStates;
             public static LightStatesPacket Deserialize(NetDataReader reader)
             {
-                LightStatesPacket packet = new();
-                packet.Amount = reader.GetInt();
+                LightStatesPacket packet = new()
+                {
+                    Amount = reader.GetInt()
+                };
                 if (packet.Amount > 0)
                 {
-                    packet.LightStates = new GStruct163[packet.Amount];
+                    packet.LightStates = new FirearmLightStateStruct[packet.Amount];
                     for (int i = 0; i < packet.Amount; i++)
                     {
                         packet.LightStates[i] = new()
@@ -312,14 +311,16 @@ namespace Fika.Core.Networking
         public struct HeadLightsPacket
         {
             public int Amount;
-            public GStruct163[] LightStates;
+            public FirearmLightStateStruct[] LightStates;
             public static HeadLightsPacket Deserialize(NetDataReader reader)
             {
-                HeadLightsPacket packet = new();
-                packet.Amount = reader.GetInt();
+                HeadLightsPacket packet = new()
+                {
+                    Amount = reader.GetInt()
+                };
                 if (packet.Amount > 0)
                 {
-                    packet.LightStates = new GStruct163[packet.Amount];
+                    packet.LightStates = new FirearmLightStateStruct[packet.Amount];
                     for (int i = 0; i < packet.Amount; i++)
                     {
                         packet.LightStates[i] = new()
@@ -351,17 +352,17 @@ namespace Fika.Core.Networking
         public struct ScopeStatesPacket
         {
             public int Amount;
-            public GStruct164[] GStruct164;
+            public FirearmScopeStateStruct[] FirearmScopeStateStruct;
             public static ScopeStatesPacket Deserialize(NetDataReader reader)
             {
                 ScopeStatesPacket packet = new();
                 packet.Amount = reader.GetInt();
                 if (packet.Amount > 0)
                 {
-                    packet.GStruct164 = new GStruct164[packet.Amount];
+                    packet.FirearmScopeStateStruct = new FirearmScopeStateStruct[packet.Amount];
                     for (int i = 0; i < packet.Amount; i++)
                     {
-                        packet.GStruct164[i] = new()
+                        packet.FirearmScopeStateStruct[i] = new()
                         {
                             Id = reader.GetString(),
                             ScopeMode = reader.GetInt(),
@@ -380,10 +381,10 @@ namespace Fika.Core.Networking
                 {
                     for (int i = 0; i < packet.Amount; i++)
                     {
-                        writer.Put(packet.GStruct164[i].Id);
-                        writer.Put(packet.GStruct164[i].ScopeMode);
-                        writer.Put(packet.GStruct164[i].ScopeIndexInsideSight);
-                        writer.Put(packet.GStruct164[i].ScopeCalibrationIndex);
+                        writer.Put(packet.FirearmScopeStateStruct[i].Id);
+                        writer.Put(packet.FirearmScopeStateStruct[i].ScopeMode);
+                        writer.Put(packet.FirearmScopeStateStruct[i].ScopeIndexInsideSight);
+                        writer.Put(packet.FirearmScopeStateStruct[i].ScopeCalibrationIndex);
                     }
                 }
             }
@@ -509,7 +510,7 @@ namespace Fika.Core.Networking
 
             public static CylinderMagPacket Deserialize(NetDataReader reader)
             {
-                CylinderMagPacket packet = new CylinderMagPacket();
+                CylinderMagPacket packet = new();
                 packet.Changed = reader.GetBool();
                 if (packet.Changed)
                 {
@@ -631,72 +632,6 @@ namespace Fika.Core.Networking
                     writer.Put(packet.ThrowForce);
                     writer.Put(packet.LowThrow);
                 }
-            }
-        }
-
-        public struct ApplyShotPacket()
-        {
-            public EDamageType DamageType;
-            public float Damage;
-            public EBodyPart BodyPartType;
-            public EBodyPartColliderType ColliderType;
-            public EArmorPlateCollider ArmorPlateCollider;
-            public float Absorbed;
-            public Vector3 Direction = Vector3.zero;
-            public Vector3 Point = Vector3.zero;
-            public Vector3 HitNormal = Vector3.zero;
-            public float PenetrationPower = 0f;
-            public string BlockedBy;
-            public string DeflectedBy;
-            public string SourceId;
-            public string AmmoId;
-            public int FragmentIndex;
-            public float ArmorDamage = 0f;
-            public string ProfileId;
-
-            public static ApplyShotPacket Deserialize(NetDataReader reader)
-            {
-                ApplyShotPacket packet = new()
-                {
-                    DamageType = (EDamageType)reader.GetInt(),
-                    Damage = reader.GetFloat(),
-                    BodyPartType = (EBodyPart)reader.GetInt(),
-                    ColliderType = (EBodyPartColliderType)reader.GetInt(),
-                    ArmorPlateCollider = (EArmorPlateCollider)reader.GetInt(),
-                    Absorbed = reader.GetFloat(),
-                    Direction = reader.GetVector3(),
-                    Point = reader.GetVector3(),
-                    HitNormal = reader.GetVector3(),
-                    PenetrationPower = reader.GetFloat(),
-                    BlockedBy = reader.GetString(),
-                    DeflectedBy = reader.GetString(),
-                    SourceId = reader.GetString(),
-                    AmmoId = reader.GetString(),
-                    FragmentIndex = reader.GetInt(),
-                    ArmorDamage = reader.GetFloat(),
-                    ProfileId = reader.GetString()
-                };
-                return packet;
-            }
-            public static void Serialize(NetDataWriter writer, ApplyShotPacket packet)
-            {
-                writer.Put((int)packet.DamageType);
-                writer.Put(packet.Damage);
-                writer.Put((int)packet.BodyPartType);
-                writer.Put((int)packet.ColliderType);
-                writer.Put((int)packet.ArmorPlateCollider);
-                writer.Put(packet.Absorbed);
-                writer.Put(packet.Direction);
-                writer.Put(packet.Point);
-                writer.Put(packet.HitNormal);
-                writer.Put(packet.PenetrationPower);
-                writer.Put(packet.BlockedBy);
-                writer.Put(packet.DeflectedBy);
-                writer.Put(packet.SourceId);
-                writer.Put(packet.AmmoId);
-                writer.Put(packet.FragmentIndex);
-                writer.Put(packet.ArmorDamage);
-                writer.Put(packet.ProfileId);
             }
         }
 
@@ -892,7 +827,6 @@ namespace Fika.Core.Networking
         public struct ShotInfoPacket()
         {
 
-            public bool IsPrimaryActive = true;
             public EShotType ShotType = EShotType.Unknown;
             public int AmmoAfterShot = 0;
             public Vector3 ShotPosition = Vector3.zero;
@@ -910,7 +844,6 @@ namespace Fika.Core.Networking
             {
                 ShotInfoPacket packet = new()
                 {
-                    IsPrimaryActive = reader.GetBool(),
                     ShotType = (EShotType)reader.GetInt(),
                     AmmoAfterShot = reader.GetInt(),
                     ShotPosition = reader.GetVector3(),
@@ -929,7 +862,6 @@ namespace Fika.Core.Networking
             }
             public static void Serialize(NetDataWriter writer, ShotInfoPacket packet)
             {
-                writer.Put(packet.IsPrimaryActive);
                 writer.Put((int)packet.ShotType);
                 writer.Put(packet.AmmoAfterShot);
                 writer.Put(packet.ShotPosition);
@@ -953,7 +885,7 @@ namespace Fika.Core.Networking
 
             public static SearchPacket Deserialize(NetDataReader reader)
             {
-                SearchPacket packet = new SearchPacket()
+                SearchPacket packet = new()
                 {
                     IsStop = reader.GetBool(),
                     ItemId = reader.GetString(),
@@ -1119,8 +1051,8 @@ namespace Fika.Core.Networking
                     LeftSideState = reader.GetByte(),
                     RouteState = reader.GetByte(),
                     State = reader.GetByte(),
-                    gunsBlockRotation = reader.GetQuaternion(),
-                    turretRotation = reader.GetQuaternion(),
+                    gunsBlockRotation = reader.GetFloat(),
+                    turretRotation = reader.GetFloat(),
                     rotation = reader.GetQuaternion()
                 };
             }

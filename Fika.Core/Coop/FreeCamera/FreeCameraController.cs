@@ -27,7 +27,7 @@ namespace Fika.Core.Coop.FreeCamera
         //private GameObject _mainCamera;
         private FreeCamera _freeCamScript;
 
-        private BattleUIScreen _playerUi;
+        private EftBattleUIScreen _playerUi;
         private bool _uiHidden;
 
         private bool _effectsCleared = false;
@@ -46,6 +46,7 @@ namespace Fika.Core.Coop.FreeCamera
         private bool deathFadeEnabled;
         private DisablerCullingObjectBase[] allCullingObjects;
         private List<PerfectCullingBakeGroup> previouslyActiveBakeGroups;
+        private bool hasEnabledCulling = false;
 
         protected void Awake()
         {
@@ -145,8 +146,8 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (quitState == CoopHandler.EQuitState.YouHaveExtracted && !extracted)
             {
-                CoopGame coopGame = (CoopGame)coopHandler.LocalGameInstance;
-                if (coopGame.ExtractedPlayers.Contains((_player).NetId))
+                CoopGame coopGame = coopHandler.LocalGameInstance;
+                if (coopGame.ExtractedPlayers.Contains(_player.NetId))
                 {
                     extracted = true;
                     ShowExtractMessage();
@@ -227,16 +228,16 @@ namespace Fika.Core.Coop.FreeCamera
 
             Traverse effectsController = Traverse.Create(cameraClass.EffectsController);
 
-            BloodOnScreen bloodOnScreen = effectsController.Field("bloodOnScreen_0").GetValue<BloodOnScreen>();
+            BloodOnScreen bloodOnScreen = effectsController.Field<BloodOnScreen>("bloodOnScreen_0").Value;
             if (bloodOnScreen != null)
             {
                 Destroy(bloodOnScreen);
             }
 
-            List<EffectsController.Class566> effectsManagerList = effectsController.Field("list_0").GetValue<List<EffectsController.Class566>>();
+            List<EffectsController.Class576> effectsManagerList = effectsController.Field<List<EffectsController.Class576>>("list_0").Value;
             if (effectsManagerList != null)
             {
-                foreach (EffectsController.Class566 effectsManager in effectsManagerList)
+                foreach (EffectsController.Class576 effectsManager in effectsManagerList)
                 {
                     while (effectsManager.ActiveEffects.Count > 0)
                     {
@@ -267,8 +268,14 @@ namespace Fika.Core.Coop.FreeCamera
             Destroy(cameraClass.VisorEffect);
             cameraClass.VisorSwitcher.Deinit();
             Destroy(cameraClass.VisorSwitcher);
-            Destroy(cameraClass.NightVision);
-            Destroy(cameraClass.ThermalVision);
+            if (cameraClass.NightVision.On)
+            {
+                cameraClass.NightVision.method_1(false);
+            }
+            if (cameraClass.ThermalVision.On)
+            {
+                cameraClass.ThermalVision.method_1(false);
+            }
         }
 
         private void ShowExtractMessage()
@@ -326,7 +333,7 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                _playerUi = gameObject.GetComponent<BattleUIScreen>();
+                _playerUi = gameObject.GetComponent<EftBattleUIScreen>();
 
                 if (_playerUi == null)
                 {
@@ -362,7 +369,29 @@ namespace Fika.Core.Coop.FreeCamera
 
             _gamePlayerOwner.enabled = false;
             _freeCamScript.SetActive(true);
+        }
 
+        /// <summary>
+        /// A helper method to reset the player view back to First Person
+        /// </summary>
+        /// <param name="localPlayer"></param>
+        private void SetPlayerToFirstPersonMode(Player localPlayer)
+        {
+            // re-enable _gamePlayerOwner
+            _gamePlayerOwner.enabled = true;
+            _freeCamScript.SetActive(false);
+
+            localPlayer.PointOfView = EPointOfView.FirstPerson;
+            CameraClass.Instance.SetOcclusionCullingEnabled(true);
+
+            if (hasEnabledCulling)
+            {
+                EnableAllCullingObjects();
+            }
+        }
+
+        public void DisableAllCullingObjects()
+        {
             int count = 0;
             foreach (DisablerCullingObjectBase cullingObject in allCullingObjects)
             {
@@ -373,7 +402,9 @@ namespace Fika.Core.Coop.FreeCamera
                 count++;
                 cullingObject.SetComponentsEnabled(true);
             }
-            FikaPlugin.Instance.FikaLogger.LogDebug($"Enabled {count} Culling Triggers.");
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogWarning($"Enabled {count} Culling Triggers.");
+#endif
 
             PerfectCullingAdaptiveGrid perfectCullingAdaptiveGrid = FindObjectOfType<PerfectCullingAdaptiveGrid>();
             if (perfectCullingAdaptiveGrid != null)
@@ -398,21 +429,12 @@ namespace Fika.Core.Coop.FreeCamera
                     }
                 }
             }
+
+            hasEnabledCulling = true;
         }
 
-        /// <summary>
-        /// A helper method to reset the player view back to First Person
-        /// </summary>
-        /// <param name="localPlayer"></param>
-        private void SetPlayerToFirstPersonMode(Player localPlayer)
+        public void EnableAllCullingObjects()
         {
-            // re-enable _gamePlayerOwner
-            _gamePlayerOwner.enabled = true;
-            _freeCamScript.SetActive(false);
-
-            localPlayer.PointOfView = EPointOfView.FirstPerson;
-            CameraClass.Instance.SetOcclusionCullingEnabled(true);
-
             int count = 0;
             foreach (DisablerCullingObjectBase cullingObject in allCullingObjects)
             {
@@ -423,7 +445,9 @@ namespace Fika.Core.Coop.FreeCamera
                 count++;
                 cullingObject.SetComponentsEnabled(false);
             }
-            FikaPlugin.Instance.FikaLogger.LogDebug($"Disabled {count} Culling Triggers.");
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogWarning($"Disabled {count} Culling Triggers.");
+#endif
 
             PerfectCullingAdaptiveGrid perfectCullingAdaptiveGrid = FindObjectOfType<PerfectCullingAdaptiveGrid>();
             if (perfectCullingAdaptiveGrid != null)
@@ -450,6 +474,8 @@ namespace Fika.Core.Coop.FreeCamera
                     }
                 }
             }
+
+            hasEnabledCulling = false;
         }
 
         /// <summary>

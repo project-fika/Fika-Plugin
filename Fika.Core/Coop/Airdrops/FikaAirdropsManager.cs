@@ -1,15 +1,13 @@
-﻿using Aki.Custom.Airdrops.Models;
-using Aki.Custom.Airdrops.Utils;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using Fika.Core.AkiSupport.Airdrops;
-using Fika.Core.AkiSupport.Airdrops.Models;
-using Fika.Core.AkiSupport.Airdrops.Utils;
+using Fika.Core.Coop.Airdrops;
+using Fika.Core.Coop.Airdrops.Models;
+using Fika.Core.Coop.Airdrops.Utils;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Matchmaker;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -17,11 +15,11 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace Aki.Custom.Airdrops
+namespace Coop.Airdrops
 {
     /// <summary>
-    /// Created by: SPT-Aki team
-    /// Link: https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/project/Aki.Custom/Airdrops/AirdropsManager.cs
+    /// Created by: SPT team
+    /// Link: https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/project/SPT.Custom/Airdrops/AirdropsManager.cs
     /// Modified by Lacyway and nexus4880: Uses BSG code to serialize/deserialize data from host to clients
     /// </summary>
     public class FikaAirdropsManager : MonoBehaviour
@@ -84,7 +82,7 @@ namespace Aki.Custom.Airdrops
             }
 
             // If this is not the server, then this manager will have to wait for the packet to initialize stuff.
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 return;
             }
@@ -110,17 +108,15 @@ namespace Aki.Custom.Airdrops
 
             try
             {
-                airdropPlane = await FikaAirdropPlane.Init(
-                    AirdropParameters.RandomAirdropPoint,
-                    AirdropParameters.DropHeight,
-                    AirdropParameters.Config.PlaneVolume,
+                airdropPlane = await FikaAirdropPlane.Init(AirdropParameters.RandomAirdropPoint,
+                    AirdropParameters.DropHeight, AirdropParameters.Config.PlaneVolume,
                     AirdropParameters.Config.PlaneSpeed);
                 AirdropBox = await FikaAirdropBox.Init(AirdropParameters.Config.CrateFallSpeed);
                 factory = new FikaItemFactoryUtil();
             }
             catch
             {
-                Logger.LogError("[AKI-AIRDROPS]: Unable to create plane or crate, airdrop won't occur");
+                Logger.LogError("[SPT-AIRDROPS]: Unable to create plane or crate, airdrop won't occur");
                 Destroy(this);
                 throw;
             }
@@ -132,7 +128,7 @@ namespace Aki.Custom.Airdrops
 
         public void SendParamsToClients()
         {
-            if (!MatchmakerAcceptPatches.IsServer)
+            if (!FikaBackendUtils.IsServer)
             {
                 return;
             }
@@ -166,13 +162,13 @@ namespace Aki.Custom.Airdrops
             }
 
             // If we are a client. Wait until the server has sent all the data.
-            if (MatchmakerAcceptPatches.IsClient && rootItem == null)
+            if (FikaBackendUtils.IsClient && rootItem == null)
             {
                 return;
             }
 
             // If we have all the parameters sent from the Server. Lets build the plane, box, container and loot
-            if (MatchmakerAcceptPatches.IsClient && !ClientLootBuilt)
+            if (FikaBackendUtils.IsClient && !ClientLootBuilt)
             {
                 ClientLootBuilt = true;
 
@@ -212,7 +208,7 @@ namespace Aki.Custom.Airdrops
                 return;
             }
 
-            if (MatchmakerAcceptPatches.IsServer || MatchmakerAcceptPatches.IsSinglePlayer)
+            if (FikaBackendUtils.IsServer || FikaBackendUtils.IsSinglePlayer)
             {
                 AirdropParameters.Timer += 0.02f;
 
@@ -273,7 +269,7 @@ namespace Aki.Custom.Airdrops
 
         private void BuildLootContainer(FikaAirdropConfigModel config)
         {
-            if (MatchmakerAcceptPatches.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 return;
             }
@@ -301,7 +297,7 @@ namespace Aki.Custom.Airdrops
             }
 
             // Get the lootData. Send to clients.
-            if (MatchmakerAcceptPatches.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 StartCoroutine(SendLootToClients(isFlareDrop));
             }

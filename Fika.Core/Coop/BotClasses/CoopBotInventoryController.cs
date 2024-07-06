@@ -14,7 +14,7 @@ namespace Fika.Core.Coop.BotClasses
     {
         private readonly CoopBot CoopBot = (CoopBot)player;
 
-        public override void Execute(GClass2837 operation, [CanBeNull] Callback callback)
+        public override void Execute(GClass2854 operation, [CanBeNull] Callback callback)
         {
             base.Execute(operation, callback);
 
@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.BotClasses
 
             using MemoryStream memoryStream = new();
             using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.WritePolymorph(GClass1632.FromInventoryOperation(operation, false));
+            binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
             byte[] opBytes = memoryStream.ToArray();
             packet.ItemControllerExecutePacket = new()
             {

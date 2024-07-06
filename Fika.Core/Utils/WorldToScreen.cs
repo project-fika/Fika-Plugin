@@ -8,7 +8,7 @@ namespace Fika.Core.Utils
 {
     public static class WorldToScreen
     {
-        public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint)
+        public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true)
         {
             CameraClass worldCameraInstance = CameraClass.Instance;
             Camera worldCamera = worldCameraInstance.Camera;
@@ -22,7 +22,7 @@ namespace Fika.Core.Utils
 
             ProceduralWeaponAnimation weaponAnimation = mainPlayer.ProceduralWeaponAnimation;
 
-            if (weaponAnimation != null)
+            if (useOpticCamera && weaponAnimation != null)
             {
                 if (weaponAnimation.IsAiming && weaponAnimation.CurrentScope.IsOptic)
                 {
@@ -33,8 +33,8 @@ namespace Fika.Core.Utils
                         Vector3 opticCenterScreenPosition = GetOpticCenterScreenPosition(weaponAnimation, worldCamera);
                         Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(Screen.width, Screen.height, 0f) / 2);
 
-                        float opticScale = (Screen.height / opticCamera.scaledPixelHeight);
-                        Vector3 opticCameraOffset = new Vector3((worldCamera.pixelWidth / 2 - opticCamera.pixelWidth / 2), (worldCamera.pixelHeight / 2 - opticCamera.pixelHeight / 2), 0);
+                        float opticScale = Screen.height / opticCamera.scaledPixelHeight;
+                        Vector3 opticCameraOffset = new(worldCamera.pixelWidth / 2 - opticCamera.pixelWidth / 2, worldCamera.pixelHeight / 2 - opticCamera.pixelHeight / 2, 0);
                         Vector3 opticScreenPoint = (opticCamera.WorldToScreenPoint(worldPosition) + opticCameraOffset) * opticScale;
 
                         if (opticScreenPoint.z > 0f)

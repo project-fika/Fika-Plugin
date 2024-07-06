@@ -6,6 +6,7 @@ using EFT.Weather;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections;
@@ -25,6 +26,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public NetDataWriter Writer { get; set; } = new();
         public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
         public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
+        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
         public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
@@ -33,9 +35,26 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             player = GetComponent<CoopPlayer>();
             Client = Singleton<FikaClient>.Instance;
+            enabled = false;
+        }
 
+        public void Init()
+        {
+            enabled = true;
             StartCoroutine(SyncWorld());
             StartCoroutine(SyncWeather());
+        }
+
+        public void SendQuestPacket(ref QuestConditionPacket packet)
+        {
+            Writer.Reset();
+            Client.SendData(Writer, ref packet, DeliveryMethod.ReliableUnordered);
+        }
+
+        public void SendQuestItemPacket(ref QuestItemPacket packet)
+        {
+            Writer.Reset();
+            Client.SendData(Writer, ref packet, DeliveryMethod.ReliableUnordered);
         }
 
         protected void FixedUpdate()
@@ -45,12 +64,14 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
-            PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation,
-                            player.LastDirection, player.CurrentManagedState.Name, player.MovementContext.SmoothedTilt,
-                            player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-                            player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-                            player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled, player.MovementContext.IsGrounded,
-                            player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
+            PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation,
+                player.HeadRotation, player.LastDirection, player.CurrentManagedState.Name,
+                player.MovementContext.SmoothedTilt, player.MovementContext.Step, player.CurrentAnimatorStateIndex,
+                player.MovementContext.SmoothedCharacterMovementSpeed, player.IsInPronePose, player.PoseLevel,
+                player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
+                player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
+                player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface,
+                player.MovementContext.SurfaceNormal);
 
             Writer.Reset();
             Client.SendData(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
@@ -75,16 +96,28 @@ namespace Fika.Core.Coop.PacketHandlers
                     Client.SendData(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
-            int healthPackets = DamagePackets.Count;
-            if (healthPackets > 0)
+            int damagePackets = DamagePackets.Count;
+            if (damagePackets > 0)
             {
-                for (int i = 0; i < healthPackets; i++)
+                for (int i = 0; i < damagePackets; i++)
                 {
-                    DamagePacket healthPacket = DamagePackets.Dequeue();
-                    healthPacket.NetId = player.NetId;
+                    DamagePacket damagePacket = DamagePackets.Dequeue();
+                    damagePacket.NetId = player.NetId;
 
                     Writer.Reset();
-                    Client.SendData(Writer, ref healthPacket, DeliveryMethod.ReliableOrdered);
+                    Client.SendData(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+                }
+            }
+            int armorDamagePackets = ArmorDamagePackets.Count;
+            if (armorDamagePackets > 0)
+            {
+                for (int i = 0; i < armorDamagePackets; i++)
+                {
+                    ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
+                    armorDamagePacket.NetId = player.NetId;
+
+                    Writer.Reset();
+                    Client.SendData(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
                 }
             }
             int inventoryPackets = InventoryPackets.Count;

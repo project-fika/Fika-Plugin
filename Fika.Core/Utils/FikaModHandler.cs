@@ -1,44 +1,111 @@
-﻿using BepInEx.Bootstrap;
+﻿using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Logging;
+using Comfort.Common;
+using EFT;
+using EFT.UI;
+using Fika.Core.Networking.Http.Models;
+using LiteNetLib.Utils;
+using Newtonsoft.Json;
+using SPT.Common.Http;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using Logger = BepInEx.Logging.Logger;
 
 namespace Fika.Core.Utils
 {
     public class FikaModHandler
     {
-        private string[] loadedMods;
         private readonly ManualLogSource logger = Logger.CreateLogSource("FikaModHandler");
 
         public bool QuestingBotsLoaded = false;
         public bool SAINLoaded = false;
 
-        public void Run()
+        public void VerifyMods()
         {
-            // Store all loaded plugins (mods) to improve compatibility
-            List<string> tempPluginInfos = [];
+            PluginInfo[] pluginInfos = [.. Chainloader.PluginInfos.Values];
 
-            foreach (string key in Chainloader.PluginInfos.Keys)
+            // Set capacity to avoid unnecessarily resizing for people who have a lot of mods loaded
+            Dictionary<string, uint> loadedMods = new(pluginInfos.Length);
+
+            foreach (PluginInfo pluginInfo in pluginInfos)
             {
-                logger.LogInfo($"Adding {key}, {Chainloader.PluginInfos[key].Metadata.Name} to loaded mods.");
-                tempPluginInfos.Add(key);
-                CheckSpecialMods(key);
+                string location = pluginInfo.Location;
+                byte[] fileBytes = File.ReadAllBytes(location);
+                uint crc32 = CRC32C.Compute(fileBytes, 0, fileBytes.Length);
+                loadedMods.Add(pluginInfo.Metadata.GUID, crc32);
+                logger.LogInfo($"Loaded plugin: [{pluginInfo.Metadata.Name}] with GUID [{pluginInfo.Metadata.GUID}] and crc32 [{crc32}]");
+                CheckSpecialMods(pluginInfo.Metadata.GUID);
             }
 
-            loadedMods = [.. tempPluginInfos];
+            string modValidationRequestJson = JsonConvert.SerializeObject(loadedMods);
+            logger.LogDebug(modValidationRequestJson);
 
-            logger.LogInfo($"Loaded {loadedMods.Length} mods!");
+            string validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
+            logger.LogDebug(validationJson);
+
+            ModValidationResponse validationResult =
+                JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
+
+            // If any errors were detected we will print what has happened
+            bool installationError =
+                validationResult.Forbidden.Length > 0 ||
+                validationResult.MissingRequired.Length > 0 ||
+                validationResult.HashMismatch.Length > 0;
+
+            if (validationResult.Forbidden.Length > 0)
+            {
+                logger.LogError($"{validationResult.Forbidden.Length} forbidden mod(s) are loaded, have the server host allow or remove the following mods: {string.Join(", ", validationResult.Forbidden)}");
+            }
+
+            if (validationResult.MissingRequired.Length > 0)
+            {
+                logger.LogError($"{validationResult.MissingRequired.Length} missing required mod(s), verify the following mods are present: {string.Join(", ", validationResult.MissingRequired)}");
+            }
+
+            if (validationResult.HashMismatch.Length > 0)
+            {
+                logger.LogWarning($"{validationResult.HashMismatch.Length} mismatched mod(s) are loaded, verify the following mods are up to date with the server host: {string.Join(", ", validationResult.HashMismatch)}");
+            }
+
+            if (installationError)
+            {
+                StaticManager.BeginCoroutine(InformInstallationError());
+            }
+        }
+
+        private IEnumerator InformInstallationError()
+        {
+            while (!Singleton<PreloaderUI>.Instantiated)
+            {
+                yield return null;
+            }
+
+            string message = "Your client doesn't meet server requirements, check logs for more details";
+
+            // -1f time makes the message permanent
+            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
+                ErrorScreen.EButtonType.QuitButton, -1f, Application.Quit, null);
         }
 
         private void CheckSpecialMods(string key)
         {
-            if (key == "com.DanW.QuestingBots")
+            switch (key)
             {
-                QuestingBotsLoaded = true;
-            }
+                case "com.DanW.QuestingBots":
+                    {
+                        QuestingBotsLoaded = true;
 
-            if (key == "me.sol.sain")
-            {
-                SAINLoaded = true;
+                        break;
+                    }
+                case "me.sol.sain":
+                    {
+                        SAINLoaded = true;
+
+                        break;
+                    }
             }
         }
     }

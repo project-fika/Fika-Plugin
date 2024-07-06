@@ -1,9 +1,9 @@
-﻿using Aki.Reflection.Patching;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
-using Fika.Core.Coop.Matchmaker;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
+using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.Patches
         {
             if (player is ObservedCoopPlayer)
             {
-                if (MatchmakerAcceptPatches.IsServer)
+                if (FikaBackendUtils.IsServer)
                 {
                     Vector3 position = player.Position;
                     foreach (IPlayer player2 in ___TargetedPlayers.Concat(___NotTargetedPlayers).ToList())
@@ -65,10 +65,10 @@ namespace Fika.Core.Coop.Patches
                 IEnumerable<BodyPartCollider> enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_4))
                     : player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_5));
 
-                enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2286.class2286_0.method_0)).ToArray();
+                enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2316.class2316_0.method_0)).ToArray();
                 enumerable = enumerable.Randomize();
 
-                int num3 = ((isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue);
+                int num3 = (isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue;
                 float num4 = (isCollateral || first) ? firstExplosionDamage : secondExplosionDamage;
                 int num5 = 0;
 
@@ -76,17 +76,14 @@ namespace Fika.Core.Coop.Patches
                 {
                     coopPlayer.PacketSender.DamagePackets.Enqueue(new()
                     {
-                        DamageInfo = new()
-                        {
-                            DamageType = EDamageType.Landmine,
-                            Damage = num4 * num2,
-                            ArmorDamage = 0.5f,
-                            PenetrationPower = 30f,
-                            Direction = Vector3.zero,
-                            HitNormal = Vector3.zero,
-                            ColliderType = bodyPartCollider.BodyPartColliderType,
-                            BodyPartType = bodyPartCollider.BodyPartType
-                        }
+                        DamageType = EDamageType.Landmine,
+                        Damage = num4 * num2,
+                        ArmorDamage = 0.5f,
+                        PenetrationPower = 30f,
+                        Direction = Vector3.zero,
+                        HitNormal = Vector3.zero,
+                        ColliderType = bodyPartCollider.BodyPartColliderType,
+                        BodyPartType = bodyPartCollider.BodyPartType
                     });
                     if (++num5 >= num3)
                     {

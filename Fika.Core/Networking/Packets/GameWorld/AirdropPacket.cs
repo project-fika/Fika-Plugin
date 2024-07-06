@@ -1,7 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using Aki.Custom.Airdrops.Models;
 using ComponentAce.Compression.Libs.zlib;
+using Fika.Core.Coop.Airdrops.Models;
 using LiteNetLib.Utils;
 using UnityEngine;
 

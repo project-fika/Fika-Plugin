@@ -33,18 +33,15 @@ namespace Fika.Core.Coop.Players
         /// The amount of players that have loaded this bot
         /// </summary>
         public int loadedPlayers = 0;
-        //private FikaDynamicAI dynamicAi;
         private bool firstEnabled;
 
         public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-            Func<float> getAimingSensitivity, GInterface99 filter)
+            Func<float> getAimingSensitivity, IViewFilter filter)
         {
-            CoopBot player = null;
-
-            player = Create<CoopBot>(GClass1388.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+            CoopBot player = Create<CoopBot>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
 
             player.IsYourPlayer = false;
@@ -61,11 +58,14 @@ namespace Fika.Core.Coop.Players
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
+
             player.AIData = new AIData(null, player)
             {
                 IsAI = true
             };
+
             player.AggressorFound = false;
+
             player._animators[0].enabled = true;
             player._armsUpdateQueue = EUpdateQueue.Update;
 
@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public override void OnSkillLevelChanged(GClass1766 skill)
+        public override void OnSkillLevelChanged(GClass1778 skill)
         {
             // Do nothing
         }
@@ -93,15 +93,7 @@ namespace Fika.Core.Coop.Players
             MovementContext = BotMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon), new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
         }
 
-        /*public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
-        {
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
-                return;
-
-            base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
-        }*/
-
-        public override GClass1676 ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct390 shotId)
+        public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
         {
             if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
             {
@@ -120,11 +112,11 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            MaterialType materialType = (flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material));
-            GClass1676 hitInfo = new()
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
-                Penetrated = (string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy)),
+                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                 Material = materialType
             };
             float num = damage - damageInfo.Damage;
@@ -135,15 +127,13 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
-            return hitInfo;
-        }
 
-        protected override void Start()
-        {
-            if (FikaPlugin.DisableBotMetabolism.Value)
+            if (list != null)
             {
-                HealthController.DisableMetabolism();
+                QueueArmorDamagePackets([.. list]);
             }
+
+            return hitInfo;
         }
 
         public override void BtrInteraction()
@@ -214,18 +204,18 @@ namespace Fika.Core.Coop.Players
                             // This one is already handled by SPT, so we do not add directly to profile until they move it to client side
                             // They also do a flat value of 0.02 rather than 0.01 for 1 scav kill or 0.03 for >1
                             LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.02, [CounterTag.FenceStanding, EFenceStandingSource.ScavHelp]);
-                            //LastAggressor.Profile.FenceInfo.AddStanding(0.01, EFenceStandingSource.ScavHelp);
+                            LastAggressor.Profile.FenceInfo.AddStanding(0.01, EFenceStandingSource.ScavHelp);
                         }
                         else if (Side == EPlayerSide.Savage)
                         {
-                            //LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.03, [CounterTag.FenceStanding, EFenceStandingSource.TraitorKill]);
+                            LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.03, [CounterTag.FenceStanding, EFenceStandingSource.TraitorKill]);
                             LastAggressor.Profile.FenceInfo.AddStanding(0.03, EFenceStandingSource.TraitorKill);
                         }
                     }
                 }
             }
 
-            CoopGame coopGame = (CoopGame)Singleton<IBotGame>.Instance;
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Bots.ContainsKey(ProfileId))
             {
                 coopGame.Bots.Remove(ProfileId);
@@ -242,6 +232,11 @@ namespace Fika.Core.Coop.Players
             {
                 PacketSender.DestroyThis();
             }
+        }
+
+        public override void ShowHelloNotification(string sender)
+        {
+            // Do nothing
         }
 
         public override void UpdateTick()
@@ -294,7 +289,7 @@ namespace Fika.Core.Coop.Players
         public override void OnDestroy()
         {
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo("Destroying " + ProfileId); 
+            FikaPlugin.Instance.FikaLogger.LogInfo("Destroying " + ProfileId);
 #endif
             if (Singleton<FikaServer>.Instantiated)
             {
@@ -308,6 +303,11 @@ namespace Fika.Core.Coop.Players
                         BotNetId = NetId
                     };
                     server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+                    if (!coopGame.Bots.Remove(ProfileId))
+                    {
+                        FikaPlugin.Instance.FikaLogger.LogWarning("Unable to remove " + ProfileId + " from CoopGame.Bots when Destroying");
+                    }
                 }
             }
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
