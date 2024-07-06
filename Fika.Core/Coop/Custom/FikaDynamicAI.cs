@@ -118,7 +118,13 @@ namespace Fika.Core.Coop.Custom
             bot.AIData.BotOwner.DecisionQueue.Clear();
             bot.AIData.BotOwner.Memory.GoalEnemy = null;
             bot.AIData.BotOwner.PatrollingData.Pause();
-            bot.AIData.BotOwner.ShootData.EndShoot();
+            ShootData shootData = bot.AIData.BotOwner.ShootData;
+            shootData.method_5();
+            shootData.Shooting = false;
+            if (shootData.ShootController != null)
+            {
+                shootData.ShootController.SetTriggerPressed(false);
+            }
             bot.ActiveHealthController.PauseAllEffects();
             bot.gameObject.SetActive(false);
 
