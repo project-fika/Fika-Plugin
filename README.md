@@ -25,11 +25,9 @@ to make your code coherent for the other developers.
 
 ## Setup
 
-- Fika developer: `git submodule update --init --recursive`
-- Collaborator:
-  1. Copy-paste the contents of `EscapeFromTarkov_Data/Managed/` into
+1. Copy-paste the contents of `EscapeFromTarkov_Data/Managed/` into
     `References/`
-  2. Copy-paste from Aki.Modules `project/Shared/Hollowed/hollowed.dll` into
+2. Copy-paste from SPT.Modules `project/Shared/Hollowed/hollowed.dll` into
     `References/`
 
 ## Build
@@ -59,7 +57,7 @@ This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/lic
 
 **Project** | **License**
 ----------- | -----------------------------------------------------------------------
-Aki.Modules | [NCSA](https://dev.sp-tarkov.com/SPT-AKI/Modules/src/branch/master/LICENSE.md)
+SPT.Modules | [NCSA](https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/LICENSE.md)
 SIT         | [NCSA](./LICENSE-SIT.md) (`Forked from SIT.Client master:9de30d8`)
 Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE) (for UPnP implementation)
 LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt) (for P2P UDP implementation)
