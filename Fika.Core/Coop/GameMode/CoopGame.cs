@@ -338,7 +338,7 @@ namespace Fika.Core.Coop.GameMode
             string furthestBot = string.Empty;
             furthestDistance = 0f;
 
-            foreach (var botKeyValuePair in Bots)
+            foreach (KeyValuePair<string, Player> botKeyValuePair in Bots)
             {
                 if (IsInvalidBotForDespawning(botKeyValuePair))
                 {
@@ -1884,7 +1884,7 @@ namespace Fika.Core.Coop.GameMode
         {
             if (hasSaved)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             if (fromDeath)
@@ -1912,7 +1912,7 @@ namespace Fika.Core.Coop.GameMode
 
             await RequestHandler.PutJsonAsync("/raid/profile/save", saveRequest.ToJson(converters));
             hasSaved = true;
-            return Task.CompletedTask;
+            return;
         }
 
         /// <summary>

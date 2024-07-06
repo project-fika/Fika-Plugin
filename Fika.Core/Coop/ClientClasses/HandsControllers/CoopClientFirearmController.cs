@@ -382,23 +382,6 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void SendScopeStates(FirearmScopeStateStruct[] scopeStates)
         {
-            SendScopeStates(scopeStates);
-            base.SetScopeMode(scopeStates);
-        }
-        public override void OpticCalibrationSwitchUp(GStruct164[] scopeStates)
-        {
-            SendScopeStates(scopeStates);
-            base.OpticCalibrationSwitchUp(scopeStates);
-        }
-
-        public override void OpticCalibrationSwitchDown(GStruct164[] scopeStates)
-        {
-            SendScopeStates(scopeStates);
-            base.OpticCalibrationSwitchDown(scopeStates);
-        }
-
-        private void SendScopeStates(GStruct164[] scopeStates)
-        {
             if (!CurrentOperation.CanChangeScopeStates(scopeStates))
             {
                 return;
