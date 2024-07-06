@@ -1884,7 +1884,7 @@ namespace Fika.Core.Coop.GameMode
         {
             if (hasSaved)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             if (fromDeath)
@@ -1912,6 +1912,7 @@ namespace Fika.Core.Coop.GameMode
 
             await RequestHandler.PutJsonAsync("/raid/profile/save", saveRequest.ToJson(converters));
             hasSaved = true;
+            return Task.CompletedTask;
         }
 
         /// <summary>
