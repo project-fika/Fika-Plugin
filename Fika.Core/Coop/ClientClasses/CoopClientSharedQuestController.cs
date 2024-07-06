@@ -107,7 +107,7 @@ namespace Fika.Core.Coop.ClientClasses
                 if (quest.Id == packet.SourceId && quest.QuestStatus == EQuestStatus.Started)
                 {
                     TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(packet.Id);
-                    if (counter != null)
+                    if (counter != null && !quest.CompletedConditions.Contains(counter.Id))
                     {
                         if (!ValidateQuestType(counter))
                         {
