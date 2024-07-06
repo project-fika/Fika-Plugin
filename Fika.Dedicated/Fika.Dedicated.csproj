@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Build.props" />
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="UnityEngine.Modules" Version="2019.4.39" IncludeAssets="compile" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fika.Core\Fika.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="aki-core">
+      <HintPath>..\References\aki-core.dll</HintPath>
+    </Reference>
+    <Reference Include="aki-custom">
+      <HintPath>..\References\aki-custom.dll</HintPath>
+    </Reference>
+    <Reference Include="aki-debugging">
+      <HintPath>..\References\aki-debugging.dll</HintPath>
+    </Reference>
+    <Reference Include="aki-singleplayer">
+      <HintPath>..\References\aki-singleplayer.dll</HintPath>
+    </Reference>
+    <Reference Include="Aki.Common">
+      <HintPath>..\References\Aki.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Aki.Reflection">
+      <HintPath>..\References\Aki.Reflection.dll</HintPath>
+    </Reference>
+    <Reference Include="AnimationSystem.Types" HintPath="..\References\AnimationSystem.Types.dll" Private="false" />
+    <Reference Include="Assembly-CSharp" HintPath="..\References\hollowed.dll" Private="false" />
+    <Reference Include="bsg.componentace.compression.libs.zlib" HintPath="..\References\bsg.componentace.compression.libs.zlib.dll" Private="false" />
+    <Reference Include="bsg.console.core" HintPath="..\References\bsg.console.core.dll" Private="false" />
+    <Reference Include="Comfort" HintPath="..\References\Comfort.dll" Private="false" />
+    <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
+    <Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
+    <Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
+    <Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
+    <Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />
+    <Reference Include="Sirenix.Serialization" HintPath="..\References\Sirenix.Serialization.dll" Private="false" />
+    <Reference Include="Unity.Postprocessing.Runtime" HintPath="..\References\Unity.Postprocessing.Runtime.dll" Private="false" />
+    <Reference Include="Unity.TextMeshPro" HintPath="..\References\Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath="..\References\UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.UI" HintPath="..\References\UnityEngine.UI.dll" Private="false" />
+    <Reference Include="websocket-sharp">
+      <HintPath>..\References\websocket-sharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
+    <!-- <Exec Command="copy &quot;$(TargetPath)&quot; &quot;Y:\Users\Attacker\Downloads\SPT\BepInEx\plugins&quot;" /> -->
+  </Target>
+</Project>

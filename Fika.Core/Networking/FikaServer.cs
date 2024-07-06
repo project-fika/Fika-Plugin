@@ -848,6 +848,34 @@ namespace Fika.Core.Networking
             {
                 timeSinceLastPeerDisconnected = DateTime.Now;
             }
+
+            if (FikaBackendUtils.IsDedicated)
+            {
+                if (_netServer.ConnectedPeersCount == 0)
+                {
+                    foreach (var profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
+                    {
+                        if (profile is null)
+                        {
+                            continue;
+                        }
+
+                        if (profile.ProfileId == RequestHandler.SessionId)
+                        {
+                            foreach (var bodyPartHealth in profile.Health.BodyParts.Values)
+                            {
+                                bodyPartHealth.Effects.Clear();
+                                bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
+                            }
+                        }
+                    }
+
+                    // End the raid
+                    Singleton<IFikaGame>.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId,
+                            Singleton<IFikaGame>.Instance.MyExitStatus,
+                            Singleton<IFikaGame>.Instance.MyExitLocation, 0);
+                }
+            }
         }
 
         public void WriteNet(NetLogLevel level, string str, params object[] args)
