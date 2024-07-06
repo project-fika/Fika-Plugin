@@ -11,6 +11,7 @@ namespace Fika.Core.Console
 {
     public class FikaCommands
     {
+#if DEBUG
         [ConsoleCommand("bring", "", null, "Teleports all AI to yourself as the host", [])]
         public static void Bring()
         {
@@ -56,7 +57,7 @@ namespace Fika.Core.Console
         }
 
         [ConsoleCommand("god", "", null, "Set god mode on/off", [])]
-        public static void God(bool state)
+        public static void God([ConsoleArgument(false, "true or false to toggle god mode")] bool state)
         {
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
@@ -90,6 +91,7 @@ namespace Fika.Core.Console
                 ConsoleScreen.LogWarning("Could not find CoopHandler.");
             }
         }
+#endif
 
         [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
         public static void Debug(bool state)
