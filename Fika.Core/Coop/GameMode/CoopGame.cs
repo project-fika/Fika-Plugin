@@ -470,14 +470,15 @@ namespace Fika.Core.Coop.GameMode
                 }
 
                 localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
-                   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Manual,
-                   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, () => 1f,
-                   () => 1f, GClass1457.Default);
+                   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
+                   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(LocalGame.Class1394.class1394_0.method_4),
+                   new Func<float>(LocalGame.Class1394.class1394_0.method_5), GClass1457.Default);
 
                 localPlayer.Location = Location_0.Id;
 
                 if (Bots.ContainsKey(localPlayer.ProfileId))
                 {
+                    Logger.LogError($"{profile.ProfileId} already exists in the bots list, cancelling...");
                     Destroy(localPlayer);
                     return null;
                 }
