@@ -4,7 +4,6 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.GlobalEvents;
 using EFT.InventoryLogic;
-using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
@@ -426,7 +425,7 @@ namespace Fika.Core.Coop.BTR
             Collider clientRootCollider = clientColliders.First(x => x.gameObject.name == "Root");
 
             // Retrieve all TerrainColliders
-            List<TerrainCollider> terrainColliders = new List<TerrainCollider>();
+            List<TerrainCollider> terrainColliders = new();
 
             foreach (GPUInstancerManager manager in GPUInstancerManager.activeManagerList)
             {

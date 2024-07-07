@@ -564,7 +564,7 @@ namespace Fika.Core.Coop.BTR
             Collider clientRootCollider = clientColliders.First(x => x.gameObject.name == "Root");
 
             // Retrieve all TerrainColliders
-            List<TerrainCollider> terrainColliders = new List<TerrainCollider>();
+            List<TerrainCollider> terrainColliders = new();
 
             foreach (GPUInstancerManager manager in GPUInstancerManager.activeManagerList)
             {

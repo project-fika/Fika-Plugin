@@ -35,7 +35,6 @@ using JsonType;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
-using SPT.Reflection.Utils;
 using SPT.SinglePlayer.Models.Progression;
 using SPT.SinglePlayer.Utils.Healing;
 using SPT.SinglePlayer.Utils.Insurance;
@@ -1054,7 +1053,7 @@ namespace Fika.Core.Coop.GameMode
                 UpdateQueue, eupdateMode, Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
                 new Func<float>(Class1384.class1384_0.method_3), new Func<float>(Class1384.class1384_0.method_4),
                 statisticsManager, null, null);
-            
+
             myPlayer.OnEpInteraction += OnEpInteraction;
 
             return myPlayer;
