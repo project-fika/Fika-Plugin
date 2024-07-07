@@ -413,6 +413,16 @@ namespace Fika.Core.Coop.GameMode
                 return null;
             }
 
+            while (!this.Status.IsRunned())
+            {
+                if (this.Status == GameStatus.Stopped)
+                {
+                    return null;
+                }
+
+                await Task.Yield();
+            }
+
             WildSpawnType role = profile.Info.Settings.Role;
             bool isSpecial = false;
             if (role is not WildSpawnType.pmcUSEC and not WildSpawnType.pmcBEAR and not WildSpawnType.assault)
@@ -1184,7 +1194,6 @@ namespace Fika.Core.Coop.GameMode
 #if DEBUG
             Logger.LogWarning("vmethod_4");
 #endif
-
             if (isServer)
             {
                 BotsPresets botsPresets = new(iSession, wavesSpawnScenario_0.SpawnWaves,
@@ -1271,24 +1280,6 @@ namespace Fika.Core.Coop.GameMode
             yield return new WaitUntil(new Func<bool>(seasonTaskHandler.method_0));
 
             yield return WaitForOtherPlayers();
-
-            int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
-            if (isServer)
-            {
-                FikaServer server = Singleton<FikaServer>.Instance;
-                while (server.ReadyClients < expectedPlayers)
-                {
-                    yield return new WaitForEndOfFrame();
-                }
-            }
-            else
-            {
-                FikaClient client = Singleton<FikaClient>.Instance;
-                while (client.ReadyClients < expectedPlayers)
-                {
-                    yield return new WaitForEndOfFrame();
-                }
-            }
 
             if (isServer)
             {
