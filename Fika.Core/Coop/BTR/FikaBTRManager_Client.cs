@@ -4,10 +4,12 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.GlobalEvents;
 using EFT.InventoryLogic;
+using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using GPUInstancer;
 using HarmonyLib;
 using LiteNetLib.Utils;
 using SPT.Custom.BTR;
@@ -17,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
 // TODO: Door animations don't play when Clients enter, but it does when the Host does for the Client?
@@ -38,6 +41,7 @@ namespace Fika.Core.Coop.BTR
         private BTRVehicle btrServerSide;
         public BTRView btrClientSide;
         private BTRDataPacket btrDataPacket = default;
+        private bool btrInitialized = false;
         private bool btrBotShooterInitialized = false;
 
         private BTRTurretServer btrTurretServer;
@@ -64,7 +68,7 @@ namespace Fika.Core.Coop.BTR
             btrLogger = BepInEx.Logging.Logger.CreateLogSource("BTR Client");
         }
 
-        private void Awake()
+        private async void Awake()
         {
             try
             {
@@ -82,7 +86,7 @@ namespace Fika.Core.Coop.BTR
 
                 btrController = gameWorld.BtrController;
 
-                InitBtr();
+                await InitBtr();
             }
             catch
             {
@@ -230,34 +234,38 @@ namespace Fika.Core.Coop.BTR
             }
         }
 
-        private void InitBtr()
+        private async Task InitBtr()
         {
             // Initial setup
+            await btrController.InitBtrController();
+
             botEventHandler = Singleton<BotEventHandler>.Instance;
-            BotsController botsController = Singleton<IBotGame>.Instance.BotsController;
+            var botsController = Singleton<IBotGame>.Instance.BotsController;
             btrBotService = botsController.BotTradersServices.BTRServices;
             btrController.method_3(); // spawns server-side BTR game object
-            //botsController.BotSpawner.SpawnBotBTR(); // spawns the scav bot which controls the BTR's turret
+            botsController.BotSpawner.SpawnBotBTR(); // spawns the scav bot which controls the BTR's turret
 
             // Initial BTR configuration
             btrServerSide = btrController.BtrVehicle;
             btrClientSide = btrController.BtrView;
             btrServerSide.transform.Find("KillBox").gameObject.AddComponent<BTRRoadKillTrigger>();
 
-            btrServerSide.LeftSlot0State = 0;
-            btrServerSide.LeftSlot1State = 0;
-            btrServerSide.RightSlot0State = 0;
-            btrServerSide.RightSlot1State = 0;
-
             // Get config from server and initialise respective settings
             ConfigureSettingsFromServer();
 
             /*var btrMapConfig = btrController.MapPathsConfiguration;
+            if (btrMapConfig == null)
+            {
+                ConsoleScreen.LogError($"{nameof(btrController.MapPathsConfiguration)}");
+                return;
+            }
             btrServerSide.CurrentPathConfig = btrMapConfig.PathsConfiguration.pathsConfigurations.RandomElement();
             btrServerSide.Initialization(btrMapConfig);*/
             btrController.method_14(); // creates and assigns the BTR a fake stash
 
             DisableServerSideObjects();
+
+            /*gameWorld.MainPlayer.OnBtrStateChanged += HandleBtrDoorState;*/
 
             /*btrServerSide.MoveEnable();*/
             btrServerSide.IncomingToDestinationEvent += ToDestinationEvent;
@@ -269,7 +277,7 @@ namespace Fika.Core.Coop.BTR
 
             // Initialise turret variables
             btrTurretServer = btrServerSide.BTRTurret;
-            Transform btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
+            var btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
             isTurretInDefaultRotation = btrTurretServer.targetTransform == btrTurretDefaultTargetTransform
                 && btrTurretServer.targetPosition == btrTurretServer.defaultAimingPosition;
             btrMachineGunAmmo = (BulletClass)BTRUtil.CreateItem(BTRUtil.BTRMachineGunAmmoTplId);
@@ -277,6 +285,8 @@ namespace Fika.Core.Coop.BTR
 
             // Pull services data for the BTR from the server
             TraderServicesManager.Instance.GetTraderServicesDataFromServer(BTRUtil.BTRTraderId);
+
+            btrInitialized = true;
         }
 
         private void ConfigureSettingsFromServer()
@@ -397,14 +407,73 @@ namespace Fika.Core.Coop.BTR
             // Initially we assumed there was a reason for this so it was left as is.
             // Turns out disabling the server collider in favour of the client collider fixes the "BTR doing a wheelie" bug,
             // while preventing the player from walking through the BTR.
+            // We also need to change the client collider's layer to HighPolyCollider due to unknown collisions that occur
+            // when going down a steep slope.
+
+            // Add collision debugger component to log collisions in the EFT Console
+            var clientColliders = btrClientSide.GetComponentsInChildren<Collider>(true);
+            //foreach (var collider in clientColliders)
+            //{
+            //    collider.gameObject.AddComponent<CollisionDebugger>();
+            //}
+
+            var serverColliders = btrServerSide.GetComponentsInChildren<Collider>(true);
+            //foreach (var collider in serverColliders)
+            //{
+            //    collider.gameObject.AddComponent<CollisionDebugger>();
+            //}
+
+            var clientRootCollider = clientColliders.First(x => x.gameObject.name == "Root");
+
+            // Retrieve all TerrainColliders
+            var terrainColliders = new List<TerrainCollider>();
+
+            foreach (GPUInstancerManager manager in GPUInstancerManager.activeManagerList)
+            {
+                if (manager.GetType() != typeof(GPUInstancerDetailManager))
+                {
+                    continue;
+                }
+
+                var detailManager = (GPUInstancerDetailManager)manager;
+                if (detailManager.terrain == null)
+                {
+                    continue;
+                }
+
+                terrainColliders.Add(detailManager.terrain.GetComponent<TerrainCollider>());
+            }
+
+            // Make the Root collider ignore collisions with TerrainColliders
+            foreach (var collider in terrainColliders)
+            {
+                Physics.IgnoreCollision(clientRootCollider, collider);
+            }
+
+            // Retrieve all wheel colliders on the serverside BTR
+            const string wheelColliderParentName = "BTR_82_wheel";
+            const string wheelColliderName = "Cylinder";
+
+            var serverWheelColliders = serverColliders
+                .Where(x => x.transform.parent.name.StartsWith(wheelColliderParentName) && x.gameObject.name.StartsWith(wheelColliderName))
+                .ToArray();
+
+            // Make the Root collider ignore collisions with the serverside BTR wheels
+            foreach (var collider in serverWheelColliders)
+            {
+                Physics.IgnoreCollision(clientRootCollider, collider);
+            }
+
+            // Enable clientside BTR collider and disable serverside BTR collider
             const string exteriorColliderName = "BTR_82_exterior_COLLIDER";
-            Collider serverExteriorCollider = btrServerSide.GetComponentsInChildren<Collider>(true)
+            Collider serverExteriorCollider = serverColliders
                 .First(x => x.gameObject.name == exteriorColliderName);
-            Collider clientExteriorCollider = btrClientSide.GetComponentsInChildren<Collider>(true)
+            Collider clientExteriorCollider = clientColliders
                 .First(x => x.gameObject.name == exteriorColliderName);
 
             serverExteriorCollider.gameObject.SetActive(false);
             clientExteriorCollider.gameObject.SetActive(true);
+            clientExteriorCollider.gameObject.layer = LayerMask.NameToLayer("HighPolyCollider");
         }
 
         public void ClientInteraction(Player player, PlayerInteractPacket packet)
