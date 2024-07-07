@@ -37,6 +37,7 @@ namespace Fika.Core.UI.Patches
                     if (text != null)
                     {
                         text.method_2("DOWNLOAD PROFILE");
+                        text.LocalizationKey = "";
                     }
 
                     AnimatedToggle animatedToggle = downloadProfileGameObject.GetComponentInChildren<AnimatedToggle>();
