@@ -4,6 +4,7 @@ using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System.Collections.Generic;
 using System.Text;
@@ -144,6 +145,11 @@ namespace Fika.Core.Networking.Http
         public static async Task<RaidSettingsResponse> GetRaidSettings(RaidSettingsRequest data)
         {
             return await PostJsonAsync<RaidSettingsRequest, RaidSettingsResponse>("/fika/raid/getsettings", data);
+        }
+
+        public static async Task<JObject> GetProfile()
+        {
+            return await GetJsonAsync<JObject>("/fika/profile/download");
         }
     }
 }
