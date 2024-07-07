@@ -944,8 +944,6 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            FikaPlugin.Instance.FikaLogger.LogWarning("Found dogtag");
-
             if (!string.IsNullOrEmpty(Location))
             {
                 // Delete labs card on labs
