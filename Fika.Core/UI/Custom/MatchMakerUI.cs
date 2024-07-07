@@ -20,6 +20,8 @@ public class MatchMakerUI : MonoBehaviour
     public Button CloseButton;
     [SerializeField]
     public TextMeshProUGUI PlayerAmountText;
+    [SerializeField]
+    public Toggle DedicatedToggle;
 
     public void SetServerNumberText(string text)
     {
