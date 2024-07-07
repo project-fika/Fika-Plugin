@@ -79,7 +79,7 @@ namespace Fika.Core.Coop.Players
             questController.Init();
             questController.Run();
 
-            AchievementControllerClass achievementsController = new(profile, inventoryController, session, true);
+            GClass3233 achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
 
