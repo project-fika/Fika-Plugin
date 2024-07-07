@@ -240,7 +240,7 @@ namespace Fika.Core.Coop.BTR
             await btrController.InitBtrController();
 
             botEventHandler = Singleton<BotEventHandler>.Instance;
-            var botsController = Singleton<IBotGame>.Instance.BotsController;
+            BotsController botsController = Singleton<IBotGame>.Instance.BotsController;
             btrBotService = botsController.BotTradersServices.BTRServices;
             btrController.method_3(); // spawns server-side BTR game object
             //botsController.BotSpawner.SpawnBotBTR(); // spawns the scav bot which controls the BTR's turret
@@ -277,7 +277,7 @@ namespace Fika.Core.Coop.BTR
 
             // Initialise turret variables
             btrTurretServer = btrServerSide.BTRTurret;
-            var btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
+            Transform btrTurretDefaultTargetTransform = (Transform)AccessTools.Field(btrTurretServer.GetType(), "defaultTargetTransform").GetValue(btrTurretServer);
             isTurretInDefaultRotation = btrTurretServer.targetTransform == btrTurretDefaultTargetTransform
                 && btrTurretServer.targetPosition == btrTurretServer.defaultAimingPosition;
             btrMachineGunAmmo = (BulletClass)BTRUtil.CreateItem(BTRUtil.BTRMachineGunAmmoTplId);
@@ -411,22 +411,22 @@ namespace Fika.Core.Coop.BTR
             // when going down a steep slope.
 
             // Add collision debugger component to log collisions in the EFT Console
-            var clientColliders = btrClientSide.GetComponentsInChildren<Collider>(true);
+            Collider[] clientColliders = btrClientSide.GetComponentsInChildren<Collider>(true);
             //foreach (var collider in clientColliders)
             //{
             //    collider.gameObject.AddComponent<CollisionDebugger>();
             //}
 
-            var serverColliders = btrServerSide.GetComponentsInChildren<Collider>(true);
+            Collider[] serverColliders = btrServerSide.GetComponentsInChildren<Collider>(true);
             //foreach (var collider in serverColliders)
             //{
             //    collider.gameObject.AddComponent<CollisionDebugger>();
             //}
 
-            var clientRootCollider = clientColliders.First(x => x.gameObject.name == "Root");
+            Collider clientRootCollider = clientColliders.First(x => x.gameObject.name == "Root");
 
             // Retrieve all TerrainColliders
-            var terrainColliders = new List<TerrainCollider>();
+            List<TerrainCollider> terrainColliders = new List<TerrainCollider>();
 
             foreach (GPUInstancerManager manager in GPUInstancerManager.activeManagerList)
             {
@@ -435,7 +435,7 @@ namespace Fika.Core.Coop.BTR
                     continue;
                 }
 
-                var detailManager = (GPUInstancerDetailManager)manager;
+                GPUInstancerDetailManager detailManager = (GPUInstancerDetailManager)manager;
                 if (detailManager.terrain == null)
                 {
                     continue;
@@ -445,7 +445,7 @@ namespace Fika.Core.Coop.BTR
             }
 
             // Make the Root collider ignore collisions with TerrainColliders
-            foreach (var collider in terrainColliders)
+            foreach (TerrainCollider collider in terrainColliders)
             {
                 Physics.IgnoreCollision(clientRootCollider, collider);
             }
@@ -454,12 +454,12 @@ namespace Fika.Core.Coop.BTR
             const string wheelColliderParentName = "BTR_82_wheel";
             const string wheelColliderName = "Cylinder";
 
-            var serverWheelColliders = serverColliders
+            Collider[] serverWheelColliders = serverColliders
                 .Where(x => x.transform.parent.name.StartsWith(wheelColliderParentName) && x.gameObject.name.StartsWith(wheelColliderName))
                 .ToArray();
 
             // Make the Root collider ignore collisions with the serverside BTR wheels
-            foreach (var collider in serverWheelColliders)
+            foreach (Collider collider in serverWheelColliders)
             {
                 Physics.IgnoreCollision(clientRootCollider, collider);
             }
