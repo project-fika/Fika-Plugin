@@ -88,7 +88,6 @@ namespace Fika.Core.UI.Patches
                     }
                 }
             }
-
         }
     }
 }
