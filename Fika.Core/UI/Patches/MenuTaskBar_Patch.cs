@@ -69,7 +69,7 @@ namespace Fika.Core.UI.Patches
                                         }
 
                                         File.WriteAllText(@$"{fikaDir}/{profileId}.json", profile.ToString());
-                                        NotificationManagerClass.DisplayMessageNotification($"Saved profile '{profileId}'");
+                                        NotificationManagerClass.DisplayMessageNotification($"Saved profile '{profileId}' to {fikaDir}");
 
                                         GameObject.Destroy(downloadProfileGameObject);
                                     }
