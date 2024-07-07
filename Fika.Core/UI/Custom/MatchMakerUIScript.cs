@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.UI;
-using EFT.UI.Matchmaker;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Models;
@@ -93,6 +92,7 @@ namespace Fika.Core.UI.Custom
                 fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
             }
 
+            TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
@@ -115,6 +115,12 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
+            fikaMatchMakerUi.DedicatedToggle.isOn = false;
+            fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
+            {
+                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
+            });
+
             fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
             {
                 var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
@@ -122,7 +128,7 @@ namespace Fika.Core.UI.Custom
 
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
 
-                if (!GetComponentInChildren<Toggle>().isOn)
+                if (!fikaMatchMakerUi.DedicatedToggle.isOn)
                 {
                     if (FikaPlugin.ForceIP.Value != "")
                     {
@@ -166,7 +172,20 @@ namespace Fika.Core.UI.Custom
                 }
                 else
                 {
-                    NotificationManagerClass.DisplaySingletonWarningNotification("Sending to dedicated host");
+                    fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+                    fikaMatchMakerUi.RaidGroupHostButton.interactable = false;
+                    matchmakerUiHostRaidText.text = "LOADING...";
+
+                    if (FikaPlugin.DedicatedRaidWebSocket == null)
+                    {
+                        FikaPlugin.DedicatedRaidWebSocket = new DedicatedRaidWebSocketClient();
+                    }
+
+                    if (!FikaPlugin.DedicatedRaidWebSocket.Connected)
+                    {
+                        FikaPlugin.DedicatedRaidWebSocket.Connect();
+                    }
+
                     var raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
                     StartDedicatedRequest request = new StartDedicatedRequest
@@ -182,23 +201,20 @@ namespace Fika.Core.UI.Custom
                         WavesSettings = raidSettings.WavesSettings
                     };
 
-                    DestroyThis();
                     var response = await FikaRequestHandler.StartDedicated(request);
+
                     if (response.Error is not null)
                     {
-                        PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error, () =>
-                        {
-                            var acceptScreen = FindObjectOfType<MatchMakerAcceptScreen>();
-                            var controller = Traverse.Create(acceptScreen).Field<MatchMakerAcceptScreen.GClass3177>("ScreenController").Value;
-                            controller.CloseScreen();
-                        });
+                        PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error);
+
+                        fikaMatchMakerUi.RaidGroupHostButton.interactable = true;
+                        matchmakerUiHostRaidText.text = "HOST RAID";
                     }
                     else
                     {
-                        ConsoleScreen.Log($"We should join match: {response.MatchId}");
+                        NotificationManagerClass.DisplaySingletonWarningNotification("Starting raid on dedicated client... please wait.");
                     }
                 }
-
             });
 
             fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
@@ -251,7 +267,8 @@ namespace Fika.Core.UI.Custom
                 button.enabled = false;
             }
 
-            NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+            // TODO: crashes when JoinMatch is called from DedicatedRaidWebSocketClient
+            //NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
             NetManagerUtils.CreatePingingClient();
 

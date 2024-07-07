@@ -1,4 +1,4 @@
-﻿using Aki.Reflection.Patching;
+﻿using SPT.Reflection.Patching;
 using EFT.UI.SessionEnd;
 using EFT;
 using System;
@@ -8,17 +8,22 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using EFT.UI;
-using Aki.Common.Http;
+using SPT.Common.Http;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
 
-namespace Fika.Headless.Patches
+namespace Fika.Dedicated.Patches
 {
     public class MenuScreenPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(MenuScreen).GetMethod(nameof(MenuScreen.Show), [typeof(MatchmakerPlayerControllerClass)]);
+            return typeof(MenuScreen).GetMethod(nameof(MenuScreen.Show), 
+                [
+                    typeof(Profile),
+                    typeof(MatchmakerPlayerControllerClass),
+                    typeof(ESessionMode)
+                ]);
         }
 
         [PatchPostfix]

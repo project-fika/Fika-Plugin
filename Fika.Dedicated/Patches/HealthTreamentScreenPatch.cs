@@ -1,4 +1,4 @@
-﻿using Aki.Reflection.Patching;
+﻿using SPT.Reflection.Patching;
 using EFT.UI.SessionEnd;
 using EFT;
 using System;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EFT.UI;
 
-namespace Fika.Headless.Patches
+namespace Fika.Dedicated.Patches
 {
     public class HealthTreamentScreenPatch : ModulePatch
     {

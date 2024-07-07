@@ -14,6 +14,7 @@ using Fika.Core.Coop.World;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Websocket;
 using Fika.Core.SPTSupport.Scav;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
@@ -61,6 +62,7 @@ namespace Fika.Core
         public FikaModHandler ModHandler = new();
         public string Locale { get; private set; } = "en";
         public string[] LocalIPs;
+        public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
         public static Dictionary<string, string> RespectedPlayersList = new()
         {
@@ -249,6 +251,8 @@ namespace Fika.Core
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
 
             StartCoroutine(RunModHandler());
+
+
         }
 
         /// <summary>

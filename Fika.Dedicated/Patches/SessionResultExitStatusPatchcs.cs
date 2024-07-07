@@ -1,15 +1,10 @@
-﻿using Aki.Reflection.Patching;
+﻿using SPT.Reflection.Patching;
 using EFT;
 using EFT.UI;
 using EFT.UI.SessionEnd;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fika.Headless.Patches
+namespace Fika.Dedicated.Patches
 {
     public class SessionResultExitStatusPatch : ModulePatch
     {

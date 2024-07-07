@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using EFT.UI;
-using Aki.Reflection.Patching;
+using SPT.Reflection.Patching;
 
-namespace Fika.Headless.Patches
+namespace Fika.Dedicated.Patches
 {
     // Token: 0x02000008 RID: 8
     internal class ErrorScreenShowPatch : ModulePatch

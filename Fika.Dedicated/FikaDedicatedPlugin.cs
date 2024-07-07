@@ -12,27 +12,28 @@ using EFT.UI.Matchmaker;
 using Fika.Core;
 using Fika.Core.Models;
 using Fika.Core.UI.Custom;
-using Fika.Headless.Patches;
+using Fika.Dedicated.Patches;
 using HarmonyLib;
 using Newtonsoft.Json;
-using Aki.SinglePlayer.Patches.MainMenu;
+using SPT.SinglePlayer.Patches.MainMenu;
 using UnityEngine;
-using Fika.Core.Coop.Matchmaker;
-using EFT.UI.SessionEnd;
 using Fika.Core.Networking.Http;
-using Aki.Common.Http;
+using SPT.Common.Http;
 using System.Threading.Tasks;
+using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 
-namespace Fika.Headless
+namespace Fika.Dedicated
 {
     [BepInPlugin("com.project-fika.dedicated", "Dedicated", "1.0.0")]
     [BepInDependency("com.fika.core", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.spt-aki.custom", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)]
     public class FikaDedicatedPlugin : BaseUnityPlugin
     {        
         public static FikaDedicatedPlugin Instance { get; private set; }
-        private static FieldInfo _hydrationField = typeof(ActiveHealthController).GetField("healthValue_1", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static FieldInfo _energyField = typeof(ActiveHealthController).GetField("healthValue_0", BindingFlags.NonPublic | BindingFlags.Instance);
+        //private static FieldInfo _hydrationField = typeof(ActiveHealthController).GetField("healthValue_1", BindingFlags.NonPublic | BindingFlags.Instance);
+        //private static FieldInfo _energyField = typeof(ActiveHealthController).GetField("healthValue_0", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static DedicatedRaidWebSocketServer fikaDedicatedWebSocket;
 
         public Coroutine setDedicatedStatusRoutine;
 
@@ -40,7 +41,6 @@ namespace Fika.Headless
         {
             Instance = this;
             FikaPlugin.AutoExtract.Value = true;
-            new WebSocketReceivePatch().Enable();
             new DLSSPatch1().Enable();
             new DLSSPatch2().Enable();
             new DLSSPatch3().Enable();
@@ -53,7 +53,14 @@ namespace Fika.Headless
             new SessionResultExitStatusPatch().Enable();
             new MenuScreenPatch().Enable();
             new HealthTreamentScreenPatch().Enable();
+            new CreateMovementContextPatch().Enable();
+            new HealthControllerPlayerAfterInitPatch().Enable();
             //InvokeRepeating("ClearRenderables", 1f, 1f);
+
+            Logger.LogInfo("Fika.Dedicated loaded!");
+
+            fikaDedicatedWebSocket = new DedicatedRaidWebSocketServer();
+            fikaDedicatedWebSocket.Connect();
         }
 
         // Done every second as a way to minimize processing time
@@ -69,7 +76,7 @@ namespace Fika.Headless
             Logger.LogInfo($"ClearRenderables: ${sw.ElapsedMilliseconds}");
         }
 
-        private void FixedUpdate()
+        /*private void FixedUpdate()
         {
             if (!Singleton<GameWorld>.Instantiated)
             {
@@ -82,21 +89,22 @@ namespace Fika.Headless
                 return;
             }
 
-            MovementContext localPlayerMovementContext = localPlayer.MovementContext;
+            *//*MovementContext localPlayerMovementContext = localPlayer.MovementContext;
             if (localPlayerMovementContext != null)
             {
-                /*
+                *//*
                  * Disables gravity. Even though we are teleporting ourselves high
                  * eventually the fall time will become great enough to cause us to fall
-                */
+                *//*
                 localPlayerMovementContext.FreefallTime = 0f;
-                }
+            }*/
 
-            ActiveHealthController localPlayerHealthController = localPlayer.ActiveHealthController;
+            /*ActiveHealthController localPlayerHealthController = localPlayer.ActiveHealthController;
             if (localPlayerHealthController != null)
             {
                 // Make headless immune to damage
                 localPlayerHealthController.DamageCoeff = 0f;
+                localPlayerHealthController.DisableMetabolism();
 
                 // This bit is required because even with coefficient at 0
                 // you will still take damage from dehydration and starvation
@@ -115,12 +123,12 @@ namespace Fika.Headless
                         healthValue.Current = healthValue.Maximum;
                     }
                 }
-            }
+            }*//*
 
             // Keep dedicated client underground - putting the client high up in the air seems to mess with AI/spawn mods
             BifacialTransform localPlayerTransform = localPlayer.Transform;
             localPlayerTransform.position = localPlayerTransform.position.WithY(-50f);
-        }
+        }*/
 
         public void OnFikaStartRaid(StartDedicatedRequest request)
         {
@@ -168,8 +176,8 @@ namespace Fika.Headless
                 menuScreen = FindObjectOfType<MenuScreen>();
             } while (menuScreen == null);
             yield return null;
-            //menuScreen.method_9(); // main menu -> faction selection screen
-            menuScreen.method_8();
+            menuScreen.method_9(); // main menu -> faction selection screen
+            //menuScreen.method_8();
 
             MatchMakerSideSelectionScreen sideSelectionScreen;
             do
@@ -204,8 +212,8 @@ namespace Fika.Headless
             locationSelectionScreen.Location_0 = session.LocationSettings.locations[request.LocationId];
             locationSelectionScreen.method_6(request.Time);
             //locationSelectionScreen.method_7(locationSelectionScreen.Location_0, request.Time);
-            //locationSelectionScreen.method_10(); // location selection screen -> offline raid screen
-            locationSelectionScreen.method_8();
+            locationSelectionScreen.method_10(); // location selection screen -> offline raid screen
+            //locationSelectionScreen.method_8();
 
             MatchmakerOfflineRaidScreen offlineRaidScreen;
             do
@@ -288,9 +296,10 @@ namespace Fika.Headless
             }
 
             Logger.LogInfo($"Starting with: {JsonConvert.SerializeObject(request)}");
-            MatchmakerAcceptPatches.HostExpectedNumberOfPlayers = request.ExpectedNumPlayers + 1;
-            MatchmakerAcceptPatches.CreateMatch(session.Profile.ProfileId, session.Profile.Info.Nickname, raidSettings);
-            MatchmakerAcceptPatches.IsDedicated = true;
+
+            FikaBackendUtils.HostExpectedNumberOfPlayers = request.ExpectedNumPlayers + 1;
+            FikaBackendUtils.CreateMatch(session.Profile.ProfileId, session.Profile.Info.Nickname, raidSettings);
+            FikaBackendUtils.IsDedicated = true;
 
             fikaMatchMakerScript.AcceptButton.OnClick.Invoke();
         }

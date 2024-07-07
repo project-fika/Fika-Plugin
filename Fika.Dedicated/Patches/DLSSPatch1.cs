@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
-using Aki.Reflection.Patching;
+using SPT.Reflection.Patching;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Fika.Headless.Patches
+namespace Fika.Dedicated.Patches
 {
     // Token: 0x02000004 RID: 4
     public class DLSSPatch1 : ModulePatch

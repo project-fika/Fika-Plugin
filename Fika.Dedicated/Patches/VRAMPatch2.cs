@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using HarmonyLib;
-using Aki.Reflection.Patching;
+using SPT.Reflection.Patching;
 using UnityEngine;
 
-namespace Fika.Headless.Patches
+namespace Fika.Dedicated.Patches
 {
     // Token: 0x0200000A RID: 10
     public class VRAMPatch2 : ModulePatch

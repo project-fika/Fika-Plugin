@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using EFT.UI.Settings;
-using Aki.Reflection.Patching;
+using SPT.Reflection.Patching;
 
-namespace Fika.Headless.Patches
+namespace Fika.Dedicated.Patches
 {
     // Token: 0x0200000C RID: 12
     public class VRAMPatch4 : ModulePatch
