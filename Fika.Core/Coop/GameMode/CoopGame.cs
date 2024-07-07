@@ -857,6 +857,8 @@ namespace Fika.Core.Coop.GameMode
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity,
                 getAimingSensitivity, new GClass1456(), isServer ? 0 : 1000, statisticsManager);
 
+            myPlayer.Location = Location_0.Id;
+
             await NetManagerUtils.InitNetManager(isServer);
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
@@ -873,6 +875,7 @@ namespace Fika.Core.Coop.GameMode
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
+            coopPlayer.SetupMainPlayer();
 
             PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
             await FikaRequestHandler.UpdatePlayerSpawn(body);
@@ -1052,8 +1055,7 @@ namespace Fika.Core.Coop.GameMode
                 UpdateQueue, eupdateMode, Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
                 new Func<float>(Class1384.class1384_0.method_3), new Func<float>(Class1384.class1384_0.method_4),
                 statisticsManager, null, null);
-
-            myPlayer.Location = Location_0.Id;
+            
             myPlayer.OnEpInteraction += OnEpInteraction;
 
             return myPlayer;

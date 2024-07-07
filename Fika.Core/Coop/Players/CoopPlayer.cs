@@ -113,9 +113,7 @@ namespace Fika.Core.Coop.Players
 
             player._animators[0].enabled = true;
 
-            player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
-
-            player.SetupMainPlayer();
+            player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;            
 
             return player;
         }
@@ -946,24 +944,31 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            // Delete labs card on labs
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-            if (coopGame.Location_0.Name.ToLower() == "laboratory")
+            FikaPlugin.Instance.FikaLogger.LogWarning("Found dogtag");
+
+            if (!string.IsNullOrEmpty(Location))
             {
-                foreach (Item item in Profile.Inventory.AllRealPlayerItems)
+                // Delete labs card on labs
+                if (Location.ToLower() == "laboratory")
                 {
-                    if (item.TemplateId == "5c94bbff86f7747ee735c08f")
+                    foreach (Item item in Inventory.AllRealPlayerItems)
                     {
-                        InteractionsHandlerClass.Remove(item, _inventoryController, false, true);
+                        if (item.TemplateId == "5c94bbff86f7747ee735c08f")
+                        {
+                            InteractionsHandlerClass.Remove(item, _inventoryController, false, true);
+                            break;
+                        }
                     }
                 }
+            }
+            else
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("CoopPlayer::SetupMainPlayer: Location was null!");
             }
         }
 
         private string GetDogTagTemplateId()
         {
-            //return Profile.Side == EPlayerSide.Usec ? "6662ea05f6259762c56f3189" : "59f32bb586f774757e1e8442";
-
             if (Side is EPlayerSide.Usec)
             {
                 switch (Profile.Info.MemberCategory)
