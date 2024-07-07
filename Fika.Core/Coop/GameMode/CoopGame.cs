@@ -79,7 +79,6 @@ namespace Fika.Core.Coop.GameMode
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
-        public ISession BackEndSession { get => PatchConstants.BackEndSession; }
         BotsController IBotGame.BotsController
         {
             get
@@ -956,7 +955,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     int num = UnityEngine.Random.Range(1, 6);
                     method_6(backendUrl, Location_0.Id, num);
-                    location = await BackEndSession.LoadLocationLoot(Location_0.Id, num);
+                    location = await iSession.LoadLocationLoot(Location_0.Id, num);
                 }
             }
 
@@ -1186,17 +1185,12 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogWarning("vmethod_4");
 #endif
 
-            if (!isServer)
-            {
-                controllerSettings.BotAmount = EBotAmount.NoBots;
-            }
-
             if (isServer)
             {
-                BotsPresets profileCreator = new(BackEndSession, wavesSpawnScenario_0.SpawnWaves,
+                BotsPresets botsPresets = new(iSession, wavesSpawnScenario_0.SpawnWaves,
                     BossSpawnWaveManagerClass.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1478_0, false);
 
-                GClass814 botCreator = new(this, profileCreator, CreateBot);
+                GClass814 botCreator = new(this, botsPresets, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 
                 bool enableWaves = controllerSettings.BotAmount == EBotAmount.Horde;
@@ -1215,15 +1209,10 @@ namespace Fika.Core.Coop.GameMode
                     EBotAmount.Medium => 20,
                     EBotAmount.High => 25,
                     EBotAmount.Horde => 35,
-                    _ => 0,
+                    _ => 15,
                 };
 
-                if (!isServer)
-                {
-                    numberOfBots = 0;
-                }
-
-                botsController_0.SetSettings(numberOfBots, BackEndSession.BackEndConfig.BotPresets, BackEndSession.BackEndConfig.BotWeaponScatterings);
+                botsController_0.SetSettings(numberOfBots, iSession.BackEndConfig.BotPresets, iSession.BackEndConfig.BotWeaponScatterings);
                 botsController_0.AddActivePLayer(PlayerOwner.Player);
 
                 if (FikaPlugin.EnforcedSpawnLimits.Value)
@@ -1254,7 +1243,9 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                BotsPresets profileCreator = new(BackEndSession, [], [], [], false);
+                controllerSettings.BotAmount = EBotAmount.NoBots;
+
+                BotsPresets profileCreator = new(iSession, [], [], [], false);
 
                 GClass814 botCreator = new(this, profileCreator, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
@@ -1273,7 +1264,7 @@ namespace Fika.Core.Coop.GameMode
             BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
 
             LocalGame.Class1391 seasonTaskHandler = new();
-            ESeason season = BackEndSession.Season;
+            ESeason season = iSession.Season;
             Class394 seasonHandler = new();
             Singleton<GameWorld>.Instance.GInterface26_0 = seasonHandler;
             seasonTaskHandler.task = seasonHandler.Run(season);
@@ -1583,7 +1574,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             BackendConfigSettingsClass.GClass1361.GClass1367 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
-            if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement || PastTime < matchEndConfig.SurvivedTimeRequirement)
+            if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && PastTime < matchEndConfig.SurvivedTimeRequirement)
             {
                 MyExitStatus = ExitStatus.Runner;
             }
@@ -2149,7 +2140,7 @@ namespace Fika.Core.Coop.GameMode
                 localGame.CleanUp();
                 localGame.Status = GameStatus.Stopped;
                 TimeSpan timeSpan = EFTDateTimeClass.Now - localGame.dateTime_0;
-                localGame.BackEndSession.OfflineRaidEnded(exitStatus, exitName, timeSpan.TotalSeconds).HandleExceptions();
+                localGame.iSession.OfflineRaidEnded(exitStatus, exitName, timeSpan.TotalSeconds).HandleExceptions();
                 MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
                 StaticManager staticManager = StaticManager.Instance;
                 float num = delay;
