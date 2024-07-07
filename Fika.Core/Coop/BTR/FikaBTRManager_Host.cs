@@ -315,6 +315,7 @@ namespace Fika.Core.Coop.BTR
             TraderServicesManager.Instance.GetTraderServicesDataFromServer(BTRUtil.BTRTraderId);
 
             btrInitialized = true;
+            StartCoroutine(SendBotProfileId());
         }
 
 
