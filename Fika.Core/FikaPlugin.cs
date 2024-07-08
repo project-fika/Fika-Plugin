@@ -314,7 +314,7 @@ namespace Fika.Core
 
             ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
-            ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.Backspace), new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+            ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.RightControl), new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Name Plates
 
