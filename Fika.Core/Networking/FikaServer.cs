@@ -206,7 +206,7 @@ namespace Fika.Core.Networking
                 iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value);
+            SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicated);
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));

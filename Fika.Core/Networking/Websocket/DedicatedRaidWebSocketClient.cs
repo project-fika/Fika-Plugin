@@ -6,19 +6,14 @@ using Fika.Core.UI.Custom;
 using LiteNetLib;
 using SPT.Common.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using WebSocketSharp;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using Comfort.Common;
-using Fika.Core.Models;
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine.UI;
+using Fika.Core.Coop.Utils;
 
 namespace Fika.Core.Networking.Websocket
 {
@@ -36,7 +31,6 @@ namespace Fika.Core.Networking.Websocket
                 return _webSocket.ReadyState == WebSocketState.Open;
             }
         }
-        public event EventHandler<string> OnFikaDedicatedJoinMatch;
 
         private WebSocket _webSocket;
 
@@ -120,8 +114,9 @@ namespace Fika.Core.Networking.Websocket
                         TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
 
                         tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, () =>
-                        {
-                            Traverse.Create(matchMakerAcceptScreen).Field<DefaultUIButton>("_acceptButton").Value.OnClick.Invoke();
+                        {                           
+                            // MatchmakerAcceptScreen -> next screen (accept)
+                            matchMakerAcceptScreen.method_22();
 
                             Destroy(matchmakerUI.gameObject);
                             Destroy(matchmakerUI);

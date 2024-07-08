@@ -5,8 +5,6 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fika.Core", "Fika.Core\Fika.Core.csproj", "{79F0E889-A195-42B4-8656-4F35685BBB80}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fika.Dedicated", "Fika.Dedicated\Fika.Dedicated.csproj", "{95F55C25-695F-4153-8F18-2637FC49FDE3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,12 +18,6 @@ Global
 		{79F0E889-A195-42B4-8656-4F35685BBB80}.GoldMaster|Any CPU.Build.0 = GoldMaster|Any CPU
 		{79F0E889-A195-42B4-8656-4F35685BBB80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79F0E889-A195-42B4-8656-4F35685BBB80}.Release|Any CPU.Build.0 = Release|Any CPU
-		{95F55C25-695F-4153-8F18-2637FC49FDE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95F55C25-695F-4153-8F18-2637FC49FDE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95F55C25-695F-4153-8F18-2637FC49FDE3}.GoldMaster|Any CPU.ActiveCfg = Debug|Any CPU
-		{95F55C25-695F-4153-8F18-2637FC49FDE3}.GoldMaster|Any CPU.Build.0 = Debug|Any CPU
-		{95F55C25-695F-4153-8F18-2637FC49FDE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95F55C25-695F-4153-8F18-2637FC49FDE3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
