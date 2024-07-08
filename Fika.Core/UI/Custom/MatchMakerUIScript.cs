@@ -33,14 +33,30 @@ namespace Fika.Core.UI.Custom
         public GameObject NewBackButton { get; internal set; }
 
         private string ProfileId => FikaBackendUtils.Profile.ProfileId;
-
         private float _lastRefreshed;
+        private bool _started;
+
+        protected void OnEnable()
+        {
+            if(_started)
+            {
+                StopQuery = false;
+                StartCoroutine(ServerQuery());
+            }
+        }
+
+        protected void OnDisable()
+        {
+            StopQuery = true;
+            StopCoroutine(ServerQuery());
+        }
 
         protected void Start()
         {
             CreateMatchMakerUI();
-
             StartCoroutine(ServerQuery());
+
+            _started = true;
         }
 
         protected void Update()
@@ -173,9 +189,7 @@ namespace Fika.Core.UI.Custom
                 }
                 else
                 {
-                    fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
-                    fikaMatchMakerUi.RaidGroupHostButton.interactable = false;
-                    matchmakerUiHostRaidText.text = "LOADING...";
+                    gameObject.SetActive(false);
 
                     if (FikaPlugin.DedicatedRaidWebSocket == null)
                     {
@@ -204,12 +218,11 @@ namespace Fika.Core.UI.Custom
 
                     var response = await FikaRequestHandler.StartDedicated(request);
 
-                    if (response.Error is not null)
+                    if (!string.IsNullOrEmpty(response.Error))
                     {
                         PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error);
 
-                        fikaMatchMakerUi.RaidGroupHostButton.interactable = true;
-                        matchmakerUiHostRaidText.text = "HOST RAID";
+                        gameObject.SetActive(true);
                     }
                     else
                     {
@@ -268,8 +281,7 @@ namespace Fika.Core.UI.Custom
                 button.enabled = false;
             }
 
-            // TODO: crashes when JoinMatch is called from DedicatedRaidWebSocketClient
-            //NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+            NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
             NetManagerUtils.CreatePingingClient();
 

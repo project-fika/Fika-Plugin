@@ -18,7 +18,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
                 .First(x => x.Name == "Show" && x.GetParameters()[0].Name == "session");
         }
 
-        private static GameObject MatchmakerObject { get; set; }
+        public static GameObject MatchmakerObject { get; set; }
 
         [PatchPrefix]
         private static void PreFix(ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)

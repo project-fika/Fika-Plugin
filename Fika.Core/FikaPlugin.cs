@@ -224,6 +224,9 @@ namespace Fika.Core
             new AbstractGame_InRaid_Patch().Enable();
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
+
+            gameObject.AddComponent<MainThreadDispatcher>();
+
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif

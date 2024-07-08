@@ -3,21 +3,18 @@ using EFT.UI.Matchmaker;
 using EFT.UI;
 using EFT;
 using Fika.Core.UI.Custom;
-using LiteNetLib;
 using SPT.Common.Http;
 using System;
 using UnityEngine;
 using WebSocketSharp;
-using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using Comfort.Common;
-using TMPro;
-using UnityEngine.UI;
 using Fika.Core.Coop.Utils;
+using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 
 namespace Fika.Core.Networking.Websocket
 {
-    public class DedicatedRaidWebSocketClient : MonoBehaviour
+    public class DedicatedRaidWebSocketClient
     {
         private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.DedicatedWebSocket");
 
@@ -48,13 +45,19 @@ namespace Fika.Core.Networking.Websocket
 
             _webSocket.OnOpen += WebSocket_OnOpen;
             _webSocket.OnError += WebSocket_OnError;
-            _webSocket.OnMessage += WebSocket_OnMessage;
-            //_webSocket.OnClose += WebSocket_OnClose;
+            _webSocket.OnMessage += (sender, args) =>
+            {
+                // Run the OnMessage event on main thread
+                MainThreadDispatcher.RunOnMainThread(() =>
+                {
+                    WebSocket_OnMessage(sender, args);
+                });
+            };
         }
 
         private void WebSocket_OnError(object sender, ErrorEventArgs e)
         {
-            logger.LogInfo($"websocket err: {e.Message}");
+            logger.LogInfo($"WS error: {e.Message}");
         }
 
         public void Connect()
@@ -91,43 +94,33 @@ namespace Fika.Core.Networking.Websocket
                 return;
             }
 
-            string type = jsonObject["type"].ToString();
+            string type = jsonObject.Value<string>("type");
 
             switch (type)
             {
                 case "fikaDedicatedJoinMatch":
-                    MatchMakerUI matchmakerUI = FindObjectOfType<MatchMakerUI>();
-
                     string matchId = jsonObject.Value<string>("matchId");
-                    MatchMakerAcceptScreen matchMakerAcceptScreen = FindObjectOfType<MatchMakerAcceptScreen>();
-                    TMP_Text matchmakerUiHostRaidText = matchmakerUI.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
-                    if (matchMakerAcceptScreen == null)
-                    {
-                        PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", "Failed to find MatchMakerAcceptScreen");
 
-                        matchmakerUI.RaidGroupHostButton.interactable = true;
-                        matchmakerUiHostRaidText.text = "HOST RAID";
-                    }
+                    GameObject matchmakerObject = MatchmakerAcceptScreen_Show_Patch.MatchmakerObject;
+                    MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;
 
-                    if (matchId is not null)
+                    if (!string.IsNullOrEmpty(matchId))
                     {
                         TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
 
                         tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, () =>
-                        {                           
-                            // MatchmakerAcceptScreen -> next screen (accept)
-                            matchMakerAcceptScreen.method_22();
+                        {
+                            // Hide matchmaker UI
+                            matchmakerObject.SetActive(false);
 
-                            Destroy(matchmakerUI.gameObject);
-                            Destroy(matchmakerUI);
+                            // Matchmaker next screen (accept)
+                            matchMakerAcceptScreen.method_22();
                         }));
                     }
                     else
                     {
                         PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", "Received fikaJoinMatch WS event but there was no matchId");
-
-                        matchmakerUI.RaidGroupHostButton.interactable = true;
-                        matchmakerUiHostRaidText.text = "HOST RAID";
+                        matchmakerObject.SetActive(true);
                     }
 
                     FikaPlugin.DedicatedRaidWebSocket.Close();
