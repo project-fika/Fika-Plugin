@@ -175,7 +175,6 @@ namespace Fika.Core.Coop.GameMode
             }
 
             coopGame.timeManager = CoopTimeManager.Create(coopGame);
-
             coopGame.RaidSettings = raidSettings;
 
             return coopGame;
@@ -894,8 +893,43 @@ namespace Fika.Core.Coop.GameMode
             GameObject customButton = null;
 
             await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
+            customButton = CreateCancelButton(myPlayer, coopPlayer, customButton);
 
-            // This creates a "custom" Back button so that we can back out if we get stuck
+            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
+
+            if (isServer)
+            {
+                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
+            }
+            else
+            {
+                FikaClient client = Singleton<FikaClient>.Instance;
+                do
+                {
+                    await Task.Delay(250);
+                } while (client.NetClient.FirstPeer == null);
+
+                client.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+            }
+
+            await WaitForPlayers();
+
+            fikaDebug = gameObject.AddComponent<FikaDebug>();
+
+            Destroy(customButton);
+
+            return myPlayer;
+        }
+
+        /// <summary>
+        /// This creates a "custom" Back button so that we can back out if we get stuck
+        /// </summary>
+        /// <param name="myPlayer"></param>
+        /// <param name="coopPlayer"></param>
+        /// <param name="customButton"></param>
+        /// <returns></returns>
+        private GameObject CreateCancelButton(LocalPlayer myPlayer, CoopPlayer coopPlayer, GameObject customButton)
+        {
             if (MenuUI.Instantiated)
             {
                 MenuUI menuUI = MenuUI.Instance;
@@ -922,24 +956,7 @@ namespace Fika.Core.Coop.GameMode
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
             }
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
-
-            if (isServer)
-            {
-                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-            }
-            else
-            {
-                Singleton<FikaClient>.Instance.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
-            }
-
-            await WaitForPlayers();
-
-            fikaDebug = gameObject.AddComponent<FikaDebug>();
-
-            Destroy(customButton);
-
-            return myPlayer;
+            return customButton;
         }
 
         /// <summary>
@@ -1629,12 +1646,6 @@ namespace Fika.Core.Coop.GameMode
 
             extractRoutine = StartCoroutine(ExtractRoutine(player));
 
-            // Clear to make sure we don't interfere with SPT logic
-            if (coopPlayer.Profile.InsuredItems.Length > 0)
-            {
-                coopPlayer.Profile.InsuredItems = Array.Empty<InsuredItemClass>();
-            }
-
             // Prevents players from looting after extracting
             CurrentScreenSingleton.Instance.CloseAllScreensForced();
 
@@ -1814,12 +1825,7 @@ namespace Fika.Core.Coop.GameMode
                 CoopPlayer[] players = [.. coopHandler.Players.Values];
                 foreach (CoopPlayer player in players)
                 {
-                    if (player == null)
-                    {
-                        continue;
-                    }
-
-                    if (player.IsYourPlayer)
+                    if (player == null || player.IsYourPlayer)
                     {
                         continue;
                     }

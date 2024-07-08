@@ -589,11 +589,6 @@ namespace Fika.Core.Coop.Components
                 item = equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem;
             }
 
-            if (item == null)
-            {
-                Logger.LogError($"SetWeaponInHandsOfNewPlayer: Unable to find any weapon for {player.Profile.Nickname}, {player.Profile.ProfileId}");
-            }
-
             player.SetItemInHands(item, (IResult) =>
             {
                 if (IResult.Failed == true)

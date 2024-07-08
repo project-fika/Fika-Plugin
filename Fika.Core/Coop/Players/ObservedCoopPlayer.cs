@@ -536,7 +536,7 @@ namespace Fika.Core.Coop.Players
 
         public PlayerStatePacket Interpolate(in PlayerStatePacket newState, in PlayerStatePacket lastState)
         {
-            float interpolate = Time.fixedDeltaTime;
+            float interpolate = 0.3f;
 
             method_58(newState.HasGround, newState.SurfaceSound);
 
