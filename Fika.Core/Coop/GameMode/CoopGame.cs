@@ -1558,7 +1558,6 @@ namespace Fika.Core.Coop.GameMode
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
 
-
             if (MyExitStatus == ExitStatus.MissingInAction)
             {
                 NotificationManagerClass.DisplayMessageNotification("You have gone missing in action...", iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
@@ -1629,6 +1628,12 @@ namespace Fika.Core.Coop.GameMode
             player.ActiveHealthController.PauseAllEffects();
 
             extractRoutine = StartCoroutine(ExtractRoutine(player));
+
+            // Clear to make sure we don't interfere with SPT logic
+            if (coopPlayer.Profile.InsuredItems.Length > 0)
+            {
+                coopPlayer.Profile.InsuredItems = Array.Empty<InsuredItemClass>();
+            }
 
             // Prevents players from looting after extracting
             CurrentScreenSingleton.Instance.CloseAllScreensForced();
