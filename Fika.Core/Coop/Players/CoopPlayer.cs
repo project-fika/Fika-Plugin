@@ -80,18 +80,21 @@ namespace Fika.Core.Coop.Players
             questController.Run();
 
             // Used to communicate what insurance each profile has between clients
-            if (session.InsuranceCompany?.InsuredItems?.Count > 0)
+            if (profile.Side is not EPlayerSide.Savage)
             {
-                List<InsuredItemClass> itemsToInsure = [];
-                foreach (ItemClass item in session.InsuranceCompany.InsuredItems)
+                if (session.InsuranceCompany?.InsuredItems?.Count > 0)
                 {
-                    itemsToInsure.Add(new()
+                    List<InsuredItemClass> itemsToInsure = [];
+                    foreach (ItemClass item in session.InsuranceCompany.InsuredItems)
                     {
-                        itemId = item.Id,
-                        tid = item.TemplateId
-                    });
-                }
-                profile.InsuredItems = [.. itemsToInsure];
+                        itemsToInsure.Add(new()
+                        {
+                            itemId = item.Id,
+                            tid = item.TemplateId
+                        });
+                    }
+                    profile.InsuredItems = [.. itemsToInsure];
+                } 
             }
 
             GClass3233 achievementsController = new(profile, inventoryController, session, true);
