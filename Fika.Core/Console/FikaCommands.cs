@@ -91,6 +91,28 @@ namespace Fika.Core.Console
                 ConsoleScreen.LogWarning("Could not find CoopHandler.");
             }
         }
+
+        [ConsoleCommand("extract", "", null, "Extract from raid", [])]
+        public static void Extract()
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            if (coopGame == null)
+            {
+                ConsoleScreen.LogWarning("You are not in a game.");
+                return;
+            }
+
+            if (coopGame.Status != GameStatus.Started)
+            {
+                ConsoleScreen.LogWarning("Game is not running.");
+                return;
+            }
+
+            CoopPlayer localPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+
+            coopGame.Extract(localPlayer, null);
+        }
 #endif
 
         [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
