@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Fika.Core.UI.Patches
 {
@@ -33,11 +34,25 @@ namespace Fika.Core.UI.Patches
                     downloadProfileGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
                     downloadProfileGameObject.transform.SetSiblingIndex(10);
 
+                    GameObject downloadProfileButton = downloadProfileGameObject.transform.GetChild(0).gameObject;
+                    downloadProfileButton.name = "DownloadProfileButton";
+
                     LocalizedText text = downloadProfileGameObject.GetComponentInChildren<LocalizedText>();
                     if (text != null)
                     {
                         text.method_2("DOWNLOAD PROFILE");
                         text.LocalizationKey = "";
+                    }
+
+                    GameObject buildListObject = GameObject.Find("/Menu UI/UI/EquipmentBuildsScreen/Panels/BuildsListPanel/Header/SizeSample/Selected/Icon");
+                    if (buildListObject != null)
+                    {
+                        Image downloadImage = buildListObject.GetComponent<Image>();
+                        Image downloadProfileImage = downloadProfileButton.transform.GetChild(0).gameObject.GetComponent<Image>();
+                        if (downloadProfileImage != null && downloadImage != null)
+                        {
+                            downloadProfileImage.sprite = downloadImage.sprite;
+                        }
                     }
 
                     AnimatedToggle animatedToggle = downloadProfileGameObject.GetComponentInChildren<AnimatedToggle>();
