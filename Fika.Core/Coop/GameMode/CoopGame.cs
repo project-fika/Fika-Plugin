@@ -732,6 +732,7 @@ namespace Fika.Core.Coop.GameMode
                     if (!server.Groups.TryGetValue(groupId, out ServerGroup groupInfo))
                     {
                         groupInfo = new ServerGroup();
+                        server.Groups.Add(groupId, groupInfo);
                     }
                     
                     groupInfo.ReadyClients++;
@@ -1142,7 +1143,7 @@ namespace Fika.Core.Coop.GameMode
                 if (!server.Groups.TryGetValue(groupId, out ServerGroup groupInfo))
                 {
                     groupInfo = new ServerGroup();
-                    server.Groups[groupId] = groupInfo;
+                    server.Groups.Add(groupId, groupInfo);
                 }
                 
                 do

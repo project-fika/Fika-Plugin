@@ -514,6 +514,7 @@ namespace Fika.Core.Networking
             if (!Groups.TryGetValue(packet.GroupId, out ServerGroup groupInfo))
             {
                 groupInfo = new ServerGroup();
+                Groups.Add(packet.GroupId, groupInfo);
             }
 
             groupInfo.ConnectedClients += packet.Connected;
