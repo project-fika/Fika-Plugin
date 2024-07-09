@@ -930,6 +930,11 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         private GameObject CreateCancelButton(LocalPlayer myPlayer, CoopPlayer coopPlayer, GameObject customButton)
         {
+            if (myPlayer.Side is EPlayerSide.Savage)
+            {
+                return null;
+            }
+
             if (MenuUI.Instantiated)
             {
                 MenuUI menuUI = MenuUI.Instance;
