@@ -26,35 +26,43 @@ namespace Fika.Core.UI.Custom
         public RaidSettings RaidSettings { get; set; }
         private LobbyEntry[] Matches { get; set; }
         private List<GameObject> MatchesListObjects { get; set; } = [];
-        private bool StopQuery = false;
+        private bool stopQuery = false;
 
         public DefaultUIButton BackButton { get; internal set; }
         public DefaultUIButton AcceptButton { get; internal set; }
         public GameObject NewBackButton { get; internal set; }
 
-        private string ProfileId => FikaBackendUtils.Profile.ProfileId;
+        private string profileId => FikaBackendUtils.Profile.ProfileId;
         private float _lastRefreshed;
         private bool _started;
+        private Coroutine serverQueryRoutine;
 
         protected void OnEnable()
         {
             if(_started)
             {
-                StopQuery = false;
-                StartCoroutine(ServerQuery());
+                stopQuery = false;
+                if (serverQueryRoutine == null)
+                {
+                    serverQueryRoutine = StartCoroutine(ServerQuery()); 
+                }
             }
         }
 
         protected void OnDisable()
         {
-            StopQuery = true;
-            StopCoroutine(ServerQuery());
+            stopQuery = true;
+            if (serverQueryRoutine != null)
+            {
+                StopCoroutine(serverQueryRoutine);
+                serverQueryRoutine = null;
+            }
         }
 
         protected void Start()
         {
             CreateMatchMakerUI();
-            StartCoroutine(ServerQuery());
+            serverQueryRoutine = StartCoroutine(ServerQuery());
 
             _started = true;
         }
@@ -66,16 +74,24 @@ namespace Fika.Core.UI.Custom
                 DestroyThis();
             }
 
-            if (StopQuery)
+            if (stopQuery)
             {
-                StopCoroutine(ServerQuery());
+                if (serverQueryRoutine != null)
+                {
+                    StopCoroutine(serverQueryRoutine);
+                    serverQueryRoutine = null;
+                }
             }
         }
 
         private void DestroyThis()
         {
-            StopQuery = true;
-            StopCoroutine(ServerQuery());
+            stopQuery = true;
+            if (serverQueryRoutine != null)
+            {
+                StopCoroutine(serverQueryRoutine);
+                serverQueryRoutine = null;
+            }
 
             Destroy(gameObject);
             Destroy(fikaMatchMakerUi);
@@ -84,7 +100,7 @@ namespace Fika.Core.UI.Custom
 
         protected void OnDestroy()
         {
-            StopQuery = true;
+            stopQuery = true;
             if (NewBackButton != null)
             {
                 Destroy(NewBackButton);
@@ -140,8 +156,8 @@ namespace Fika.Core.UI.Custom
 
             fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
             {
-                var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-                var session = tarkovApplication.Session;
+                TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+                ISession session = tarkovApplication.Session;
 
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
 
@@ -201,7 +217,7 @@ namespace Fika.Core.UI.Custom
                         FikaPlugin.DedicatedRaidWebSocket.Connect();
                     }
 
-                    var raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
+                    RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
                     StartDedicatedRequest request = new StartDedicatedRequest
                     {
@@ -216,7 +232,7 @@ namespace Fika.Core.UI.Custom
                         WavesSettings = raidSettings.WavesSettings
                     };
 
-                    var response = await FikaRequestHandler.StartDedicated(request);
+                    StartDedicatedResponse response = await FikaRequestHandler.StartDedicated(request);
 
                     if (!string.IsNullOrEmpty(response.Error))
                     {
@@ -407,7 +423,7 @@ namespace Fika.Core.UI.Custom
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                     //StartCoroutine(JoinMatch(ProfileId, server.name, button));
-                    StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
+                    StartCoroutine(JoinMatch(profileId, server.name, button, () =>
                     {
                         this.DestroyThis();
                         this.AcceptButton.OnClick.Invoke();
@@ -551,7 +567,7 @@ namespace Fika.Core.UI.Custom
 
         public IEnumerator ServerQuery()
         {
-            while (!StopQuery)
+            while (!stopQuery)
             {
                 AutoRefresh();
 
