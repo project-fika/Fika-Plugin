@@ -118,9 +118,24 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
-        public override BasePhysicalClass CreatePhysical()
+        /*public override BasePhysicalClass CreatePhysical()
         {
             return FikaPlugin.Instance.UseInertia ? new PlayerPhysicalClass() : new NoInertiaPhysical();
+        }*/
+
+        public override void CreateMovementContext()
+        {
+            LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
+            if (FikaPlugin.Instance.UseInertia)
+            {
+                MovementContext = MovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                    new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+            }
+            else
+            {
+                MovementContext = NoInertiaMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                    new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+            }
         }
 
         public override void OnSkillLevelChanged(GClass1778 skill)
