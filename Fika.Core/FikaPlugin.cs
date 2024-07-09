@@ -102,6 +102,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
         public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+        public static ConfigEntry<bool> EnableChat { get; set; }
         public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
 
         // Coop | Name Plates
@@ -302,17 +303,19 @@ namespace Fika.Core
 
             // Coop
 
-            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 2 }));
+            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 3 }));
 
-            ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+            ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+            EnableChat = Config.Bind("Coop", "Enable Chat", false, new ConfigDescription("Toggle to enable chat in game. Cannot be change mid raid", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.RightControl), new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 

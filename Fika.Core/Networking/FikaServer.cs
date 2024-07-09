@@ -281,7 +281,10 @@ namespace Fika.Core.Networking
         {
             coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             MyPlayer = coopPlayer;
-            fikaChat = gameObject.AddComponent<FikaChat>();
+            if (FikaPlugin.EnableChat.Value)
+            {
+                fikaChat = gameObject.AddComponent<FikaChat>(); 
+            }
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
