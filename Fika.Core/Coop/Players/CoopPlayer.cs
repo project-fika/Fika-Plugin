@@ -39,6 +39,7 @@ namespace Fika.Core.Coop.Players
         public PacketReceiver PacketReceiver;
         public IPacketSender PacketSender;
         private DateTime lastPingTime;
+        public bool hasSkilledScav = false;
         //public bool hasKilledScav = false;
         public float observedOverlap = 0f;
         public bool leftStanceDisabled = false;
@@ -421,6 +422,20 @@ namespace Fika.Core.Coop.Players
         {
             base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
             aggressor.Loyalty?.method_1(this);
+
+            // Handle 'Help Scav' rep gains
+            if (aggressor is CoopPlayer coopPlayer)
+            {
+                if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.hasSkilledScav)
+                {
+                    coopPlayer.hasSkilledScav = true;
+                    return;
+                }
+                else if (Side != EPlayerSide.Savage && hasSkilledScav && aggressor.Side == EPlayerSide.Savage)
+                {
+                    aggressor.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
+                }
+            }
         }
 
         public override void SetInventoryOpened(bool opened)
