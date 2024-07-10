@@ -99,8 +99,8 @@ namespace Fika.Core
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
         public static ConfigEntry<bool> ShowExtractMessage { get; set; }
-        public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
-        public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
+        //public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
+        //public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
         public static ConfigEntry<bool> EnableChat { get; set; }
         public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
@@ -143,6 +143,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
+        public static ConfigEntry<bool> DynamicAIIgnoreSnipers { get; set; }
         //public static ConfigEntry<bool> CullPlayers { get; set; }
         //public static ConfigEntry<float> CullingRange { get; set; }
 
@@ -309,9 +310,9 @@ namespace Fika.Core
 
             ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            //FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 3 }));
+            //FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 3 }));
 
             ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
@@ -381,11 +382,13 @@ namespace Fika.Core
 
             // Performance
 
-            DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 4 }));
+            DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
 
-            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+            DynamicAIIgnoreSnipers = Config.Bind("Performance", "Dynamic AI - Ignore Snipers", true, new ConfigDescription("Whether Dynamic AI should ignore sniper scavs.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             //CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
