@@ -420,12 +420,16 @@ namespace Fika.Core.Coop.Players
 
         public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
-            aggressor.Loyalty?.method_1(this);
+            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);            
 
             // Handle 'Help Scav' rep gains
             if (aggressor is CoopPlayer coopPlayer)
             {
+                if (coopPlayer.Side != EPlayerSide.Savage)
+                {
+                    coopPlayer.Loyalty.method_1(this);
+                }
+
                 if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.hasSkilledScav)
                 {
                     coopPlayer.hasSkilledScav = true;
@@ -433,10 +437,21 @@ namespace Fika.Core.Coop.Players
                 }
                 else if (Side != EPlayerSide.Savage && hasSkilledScav && aggressor.Side == EPlayerSide.Savage)
                 {
-                    aggressor.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
+                    coopPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
                 }
             }
         }
+
+#if DEBUG
+        public override void ShowStringNotification(string message)
+        {
+            if (IsYourPlayer)
+            {
+                ConsoleScreen.Log(message);
+                FikaPlugin.Instance.FikaLogger.LogInfo(message);
+            }
+        } 
+#endif
 
         public override void SetInventoryOpened(bool opened)
         {
