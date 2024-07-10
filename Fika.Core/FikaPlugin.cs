@@ -220,7 +220,7 @@ namespace Fika.Core
             new MatchmakerAcceptScreen_Show_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
             new BotCacher_Patch().Enable();
-            new InventoryScroll_Patch().Enable();
+            //new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
