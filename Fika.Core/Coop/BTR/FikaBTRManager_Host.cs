@@ -40,7 +40,9 @@ namespace Fika.Core.Coop.BTR
         private BTRView btrClientSide;
         private BotOwner btrBotShooter;
         private BTRDataPacket btrDataPacket = default;
+#pragma warning disable CS0414 // The field 'FikaBTRManager_Host.btrInitialized' is assigned but its value is never used
         private bool btrInitialized = false;
+#pragma warning restore CS0414 // The field 'FikaBTRManager_Host.btrInitialized' is assigned but its value is never used
         private bool btrBotShooterInitialized = false;
 
         private float coverFireTime = 90f;

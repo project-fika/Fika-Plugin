@@ -40,7 +40,9 @@ namespace Fika.Core.Coop.BTR
         private BTRVehicle btrServerSide;
         public BTRView btrClientSide;
         private BTRDataPacket btrDataPacket = default;
+#pragma warning disable CS0414 // The field 'FikaBTRManager_Client.btrInitialized' is assigned but its value is never used
         private bool btrInitialized = false;
+#pragma warning restore CS0414 // The field 'FikaBTRManager_Client.btrInitialized' is assigned but its value is never used
         private bool btrBotShooterInitialized = false;
 
         private BTRTurretServer btrTurretServer;
