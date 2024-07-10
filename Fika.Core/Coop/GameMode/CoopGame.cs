@@ -706,9 +706,9 @@ namespace Fika.Core.Coop.GameMode
 
                 NetDataWriter writer = new();
 
-                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
+                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", 0);
 
-                int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+                float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
 
                 if (isServer)
                 {
@@ -737,7 +737,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)server.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (server.ReadyClients < expectedPlayers);
 
@@ -771,7 +771,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)client.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (client.ReadyClients < expectedPlayers);
                 }
