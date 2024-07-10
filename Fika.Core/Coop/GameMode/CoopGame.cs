@@ -55,7 +55,6 @@ namespace Fika.Core.Coop.GameMode
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
     {
         public string InfiltrationPoint;
-        public bool HasAddedFenceRep = false;
         public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
         public string MyExitLocation { get; set; } = null;
         public ISpawnSystem SpawnSystem;
@@ -1597,10 +1596,10 @@ namespace Fika.Core.Coop.GameMode
 
                 if (point.HasRequirements && point.TransferItemRequirement != null)
                 {
-                    if (point.TransferItemRequirement.Met(player, point) && player.IsYourPlayer && !HasAddedFenceRep)
+                    if (point.TransferItemRequirement.Met(player, point) && player.IsYourPlayer)
                     {
+                        // Seems to already be handled by SPT so we only add it visibly
                         player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
-                        HasAddedFenceRep = true;
                     }
                 }
             }
@@ -1609,7 +1608,6 @@ namespace Fika.Core.Coop.GameMode
             {
                 // Seems to already be handled by SPT so we only add it visibly
                 player.Profile.EftStats.SessionCounters.AddDouble(0.01, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
-                //player.Profile.FenceInfo.AddStanding(0.1, EFenceStandingSource.ExitStanding);
             }
 
             GenericPacket genericPacket = new()

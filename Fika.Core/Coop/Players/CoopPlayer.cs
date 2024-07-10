@@ -39,7 +39,7 @@ namespace Fika.Core.Coop.Players
         public PacketReceiver PacketReceiver;
         public IPacketSender PacketSender;
         private DateTime lastPingTime;
-        public bool hasKilledScav = false;
+        //public bool hasKilledScav = false;
         public float observedOverlap = 0f;
         public bool leftStanceDisabled = false;
         public Vector2 LastDirection = Vector2.zero;
@@ -295,6 +295,7 @@ namespace Fika.Core.Coop.Players
             return gclass;
         }
 
+        #region Proceed
         public override void Proceed(bool withNetwork, Callback<GInterface137> callback, bool scheduled = true)
         {
             base.Proceed(withNetwork, callback, scheduled);
@@ -398,7 +399,8 @@ namespace Fika.Core.Coop.Players
         {
             // what is this
             base.Proceed<T>(item, callback, scheduled);
-        }
+        } 
+        #endregion
 
         public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
         {
@@ -413,6 +415,12 @@ namespace Fika.Core.Coop.Players
                     HasItemId = false
                 }
             });*/
+        }
+
+        public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+        {
+            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
+            aggressor.Loyalty?.method_1(this);
         }
 
         public override void SetInventoryOpened(bool opened)

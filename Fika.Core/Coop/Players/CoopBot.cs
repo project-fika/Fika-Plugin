@@ -182,7 +182,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            if (Side == EPlayerSide.Savage)
+            /*if (Side == EPlayerSide.Savage)
             {
                 if (LastAggressor != null)
                 {
@@ -213,7 +213,7 @@ namespace Fika.Core.Coop.Players
                         }
                     }
                 }
-            }
+            }*/
 
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Bots.ContainsKey(ProfileId))
