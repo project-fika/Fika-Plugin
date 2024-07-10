@@ -25,8 +25,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
     {
         protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_47));
 
-        static ISession CurrentSession { get; set; }
-
         [PatchPrefix]
         public static bool Prefix(TarkovApplication __instance)
         {
@@ -37,15 +35,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 return true;
             }
 
-            ISession session = __instance.GetClientBackEndSession();
-            if (session == null)
-            {
-                Logger.LogError("Session is NULL. Continuing as Single-player.");
-                return true;
-            }
-
-            CurrentSession = session;
-
             return false;
         }
 
@@ -54,11 +43,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
             RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
         {
             if (FikaBackendUtils.IsSinglePlayer)
-            {
-                return;
-            }
-
-            if (CurrentSession == null)
             {
                 return;
             }
@@ -92,7 +76,12 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 NetManagerUtils.StartPinger();
             }
 
-            ISession session = CurrentSession;
+            ISession session = __instance.GetClientBackEndSession();
+
+            if (session == null)
+            {
+                throw new NullReferenceException("Backend session was null when initializing game!");
+            }
 
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
 
