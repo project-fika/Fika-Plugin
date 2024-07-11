@@ -141,9 +141,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnSkillLevelChanged(GClass1778 skill)
         {
-            NotificationManagerClass.DisplayMessageNotification(string.Format("SkillLevelUpMessage".Localized(null),
-                skill.Id.ToString().Localized(null),
-                skill.Level.ToString()), ENotificationDurationType.Default, ENotificationIconType.Default, null);
+            NotificationManagerClass.DisplayNotification(new GClass2044(skill));
         }
 
         public override bool CheckSurface()
