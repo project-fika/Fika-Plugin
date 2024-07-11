@@ -1223,10 +1223,10 @@ namespace Fika.Core.Coop.GameMode
                 GClass814 botCreator = new(this, botsPresets, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 
-                bool enableWaves = controllerSettings.BotAmount == EBotAmount.Horde;
+                bool useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
                 botsController_0.Init(this, botCreator, botZones, spawnSystem, wavesSpawnScenario_0.BotLocationModifier,
-                    controllerSettings.IsEnabled, controllerSettings.IsScavWars, enableWaves, false,
+                    controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
                     BossSpawnWaveManagerClass.HaveSectants, Singleton<GameWorld>.Instance, Location_0.OpenZones);
 
                 Logger.LogInfo($"Location: {Location_0.Name}");
