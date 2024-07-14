@@ -663,6 +663,27 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override IEnumerator vmethod_1()
         {
+            if (!isServer)
+            {
+                FikaClient fikaClient = Singleton<FikaClient>.Instance;
+                do
+                {
+                    yield return new WaitForEndOfFrame();
+                } while (!fikaClient.HostReady);
+            }
+            else
+            {
+                FikaServer fikaServer = Singleton<FikaServer>.Instance;
+                InformationPacket packet = new(false)
+                {
+                    NumberOfPlayers = fikaServer.NetServer.ConnectedPeersCount,
+                    ReadyPlayers = fikaServer.ReadyClients,
+                    HostReady = true
+                };
+
+                fikaServer.SendDataToAll(new(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+            }
+
             CoopPlayer coopPlayer = (CoopPlayer)PlayerOwner.Player;
             coopPlayer.PacketSender.Init();
 
@@ -1477,6 +1498,8 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         public override void vmethod_5()
         {
+
+
             GameTimer.Start(null, null);
             gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
             gparam_0.vmethod_0();

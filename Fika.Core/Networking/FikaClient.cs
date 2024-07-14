@@ -44,6 +44,7 @@ namespace Fika.Core.Networking
         public int Ping = 0;
         public int ConnectedClients = 0;
         public int ReadyClients = 0;
+        public bool HostReady = false;
         public NetManager NetClient
         {
             get
