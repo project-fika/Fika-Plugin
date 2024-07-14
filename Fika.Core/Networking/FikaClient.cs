@@ -608,6 +608,7 @@ namespace Fika.Core.Networking
             {
                 ConnectedClients = packet.NumberOfPlayers;
                 ReadyClients = packet.ReadyPlayers;
+                HostReady = packet.HostReady;
             }
         }
 
