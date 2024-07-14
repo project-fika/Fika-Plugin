@@ -193,7 +193,7 @@ namespace Fika.Core.Networking
 
             foreach (string ip in FikaPlugin.Instance.LocalIPs)
             {
-                if (ip.StartsWith("192.168")) // need to add more cases here later, for now only check normal range...
+                if (ip.StartsWith("192.168") || ip.StartsWith("10.") || ip.StartsWith("172.16"))
                 {
                     Ips = [MyExternalIP, ip];
                 }
