@@ -3,6 +3,7 @@ using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
+using SPT.Custom.BTR.Patches;
 using System;
 using System.Collections.Generic;
 
@@ -15,6 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
         private readonly List<string> lastFromNetwork = [];
         private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
+        private bool canSendAndReceive = true;
 
         public override void Init()
         {
@@ -49,6 +51,12 @@ namespace Fika.Core.Coop.ClientClasses
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
         {
             base.OnConditionValueChanged(conditional, status, condition, notify);
+
+            if (!canSendAndReceive)
+            {
+                return;
+            }
+
             if (lastFromNetwork.Contains(condition.id))
             {
                 lastFromNetwork.Remove(condition.id);
@@ -78,6 +86,11 @@ namespace Fika.Core.Coop.ClientClasses
             return lootedTemplateIds.Contains(templateId);
         }
 
+        public void ToggleQuestSharing(bool state)
+        {
+            canSendAndReceive = state;
+        }
+
         private void SendQuestPacket(IConditionCounter conditional, Condition condition)
         {
             if (conditional is QuestClass quest)
@@ -101,6 +114,11 @@ namespace Fika.Core.Coop.ClientClasses
 
         internal void ReceiveQuestPacket(ref QuestConditionPacket packet)
         {
+            if (!canSendAndReceive)
+            {
+                return;
+            }
+
             AddNetworkId(packet.Id);
             foreach (QuestClass quest in Quests)
             {
@@ -124,6 +142,11 @@ namespace Fika.Core.Coop.ClientClasses
 
         internal void ReceiveQuestItemPacket(ref QuestItemPacket packet)
         {
+            if (!canSendAndReceive)
+            {
+                return;
+            }
+
             if (!string.IsNullOrEmpty(packet.ItemId))
             {
                 Item item = player.FindItem(packet.ItemId, true);

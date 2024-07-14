@@ -1583,6 +1583,11 @@ namespace Fika.Core.Coop.GameMode
                 NotificationManagerClass.DisplayMessageNotification("You have gone missing in action...", iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
+            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ToggleQuestSharing(false);
+            }
+
             BackendConfigSettingsClass.GClass1361.GClass1367 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
             if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && PastTime < matchEndConfig.SurvivedTimeRequirement)
             {
