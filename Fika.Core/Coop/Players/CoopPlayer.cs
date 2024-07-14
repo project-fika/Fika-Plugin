@@ -421,9 +421,9 @@ namespace Fika.Core.Coop.Players
             base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);            
 
             // Handle 'Help Scav' rep gains
-            if (aggressor is CoopPlayer coopPlayer && coopPlayer.IsYourPlayer)
+            if (aggressor is CoopPlayer coopPlayer)
             {
-                if (coopPlayer.Side != EPlayerSide.Savage)
+                if (coopPlayer.Side == EPlayerSide.Savage)
                 {
                     coopPlayer.Loyalty.method_1(this);
                 }
