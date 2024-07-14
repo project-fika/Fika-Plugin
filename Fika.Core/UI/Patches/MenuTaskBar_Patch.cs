@@ -63,8 +63,9 @@ namespace Fika.Core.UI.Patches
                             try
                             {
                                 JObject profile = await FikaRequestHandler.GetProfile();
-
-                                if (profile != null)
+                                bool responseHasError = profile.ContainsKey("errmsg");
+                                string error = responseHasError ? profile.Value<string>("errmsg") : "Failed to retrieve profile";
+                                if (!responseHasError && profile != null)
                                 {
                                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                                     string installDir = Environment.CurrentDirectory;
@@ -92,7 +93,7 @@ namespace Fika.Core.UI.Patches
                                 }
                                 else
                                 {
-                                    NotificationManagerClass.DisplayWarningNotification("Failed to retrieve profile");
+                                    NotificationManagerClass.DisplayWarningNotification(error);
                                 }
                             }
                             catch (Exception ex)
