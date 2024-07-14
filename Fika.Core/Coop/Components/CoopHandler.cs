@@ -3,6 +3,7 @@ using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.UI;
 using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
@@ -196,6 +197,10 @@ namespace Fika.Core.Coop.Components
 
             if (FikaPlugin.ExtractKey.Value.IsDown() && quitState != EQuitState.NONE && !requestQuitGame)
             {
+                //Log to both the in-game console as well as into the BepInEx logfile
+                ConsoleScreen.Log($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
+                Logger.LogInfo($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
+
                 requestQuitGame = true;
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
