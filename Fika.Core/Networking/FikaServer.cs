@@ -193,7 +193,7 @@ namespace Fika.Core.Networking
 
             foreach (string ip in FikaPlugin.Instance.LocalIPs)
             {
-                if (ip.StartsWith("192.168") || ip.StartsWith("10.") || ip.StartsWith("172.16"))
+                if (ValidateLocalIP(ip))
                 {
                     Ips = [MyExternalIP, ip];
                 }
@@ -210,6 +210,24 @@ namespace Fika.Core.Networking
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+        }
+
+        private bool ValidateLocalIP(string LocalIP)
+        {
+            if(LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
+            {
+                return true;
+            }
+
+            //Check for RFC1918's 20 bit block.
+            int[] ip = Array.ConvertAll(LocalIP.Split('.'), int.Parse);
+
+            if (ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
