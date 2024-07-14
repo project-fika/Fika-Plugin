@@ -640,9 +640,8 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         /// <param name="coopHandler"></param>
         /// <param name="bot">The bot to despawn</param>
-        private void DespawnBot(CoopHandler coopHandler, Player bot)
+        internal void DespawnBot(CoopHandler coopHandler, Player bot)
         {
-            IBotGame botGame = Singleton<IBotGame>.Instance;
             BotOwner botOwner = bot.AIData.BotOwner;
 
             BotsController.Bots.Remove(botOwner);
