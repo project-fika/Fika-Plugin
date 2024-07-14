@@ -45,6 +45,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Fika.Core.Models;
 using UnityEngine;
 
 namespace Fika.Core.Coop.GameMode
@@ -66,7 +67,7 @@ namespace Fika.Core.Coop.GameMode
         private Coroutine extractRoutine;
         private SpawnPointManagerClass spawnPoints = null;
         private ISpawnPoint spawnPoint = null;
-        private BossSpawnWaveManagerClass BossSpawnWaveManagerClass;
+        private BossSpawnWaveManagerClass bossSpawnWaveManager;
         private WavesSpawnScenario wavesSpawnScenario_0;
         private NonWavesSpawnScenario nonWavesSpawnScenario_0;
         private Func<Player, EftGamePlayerOwner> func_1;
@@ -148,7 +149,7 @@ namespace Fika.Core.Coop.GameMode
             coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, new Action<BotWaveDataClass>(coopGame.botsController_0.ActivateBotsByWave), location);
 
             BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
-            coopGame.BossSpawnWaveManagerClass = BossSpawnWaveManagerClass.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
+            coopGame.bossSpawnWaveManager = BossSpawnWaveManagerClass.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
             if (useCustomWeather && coopGame.isServer)
             {
@@ -268,9 +269,9 @@ namespace Fika.Core.Coop.GameMode
             coopHandler = CoopHandler.CoopHandlerParent.AddComponent<CoopHandler>();
             coopHandler.LocalGameInstance = this;
 
-            if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
+            if (!string.IsNullOrEmpty(FikaBackendUtils.GetServerId()))
             {
-                coopHandler.ServerId = FikaBackendUtils.GetGroupId();
+                coopHandler.ServerId = FikaBackendUtils.GetServerId();
             }
             else
             {
@@ -701,7 +702,6 @@ namespace Fika.Core.Coop.GameMode
                         yield return null;
                     }
 
-                    Singleton<FikaServer>.Instance.ReadyClients++;
                     yield break;
                 }
 
@@ -709,7 +709,8 @@ namespace Fika.Core.Coop.GameMode
 
                 FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
 
-                int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+                int expectedPlayers = (isServer ? FikaBackendUtils.HostExpectedNumberOfPlayers : FikaGroupUtils.GroupSize) - 1;
+                var groupId = FikaGroupUtils.GroupSize > 1 ? FikaGroupUtils.GroupId : "solo";
 
                 if (isServer)
                 {
@@ -727,20 +728,31 @@ namespace Fika.Core.Coop.GameMode
                     } while (coopHandler.HumanPlayers < expectedPlayers);
 
                     FikaServer server = Singleton<FikaServer>.Instance;
-                    server.ReadyClients++;
+                    
+                    if (!server.Groups.TryGetValue(groupId, out ServerGroup groupInfo))
+                    {
+                        groupInfo = new ServerGroup();
+                        server.Groups.Add(groupId, groupInfo);
+                    }
+                    
+                    groupInfo.ReadyClients++;
+                    server.Groups[groupId] = groupInfo;
+                    
                     InformationPacket packet = new()
                     {
-                        NumberOfPlayers = server.NetServer.ConnectedPeersCount,
-                        ReadyPlayers = server.ReadyClients
+                        Ready = groupInfo.ReadyClients,
+                        Connected = groupInfo.ConnectedClients,
+                        GroupId = groupId
                     };
                     writer.Reset();
                     server.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
+                        groupInfo = server.Groups[groupId];
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", groupInfo.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
-                    } while (server.ReadyClients < expectedPlayers);
+                    } while (groupInfo.ReadyClients < expectedPlayers);
 
                     foreach (CoopPlayer player in coopHandler.Players.Values)
                     {
@@ -755,7 +767,7 @@ namespace Fika.Core.Coop.GameMode
                         DynamicAI.AddHumans();
                     }
                 }
-                else
+                else if (FikaGroupUtils.GroupSize > 1)
                 {
                     do
                     {
@@ -763,9 +775,10 @@ namespace Fika.Core.Coop.GameMode
                     } while (coopHandler.HumanPlayers < expectedPlayers);
 
                     FikaClient client = Singleton<FikaClient>.Instance;
-                    InformationPacket packet = new(true)
+                    InformationPacket packet = new()
                     {
-                        ReadyPlayers = 1
+                        Ready = 1,
+                        GroupId = groupId
                     };
                     writer.Reset();
                     client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
@@ -773,6 +786,14 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
+
+                        packet = new(true)
+                        {
+                            GroupId = groupId
+                        };
+                        writer.Reset();
+                        client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        
                         yield return new WaitForEndOfFrame();
                     } while (client.ReadyClients < expectedPlayers);
                 }
@@ -785,10 +806,10 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         private async Task SendOrReceiveSpawnPoint()
         {
-            if (isServer)
+            if (isServer || FikaGroupUtils.IsGroupLeader)
             {
                 bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
-                UpdateSpawnPointRequest body = new(spawnTogether ? spawnPoint.Id : "");
+                UpdateSpawnPointRequest body = new(spawnTogether ? spawnPoint.Id : "", FikaGroupUtils.GroupId);
                 if (spawnTogether)
                 {
                     Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}");
@@ -796,13 +817,18 @@ namespace Fika.Core.Coop.GameMode
                 else
                 {
                     Logger.LogInfo("Using random spawn points!");
-                    NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
+                    NotificationManagerClass.DisplayMessageNotification("Using random spawn points",
+                        iconType: EFT.Communications.ENotificationIconType.Alert);
                 }
+
                 await FikaRequestHandler.UpdateSpawnPoint(body);
             }
             else
             {
-                SpawnPointRequest body = new();
+                SpawnPointRequest body = new()
+                {
+                    GroupId = FikaGroupUtils.GroupId
+                };
                 SpawnPointResponse response = await FikaRequestHandler.RaidSpawnPoint(body);
                 string name = response.SpawnPoint;
 
@@ -885,7 +911,7 @@ namespace Fika.Core.Coop.GameMode
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
             coopPlayer.SetupMainPlayer();
 
-            PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
+            PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetServerId());
             await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             myPlayer.SpawnPoint = spawnPoint;
@@ -930,6 +956,11 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         private GameObject CreateCancelButton(LocalPlayer myPlayer, CoopPlayer coopPlayer, GameObject customButton)
         {
+            if (myPlayer.Side is EPlayerSide.Savage)
+            {
+                return null;
+            }
+
             if (MenuUI.Instantiated)
             {
                 MenuUI menuUI = MenuUI.Instance;
@@ -1059,7 +1090,7 @@ namespace Fika.Core.Coop.GameMode
             GStruct379 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
             SpawnSystem = GClass2950.CreateSpawnSystem(settings, new Func<float>(Class1384.class1384_0.method_0), Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
 
-            if (isServer)
+            if (isServer || FikaGroupUtils.IsGroupLeader)
             {
                 spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 await SendOrReceiveSpawnPoint();
@@ -1101,13 +1132,25 @@ namespace Fika.Core.Coop.GameMode
             }
             int numbersOfPlayersToWaitFor = 0;
 
+            int expectedPlayers = isServer ? FikaBackendUtils.HostExpectedNumberOfPlayers : FikaGroupUtils.GroupSize;
+            var groupId = FikaGroupUtils.GroupSize > 1 ? FikaGroupUtils.GroupId : "solo";
+
             if (isServer)
             {
                 FikaServer server = Singleton<FikaServer>.Instance;
 
+                // In case the group info isn't already setup
+                if (!server.Groups.TryGetValue(groupId, out ServerGroup groupInfo))
+                {
+                    groupInfo = new ServerGroup();
+                    server.Groups.Add(groupId, groupInfo);
+                }
+                
                 do
                 {
-                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
+                    // Wait for all other clients to be "Connected"
+                    groupInfo = server.Groups[groupId];
+                    numbersOfPlayersToWaitFor = expectedPlayers - (groupInfo.ConnectedClients + 1);
                     if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
@@ -1156,13 +1199,17 @@ namespace Fika.Core.Coop.GameMode
                     await Task.Delay(500);
                 }
 
-                InformationPacket packet = new(true);
+                InformationPacket packet = new(true)
+                {
+                    Connected = 1,
+                    GroupId = groupId
+                };
                 NetDataWriter writer = new();
                 writer.Reset();
                 client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 do
                 {
-                    numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
+                    numbersOfPlayersToWaitFor = expectedPlayers - (client.ConnectedClients + 1);
                     if (FikaBackendUtils.ScreenController != null)
                     {
                         if (numbersOfPlayersToWaitFor > 0)
@@ -1178,7 +1225,11 @@ namespace Fika.Core.Coop.GameMode
                     {
                         Logger.LogError("WaitForPlayers::GClass3163 was null!");
                     }
-                    packet = new(true);
+
+                    packet = new(true)
+                    {
+                        GroupId = groupId
+                    };
                     writer.Reset();
                     client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
@@ -1214,7 +1265,7 @@ namespace Fika.Core.Coop.GameMode
             if (isServer)
             {
                 BotsPresets botsPresets = new(iSession, wavesSpawnScenario_0.SpawnWaves,
-                    BossSpawnWaveManagerClass.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1478_0, false);
+                    bossSpawnWaveManager.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1478_0, false);
 
                 GClass814 botCreator = new(this, botsPresets, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
@@ -1223,7 +1274,7 @@ namespace Fika.Core.Coop.GameMode
 
                 botsController_0.Init(this, botCreator, botZones, spawnSystem, wavesSpawnScenario_0.BotLocationModifier,
                     controllerSettings.IsEnabled, controllerSettings.IsScavWars, enableWaves, false,
-                    BossSpawnWaveManagerClass.HaveSectants, Singleton<GameWorld>.Instance, Location_0.OpenZones);
+                    bossSpawnWaveManager.HaveSectants, Singleton<GameWorld>.Instance, Location_0.OpenZones);
 
                 Logger.LogInfo($"Location: {Location_0.Name}");
 
@@ -1318,7 +1369,7 @@ namespace Fika.Core.Coop.GameMode
                     }
                 }
 
-                BossSpawnWaveManagerClass.Run(EBotsSpawnMode.Anyway);
+                bossSpawnWaveManager.Run(EBotsSpawnMode.Anyway);
 
                 FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
                 FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
@@ -1333,9 +1384,9 @@ namespace Fika.Core.Coop.GameMode
                 {
                     nonWavesSpawnScenario_0.Stop();
                 }
-                if (BossSpawnWaveManagerClass != null)
+                if (bossSpawnWaveManager != null)
                 {
-                    BossSpawnWaveManagerClass.Stop();
+                    bossSpawnWaveManager.Stop();
                 }
             }
 
@@ -1796,9 +1847,9 @@ namespace Fika.Core.Coop.GameMode
                 botsController_0.DestroyInfo(gparam_0.Player);
             }
 
-            if (BossSpawnWaveManagerClass != null)
+            if (bossSpawnWaveManager != null)
             {
-                BossSpawnWaveManagerClass.Stop();
+                bossSpawnWaveManager.Stop();
             }
             if (nonWavesSpawnScenario_0 != null)
             {
@@ -1968,9 +2019,9 @@ namespace Fika.Core.Coop.GameMode
                 Destroy(CoopHandler.CoopHandlerParent);
             }
 
-            if (BossSpawnWaveManagerClass != null)
+            if (bossSpawnWaveManager != null)
             {
-                BossSpawnWaveManagerClass.Stop();
+                bossSpawnWaveManager.Stop();
             }
             if (nonWavesSpawnScenario_0 != null)
             {
@@ -2048,7 +2099,7 @@ namespace Fika.Core.Coop.GameMode
             }
             dictionary_0.Clear();
             // Reset MatchingType to Single when the game ends.
-            FikaBackendUtils.MatchingType = EMatchmakerType.Single;
+            FikaBackendUtils.MatchingType = EMatchingType.Single;
         }
 
         /// <summary>

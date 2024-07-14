@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
+    /// <summary>
+    /// Currently unused
+    /// </summary>
     public class NoInertiaPhysical : PlayerPhysicalClass
     {
         private CoopPlayer coopPlayer;

@@ -34,6 +34,7 @@ using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Fika.Core.Models;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -49,7 +50,7 @@ namespace Fika.Core.Networking
         public string MyExternalIP { get; private set; } = NetUtils.GetLocalIp(LocalAddrType.IPv4);
         private int Port => FikaPlugin.UDPPort.Value;
         private CoopHandler coopHandler;
-        public int ReadyClients = 0;
+        public readonly Dictionary<string, ServerGroup> Groups = new();
         public NetManager NetServer
         {
             get
@@ -281,7 +282,10 @@ namespace Fika.Core.Networking
         {
             coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             MyPlayer = coopPlayer;
-            fikaChat = gameObject.AddComponent<FikaChat>();
+            if (FikaPlugin.EnableChat.Value)
+            {
+                fikaChat = gameObject.AddComponent<FikaChat>(); 
+            }
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
@@ -443,7 +447,7 @@ namespace Fika.Core.Networking
                         if (FikaPlugin.ShowNotifications.Value)
                         {
                             string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                            NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
+                            NotificationManagerClass.DisplayMessageNotification($"'{nickname}' has extracted.",
                                             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                         }
                     }
@@ -502,12 +506,27 @@ namespace Fika.Core.Networking
 
         private void OnInformationPacketReceived(InformationPacket packet, NetPeer peer)
         {
-            ReadyClients += packet.ReadyPlayers;
+            if (packet.GroupId == null)
+            {
+                return;
+            };
+            
+            if (!Groups.TryGetValue(packet.GroupId, out ServerGroup groupInfo))
+            {
+                groupInfo = new ServerGroup();
+                Groups.Add(packet.GroupId, groupInfo);
+            }
+
+            groupInfo.ConnectedClients += packet.Connected;
+            groupInfo.ReadyClients += packet.Ready;
+            
+            Groups[packet.GroupId] = groupInfo;
 
             InformationPacket respondPackage = new(false)
             {
-                NumberOfPlayers = _netServer.ConnectedPeersCount,
-                ReadyPlayers = ReadyClients,
+                Connected = groupInfo.ConnectedClients,
+                Ready = groupInfo.ReadyClients,
+                GroupId = packet.GroupId
             };
 
             _dataWriter.Reset();
@@ -842,8 +861,13 @@ namespace Fika.Core.Networking
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
+#if DEBUG
             logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
-            NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
+#endif
+            if (FikaPlugin.ShowNotifications.Value)
+            {
+                NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
+            }
             if (_netServer.ConnectedPeersCount == 0)
             {
                 timeSinceLastPeerDisconnected = DateTime.Now;

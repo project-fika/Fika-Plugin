@@ -18,10 +18,9 @@ using UnityEngine.UI;
 
 namespace Fika.Core.UI.Custom
 {
-    internal class MatchMakerUIScript : MonoBehaviour
+    public class MatchMakerUIScript : MonoBehaviour
     {
         private MatchMakerUI fikaMatchMakerUi;
-        public RaidSettings RaidSettings { get; set; }
         private LobbyEntry[] Matches { get; set; }
         private List<GameObject> MatchesListObjects { get; set; } = [];
         private bool StopQuery = false;
@@ -103,6 +102,7 @@ namespace Fika.Core.UI.Custom
                 if (!fikaMatchMakerUi.PlayerAmountSelection.active)
                 {
                     fikaMatchMakerUi.PlayerAmountSelection.SetActive(true);
+                    fikaMatchMakerUi.PlayerAmountText.text = FikaGroupUtils.GroupSize.ToString();
                 }
                 else
                 {
@@ -158,7 +158,7 @@ namespace Fika.Core.UI.Custom
                     }
                 }
                 FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
+                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, FikaBackendUtils.RaidSettings);
                 AcceptButton.OnClick.Invoke();
                 DestroyThis();
             });
@@ -189,7 +189,7 @@ namespace Fika.Core.UI.Custom
 
         private void AutoRefresh()
         {
-            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+            Matches = FikaRequestHandler.LocationRaids(FikaBackendUtils.RaidSettings);
 
             _lastRefreshed = Time.time;
 
@@ -199,79 +199,35 @@ namespace Fika.Core.UI.Custom
         private void ManualRefresh()
         {
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-            Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+            Matches = FikaRequestHandler.LocationRaids(FikaBackendUtils.RaidSettings);
 
             _lastRefreshed = Time.time;
 
             RefreshUI();
         }
 
-        private IEnumerator JoinMatch(string profileId, string serverId, Button button)
+        public void JoinMatchCoroutine(string profileId, string serverId, Button button = null)
         {
+            StartCoroutine(JoinMatch(profileId, serverId, button));
+        }
+        
+        private IEnumerator JoinMatch(string profileId, string serverId, Button button = null)
+        {
+            if (fikaMatchMakerUi.PlayerAmountSelection.active)
+            {
+                fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+            }
+            
             if (button != null)
             {
                 button.enabled = false;
             }
-
-            NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
-
-            NetManagerUtils.CreatePingingClient();
-
-            FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
-
-            if (pingingClient.Init(serverId))
-            {
-                int attempts = 0;
-                bool success;
-
-                FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
-
-                do
-                {
-                    attempts++;
-
-                    pingingClient.PingEndPoint("fika.hello");
-                    pingingClient.NetClient.PollEvents();
-                    success = pingingClient.Received;
-
-                    yield return new WaitForSeconds(0.1f);
-                } while (!success && attempts < 50);
-
-                if (!success)
-                {
-                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                    "ERROR CONNECTING",
-                    "Unable to connect to the server. Make sure that all ports are open and that all settings are configured correctly.",
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
-
-                    FikaPlugin.Instance.FikaLogger.LogError("Unable to connect to the session!");
-
-                    if (button != null)
-                    {
-                        button.enabled = true;
-                    }
-                    yield break;
-                }
-            }
-            else
-            {
-                ConsoleScreen.Log("ERROR");
-            }
-
+            
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
-                FikaBackendUtils.SetGroupId(result.ServerId);
-                FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
+                FikaBackendUtils.SetServerId(result.ServerId);
+                FikaBackendUtils.MatchingType = EMatchingType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
-
-                if (FikaBackendUtils.IsHostNatPunch)
-                {
-                    pingingClient.StartKeepAliveRoutine();
-                }
-                else
-                {
-                    NetManagerUtils.DestroyPingingClient();
-                }
 
                 DestroyThis();
 
@@ -279,10 +235,10 @@ namespace Fika.Core.UI.Custom
             }
             else
             {
-                NetManagerUtils.DestroyPingingClient();
-
                 Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage, ErrorScreen.EButtonType.OkButton, 15, null, null);
             }
+
+            yield break;
         }
 
         private void RefreshUI()
@@ -330,20 +286,15 @@ namespace Fika.Core.UI.Custom
                 Button button = joinButton.GetComponent<Button>();
                 button.onClick.AddListener(() =>
                 {
-                    if (fikaMatchMakerUi.PlayerAmountSelection.active)
-                    {
-                        fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
-                    }
-
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                    StartCoroutine(JoinMatch(ProfileId, server.name, button));
+                    JoinMatchCoroutine(ProfileId, server.name, button);
                 });
 
                 TooltipTextGetter tooltipTextGetter;
                 HoverTooltipArea tooltipArea;
                 Image image = server.GetComponent<Image>();
 
-                if (RaidSettings.LocationId != entry.Location)
+                if (FikaBackendUtils.RaidSettings.LocationId != entry.Location)
                 {
                     tooltipTextGetter = new()
                     {
@@ -363,7 +314,7 @@ namespace Fika.Core.UI.Custom
                     continue;
                 }
 
-                if (RaidSettings.SelectedDateTime != entry.Time)
+                if (FikaBackendUtils.RaidSettings.SelectedDateTime != entry.Time)
                 {
                     tooltipTextGetter = new()
                     {
@@ -383,14 +334,14 @@ namespace Fika.Core.UI.Custom
                     continue;
                 }
 
-                if (RaidSettings.Side != entry.Side)
+                if (FikaBackendUtils.RaidSettings.Side != entry.Side)
                 {
                     string errorText = "Cannot join a raid that is on another map.";
-                    if (RaidSettings.Side == ESideType.Pmc)
+                    if (FikaBackendUtils.RaidSettings.Side == ESideType.Pmc)
                     {
                         errorText = "You cannot join a scav raid as a PMC.";
                     }
-                    else if (RaidSettings.Side == ESideType.Savage)
+                    else if (FikaBackendUtils.RaidSettings.Side == ESideType.Savage)
                     {
                         errorText = "You cannot join a PMC raid as a scav.";
                     }
@@ -412,7 +363,7 @@ namespace Fika.Core.UI.Custom
 
                     continue;
                 }
-
+                
                 switch (entry.Status)
                 {
                     case LobbyEntry.ELobbyStatus.LOADING:

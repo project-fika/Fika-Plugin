@@ -58,7 +58,7 @@ namespace Fika.Core.Coop.Players
             Func<float> getAimingSensitivity, IViewFilter filter, int netId, IStatisticsManager statisticsManager)
         {
             CoopPlayer player = Create<CoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
-                        bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
+                bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
             player.IsYourPlayer = true;
             player.NetId = netId;
@@ -67,7 +67,7 @@ namespace Fika.Core.Coop.Players
 
             ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
 
-            LocalQuestControllerClass questController;
+            AbstractQuestControllerClass questController;
             if (FikaPlugin.Instance.SharedQuestProgression)
             {
                 questController = new CoopClientSharedQuestController(profile, inventoryController, session, player);
@@ -118,9 +118,24 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
-        public override BasePhysicalClass CreatePhysical()
+        /*public override BasePhysicalClass CreatePhysical()
         {
             return FikaPlugin.Instance.UseInertia ? new PlayerPhysicalClass() : new NoInertiaPhysical();
+        }*/
+
+        public override void CreateMovementContext()
+        {
+            LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
+            if (FikaPlugin.Instance.UseInertia)
+            {
+                MovementContext = MovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                    new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+            }
+            else
+            {
+                MovementContext = NoInertiaMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                    new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+            }
         }
 
         public override void OnSkillLevelChanged(GClass1778 skill)
@@ -894,9 +909,6 @@ namespace Fika.Core.Coop.Players
 
         public void SetupMainPlayer()
         {
-            // Set own group id
-            Profile.Info.GroupId = "Fika";
-
             // Setup own dog tag
             if (Side != EPlayerSide.Savage)
             {
@@ -931,7 +943,7 @@ namespace Fika.Core.Coop.Players
                     if (dogtagComponent != null)
                     {
                         dogtagComponent.ProfileId = ProfileId;
-                        dogtagComponent.GroupId = Profile.Info.GroupId;
+                        dogtagComponent.GroupId = FikaGroupUtils.GroupId;
                     }
                     else
                     {
@@ -1484,7 +1496,7 @@ namespace Fika.Core.Coop.Players
                         dogtagComponent.Time = DateTime.Now;
                         dogtagComponent.Status = "Killed by ";
                         dogtagComponent.WeaponName = LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.Name : "Unknown";
-                        dogtagComponent.GroupId = GroupId;
+                        dogtagComponent.GroupId = FikaGroupUtils.GroupId;
                     }
                 }
             }
