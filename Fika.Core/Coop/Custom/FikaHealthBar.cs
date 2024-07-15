@@ -174,7 +174,7 @@ namespace Fika.Core.Coop.Custom
 
             if (currentPlayer.ProfileId == FikaBackendUtils.GetGroupId())
             {
-                if (FikaBackendUtils.IsDedicated)
+                if (FikaBackendUtils.IsDedicatedGame)
                 {
                     // Do not show dedicated client name plate
                     Destroy(this);

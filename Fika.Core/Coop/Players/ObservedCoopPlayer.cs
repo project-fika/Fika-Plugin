@@ -800,7 +800,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void InitObservedPlayer()
+        public void InitObservedPlayer(bool isDedicatedHost)
         {
             if (gameObject.name.StartsWith("Bot_"))
             {
@@ -860,7 +860,7 @@ namespace Fika.Core.Coop.Players
 
                 InitVaultingAudioControllers(ObservedVaultingParameters);
 
-                if (FikaPlugin.ShowNotifications.Value)
+                if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
                 {
                     NotificationManagerClass.DisplayMessageNotification($"Group member '{(Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname)}' has spawned",
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);

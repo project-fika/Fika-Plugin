@@ -92,6 +92,11 @@ namespace Fika.Core.Coop.Players
             {
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
+            else if (FikaBackendUtils.IsDedicated)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("I AM DEDICATED");
+                player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
+            }
 
             player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
 
@@ -118,11 +123,6 @@ namespace Fika.Core.Coop.Players
 
             return player;
         }
-
-        /*public override BasePhysicalClass CreatePhysical()
-        {
-            return FikaPlugin.Instance.UseInertia ? new PlayerPhysicalClass() : new NoInertiaPhysical();
-        }*/
 
         public override void CreateMovementContext()
         {

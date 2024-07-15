@@ -33,7 +33,7 @@ namespace Fika.Core.Networking
             GetHostResponse result = FikaRequestHandler.GetHost(body);
 
             FikaBackendUtils.IsHostNatPunch = result.NatPunch;
-            FikaBackendUtils.IsDedicated = result.IsDedicated;
+            FikaBackendUtils.IsDedicatedGame = result.IsDedicated;
 
             NetClient.Start();
 

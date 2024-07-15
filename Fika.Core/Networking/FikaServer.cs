@@ -206,7 +206,7 @@ namespace Fika.Core.Networking
                 iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicated);
+            SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
@@ -870,7 +870,7 @@ namespace Fika.Core.Networking
                 timeSinceLastPeerDisconnected = DateTime.Now;
             }
 
-            if (FikaBackendUtils.IsDedicated)
+            if (FikaBackendUtils.IsDedicatedGame)
             {
                 if (_netServer.ConnectedPeersCount == 0)
                 {

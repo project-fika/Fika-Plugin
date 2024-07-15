@@ -85,6 +85,12 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             Profile profile = session.GetProfileBySide(____raidSettings.Side);
 
+            bool isDedicatedHost = session.Profile.Nickname.StartsWith("dedicated_");
+            if (isDedicatedHost)
+            {
+                FikaBackendUtils.IsDedicated = true;
+            }
+
             profile.Inventory.Stash = null;
             profile.Inventory.QuestStashItems = null;
             profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();

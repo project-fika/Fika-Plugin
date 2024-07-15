@@ -433,6 +433,8 @@ namespace Fika.Core.Coop.Components
 
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
+            bool isDedicatedProfile = profile.Nickname.Contains("dedicated_");
+
             ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position,
                 Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
                 EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
@@ -453,13 +455,16 @@ namespace Fika.Core.Coop.Components
                 HumanPlayers++;
             }
 
-            if (!Players.ContainsKey(netId))
+            if (!isDedicatedProfile)
             {
-                Players.Add(netId, otherPlayer);
-            }
-            else
-            {
-                Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
+                if (!Players.ContainsKey(netId))
+                {
+                    Players.Add(netId, otherPlayer);
+                }
+                else
+                {
+                    Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
+                } 
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))
@@ -512,7 +517,7 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            otherPlayer.InitObservedPlayer();
+            otherPlayer.InitObservedPlayer(isDedicatedProfile);
 
             Logger.LogDebug($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 
