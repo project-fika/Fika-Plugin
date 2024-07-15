@@ -99,9 +99,10 @@ namespace Fika.Core
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
         public static ConfigEntry<bool> ShowExtractMessage { get; set; }
-        public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
-        public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
+        //public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
+        //public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
         public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+        public static ConfigEntry<bool> EnableChat { get; set; }
         public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
 
         // Coop | Name Plates
@@ -120,6 +121,7 @@ namespace Fika.Core
 
         // Coop | Quest Sharing
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
+        public static ConfigEntry<bool> QuestSharingNotifications { get; set; }
 
         // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
@@ -142,6 +144,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> DynamicAI { get; set; }
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
+        public static ConfigEntry<bool> DynamicAIIgnoreSnipers { get; set; }
         //public static ConfigEntry<bool> CullPlayers { get; set; }
         //public static ConfigEntry<float> CullingRange { get; set; }
 
@@ -218,7 +221,7 @@ namespace Fika.Core
             new MatchmakerAcceptScreen_Show_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
             new BotCacher_Patch().Enable();
-            new InventoryScroll_Patch().Enable();
+            //new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
@@ -302,17 +305,19 @@ namespace Fika.Core
 
             // Coop
 
-            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+            ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true, new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
-            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            AutoExtract = Config.Bind("Coop", "Auto Extract", false, new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+            ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true, new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-            FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            //FasterInventoryScroll = Config.Bind("Coop", "Faster Inventory Scroll", false, new ConfigDescription("Toggle to increase the inventory scroll speed", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-            FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 2 }));
+            //FasterInventoryScrollSpeed = Config.Bind("Coop", "Faster Inventory Scroll Speed", 63, new ConfigDescription("The speed at which the inventory scrolls at. Default is 63.", new AcceptableValueRange<int>(63, 500), new ConfigurationManagerAttributes() { Order = 3 }));
 
-            ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+            ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8), new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+            EnableChat = Config.Bind("Coop", "Enable Chat", false, new ConfigDescription("Toggle to enable chat in game. Cannot be change mid raid", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.RightControl), new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
@@ -344,7 +349,9 @@ namespace Fika.Core
 
             // Coop | Quest Sharing
 
-            QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+            QuestSharingNotifications = Config.Bind("Coop | Quest Sharing", "Show Notifications", true, new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Coop | Custom
 
@@ -378,11 +385,13 @@ namespace Fika.Core
 
             // Performance
 
-            DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+            DynamicAI = Config.Bind("Performance", "Dynamic AI", false, new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-            DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 4 }));
+            DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f, new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
 
-            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+            DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium, new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+            DynamicAIIgnoreSnipers = Config.Bind("Performance", "Dynamic AI - Ignore Snipers", true, new ConfigDescription("Whether Dynamic AI should ignore sniper scavs.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             //CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
@@ -521,6 +530,7 @@ namespace Fika.Core
             new BotTemplateLimitPatch_Override().Enable();
             new OfflineRaidSettingsMenuPatch_Override().Enable();
             new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
+            new AirdropBox_Patch().Enable();
             new FikaAirdropFlare_Patch().Enable();
         }
 

@@ -55,7 +55,6 @@ namespace Fika.Core.Coop.GameMode
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
     {
         public string InfiltrationPoint;
-        public bool HasAddedFenceRep = false;
         public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
         public string MyExitLocation { get; set; } = null;
         public ISpawnSystem SpawnSystem;
@@ -641,9 +640,8 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         /// <param name="coopHandler"></param>
         /// <param name="bot">The bot to despawn</param>
-        private void DespawnBot(CoopHandler coopHandler, Player bot)
+        internal void DespawnBot(CoopHandler coopHandler, Player bot)
         {
-            IBotGame botGame = Singleton<IBotGame>.Instance;
             BotOwner botOwner = bot.AIData.BotOwner;
 
             BotsController.Bots.Remove(botOwner);
@@ -665,6 +663,29 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override IEnumerator vmethod_1()
         {
+            if (!isServer)
+            {
+                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for host to finish raid initialization...");
+
+                FikaClient fikaClient = Singleton<FikaClient>.Instance;
+                do
+                {
+                    yield return new WaitForEndOfFrame();
+                } while (!fikaClient.HostReady);
+            }
+            else
+            {
+                FikaServer fikaServer = Singleton<FikaServer>.Instance;
+                InformationPacket packet = new(false)
+                {
+                    NumberOfPlayers = fikaServer.NetServer.ConnectedPeersCount,
+                    ReadyPlayers = fikaServer.ReadyClients,
+                    HostReady = true
+                };
+
+                fikaServer.SendDataToAll(new(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+            }
+
             CoopPlayer coopPlayer = (CoopPlayer)PlayerOwner.Player;
             coopPlayer.PacketSender.Init();
 
@@ -707,9 +728,8 @@ namespace Fika.Core.Coop.GameMode
 
                 NetDataWriter writer = new();
 
-                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...");
-
-                int expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+                float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)(1 / expectedPlayers));
 
                 if (isServer)
                 {
@@ -738,7 +758,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", server.ReadyClients / expectedPlayers);
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)server.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (server.ReadyClients < expectedPlayers);
 
@@ -772,7 +792,7 @@ namespace Fika.Core.Coop.GameMode
 
                     do
                     {
-                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", client.ReadyClients / expectedPlayers);
+                        FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)client.ReadyClients / expectedPlayers);
                         yield return new WaitForEndOfFrame();
                     } while (client.ReadyClients < expectedPlayers);
                 }
@@ -930,6 +950,11 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         private GameObject CreateCancelButton(LocalPlayer myPlayer, CoopPlayer coopPlayer, GameObject customButton)
         {
+            if (myPlayer.Side is EPlayerSide.Savage)
+            {
+                return null;
+            }
+
             if (MenuUI.Instantiated)
             {
                 MenuUI menuUI = MenuUI.Instance;
@@ -1219,10 +1244,10 @@ namespace Fika.Core.Coop.GameMode
                 GClass814 botCreator = new(this, botsPresets, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 
-                bool enableWaves = controllerSettings.BotAmount == EBotAmount.Horde;
+                bool useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
                 botsController_0.Init(this, botCreator, botZones, spawnSystem, wavesSpawnScenario_0.BotLocationModifier,
-                    controllerSettings.IsEnabled, controllerSettings.IsScavWars, enableWaves, false,
+                    controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
                     BossSpawnWaveManagerClass.HaveSectants, Singleton<GameWorld>.Instance, Location_0.OpenZones);
 
                 Logger.LogInfo($"Location: {Location_0.Name}");
@@ -1354,6 +1379,8 @@ namespace Fika.Core.Coop.GameMode
 
             Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 5);
 
+            FikaBackendUtils.ScreenController.ChangeStatus("Finishing raid initialization...");
+
             yield return base.vmethod_4(controllerSettings, spawnSystem, runCallback);
             yield break;
         }
@@ -1474,6 +1501,8 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         public override void vmethod_5()
         {
+
+
             GameTimer.Start(null, null);
             gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
             gparam_0.vmethod_0();
@@ -1580,6 +1609,11 @@ namespace Fika.Core.Coop.GameMode
                 NotificationManagerClass.DisplayMessageNotification("You have gone missing in action...", iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
+            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ToggleQuestSharing(false);
+            }
+
             BackendConfigSettingsClass.GClass1361.GClass1367 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
             if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && PastTime < matchEndConfig.SurvivedTimeRequirement)
             {
@@ -1592,10 +1626,10 @@ namespace Fika.Core.Coop.GameMode
 
                 if (point.HasRequirements && point.TransferItemRequirement != null)
                 {
-                    if (point.TransferItemRequirement.Met(player, point) && player.IsYourPlayer && !HasAddedFenceRep)
+                    if (point.TransferItemRequirement.Met(player, point) && player.IsYourPlayer)
                     {
+                        // Seems to already be handled by SPT so we only add it visibly
                         player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
-                        HasAddedFenceRep = true;
                     }
                 }
             }
@@ -1604,7 +1638,6 @@ namespace Fika.Core.Coop.GameMode
             {
                 // Seems to already be handled by SPT so we only add it visibly
                 player.Profile.EftStats.SessionCounters.AddDouble(0.01, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
-                //player.Profile.FenceInfo.AddStanding(0.1, EFenceStandingSource.ExitStanding);
             }
 
             GenericPacket genericPacket = new()

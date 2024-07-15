@@ -44,6 +44,7 @@ namespace Fika.Core.Networking
         public int Ping = 0;
         public int ConnectedClients = 0;
         public int ReadyClients = 0;
+        public bool HostReady = false;
         public NetManager NetClient
         {
             get
@@ -165,7 +166,10 @@ namespace Fika.Core.Networking
         {
             coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             MyPlayer = coopPlayer;
-            fikaChat = gameObject.AddComponent<FikaChat>();
+            if (FikaPlugin.EnableChat.Value)
+            {
+                fikaChat = gameObject.AddComponent<FikaChat>(); 
+            }
         }
 
         private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet)
@@ -604,6 +608,7 @@ namespace Fika.Core.Networking
             {
                 ConnectedClients = packet.NumberOfPlayers;
                 ReadyClients = packet.ReadyPlayers;
+                HostReady = packet.HostReady;
             }
         }
 
