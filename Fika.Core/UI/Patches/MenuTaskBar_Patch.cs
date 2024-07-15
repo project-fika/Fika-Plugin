@@ -68,7 +68,7 @@ namespace Fika.Core.UI.Patches
                                 {
                                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                                     string installDir = Environment.CurrentDirectory;
-                                    string fikaDir = installDir + @"/user/fika";
+                                    string fikaDir = installDir + @"\user\fika";
 
                                     if (!string.IsNullOrEmpty(installDir))
                                     {
@@ -79,12 +79,12 @@ namespace Fika.Core.UI.Patches
 
                                         string profileId = Singleton<ClientApplication<ISession>>.Instance.Session.Profile.ProfileId;
 
-                                        if (File.Exists(@$"{fikaDir}/{profileId}.json"))
+                                        if (File.Exists(@$"{fikaDir}\{profileId}.json"))
                                         {
-                                            File.Copy(@$"{fikaDir}/{profileId}.json", @$"{fikaDir}/{profileId}.json.BAK", true);
+                                            File.Copy(@$"{fikaDir}\{profileId}.json", @$"{fikaDir}\{profileId}.json.BAK", true);
                                         }
 
-                                        File.WriteAllText(@$"{fikaDir}/{profileId}.json", profile.ToString());
+                                        File.WriteAllText(@$"{fikaDir}\{profileId}.json", profile.ToString());
                                         NotificationManagerClass.DisplayMessageNotification($"Saved profile '{profileId}' to {fikaDir}");
 
                                         GameObject.Destroy(downloadProfileGameObject);
