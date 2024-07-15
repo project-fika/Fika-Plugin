@@ -3,10 +3,12 @@ using Comfort.Common;
 using EFT;
 using EFT.GlobalEvents;
 using EFT.InventoryLogic;
+using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using GPUInstancer;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -38,6 +40,9 @@ namespace Fika.Core.Coop.BTR
         private BTRView btrClientSide;
         private BotOwner btrBotShooter;
         private BTRDataPacket btrDataPacket = default;
+#pragma warning disable CS0414 // The field 'FikaBTRManager_Host.btrInitialized' is assigned but its value is never used
+        private bool btrInitialized = false;
+#pragma warning restore CS0414 // The field 'FikaBTRManager_Host.btrInitialized' is assigned but its value is never used
         private bool btrBotShooterInitialized = false;
 
         private float coverFireTime = 90f;
@@ -89,7 +94,7 @@ namespace Fika.Core.Coop.BTR
             }
         }
 
-        private void Awake()
+        private async void Awake()
         {
             try
             {
@@ -107,7 +112,7 @@ namespace Fika.Core.Coop.BTR
 
                 btrController = gameWorld.BtrController;
 
-                InitBtr();
+                await InitBtr();
             }
             catch
             {
@@ -259,9 +264,11 @@ namespace Fika.Core.Coop.BTR
             }
         }
 
-        private void InitBtr()
+        private async Task InitBtr()
         {
             // Initial setup
+            await btrController.InitBtrController();
+
             botEventHandler = Singleton<BotEventHandler>.Instance;
             BotsController botsController = Singleton<IBotGame>.Instance.BotsController;
             btrBotService = botsController.BotTradersServices.BTRServices;
@@ -273,15 +280,15 @@ namespace Fika.Core.Coop.BTR
             btrClientSide = btrController.BtrView;
             btrServerSide.transform.Find("KillBox").gameObject.AddComponent<BTRRoadKillTrigger>();
 
-            btrServerSide.LeftSlot0State = 0;
-            btrServerSide.LeftSlot1State = 0;
-            btrServerSide.RightSlot0State = 0;
-            btrServerSide.RightSlot1State = 0;
-
             // Get config from server and initialise respective settings
             ConfigureSettingsFromServer();
 
             MapPathConfig btrMapConfig = btrController.MapPathsConfiguration;
+            if (btrMapConfig == null)
+            {
+                ConsoleScreen.LogError($"{nameof(btrController.MapPathsConfiguration)}");
+                return;
+            }
             btrServerSide.CurrentPathConfig = btrMapConfig.PathsConfiguration.pathsConfigurations.RandomElement();
             btrServerSide.Initialization(btrMapConfig);
             btrController.method_14(); // creates and assigns the BTR a fake stash
@@ -309,8 +316,10 @@ namespace Fika.Core.Coop.BTR
             // Pull services data for the BTR from the server
             TraderServicesManager.Instance.GetTraderServicesDataFromServer(BTRUtil.BTRTraderId);
 
+            btrInitialized = true;
             StartCoroutine(SendBotProfileId());
         }
+
 
         private void ConfigureSettingsFromServer()
         {
@@ -329,6 +338,7 @@ namespace Fika.Core.Coop.BTR
         private void InitBtrBotService()
         {
             btrBotShooter = btrController.BotShooterBtr;
+            btrBotShooter.GetPlayer.GetComponent<Rigidbody>().detectCollisions = false; // disable rigidbody collisions with BTR bot
             firearmController = btrBotShooter.GetComponent<Player.FirearmController>();
             WeaponPrefab weaponPrefab = (WeaponPrefab)AccessTools.Field(firearmController.GetType(), "weaponPrefab_0").GetValue(firearmController);
             weaponSoundPlayer = weaponPrefab.GetComponent<WeaponSoundPlayer>();
@@ -537,14 +547,73 @@ namespace Fika.Core.Coop.BTR
             // Initially we assumed there was a reason for this so it was left as is.
             // Turns out disabling the server collider in favour of the client collider fixes the "BTR doing a wheelie" bug,
             // while preventing the player from walking through the BTR.
+            // We also need to change the client collider's layer to HighPolyCollider due to unknown collisions that occur
+            // when going down a steep slope.
+
+            // Add collision debugger component to log collisions in the EFT Console
+            Collider[] clientColliders = btrClientSide.GetComponentsInChildren<Collider>(true);
+            //foreach (var collider in clientColliders)
+            //{
+            //    collider.gameObject.AddComponent<CollisionDebugger>();
+            //}
+
+            Collider[] serverColliders = btrServerSide.GetComponentsInChildren<Collider>(true);
+            //foreach (var collider in serverColliders)
+            //{
+            //    collider.gameObject.AddComponent<CollisionDebugger>();
+            //}
+
+            Collider clientRootCollider = clientColliders.First(x => x.gameObject.name == "Root");
+
+            // Retrieve all TerrainColliders
+            List<TerrainCollider> terrainColliders = new();
+
+            foreach (GPUInstancerManager manager in GPUInstancerManager.activeManagerList)
+            {
+                if (manager.GetType() != typeof(GPUInstancerDetailManager))
+                {
+                    continue;
+                }
+
+                GPUInstancerDetailManager detailManager = (GPUInstancerDetailManager)manager;
+                if (detailManager.terrain == null)
+                {
+                    continue;
+                }
+
+                terrainColliders.Add(detailManager.terrain.GetComponent<TerrainCollider>());
+            }
+
+            // Make the Root collider ignore collisions with TerrainColliders
+            foreach (Collider collider in terrainColliders)
+            {
+                Physics.IgnoreCollision(clientRootCollider, collider);
+            }
+
+            // Retrieve all wheel colliders on the serverside BTR
+            const string wheelColliderParentName = "BTR_82_wheel";
+            const string wheelColliderName = "Cylinder";
+
+            Collider[] serverWheelColliders = serverColliders
+                .Where(x => x.transform.parent.name.StartsWith(wheelColliderParentName) && x.gameObject.name.StartsWith(wheelColliderName))
+                .ToArray();
+
+            // Make the Root collider ignore collisions with the serverside BTR wheels
+            foreach (Collider collider in serverWheelColliders)
+            {
+                Physics.IgnoreCollision(clientRootCollider, collider);
+            }
+
+            // Enable clientside BTR collider and disable serverside BTR collider
             const string exteriorColliderName = "BTR_82_exterior_COLLIDER";
-            Collider serverExteriorCollider = btrServerSide.GetComponentsInChildren<Collider>(true)
+            Collider serverExteriorCollider = serverColliders
                 .First(x => x.gameObject.name == exteriorColliderName);
-            Collider clientExteriorCollider = btrClientSide.GetComponentsInChildren<Collider>(true)
+            Collider clientExteriorCollider = clientColliders
                 .First(x => x.gameObject.name == exteriorColliderName);
 
             serverExteriorCollider.gameObject.SetActive(false);
             clientExteriorCollider.gameObject.SetActive(true);
+            clientExteriorCollider.gameObject.layer = LayerMask.NameToLayer("HighPolyCollider");
         }
 
         private void UpdateTarget()

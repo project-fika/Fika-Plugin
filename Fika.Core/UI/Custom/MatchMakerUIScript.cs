@@ -125,6 +125,11 @@ namespace Fika.Core.UI.Custom
                 fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
             }
 
+            fikaMatchMakerUi.DedicatedToggle.isOn = false;
+            fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
+            {
+                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
+            });
             TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {

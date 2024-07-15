@@ -1,5 +1,7 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.UI.Matchmaker;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
@@ -22,7 +24,14 @@ namespace Fika.Core.Coop.Utils
         public static EMatchmakerType MatchingType = EMatchmakerType.Single;
         public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
         public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
-        public static bool IsSinglePlayer => MatchingType == EMatchmakerType.Single;
+        public static bool IsSinglePlayer
+        {
+            get
+            {
+                return Singleton<FikaServer>.Instantiated
+                    && Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0;
+            }
+        }
         public static bool IsDedicated = false;
         public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         public static MatchMakerGroupPreview MatchMakerGroupPreview;

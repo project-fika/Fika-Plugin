@@ -34,7 +34,6 @@ namespace Fika.Core.Coop.Players
     {
         #region Fields and Properties
         public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-        private readonly float interpolationRatio = 0.5f;
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
@@ -537,10 +536,12 @@ namespace Fika.Core.Coop.Players
 
         public PlayerStatePacket Interpolate(in PlayerStatePacket newState, in PlayerStatePacket lastState)
         {
+            float interpolate = 0.3f;
+
             method_58(newState.HasGround, newState.SurfaceSound);
 
-            Rotation = new Vector2(Mathf.LerpAngle(MovementContext.Rotation.x, newState.Rotation.x, interpolationRatio),
-                Mathf.Lerp(MovementContext.Rotation.y, newState.Rotation.y, interpolationRatio));
+            Rotation = new Vector2(Mathf.LerpAngle(MovementContext.Rotation.x, newState.Rotation.x, interpolate),
+                Mathf.Lerp(MovementContext.Rotation.y, newState.Rotation.y, interpolate));
 
             HeadRotation = newState.HeadRotation;
             ProceduralWeaponAnimation.SetHeadRotation(HeadRotation);
@@ -607,11 +608,11 @@ namespace Fika.Core.Coop.Players
 
             if (!IsInventoryOpened)
             {
-                Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolationRatio));
+                Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolate));
             }
 
-            Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolationRatio);
-            CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolationRatio);
+            Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolate);
+            CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolate);
 
             if (!Mathf.Approximately(MovementContext.Tilt, newState.Tilt))
             {
@@ -661,7 +662,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            if (Side == EPlayerSide.Savage)
+            /*if (Side == EPlayerSide.Savage)
             {
                 if (LastAggressor != null)
                 {
@@ -692,7 +693,7 @@ namespace Fika.Core.Coop.Players
                         }
                     }
                 }
-            }
+            }*/
 
             Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= SetSoundRollOff;
             /*if (FikaPlugin.CullPlayers.Value)

@@ -6,6 +6,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using System.Collections.Generic;
 
 namespace Fika.Core.Console
 {
@@ -91,6 +92,58 @@ namespace Fika.Core.Console
                 ConsoleScreen.LogWarning("Could not find CoopHandler.");
             }
         }
+
+        [ConsoleCommand("extract", "", null, "Extract from raid", [])]
+        public static void Extract()
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+            if (coopGame == null)
+            {
+                ConsoleScreen.LogWarning("You are not in a game.");
+                return;
+            }
+
+            if (coopGame.Status != GameStatus.Started)
+            {
+                ConsoleScreen.LogWarning("Game is not running.");
+                return;
+            }
+
+            CoopPlayer localPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+
+            coopGame.Extract(localPlayer, null);
+        }
+
+        [ConsoleCommand("despawnallai", "", null, "Despawns all AI Bots", [])]
+        public static void DespawnAllAI()
+        {
+            if (Singleton<IFikaGame>.Instance is CoopGame game)
+            {
+                if (!FikaBackendUtils.IsServer)
+                {
+                    ConsoleScreen.LogWarning("You are not the host.");
+                    return;
+                }
+
+                CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler);
+
+                List<IPlayer> Bots = new List<IPlayer>(game.BotsController.Players);
+
+                foreach (Player bot in Bots)
+                {
+                    if (bot.AIData.BotOwner == null)
+                    {
+                        continue;
+                    }
+
+                    ConsoleScreen.Log($"Despawning: {bot.Profile.Nickname}");
+
+                    game.DespawnBot(coopHandler, bot);
+                }
+            }
+        }
+
 #endif
 
         [ConsoleCommand("debug", "", null, "Toggle debug window", [])]

@@ -39,7 +39,8 @@ namespace Fika.Core.Coop.Players
         public PacketReceiver PacketReceiver;
         public IPacketSender PacketSender;
         private DateTime lastPingTime;
-        public bool hasKilledScav = false;
+        public bool hasSkilledScav = false;
+        //public bool hasKilledScav = false;
         public float observedOverlap = 0f;
         public bool leftStanceDisabled = false;
         public Vector2 LastDirection = Vector2.zero;
@@ -79,7 +80,7 @@ namespace Fika.Core.Coop.Players
             questController.Init();
             questController.Run();
 
-            AchievementControllerClass achievementsController = new(profile, inventoryController, session, true);
+            GClass3233 achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
 
@@ -115,21 +116,32 @@ namespace Fika.Core.Coop.Players
 
             player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
 
-            player.SetupMainPlayer();
-
             return player;
         }
 
-        public override BasePhysicalClass CreatePhysical()
+        /*public override BasePhysicalClass CreatePhysical()
         {
             return FikaPlugin.Instance.UseInertia ? new PlayerPhysicalClass() : new NoInertiaPhysical();
+        }*/
+
+        public override void CreateMovementContext()
+        {
+            LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
+            if (FikaPlugin.Instance.UseInertia)
+            {
+                MovementContext = MovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                    new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+            }
+            else
+            {
+                MovementContext = NoInertiaMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                    new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+            }
         }
 
         public override void OnSkillLevelChanged(GClass1778 skill)
         {
-            NotificationManagerClass.DisplayMessageNotification(string.Format("SkillLevelUpMessage".Localized(null),
-                skill.Id.ToString().Localized(null),
-                skill.Level.ToString()), ENotificationDurationType.Default, ENotificationIconType.Default, null);
+            NotificationManagerClass.DisplayNotification(new GClass2044(skill));
         }
 
         public override bool CheckSurface()
@@ -282,6 +294,7 @@ namespace Fika.Core.Coop.Players
             return gclass;
         }
 
+        #region Proceed
         public override void Proceed(bool withNetwork, Callback<GInterface137> callback, bool scheduled = true)
         {
             base.Proceed(withNetwork, callback, scheduled);
@@ -385,7 +398,8 @@ namespace Fika.Core.Coop.Players
         {
             // what is this
             base.Proceed<T>(item, callback, scheduled);
-        }
+        } 
+        #endregion
 
         public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
         {
@@ -401,6 +415,41 @@ namespace Fika.Core.Coop.Players
                 }
             });*/
         }
+
+        public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+        {
+            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);            
+
+            // Handle 'Help Scav' rep gains
+            if (aggressor is CoopPlayer coopPlayer)
+            {
+                if (coopPlayer.Side == EPlayerSide.Savage)
+                {
+                    coopPlayer.Loyalty.method_1(this);
+                }
+
+                if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.hasSkilledScav)
+                {
+                    coopPlayer.hasSkilledScav = true;
+                    return;
+                }
+                else if (Side != EPlayerSide.Savage && hasSkilledScav && aggressor.Side == EPlayerSide.Savage)
+                {
+                    coopPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
+                }
+            }
+        }
+
+#if DEBUG
+        public override void ShowStringNotification(string message)
+        {
+            if (IsYourPlayer)
+            {
+                ConsoleScreen.Log(message);
+                FikaPlugin.Instance.FikaLogger.LogInfo(message);
+            }
+        } 
+#endif
 
         public override void SetInventoryOpened(bool opened)
         {
@@ -946,24 +995,29 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            // Delete labs card on labs
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-            if (coopGame.Location_0.Name.ToLower() == "laboratory")
+            if (!string.IsNullOrEmpty(Location))
             {
-                foreach (Item item in Profile.Inventory.AllRealPlayerItems)
+                // Delete labs card on labs
+                if (Location.ToLower() == "laboratory")
                 {
-                    if (item.TemplateId == "5c94bbff86f7747ee735c08f")
+                    foreach (Item item in Inventory.AllRealPlayerItems)
                     {
-                        InteractionsHandlerClass.Remove(item, _inventoryController, false, true);
+                        if (item.TemplateId == "5c94bbff86f7747ee735c08f")
+                        {
+                            InteractionsHandlerClass.Remove(item, _inventoryController, false, true);
+                            break;
+                        }
                     }
                 }
+            }
+            else
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("CoopPlayer::SetupMainPlayer: Location was null!");
             }
         }
 
         private string GetDogTagTemplateId()
         {
-            //return Profile.Side == EPlayerSide.Usec ? "6662ea05f6259762c56f3189" : "59f32bb586f774757e1e8442";
-
             if (Side is EPlayerSide.Usec)
             {
                 switch (Profile.Info.MemberCategory)

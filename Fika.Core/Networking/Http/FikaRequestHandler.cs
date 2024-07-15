@@ -4,6 +4,7 @@ using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System.Collections.Generic;
 using System.Text;
@@ -22,19 +23,19 @@ namespace Fika.Core.Networking.Http
 
         private static byte[] EncodeBody<T>(T o)
         {
-            var serialized = JsonConvert.SerializeObject(o);
+            string serialized = JsonConvert.SerializeObject(o);
             return Encoding.UTF8.GetBytes(serialized);
         }
 
         private static T DecodeBody<T>(byte[] data)
         {
-            var json = Encoding.UTF8.GetString(data);
+            string json = Encoding.UTF8.GetString(data);
             return JsonConvert.DeserializeObject<T>(json);
         }
 
         private static async Task<T> GetJsonAsync<T>(string path)
         {
-            var response = await _httpClient.GetAsync(path);
+            byte[] response = await _httpClient.GetAsync(path);
             return DecodeBody<T>(response);
         }
 
@@ -45,8 +46,8 @@ namespace Fika.Core.Networking.Http
 
         private static async Task<T2> PostJsonAsync<T1, T2>(string path, T1 o)
         {
-            var data = EncodeBody<T1>(o);
-            var response = await _httpClient.PostAsync(path, data);
+            byte[] data = EncodeBody<T1>(o);
+            byte[] response = await _httpClient.PostAsync(path, data);
             return DecodeBody<T2>(response);
         }
 
@@ -57,7 +58,7 @@ namespace Fika.Core.Networking.Http
 
         private static async Task<byte[]> PutJsonAsync<T>(string path, T o)
         {
-            var data = EncodeBody(o);
+            byte[] data = EncodeBody(o);
             return await _httpClient.PutAsync(path, data);
         }
 
@@ -144,6 +145,11 @@ namespace Fika.Core.Networking.Http
         public static async Task<RaidSettingsResponse> GetRaidSettings(RaidSettingsRequest data)
         {
             return await PostJsonAsync<RaidSettingsRequest, RaidSettingsResponse>("/fika/raid/getsettings", data);
+        }
+
+        public static async Task<JObject> GetProfile()
+        {
+            return await GetJsonAsync<JObject>("/fika/profile/download");
         }
 
         public static async Task<StartDedicatedResponse> StartDedicated(StartDedicatedRequest request)

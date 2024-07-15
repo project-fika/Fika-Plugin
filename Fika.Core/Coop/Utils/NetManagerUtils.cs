@@ -59,14 +59,18 @@ namespace Fika.Core.Coop.Utils
             {
                 if (isServer)
                 {
-                    Singleton<FikaServer>.Instance.NetServer.Stop();
-                    Singleton<FikaServer>.TryRelease(Singleton<FikaServer>.Instance);
+                    FikaServer server = Singleton<FikaServer>.Instance;
+                    server.NetServer.Stop();
+                    Singleton<FikaServer>.TryRelease(server);
+                    GameObject.Destroy(server);
                     logger.LogInfo("Destroyed FikaServer");
                 }
                 else
                 {
-                    Singleton<FikaClient>.Instance.NetClient.Stop();
-                    Singleton<FikaClient>.TryRelease(Singleton<FikaClient>.Instance);
+                    FikaClient client = Singleton<FikaClient>.Instance;
+                    client.NetClient.Stop();
+                    Singleton<FikaClient>.TryRelease(client);
+                    GameObject.Destroy(client);
                     logger.LogInfo("Destroyed FikaClient");
                 }
             }
@@ -75,10 +79,12 @@ namespace Fika.Core.Coop.Utils
         public static void DestroyPingingClient()
         {
             if (FikaGameObject != null)
-            {
-                Singleton<FikaPingingClient>.Instance.StopKeepAliveRoutine();
-                Singleton<FikaPingingClient>.Instance.NetClient.Stop();
-                Singleton<FikaPingingClient>.TryRelease(Singleton<FikaPingingClient>.Instance);
+            { 
+                FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
+                pingingClient.StopKeepAliveRoutine();
+                pingingClient.NetClient.Stop();
+                Singleton<FikaPingingClient>.TryRelease(pingingClient);
+                GameObject.Destroy(pingingClient);
                 logger.LogInfo("Destroyed FikaPingingClient");
             }
         }
