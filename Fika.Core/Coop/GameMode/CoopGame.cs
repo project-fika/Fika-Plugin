@@ -728,9 +728,8 @@ namespace Fika.Core.Coop.GameMode
 
                 NetDataWriter writer = new();
 
-                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", 0);
-
                 float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)(1 / expectedPlayers));
 
                 if (isServer)
                 {
