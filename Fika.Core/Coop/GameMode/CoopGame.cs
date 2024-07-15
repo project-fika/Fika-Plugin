@@ -665,6 +665,8 @@ namespace Fika.Core.Coop.GameMode
         {
             if (!isServer)
             {
+                FikaBackendUtils.ScreenController.ChangeStatus("Waiting for host to finish raid initialization...");
+
                 FikaClient fikaClient = Singleton<FikaClient>.Instance;
                 do
                 {
@@ -1377,6 +1379,8 @@ namespace Fika.Core.Coop.GameMode
             }
 
             Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 5);
+
+            FikaBackendUtils.ScreenController.ChangeStatus("Finishing raid initialization...");
 
             yield return base.vmethod_4(controllerSettings, spawnSystem, runCallback);
             yield break;
