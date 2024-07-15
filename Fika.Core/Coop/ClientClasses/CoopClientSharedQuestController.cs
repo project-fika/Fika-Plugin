@@ -133,8 +133,11 @@ namespace Fika.Core.Coop.ClientClasses
                         }
 
                         counter.Value++;
-                        NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",
-                            iconType: EFT.Communications.ENotificationIconType.Quest);
+                        if (FikaPlugin.QuestSharingNotifications.Value)
+                        {
+                            NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",
+                                                iconType: EFT.Communications.ENotificationIconType.Quest); 
+                        }
                     }
                 }
             }
@@ -161,8 +164,11 @@ namespace Fika.Core.Coop.ClientClasses
                     {
                         AddLootedTemplateId(item.TemplateId);
                         playerInventory.RunNetworkTransaction(pickupResult.Value);
-                        NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} picked up {item.Name.Localized()}",
-                            iconType: EFT.Communications.ENotificationIconType.Quest);
+                        if (FikaPlugin.QuestSharingNotifications.Value)
+                        {
+                            NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} picked up {item.Name.Localized()}",
+                                                iconType: EFT.Communications.ENotificationIconType.Quest); 
+                        }
                     }
                 }
             }

@@ -121,6 +121,7 @@ namespace Fika.Core
 
         // Coop | Quest Sharing
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
+        public static ConfigEntry<bool> QuestSharingNotifications { get; set; }
 
         // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
@@ -348,7 +349,9 @@ namespace Fika.Core
 
             // Coop | Quest Sharing
 
-            QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+            QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All, new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+            QuestSharingNotifications = Config.Bind("Coop | Quest Sharing", "Show Notifications", true, new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             // Coop | Custom
 
