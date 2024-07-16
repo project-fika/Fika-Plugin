@@ -31,7 +31,7 @@ public class PlayerPlateUI : MonoBehaviour
     [SerializeField]
     public GameObject EffectsBackground;
     [SerializeField]
-    public Image EffectImageTemplate;
+    public GameObject EffectImageTemplate;
 
     public void SetNameText(string text)
     {
