@@ -70,6 +70,9 @@ namespace Fika.Core.Networking
 
         public void Init()
         {
+            NetworkGameSession.RTT = 0;
+            NetworkGameSession.LossPercent = 0;
+
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnFirearmPacketReceived);

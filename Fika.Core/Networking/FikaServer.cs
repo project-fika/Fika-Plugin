@@ -77,6 +77,9 @@ namespace Fika.Core.Networking
 
         public async Task Init()
         {
+            NetworkGameSession.RTT = 0;
+            NetworkGameSession.LossPercent = 0;
+
             // Start at 1 to avoid having 0 and making us think it's working when it's not
             _currentNetId = 1;
 
