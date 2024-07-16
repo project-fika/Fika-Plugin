@@ -55,6 +55,11 @@ namespace Fika.Core.UI.Patches
                     return;
                 }
 
+                if (item.Parent.Item.TemplateId == "55d7217a4bdc2d86028b456d") // Fix for UI Fixes
+                {
+                    return;
+                }
+
                 // Check for GClass increments
                 Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions)
                     .Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
