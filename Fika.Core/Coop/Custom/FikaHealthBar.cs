@@ -183,6 +183,7 @@ namespace Fika.Core.Coop.Custom
             {
                 currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
                 currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
+                AddAllActiveEffects();
             }
 
             FikaPlugin.UsePlateFactionSide.SettingChanged += UsePlateFactionSide_SettingChanged;
@@ -262,12 +263,7 @@ namespace Fika.Core.Coop.Custom
             {
                 currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
                 currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
-
-                IEnumerable<IEffect> currentEffects = currentPlayer.HealthController.GetAllActiveEffects();
-                foreach (IEffect effect in currentEffects)
-                {
-                    AddEffect(effect);
-                }
+                AddAllActiveEffects();
             }
             else
             {
@@ -282,6 +278,15 @@ namespace Fika.Core.Coop.Custom
                 effects.Clear();
                 tempList.Clear();
                 tempList = null;
+            }
+        }
+
+        private void AddAllActiveEffects()
+        {
+            IEnumerable<IEffect> currentEffects = currentPlayer.HealthController.GetAllActiveEffects();
+            foreach (IEffect effect in currentEffects)
+            {
+                AddEffect(effect);
             }
         }
 
@@ -413,7 +418,10 @@ namespace Fika.Core.Coop.Custom
             currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
             currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
 
+
+
             playerPlate.gameObject.SetActive(false);
+            effects.Clear();
             Destroy(this);
         }
 
