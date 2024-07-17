@@ -348,7 +348,7 @@ namespace Fika.Core
 
             MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f, new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
 
-            ShowEffects = Config.Bind("Coop | Name Plates", "Show Effects", true, new ConfigDescription("If status effects should be display below the health bar.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+            ShowEffects = Config.Bind("Coop | Name Plates", "Show Effects", true, new ConfigDescription("If status effects should be displayed below the health bar.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Quest Sharing
 
