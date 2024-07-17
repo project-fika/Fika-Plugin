@@ -128,7 +128,7 @@ namespace Fika.Core.Console
 
                 CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler);
 
-                List<IPlayer> Bots = new List<IPlayer>(game.BotsController.Players);
+                List<IPlayer> Bots = new(game.BotsController.Players);
 
                 foreach (Player bot in Bots)
                 {

@@ -229,7 +229,7 @@ namespace Fika.Core.Networking
 
         private bool ValidateLocalIP(string LocalIP)
         {
-            if(LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
+            if (LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
             {
                 return true;
             }
@@ -316,7 +316,7 @@ namespace Fika.Core.Networking
             MyPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
-                fikaChat = gameObject.AddComponent<FikaChat>(); 
+                fikaChat = gameObject.AddComponent<FikaChat>();
             }
         }
 

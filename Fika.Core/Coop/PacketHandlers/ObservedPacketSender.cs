@@ -4,7 +4,6 @@ using Comfort.Common;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
@@ -48,7 +47,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void SendQuestPacket<T>(ref T packet) where T : INetSerializable
         {
-            
+
         }
 
         protected void Update()

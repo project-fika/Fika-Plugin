@@ -14,7 +14,7 @@ namespace Fika.Core.Coop.Patches.Airdrop
         public static bool PatchPrefix(AirdropBox __instance)
         {
             //Allow method to go through
-            if(FikaBackendUtils.IsServer)
+            if (FikaBackendUtils.IsServer)
             {
                 return true;
             }

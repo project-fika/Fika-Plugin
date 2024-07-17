@@ -183,7 +183,7 @@ namespace Fika.Core.Networking
             MyPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
-                fikaChat = gameObject.AddComponent<FikaChat>(); 
+                fikaChat = gameObject.AddComponent<FikaChat>();
             }
         }
 

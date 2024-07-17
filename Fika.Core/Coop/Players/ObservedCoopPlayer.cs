@@ -3,7 +3,6 @@
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
-using EFT.Counters;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;

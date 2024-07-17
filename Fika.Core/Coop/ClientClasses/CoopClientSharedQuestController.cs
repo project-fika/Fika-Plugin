@@ -3,7 +3,6 @@ using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
-using SPT.Custom.BTR.Patches;
 using System;
 using System.Collections.Generic;
 
@@ -42,7 +41,7 @@ namespace Fika.Core.Coop.ClientClasses
                             acceptedTypes.Add(shareType.ToString());
                             break;
                         case FikaPlugin.EQuestSharingTypes.PlaceBeacon:
-                            acceptedTypes.Add(shareType.ToString());                            
+                            acceptedTypes.Add(shareType.ToString());
                             break;
                     }
                 }
@@ -163,7 +162,7 @@ namespace Fika.Core.Coop.ClientClasses
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
                             NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",
-                                                iconType: EFT.Communications.ENotificationIconType.Quest); 
+                                                iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
                 }
@@ -194,7 +193,7 @@ namespace Fika.Core.Coop.ClientClasses
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
                             NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} picked up {item.Name.Localized()}",
-                                                iconType: EFT.Communications.ENotificationIconType.Quest); 
+                                                iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
                 }
@@ -234,6 +233,6 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             return false;
-        }        
+        }
     }
 }

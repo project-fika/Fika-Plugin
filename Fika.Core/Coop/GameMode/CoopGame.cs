@@ -16,7 +16,6 @@ using EFT.UI.BattleTimer;
 using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
 using EFT.Weather;
-using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
@@ -1835,7 +1834,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (isServer)
             {
-                botsController_0.Stop();                
+                botsController_0.Stop();
             }
 
             if (BossSpawnWaveManagerClass != null)

@@ -79,7 +79,7 @@ namespace Fika.Core.Coop.Utils
         public static void DestroyPingingClient()
         {
             if (FikaGameObject != null)
-            { 
+            {
                 FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
                 pingingClient.StopKeepAliveRoutine();
                 pingingClient.NetClient.Stop();

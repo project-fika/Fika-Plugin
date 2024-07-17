@@ -7,7 +7,6 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections;
