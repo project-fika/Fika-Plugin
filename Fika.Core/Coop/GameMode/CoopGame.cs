@@ -74,6 +74,7 @@ namespace Fika.Core.Coop.GameMode
         private CoopTimeManager timeManager;
         private FikaDebug fikaDebug;
         private bool isServer;
+        private List<string> localTriggerZones;
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
@@ -1599,10 +1600,17 @@ namespace Fika.Core.Coop.GameMode
         /// When the local player successfully extracts, enable freecam, notify other players about the extract
         /// </summary>
         /// <param name="player">The local player to start the Coroutine on</param>
+        /// <param name="point">The point that was used to extract</param>
         /// <returns></returns>
         public void Extract(CoopPlayer player, ExfiltrationPoint point)
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
+            localTriggerZones = new(player.TriggerZones);
+
+            player.ClientMovementContext.SetGravity(false);
+            Vector3 position = player.Position;
+            position.y += 500;
+            player.Teleport(position);
 
             if (MyExitStatus == ExitStatus.MissingInAction)
             {
@@ -1730,7 +1738,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         public void ClearHostAI(Player player)
-        {
+        {/*
             if (player != null)
             {
                 if (botsController_0 != null)
@@ -1752,7 +1760,8 @@ namespace Fika.Core.Coop.GameMode
                         bot.Memory.DeleteInfoAboutEnemy(player);
                     }
                 }
-            }
+            }*/
+            botsController_0.DestroyInfo(player);
         }
 
         /// <summary>
@@ -1795,6 +1804,7 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogDebug("Stop");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            myPlayer.TriggerZones = localTriggerZones;
             myPlayer.PacketSender.DestroyThis();
 
             if (myPlayer.Side != EPlayerSide.Savage)
@@ -1825,8 +1835,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (isServer)
             {
-                botsController_0.Stop();
-                botsController_0.DestroyInfo(gparam_0.Player);
+                botsController_0.Stop();                
             }
 
             if (BossSpawnWaveManagerClass != null)

@@ -8,7 +8,7 @@ namespace Fika.Core.Coop.ClientClasses
     /// <summary>
     /// Used to simulate having near no inertia
     /// </summary>
-    public class NoInertiaMovementContext : MovementContext
+    public class NoInertiaMovementContext : ClientMovementContext
     {
         public new static NoInertiaMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
         {
