@@ -120,6 +120,11 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void SendQuestPacket(IConditionCounter conditional, Condition condition)
         {
+            if (!canSendAndReceive)
+            {
+                return;
+            }
+
             if (conditional is QuestClass quest)
             {
                 TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(condition.id);
