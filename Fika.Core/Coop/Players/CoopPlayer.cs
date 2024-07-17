@@ -1034,7 +1034,7 @@ namespace Fika.Core.Coop.Players
         {
             if (Side is EPlayerSide.Usec)
             {
-                switch (Profile.Info.MemberCategory)
+                switch (Profile.Info.SelectedMemberCategory)
                 {
                     case EMemberCategory.Default:
                         return "59f32c3b86f77472a31742f0";
@@ -1046,7 +1046,7 @@ namespace Fika.Core.Coop.Players
             }
             else if (Side is EPlayerSide.Bear)
             {
-                switch (Profile.Info.MemberCategory)
+                switch (Profile.Info.SelectedMemberCategory)
                 {
                     case EMemberCategory.Default:
                         return "59f32bb586f774757e1e8442";
