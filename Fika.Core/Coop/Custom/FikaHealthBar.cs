@@ -28,6 +28,7 @@ namespace Fika.Core.Coop.Custom
         private float screenScale = 1f;
         private Dictionary<Type, Sprite> effectIcons;
         private List<HealthBarEffect> effects;
+        private List<Type> ignoredTypes; // Check for GClass increments
 
         protected void Awake()
         {
@@ -35,6 +36,7 @@ namespace Fika.Core.Coop.Custom
             mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
             effects = [];
+            ignoredTypes = [typeof(GInterface279), typeof(GInterface281), typeof(GInterface282)];
             CreateHealthBar();
         }
 
@@ -233,6 +235,11 @@ namespace Fika.Core.Coop.Custom
 
         private void AddEffect(IEffect effect)
         {
+            if (ignoredTypes.Contains(effect.Type))
+            {
+                return;
+            }
+
             bool found = false;
             foreach (HealthBarEffect currentEffect in effects)
             {
@@ -323,7 +330,7 @@ namespace Fika.Core.Coop.Custom
         private void UseNamePlates_SettingChanged(object sender, EventArgs e)
         {
             playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
-        } 
+        }
         #endregion
 
         /// <summary>
@@ -442,6 +449,7 @@ namespace Fika.Core.Coop.Custom
                 tmpText = effectObject.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
                 amount = 1;
                 tmpText.text = amount.ToString();
+                tmpText.enabled = false;
                 effectType = effect.Type;
             }
 
@@ -461,11 +469,22 @@ namespace Fika.Core.Coop.Custom
             {
                 amount++;
                 tmpText.text = amount.ToString();
+
+                if (amount > 1)
+                {
+                    tmpText.enabled = true;
+                }
             }
 
             public void DecreaseAmount()
             {
                 amount = Math.Max(0, amount - 1);
+
+                if (amount == 1)
+                {
+                    tmpText.enabled = false;
+                }
+
                 if (amount == 0)
                 {
                     Remove();
