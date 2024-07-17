@@ -5,6 +5,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -15,7 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
         private readonly List<string> lastFromNetwork = [];
         private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
-        private readonly HashSet<string> usedItemIds = [];
+        private readonly HashSet<string> droppedZoneIds = [];
         private bool canSendAndReceive = true;
 
         public override void Init()
@@ -61,12 +62,12 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void Profile_OnItemZoneDropped(string itemId, string zoneId)
         {
-            if (usedItemIds.Contains(itemId))
+            if (droppedZoneIds.Contains(itemId))
             {
                 return;
             }
 
-            usedItemIds.Add(itemId);
+            droppedZoneIds.Add(zoneId);
             QuestDropItemPacket packet = new(itemId, zoneId);
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
@@ -202,8 +203,30 @@ namespace Fika.Core.Coop.ClientClasses
 
         internal void ReceiveQuestDropItemPacket(ref QuestDropItemPacket packet)
         {
-            usedItemIds.Add(packet.ItemId);
-            player.Profile.ItemDroppedAtPlace(packet.ItemId, packet.ZoneId);
+            if (!canSendAndReceive)
+            {
+                return;
+            }
+
+            string itemId = packet.ItemId;
+            string zoneId = packet.ZoneId;
+
+            if (CheckForDroppedItem(itemId, zoneId))
+            {
+                return;
+            }
+
+            droppedZoneIds.Add(zoneId);
+            player.Profile.ItemDroppedAtPlace(itemId, zoneId);
+        }
+
+        private bool CheckForDroppedItem(string itemId, string zoneId)
+        {
+            if (player.Profile.EftStats.DroppedItems.Any(x => x.ItemId == itemId && x.ZoneId == zoneId) || droppedZoneIds.Contains(zoneId))
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
