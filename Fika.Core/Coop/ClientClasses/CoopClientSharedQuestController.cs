@@ -16,6 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
         private readonly List<string> lastFromNetwork = [];
         private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
+        private readonly HashSet<string> usedItemIds = [];
         private bool canSendAndReceive = true;
 
         public override void Init()
@@ -41,11 +42,37 @@ namespace Fika.Core.Coop.ClientClasses
                             acceptedTypes.Add(shareType.ToString());
                             break;
                         case FikaPlugin.EQuestSharingTypes.PlaceBeacon:
-                            acceptedTypes.Add(shareType.ToString());
+                            acceptedTypes.Add(shareType.ToString());                            
                             break;
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Used to prevent errors when subscribing to the event
+        /// </summary>
+        public void LateInit()
+        {
+            if (acceptedTypes.Contains("PlaceBeacon"))
+            {
+                player.Profile.OnItemZoneDropped += Profile_OnItemZoneDropped;
+            }
+        }
+
+        private void Profile_OnItemZoneDropped(string itemId, string zoneId)
+        {
+            if (usedItemIds.Contains(itemId))
+            {
+                return;
+            }
+
+            usedItemIds.Add(itemId);
+            QuestDropItemPacket packet = new(itemId, zoneId);
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
+#endif
+            player.PacketSender.SendQuestPacket(ref packet);
         }
 
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
@@ -174,6 +201,12 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
+        internal void ReceiveQuestDropItemPacket(ref QuestDropItemPacket packet)
+        {
+            usedItemIds.Add(packet.ItemId);
+            player.Profile.ItemDroppedAtPlace(packet.ItemId, packet.ZoneId);
+        }
+
         /// <summary>
         /// Validates quest typing, some quests use CounterCreator which we also need to validate.
         /// </summary>
@@ -201,6 +234,6 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             return false;
-        }
+        }        
     }
 }

@@ -21,8 +21,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; }
 
         public void Init();
-        public void SendQuestPacket(ref QuestConditionPacket packet);
-        public void SendQuestItemPacket(ref QuestItemPacket packet);
+        public void SendQuestPacket<T>(ref T packet) where T : INetSerializable;
         public void DestroyThis();
     }
 }

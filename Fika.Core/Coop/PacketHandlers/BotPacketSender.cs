@@ -36,14 +36,9 @@ namespace Fika.Core.Coop.PacketHandlers
 
         }
 
-        public void SendQuestPacket(ref QuestConditionPacket packet)
+        public void SendQuestPacket<T>(ref T packet) where T : INetSerializable
         {
-
-        }
-
-        public void SendQuestItemPacket(ref QuestItemPacket packet)
-        {
-
+            
         }
 
         protected void FixedUpdate()

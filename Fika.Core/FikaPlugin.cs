@@ -32,6 +32,7 @@ using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -371,7 +372,7 @@ namespace Fika.Core
             // Coop | Quest Sharing
 
             QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All,
-                new ConfigDescription("Which quest types to receive and send.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+                new ConfigDescription("Which quest types to receive and send. PlaceBeacon is both markers and items.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
             QuestSharingNotifications = Config.Bind("Coop | Quest Sharing", "Show Notifications", true,
                 new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
