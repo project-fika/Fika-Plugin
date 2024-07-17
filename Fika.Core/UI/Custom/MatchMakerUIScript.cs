@@ -96,7 +96,7 @@ namespace Fika.Core.UI.Custom
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
-            fikaMatchMakerUi.DedicatedToggle.enabled = false; // Until implemented
+            fikaMatchMakerUi.DedicatedToggle.gameObject.SetActive(false); // Until implemented
 
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {
