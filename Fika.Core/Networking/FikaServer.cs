@@ -77,6 +77,9 @@ namespace Fika.Core.Networking
 
         public async Task Init()
         {
+            NetworkGameSession.RTT = 0;
+            NetworkGameSession.LossPercent = 0;
+
             // Start at 1 to avoid having 0 and making us think it's working when it's not
             _currentNetId = 1;
 
@@ -101,6 +104,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -212,9 +216,20 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
+        {
+            if (MyPlayer.HealthController.IsAlive)
+            {
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
+                }
+            }
+        }
+
         private bool ValidateLocalIP(string LocalIP)
         {
-            if(LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
+            if (LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
             {
                 return true;
             }
@@ -301,7 +316,7 @@ namespace Fika.Core.Networking
             MyPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
-                fikaChat = gameObject.AddComponent<FikaChat>(); 
+                fikaChat = gameObject.AddComponent<FikaChat>();
             }
         }
 

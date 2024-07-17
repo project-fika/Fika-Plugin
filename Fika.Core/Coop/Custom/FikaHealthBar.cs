@@ -3,11 +3,14 @@
 using Comfort.Common;
 using EFT;
 using EFT.Animations;
+using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
 using Fika.Core.Utils;
 using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,11 +26,17 @@ namespace Fika.Core.Coop.Custom
         private CoopPlayer mainPlayer;
         private PlayerPlateUI playerPlate;
         private float screenScale = 1f;
+        private Dictionary<Type, Sprite> effectIcons;
+        private List<HealthBarEffect> effects;
+        private List<Type> ignoredTypes; // Check for GClass increments
 
         protected void Awake()
         {
             currentPlayer = GetComponent<ObservedCoopPlayer>();
             mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
+            effects = [];
+            ignoredTypes = [typeof(GInterface279), typeof(GInterface281), typeof(GInterface282)];
             CreateHealthBar();
         }
 
@@ -172,16 +181,120 @@ namespace Fika.Core.Coop.Custom
             SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
             playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
 
+            if (FikaPlugin.ShowEffects.Value)
+            {
+                currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
+                currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
+                AddAllActiveEffects();
+            }
+
             FikaPlugin.UsePlateFactionSide.SettingChanged += UsePlateFactionSide_SettingChanged;
             FikaPlugin.HideHealthBar.SettingChanged += HideHealthBar_SettingChanged;
             FikaPlugin.UseNamePlates.SettingChanged += UseNamePlates_SettingChanged;
+            FikaPlugin.UseHealthNumber.SettingChanged += UseHealthNumber_SettingChanged;
+            FikaPlugin.ShowEffects.SettingChanged += ShowEffects_SettingChanged;
 
             currentPlayer.HealthController.HealthChangedEvent += HealthController_HealthChangedEvent;
             currentPlayer.HealthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
             currentPlayer.HealthController.BodyPartRestoredEvent += HealthController_BodyPartRestoredEvent;
             currentPlayer.HealthController.DiedEvent += HealthController_DiedEvent;
 
+            playerPlate.SetHealthNumberText("100%");
+
             UpdateHealth();
+        }
+
+        #region events
+        private void UseHealthNumber_SettingChanged(object sender, EventArgs e)
+        {
+            UpdateHealth();
+        }
+
+        private void HealthController_EffectRemovedEvent(IEffect effect)
+        {
+            for (int i = 0; i < effects.Count; i++)
+            {
+                HealthBarEffect currentEffect = effects[i];
+                if (currentEffect.effectType == effect.Type)
+                {
+                    currentEffect.DecreaseAmount();
+                    if (currentEffect.GetAmount() == 0)
+                    {
+                        currentEffect.Remove();
+                        effects.Remove(currentEffect);
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void HealthController_EffectAddedEvent(IEffect effect)
+        {
+            AddEffect(effect);
+        }
+
+        private void AddEffect(IEffect effect)
+        {
+            if (ignoredTypes.Contains(effect.Type))
+            {
+                return;
+            }
+
+            bool found = false;
+            foreach (HealthBarEffect currentEffect in effects)
+            {
+                if (currentEffect.effectType == effect.Type)
+                {
+                    currentEffect.IncreaseAmount();
+                    found = true;
+                }
+            }
+
+            if (found)
+            {
+                return;
+            }
+
+            if (effectIcons.TryGetValue(effect.Type, out Sprite effectSprite))
+            {
+                GameObject newEffect = Instantiate(playerPlate.EffectImageTemplate, playerPlate.EffectsBackground.transform);
+                HealthBarEffect healthBarEffect = new();
+                healthBarEffect.Init(newEffect, effect, effectSprite);
+                effects.Add(healthBarEffect);
+            }
+        }
+
+        private void ShowEffects_SettingChanged(object sender, EventArgs e)
+        {
+            if (FikaPlugin.ShowEffects.Value)
+            {
+                currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
+                currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
+                AddAllActiveEffects();
+            }
+            else
+            {
+                currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
+                currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
+
+                List<HealthBarEffect> tempList = new(effects);
+                foreach (HealthBarEffect effect in tempList)
+                {
+                    effect.Remove();
+                }
+                effects.Clear();
+                tempList.Clear();
+                tempList = null;
+            }
+        }
+
+        private void AddAllActiveEffects()
+        {
+            IEnumerable<IEffect> currentEffects = currentPlayer.HealthController.GetAllActiveEffects();
+            foreach (IEffect effect in currentEffects)
+            {
+                AddEffect(effect);
+            }
         }
 
         private void HealthController_DiedEvent(EDamageType obj)
@@ -189,7 +302,7 @@ namespace Fika.Core.Coop.Custom
             Destroy(this);
         }
 
-        private void HealthController_BodyPartRestoredEvent(EBodyPart arg1, EFT.HealthSystem.ValueStruct arg2)
+        private void HealthController_BodyPartRestoredEvent(EBodyPart arg1, ValueStruct arg2)
         {
             UpdateHealth();
         }
@@ -208,6 +321,7 @@ namespace Fika.Core.Coop.Custom
         {
             SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
         }
+
         private void HideHealthBar_SettingChanged(object sender, EventArgs e)
         {
             SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
@@ -217,6 +331,7 @@ namespace Fika.Core.Coop.Custom
         {
             playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
         }
+        #endregion
 
         /// <summary>
         /// Updates the health on the HealthBar, this is invoked from events on the healthcontroller
@@ -229,8 +344,7 @@ namespace Fika.Core.Coop.Custom
             {
                 if (!playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
                 {
-                    playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(true);
-                    playerPlate.healthBarBackgroundScreen.gameObject.SetActive(false);
+                    SetPlayerPlateHealthVisibility(false);
                 }
                 int healthNumberPercentage = (int)Math.Round(currentHealth / maxHealth * 100);
                 playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
@@ -239,8 +353,7 @@ namespace Fika.Core.Coop.Custom
             {
                 if (!playerPlate.healthBarBackgroundScreen.gameObject.activeSelf)
                 {
-                    playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(false);
-                    playerPlate.healthBarBackgroundScreen.gameObject.SetActive(true);
+                    SetPlayerPlateHealthVisibility(false);
                 }
 
                 float normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
@@ -302,14 +415,86 @@ namespace Fika.Core.Coop.Custom
             FikaPlugin.UsePlateFactionSide.SettingChanged -= UsePlateFactionSide_SettingChanged;
             FikaPlugin.HideHealthBar.SettingChanged -= HideHealthBar_SettingChanged;
             FikaPlugin.UseNamePlates.SettingChanged -= UseNamePlates_SettingChanged;
+            FikaPlugin.UseHealthNumber.SettingChanged -= UseHealthNumber_SettingChanged;
+            FikaPlugin.ShowEffects.SettingChanged -= ShowEffects_SettingChanged;
 
             currentPlayer.HealthController.HealthChangedEvent -= HealthController_HealthChangedEvent;
             currentPlayer.HealthController.BodyPartDestroyedEvent -= HealthController_BodyPartDestroyedEvent;
             currentPlayer.HealthController.BodyPartRestoredEvent -= HealthController_BodyPartRestoredEvent;
             currentPlayer.HealthController.DiedEvent -= HealthController_DiedEvent;
+            currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
+            currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
+
+
 
             playerPlate.gameObject.SetActive(false);
+            effects.Clear();
             Destroy(this);
+        }
+
+        private class HealthBarEffect
+        {
+            public Type effectType;
+            private int amount;
+            private GameObject effectObject;
+            private Image effectImage;
+            private TextMeshProUGUI tmpText;
+
+            public void Init(GameObject initObject, IEffect effect, Sprite effectSprite)
+            {
+                effectObject = initObject;
+                effectObject.SetActive(true);
+                effectImage = effectObject.transform.GetChild(0).GetComponent<Image>();
+                effectImage.sprite = effectSprite;
+                tmpText = effectObject.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+                amount = 1;
+                tmpText.text = amount.ToString();
+                tmpText.enabled = false;
+                effectType = effect.Type;
+            }
+
+            public void Remove()
+            {
+                Destroy(effectImage);
+                Destroy(tmpText);
+                Destroy(effectObject);
+            }
+
+            public int GetAmount()
+            {
+                return amount;
+            }
+
+            public void IncreaseAmount()
+            {
+                amount++;
+                tmpText.text = amount.ToString();
+
+                if (amount > 1)
+                {
+                    tmpText.enabled = true;
+                }
+            }
+
+            public void DecreaseAmount()
+            {
+                amount = Math.Max(0, amount - 1);
+
+                if (amount == 1)
+                {
+                    tmpText.enabled = false;
+                }
+
+                if (amount == 0)
+                {
+                    Remove();
+                    return;
+                }
+                else
+                {
+                    tmpText.text = amount.ToString();
+                }
+            }
         }
     }
 }

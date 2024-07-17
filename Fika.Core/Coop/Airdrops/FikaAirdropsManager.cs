@@ -113,6 +113,7 @@ namespace Coop.Airdrops
                     AirdropParameters.DropHeight, AirdropParameters.Config.PlaneVolume,
                     AirdropParameters.Config.PlaneSpeed);
                 AirdropBox = await AirdropBox.Init(AirdropParameters.Config.CrateFallSpeed);
+                AirdropBox.container.Id = "FikaAirdropContainer";
                 factory = new FikaItemFactoryUtil();
             }
             catch

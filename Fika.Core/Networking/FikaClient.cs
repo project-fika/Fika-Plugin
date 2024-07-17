@@ -70,6 +70,9 @@ namespace Fika.Core.Networking
 
         public void Init()
         {
+            NetworkGameSession.RTT = 0;
+            NetworkGameSession.LossPercent = 0;
+
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnFirearmPacketReceived);
@@ -96,6 +99,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -128,6 +132,17 @@ namespace Fika.Core.Networking
             };
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
+        {
+            if (MyPlayer.HealthController.IsAlive)
+            {
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
+                }
+            }
         }
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet)
@@ -168,7 +183,7 @@ namespace Fika.Core.Networking
             MyPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
-                fikaChat = gameObject.AddComponent<FikaChat>(); 
+                fikaChat = gameObject.AddComponent<FikaChat>();
             }
         }
 

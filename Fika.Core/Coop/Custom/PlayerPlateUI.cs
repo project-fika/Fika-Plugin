@@ -28,6 +28,10 @@ public class PlayerPlateUI : MonoBehaviour
     public Image usecPlateScreen;
     [SerializeField]
     public Image bearPlateScreen;
+    [SerializeField]
+    public GameObject EffectsBackground;
+    [SerializeField]
+    public GameObject EffectImageTemplate;
 
     public void SetNameText(string text)
     {

@@ -50,6 +50,13 @@ namespace Fika.Core.Coop.Players
         public int NetId;
         public bool IsObservedAI = false;
         public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+        public ClientMovementContext ClientMovementContext
+        {
+            get
+            {
+                return MovementContext as ClientMovementContext;
+            }
+        }
         #endregion
 
         public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
@@ -129,7 +136,7 @@ namespace Fika.Core.Coop.Players
             LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
             if (FikaPlugin.Instance.UseInertia)
             {
-                MovementContext = MovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                MovementContext = ClientMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
                     new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
             }
             else
@@ -398,7 +405,7 @@ namespace Fika.Core.Coop.Players
         {
             // what is this
             base.Proceed<T>(item, callback, scheduled);
-        } 
+        }
         #endregion
 
         public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
@@ -418,7 +425,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);            
+            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
             // Handle 'Help Scav' rep gains
             if (aggressor is CoopPlayer coopPlayer)
@@ -448,7 +455,7 @@ namespace Fika.Core.Coop.Players
                 ConsoleScreen.Log(message);
                 FikaPlugin.Instance.FikaLogger.LogInfo(message);
             }
-        } 
+        }
 #endif
 
         public override void SetInventoryOpened(bool opened)
@@ -605,6 +612,13 @@ namespace Fika.Core.Coop.Players
             {
                 Gesture = gesture
             });
+        }
+
+        public override Corpse CreateCorpse()
+        {
+            Vector3 normalized = Velocity.normalized;
+            Vector3 velocityToApply = normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(Velocity, 2f);
+            return CreateCorpse<Corpse>(velocityToApply);
         }
 
         public override void ApplyCorpseImpulse()
@@ -1020,7 +1034,7 @@ namespace Fika.Core.Coop.Players
         {
             if (Side is EPlayerSide.Usec)
             {
-                switch (Profile.Info.MemberCategory)
+                switch (Profile.Info.SelectedMemberCategory)
                 {
                     case EMemberCategory.Default:
                         return "59f32c3b86f77472a31742f0";
@@ -1032,7 +1046,7 @@ namespace Fika.Core.Coop.Players
             }
             else if (Side is EPlayerSide.Bear)
             {
-                switch (Profile.Info.MemberCategory)
+                switch (Profile.Info.SelectedMemberCategory)
                 {
                     case EMemberCategory.Default:
                         return "59f32bb586f774757e1e8442";

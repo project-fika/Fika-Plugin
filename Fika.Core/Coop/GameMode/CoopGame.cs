@@ -16,11 +16,11 @@ using EFT.UI.BattleTimer;
 using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
 using EFT.Weather;
-using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
+using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -74,6 +74,7 @@ namespace Fika.Core.Coop.GameMode
         private CoopTimeManager timeManager;
         private FikaDebug fikaDebug;
         private bool isServer;
+        private List<string> localTriggerZones;
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
@@ -127,10 +128,7 @@ namespace Fika.Core.Coop.GameMode
             Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
             ISession backEndSession, TimeSpan sessionTime, RaidSettings raidSettings)
         {
-            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
-
-            bool useCustomWeather = timeAndWeather.IsRandomWeather;
-            timeAndWeather.IsRandomWeather = false;
+            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");            
 
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, backendDateTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
@@ -149,11 +147,13 @@ namespace Fika.Core.Coop.GameMode
             BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.BossSpawnWaveManagerClass = BossSpawnWaveManagerClass.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
-            if (useCustomWeather && coopGame.isServer)
+            if (OfflineRaidSettingsMenuPatch_Override.UseRandomWeather && coopGame.isServer)
             {
                 Logger.LogInfo("Custom weather enabled, initializing curves");
                 coopGame.SetupCustomWeather(timeAndWeather);
             }
+
+            OfflineRaidSettingsMenuPatch_Override.UseRandomWeather = false;
 
             SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
             coopGame.func_1 = new Func<Player, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);
@@ -1534,7 +1534,7 @@ namespace Fika.Core.Coop.GameMode
             exfilManager = gameObject.AddComponent<CoopExfilManager>();
             exfilManager.Run(exfilPoints);
 
-            if (FikaPlugin.Instance.UseBTR)
+            /*if (FikaPlugin.Instance.UseBTR)
             {
                 try
                 {
@@ -1562,7 +1562,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogError("vmethod_5: Exception thrown during BTR init, check logs.");
                 }
-            }
+            }*/
 
             dateTime_0 = EFTDateTimeClass.Now;
             Status = GameStatus.Started;
@@ -1599,10 +1599,17 @@ namespace Fika.Core.Coop.GameMode
         /// When the local player successfully extracts, enable freecam, notify other players about the extract
         /// </summary>
         /// <param name="player">The local player to start the Coroutine on</param>
+        /// <param name="point">The point that was used to extract</param>
         /// <returns></returns>
         public void Extract(CoopPlayer player, ExfiltrationPoint point)
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
+            localTriggerZones = new(player.TriggerZones);
+
+            player.ClientMovementContext.SetGravity(false);
+            Vector3 position = player.Position;
+            position.y += 500;
+            player.Teleport(position);
 
             if (MyExitStatus == ExitStatus.MissingInAction)
             {
@@ -1730,7 +1737,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         public void ClearHostAI(Player player)
-        {
+        {/*
             if (player != null)
             {
                 if (botsController_0 != null)
@@ -1752,7 +1759,8 @@ namespace Fika.Core.Coop.GameMode
                         bot.Memory.DeleteInfoAboutEnemy(player);
                     }
                 }
-            }
+            }*/
+            botsController_0.DestroyInfo(player);
         }
 
         /// <summary>
@@ -1795,6 +1803,7 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogDebug("Stop");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            myPlayer.TriggerZones = localTriggerZones;
             myPlayer.PacketSender.DestroyThis();
 
             if (myPlayer.Side != EPlayerSide.Savage)
@@ -1826,7 +1835,6 @@ namespace Fika.Core.Coop.GameMode
             if (isServer)
             {
                 botsController_0.Stop();
-                botsController_0.DestroyInfo(gparam_0.Player);
             }
 
             if (BossSpawnWaveManagerClass != null)
