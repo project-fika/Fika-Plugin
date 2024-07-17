@@ -229,6 +229,9 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (player.Profile.EftStats.DroppedItems.Any(x => x.ItemId == itemId && x.ZoneId == zoneId) || droppedZoneIds.Contains(zoneId))
             {
+#if DEBUG
+                FikaPlugin.Instance.FikaLogger.LogWarning($"Quest already existed in 'DroppedItems', itemId: {itemId}, zoneId: {zoneId}");
+#endif
                 return true;
             }
             return false;
