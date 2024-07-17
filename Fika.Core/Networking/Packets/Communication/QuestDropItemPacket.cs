@@ -2,8 +2,9 @@
 
 namespace Fika.Core.Networking.Packets
 {
-    public struct QuestDropItemPacket(string itemId, string zoneId) : INetSerializable
+    public struct QuestDropItemPacket(string nickname, string itemId, string zoneId) : INetSerializable
     {
+        public string Nickname = nickname;
         public string ItemId = itemId;
         public string ZoneId = zoneId;
 

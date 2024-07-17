@@ -68,7 +68,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             droppedZoneIds.Add(zoneId);
-            QuestDropItemPacket packet = new(itemId, zoneId);
+            QuestDropItemPacket packet = new(player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
 #endif
@@ -216,16 +216,22 @@ namespace Fika.Core.Coop.ClientClasses
             string itemId = packet.ItemId;
             string zoneId = packet.ZoneId;
 
-            if (CheckForDroppedItem(itemId, zoneId))
+            if (DroppedItemAlreadyExists(itemId, zoneId))
             {
                 return;
+            }
+
+            if (FikaPlugin.QuestSharingNotifications.Value)
+            {
+                NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} planted an item.",
+                                    iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
             droppedZoneIds.Add(zoneId);
             player.Profile.ItemDroppedAtPlace(itemId, zoneId);
         }
 
-        private bool CheckForDroppedItem(string itemId, string zoneId)
+        private bool DroppedItemAlreadyExists(string itemId, string zoneId)
         {
             if (player.Profile.EftStats.DroppedItems.Any(x => x.ItemId == itemId && x.ZoneId == zoneId) || droppedZoneIds.Contains(zoneId))
             {
