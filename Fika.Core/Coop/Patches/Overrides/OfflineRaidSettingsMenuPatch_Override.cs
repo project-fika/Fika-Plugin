@@ -17,8 +17,14 @@ namespace Fika.Core.Coop.Patches.Overrides
             return AccessTools.Method(typeof(RaidSettingsWindow), nameof(RaidSettingsWindow.Show));
         }
 
-        static RaidSettingsWindow instance;
-        static List<CanvasGroup> weatherCanvasGroups;
+        private static RaidSettingsWindow instance;
+        private static List<CanvasGroup> weatherCanvasGroups;
+        private static bool randomWeather;
+        public static bool UseRandomWeather
+        { 
+            get => randomWeather;
+            set => randomWeather = value;
+        }
 
         [PatchPostfix]
         private static void PatchPostfix(RaidSettingsWindow __instance, UiElementBlocker ____coopModeBlocker,
@@ -27,6 +33,7 @@ namespace Fika.Core.Coop.Patches.Overrides
             List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown,
             RaidSettings raidSettings)
         {
+            randomWeather = false;
             // Always disable the Coop Mode checkbox
             ____coopModeBlocker.SetBlock(true, "Co-op is always enabled in Fika");
 
@@ -62,6 +69,7 @@ namespace Fika.Core.Coop.Patches.Overrides
 
             instance = __instance;
 
+            // If enforced from server, this will be true by default
             if (!raidSettings.TimeAndWeatherSettings.IsRandomWeather)
             {
                 ____randomWeatherToggle.Bind(new Action<bool>(ToggleWeather));
@@ -96,6 +104,7 @@ namespace Fika.Core.Coop.Patches.Overrides
                 item.SetUnlockStatus(enabled, enabled);
             }
 
+            randomWeather = enabled;
             instance.method_4();
         }
     }
