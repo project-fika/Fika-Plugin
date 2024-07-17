@@ -1534,7 +1534,7 @@ namespace Fika.Core.Coop.GameMode
             exfilManager = gameObject.AddComponent<CoopExfilManager>();
             exfilManager.Run(exfilPoints);
 
-            if (FikaPlugin.Instance.UseBTR)
+            /*if (FikaPlugin.Instance.UseBTR)
             {
                 try
                 {
@@ -1562,7 +1562,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogError("vmethod_5: Exception thrown during BTR init, check logs.");
                 }
-            }
+            }*/
 
             dateTime_0 = EFTDateTimeClass.Now;
             Status = GameStatus.Started;
