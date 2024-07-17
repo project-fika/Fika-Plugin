@@ -581,6 +581,7 @@ namespace Fika.Core
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
             new DisablePvEPatch().Disable();
+            new ClampRagdollPatch().Disable();
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
