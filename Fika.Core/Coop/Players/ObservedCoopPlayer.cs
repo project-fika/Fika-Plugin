@@ -405,7 +405,9 @@ namespace Fika.Core.Coop.Players
 
         public override Corpse CreateCorpse()
         {
-            return CreateCorpse<Corpse>(RagdollPacket.OverallVelocity);
+            Vector3 normalized = RagdollPacket.OverallVelocity.normalized;
+            Vector3 velocityToApply = normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(RagdollPacket.OverallVelocity, 2f);
+            return CreateCorpse<Corpse>(velocityToApply);
         }
 
         public override void ApplyCorpseImpulse()
