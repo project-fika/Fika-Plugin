@@ -10,12 +10,14 @@ namespace Fika.Core.Networking.Packets
 
         public void Deserialize(NetDataReader reader)
         {
+            Nickname = reader.GetString();
             ItemId = reader.GetString();
             ZoneId = reader.GetString();
         }
 
         public void Serialize(NetDataWriter writer)
         {
+            writer.Put(Nickname);
             writer.Put(ItemId);
             writer.Put(ZoneId);
         }
