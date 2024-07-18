@@ -43,6 +43,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -1766,9 +1767,14 @@ namespace Fika.Core.Coop.GameMode
         /// <summary>
         /// Triggers when the main player dies
         /// </summary>
-        /// <param name="obj"></param>
-        private void HealthController_DiedEvent(EDamageType obj)
+        /// <param name="damageType"></param>
+        private void HealthController_DiedEvent(EDamageType damageType)
         {
+            Player player = gparam_0.Player;
+            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ToggleQuestSharing(false);
+            }
             if (timeManager != null)
             {
                 Destroy(timeManager);
@@ -1778,16 +1784,16 @@ namespace Fika.Core.Coop.GameMode
                 GameUi.TimerPanel.Close();
             }
 
-            gparam_0.Player.HealthController.DiedEvent -= method_15;
-            gparam_0.Player.HealthController.DiedEvent -= HealthController_DiedEvent;
+            player.HealthController.DiedEvent -= method_15;
+            player.HealthController.DiedEvent -= HealthController_DiedEvent;
 
             PlayerOwner.vmethod_1();
             MyExitStatus = ExitStatus.Killed;
-            MyExitLocation = null;
+            MyExitLocation = string.Empty;
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                Task.Run(() => SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true));
+                Task.Run(() => SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true));
             }
         }
 
