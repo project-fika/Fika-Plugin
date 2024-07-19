@@ -344,7 +344,7 @@ namespace Fika.Core.UI.Custom
                 HoverTooltipArea tooltipArea;
                 Image image = server.GetComponent<Image>();
 
-                if (RaidSettings.LocationId != entry.Location)
+                if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
                 {
                     tooltipTextGetter = new()
                     {
