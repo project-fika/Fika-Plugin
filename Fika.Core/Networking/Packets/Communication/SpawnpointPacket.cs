@@ -1,6 +1,6 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Communication
+namespace Fika.Core.Networking.Packets
 {
     public struct SpawnpointPacket(bool isRequest) : INetSerializable
     {
