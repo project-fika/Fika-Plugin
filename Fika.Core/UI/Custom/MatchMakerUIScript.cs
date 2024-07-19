@@ -31,14 +31,14 @@ namespace Fika.Core.UI.Custom
         public GameObject NewBackButton { get; internal set; }
 
         private string ProfileId => FikaBackendUtils.Profile.ProfileId;
-
-        private float _lastRefreshed;
+        private float lastRefreshed;
+        private ISession session;
 
         protected void Start()
         {
             CreateMatchMakerUI();
-
             StartCoroutine(ServerQuery());
+            session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
         }
 
         protected void Update()
@@ -192,7 +192,7 @@ namespace Fika.Core.UI.Custom
         {
             Matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
-            _lastRefreshed = Time.time;
+            lastRefreshed = Time.time;
 
             RefreshUI();
         }
@@ -202,7 +202,7 @@ namespace Fika.Core.UI.Custom
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
             Matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
-            _lastRefreshed = Time.time;
+            lastRefreshed = Time.time;
 
             RefreshUI();
         }
@@ -337,6 +337,7 @@ namespace Fika.Core.UI.Custom
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+                    FikaBackendUtils.HostLocationId = entry.Location;
                     StartCoroutine(JoinMatch(ProfileId, server.name, button));
                 });
 
@@ -481,7 +482,7 @@ namespace Fika.Core.UI.Custom
             {
                 AutoRefresh();
 
-                while (Time.time < _lastRefreshed + FikaPlugin.AutoRefreshRate.Value)
+                while (Time.time < lastRefreshed + FikaPlugin.AutoRefreshRate.Value)
                 {
                     yield return null;
                 }
