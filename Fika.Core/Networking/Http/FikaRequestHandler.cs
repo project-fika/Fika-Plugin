@@ -107,11 +107,6 @@ namespace Fika.Core.Networking.Http
             PutJson("/fika/update/sethost", data);
         }
 
-        public static async Task<SpawnPointResponse> RaidSpawnPoint(SpawnPointRequest data)
-        {
-            return await PostJsonAsync<SpawnPointRequest, SpawnPointResponse>("/fika/raid/spawnpoint", data);
-        }
-
         public static void RaidLeave(PlayerLeftRequest data)
         {
             PutJson("/fika/raid/leave", data);
@@ -120,6 +115,11 @@ namespace Fika.Core.Networking.Http
         public static CreateMatch RaidJoin(MatchJoinRequest data)
         {
             return PostJson<MatchJoinRequest, CreateMatch>("/fika/raid/join", data);
+        }
+
+        public static void UpdateAddPlayer(AddPlayerRequest data)
+        {
+            PutJson("/fika/update/addplayer", data);
         }
 
         public static void RaidCreate(CreateMatch data)

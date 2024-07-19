@@ -74,6 +74,7 @@ namespace Fika.Core.Networking
         }
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
+        private HashSet<string> addedPlayers = [];
 
         public async Task Init()
         {
@@ -105,6 +106,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -216,6 +218,28 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnSpawnPointPacketReceived(SpawnpointPacket packet, NetPeer peer)
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            if (coopGame != null)
+            {
+                if (packet.IsRequest)
+                {
+                    SpawnpointPacket response = new(false)
+                    {
+                        Name = coopGame.GetSpawnpointName()
+                    };
+
+                    _dataWriter.Reset();
+                    SendDataToPeer(peer, _dataWriter, ref response, DeliveryMethod.ReliableUnordered);
+                }
+            }
+            else
+            {
+                logger.LogError("OnSpawnPointPacketReceived: CoopGame was null upon receiving packet!"); ;
+            }
+        }
+
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
         {
             if (MyPlayer.HealthController.IsAlive)
@@ -322,11 +346,17 @@ namespace Fika.Core.Networking
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             int netId = PopNetId();
             packet.netId = netId;
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
                 coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
+                AddPlayerToBackend(packet.PlayerInfo.Profile.ProfileId);
             }
 
             _dataWriter.Reset();
@@ -552,6 +582,11 @@ namespace Fika.Core.Networking
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             if (packet.IsRequest)
             {
                 foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -595,9 +630,21 @@ namespace Fika.Core.Networking
                 logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
+                    AddPlayerToBackend(packet.ProfileId);
+
                     coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
                     PlayersMissing.Remove(packet.ProfileId);
                 }
+            }
+        }
+
+        private void AddPlayerToBackend(string profileId)
+        {
+            if (!addedPlayers.Contains(profileId))
+            {
+                addedPlayers.Add(profileId);
+                AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
+                FikaRequestHandler.UpdateAddPlayer(data);
             }
         }
 

@@ -28,6 +28,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using HarmonyLib;
@@ -60,6 +61,7 @@ namespace Fika.Core.Coop.GameMode
         public ISpawnSystem SpawnSystem;
         public Dictionary<string, Player> Bots = [];
         public List<int> ExtractedPlayers { get; } = [];
+        public string SpawnId;
 
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
@@ -128,7 +130,7 @@ namespace Fika.Core.Coop.GameMode
             Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
             ISession backEndSession, TimeSpan sessionTime, RaidSettings raidSettings)
         {
-            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");            
+            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, backendDateTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
@@ -799,41 +801,57 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        public string GetSpawnpointName()
+        {
+            if (!string.IsNullOrEmpty(SpawnId))
+            {
+                return SpawnId;
+            }
+            return string.Empty;
+        }
+
         /// <summary>
         /// Sends or receives the <see cref="ISpawnPoint"/> for the game
         /// </summary>
         /// <returns></returns>
         private async Task SendOrReceiveSpawnPoint()
         {
+            FikaBackendUtils.ScreenController.ChangeStatus($"Setting up spawn system...");
             if (isServer)
             {
                 bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
-                UpdateSpawnPointRequest body = new(spawnTogether ? spawnPoint.Id : "");
                 if (spawnTogether)
                 {
-                    Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}");
+                    Logger.LogInfo($"Setting spawn point to name: '{spawnPoint.Name}', id: '{spawnPoint.Id}'");
+                    SpawnId = spawnPoint.Id;
                 }
                 else
                 {
                     Logger.LogInfo("Using random spawn points!");
                     NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
+                    SpawnId = "RANDOM";
                 }
-                await FikaRequestHandler.UpdateSpawnPoint(body);
             }
             else
             {
-                SpawnPointRequest body = new();
-                SpawnPointResponse response = await FikaRequestHandler.RaidSpawnPoint(body);
-                string name = response.SpawnPoint;
+                NetDataWriter writer = new();
+                SpawnpointPacket packet = new(true);
+                FikaClient client = Singleton<FikaClient>.Instance;
 
-                if (!string.IsNullOrEmpty(name))
+                do
                 {
-                    Logger.LogInfo($"Retrieved Spawn Point '{name}' from server");
+                    client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                    await Task.Delay(500);
+                } while (string.IsNullOrEmpty(SpawnId));
 
+                Logger.LogInfo($"Retrieved spawn point id '{SpawnId}' from server");
+
+                if (SpawnId != "RANDOM")
+                {
                     Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field<Dictionary<ISpawnPoint, SpawnPointMarker>>("dictionary_0").Value;
                     foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
                     {
-                        if (spawnPointObject.Id == name)
+                        if (spawnPointObject.Id == SpawnId)
                         {
                             spawnPoint = spawnPointObject;
                         }
@@ -841,7 +859,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
-                    Logger.LogInfo("Spawn Point was empty, selecting random.");
+                    Logger.LogInfo("Spawn Point was random");
                     NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
                     spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 }
@@ -887,8 +905,6 @@ namespace Fika.Core.Coop.GameMode
 
             myPlayer.Location = Location_0.Id;
 
-            await NetManagerUtils.InitNetManager(isServer);
-
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
                 Logger.LogError($"{nameof(vmethod_2)}:Unable to find {nameof(CoopHandler)}");
@@ -915,21 +931,19 @@ namespace Fika.Core.Coop.GameMode
             await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
             customButton = CreateCancelButton(myPlayer, coopPlayer, customButton);
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
-            if (isServer)
+            if (!isServer)
             {
-                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-            }
-            else
-            {
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(coopPlayer.Profile), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
                 FikaClient client = Singleton<FikaClient>.Instance;
+                NetDataWriter writer = new();
+
                 do
                 {
                     await Task.Delay(250);
                 } while (client.NetClient.FirstPeer == null);
 
-                client.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
             }
 
             await WaitForPlayers();

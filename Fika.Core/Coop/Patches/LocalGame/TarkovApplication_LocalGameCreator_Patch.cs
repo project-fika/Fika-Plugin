@@ -14,6 +14,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {
@@ -26,7 +27,8 @@ namespace Fika.Core.Coop.Patches.LocalGame
         protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_47));
 
         [PatchPrefix]
-        public static bool Prefix(TarkovApplication __instance)
+        public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
+            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
         {
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
@@ -35,19 +37,19 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 return true;
             }
 
+            __result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings, ____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl);
             return false;
         }
 
-        [PatchPostfix]
-        public static async Task Postfix(Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
+        public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
+            RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl)
         {
             if (FikaBackendUtils.IsSinglePlayer)
             {
                 return;
             }
 
-            if (____raidSettings == null)
+            if (raidSettings == null)
             {
                 Logger.LogError("RaidSettings is Null");
                 throw new ArgumentNullException("RaidSettings");
@@ -58,10 +60,9 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 Logger.LogError("timeHasComeScreenController is Null");
                 throw new ArgumentNullException("timeHasComeScreenController");
             }
-
             bool isServer = FikaBackendUtils.IsServer;
 
-            LocationSettingsClass.Location location = ____raidSettings.SelectedLocation;
+            LocationSettingsClass.Location location = raidSettings.SelectedLocation;
 
             FikaBackendUtils.ScreenController = timeHasComeScreenController;
 
@@ -70,20 +71,14 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
             }
 
-            NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
-            if (isServer)
-            {
-                NetManagerUtils.StartPinger();
-            }
-
-            ISession session = __instance.GetClientBackEndSession();
+            ISession session = instance.GetClientBackEndSession();
 
             if (session == null)
             {
                 throw new NullReferenceException("Backend session was null when initializing game!");
             }
 
-            Profile profile = session.GetProfileBySide(____raidSettings.Side);
+            Profile profile = session.GetProfileBySide(raidSettings.Side);
 
             profile.Inventory.Stash = null;
             profile.Inventory.QuestStashItems = null;
@@ -91,7 +86,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
 
-            await session.SendRaidSettings(____raidSettings);
+            await session.SendRaidSettings(raidSettings);
 
             if (!isServer)
             {
@@ -100,21 +95,21 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 RaidSettingsRequest data = new();
                 RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
 
-                ____raidSettings.MetabolismDisabled = raidSettingsResponse.MetabolismDisabled;
-                ____raidSettings.PlayersSpawnPlace = (EPlayersSpawnPlace)Enum.Parse(typeof(EPlayersSpawnPlace), raidSettingsResponse.PlayersSpawnPlace);
+                raidSettings.MetabolismDisabled = raidSettingsResponse.MetabolismDisabled;
+                raidSettings.PlayersSpawnPlace = (EPlayersSpawnPlace)Enum.Parse(typeof(EPlayersSpawnPlace), raidSettingsResponse.PlayersSpawnPlace);
             }
             else
             {
                 timeHasComeScreenController.ChangeStatus("Creating coop game...");
             }
 
-            StartHandler startHandler = new(__instance, session.Profile, session.ProfileOfPet, ____raidSettings.SelectedLocation, timeHasComeScreenController);
+            StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation, timeHasComeScreenController);
 
-            TimeSpan raidLimits = __instance.method_48(____raidSettings.SelectedLocation.EscapeTimeLimit);
+            TimeSpan raidLimits = instance.method_48(raidSettings.SelectedLocation.EscapeTimeLimit);
 
-            CoopGame coopGame = CoopGame.Create(____inputTree, profile, ____localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
-                ____raidSettings.SelectedLocation, timeAndWeather, ____raidSettings.WavesSettings, ____raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStop),
-                ____fixedDeltaTime, EUpdateQueue.Update, session, raidLimits, ____raidSettings);
+            CoopGame coopGame = CoopGame.Create(inputTree, profile, localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
+                raidSettings.SelectedLocation, timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStop),
+                fixedDeltaTime, EUpdateQueue.Update, session, raidLimits, raidSettings);
 
             Singleton<AbstractGame>.Create(coopGame);
             FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
@@ -128,8 +123,8 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 coopGame.SetMatchmakerStatus("Coop game created");
             }
 
-            Task finishTask = coopGame.InitPlayer(____raidSettings.BotSettings, ____backendUrl, new Callback(startHandler.HandleLoadComplete));
-            __result = Task.WhenAll(finishTask);
+            Task finishTask = coopGame.InitPlayer(raidSettings.BotSettings, backendUrl, new Callback(startHandler.HandleLoadComplete));
+            await Task.WhenAll(finishTask);
         }
 
         private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController)
@@ -149,7 +144,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
             {
                 using (CounterCreatorAbstractClass.StartWithToken("LoadingScreen.LoadComplete"))
                 {
-                    UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
+                    GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
                     MainMenuController mmc = (MainMenuController)typeof(TarkovApplication).GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(x => x.FieldType == typeof(MainMenuController)).FirstOrDefault().GetValue(tarkovApplication);
                     mmc?.Unsubscribe();
                     GameWorld gameWorld = Singleton<GameWorld>.Instance;

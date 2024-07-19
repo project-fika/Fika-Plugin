@@ -262,7 +262,6 @@ namespace Fika.Core.Coop.Components
                 if (Players == null)
                 {
                     continue;
-
                 }
 
                 ReadFromServerCharacters();

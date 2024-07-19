@@ -213,6 +213,7 @@ namespace Fika.Core
             new DisableReadyButton_Patch().Enable();
             new DisableInsuranceReadyButton_Patch().Enable();
             new DisableMatchSettingsReadyButton_Patch().Enable();
+            new TarkovApplication_LocalGamePreparer_Patch().Enable();
             new TarkovApplication_LocalGameCreator_Patch().Enable();
             new DeathFade_Patch().Enable();
             new NonWaveSpawnScenario_Patch().Enable();
