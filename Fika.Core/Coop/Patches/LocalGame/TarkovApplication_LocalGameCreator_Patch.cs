@@ -32,11 +32,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
         {
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
-            if (FikaBackendUtils.IsSinglePlayer)
-            {
-                return true;
-            }
-
             __result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings, ____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl);
             return false;
         }
@@ -44,11 +39,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
         public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
             RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl)
         {
-            if (FikaBackendUtils.IsSinglePlayer)
-            {
-                return;
-            }
-
             if (raidSettings == null)
             {
                 Logger.LogError("RaidSettings is Null");

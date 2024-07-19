@@ -717,14 +717,6 @@ namespace Fika.Core.Coop.GameMode
                         DynamicAI.AddHumans();
                     }
 
-                    SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
-
-                    while (!updateStatus.IsCompleted)
-                    {
-                        yield return null;
-                    }
-
                     Singleton<FikaServer>.Instance.ReadyClients++;
                     yield break;
                 }
@@ -736,14 +728,6 @@ namespace Fika.Core.Coop.GameMode
 
                 if (isServer)
                 {
-                    SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
-
-                    while (!updateStatus.IsCompleted)
-                    {
-                        yield return null;
-                    }
-
                     do
                     {
                         yield return null;
@@ -1362,6 +1346,14 @@ namespace Fika.Core.Coop.GameMode
 
                 FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
                 FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
+
+                SetStatusModel status = new(FikaBackendUtils.GetGroupId(), LobbyEntry.ELobbyStatus.IN_GAME);
+                Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
+
+                while (!updateStatus.IsCompleted)
+                {
+                    yield return null;
+                }
             }
             else
             {

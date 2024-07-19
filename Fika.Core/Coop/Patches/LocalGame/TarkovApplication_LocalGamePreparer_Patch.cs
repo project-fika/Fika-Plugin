@@ -19,11 +19,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
         {
             Logger.LogDebug("TarkovApplication_LocalGamePreparer_Patch:Prefix");
 
-            if (FikaBackendUtils.IsSinglePlayer)
-            {
-                return;
-            }
-
             bool isServer = FikaBackendUtils.IsServer;
             NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
             if (isServer)
