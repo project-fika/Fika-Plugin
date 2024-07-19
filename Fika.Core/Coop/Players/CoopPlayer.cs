@@ -855,6 +855,7 @@ namespace Fika.Core.Coop.Players
 
                     PingFactory.EPingType pingType = PingFactory.EPingType.Point;
                     object userData = null;
+                    string localeId = null;
 
                     //ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
 
@@ -880,6 +881,7 @@ namespace Fika.Core.Coop.Players
                     {
                         pingType = PingFactory.EPingType.LootItem;
                         userData = lootItem;
+                        localeId = lootItem.Item.ShortName;
                     }
                     else if (hitGameObject.TryGetComponent(out Door door))
                     {
@@ -908,7 +910,8 @@ namespace Fika.Core.Coop.Players
                         PingLocation = hitPoint,
                         PingType = pingType,
                         PingColor = pingColor,
-                        Nickname = Profile.Nickname
+                        Nickname = Profile.Nickname,
+                        LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                     };
 
                     PacketSender.Writer.Reset();
@@ -929,7 +932,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname)
+        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname, string localeId)
         {
             GameObject prefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
             GameObject pingGameObject = Instantiate(prefab);
@@ -938,8 +941,16 @@ namespace Fika.Core.Coop.Players
             {
                 abstractPing.Initialize(ref location, null, pingColor);
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestSubTrackComplete);
-                NotificationManagerClass.DisplayMessageNotification($"Received a ping from '{nickname}'",
-                    ENotificationDurationType.Default, ENotificationIconType.Friend);
+                if (string.IsNullOrEmpty(localeId))
+                {
+                    NotificationManagerClass.DisplayMessageNotification($"Received a ping from '{nickname}'",
+                                ENotificationDurationType.Default, ENotificationIconType.Friend); 
+                }
+                else
+                {
+                    NotificationManagerClass.DisplayMessageNotification($"'{nickname}' has pinged item '{localeId.Localized()}'",
+                                ENotificationDurationType.Default, ENotificationIconType.Friend);
+                }
             }
             else
             {

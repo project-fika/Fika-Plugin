@@ -485,7 +485,7 @@ namespace Fika.Core.Networking
                     {
                         if (Players.TryGetValue(packet.NetId, out CoopPlayer pingPlayerToApply))
                         {
-                            pingPlayerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname);
+                            pingPlayerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
                         }
                     }
                     break;

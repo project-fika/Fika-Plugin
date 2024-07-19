@@ -522,7 +522,7 @@ namespace Fika.Core.Networking
             {
                 if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                 {
-                    playerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname);
+                    playerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
                 }
             }
             else if (packet.PacketType == EPackageType.LoadBot)
