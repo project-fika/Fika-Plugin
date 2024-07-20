@@ -34,7 +34,6 @@ namespace Fika.Core.UI.Custom
 
         private string ProfileId => FikaBackendUtils.Profile.ProfileId;
         private float lastRefreshed;
-        private ISession session;
 
         private bool _started;
         private Coroutine serverQueryRoutine;
@@ -65,7 +64,6 @@ namespace Fika.Core.UI.Custom
         {
             CreateMatchMakerUI();
             serverQueryRoutine = StartCoroutine(ServerQuery());
-            session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
             _started = true;
         }
 
@@ -431,7 +429,7 @@ namespace Fika.Core.UI.Custom
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                     //StartCoroutine(JoinMatch(ProfileId, server.name, button));
                     FikaBackendUtils.HostLocationId = entry.Location;
-                    StartCoroutine(JoinMatch(profileId, server.name, button, () =>
+                    StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
                     {
                         this.DestroyThis();
                         this.AcceptButton.OnClick.Invoke();
