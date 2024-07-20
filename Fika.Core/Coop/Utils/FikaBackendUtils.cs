@@ -107,7 +107,6 @@ namespace Fika.Core.Coop.Utils
             CreateMatch body = new(raidCode, profileId, hostUsername, timestamp, raidSettings,
                 HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
-            await Task.Delay(2000);
             await FikaRequestHandler.RaidCreate(body);
 
             SetGroupId(profileId);
