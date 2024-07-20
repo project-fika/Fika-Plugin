@@ -86,7 +86,7 @@ namespace Fika.Core.UI.Patches
                                         }
 
                                         File.WriteAllText(@$"{fikaDir}\{profileId}.json", profile.ToString());
-                                        NotificationManagerClass.DisplayMessageNotification($"Saved profile '{profileId}' to {fikaDir}");
+                                        NotificationManagerClass.DisplayMessageNotification($"Saved profile <color=#51c6db>{profileId}</color> to {fikaDir}");
 
                                         GameObject.Destroy(downloadProfileGameObject);
                                     }

@@ -167,7 +167,7 @@ namespace Fika.Core.Coop.ClientClasses
                         counter.Value++;
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",
+                            NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from <color=#32a852>{packet.Nickname}</color>",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -198,7 +198,7 @@ namespace Fika.Core.Coop.ClientClasses
                         playerInventory.RunNetworkTransaction(pickupResult.Value);
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} picked up {item.Name.Localized()}",
+                            NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> picked up <color=#51c6db>{item.Name.Localized()}</color>",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -223,7 +223,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (FikaPlugin.QuestSharingNotifications.Value)
             {
-                NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} planted an item.",
+                NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> planted an item.",
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 

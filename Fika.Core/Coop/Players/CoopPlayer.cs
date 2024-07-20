@@ -945,13 +945,13 @@ namespace Fika.Core.Coop.Players
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestSubTrackComplete);
                 if (string.IsNullOrEmpty(localeId))
                 {
-                    NotificationManagerClass.DisplayMessageNotification($"Received a ping from '{nickname}'",
+                    NotificationManagerClass.DisplayMessageNotification($"Received a ping from <color=#32a852>{nickname}</color>",
                                 ENotificationDurationType.Default, ENotificationIconType.Friend); 
                 }
                 else
                 {
                     string localizedName = localeId.Localized();
-                    NotificationManagerClass.DisplayMessageNotification($"'{nickname}' has pinged {LocaleUtils.GetPrefix(localizedName)} '{localizedName}'",
+                    NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{nickname}</color> has pinged {LocaleUtils.GetPrefix(localizedName)} <color=#51c6db>{localizedName}</color>",
                                 ENotificationDurationType.Default, ENotificationIconType.Friend);
                 }
             }
