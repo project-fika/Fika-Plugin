@@ -32,13 +32,11 @@ namespace Fika.Core.UI.Custom
 
         private string ProfileId => FikaBackendUtils.Profile.ProfileId;
         private float lastRefreshed;
-        private ISession session;
 
         protected void Start()
         {
             CreateMatchMakerUI();
             StartCoroutine(ServerQuery());
-            session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
         }
 
         protected void Update()
