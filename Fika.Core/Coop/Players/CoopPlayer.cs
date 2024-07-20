@@ -19,6 +19,7 @@ using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -876,6 +877,7 @@ namespace Fika.Core.Coop.Players
                     {
                         pingType = PingFactory.EPingType.LootContainer;
                         userData = container;
+                        localeId = container.ItemOwner.Name;
                     }
                     else if (hitGameObject.TryGetComponent(out LootItem lootItem))
                     {
@@ -948,7 +950,8 @@ namespace Fika.Core.Coop.Players
                 }
                 else
                 {
-                    NotificationManagerClass.DisplayMessageNotification($"'{nickname}' has pinged item '{localeId.Localized()}'",
+                    string localizedName = localeId.Localized();
+                    NotificationManagerClass.DisplayMessageNotification($"'{nickname}' has pinged {LocaleUtils.GetPrefix(localizedName)} '{localizedName}'",
                                 ENotificationDurationType.Default, ENotificationIconType.Friend);
                 }
             }
