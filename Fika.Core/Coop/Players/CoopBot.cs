@@ -176,7 +176,7 @@ namespace Fika.Core.Coop.Players
                     if (LastAggressor is CoopPlayer aggressor)
                     {
                         if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
-                            NotificationManagerClass.DisplayMessageNotification($"{LastAggressor.Profile.Nickname} killed boss {name}", iconType: EFT.Communications.ENotificationIconType.Friend);
+                            NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{LastAggressor.Profile.Info.MainProfileNickname}</color> killed boss <color=#a87332>{name}</color>", iconType: EFT.Communications.ENotificationIconType.Friend);
                     }
                 }
             }
