@@ -283,6 +283,9 @@ namespace Fika.Core.UI.Custom
                 FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
+                AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
+                FikaRequestHandler.UpdateAddPlayer(data);
+
                 if (FikaBackendUtils.IsHostNatPunch)
                 {
                     pingingClient.StartKeepAliveRoutine();
