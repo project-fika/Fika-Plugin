@@ -6,6 +6,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -98,14 +99,16 @@ namespace Fika.Core.Coop.Utils
             return true;
         }
 
-        public static void CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
+        public static async Task CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
         {
+            NotificationManagerClass.DisplayWarningNotification("Starting raid, please wait...");
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             string raidCode = GenerateRaidCode(6);
             CreateMatch body = new(raidCode, profileId, hostUsername, timestamp, raidSettings,
                 HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
-            FikaRequestHandler.RaidCreate(body);
+            await Task.Delay(2000);
+            await FikaRequestHandler.RaidCreate(body);
 
             SetGroupId(profileId);
             MatchingType = EMatchmakerType.GroupLeader;

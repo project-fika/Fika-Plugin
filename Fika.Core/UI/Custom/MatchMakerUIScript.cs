@@ -118,8 +118,10 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            fikaMatchMakerUi.StartButton.onClick.AddListener(() =>
+            fikaMatchMakerUi.StartButton.onClick.AddListener(async() =>
             {
+                fikaMatchMakerUi.RaidGroupHostButton.interactable = false;
+                fikaMatchMakerUi.StartButton.interactable = false;
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                 if (FikaPlugin.ForceIP.Value != "")
                 {
@@ -143,6 +145,9 @@ namespace Fika.Core.UI.Custom
                         Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
                             $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
                             ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                        fikaMatchMakerUi.RaidGroupHostButton.interactable = true;
+                        fikaMatchMakerUi.StartButton.interactable = true;
                         return;
                     }
                 }
@@ -153,11 +158,14 @@ namespace Fika.Core.UI.Custom
                         Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
                             $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
                             ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                        fikaMatchMakerUi.RaidGroupHostButton.interactable = true;
+                        fikaMatchMakerUi.StartButton.interactable = true;
                         return;
                     }
                 }
                 FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
+                await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
                 AcceptButton.OnClick.Invoke();
                 DestroyThis();
             });
