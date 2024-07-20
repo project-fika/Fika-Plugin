@@ -50,6 +50,12 @@ namespace Fika.Core.UI.Custom
             {
                 StopCoroutine(ServerQuery());
             }
+
+            GameObject imageObject = fikaMatchMakerUi.LoadingImage.gameObject;
+            if (imageObject.activeSelf)
+            {
+                imageObject.transform.Rotate(0, 0, 3f); 
+            }
         }
 
         private void DestroyThis()
@@ -120,8 +126,8 @@ namespace Fika.Core.UI.Custom
 
             fikaMatchMakerUi.StartButton.onClick.AddListener(async() =>
             {
-                fikaMatchMakerUi.RaidGroupHostButton.interactable = false;
-                fikaMatchMakerUi.StartButton.interactable = false;
+                ToggleButtons(false);
+
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                 if (FikaPlugin.ForceIP.Value != "")
                 {
@@ -145,9 +151,7 @@ namespace Fika.Core.UI.Custom
                         Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
                             $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
                             ErrorScreen.EButtonType.OkButton, 10f, null, null);
-
-                        fikaMatchMakerUi.RaidGroupHostButton.interactable = true;
-                        fikaMatchMakerUi.StartButton.interactable = true;
+                        ToggleButtons(true);
                         return;
                     }
                 }
@@ -159,8 +163,7 @@ namespace Fika.Core.UI.Custom
                             $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
                             ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
-                        fikaMatchMakerUi.RaidGroupHostButton.interactable = true;
-                        fikaMatchMakerUi.StartButton.interactable = true;
+                        ToggleButtons(true);
                         return;
                     }
                 }
@@ -192,6 +195,15 @@ namespace Fika.Core.UI.Custom
             }
 
             BackButton.gameObject.SetActive(false);
+        }
+
+        private void ToggleButtons(bool enabled)
+        {
+            fikaMatchMakerUi.RaidGroupHostButton.interactable = enabled;
+            fikaMatchMakerUi.RaidGroupHostButton.gameObject.SetActive(enabled);
+            fikaMatchMakerUi.StartButton.interactable = enabled;
+            fikaMatchMakerUi.StartButton.gameObject.SetActive(enabled);
+            fikaMatchMakerUi.LoadingImage.gameObject.SetActive(!enabled);
         }
 
         private void AutoRefresh()
