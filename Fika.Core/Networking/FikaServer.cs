@@ -74,9 +74,13 @@ namespace Fika.Core.Networking
         }
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
+        private HashSet<string> addedPlayers = [];
 
         public async Task Init()
         {
+            NetworkGameSession.RTT = 0;
+            NetworkGameSession.LossPercent = 0;
+
             // Start at 1 to avoid having 0 and making us think it's working when it's not
             _currentNetId = 1;
 
@@ -101,6 +105,8 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -212,9 +218,42 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnSpawnPointPacketReceived(SpawnpointPacket packet, NetPeer peer)
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            if (coopGame != null)
+            {
+                if (packet.IsRequest)
+                {
+                    SpawnpointPacket response = new(false)
+                    {
+                        Name = coopGame.GetSpawnpointName()
+                    };
+
+                    _dataWriter.Reset();
+                    SendDataToPeer(peer, _dataWriter, ref response, DeliveryMethod.ReliableUnordered);
+                }
+            }
+            else
+            {
+                logger.LogError("OnSpawnPointPacketReceived: CoopGame was null upon receiving packet!"); ;
+            }
+        }
+
+        private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
+        {
+            if (MyPlayer.HealthController.IsAlive)
+            {
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
+                }
+            }
+        }
+
         private bool ValidateLocalIP(string LocalIP)
         {
-            if(LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
+            if (LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
             {
                 return true;
             }
@@ -301,17 +340,23 @@ namespace Fika.Core.Networking
             MyPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
-                fikaChat = gameObject.AddComponent<FikaChat>(); 
+                fikaChat = gameObject.AddComponent<FikaChat>();
             }
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             int netId = PopNetId();
             packet.netId = netId;
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
                 coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
+                AddPlayerToBackend(packet.PlayerInfo.Profile.ProfileId);
             }
 
             _dataWriter.Reset();
@@ -464,7 +509,7 @@ namespace Fika.Core.Networking
                         if (FikaPlugin.ShowNotifications.Value)
                         {
                             string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                            NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
+                            NotificationManagerClass.DisplayMessageNotification($"Group member <color=#32a852>{nickname}</color> has extracted.",
                                             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                         }
                     }
@@ -477,7 +522,7 @@ namespace Fika.Core.Networking
             {
                 if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                 {
-                    playerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname);
+                    playerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
                 }
             }
             else if (packet.PacketType == EPackageType.LoadBot)
@@ -537,6 +582,11 @@ namespace Fika.Core.Networking
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             if (packet.IsRequest)
             {
                 foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -580,9 +630,21 @@ namespace Fika.Core.Networking
                 logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
+                    AddPlayerToBackend(packet.ProfileId);
+
                     coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
                     PlayersMissing.Remove(packet.ProfileId);
                 }
+            }
+        }
+
+        private void AddPlayerToBackend(string profileId)
+        {
+            if (!addedPlayers.Contains(profileId))
+            {
+                addedPlayers.Add(profileId);
+                AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
+                FikaRequestHandler.UpdateAddPlayer(data);
             }
         }
 

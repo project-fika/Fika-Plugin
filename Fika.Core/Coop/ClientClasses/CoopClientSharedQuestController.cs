@@ -3,9 +3,9 @@ using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
-using SPT.Custom.BTR.Patches;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -16,6 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
         private readonly List<string> lastFromNetwork = [];
         private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
+        private readonly HashSet<string> droppedZoneIds = [];
         private bool canSendAndReceive = true;
 
         public override void Init()
@@ -46,6 +47,32 @@ namespace Fika.Core.Coop.ClientClasses
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Used to prevent errors when subscribing to the event
+        /// </summary>
+        public void LateInit()
+        {
+            if (acceptedTypes.Contains("PlaceBeacon"))
+            {
+                player.Profile.OnItemZoneDropped += Profile_OnItemZoneDropped;
+            }
+        }
+
+        private void Profile_OnItemZoneDropped(string itemId, string zoneId)
+        {
+            if (droppedZoneIds.Contains(itemId))
+            {
+                return;
+            }
+
+            droppedZoneIds.Add(zoneId);
+            QuestDropItemPacket packet = new(player.Profile.Info.MainProfileNickname, itemId, zoneId);
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
+#endif
+            player.PacketSender.SendQuestPacket(ref packet);
         }
 
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
@@ -93,6 +120,11 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void SendQuestPacket(IConditionCounter conditional, Condition condition)
         {
+            if (!canSendAndReceive)
+            {
+                return;
+            }
+
             if (conditional is QuestClass quest)
             {
                 TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(condition.id);
@@ -135,8 +167,8 @@ namespace Fika.Core.Coop.ClientClasses
                         counter.Value++;
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",
-                                                iconType: EFT.Communications.ENotificationIconType.Quest); 
+                            NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from <color=#32a852>{packet.Nickname}</color>",
+                                                iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
                 }
@@ -166,12 +198,49 @@ namespace Fika.Core.Coop.ClientClasses
                         playerInventory.RunNetworkTransaction(pickupResult.Value);
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} picked up {item.Name.Localized()}",
-                                                iconType: EFT.Communications.ENotificationIconType.Quest); 
+                            NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> picked up <color=#51c6db>{item.Name.Localized()}</color>",
+                                                iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
                 }
             }
+        }
+
+        internal void ReceiveQuestDropItemPacket(ref QuestDropItemPacket packet)
+        {
+            if (!canSendAndReceive)
+            {
+                return;
+            }
+
+            string itemId = packet.ItemId;
+            string zoneId = packet.ZoneId;
+
+            if (DroppedItemAlreadyExists(itemId, zoneId))
+            {
+                return;
+            }
+
+            if (FikaPlugin.QuestSharingNotifications.Value)
+            {
+                NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> planted an item.",
+                                    iconType: EFT.Communications.ENotificationIconType.Quest);
+            }
+
+            droppedZoneIds.Add(zoneId);
+            player.Profile.ItemDroppedAtPlace(itemId, zoneId);
+        }
+
+        private bool DroppedItemAlreadyExists(string itemId, string zoneId)
+        {
+            if (player.Profile.EftStats.DroppedItems.Any(x => x.ItemId == itemId && x.ZoneId == zoneId) || droppedZoneIds.Contains(zoneId))
+            {
+#if DEBUG
+                FikaPlugin.Instance.FikaLogger.LogWarning($"Quest already existed in 'DroppedItems', itemId: {itemId}, zoneId: {zoneId}");
+#endif
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

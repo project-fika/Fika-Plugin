@@ -8,6 +8,7 @@ using Fika.Core.Networking.Http.Models;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
+using SPT.Custom.Utils;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -46,8 +47,14 @@ namespace Fika.Core.Utils
             string validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
             logger.LogDebug(validationJson);
 
-            ModValidationResponse validationResult =
-                JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
+            ModValidationResponse validationResult = JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
+            if (validationResult.Forbidden == null || validationResult.MissingRequired == null || validationResult.HashMismatch == null)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("FikaModHandler::VerifyMods: Response was invalid!");
+                MessageBoxHelper.Show($"Failed to verify mods with server.\nMake sure that the server mod is installed!", "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
+                Application.Quit();
+                return;
+            }
 
             // If any errors were detected we will print what has happened
             bool installationError =

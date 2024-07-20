@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -68,8 +69,11 @@ namespace Fika.Core.Networking
         }
         private FikaChat fikaChat;
 
-        public void Init()
+        public async void Init()
         {
+            NetworkGameSession.RTT = 0;
+            NetworkGameSession.LossPercent = 0;
+
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnFirearmPacketReceived);
@@ -96,6 +100,8 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SpawnpointPacket>(OnSpawnPointPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -105,7 +111,9 @@ namespace Fika.Core.Networking
                 IPv6Enabled = false,
                 DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
-                EnableStatistics = true
+                EnableStatistics = true,
+                MaxConnectAttempts = 5,
+                ReconnectDelay = 1 * 1000
             };
 
             if (FikaBackendUtils.IsHostNatPunch)
@@ -127,7 +135,43 @@ namespace Fika.Core.Networking
                 ServerConnection = _netClient.Connect(ip, port, "fika.core");
             };
 
+            while (ServerConnection.ConnectionState != ConnectionState.Connected)
+            {
+#if DEBUG
+                FikaPlugin.Instance.FikaLogger.LogWarning("FikaClient was not able to connect in time!"); 
+#endif
+                await Task.Delay(1 * 6000);
+                ServerConnection = _netClient.Connect(ip, port, "fika.core");
+            }
+
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnSpawnPointPacketReceived(SpawnpointPacket packet)
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            if (coopGame != null)
+            {
+                if (!packet.IsRequest && !string.IsNullOrEmpty(packet.Name))
+                {
+                    coopGame.SpawnId = packet.Name;
+                }
+            }
+            else
+            {
+                logger.LogError("OnSpawnPointPacketReceived: CoopGame was null upon receiving packet!"); ;
+            }
+        }
+
+        private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet)
+        {
+            if (MyPlayer.HealthController.IsAlive)
+            {
+                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
+                }
+            }
         }
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet)
@@ -168,7 +212,7 @@ namespace Fika.Core.Networking
             MyPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
-                fikaChat = gameObject.AddComponent<FikaChat>(); 
+                fikaChat = gameObject.AddComponent<FikaChat>();
             }
         }
 
@@ -236,6 +280,11 @@ namespace Fika.Core.Networking
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
                 coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
@@ -422,7 +471,7 @@ namespace Fika.Core.Networking
                                 if (FikaPlugin.ShowNotifications.Value)
                                 {
                                     string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                                    NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
+                                    NotificationManagerClass.DisplayMessageNotification($"Group member <color=#32a852>{nickname}</color> has extracted.",
                                                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                                 }
                             }
@@ -436,7 +485,7 @@ namespace Fika.Core.Networking
                     {
                         if (Players.TryGetValue(packet.NetId, out CoopPlayer pingPlayerToApply))
                         {
-                            pingPlayerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname);
+                            pingPlayerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
                         }
                     }
                     break;
@@ -614,6 +663,11 @@ namespace Fika.Core.Networking
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             if (!packet.IsRequest)
             {
                 logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");

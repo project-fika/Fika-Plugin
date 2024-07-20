@@ -42,6 +42,7 @@ namespace Fika.Core.Coop.Utils
         public static int RemotePort;
         public static int LocalPort = 0;
         public static bool IsHostNatPunch = false;
+        public static string HostLocationId;
         private static string groupId;
         private static string raidCode;
 

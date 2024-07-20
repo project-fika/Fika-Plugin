@@ -4,10 +4,10 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.MovingPlatforms;
+using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -46,16 +46,14 @@ namespace Fika.Core.Coop.PacketHandlers
         public void Init()
         {
             enabled = true;
+            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.LateInit();
+            }
             StartCoroutine(SendTrainTime());
         }
 
-        public void SendQuestPacket(ref QuestConditionPacket packet)
-        {
-            Writer.Reset();
-            Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);
-        }
-
-        public void SendQuestItemPacket(ref QuestItemPacket packet)
+        public void SendQuestPacket<T>(ref T packet) where T : INetSerializable
         {
             Writer.Reset();
             Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);

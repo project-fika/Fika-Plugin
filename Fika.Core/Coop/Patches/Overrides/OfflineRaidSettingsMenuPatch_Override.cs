@@ -1,4 +1,5 @@
-﻿using EFT.UI;
+﻿using EFT;
+using EFT.UI;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -16,13 +17,23 @@ namespace Fika.Core.Coop.Patches.Overrides
             return AccessTools.Method(typeof(RaidSettingsWindow), nameof(RaidSettingsWindow.Show));
         }
 
-        static RaidSettingsWindow instance;
-        static List<CanvasGroup> weatherCanvasGroups;
+        private static RaidSettingsWindow instance;
+        private static List<CanvasGroup> weatherCanvasGroups;
+        private static bool randomWeather;
+        public static bool UseRandomWeather
+        { 
+            get => randomWeather;
+            set => randomWeather = value;
+        }
 
         [PatchPostfix]
-        private static void PatchPostfix(RaidSettingsWindow __instance, UiElementBlocker ____coopModeBlocker, List<CanvasGroup> ____weatherCanvasGroups,
-            UpdatableToggle ____randomTimeToggle, UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups, List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown)
+        private static void PatchPostfix(RaidSettingsWindow __instance, UiElementBlocker ____coopModeBlocker,
+            List<CanvasGroup> ____weatherCanvasGroups, UpdatableToggle ____randomTimeToggle,
+            UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups,
+            List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown,
+            RaidSettings raidSettings)
         {
+            randomWeather = false;
             // Always disable the Coop Mode checkbox
             ____coopModeBlocker.SetBlock(true, "Co-op is always enabled in Fika");
 
@@ -58,17 +69,21 @@ namespace Fika.Core.Coop.Patches.Overrides
 
             instance = __instance;
 
-            ____randomWeatherToggle.Bind(new Action<bool>(ToggleWeather));
-            ____randomTimeToggle.gameObject.GetComponent<CanvasGroup>().SetUnlockStatus(false, false);
-
-            GameObject weatherToggle = GameObject.Find("RandomWeatherCheckmark");
-            if (weatherToggle != null)
+            // If enforced from server, this will be true by default
+            if (!raidSettings.TimeAndWeatherSettings.IsRandomWeather)
             {
-                CustomTextMeshProUGUI customTmp = weatherToggle.GetComponentInChildren<CustomTextMeshProUGUI>();
-                if (customTmp != null)
+                ____randomWeatherToggle.Bind(new Action<bool>(ToggleWeather));
+                ____randomTimeToggle.gameObject.GetComponent<CanvasGroup>().SetUnlockStatus(false, false);
+
+                GameObject weatherToggle = GameObject.Find("RandomWeatherCheckmark");
+                if (weatherToggle != null)
                 {
-                    customTmp.text = "Use custom weather";
-                }
+                    CustomTextMeshProUGUI customTmp = weatherToggle.GetComponentInChildren<CustomTextMeshProUGUI>();
+                    if (customTmp != null)
+                    {
+                        customTmp.text = "Use custom weather";
+                    }
+                } 
             }
         }
 
@@ -89,6 +104,7 @@ namespace Fika.Core.Coop.Patches.Overrides
                 item.SetUnlockStatus(enabled, enabled);
             }
 
+            randomWeather = enabled;
             instance.method_4();
         }
     }

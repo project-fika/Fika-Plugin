@@ -16,11 +16,11 @@ using EFT.UI.BattleTimer;
 using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
 using EFT.Weather;
-using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
+using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -28,6 +28,8 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using HarmonyLib;
@@ -60,6 +62,7 @@ namespace Fika.Core.Coop.GameMode
         public ISpawnSystem SpawnSystem;
         public Dictionary<string, Player> Bots = [];
         public List<int> ExtractedPlayers { get; } = [];
+        public string SpawnId;
 
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
@@ -74,6 +77,7 @@ namespace Fika.Core.Coop.GameMode
         private CoopTimeManager timeManager;
         private FikaDebug fikaDebug;
         private bool isServer;
+        private List<string> localTriggerZones;
 
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
@@ -129,9 +133,6 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
-            bool useCustomWeather = timeAndWeather.IsRandomWeather;
-            timeAndWeather.IsRandomWeather = false;
-
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, backendDateTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
                 new TimeSpan?(sessionTime));
@@ -149,11 +150,13 @@ namespace Fika.Core.Coop.GameMode
             BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.BossSpawnWaveManagerClass = BossSpawnWaveManagerClass.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
-            if (useCustomWeather && coopGame.isServer)
+            if (OfflineRaidSettingsMenuPatch_Override.UseRandomWeather && coopGame.isServer)
             {
                 Logger.LogInfo("Custom weather enabled, initializing curves");
                 coopGame.SetupCustomWeather(timeAndWeather);
             }
+
+            OfflineRaidSettingsMenuPatch_Override.UseRandomWeather = false;
 
             SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
             coopGame.func_1 = new Func<Player, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);
@@ -714,14 +717,6 @@ namespace Fika.Core.Coop.GameMode
                         DynamicAI.AddHumans();
                     }
 
-                    SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
-
-                    while (!updateStatus.IsCompleted)
-                    {
-                        yield return null;
-                    }
-
                     Singleton<FikaServer>.Instance.ReadyClients++;
                     yield break;
                 }
@@ -733,14 +728,6 @@ namespace Fika.Core.Coop.GameMode
 
                 if (isServer)
                 {
-                    SetStatusModel status = new(coopHandler.MyPlayer.ProfileId, LobbyEntry.ELobbyStatus.IN_GAME);
-                    Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
-
-                    while (!updateStatus.IsCompleted)
-                    {
-                        yield return null;
-                    }
-
                     do
                     {
                         yield return null;
@@ -799,41 +786,57 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        public string GetSpawnpointName()
+        {
+            if (!string.IsNullOrEmpty(SpawnId))
+            {
+                return SpawnId;
+            }
+            return string.Empty;
+        }
+
         /// <summary>
         /// Sends or receives the <see cref="ISpawnPoint"/> for the game
         /// </summary>
         /// <returns></returns>
         private async Task SendOrReceiveSpawnPoint()
         {
+            FikaBackendUtils.ScreenController.ChangeStatus($"Setting up spawn system...");
             if (isServer)
             {
                 bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
-                UpdateSpawnPointRequest body = new(spawnTogether ? spawnPoint.Id : "");
                 if (spawnTogether)
                 {
-                    Logger.LogInfo($"Setting Spawn Point to: {spawnPoint.Id}");
+                    Logger.LogInfo($"Setting spawn point to name: '{spawnPoint.Name}', id: '{spawnPoint.Id}'");
+                    SpawnId = spawnPoint.Id;
                 }
                 else
                 {
                     Logger.LogInfo("Using random spawn points!");
                     NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
+                    SpawnId = "RANDOM";
                 }
-                await FikaRequestHandler.UpdateSpawnPoint(body);
             }
             else
             {
-                SpawnPointRequest body = new();
-                SpawnPointResponse response = await FikaRequestHandler.RaidSpawnPoint(body);
-                string name = response.SpawnPoint;
+                NetDataWriter writer = new();
+                SpawnpointPacket packet = new(true);
+                FikaClient client = Singleton<FikaClient>.Instance;
 
-                if (!string.IsNullOrEmpty(name))
+                do
                 {
-                    Logger.LogInfo($"Retrieved Spawn Point '{name}' from server");
+                    client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                    await Task.Delay(500);
+                } while (string.IsNullOrEmpty(SpawnId));
 
+                Logger.LogInfo($"Retrieved spawn point id '{SpawnId}' from server");
+
+                if (SpawnId != "RANDOM")
+                {
                     Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field<Dictionary<ISpawnPoint, SpawnPointMarker>>("dictionary_0").Value;
                     foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
                     {
-                        if (spawnPointObject.Id == name)
+                        if (spawnPointObject.Id == SpawnId)
                         {
                             spawnPoint = spawnPointObject;
                         }
@@ -841,7 +844,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
-                    Logger.LogInfo("Spawn Point was empty, selecting random.");
+                    Logger.LogInfo("Spawn Point was random");
                     NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
                     spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 }
@@ -887,8 +890,6 @@ namespace Fika.Core.Coop.GameMode
 
             myPlayer.Location = Location_0.Id;
 
-            await NetManagerUtils.InitNetManager(isServer);
-
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
                 Logger.LogError($"{nameof(vmethod_2)}:Unable to find {nameof(CoopHandler)}");
@@ -915,21 +916,19 @@ namespace Fika.Core.Coop.GameMode
             await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
             customButton = CreateCancelButton(myPlayer, coopPlayer, customButton);
 
-            SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(myPlayer.Profile), myPlayer.HealthController.IsAlive, false, myPlayer.Transform.position, (myPlayer as CoopPlayer).NetId);
 
-            if (isServer)
+            if (!isServer)
             {
-                await SetStatus(myPlayer, LobbyEntry.ELobbyStatus.COMPLETE);
-            }
-            else
-            {
+                SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(coopPlayer.Profile), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
                 FikaClient client = Singleton<FikaClient>.Instance;
+                NetDataWriter writer = new();
+
                 do
                 {
                     await Task.Delay(250);
                 } while (client.NetClient.FirstPeer == null);
 
-                client.SendData(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+                client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
             }
 
             await WaitForPlayers();
@@ -1347,6 +1346,14 @@ namespace Fika.Core.Coop.GameMode
 
                 FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
                 FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
+
+                SetStatusModel status = new(FikaBackendUtils.GetGroupId(), LobbyEntry.ELobbyStatus.IN_GAME);
+                Task updateStatus = FikaRequestHandler.UpdateSetStatus(status);
+
+                while (!updateStatus.IsCompleted)
+                {
+                    yield return null;
+                }
             }
             else
             {
@@ -1534,7 +1541,7 @@ namespace Fika.Core.Coop.GameMode
             exfilManager = gameObject.AddComponent<CoopExfilManager>();
             exfilManager.Run(exfilPoints);
 
-            if (FikaPlugin.Instance.UseBTR)
+            /*if (FikaPlugin.Instance.UseBTR)
             {
                 try
                 {
@@ -1562,7 +1569,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogError("vmethod_5: Exception thrown during BTR init, check logs.");
                 }
-            }
+            }*/
 
             dateTime_0 = EFTDateTimeClass.Now;
             Status = GameStatus.Started;
@@ -1599,10 +1606,17 @@ namespace Fika.Core.Coop.GameMode
         /// When the local player successfully extracts, enable freecam, notify other players about the extract
         /// </summary>
         /// <param name="player">The local player to start the Coroutine on</param>
+        /// <param name="point">The point that was used to extract</param>
         /// <returns></returns>
         public void Extract(CoopPlayer player, ExfiltrationPoint point)
         {
             PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
+            localTriggerZones = new(player.TriggerZones);
+
+            player.ClientMovementContext.SetGravity(false);
+            Vector3 position = player.Position;
+            position.y += 500;
+            player.Teleport(position);
 
             if (MyExitStatus == ExitStatus.MissingInAction)
             {
@@ -1730,7 +1744,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         public void ClearHostAI(Player player)
-        {
+        {/*
             if (player != null)
             {
                 if (botsController_0 != null)
@@ -1752,15 +1766,21 @@ namespace Fika.Core.Coop.GameMode
                         bot.Memory.DeleteInfoAboutEnemy(player);
                     }
                 }
-            }
+            }*/
+            botsController_0.DestroyInfo(player);
         }
 
         /// <summary>
         /// Triggers when the main player dies
         /// </summary>
-        /// <param name="obj"></param>
-        private void HealthController_DiedEvent(EDamageType obj)
+        /// <param name="damageType"></param>
+        private void HealthController_DiedEvent(EDamageType damageType)
         {
+            Player player = gparam_0.Player;
+            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            {
+                sharedQuestController.ToggleQuestSharing(false);
+            }
             if (timeManager != null)
             {
                 Destroy(timeManager);
@@ -1770,16 +1790,16 @@ namespace Fika.Core.Coop.GameMode
                 GameUi.TimerPanel.Close();
             }
 
-            gparam_0.Player.HealthController.DiedEvent -= method_15;
-            gparam_0.Player.HealthController.DiedEvent -= HealthController_DiedEvent;
+            player.HealthController.DiedEvent -= method_15;
+            player.HealthController.DiedEvent -= HealthController_DiedEvent;
 
             PlayerOwner.vmethod_1();
             MyExitStatus = ExitStatus.Killed;
-            MyExitLocation = null;
+            MyExitLocation = string.Empty;
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                Task.Run(() => SavePlayer((CoopPlayer)gparam_0.Player, MyExitStatus, null, true));
+                Task.Run(() => SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true));
             }
         }
 
@@ -1795,6 +1815,7 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogDebug("Stop");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            myPlayer.TriggerZones = localTriggerZones;
             myPlayer.PacketSender.DestroyThis();
 
             if (myPlayer.Side != EPlayerSide.Savage)
@@ -1826,7 +1847,6 @@ namespace Fika.Core.Coop.GameMode
             if (isServer)
             {
                 botsController_0.Stop();
-                botsController_0.DestroyInfo(gparam_0.Player);
             }
 
             if (BossSpawnWaveManagerClass != null)

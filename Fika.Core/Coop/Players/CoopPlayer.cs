@@ -19,6 +19,7 @@ using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,6 +51,13 @@ namespace Fika.Core.Coop.Players
         public int NetId;
         public bool IsObservedAI = false;
         public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+        public ClientMovementContext ClientMovementContext
+        {
+            get
+            {
+                return MovementContext as ClientMovementContext;
+            }
+        }
         #endregion
 
         public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
@@ -129,7 +137,7 @@ namespace Fika.Core.Coop.Players
             LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
             if (FikaPlugin.Instance.UseInertia)
             {
-                MovementContext = MovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+                MovementContext = ClientMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
                     new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
             }
             else
@@ -398,7 +406,7 @@ namespace Fika.Core.Coop.Players
         {
             // what is this
             base.Proceed<T>(item, callback, scheduled);
-        } 
+        }
         #endregion
 
         public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
@@ -418,7 +426,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);            
+            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
             // Handle 'Help Scav' rep gains
             if (aggressor is CoopPlayer coopPlayer)
@@ -448,7 +456,7 @@ namespace Fika.Core.Coop.Players
                 ConsoleScreen.Log(message);
                 FikaPlugin.Instance.FikaLogger.LogInfo(message);
             }
-        } 
+        }
 #endif
 
         public override void SetInventoryOpened(bool opened)
@@ -605,6 +613,13 @@ namespace Fika.Core.Coop.Players
             {
                 Gesture = gesture
             });
+        }
+
+        public override Corpse CreateCorpse()
+        {
+            Vector3 normalized = Velocity.normalized;
+            Vector3 velocityToApply = normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(Velocity, 2f);
+            return CreateCorpse<Corpse>(velocityToApply);
         }
 
         public override void ApplyCorpseImpulse()
@@ -841,6 +856,7 @@ namespace Fika.Core.Coop.Players
 
                     PingFactory.EPingType pingType = PingFactory.EPingType.Point;
                     object userData = null;
+                    string localeId = null;
 
                     //ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
 
@@ -861,11 +877,13 @@ namespace Fika.Core.Coop.Players
                     {
                         pingType = PingFactory.EPingType.LootContainer;
                         userData = container;
+                        localeId = container.ItemOwner.Name;
                     }
                     else if (hitGameObject.TryGetComponent(out LootItem lootItem))
                     {
                         pingType = PingFactory.EPingType.LootItem;
                         userData = lootItem;
+                        localeId = lootItem.Item.ShortName;
                     }
                     else if (hitGameObject.TryGetComponent(out Door door))
                     {
@@ -894,7 +912,8 @@ namespace Fika.Core.Coop.Players
                         PingLocation = hitPoint,
                         PingType = pingType,
                         PingColor = pingColor,
-                        Nickname = Profile.Nickname
+                        Nickname = Profile.Nickname,
+                        LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                     };
 
                     PacketSender.Writer.Reset();
@@ -915,7 +934,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname)
+        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname, string localeId)
         {
             GameObject prefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
             GameObject pingGameObject = Instantiate(prefab);
@@ -924,8 +943,17 @@ namespace Fika.Core.Coop.Players
             {
                 abstractPing.Initialize(ref location, null, pingColor);
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestSubTrackComplete);
-                NotificationManagerClass.DisplayMessageNotification($"Received a ping from '{nickname}'",
-                    ENotificationDurationType.Default, ENotificationIconType.Friend);
+                if (string.IsNullOrEmpty(localeId))
+                {
+                    NotificationManagerClass.DisplayMessageNotification($"Received a ping from <color=#32a852>{nickname}</color>",
+                                ENotificationDurationType.Default, ENotificationIconType.Friend); 
+                }
+                else
+                {
+                    string localizedName = localeId.Localized();
+                    NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{nickname}</color> has pinged {LocaleUtils.GetPrefix(localizedName)} <color=#51c6db>{localizedName}</color>",
+                                ENotificationDurationType.Default, ENotificationIconType.Friend);
+                }
             }
             else
             {
@@ -1020,7 +1048,7 @@ namespace Fika.Core.Coop.Players
         {
             if (Side is EPlayerSide.Usec)
             {
-                switch (Profile.Info.MemberCategory)
+                switch (Profile.Info.SelectedMemberCategory)
                 {
                     case EMemberCategory.Default:
                         return "59f32c3b86f77472a31742f0";
@@ -1032,7 +1060,7 @@ namespace Fika.Core.Coop.Players
             }
             else if (Side is EPlayerSide.Bear)
             {
-                switch (Profile.Info.MemberCategory)
+                switch (Profile.Info.SelectedMemberCategory)
                 {
                     case EMemberCategory.Default:
                         return "59f32bb586f774757e1e8442";
