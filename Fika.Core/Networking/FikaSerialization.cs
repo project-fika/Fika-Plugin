@@ -311,12 +311,14 @@ namespace Fika.Core.Networking
         public struct HeadLightsPacket
         {
             public int Amount;
+            public bool IsSilent;
             public FirearmLightStateStruct[] LightStates;
             public static HeadLightsPacket Deserialize(NetDataReader reader)
             {
                 HeadLightsPacket packet = new()
                 {
-                    Amount = reader.GetInt()
+                    Amount = reader.GetInt(),
+                    IsSilent = reader.GetBool()
                 };
                 if (packet.Amount > 0)
                 {
@@ -337,6 +339,7 @@ namespace Fika.Core.Networking
             public static void Serialize(NetDataWriter writer, HeadLightsPacket packet)
             {
                 writer.Put(packet.Amount);
+                writer.Put(packet.IsSilent);
                 if (packet.Amount > 0)
                 {
                     for (int i = 0; i < packet.Amount; i++)
