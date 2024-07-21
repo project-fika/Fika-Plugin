@@ -255,6 +255,11 @@ namespace Fika.Core.Coop.Players
             return true;
         }
 
+        public override void SendHeadlightsPacket(bool isSilent)
+        {
+            // Do nothing
+        }
+
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
         {
             if (damageInfo.DamageType == EDamageType.Landmine && FikaBackendUtils.IsServer)

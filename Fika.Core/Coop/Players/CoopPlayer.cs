@@ -1147,25 +1147,16 @@ namespace Fika.Core.Coop.Players
 
             if (packet.HasHeadLightsPacket)
             {
-                try
+                if (_helmetLightControllers != null)
                 {
-                    if (_helmetLightControllers != null)
+                    for (int i = 0; i < _helmetLightControllers.Count(); i++)
                     {
-                        for (int i = 0; i < _helmetLightControllers.Count(); i++)
-                        {
-                            _helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.HeadLightsPacket.LightStates[i]);
-                        }
-                        if (!packet.HeadLightsPacket.IsSilent)
-                        {
-                            SwitchHeadLightsAnimation();
-                        }
+                        _helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.HeadLightsPacket.LightStates[i]);
                     }
-                }
-                catch (Exception)
-                {
-                    /*
-                     * We do nothing, there is a weird bug where it throws harmless errors upon game start. Until I figure out what, I'll do this.
-                     */
+                    if (!packet.HeadLightsPacket.IsSilent)
+                    {
+                        SwitchHeadLightsAnimation();
+                    }
                 }
             }
 
