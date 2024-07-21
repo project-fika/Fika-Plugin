@@ -22,6 +22,8 @@ public class MatchMakerUI : MonoBehaviour
     public TextMeshProUGUI PlayerAmountText;
     [SerializeField]
     public Toggle DedicatedToggle;
+    [SerializeField]
+    public Image LoadingImage;
 
     public void SetServerNumberText(string text)
     {

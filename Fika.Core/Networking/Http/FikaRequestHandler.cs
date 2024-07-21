@@ -122,9 +122,9 @@ namespace Fika.Core.Networking.Http
             PutJson("/fika/update/addplayer", data);
         }
 
-        public static void RaidCreate(CreateMatch data)
+        public static async Task RaidCreate(CreateMatch data)
         {
-            PutJson("/fika/raid/create", data);
+            await PutJsonAsync("/fika/raid/create", data);
         }
 
         public static GetHostResponse GetHost(GetHostRequest data)

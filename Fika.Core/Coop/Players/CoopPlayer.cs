@@ -497,7 +497,8 @@ namespace Fika.Core.Coop.Players
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, FirearmLightStateStruct>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
+            FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController,
+                FirearmLightStateStruct>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
 
             if (PacketSender != null)
             {
@@ -507,6 +508,7 @@ namespace Fika.Core.Coop.Players
                     HeadLightsPacket = new()
                     {
                         Amount = lightStates.Count(),
+                        IsSilent = isSilent,
                         LightStates = lightStates
                     }
                 });
@@ -1145,11 +1147,17 @@ namespace Fika.Core.Coop.Players
 
             if (packet.HasHeadLightsPacket)
             {
-                for (int i = 0; i < _helmetLightControllers.Count(); i++)
+                if (_helmetLightControllers != null)
                 {
-                    _helmetLightControllers.ElementAt(i).LightMod.SetLightState(packet.HeadLightsPacket.LightStates[i]);
+                    for (int i = 0; i < _helmetLightControllers.Count(); i++)
+                    {
+                        _helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.HeadLightsPacket.LightStates[i]);
+                    }
+                    if (!packet.HeadLightsPacket.IsSilent)
+                    {
+                        SwitchHeadLightsAnimation();
+                    }
                 }
-                SwitchHeadLightsAnimation();
             }
 
             if (packet.HasInventoryChanged)

@@ -82,6 +82,12 @@ namespace Fika.Core.UI.Custom
                     serverQueryRoutine = null;
                 }
             }
+
+            GameObject imageObject = fikaMatchMakerUi.LoadingImage.gameObject;
+            if (imageObject.activeSelf)
+            {
+                imageObject.transform.Rotate(0, 0, 3f);
+            }
         }
 
         private void DestroyThis()
@@ -153,7 +159,7 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            fikaMatchMakerUi.DedicatedToggle.isOn = false;
+            //fikaMatchMakerUi.DedicatedToggle.isOn = false;
             fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
@@ -161,6 +167,8 @@ namespace Fika.Core.UI.Custom
 
             fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
             {
+                ToggleButtons(false);
+
                 TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
                 ISession session = tarkovApplication.Session;
 
@@ -276,6 +284,15 @@ namespace Fika.Core.UI.Custom
             BackButton.gameObject.SetActive(false);
         }
 
+        private void ToggleButtons(bool enabled)
+        {
+            fikaMatchMakerUi.RaidGroupHostButton.interactable = enabled;
+            fikaMatchMakerUi.RaidGroupHostButton.gameObject.SetActive(enabled);
+            fikaMatchMakerUi.StartButton.interactable = enabled;
+            fikaMatchMakerUi.StartButton.gameObject.SetActive(enabled);
+            fikaMatchMakerUi.LoadingImage.gameObject.SetActive(!enabled);
+        }
+
         private void AutoRefresh()
         {
             Matches = FikaRequestHandler.LocationRaids(RaidSettings);
@@ -352,6 +369,9 @@ namespace Fika.Core.UI.Custom
                 FikaBackendUtils.SetGroupId(result.ServerId);
                 FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
+
+                AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
+                FikaRequestHandler.UpdateAddPlayer(data);
 
                 if (FikaBackendUtils.IsHostNatPunch)
                 {

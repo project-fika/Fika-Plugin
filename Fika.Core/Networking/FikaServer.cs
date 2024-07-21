@@ -74,7 +74,6 @@ namespace Fika.Core.Networking
         }
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
-        private HashSet<string> addedPlayers = [];
 
         public async Task Init()
         {
@@ -356,7 +355,6 @@ namespace Fika.Core.Networking
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
             {
                 coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
-                AddPlayerToBackend(packet.PlayerInfo.Profile.ProfileId);
             }
 
             _dataWriter.Reset();
@@ -630,21 +628,9 @@ namespace Fika.Core.Networking
                 logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
                 if (packet.ProfileId != MyPlayer.ProfileId)
                 {
-                    AddPlayerToBackend(packet.ProfileId);
-
                     coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
                     PlayersMissing.Remove(packet.ProfileId);
                 }
-            }
-        }
-
-        private void AddPlayerToBackend(string profileId)
-        {
-            if (!addedPlayers.Contains(profileId))
-            {
-                addedPlayers.Add(profileId);
-                AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
-                FikaRequestHandler.UpdateAddPlayer(data);
             }
         }
 
