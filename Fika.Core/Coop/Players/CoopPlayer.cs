@@ -1147,16 +1147,23 @@ namespace Fika.Core.Coop.Players
 
             if (packet.HasHeadLightsPacket)
             {
-                if (_helmetLightControllers != null)
+                try
                 {
-                    for (int i = 0; i < _helmetLightControllers.Count(); i++)
+                    if (_helmetLightControllers != null)
                     {
-                        _helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.HeadLightsPacket.LightStates[i]);
+                        for (int i = 0; i < _helmetLightControllers.Count(); i++)
+                        {
+                            _helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.HeadLightsPacket.LightStates[i]);
+                        }
+                        if (!packet.HeadLightsPacket.IsSilent)
+                        {
+                            SwitchHeadLightsAnimation();
+                        }
                     }
-                    if (!packet.HeadLightsPacket.IsSilent)
-                    {
-                        SwitchHeadLightsAnimation();
-                    }
+                }
+                catch (Exception)
+                {
+                    // Do nothing
                 }
             }
 
