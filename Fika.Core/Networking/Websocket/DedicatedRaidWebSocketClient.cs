@@ -94,6 +94,7 @@ namespace Fika.Core.Networking.Websocket
                 return;
             }
 
+            // TODO: Convert to bytes and use an enum...
             string type = jsonObject.Value<string>("type");
 
             switch (type)

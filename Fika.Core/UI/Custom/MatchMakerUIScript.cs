@@ -198,9 +198,12 @@ namespace Fika.Core.UI.Custom
                             Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
                                 $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
                                 ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                            ToggleButtons(true);
                             return;
                         }
                     }
+
                     if (FikaPlugin.ForceBindIP.Value != "Disabled")
                     {
                         if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
@@ -208,22 +211,22 @@ namespace Fika.Core.UI.Custom
                             Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
                                 $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
                                 ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                            ToggleButtons(true);
                             return;
                         }
                     }
+
                     FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                    FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
+                    await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
                     AcceptButton.OnClick.Invoke();
                     DestroyThis();
                 }
                 else
                 {
-                    gameObject.SetActive(false);
+                    ToggleButtons(false);
 
-                    if (FikaPlugin.DedicatedRaidWebSocket == null)
-                    {
-                        FikaPlugin.DedicatedRaidWebSocket = new DedicatedRaidWebSocketClient();
-                    }
+                    FikaPlugin.DedicatedRaidWebSocket ??= new DedicatedRaidWebSocketClient();
 
                     if (!FikaPlugin.DedicatedRaidWebSocket.Connected)
                     {
@@ -232,7 +235,7 @@ namespace Fika.Core.UI.Custom
 
                     RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
-                    StartDedicatedRequest request = new StartDedicatedRequest
+                    StartDedicatedRequest request = new()
                     {
                         ExpectedNumPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text),
                         Time = raidSettings.SelectedDateTime,
@@ -251,7 +254,7 @@ namespace Fika.Core.UI.Custom
                     {
                         PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error);
 
-                        gameObject.SetActive(true);
+                        ToggleButtons(false);
                     }
                     else
                     {
@@ -451,8 +454,8 @@ namespace Fika.Core.UI.Custom
                     FikaBackendUtils.HostLocationId = entry.Location;
                     StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
                     {
-                        this.DestroyThis();
-                        this.AcceptButton.OnClick.Invoke();
+                        DestroyThis();
+                        AcceptButton.OnClick.Invoke();
                     }));
                 });
 
