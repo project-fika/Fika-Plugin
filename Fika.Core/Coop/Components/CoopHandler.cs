@@ -30,7 +30,8 @@ namespace Fika.Core.Coop.Components
         public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
         public Dictionary<int, CoopPlayer> Players = [];
-        public int HumanPlayers = 1;
+        public List<CoopPlayer> HumanPlayers = [];
+        public int AmountOfHumans = 1;
         public List<int> ExtractedPlayers = [];
         ManualLogSource Logger;
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
@@ -125,6 +126,7 @@ namespace Fika.Core.Coop.Components
         protected void OnDestroy()
         {
             Players.Clear();
+            HumanPlayers.Clear();
 
             RunAsyncTasks = false;
 
@@ -451,19 +453,21 @@ namespace Fika.Core.Coop.Components
             Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
             if (!isAI)
             {
-                HumanPlayers++;
+                AmountOfHumans++;
             }
 
-            if (!isDedicatedProfile)
+            if (!Players.ContainsKey(netId))
             {
-                if (!Players.ContainsKey(netId))
-                {
-                    Players.Add(netId, otherPlayer);
-                }
-                else
-                {
-                    Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
-                } 
+                Players.Add(netId, otherPlayer);
+            }
+            else
+            {
+                Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
+            }
+
+            if (!isAI && !isDedicatedProfile && !HumanPlayers.Contains(otherPlayer))
+            {
+                HumanPlayers.Add(otherPlayer);
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))

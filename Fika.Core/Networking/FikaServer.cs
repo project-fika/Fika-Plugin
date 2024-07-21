@@ -922,7 +922,7 @@ namespace Fika.Core.Networking
             {
                 if (_netServer.ConnectedPeersCount == 0)
                 {
-                    foreach (var profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
+                    foreach (Profile profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
                     {
                         if (profile is null)
                         {
@@ -931,7 +931,7 @@ namespace Fika.Core.Networking
 
                         if (profile.ProfileId == RequestHandler.SessionId)
                         {
-                            foreach (var bodyPartHealth in profile.Health.BodyParts.Values)
+                            foreach (Profile.ProfileHealthClass.GClass1770 bodyPartHealth in profile.Health.BodyParts.Values)
                             {
                                 bodyPartHealth.Effects.Clear();
                                 bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;

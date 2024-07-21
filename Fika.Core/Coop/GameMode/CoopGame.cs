@@ -731,7 +731,7 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         yield return null;
-                    } while (coopHandler.HumanPlayers < expectedPlayers);
+                    } while (coopHandler.AmountOfHumans < expectedPlayers);
 
                     FikaServer server = Singleton<FikaServer>.Instance;
                     server.ReadyClients++;
@@ -767,7 +767,7 @@ namespace Fika.Core.Coop.GameMode
                     do
                     {
                         yield return null;
-                    } while (coopHandler.HumanPlayers < expectedPlayers);
+                    } while (coopHandler.AmountOfHumans < expectedPlayers);
 
                     FikaClient client = Singleton<FikaClient>.Instance;
                     InformationPacket packet = new(true)

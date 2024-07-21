@@ -37,15 +37,16 @@ namespace Fika.Core.UI.Custom
 
         private bool _started;
         private Coroutine serverQueryRoutine;
+        private float loadingTextTick = 0f;
 
         protected void OnEnable()
         {
-            if(_started)
+            if (_started)
             {
                 stopQuery = false;
                 if (serverQueryRoutine == null)
                 {
-                    serverQueryRoutine = StartCoroutine(ServerQuery()); 
+                    serverQueryRoutine = StartCoroutine(ServerQuery());
                 }
             }
         }
@@ -83,10 +84,25 @@ namespace Fika.Core.UI.Custom
                 }
             }
 
-            GameObject imageObject = fikaMatchMakerUi.LoadingImage.gameObject;
-            if (imageObject.activeSelf)
+            if (fikaMatchMakerUi.LoadingScreen.activeSelf)
             {
-                imageObject.transform.Rotate(0, 0, 3f);
+                fikaMatchMakerUi.LoadingImage.transform.Rotate(0, 0, 3f);
+                string text = fikaMatchMakerUi.LoadingText.text;
+                TextMeshProUGUI tmpText = fikaMatchMakerUi.LoadingText;
+
+                loadingTextTick++;
+
+                if (loadingTextTick > 30)
+                {
+                    loadingTextTick = 0;
+
+                    text += ".";
+                    if (text == "....")
+                    {
+                        text = ".";
+                    }
+                    tmpText.text = text; 
+                }
             }
         }
 
@@ -131,6 +147,8 @@ namespace Fika.Core.UI.Custom
                 fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
             }
 
+            fikaMatchMakerUi.LoadingText.text = "";
+
             fikaMatchMakerUi.DedicatedToggle.isOn = false;
             fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
@@ -167,7 +185,7 @@ namespace Fika.Core.UI.Custom
 
             fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
             {
-                ToggleButtons(false);
+                ToggleLoading(true);
 
                 TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
                 ISession session = tarkovApplication.Session;
@@ -199,7 +217,7 @@ namespace Fika.Core.UI.Custom
                                 $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
                                 ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
-                            ToggleButtons(true);
+                            ToggleLoading(false);
                             return;
                         }
                     }
@@ -212,7 +230,7 @@ namespace Fika.Core.UI.Custom
                                 $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
                                 ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
-                            ToggleButtons(true);
+                            ToggleLoading(false);
                             return;
                         }
                     }
@@ -224,7 +242,7 @@ namespace Fika.Core.UI.Custom
                 }
                 else
                 {
-                    ToggleButtons(false);
+                    ToggleLoading(true);
 
                     FikaPlugin.DedicatedRaidWebSocket ??= new DedicatedRaidWebSocketClient();
 
@@ -254,7 +272,7 @@ namespace Fika.Core.UI.Custom
                     {
                         PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error);
 
-                        ToggleButtons(false);
+                        ToggleLoading(false);
                     }
                     else
                     {
@@ -287,13 +305,13 @@ namespace Fika.Core.UI.Custom
             BackButton.gameObject.SetActive(false);
         }
 
-        private void ToggleButtons(bool enabled)
+        private void ToggleLoading(bool enabled)
         {
-            fikaMatchMakerUi.RaidGroupHostButton.interactable = enabled;
-            fikaMatchMakerUi.RaidGroupHostButton.gameObject.SetActive(enabled);
-            fikaMatchMakerUi.StartButton.interactable = enabled;
-            fikaMatchMakerUi.StartButton.gameObject.SetActive(enabled);
-            fikaMatchMakerUi.LoadingImage.gameObject.SetActive(!enabled);
+            fikaMatchMakerUi.RaidGroupHostButton.interactable = !enabled;
+            fikaMatchMakerUi.StartButton.interactable = !enabled;
+            fikaMatchMakerUi.ServerBrowserPanel.SetActive(!enabled);
+
+            fikaMatchMakerUi.LoadingScreen.SetActive(enabled);
         }
 
         private void AutoRefresh()
