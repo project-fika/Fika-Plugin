@@ -241,6 +241,9 @@ namespace Fika.Core.Networking
 
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
         {
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
+
             if (MyPlayer.HealthController.IsAlive)
             {
                 if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
