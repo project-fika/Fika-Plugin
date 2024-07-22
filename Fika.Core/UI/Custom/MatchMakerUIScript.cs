@@ -382,7 +382,11 @@ namespace Fika.Core.UI.Custom
             }
             else
             {
-                ConsoleScreen.Log("ERROR");
+                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                    "ERROR CONNECTING",
+                    "Could not start the FikaPinger!",
+                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                yield break;
             }
 
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
