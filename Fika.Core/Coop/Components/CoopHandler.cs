@@ -30,7 +30,8 @@ namespace Fika.Core.Coop.Components
         public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
         public Dictionary<int, CoopPlayer> Players = [];
-        public int HumanPlayers = 1;
+        public List<CoopPlayer> HumanPlayers = [];
+        public int AmountOfHumans = 1;
         public List<int> ExtractedPlayers = [];
         ManualLogSource Logger;
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
@@ -125,6 +126,7 @@ namespace Fika.Core.Coop.Components
         protected void OnDestroy()
         {
             Players.Clear();
+            HumanPlayers.Clear();
 
             RunAsyncTasks = false;
 
@@ -322,20 +324,20 @@ namespace Fika.Core.Coop.Components
 
             await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
                 PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.General).ContinueWith(x =>
-            {
-                if (x.IsCompleted)
                 {
-                    Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
-                }
-                else if (x.IsFaulted)
-                {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
-                }
-                else if (x.IsCanceled)
-                {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
-                }
-            });
+                    if (x.IsCompleted)
+                    {
+                        Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
+                    }
+                    else if (x.IsFaulted)
+                    {
+                        Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
+                    }
+                    else if (x.IsCanceled)
+                    {
+                        Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
+                    }
+                });
 
             ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
 
@@ -432,6 +434,8 @@ namespace Fika.Core.Coop.Components
 
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
+            bool isDedicatedProfile = profile.Nickname.Contains("dedicated_");
+
             ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position,
                 Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
                 EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
@@ -449,7 +453,7 @@ namespace Fika.Core.Coop.Components
             Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
             if (!isAI)
             {
-                HumanPlayers++;
+                AmountOfHumans++;
             }
 
             if (!Players.ContainsKey(netId))
@@ -459,6 +463,11 @@ namespace Fika.Core.Coop.Components
             else
             {
                 Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
+            }
+
+            if (!isAI && !isDedicatedProfile && !HumanPlayers.Contains(otherPlayer))
+            {
+                HumanPlayers.Add(otherPlayer);
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))
@@ -511,7 +520,7 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            otherPlayer.InitObservedPlayer();
+            otherPlayer.InitObservedPlayer(isDedicatedProfile);
 
             Logger.LogDebug($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 
