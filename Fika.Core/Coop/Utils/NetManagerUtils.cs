@@ -61,7 +61,14 @@ namespace Fika.Core.Coop.Utils
                 if (isServer)
                 {
                     FikaServer server = Singleton<FikaServer>.Instance;
-                    server.NetServer.Stop();
+                    try
+                    {
+                        server.NetServer.Stop();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError("DestroyNetManager: " + ex.Message);
+                    }
                     Singleton<FikaServer>.TryRelease(server);
                     GameObject.Destroy(server);
                     logger.LogInfo("Destroyed FikaServer");
@@ -69,7 +76,14 @@ namespace Fika.Core.Coop.Utils
                 else
                 {
                     FikaClient client = Singleton<FikaClient>.Instance;
-                    client.NetClient.Stop();
+                    try
+                    {
+                        client.NetClient.Stop();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError("DestroyNetManager: " + ex.Message);
+                    }
                     Singleton<FikaClient>.TryRelease(client);
                     GameObject.Destroy(client);
                     logger.LogInfo("Destroyed FikaClient");
