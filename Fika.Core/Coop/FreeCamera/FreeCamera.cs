@@ -131,7 +131,7 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.gameObject.name.StartsWith("Player_") && x.HealthController.IsAlive)];
+                List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 
                 if (players.Count > 0)
                 {
@@ -218,7 +218,7 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                List<CoopPlayer> players = [.. coopHandler.Players.Values.Where(x => !x.IsYourPlayer && x.gameObject.name.StartsWith("Player_") && x.HealthController.IsAlive)];
+                List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 
                 if (players.Count > 0)
                 {
