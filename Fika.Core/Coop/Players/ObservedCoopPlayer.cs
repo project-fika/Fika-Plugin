@@ -874,6 +874,8 @@ namespace Fika.Core.Coop.Players
 
                 waitForStartRoutine = StartCoroutine(CreateHealthBar());
 
+                Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
+
                 RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
             }
         }

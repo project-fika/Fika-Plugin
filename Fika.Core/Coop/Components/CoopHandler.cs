@@ -324,20 +324,20 @@ namespace Fika.Core.Coop.Components
 
             await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
                 PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.General).ContinueWith(x =>
-            {
-                if (x.IsCompleted)
                 {
-                    Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
-                }
-                else if (x.IsFaulted)
-                {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
-                }
-                else if (x.IsCanceled)
-                {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
-                }
-            });
+                    if (x.IsCompleted)
+                    {
+                        Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
+                    }
+                    else if (x.IsFaulted)
+                    {
+                        Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
+                    }
+                    else if (x.IsCanceled)
+                    {
+                        Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
+                    }
+                });
 
             ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
 
