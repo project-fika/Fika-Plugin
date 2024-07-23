@@ -54,7 +54,7 @@ namespace Fika.Core.UI.Custom
             GameObject imageObject = fikaMatchMakerUi.LoadingImage.gameObject;
             if (imageObject.activeSelf)
             {
-                imageObject.transform.Rotate(0, 0, 3f); 
+                imageObject.transform.Rotate(0, 0, 3f);
             }
         }
 
@@ -124,7 +124,7 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            fikaMatchMakerUi.StartButton.onClick.AddListener(async() =>
+            fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
             {
                 ToggleButtons(false);
 

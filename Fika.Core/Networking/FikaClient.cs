@@ -138,7 +138,7 @@ namespace Fika.Core.Networking
             while (ServerConnection.ConnectionState != ConnectionState.Connected)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogWarning("FikaClient was not able to connect in time!"); 
+                FikaPlugin.Instance.FikaLogger.LogWarning("FikaClient was not able to connect in time!");
 #endif
                 await Task.Delay(1 * 6000);
                 ServerConnection = _netClient.Connect(ip, port, "fika.core");

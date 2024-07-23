@@ -948,7 +948,7 @@ namespace Fika.Core.Coop.Players
                 if (string.IsNullOrEmpty(localeId))
                 {
                     NotificationManagerClass.DisplayMessageNotification($"Received a ping from <color=#32a852>{nickname}</color>",
-                                ENotificationDurationType.Default, ENotificationIconType.Friend); 
+                                ENotificationDurationType.Default, ENotificationIconType.Friend);
                 }
                 else
                 {

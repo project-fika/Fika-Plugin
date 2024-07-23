@@ -1,7 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
-using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
 using System;
