@@ -42,10 +42,10 @@ namespace Fika.Core.Coop.Patches.LocalGame
                         LocationSettingsClass.Location sandbox = __instance.Session.LocationSettings.locations.Values.FirstOrDefault
                             (new Func<LocationSettingsClass.Location, bool>(IsSandbox));
                         ____raidSettings.SelectedLocation = sandbox;
-                    } 
+                    }
                 }
             }
-            
+
             NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
             if (isServer)
             {
