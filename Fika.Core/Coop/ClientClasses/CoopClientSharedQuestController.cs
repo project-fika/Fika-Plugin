@@ -167,7 +167,8 @@ namespace Fika.Core.Coop.ClientClasses
                         counter.Value++;
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from <color=#32a852>{packet.Nickname}</color>",
+                            NotificationManagerClass.DisplayMessageNotification(
+                                $"Received shared quest progression from <color=#32a852>{packet.Nickname}</color> for the quest <color=#a87332>{quest.Template.Name}</color>",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -213,6 +214,11 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
+            if (!acceptedTypes.Contains("PlaceBeacon"))
+            {
+                return;
+            }
+
             string itemId = packet.ItemId;
             string zoneId = packet.ZoneId;
 
@@ -233,7 +239,15 @@ namespace Fika.Core.Coop.ClientClasses
 
         private bool DroppedItemAlreadyExists(string itemId, string zoneId)
         {
-            if (player.Profile.EftStats.DroppedItems.Any(x => x.ItemId == itemId && x.ZoneId == zoneId) || droppedZoneIds.Contains(zoneId))
+            if (droppedZoneIds.Contains(zoneId))
+            {
+#if DEBUG
+                FikaPlugin.Instance.FikaLogger.LogWarning($"Quest already existed in 'droppedZoneIds', itemId: {itemId}, zoneId: {zoneId}");
+#endif
+                return true;
+            }
+
+            if (player.Profile.EftStats.DroppedItems.Any(x => x.ItemId == itemId && x.ZoneId == zoneId))
             {
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogWarning($"Quest already existed in 'DroppedItems', itemId: {itemId}, zoneId: {zoneId}");
