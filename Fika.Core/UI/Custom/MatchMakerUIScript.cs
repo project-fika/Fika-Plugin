@@ -175,6 +175,15 @@ namespace Fika.Core.UI.Custom
 
             fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
 
+            TooltipTextGetter tooltipTextGetter = new()
+            {
+                TooltipText = "Refresh list of active raids"
+            };
+
+            HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
+            tooltipArea.enabled = true;
+            tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+
             AcceptButton.gameObject.SetActive(false);
             AcceptButton.enabled = false;
             AcceptButton.Interactable = false;
