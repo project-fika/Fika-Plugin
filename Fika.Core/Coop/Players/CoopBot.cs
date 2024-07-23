@@ -5,6 +5,7 @@ using EFT;
 using EFT.Ballistics;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
+using EFT.UI;
 using Fika.Core.Coop.BotClasses;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -90,6 +91,26 @@ namespace Fika.Core.Coop.Players
         {
             LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
             MovementContext = BotMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon), new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+        }
+
+        public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+        {
+            if (aggressor.IsYourPlayer)
+            {
+                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType); 
+            }
+
+            if (aggressor.Profile.Info.GroupId == "Fika")
+            {
+                ConsoleScreen.Log("Killer was of my group");
+                CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                if (mainPlayer != null)
+                {
+                    float distance = Vector3.Distance(aggressor.Position, Position);
+                    mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
+                        distance, CurrentHour, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones, (CoopPlayer)aggressor);
+                }
+            }
         }
 
         public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)

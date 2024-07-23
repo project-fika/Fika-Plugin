@@ -78,7 +78,7 @@ namespace Fika.Core.Coop.ClientClasses
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
         {
             base.OnConditionValueChanged(conditional, status, condition, notify);
-
+            return;
             if (!canSendAndReceive)
             {
                 return;
