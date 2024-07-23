@@ -312,6 +312,19 @@ namespace Fika.Core.UI.Custom
             fikaMatchMakerUi.ServerBrowserPanel.SetActive(!enabled);
 
             fikaMatchMakerUi.LoadingScreen.SetActive(enabled);
+
+            if (enabled)
+            {
+                if (serverQueryRoutine != null)
+                {
+                    StopCoroutine(serverQueryRoutine);
+                    serverQueryRoutine = null;
+                }
+            }
+            else if (!enabled)
+            {
+                serverQueryRoutine = StartCoroutine(ServerQuery());
+            }
         }
 
         private void AutoRefresh()
