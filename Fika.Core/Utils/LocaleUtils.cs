@@ -4,7 +4,7 @@ namespace Fika.Core.Utils
 {
     public static class LocaleUtils
     {
-        private static List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
+        private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
 
         public static string GetPrefix(string word)
         {
