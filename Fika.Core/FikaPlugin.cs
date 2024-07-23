@@ -14,7 +14,6 @@ using Fika.Core.Coop.World;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
-using Fika.Core.SPTSupport.Scav;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
