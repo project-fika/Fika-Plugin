@@ -123,6 +123,7 @@ namespace Fika.Core
         // Coop | Quest Sharing
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
         public static ConfigEntry<bool> QuestSharingNotifications { get; set; }
+        public static ConfigEntry<bool> EasyKillConditions { get; set; }
 
         // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
@@ -376,6 +377,9 @@ namespace Fika.Core
 
             QuestSharingNotifications = Config.Bind("Coop | Quest Sharing", "Show Notifications", true,
                 new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+            EasyKillConditions = Config.Bind("Coop | Quest Sharing", "Easy Kill Conditions", false,
+                new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for quest progression only.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Custom
 

@@ -100,16 +100,20 @@ namespace Fika.Core.Coop.Players
                 base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType); 
             }
 
-            if (aggressor.Profile.Info.GroupId == "Fika")
+            if (FikaPlugin.EasyKillConditions.Value)
             {
-                ConsoleScreen.Log("Killer was of my group");
-                CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-                if (mainPlayer != null)
+                if (aggressor.Profile.Info.GroupId == "Fika")
                 {
-                    float distance = Vector3.Distance(aggressor.Position, Position);
-                    mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
-                        distance, CurrentHour, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones, (CoopPlayer)aggressor);
-                }
+                    ConsoleScreen.Log("Killer was of my group");
+                    CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                    if (mainPlayer != null)
+                    {
+                        float distance = Vector3.Distance(aggressor.Position, Position);
+                        mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
+                            distance, CurrentHour, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
+                            (CoopPlayer)aggressor);
+                    }
+                } 
             }
         }
 
