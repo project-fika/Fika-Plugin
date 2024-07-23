@@ -1,6 +1,7 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
+using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
 using System;
@@ -222,6 +223,11 @@ namespace Fika.Core.Coop.ClientClasses
             string itemId = packet.ItemId;
             string zoneId = packet.ZoneId;
 
+            if (!HasQuestForItem(itemId, zoneId, out string questName))
+            {
+                return;
+            }
+
             if (DroppedItemAlreadyExists(itemId, zoneId))
             {
                 return;
@@ -229,12 +235,48 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (FikaPlugin.QuestSharingNotifications.Value)
             {
-                NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> planted an item.",
+                NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> planted an item for <color=#a87332>{questName}</color>",
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
             droppedZoneIds.Add(zoneId);
             player.Profile.ItemDroppedAtPlace(itemId, zoneId);
+        }
+
+        private bool HasQuestForItem(string itemId, string zoneId, out string questName)
+        {
+            foreach (QuestClass quest in Quests)
+            {
+                foreach (ConditionPlaceBeacon conditionPlaceBeacon in quest.GetConditions<ConditionPlaceBeacon>(EQuestStatus.AvailableForFinish))
+                {
+                    if (conditionPlaceBeacon.target.Contains(itemId) && conditionPlaceBeacon.zoneId == zoneId)
+                    {
+#if DEBUG
+                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
+#endif
+                        questName = quest.Template.Name;
+                        return true;
+                    }
+                }
+
+                foreach (ConditionLeaveItemAtLocation conditionLeaveItemAtLocation in quest.GetConditions<ConditionLeaveItemAtLocation>(EQuestStatus.AvailableForFinish))
+                {
+                    if (conditionLeaveItemAtLocation.target.Contains(itemId) && conditionLeaveItemAtLocation.zoneId == zoneId)
+                    {
+#if DEBUG
+                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
+#endif
+                        questName = quest.Template.Name;
+                        return true;
+                    }
+                }
+            }
+
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogWarning($"Did not have quest for Place Beacon/Item, itemId: {itemId}, zoneId: {zoneId}");
+#endif
+            questName = null;
+            return false;
         }
 
         private bool DroppedItemAlreadyExists(string itemId, string zoneId)
