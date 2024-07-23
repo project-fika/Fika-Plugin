@@ -2,7 +2,7 @@
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.SPTSupport.Scav
+namespace Fika.Core.Coop.Patches.Overrides
 {
     internal class ScavProfileLoad_Override : ModulePatch
     {
