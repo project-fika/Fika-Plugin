@@ -14,6 +14,7 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -21,6 +22,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
 {
@@ -648,11 +650,11 @@ namespace Fika.Core.Coop.Players
                     string nickname = !string.IsNullOrEmpty(Profile.Info.MainProfileNickname) ? Profile.Info.MainProfileNickname : Profile.Nickname;
                     if (damageType != EDamageType.Undefined)
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member <color=#32a852>{nickname}</color> has died from <color=#a83232>{("DamageType_" + damageType.ToString()).Localized()}</color>");
+                        NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died from {ColorizeText(Colors.RED, ("DamageType_" + damageType.ToString()).Localized())}");
                     }
                     else
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member <color=#32a852>{nickname}</color> has died");
+                        NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died");
                     }
                 }
                 if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
@@ -662,7 +664,7 @@ namespace Fika.Core.Coop.Players
                         string aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
                         if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{LastAggressor.Profile.Info.MainProfileNickname}</color> killed boss <color=#a87332>{name}</color>", iconType: EFT.Communications.ENotificationIconType.Friend);
+                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname)} killed boss {ColorizeText(Colors.BROWN, name)}", iconType: EFT.Communications.ENotificationIconType.Friend);
                         }
                     }
                 }
@@ -868,7 +870,7 @@ namespace Fika.Core.Coop.Players
 
                 if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
                 {
-                    NotificationManagerClass.DisplayMessageNotification($"Group member <color=#32a852>{(Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname)}</color> has spawned",
+                    NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, (Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname))} has spawned",
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
                 }
 

@@ -2,6 +2,7 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Networking.Http;
+using Fika.Core.Utils;
 using Newtonsoft.Json.Linq;
 using SPT.Reflection.Patching;
 using System;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.UI.Patches
 {
@@ -86,7 +88,7 @@ namespace Fika.Core.UI.Patches
                                         }
 
                                         File.WriteAllText(@$"{fikaDir}\{profileId}.json", profile.ToString());
-                                        NotificationManagerClass.DisplayMessageNotification($"Saved profile <color=#51c6db>{profileId}</color> to {fikaDir}");
+                                        NotificationManagerClass.DisplayMessageNotification($"Saved profile {ColorizeText(Colors.BLUE, profileId)} to {fikaDir}");
 
                                         GameObject.Destroy(downloadProfileGameObject);
                                     }

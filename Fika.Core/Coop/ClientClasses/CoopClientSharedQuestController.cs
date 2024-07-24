@@ -2,10 +2,12 @@
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
+using Fika.Core.Utils;
 using Fika.Core.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -161,7 +163,7 @@ namespace Fika.Core.Coop.ClientClasses
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
                             NotificationManagerClass.DisplayMessageNotification(
-                                $"Received shared quest progression from <color=#32a852>{packet.Nickname}</color> for the quest <color=#a87332>{quest.Template.Name}</color>",
+                                $"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.GREEN, quest.Template.Name)}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -192,7 +194,7 @@ namespace Fika.Core.Coop.ClientClasses
                         playerInventory.RunNetworkTransaction(pickupResult.Value);
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> picked up <color=#51c6db>{item.Name.Localized()}</color>",
+                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} picked up {(Colors.BLUE, item.Name.Localized())}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -222,7 +224,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (FikaPlugin.QuestSharingNotifications.Value)
             {
-                NotificationManagerClass.DisplayMessageNotification($"<color=#32a852>{packet.Nickname}</color> planted an item for <color=#a87332>{questName}</color>",
+                NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} planted an item for {ColorizeText(Colors.BROWN, questName)}",
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
