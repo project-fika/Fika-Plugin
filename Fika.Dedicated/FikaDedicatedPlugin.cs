@@ -53,6 +53,9 @@ namespace Fika.Headless
             new SessionResultExitStatusPatch().Enable();
             new MenuScreenPatch().Enable();
             new HealthTreamentScreenPatch().Enable();
+            new ValidateFormatPatch1().Enable();
+            new ValidateFormatPatch2().Enable();
+            new ValidateFormatPatch3().Enable();
             //InvokeRepeating("ClearRenderables", 1f, 1f);
         }
 
