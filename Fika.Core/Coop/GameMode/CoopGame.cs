@@ -74,6 +74,7 @@ namespace Fika.Core.Coop.GameMode
         private bool hasSaved = false;
         private CoopExfilManager exfilManager;
         private CoopTimeManager timeManager;
+        private CoopHalloweenEventManager halloweenEventManager;
         private FikaDebug fikaDebug;
         private bool isServer;
         private List<string> localTriggerZones;
@@ -1009,19 +1010,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
-            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
-            {
-                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
-                if (gameObject != null)
-                {
-                    transform.InstantiatePrefab(gameObject);
-                }
-                else
-                {
-                    Logger.LogError("Can't find event prefab in resources. Path: 'Prefabs/HALLOWEEN_CONTROLLER'");
-                }
-            }
             ApplicationConfigClass config = BackendConfigAbstractClass.Config;
             if (config.FixedFrameRate > 0f)
             {
@@ -1311,6 +1299,16 @@ namespace Fika.Core.Coop.GameMode
             }
 
             BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+
+            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(base.Location_0.Id))
+            {
+                Singleton<GameWorld>.Instance.HalloweenEventController = new HalloweenEventControllerClass();
+                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
+                if (gameObject != null)
+                {
+                    base.transform.InstantiatePrefab(gameObject);
+                }
+            }
 
             LocalGame.Class1391 seasonTaskHandler = new();
             ESeason season = iSession.Season;
