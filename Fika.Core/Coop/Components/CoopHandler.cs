@@ -112,8 +112,6 @@ namespace Fika.Core.Coop.Components
                 _ = Task.Run(ReadFromServerCharactersLoop);
             }
 
-            StartCoroutine(ProcessSpawnQueue());
-
             if (FikaBackendUtils.IsServer)
             {
                 Singleton<GameWorld>.Instance.World_0.RegisterNetworkInteractionObjects(null);
@@ -126,8 +124,6 @@ namespace Fika.Core.Coop.Components
             HumanPlayers.Clear();
 
             RunAsyncTasks = false;
-
-            StopCoroutine(ProcessSpawnQueue());
         }
 
         private bool requestQuitGame = false;
@@ -236,9 +232,14 @@ namespace Fika.Core.Coop.Components
 
         protected private void Update()
         {
-            if (!Singleton<IFikaGame>.Instantiated)
+            if (LocalGameInstance == null)
             {
                 return;
+            }
+
+            if (spawnQueue.Count > 0)
+            {
+                SpawnPlayer(spawnQueue.Dequeue());
             }
 
             ProcessQuitting();
@@ -366,30 +367,6 @@ namespace Fika.Core.Coop.Components
             }
 
             queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
-        }
-
-        private IEnumerator ProcessSpawnQueue()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(1f);
-
-                if (Singleton<AbstractGame>.Instantiated)
-                {
-                    if (spawnQueue.Count > 0)
-                    {
-                        SpawnPlayer(spawnQueue.Dequeue());
-                    }
-                    else
-                    {
-                        yield return new WaitForSeconds(2);
-                    }
-                }
-                else
-                {
-                    yield return new WaitForSeconds(1);
-                }
-            }
         }
 
         public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
