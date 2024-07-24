@@ -25,7 +25,6 @@ namespace Fika.Headless.Patches {
         [PatchPostfix]
         static void Postfix(ref bool __result)
         {
-            Logger.LogError($"ValidateFormat: {__result}");
             __result = true;
         }
     }
