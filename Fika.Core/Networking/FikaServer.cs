@@ -21,6 +21,7 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
@@ -35,6 +36,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
 {
@@ -510,7 +512,7 @@ namespace Fika.Core.Networking
                         if (FikaPlugin.ShowNotifications.Value)
                         {
                             string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                            NotificationManagerClass.DisplayMessageNotification($"Group member <color=#32a852>{nickname}</color> has extracted.",
+                            NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has extracted.",
                                             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                         }
                     }
