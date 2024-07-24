@@ -1336,6 +1336,8 @@ namespace Fika.Core.Coop.GameMode
                 {
                     base.transform.InstantiatePrefab(gameObject);
                 }
+
+                halloweenEventManager = Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
             }
 
             LocalGame.Class1391 seasonTaskHandler = new();
