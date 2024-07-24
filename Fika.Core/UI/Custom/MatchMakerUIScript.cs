@@ -7,6 +7,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.UI.Models;
+using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -383,7 +384,7 @@ namespace Fika.Core.UI.Custom
                 {
                     tooltipTextGetter = new()
                     {
-                        TooltipText = $"Cannot join a raid that is on another map.\nRaid map: {entry.Location.Localized()}"
+                        TooltipText = $"Cannot join a raid that is on another map.\nRaid map: {ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized())}"
                     };
 
                     button.enabled = false;
@@ -403,7 +404,7 @@ namespace Fika.Core.UI.Custom
                 {
                     tooltipTextGetter = new()
                     {
-                        TooltipText = "Cannot join a raid that is on another time."
+                        TooltipText = $"Cannot join a raid that is on another time."
                     };
 
                     button.enabled = false;

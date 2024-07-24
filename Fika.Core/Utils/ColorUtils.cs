@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-
+﻿using System.Collections.Generic;
 
 namespace Fika.Core.Utils
 {
@@ -19,9 +12,9 @@ namespace Fika.Core.Utils
         RED
     }
 
-    class ColorUtils
+    public class ColorUtils
     {
-        private static readonly Dictionary<Colors, string> keyValuePairs = new Dictionary<Colors, string>
+        private static readonly Dictionary<Colors, string> keyValuePairs = new()
         {
             { Colors.WHITE, "ffffff" },
             { Colors.BLACK, "000000" },
@@ -33,7 +26,7 @@ namespace Fika.Core.Utils
 
         private static string GetHexByColor(Colors color)
         {
-            return keyValuePairs.TryGetValue(color, out var value) ? value : "ffffff";
+            return keyValuePairs.TryGetValue(color, out string value) ? value : "ffffff";
         }
 
         public static string ColorizeText(Colors color, string text)
@@ -41,5 +34,4 @@ namespace Fika.Core.Utils
             return $"<color=#{GetHexByColor(color)}>{text}</color>";
         }
     }
-
 }
