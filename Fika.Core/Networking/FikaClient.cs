@@ -763,7 +763,7 @@ namespace Fika.Core.Networking
         {
             HalloweenEventControllerClass controller = HalloweenEventControllerClass.Instance;
 
-            if(controller == null)
+            if (controller == null)
             {
                 return;
             }

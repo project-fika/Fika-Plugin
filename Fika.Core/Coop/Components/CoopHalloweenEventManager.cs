@@ -1,5 +1,4 @@
-﻿using System;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT.GlobalEvents;
 using Fika.Core.Coop.Utils;
@@ -7,6 +6,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using System;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Components
@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.Components
         protected void Start()
         {
             //No need to begin to subscribe to events on client as this would cause an infinite loop
-            if(FikaBackendUtils.IsClient)
+            if (FikaBackendUtils.IsClient)
             {
                 return;
             }

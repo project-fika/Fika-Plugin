@@ -1300,7 +1300,7 @@ namespace Fika.Core.Coop.GameMode
 
             BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
 
-            if(instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(base.Location_0.Id))
+            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(base.Location_0.Id))
             {
                 Singleton<GameWorld>.Instance.HalloweenEventController = new HalloweenEventControllerClass();
                 GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
