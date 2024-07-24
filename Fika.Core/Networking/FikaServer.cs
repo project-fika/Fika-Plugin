@@ -17,10 +17,6 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Communication;
-using Fika.Core.Networking.Packets.GameWorld;
-using Fika.Core.Networking.Packets.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
@@ -106,6 +102,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
+            packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -215,6 +212,29 @@ namespace Fika.Core.Networking
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+        }
+
+        private void OnInteractableInitPacketReceived(InteractableInitPacket packet, NetPeer peer)
+        {
+            if (packet.IsRequest)
+            {
+                if (Singleton<GameWorld>.Instantiated)
+                {
+                    World world = Singleton<GameWorld>.Instance.World_0;
+                    if (world.Interactables != null)
+                    {
+                        InteractableInitPacket response = new(false)
+                        {
+                            Length = world.Interactables.Count,
+                            InteractableIds = [.. world.Interactables.Keys],
+                            NetIds = [.. world.Interactables.Values]
+                        };
+
+                        _dataWriter.Reset();
+                        SendDataToPeer(peer, _dataWriter, ref response, DeliveryMethod.ReliableUnordered);
+                    } 
+                }
+            }
         }
 
         private void OnSpawnPointPacketReceived(SpawnpointPacket packet, NetPeer peer)

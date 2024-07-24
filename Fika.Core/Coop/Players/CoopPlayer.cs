@@ -18,7 +18,6 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using System;
 using System.Collections;
@@ -761,7 +760,8 @@ namespace Fika.Core.Coop.Players
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (coopHandler.GetInteractiveObject(packet.InteractiveId, out WorldInteractiveObject worldInteractiveObject))
+                WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
+                if (worldInteractiveObject != null)
                 {
                     if (worldInteractiveObject.isActiveAndEnabled)
                     {
@@ -1090,50 +1090,48 @@ namespace Fika.Core.Coop.Players
 
             if (packet.HasContainerInteractionPacket)
             {
-                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(packet.ContainerInteractionPacket.InteractiveId);
+                if (lootableContainer != null)
                 {
-                    if (coopHandler.GetInteractiveObject(packet.ContainerInteractionPacket.InteractiveId, out WorldInteractiveObject lootableContainer) as LootableContainer)
+                    if (lootableContainer.isActiveAndEnabled)
                     {
-                        if (lootableContainer.isActiveAndEnabled)
+                        string methodName = string.Empty;
+                        switch (packet.ContainerInteractionPacket.InteractionType)
                         {
-                            string methodName = string.Empty;
-                            switch (packet.ContainerInteractionPacket.InteractionType)
+                            case EInteractionType.Open:
+                                methodName = "Open";
+                                break;
+                            case EInteractionType.Close:
+                                methodName = "Close";
+                                break;
+                            case EInteractionType.Unlock:
+                                methodName = "Unlock";
+                                break;
+                            case EInteractionType.Breach:
+                                break;
+                            case EInteractionType.Lock:
+                                methodName = "Lock";
+                                break;
+                        }
+
+                        if (!string.IsNullOrEmpty(methodName))
+                        {
+                            void Interact() => lootableContainer.Invoke(methodName, 0);
+
+                            if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
                             {
-                                case EInteractionType.Open:
-                                    methodName = "Open";
-                                    break;
-                                case EInteractionType.Close:
-                                    methodName = "Close";
-                                    break;
-                                case EInteractionType.Unlock:
-                                    methodName = "Unlock";
-                                    break;
-                                case EInteractionType.Breach:
-                                    break;
-                                case EInteractionType.Lock:
-                                    methodName = "Lock";
-                                    break;
+                                Interact();
                             }
-
-                            if (!string.IsNullOrEmpty(methodName))
+                            else
                             {
-                                void Interact() => lootableContainer.Invoke(methodName, 0);
-
-                                if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
-                                {
-                                    Interact();
-                                }
-                                else
-                                {
-                                    lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
-                                }
+                                lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
                             }
                         }
                     }
-                    else
-                    {
-                        FikaPlugin.Instance.FikaLogger.LogError("CommonPlayerPacket::ContainerInteractionPacket: LootableContainer was null!");
-                    }
+                }
+                else
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError("CommonPlayerPacket::ContainerInteractionPacket: LootableContainer was null!");
                 }
             }
 

@@ -383,7 +383,7 @@ namespace Fika.Core.UI.Custom
                 {
                     tooltipTextGetter = new()
                     {
-                        TooltipText = "Cannot join a raid that is on another map."
+                        TooltipText = $"Cannot join a raid that is on another map.\nRaid map: {entry.Location.Localized()}"
                     };
 
                     button.enabled = false;

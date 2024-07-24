@@ -17,10 +17,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Communication;
-using Fika.Core.Networking.Packets.GameWorld;
-using Fika.Core.Networking.Packets.Player;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -102,6 +98,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<SpawnpointPacket>(OnSpawnPointPacketReceived);
+            packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -145,6 +142,28 @@ namespace Fika.Core.Networking
             }
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnInteractableInitPacketReceived(InteractableInitPacket packet)
+        {
+            if (!packet.IsRequest)
+            {
+                World world = Singleton<GameWorld>.Instance.World_0;
+                if (world.Interactables == null)
+                {
+                    Dictionary<string, int> interactables = [];
+                    for (int i = 0; i < packet.Length; i++)
+                    {
+                        interactables.Add(packet.InteractableIds[i], packet.NetIds[i]);
+                    }
+                    world.RegisterNetworkInteractionObjects(interactables);
+                    CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                    if (coopGame != null)
+                    {
+                        coopGame.InteractablesInitialized = true;
+                    }
+                }
+            }
         }
 
         private void OnSpawnPointPacketReceived(SpawnpointPacket packet)
