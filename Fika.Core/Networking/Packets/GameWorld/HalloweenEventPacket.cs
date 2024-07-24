@@ -2,7 +2,7 @@
 using LiteNetLib.Utils;
 using UnityEngine;
 
-namespace Fika.Core.Networking.Packets.GameWorld
+namespace Fika.Core.Networking
 {
     public struct HalloweenEventPacket(EHalloweenPacketType packetType) : INetSerializable
     {
