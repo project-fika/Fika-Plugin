@@ -225,9 +225,7 @@ namespace Fika.Core.Networking
                     {
                         InteractableInitPacket response = new(false)
                         {
-                            Length = world.Interactables.Count,
-                            InteractableIds = [.. world.Interactables.Keys],
-                            NetIds = [.. world.Interactables.Values]
+                            Interactables = world.Interactables
                         };
 
                         _dataWriter.Reset();

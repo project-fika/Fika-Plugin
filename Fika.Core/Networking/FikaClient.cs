@@ -152,12 +152,7 @@ namespace Fika.Core.Networking
                 World world = Singleton<GameWorld>.Instance.World_0;
                 if (world.Interactables == null)
                 {
-                    Dictionary<string, int> interactables = [];
-                    for (int i = 0; i < packet.Length; i++)
-                    {
-                        interactables.Add(packet.InteractableIds[i], packet.NetIds[i]);
-                    }
-                    world.RegisterNetworkInteractionObjects(interactables);
+                    world.RegisterNetworkInteractionObjects(packet.Interactables);
                     CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
                     if (coopGame != null)
                     {

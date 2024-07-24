@@ -1,5 +1,6 @@
 ﻿using ComponentAce.Compression.Libs.zlib;
 using LiteNetLib.Utils;
+using System.Collections.Generic;
 
 namespace Fika.Core.Networking
 {
@@ -7,9 +8,7 @@ namespace Fika.Core.Networking
     {
         public bool IsRequest = isRequest;
         public byte[] RawData;
-        public int Length;
-        public string[] InteractableIds;
-        public int[] NetIds;
+        public IDictionary<string, int> Interactables;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -17,10 +16,7 @@ namespace Fika.Core.Networking
             if (!IsRequest)
             {
                 RawData = reader.GetByteArray();
-                InteractableInitPacket interactableInitPacket = SimpleZlib.Decompress(RawData, null).ParseJsonTo<InteractableInitPacket>([]);
-                Length = interactableInitPacket.Length;
-                InteractableIds = interactableInitPacket.InteractableIds;
-                NetIds = interactableInitPacket.NetIds;
+                Interactables = SimpleZlib.Decompress(RawData, null).ParseJsonTo<Dictionary<string, int>>();
             }
         }
 
@@ -29,7 +25,7 @@ namespace Fika.Core.Networking
             writer.Put(IsRequest);
             if (!IsRequest)
             {
-                byte[] data = SimpleZlib.CompressToBytes(this.ToJson([]), 6);
+                byte[] data = SimpleZlib.CompressToBytes(Interactables.ToJson([]), 6);
                 writer.PutByteArray(data);
             }
         }
