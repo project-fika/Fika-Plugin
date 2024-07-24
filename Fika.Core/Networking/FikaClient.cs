@@ -98,6 +98,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<SpawnpointPacket>(OnSpawnPointPacketReceived);
+            packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
 
             _netClient = new NetManager(this)
@@ -774,6 +775,29 @@ namespace Fika.Core.Networking
                 gameTimer.ChangeSessionTime(timeRemain);
 
                 Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
+            }
+        }
+
+        private void OnHalloweenEventPacketReceived(HalloweenEventPacket packet)
+        {
+            HalloweenEventControllerClass controller = HalloweenEventControllerClass.Instance;
+
+            if (controller == null)
+            {
+                return;
+            }
+
+            switch (packet.PacketType)
+            {
+                case EHalloweenPacketType.Summon:
+                    controller.method_5(new EFT.GlobalEvents.HalloweenSummonStartedEvent() { PointPosition = packet.SummonPosition });
+                    break;
+                case EHalloweenPacketType.Sync:
+                    controller.SetEventState(packet.EventState, false);
+                    break;
+                case EHalloweenPacketType.Exit:
+                    controller.method_3(packet.Exit);
+                    break;
             }
         }
 
