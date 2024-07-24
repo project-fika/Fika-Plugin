@@ -1,6 +1,6 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets
+namespace Fika.Core.Networking
 {
     public struct QuestConditionPacket(string nickname, string id, string sourceId) : INetSerializable
     {

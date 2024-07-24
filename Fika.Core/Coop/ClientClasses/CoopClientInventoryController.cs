@@ -6,7 +6,6 @@ using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using JetBrains.Annotations;
 using System.IO;
 using UnityEngine;
@@ -190,6 +189,11 @@ namespace Fika.Core.Coop.ClientClasses
                     FikaPlugin.Instance.FikaLogger.LogError($"{inventoryController.ID} - Client operation rejected by server: {operation.Id} - {operation}\r\nReason: {callbackManager.result.Error}");
                     serverOperationStatus = EOperationStatus.Failed;
                     localOperationStatus = EOperationStatus.Failed;
+                    if (operation is IRollback rollbackOperation)
+                    {
+                        ConsoleScreen.Log("YES");
+                        rollbackOperation.RollBack();
+                    }
                     operation.Dispose();
                     callback.Invoke(callbackManager.result);
                 }

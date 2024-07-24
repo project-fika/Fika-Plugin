@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.BTR;
@@ -26,7 +25,6 @@ namespace Fika.Core.Coop.Components
     public class CoopHandler : MonoBehaviour
     {
         #region Fields/Properties        
-        public Dictionary<string, WorldInteractiveObject> ListOfInteractiveObjects { get; private set; } = [];
         public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
         public Dictionary<int, CoopPlayer> Players = [];
@@ -116,10 +114,9 @@ namespace Fika.Core.Coop.Components
 
             StartCoroutine(ProcessSpawnQueue());
 
-            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
-            foreach (WorldInteractiveObject interactiveObject in interactiveObjects)
+            if (FikaBackendUtils.IsServer)
             {
-                ListOfInteractiveObjects.Add(interactiveObject.Id, interactiveObject);
+                Singleton<GameWorld>.Instance.World_0.RegisterNetworkInteractionObjects(null);
             }
         }
 
@@ -421,15 +418,6 @@ namespace Fika.Core.Coop.Components
             queuedProfileIds.Add(profile.ProfileId);
             Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
             spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId));
-        }
-
-        public WorldInteractiveObject GetInteractiveObject(string objectId, out WorldInteractiveObject worldInteractiveObject)
-        {
-            if (ListOfInteractiveObjects.TryGetValue(objectId, out worldInteractiveObject))
-            {
-                return worldInteractiveObject;
-            }
-            return null;
         }
 
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
