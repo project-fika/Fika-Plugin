@@ -74,6 +74,7 @@ namespace Fika.Core.Coop.GameMode
         private bool hasSaved = false;
         private CoopExfilManager exfilManager;
         private CoopTimeManager timeManager;
+        private CoopHalloweenEventManager halloweenEventManager;
         private FikaDebug fikaDebug;
         private bool isServer;
         private List<string> localTriggerZones;
