@@ -240,7 +240,7 @@ namespace Fika.Core.Coop.ClientClasses
                         if (!quest.CompletedConditions.Contains(conditionPlaceBeacon.id))
                         {
 #if DEBUG
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
+                            FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
 #endif
                             questName = quest.Template.Name;
                             return true;
@@ -249,7 +249,7 @@ namespace Fika.Core.Coop.ClientClasses
                         else
                         {
                             FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
-                        } 
+                        }
 #endif
                     }
                 }
@@ -261,16 +261,16 @@ namespace Fika.Core.Coop.ClientClasses
                         if (!quest.CompletedConditions.Contains(conditionLeaveItemAtLocation.id))
                         {
 #if DEBUG
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
+                            FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
 #endif
                             questName = quest.Template.Name;
-                            return true; 
+                            return true;
                         }
 #if DEBUG
                         else
                         {
                             FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
-                        } 
+                        }
 #endif
                     }
                 }

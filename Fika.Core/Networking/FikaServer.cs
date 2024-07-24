@@ -232,7 +232,7 @@ namespace Fika.Core.Networking
 
                         _dataWriter.Reset();
                         SendDataToPeer(peer, _dataWriter, ref response, DeliveryMethod.ReliableUnordered);
-                    } 
+                    }
                 }
             }
         }

@@ -43,7 +43,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -179,7 +178,7 @@ namespace Fika.Core.Coop.GameMode
             Singleton<GameWorld>.Instance.gameObject.AddComponent<FikaWorld>();
 
             coopGame.timeManager = CoopTimeManager.Create(coopGame);
-            coopGame.RaidSettings = raidSettings;            
+            coopGame.RaidSettings = raidSettings;
 
             return coopGame;
         }
@@ -661,7 +660,7 @@ namespace Fika.Core.Coop.GameMode
             CoopPlayer coopPlayer = (CoopPlayer)bot;
             coopHandler.Players.Remove(coopPlayer.NetId);
             Bots.Remove(bot.ProfileId);
-        } 
+        }
         #endregion
 
         /// <summary>
@@ -886,7 +885,7 @@ namespace Fika.Core.Coop.GameMode
             EUpdateQueue updateQueue, Player.EUpdateMode armsUpdateMode, Player.EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity, Func<float> getAimingSensitivity,
             IStatisticsManager statisticsManager, AbstractQuestControllerClass questController, AbstractAchievementControllerClass achievementsController)
-        {          
+        {
             await CreateCoopHandler();
 
             profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
