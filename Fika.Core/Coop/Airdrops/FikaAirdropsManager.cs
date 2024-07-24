@@ -5,7 +5,6 @@ using EFT.InventoryLogic;
 using Fika.Core.Coop.Airdrops;
 using Fika.Core.Coop.Airdrops.Models;
 using Fika.Core.Coop.Airdrops.Utils;
-using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;

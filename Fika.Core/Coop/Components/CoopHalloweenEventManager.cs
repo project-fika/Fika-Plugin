@@ -3,7 +3,6 @@ using Comfort.Common;
 using EFT.GlobalEvents;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
