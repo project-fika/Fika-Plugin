@@ -28,9 +28,15 @@ namespace Fika.Core.Coop.Components
 
         protected void Start()
         {
-            //No need to begin to subscribe to events on client as this would cause an infinite loop
+            Logger.LogInfo("Initializing");
+
+            //Destroy on client as we dont need to listen to these events, and receive them from the host.
             if (FikaBackendUtils.IsClient)
             {
+                Logger.LogInfo("Running on client, destroying");
+
+                Destroy(this);
+
                 return;
             }
 
