@@ -5,7 +5,6 @@ using EFT.InventoryLogic;
 using Fika.Core.Coop.Airdrops;
 using Fika.Core.Coop.Airdrops.Models;
 using Fika.Core.Coop.Airdrops.Utils;
-using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -26,7 +25,7 @@ namespace Coop.Airdrops
     public class FikaAirdropsManager : MonoBehaviour
     {
         private FikaAirdropPlane airdropPlane;
-        private AirdropBox AirdropBox;
+        private AirdropBox airdropBox;
         private FikaItemFactoryUtil factory;
         public bool isFlareDrop;
         public FikaAirdropParametersModel AirdropParameters { get; set; }
@@ -37,7 +36,8 @@ namespace Coop.Airdrops
         public static int ContainerCount = 0;
 
         // Client fields
-        private string ContainerId;
+        private string containerId;
+        private int containerNetId;
         private Item rootItem;
 
         protected void Awake()
@@ -51,9 +51,9 @@ namespace Coop.Airdrops
                 {
                     Destroy(airdropPlane.gameObject);
                 }
-                if (AirdropBox != null)
+                if (airdropBox != null)
                 {
-                    Destroy(AirdropBox.gameObject);
+                    Destroy(airdropBox.gameObject);
                 }
                 Destroy(Singleton<FikaAirdropsManager>.Instance);
             }
@@ -112,8 +112,8 @@ namespace Coop.Airdrops
                 airdropPlane = await FikaAirdropPlane.Init(AirdropParameters.RandomAirdropPoint,
                     AirdropParameters.DropHeight, AirdropParameters.Config.PlaneVolume,
                     AirdropParameters.Config.PlaneSpeed);
-                AirdropBox = await AirdropBox.Init(AirdropParameters.Config.CrateFallSpeed);
-                AirdropBox.container.Id = "FikaAirdropContainer";
+                airdropBox = await AirdropBox.Init(AirdropParameters.Config.CrateFallSpeed);
+                airdropBox.container.Id = "FikaAirdropContainer";
                 factory = new FikaItemFactoryUtil();
             }
             catch
@@ -179,18 +179,19 @@ namespace Coop.Airdrops
                 airdropPlane = await FikaAirdropPlane.Init(AirdropParameters.SpawnPoint, AirdropParameters.DropHeight, AirdropParameters.Config.PlaneVolume,
                     AirdropParameters.Config.PlaneSpeed, true, AirdropParameters.LookPoint);
 
-                AirdropBox = await AirdropBox.Init(AirdropParameters.Config.CrateFallSpeed);
+                airdropBox = await AirdropBox.Init(AirdropParameters.Config.CrateFallSpeed);
                 factory = new FikaItemFactoryUtil();
 
-                factory.BuildClientContainer(AirdropBox.container, rootItem);
+                factory.BuildClientContainer(airdropBox.container, rootItem);
 
-                if (AirdropBox.container != null && CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                if (airdropBox.container != null)
                 {
-                    if (!string.IsNullOrEmpty(ContainerId))
+                    if (containerNetId > 0)
                     {
-                        AirdropBox.container.Id = ContainerId;
-                        coopHandler.ListOfInteractiveObjects.Add(ContainerId, AirdropBox.container);
-                        Logger.LogInfo($"Adding AirdropBox {AirdropBox.container.Id} to interactive objects.");
+                        airdropBox.container.NetId = containerNetId;
+                        airdropBox.container.Id = containerId;
+                        Singleton<GameWorld>.Instance.RegisterWorldInteractionObject(airdropBox.container);
+                        Logger.LogInfo($"Adding AirdropBox {airdropBox.container.Id} to interactive objects.");
                     }
                     else
                     {
@@ -205,7 +206,7 @@ namespace Coop.Airdrops
                 return;
             }
 
-            if (airdropPlane == null || AirdropBox == null || factory == null)
+            if (airdropPlane == null || airdropBox == null || factory == null)
             {
                 return;
             }
@@ -265,8 +266,8 @@ namespace Coop.Airdrops
             AirdropParameters.BoxSpawned = true;
             Vector3 pointPos = AirdropParameters.RandomAirdropPoint;
             Vector3 dropPos = new(pointPos.x, AirdropParameters.DropHeight, pointPos.z);
-            AirdropBox.gameObject.SetActive(true);
-            AirdropBox.StartCoroutine(AirdropBox.DropCrate(dropPos));
+            airdropBox.gameObject.SetActive(true);
+            airdropBox.StartCoroutine(airdropBox.DropCrate(dropPos));
         }
 
         private void BuildLootContainer(FikaAirdropConfigModel config)
@@ -283,19 +284,15 @@ namespace Coop.Airdrops
                 throw new Exception("Airdrops. Tried to BuildLootContainer without any Loot.");
             }
 
-            factory.BuildContainer(AirdropBox.container, config, lootData.DropType);
-            factory.AddLoot(AirdropBox.container, lootData);
+            factory.BuildContainer(airdropBox.container, config, lootData.DropType);
+            factory.AddLoot(airdropBox.container, lootData);
 
-            if (AirdropBox.container != null && CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            if (airdropBox.container != null)
             {
-                if (coopHandler.GetInteractiveObject(AirdropBox.container.Id, out _))
-                {
-                    Logger.LogInfo("Existing crate already exists, setting value to " + ContainerCount);
-                    AirdropBox.container.Id = AirdropBox.container.Id + $"_{ContainerCount}";
-                    ContainerCount++;
-                }
-                coopHandler.ListOfInteractiveObjects.Add(AirdropBox.container.Id, AirdropBox.container);
-                Logger.LogInfo($"Adding AirdropBox {AirdropBox.container.Id} to interactive objects.");
+                ContainerCount++;
+                airdropBox.container.Id = $"Airdrop{ContainerCount}";
+                Singleton<GameWorld>.Instance.RegisterWorldInteractionObject(airdropBox.container);
+                Logger.LogInfo($"Adding AirdropBox {airdropBox.container.Id} to interactive objects.");
             }
 
             // Get the lootData. Send to clients.
@@ -309,7 +306,8 @@ namespace Coop.Airdrops
         {
             Logger.LogInfo("Received loot container parameters");
             rootItem = packet.RootItem;
-            ContainerId = packet.ContainerId;
+            containerId = packet.ContainerId;
+            containerNetId = packet.ContainerNetId;
         }
 
         private void SetDistanceToDrop()
@@ -345,12 +343,13 @@ namespace Coop.Airdrops
 
             Logger.LogInfo("Sending Airdrop Loot to clients.");
 
-            Item rootItem = AirdropBox.container.ItemOwner.RootItem;
+            Item rootItem = airdropBox.container.ItemOwner.RootItem;
 
             AirdropLootPacket lootPacket = new()
             {
                 RootItem = rootItem,
-                ContainerId = AirdropBox.container.Id
+                ContainerId = airdropBox.container.Id,
+                ContainerNetId = airdropBox.container.NetId,
             };
 
             NetDataWriter writer = new();

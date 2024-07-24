@@ -175,6 +175,15 @@ namespace Fika.Core.UI.Custom
 
             fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
 
+            TooltipTextGetter tooltipTextGetter = new()
+            {
+                TooltipText = "Refresh list of active raids"
+            };
+
+            HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
+            tooltipArea.enabled = true;
+            tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+
             AcceptButton.gameObject.SetActive(false);
             AcceptButton.enabled = false;
             AcceptButton.Interactable = false;
@@ -374,7 +383,7 @@ namespace Fika.Core.UI.Custom
                 {
                     tooltipTextGetter = new()
                     {
-                        TooltipText = "Cannot join a raid that is on another map."
+                        TooltipText = $"Cannot join a raid that is on another map.\nRaid map: {entry.Location.Localized()}"
                     };
 
                     button.enabled = false;

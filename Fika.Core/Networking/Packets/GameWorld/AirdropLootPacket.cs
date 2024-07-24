@@ -9,12 +9,14 @@ namespace Fika.Core.Networking
     {
         public bool IsRequest = isRequest;
         public string ContainerId;
+        public int ContainerNetId;
         public Item RootItem;
 
         public void Deserialize(NetDataReader reader)
         {
             IsRequest = reader.GetBool();
             ContainerId = reader.GetString();
+            ContainerNetId = reader.GetInt();
             RootItem = reader.GetAirdropItem();
         }
 
@@ -22,6 +24,7 @@ namespace Fika.Core.Networking
         {
             writer.Put(IsRequest);
             writer.Put(ContainerId);
+            writer.Put(ContainerNetId);
             writer.PutAirdropItem(RootItem);
         }
     }

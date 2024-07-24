@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.BTR;
@@ -26,7 +25,6 @@ namespace Fika.Core.Coop.Components
     public class CoopHandler : MonoBehaviour
     {
         #region Fields/Properties        
-        public Dictionary<string, WorldInteractiveObject> ListOfInteractiveObjects { get; private set; } = [];
         public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
         public Dictionary<int, CoopPlayer> Players = [];
@@ -114,12 +112,9 @@ namespace Fika.Core.Coop.Components
                 _ = Task.Run(ReadFromServerCharactersLoop);
             }
 
-            StartCoroutine(ProcessSpawnQueue());
-
-            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
-            foreach (WorldInteractiveObject interactiveObject in interactiveObjects)
+            if (FikaBackendUtils.IsServer)
             {
-                ListOfInteractiveObjects.Add(interactiveObject.Id, interactiveObject);
+                Singleton<GameWorld>.Instance.World_0.RegisterNetworkInteractionObjects(null);
             }
         }
 
@@ -129,8 +124,6 @@ namespace Fika.Core.Coop.Components
             HumanPlayers.Clear();
 
             RunAsyncTasks = false;
-
-            StopCoroutine(ProcessSpawnQueue());
         }
 
         private bool requestQuitGame = false;
@@ -239,9 +232,14 @@ namespace Fika.Core.Coop.Components
 
         protected private void Update()
         {
-            if (!Singleton<IFikaGame>.Instantiated)
+            if (LocalGameInstance == null)
             {
                 return;
+            }
+
+            if (spawnQueue.Count > 0)
+            {
+                SpawnPlayer(spawnQueue.Dequeue());
             }
 
             ProcessQuitting();
@@ -371,30 +369,6 @@ namespace Fika.Core.Coop.Components
             queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
         }
 
-        private IEnumerator ProcessSpawnQueue()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(1f);
-
-                if (Singleton<AbstractGame>.Instantiated)
-                {
-                    if (spawnQueue.Count > 0)
-                    {
-                        SpawnPlayer(spawnQueue.Dequeue());
-                    }
-                    else
-                    {
-                        yield return new WaitForSeconds(2);
-                    }
-                }
-                else
-                {
-                    yield return new WaitForSeconds(1);
-                }
-            }
-        }
-
         public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
         {
             foreach (IPlayer player in Singleton<GameWorld>.Instance.RegisteredPlayers)
@@ -421,15 +395,6 @@ namespace Fika.Core.Coop.Components
             queuedProfileIds.Add(profile.ProfileId);
             Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
             spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId));
-        }
-
-        public WorldInteractiveObject GetInteractiveObject(string objectId, out WorldInteractiveObject worldInteractiveObject)
-        {
-            if (ListOfInteractiveObjects.TryGetValue(objectId, out worldInteractiveObject))
-            {
-                return worldInteractiveObject;
-            }
-            return null;
         }
 
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)

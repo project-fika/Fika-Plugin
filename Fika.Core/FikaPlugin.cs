@@ -10,7 +10,7 @@ using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Airdrop;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
-using Fika.Core.Coop.World;
+using Fika.Core.Coop.Patches.Weather;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;

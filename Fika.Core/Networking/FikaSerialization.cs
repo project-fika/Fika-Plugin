@@ -696,9 +696,11 @@ namespace Fika.Core.Networking
 
             public static ContainerInteractionPacket Deserialize(NetDataReader reader)
             {
-                ContainerInteractionPacket packet = new();
-                packet.InteractiveId = reader.GetString();
-                packet.InteractionType = (EInteractionType)reader.GetInt();
+                ContainerInteractionPacket packet = new()
+                {
+                    InteractiveId = reader.GetString(),
+                    InteractionType = (EInteractionType)reader.GetInt()
+                };
                 return packet;
             }
             public static void Serialize(NetDataWriter writer, ContainerInteractionPacket packet)
