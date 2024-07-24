@@ -3,6 +3,7 @@
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using System;
@@ -40,10 +41,11 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
         {
+            // Check for GClass increments
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-            operationFactoryDelegates[typeof(GClass1588)] = new OperationFactoryDelegate(Weapon1);
-            operationFactoryDelegates[typeof(GClass1589)] = new OperationFactoryDelegate(Weapon2);
-            operationFactoryDelegates[typeof(GClass1601)] = new OperationFactoryDelegate(Weapon3);
+            operationFactoryDelegates[typeof(GClass1599)] = new OperationFactoryDelegate(Weapon1);
+            operationFactoryDelegates[typeof(GClass1600)] = new OperationFactoryDelegate(Weapon2);
+            operationFactoryDelegates[typeof(GClass1612)] = new OperationFactoryDelegate(Weapon3);
             return operationFactoryDelegates;
         }
 
@@ -614,7 +616,8 @@ namespace Fika.Core.Coop.ClientClasses
             private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
         }
 
-        private class FirearmClass4(Player.FirearmController controller) : GClass1612(controller)
+        // Check for GClass increments
+        private class FirearmClass4(Player.FirearmController controller) : GClass1613(controller)
         {
             public override void Start()
             {
@@ -654,6 +657,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             private void SendBoltActionReloadPacket(bool value)
             {
+                ConsoleScreen.Log("YES");
                 if (!hasSent && value)
                 {
                     hasSent = true;

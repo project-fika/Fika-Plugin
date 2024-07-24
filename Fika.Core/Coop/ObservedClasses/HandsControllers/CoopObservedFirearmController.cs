@@ -653,8 +653,9 @@ namespace Fika.Core.Coop.ObservedClasses
             }
 
             MagazineClass magazine = controller.Item.GetCurrentMagazine();
+            Weapon weapon = controller.Weapon;
 
-            if (controller.Item.GetCurrentMagazine() != null && magazine is not CylinderMagazineClass)
+            if (magazine != null && magazine is not CylinderMagazineClass && weapon.HasChambers)
             {
                 magazine.Cartridges.PopTo(inventoryController, new GClass2783(controller.Item.Chambers[0]));
             }
