@@ -486,6 +486,7 @@ namespace Fika.Core.Networking
                         if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                         {
                             coopHandler.Players.Remove(packet.NetId);
+                            coopHandler.HumanPlayers.Remove(playerToApply);
                             if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
                             {
                                 coopHandler.ExtractedPlayers.Add(packet.NetId);
