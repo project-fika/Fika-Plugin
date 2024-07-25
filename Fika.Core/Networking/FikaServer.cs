@@ -38,15 +38,11 @@ namespace Fika.Core.Networking
 {
     public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener
     {
-        private NetManager _netServer;
         public NetPacketProcessor packetProcessor = new();
-        private readonly NetDataWriter _dataWriter = new();
         public CoopPlayer MyPlayer;
         public Dictionary<int, CoopPlayer> Players => coopHandler.Players;
         public List<string> PlayersMissing = [];
         public string MyExternalIP { get; private set; } = NetUtils.GetLocalIp(LocalAddrType.IPv4);
-        private int Port => FikaPlugin.UDPPort.Value;
-        private CoopHandler coopHandler;
         public int ReadyClients = 0;
         public NetManager NetServer
         {
@@ -57,8 +53,6 @@ namespace Fika.Core.Networking
         }
         public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
         public bool hasHadPeer = false;
-        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
-        private int _currentNetId;
         public bool Started
         {
             get
@@ -70,8 +64,16 @@ namespace Fika.Core.Networking
                 return _netServer.IsRunning;
             }
         }
+
+        private NetManager _netServer;
+        private readonly NetDataWriter _dataWriter = new();
+        private int Port => FikaPlugin.UDPPort.Value;
+        private CoopHandler coopHandler;
+        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
+        private int _currentNetId;
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
+        private int statisticsCounter = 0;
 
         public async Task Init()
         {
@@ -825,6 +827,22 @@ namespace Fika.Core.Networking
         {
             _netServer?.PollEvents();
             _netServer?.NatPunchModule?.PollEvents();
+
+            statisticsCounter++;
+            if (statisticsCounter > 600)
+            {
+                statisticsCounter = 0;
+                SendStatisticsPacket();
+            }
+        }
+
+        private void SendStatisticsPacket()
+        {
+            int fps = (int)(1f / Time.unscaledDeltaTime);
+            StatisticsPacket packet = new(fps);
+
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered);
         }
 
         protected void OnDestroy()

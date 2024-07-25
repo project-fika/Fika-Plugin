@@ -34,13 +34,12 @@ namespace Fika.Core.Networking
 {
     public class FikaClient : MonoBehaviour, INetEventListener
     {
-        private NetManager _netClient;
         public NetDataWriter DataWriter = new();
         public CoopPlayer MyPlayer;
         public Dictionary<int, CoopPlayer> Players => coopHandler.Players;
-        private CoopHandler coopHandler;
         public NetPacketProcessor packetProcessor = new();
         public int Ping = 0;
+        public int ServerFPS = 0;
         public int ConnectedClients = 0;
         public int ReadyClients = 0;
         public bool HostReady = false;
@@ -53,7 +52,6 @@ namespace Fika.Core.Networking
         }
         public NetPeer ServerConnection { get; private set; }
         public bool SpawnPointsReceived { get; private set; } = false;
-        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         public bool Started
         {
             get
@@ -65,6 +63,10 @@ namespace Fika.Core.Networking
                 return _netClient.IsRunning;
             }
         }
+
+        private NetManager _netClient;
+        private CoopHandler coopHandler;
+        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         private FikaChat fikaChat;
 
         public async void Init()
@@ -102,6 +104,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SpawnpointPacket>(OnSpawnPointPacketReceived);
             packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
+            packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -145,6 +148,11 @@ namespace Fika.Core.Networking
             }
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnStatisticsPacketReceived(StatisticsPacket packet)
+        {
+            ServerFPS = packet.ServerFPS;
         }
 
         private void OnInteractableInitPacketReceived(InteractableInitPacket packet)
