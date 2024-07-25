@@ -903,6 +903,7 @@ namespace Fika.Core.Coop.GameMode
                 throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
+
             if (RaidSettings.MetabolismDisabled)
             {
                 myPlayer.HealthController.DisableMetabolism();
@@ -911,6 +912,7 @@ namespace Fika.Core.Coop.GameMode
 
             CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
             coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
+            coopHandler.HumanPlayers.Add(coopPlayer);
             coopPlayer.SetupMainPlayer();
 
             PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
