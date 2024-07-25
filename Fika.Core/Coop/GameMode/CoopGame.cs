@@ -982,7 +982,7 @@ namespace Fika.Core.Coop.GameMode
                         ErrorScreen.EButtonType.OkButton, 15f, () =>
                         {
                             StopFromCancel(myPlayer.ProfileId, ExitStatus.Runner);
-                            PlayerLeftRequest playerLeftRequest = new(coopPlayer.ProfileId);
+                            PlayerLeftRequest playerLeftRequest = new(FikaBackendUtils.Profile.ProfileId);
                             FikaRequestHandler.RaidLeave(playerLeftRequest);
                         }, null);
                 });
@@ -1891,7 +1891,7 @@ namespace Fika.Core.Coop.GameMode
 
             try
             {
-                PlayerLeftRequest body = new(myPlayer.ProfileId);
+                PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
                 FikaRequestHandler.RaidLeave(body);
             }
             catch (Exception)
@@ -2018,7 +2018,7 @@ namespace Fika.Core.Coop.GameMode
             string exitName = null;
             float delay = 0f;
 
-            PlayerLeftRequest body = new(profileId);
+            PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
             FikaRequestHandler.RaidLeave(body);
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))

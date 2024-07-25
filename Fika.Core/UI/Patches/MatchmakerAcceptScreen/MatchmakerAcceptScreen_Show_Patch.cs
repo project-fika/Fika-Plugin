@@ -43,7 +43,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
         private static void PostFix(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
         {
             FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
-            FikaBackendUtils.Profile = ___profile_0;
+            FikaBackendUtils.Profile = session.Profile;
             FikaBackendUtils.PMCName = session.Profile.Nickname;
         }
     }
