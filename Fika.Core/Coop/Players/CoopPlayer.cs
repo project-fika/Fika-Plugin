@@ -976,8 +976,11 @@ namespace Fika.Core.Coop.Players
 
         public void SetupMainPlayer()
         {
-            // Set own group id
-            Profile.Info.GroupId = "Fika";
+            // Set own group id, ignore if dedicated
+            if (!Profile.Info.Nickname.Contains("dedicated_"))
+            {
+                Profile.Info.GroupId = "Fika"; 
+            }
 
             // Setup own dog tag
             if (Side != EPlayerSide.Savage)
