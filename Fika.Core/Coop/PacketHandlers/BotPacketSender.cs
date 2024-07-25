@@ -42,13 +42,12 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void FixedUpdate()
         {
-            if (!Enabled)
+            if (player == null || Writer == null)
             {
-                player.LastDirection = Vector2.zero;
                 return;
             }
 
-            if (player == null || Writer == null)
+            if (player.AIData?.BotOwner == null)
             {
                 return;
             }
