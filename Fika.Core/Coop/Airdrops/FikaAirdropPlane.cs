@@ -128,11 +128,11 @@ namespace Fika.Core.Coop.Airdrops
             ParticleSystem[] flares = projectile.GetComponentsInChildren<ParticleSystem>();
             float endTime = Time.unscaledTime + emissionTime;
 
-            GameWorld Gameworld = Singleton<GameWorld>.Instance;
+            GameWorld gameWorld= Singleton<GameWorld>.Instance;
 
-            if (Gameworld.SynchronizableObjectLogicProcessor.AirdropManager != null)
+            if (gameWorld.SynchronizableObjectLogicProcessor.AirdropManager != null)
             {
-                Gameworld.SynchronizableObjectLogicProcessor.AirdropManager.AddProjectile(projectile,
+                gameWorld.SynchronizableObjectLogicProcessor.AirdropManager.AddProjectile(projectile,
                 endTime + flares[0].main.duration + flares[0].main.startLifetime.Evaluate(1f));
             }
 
