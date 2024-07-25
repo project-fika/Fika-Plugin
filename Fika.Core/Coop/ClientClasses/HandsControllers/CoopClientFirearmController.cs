@@ -657,7 +657,6 @@ namespace Fika.Core.Coop.ClientClasses
 
             private void SendBoltActionReloadPacket(bool value)
             {
-                ConsoleScreen.Log("YES");
                 if (!hasSent && value)
                 {
                     hasSent = true;
