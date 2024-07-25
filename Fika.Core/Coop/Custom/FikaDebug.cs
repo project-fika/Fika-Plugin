@@ -163,7 +163,7 @@ namespace Fika.Core.Coop.Custom
             {
                 GUILayout.Label($"Ping: {Ping}");
                 GUILayout.Label($"RTT: {RTT}");
-                GUILayout.Label($"ServerFPS: {ServerFPS}");
+                GUILayout.Label($"Server FPS: {ServerFPS}");
             }
 
             GUILayout.EndVertical();
