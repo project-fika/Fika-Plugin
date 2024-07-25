@@ -3,10 +3,10 @@ using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Utils;
-using Fika.Core.Models;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Models.Dedicated;
 using Fika.Core.Networking.Websocket;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
@@ -132,6 +132,8 @@ namespace Fika.Core.UI.Custom
 
         private void CreateMatchMakerUI()
         {
+            GetDedicatedStatusResponse response = FikaRequestHandler.GetDedicatedStatus();
+
             GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("newmatchmakerui").LoadAsset<GameObject>("NewMatchMakerUI");
             GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
             fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
@@ -155,6 +157,21 @@ namespace Fika.Core.UI.Custom
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
+
+            if (!response.Available)
+            {
+                fikaMatchMakerUi.DedicatedToggle.interactable = false;
+
+                TooltipTextGetter dediTooltipTextGetter = new()
+                {
+                    TooltipText = $"No dedicated clients are available."
+                };
+
+                HoverTooltipArea dediTooltipArea = fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
+                dediTooltipArea.enabled = true;
+                dediTooltipArea.SetMessageText(new Func<string>(dediTooltipTextGetter.GetText));
+            }
+
             TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {

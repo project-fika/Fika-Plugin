@@ -3,7 +3,7 @@ using EFT.Bots;
 using JsonType;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Models
+namespace Fika.Core.Networking.Models.Dedicated
 {
     [DataContract]
     public struct SetDedicatedStatusRequest
@@ -14,7 +14,7 @@ namespace Fika.Core.Models
         [DataMember(Name = "status")]
         public string Status { get; set; }
 
-        public SetDedicatedStatusRequest(string sessionId, string status) 
+        public SetDedicatedStatusRequest(string sessionId, string status)
         {
             SessionId = sessionId;
             Status = status;

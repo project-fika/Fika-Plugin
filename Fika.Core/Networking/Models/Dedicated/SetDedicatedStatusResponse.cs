@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Models
+namespace Fika.Core.Networking.Models.Dedicated
 {
     [DataContract]
     public struct SetDedicatedStatusResponse

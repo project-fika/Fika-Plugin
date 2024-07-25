@@ -1,6 +1,7 @@
 using EFT;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Models.Dedicated;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
@@ -160,6 +161,11 @@ namespace Fika.Core.Networking.Http
         public static async Task<SetDedicatedStatusResponse> SetDedicatedStatus(SetDedicatedStatusRequest request)
         {
             return await PostJsonAsync<SetDedicatedStatusRequest, SetDedicatedStatusResponse>("/fika/raid/dedicated/status", request);
+        }
+
+        public static GetDedicatedStatusResponse GetDedicatedStatus()
+        {
+            return GetJson<GetDedicatedStatusResponse>("/fika/raid/dedicated/getstatus");
         }
     }
 }

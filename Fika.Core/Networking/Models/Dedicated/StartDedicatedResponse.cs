@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Fika.Core.Models
+namespace Fika.Core.Networking.Models.Dedicated
 {
     [DataContract]
     public struct StartDedicatedResponse
