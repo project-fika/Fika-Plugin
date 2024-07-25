@@ -22,6 +22,14 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
+        private int ServerFPS
+        {
+            get
+            {
+                return Singleton<FikaClient>.Instance.ServerFPS;
+            }
+        }
+
         private int RTT
         {
             get
@@ -155,6 +163,7 @@ namespace Fika.Core.Coop.Custom
             {
                 GUILayout.Label($"Ping: {Ping}");
                 GUILayout.Label($"RTT: {RTT}");
+                GUILayout.Label($"ServerFPS: {ServerFPS}");
             }
 
             GUILayout.EndVertical();
