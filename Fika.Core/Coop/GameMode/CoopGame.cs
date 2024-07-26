@@ -176,21 +176,6 @@ namespace Fika.Core.Coop.GameMode
                 Destroy(endByTimerScenario);
             }
 
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            if (coopGame.isServer)
-            {
-                gameWorld.gameObject.AddComponent<FikaHostWorld>();
-
-                Traverse.Create(gameWorld).Field<GClass676>("gclass676_0").Value = new HostGrenadeFactory();
-            }
-            else
-            {
-                gameWorld.gameObject.AddComponent<FikaWorld>();
-
-                // Check for GClass increments
-                Traverse.Create(gameWorld).Field<GClass676>("gclass676_0").Value = new GClass677();
-            }
-
             coopGame.timeManager = CoopTimeManager.Create(coopGame);
             coopGame.RaidSettings = raidSettings;
 

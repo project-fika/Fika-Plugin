@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.GameMode
         {
             server = Singleton<FikaServer>.Instance;
             writer = new();
-            gameWorld_0 = Singleton<GameWorld>.Instance;
+            gameWorld_0 = GetComponent<GameWorld>();
         }
 
         protected void FixedUpdate()

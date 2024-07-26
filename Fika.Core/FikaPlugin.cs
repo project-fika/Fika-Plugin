@@ -228,6 +228,7 @@ namespace Fika.Core
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
             new MenuTaskBar_Patch().Enable();
+            new GameWorld_Create_Patch().Enable();
 
             gameObject.AddComponent<MainThreadDispatcher>();
 
