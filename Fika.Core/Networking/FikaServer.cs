@@ -17,10 +17,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Communication;
-using Fika.Core.Networking.Packets.GameWorld;
-using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
@@ -35,20 +32,17 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
 {
     public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener
     {
-        private NetManager _netServer;
         public NetPacketProcessor packetProcessor = new();
-        private readonly NetDataWriter _dataWriter = new();
         public CoopPlayer MyPlayer;
         public Dictionary<int, CoopPlayer> Players => coopHandler.Players;
         public List<string> PlayersMissing = [];
         public string MyExternalIP { get; private set; } = NetUtils.GetLocalIp(LocalAddrType.IPv4);
-        private int Port => FikaPlugin.UDPPort.Value;
-        private CoopHandler coopHandler;
         public int ReadyClients = 0;
         public NetManager NetServer
         {
@@ -59,8 +53,6 @@ namespace Fika.Core.Networking
         }
         public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
         public bool hasHadPeer = false;
-        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
-        private int _currentNetId;
         public bool Started
         {
             get
@@ -72,8 +64,16 @@ namespace Fika.Core.Networking
                 return _netServer.IsRunning;
             }
         }
+
+        private NetManager _netServer;
+        private readonly NetDataWriter _dataWriter = new();
+        private int Port => FikaPlugin.UDPPort.Value;
+        private CoopHandler coopHandler;
+        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
+        private int _currentNetId;
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
+        private int statisticsCounter = 0;
 
         public async Task Init()
         {
@@ -105,6 +105,8 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
+            packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
 
             _netServer = new NetManager(this)
             {
@@ -210,14 +212,60 @@ namespace Fika.Core.Networking
                 iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value);
+            SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
             FikaRequestHandler.UpdateSetHost(body);
 
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnInteractableInitPacketReceived(InteractableInitPacket packet, NetPeer peer)
+        {
+            if (packet.IsRequest)
+            {
+                if (Singleton<GameWorld>.Instantiated)
+                {
+                    World world = Singleton<GameWorld>.Instance.World_0;
+                    if (world.Interactables != null)
+                    {
+                        InteractableInitPacket response = new(false)
+                        {
+                            Interactables = world.Interactables
+                        };
+
+                        _dataWriter.Reset();
+                        SendDataToPeer(peer, _dataWriter, ref response, DeliveryMethod.ReliableUnordered);
+                    }
+                }
+            }
+        }
+
+        private void OnSpawnPointPacketReceived(SpawnpointPacket packet, NetPeer peer)
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            if (coopGame != null)
+            {
+                if (packet.IsRequest)
+                {
+                    SpawnpointPacket response = new(false)
+                    {
+                        Name = coopGame.GetSpawnpointName()
+                    };
+
+                    _dataWriter.Reset();
+                    SendDataToPeer(peer, _dataWriter, ref response, DeliveryMethod.ReliableUnordered);
+                }
+            }
+            else
+            {
+                logger.LogError("OnSpawnPointPacketReceived: CoopGame was null upon receiving packet!"); ;
+            }
+        }
+
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
         {
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered, peer);
+
             if (MyPlayer.HealthController.IsAlive)
             {
                 if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -322,6 +370,11 @@ namespace Fika.Core.Networking
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             int netId = PopNetId();
             packet.netId = netId;
             if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
@@ -469,6 +522,7 @@ namespace Fika.Core.Networking
                 if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                 {
                     coopHandler.Players.Remove(packet.NetId);
+                    coopHandler.HumanPlayers.Remove(playerToApply);
                     if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
                     {
                         coopHandler.ExtractedPlayers.Add(packet.NetId);
@@ -479,7 +533,7 @@ namespace Fika.Core.Networking
                         if (FikaPlugin.ShowNotifications.Value)
                         {
                             string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                            NotificationManagerClass.DisplayMessageNotification($"Group member '{nickname}' has extracted.",
+                            NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has extracted.",
                                             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                         }
                     }
@@ -492,7 +546,7 @@ namespace Fika.Core.Networking
             {
                 if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
                 {
-                    playerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname);
+                    playerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
                 }
             }
             else if (packet.PacketType == EPackageType.LoadBot)
@@ -552,6 +606,11 @@ namespace Fika.Core.Networking
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
         {
+            if (coopHandler == null)
+            {
+                return;
+            }
+
             if (packet.IsRequest)
             {
                 foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -769,6 +828,22 @@ namespace Fika.Core.Networking
         {
             _netServer?.PollEvents();
             _netServer?.NatPunchModule?.PollEvents();
+
+            statisticsCounter++;
+            if (statisticsCounter > 600)
+            {
+                statisticsCounter = 0;
+                SendStatisticsPacket();
+            }
+        }
+
+        private void SendStatisticsPacket()
+        {
+            int fps = (int)(1f / Time.unscaledDeltaTime);
+            StatisticsPacket packet = new(fps);
+
+            _dataWriter.Reset();
+            SendDataToAll(_dataWriter, ref packet, DeliveryMethod.ReliableUnordered);
         }
 
         protected void OnDestroy()
@@ -883,6 +958,34 @@ namespace Fika.Core.Networking
             if (_netServer.ConnectedPeersCount == 0)
             {
                 timeSinceLastPeerDisconnected = DateTime.Now;
+            }
+
+            if (FikaBackendUtils.IsDedicatedGame)
+            {
+                if (_netServer.ConnectedPeersCount == 0)
+                {
+                    foreach (Profile profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
+                    {
+                        if (profile is null)
+                        {
+                            continue;
+                        }
+
+                        if (profile.ProfileId == RequestHandler.SessionId)
+                        {
+                            foreach (Profile.ProfileHealthClass.GClass1770 bodyPartHealth in profile.Health.BodyParts.Values)
+                            {
+                                bodyPartHealth.Effects.Clear();
+                                bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
+                            }
+                        }
+                    }
+
+                    // End the raid
+                    Singleton<IFikaGame>.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId,
+                            Singleton<IFikaGame>.Instance.MyExitStatus,
+                            Singleton<IFikaGame>.Instance.MyExitLocation, 0);
+                }
             }
         }
 

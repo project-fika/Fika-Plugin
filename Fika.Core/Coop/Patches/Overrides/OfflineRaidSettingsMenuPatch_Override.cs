@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches.Overrides
         private static List<CanvasGroup> weatherCanvasGroups;
         private static bool randomWeather;
         public static bool UseRandomWeather
-        { 
+        {
             get => randomWeather;
             set => randomWeather = value;
         }
@@ -83,7 +83,7 @@ namespace Fika.Core.Coop.Patches.Overrides
                     {
                         customTmp.text = "Use custom weather";
                     }
-                } 
+                }
             }
         }
 

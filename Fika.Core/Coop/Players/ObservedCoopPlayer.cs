@@ -14,6 +14,7 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -21,6 +22,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
 {
@@ -253,6 +255,11 @@ namespace Fika.Core.Coop.Players
         public override bool ShouldVocalizeDeath(EBodyPart bodyPart)
         {
             return true;
+        }
+
+        public override void SendHeadlightsPacket(bool isSilent)
+        {
+            // Do nothing
         }
 
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
@@ -643,11 +650,11 @@ namespace Fika.Core.Coop.Players
                     string nickname = !string.IsNullOrEmpty(Profile.Info.MainProfileNickname) ? Profile.Info.MainProfileNickname : Profile.Nickname;
                     if (damageType != EDamageType.Undefined)
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{nickname}' has died from '{("DamageType_" + damageType.ToString()).Localized()}'");
+                        NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died from {ColorizeText(Colors.RED, ("DamageType_" + damageType.ToString()).Localized())}");
                     }
                     else
                     {
-                        NotificationManagerClass.DisplayWarningNotification($"Group member '{nickname}' has died");
+                        NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died");
                     }
                 }
                 if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
@@ -657,7 +664,7 @@ namespace Fika.Core.Coop.Players
                         string aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
                         if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"{LastAggressor.Profile.Info.MainProfileNickname} killed boss {name}", iconType: EFT.Communications.ENotificationIconType.Friend);
+                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname)} killed boss {ColorizeText(Colors.BROWN, name)}", iconType: EFT.Communications.ENotificationIconType.Friend);
                         }
                     }
                 }
@@ -801,7 +808,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void InitObservedPlayer()
+        public void InitObservedPlayer(bool isDedicatedHost)
         {
             if (gameObject.name.StartsWith("Bot_"))
             {
@@ -845,7 +852,10 @@ namespace Fika.Core.Coop.Players
 
             if (!IsObservedAI)
             {
-                Profile.Info.GroupId = "Fika";
+                if (!isDedicatedHost)
+                {
+                    Profile.Info.GroupId = "Fika"; 
+                }
 
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
@@ -861,13 +871,15 @@ namespace Fika.Core.Coop.Players
 
                 InitVaultingAudioControllers(ObservedVaultingParameters);
 
-                if (FikaPlugin.ShowNotifications.Value)
+                if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
                 {
-                    NotificationManagerClass.DisplayMessageNotification($"Group member '{(Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname)}' has spawned",
+                    NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, (Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname))} has spawned",
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
                 }
 
                 waitForStartRoutine = StartCoroutine(CreateHealthBar());
+
+                Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
 
                 RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
             }

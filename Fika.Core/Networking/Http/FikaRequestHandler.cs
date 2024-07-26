@@ -1,6 +1,7 @@
 using EFT;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Models.Dedicated;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
@@ -107,11 +108,6 @@ namespace Fika.Core.Networking.Http
             PutJson("/fika/update/sethost", data);
         }
 
-        public static async Task<SpawnPointResponse> RaidSpawnPoint(SpawnPointRequest data)
-        {
-            return await PostJsonAsync<SpawnPointRequest, SpawnPointResponse>("/fika/raid/spawnpoint", data);
-        }
-
         public static void RaidLeave(PlayerLeftRequest data)
         {
             PutJson("/fika/raid/leave", data);
@@ -122,9 +118,14 @@ namespace Fika.Core.Networking.Http
             return PostJson<MatchJoinRequest, CreateMatch>("/fika/raid/join", data);
         }
 
-        public static void RaidCreate(CreateMatch data)
+        public static void UpdateAddPlayer(AddPlayerRequest data)
         {
-            PutJson("/fika/raid/create", data);
+            PutJson("/fika/update/addplayer", data);
+        }
+
+        public static async Task RaidCreate(CreateMatch data)
+        {
+            await PutJsonAsync("/fika/raid/create", data);
         }
 
         public static GetHostResponse GetHost(GetHostRequest data)
@@ -150,6 +151,21 @@ namespace Fika.Core.Networking.Http
         public static async Task<JObject> GetProfile()
         {
             return await GetJsonAsync<JObject>("/fika/profile/download");
+        }
+
+        public static async Task<StartDedicatedResponse> StartDedicated(StartDedicatedRequest request)
+        {
+            return await PostJsonAsync<StartDedicatedRequest, StartDedicatedResponse>("/fika/raid/dedicated/start", request);
+        }
+
+        public static async Task<SetDedicatedStatusResponse> SetDedicatedStatus(SetDedicatedStatusRequest request)
+        {
+            return await PostJsonAsync<SetDedicatedStatusRequest, SetDedicatedStatusResponse>("/fika/raid/dedicated/status", request);
+        }
+
+        public static GetDedicatedStatusResponse GetDedicatedStatus()
+        {
+            return GetJson<GetDedicatedStatusResponse>("/fika/raid/dedicated/getstatus");
         }
     }
 }

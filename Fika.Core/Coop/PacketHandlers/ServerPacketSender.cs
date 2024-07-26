@@ -78,7 +78,7 @@ namespace Fika.Core.Coop.PacketHandlers
             Writer.Reset();
             Server.SendDataToAll(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
 
-            if (player.MovementIdlingTime > 0.01f)
+            if (player.MovementIdlingTime > 0f)
             {
                 player.LastDirection = Vector2.zero;
             }

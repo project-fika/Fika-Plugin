@@ -2,7 +2,6 @@
 using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Communication;
 using HarmonyLib;
 using LiteNetLib.Utils;
 using UnityEngine;

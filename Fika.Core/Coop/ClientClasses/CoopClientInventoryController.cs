@@ -6,7 +6,6 @@ using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using JetBrains.Annotations;
 using System.IO;
 using UnityEngine;

@@ -18,12 +18,16 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "natPunch")]
         public bool NatPunch;
 
-        public SetHostRequest(string[] ips, int port, bool natPunch)
+        [DataMember(Name = "isDedicated")]
+        public bool IsDedicated;
+
+        public SetHostRequest(string[] ips, int port, bool natPunch, bool isDedicated)
         {
             ServerId = CoopHandler.GetServerId();
             Ips = ips;
             Port = port;
             NatPunch = natPunch;
+            IsDedicated = isDedicated;
         }
     }
 }

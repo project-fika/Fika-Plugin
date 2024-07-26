@@ -42,13 +42,17 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void FixedUpdate()
         {
-            if (!Enabled)
+            if (player == null || Writer == null)
             {
-                player.LastDirection = Vector2.zero;
                 return;
             }
 
-            if (player == null || Writer == null)
+            if (player.AIData?.BotOwner == null)
+            {
+                return;
+            }
+
+            if (player.AIData.BotOwner.Mover == null)
             {
                 return;
             }
@@ -65,7 +69,10 @@ namespace Fika.Core.Coop.PacketHandlers
             Writer.Reset();
             Server.SendDataToAll(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
 
-            player.LastDirection = Vector2.zero; // Bots give a constant input for some odd reason, resetting on FixedUpdate should be ok from my testing and does not cause sliding for clients
+            if (!player.AIData.BotOwner.Mover.IsMoving)
+            {
+                player.LastDirection = Vector2.zero; 
+            }
         }
 
         protected void Update()

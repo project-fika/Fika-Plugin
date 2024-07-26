@@ -30,6 +30,9 @@ namespace Fika.Core.Coop.FreeCamera
         private NightVision nightVision;
         private ThermalVision thermalVision;
         private FreeCameraController freeCameraController;
+        private float yaw = 0f;
+        private float pitch = 0f;
+        private float lookSensitivity = 3f;
 
         private KeyCode forwardKey = KeyCode.W;
         private KeyCode backKey = KeyCode.S;
@@ -128,7 +131,7 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                List<CoopPlayer> players = [.. coopHandler.Players.Values.Where(x => !x.IsYourPlayer && x.gameObject.name.StartsWith("Player_") && x.HealthController.IsAlive)];
+                List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 
                 if (players.Count > 0)
                 {
@@ -215,7 +218,7 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                List<CoopPlayer> players = [.. coopHandler.Players.Values.Where(x => !x.IsYourPlayer && x.gameObject.name.StartsWith("Player_") && x.HealthController.IsAlive)];
+                List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 
                 if (players.Count > 0)
                 {
@@ -392,9 +395,13 @@ namespace Fika.Core.Coop.FreeCamera
                 }
             }
 
-            float newRotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * 3f;
-            float newRotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * 3f;
-            transform.localEulerAngles = new Vector3(newRotationY, newRotationX, 0f);
+            float x = Input.GetAxis("Mouse X");
+            float y = Input.GetAxis("Mouse Y");
+
+            pitch += y * lookSensitivity;
+            pitch = Mathf.Clamp(pitch, -89, 89);
+            transform.eulerAngles = new(-pitch, yaw, 0);
+            yaw = (yaw + x * lookSensitivity) % 360f;
         }
 
         private void SetLeftShoulderMode(bool enabled)

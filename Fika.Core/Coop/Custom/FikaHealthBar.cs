@@ -7,6 +7,7 @@ using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
@@ -179,7 +180,19 @@ namespace Fika.Core.Coop.Custom
 
             SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
             SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
-            playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
+
+            if (currentPlayer.ProfileId == FikaBackendUtils.GetGroupId())
+            {
+                if (FikaBackendUtils.IsDedicatedGame)
+                {
+                    // Do not show dedicated client name plate
+                    Destroy(this);
+                }
+            }
+            else
+            {
+                playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
+            }
 
             if (FikaPlugin.ShowEffects.Value)
             {

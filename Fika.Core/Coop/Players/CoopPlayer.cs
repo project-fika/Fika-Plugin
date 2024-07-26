@@ -18,7 +18,7 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,6 +27,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
 {
@@ -99,6 +100,11 @@ namespace Fika.Core.Coop.Players
             {
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
+            else if (FikaBackendUtils.IsDedicated)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("I AM DEDICATED");
+                player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
+            }
 
             player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
 
@@ -125,11 +131,6 @@ namespace Fika.Core.Coop.Players
 
             return player;
         }
-
-        /*public override BasePhysicalClass CreatePhysical()
-        {
-            return FikaPlugin.Instance.UseInertia ? new PlayerPhysicalClass() : new NoInertiaPhysical();
-        }*/
 
         public override void CreateMovementContext()
         {
@@ -496,7 +497,8 @@ namespace Fika.Core.Coop.Players
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController, FirearmLightStateStruct>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
+            FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController,
+                FirearmLightStateStruct>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
 
             if (PacketSender != null)
             {
@@ -506,6 +508,7 @@ namespace Fika.Core.Coop.Players
                     HeadLightsPacket = new()
                     {
                         Amount = lightStates.Count(),
+                        IsSilent = isSilent,
                         LightStates = lightStates
                     }
                 });
@@ -758,7 +761,8 @@ namespace Fika.Core.Coop.Players
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                if (coopHandler.GetInteractiveObject(packet.InteractiveId, out WorldInteractiveObject worldInteractiveObject))
+                WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
+                if (worldInteractiveObject != null)
                 {
                     if (worldInteractiveObject.isActiveAndEnabled)
                     {
@@ -855,6 +859,7 @@ namespace Fika.Core.Coop.Players
 
                     PingFactory.EPingType pingType = PingFactory.EPingType.Point;
                     object userData = null;
+                    string localeId = null;
 
                     //ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
 
@@ -875,11 +880,13 @@ namespace Fika.Core.Coop.Players
                     {
                         pingType = PingFactory.EPingType.LootContainer;
                         userData = container;
+                        localeId = container.ItemOwner.Name;
                     }
                     else if (hitGameObject.TryGetComponent(out LootItem lootItem))
                     {
                         pingType = PingFactory.EPingType.LootItem;
                         userData = lootItem;
+                        localeId = lootItem.Item.ShortName;
                     }
                     else if (hitGameObject.TryGetComponent(out Door door))
                     {
@@ -908,7 +915,8 @@ namespace Fika.Core.Coop.Players
                         PingLocation = hitPoint,
                         PingType = pingType,
                         PingColor = pingColor,
-                        Nickname = Profile.Nickname
+                        Nickname = Profile.Nickname,
+                        LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                     };
 
                     PacketSender.Writer.Reset();
@@ -929,7 +937,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname)
+        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname, string localeId)
         {
             GameObject prefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
             GameObject pingGameObject = Instantiate(prefab);
@@ -938,8 +946,17 @@ namespace Fika.Core.Coop.Players
             {
                 abstractPing.Initialize(ref location, null, pingColor);
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestSubTrackComplete);
-                NotificationManagerClass.DisplayMessageNotification($"Received a ping from '{nickname}'",
-                    ENotificationDurationType.Default, ENotificationIconType.Friend);
+                if (string.IsNullOrEmpty(localeId))
+                {
+                    NotificationManagerClass.DisplayMessageNotification($"Received a ping from {ColorizeText(Colors.GREEN, nickname)}",
+                                ENotificationDurationType.Default, ENotificationIconType.Friend);
+                }
+                else
+                {
+                    string localizedName = localeId.Localized();
+                    NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, nickname)} has pinged {LocaleUtils.GetPrefix(localizedName)} {ColorizeText(Colors.BLUE, localizedName)}",
+                                ENotificationDurationType.Default, ENotificationIconType.Friend);
+                }
             }
             else
             {
@@ -959,8 +976,11 @@ namespace Fika.Core.Coop.Players
 
         public void SetupMainPlayer()
         {
-            // Set own group id
-            Profile.Info.GroupId = "Fika";
+            // Set own group id, ignore if dedicated
+            if (!Profile.Info.Nickname.Contains("dedicated_"))
+            {
+                Profile.Info.GroupId = "Fika"; 
+            }
 
             // Setup own dog tag
             if (Side != EPlayerSide.Savage)
@@ -1074,50 +1094,48 @@ namespace Fika.Core.Coop.Players
 
             if (packet.HasContainerInteractionPacket)
             {
-                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(packet.ContainerInteractionPacket.InteractiveId);
+                if (lootableContainer != null)
                 {
-                    if (coopHandler.GetInteractiveObject(packet.ContainerInteractionPacket.InteractiveId, out WorldInteractiveObject lootableContainer) as LootableContainer)
+                    if (lootableContainer.isActiveAndEnabled)
                     {
-                        if (lootableContainer.isActiveAndEnabled)
+                        string methodName = string.Empty;
+                        switch (packet.ContainerInteractionPacket.InteractionType)
                         {
-                            string methodName = string.Empty;
-                            switch (packet.ContainerInteractionPacket.InteractionType)
+                            case EInteractionType.Open:
+                                methodName = "Open";
+                                break;
+                            case EInteractionType.Close:
+                                methodName = "Close";
+                                break;
+                            case EInteractionType.Unlock:
+                                methodName = "Unlock";
+                                break;
+                            case EInteractionType.Breach:
+                                break;
+                            case EInteractionType.Lock:
+                                methodName = "Lock";
+                                break;
+                        }
+
+                        if (!string.IsNullOrEmpty(methodName))
+                        {
+                            void Interact() => lootableContainer.Invoke(methodName, 0);
+
+                            if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
                             {
-                                case EInteractionType.Open:
-                                    methodName = "Open";
-                                    break;
-                                case EInteractionType.Close:
-                                    methodName = "Close";
-                                    break;
-                                case EInteractionType.Unlock:
-                                    methodName = "Unlock";
-                                    break;
-                                case EInteractionType.Breach:
-                                    break;
-                                case EInteractionType.Lock:
-                                    methodName = "Lock";
-                                    break;
+                                Interact();
                             }
-
-                            if (!string.IsNullOrEmpty(methodName))
+                            else
                             {
-                                void Interact() => lootableContainer.Invoke(methodName, 0);
-
-                                if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
-                                {
-                                    Interact();
-                                }
-                                else
-                                {
-                                    lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
-                                }
+                                lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
                             }
                         }
                     }
-                    else
-                    {
-                        FikaPlugin.Instance.FikaLogger.LogError("CommonPlayerPacket::ContainerInteractionPacket: LootableContainer was null!");
-                    }
+                }
+                else
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError("CommonPlayerPacket::ContainerInteractionPacket: LootableContainer was null!");
                 }
             }
 
@@ -1131,11 +1149,24 @@ namespace Fika.Core.Coop.Players
 
             if (packet.HasHeadLightsPacket)
             {
-                for (int i = 0; i < _helmetLightControllers.Count(); i++)
+                try
                 {
-                    _helmetLightControllers.ElementAt(i).LightMod.SetLightState(packet.HeadLightsPacket.LightStates[i]);
+                    if (_helmetLightControllers != null)
+                    {
+                        for (int i = 0; i < _helmetLightControllers.Count(); i++)
+                        {
+                            _helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.HeadLightsPacket.LightStates[i]);
+                        }
+                        if (!packet.HeadLightsPacket.IsSilent)
+                        {
+                            SwitchHeadLightsAnimation();
+                        }
+                    }
                 }
-                SwitchHeadLightsAnimation();
+                catch (Exception)
+                {
+                    // Do nothing
+                }
             }
 
             if (packet.HasInventoryChanged)
