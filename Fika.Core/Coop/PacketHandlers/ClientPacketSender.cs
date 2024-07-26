@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.GameMode;
@@ -160,6 +161,10 @@ namespace Fika.Core.Coop.PacketHandlers
                 && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                 && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey))
             {
+                if (MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible)
+                {
+                    return;
+                }
                 player.Ping();
             }
         }

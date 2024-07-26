@@ -1,6 +1,7 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
+using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using System;
@@ -118,6 +119,11 @@ namespace Fika.Core.Coop.FreeCamera
             }
 
             if (disableInput)
+            {
+                return;
+            }
+
+            if (MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible)
             {
                 return;
             }
