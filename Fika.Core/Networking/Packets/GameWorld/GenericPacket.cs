@@ -19,6 +19,7 @@ namespace Fika.Core.Networking
         public PingFactory.EPingType PingType;
         public Color PingColor = Color.white;
         public string Nickname;
+        public string LocaleId;
         public int BotNetId;
         public long DepartureTime;
         public string ExfilName;
@@ -36,6 +37,7 @@ namespace Fika.Core.Networking
                     PingType = (PingFactory.EPingType)reader.GetByte();
                     PingColor = reader.GetColor();
                     Nickname = reader.GetString();
+                    LocaleId = reader.GetString();
                     break;
                 case EPackageType.TrainSync:
                     DepartureTime = reader.GetLong();
@@ -67,6 +69,7 @@ namespace Fika.Core.Networking
                     writer.Put((byte)PingType);
                     writer.Put(PingColor);
                     writer.Put(Nickname);
+                    writer.Put(LocaleId);
                     break;
                 case EPackageType.TrainSync:
                     writer.Put(DepartureTime);

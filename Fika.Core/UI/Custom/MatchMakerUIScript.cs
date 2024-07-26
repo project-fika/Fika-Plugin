@@ -6,7 +6,10 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Models.Dedicated;
+using Fika.Core.Networking.Websocket;
 using Fika.Core.UI.Models;
+using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -18,27 +21,52 @@ using UnityEngine.UI;
 
 namespace Fika.Core.UI.Custom
 {
-    internal class MatchMakerUIScript : MonoBehaviour
+    public class MatchMakerUIScript : MonoBehaviour
     {
-        private MatchMakerUI fikaMatchMakerUi;
+        public MatchMakerUI fikaMatchMakerUi;
         public RaidSettings RaidSettings { get; set; }
         private LobbyEntry[] Matches { get; set; }
         private List<GameObject> MatchesListObjects { get; set; } = [];
-        private bool StopQuery = false;
+        private bool stopQuery = false;
 
         public DefaultUIButton BackButton { get; internal set; }
         public DefaultUIButton AcceptButton { get; internal set; }
         public GameObject NewBackButton { get; internal set; }
 
         private string ProfileId => FikaBackendUtils.Profile.ProfileId;
+        private float lastRefreshed;
 
-        private float _lastRefreshed;
+        private bool _started;
+        private Coroutine serverQueryRoutine;
+        private float loadingTextTick = 0f;
+
+        protected void OnEnable()
+        {
+            if (_started)
+            {
+                stopQuery = false;
+                if (serverQueryRoutine == null)
+                {
+                    serverQueryRoutine = StartCoroutine(ServerQuery());
+                }
+            }
+        }
+
+        protected void OnDisable()
+        {
+            stopQuery = true;
+            if (serverQueryRoutine != null)
+            {
+                StopCoroutine(serverQueryRoutine);
+                serverQueryRoutine = null;
+            }
+        }
 
         protected void Start()
         {
             CreateMatchMakerUI();
-
-            StartCoroutine(ServerQuery());
+            serverQueryRoutine = StartCoroutine(ServerQuery());
+            _started = true;
         }
 
         protected void Update()
@@ -48,16 +76,45 @@ namespace Fika.Core.UI.Custom
                 DestroyThis();
             }
 
-            if (StopQuery)
+            if (stopQuery)
             {
-                StopCoroutine(ServerQuery());
+                if (serverQueryRoutine != null)
+                {
+                    StopCoroutine(serverQueryRoutine);
+                    serverQueryRoutine = null;
+                }
+            }
+
+            if (fikaMatchMakerUi.LoadingScreen.activeSelf)
+            {
+                fikaMatchMakerUi.LoadingImage.transform.Rotate(0, 0, 3f);
+                string text = fikaMatchMakerUi.LoadingText.text;
+                TextMeshProUGUI tmpText = fikaMatchMakerUi.LoadingText;
+
+                loadingTextTick++;
+
+                if (loadingTextTick > 30)
+                {
+                    loadingTextTick = 0;
+
+                    text += ".";
+                    if (text == "....")
+                    {
+                        text = ".";
+                    }
+                    tmpText.text = text; 
+                }
             }
         }
 
         private void DestroyThis()
         {
-            StopQuery = true;
-            StopCoroutine(ServerQuery());
+            stopQuery = true;
+            if (serverQueryRoutine != null)
+            {
+                StopCoroutine(serverQueryRoutine);
+                serverQueryRoutine = null;
+            }
 
             Destroy(gameObject);
             Destroy(fikaMatchMakerUi);
@@ -66,7 +123,7 @@ namespace Fika.Core.UI.Custom
 
         protected void OnDestroy()
         {
-            StopQuery = true;
+            stopQuery = true;
             if (NewBackButton != null)
             {
                 Destroy(NewBackButton);
@@ -75,6 +132,8 @@ namespace Fika.Core.UI.Custom
 
         private void CreateMatchMakerUI()
         {
+            GetDedicatedStatusResponse response = FikaRequestHandler.GetDedicatedStatus();
+
             GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("newmatchmakerui").LoadAsset<GameObject>("NewMatchMakerUI");
             GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
             fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
@@ -91,13 +150,29 @@ namespace Fika.Core.UI.Custom
                 fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
             }
 
+            fikaMatchMakerUi.LoadingText.text = "";
+
             fikaMatchMakerUi.DedicatedToggle.isOn = false;
             fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
-            fikaMatchMakerUi.DedicatedToggle.gameObject.SetActive(false); // Until implemented
 
+            if (!response.Available)
+            {
+                fikaMatchMakerUi.DedicatedToggle.interactable = false;
+
+                TooltipTextGetter dediTooltipTextGetter = new()
+                {
+                    TooltipText = $"No dedicated clients are available."
+                };
+
+                HoverTooltipArea dediTooltipArea = fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
+                dediTooltipArea.enabled = true;
+                dediTooltipArea.SetMessageText(new Func<string>(dediTooltipTextGetter.GetText));
+            }
+
+            TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
@@ -120,51 +195,120 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            fikaMatchMakerUi.StartButton.onClick.AddListener(() =>
+            //fikaMatchMakerUi.DedicatedToggle.isOn = false;
+            fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
+                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
+            });
+
+            fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
+            {
+                ToggleLoading(true);
+
+                TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+                ISession session = tarkovApplication.Session;
+
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                if (FikaPlugin.ForceIP.Value != "")
+
+                if (!fikaMatchMakerUi.DedicatedToggle.isOn)
                 {
-                    // We need to handle DNS entries as well
-                    string ip = FikaPlugin.ForceIP.Value;
-                    try
+                    if (FikaPlugin.ForceIP.Value != "")
                     {
-                        IPAddress[] dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
-                        if (dnsAddress.Length > 0)
+                        // We need to handle DNS entries as well
+                        string ip = FikaPlugin.ForceIP.Value;
+                        try
                         {
-                            ip = dnsAddress[0].ToString();
+                            IPAddress[] dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
+                            if (dnsAddress.Length > 0)
+                            {
+                                ip = dnsAddress[0].ToString();
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+
+                        if (!IPAddress.TryParse(ip, out _))
+                        {
+                            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
+                                $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
+                                ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                            ToggleLoading(false);
+                            return;
                         }
                     }
-                    catch
-                    {
 
+                    if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                    {
+                        if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
+                        {
+                            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
+                                $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
+                                ErrorScreen.EButtonType.OkButton, 10f, null, null);
+
+                            ToggleLoading(false);
+                            return;
+                        }
                     }
 
-                    if (!IPAddress.TryParse(ip, out _))
-                    {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
-                            $"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
-                            ErrorScreen.EButtonType.OkButton, 10f, null, null);
-                        return;
-                    }
+                    FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
+                    await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
+                    AcceptButton.OnClick.Invoke();
+                    DestroyThis();
                 }
-                if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                else
                 {
-                    if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
+                    ToggleLoading(true);
+
+                    FikaPlugin.DedicatedRaidWebSocket ??= new DedicatedRaidWebSocketClient();
+
+                    if (!FikaPlugin.DedicatedRaidWebSocket.Connected)
                     {
-                        Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
-                            $"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
-                            ErrorScreen.EButtonType.OkButton, 10f, null, null);
-                        return;
+                        FikaPlugin.DedicatedRaidWebSocket.Connect();
+                    }
+
+                    RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
+
+                    StartDedicatedRequest request = new()
+                    {
+                        ExpectedNumPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text),
+                        Time = raidSettings.SelectedDateTime,
+                        LocationId = raidSettings.SelectedLocation._Id,
+                        SpawnPlace = raidSettings.PlayersSpawnPlace,
+                        MetabolismDisabled = raidSettings.MetabolismDisabled,
+                        BotSettings = raidSettings.BotSettings,
+                        Side = raidSettings.Side,
+                        TimeAndWeatherSettings = raidSettings.TimeAndWeatherSettings,
+                        WavesSettings = raidSettings.WavesSettings
+                    };
+
+                    StartDedicatedResponse response = await FikaRequestHandler.StartDedicated(request);
+
+                    if (!string.IsNullOrEmpty(response.Error))
+                    {
+                        PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error);
+
+                        ToggleLoading(false);
+                    }
+                    else
+                    {
+                        NotificationManagerClass.DisplaySingletonWarningNotification("Starting raid on dedicated client... please wait.");
                     }
                 }
-                FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-                FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
-                AcceptButton.OnClick.Invoke();
-                DestroyThis();
             });
 
             fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
+
+            TooltipTextGetter tooltipTextGetter = new()
+            {
+                TooltipText = "Refresh list of active raids"
+            };
+
+            HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
+            tooltipArea.enabled = true;
+            tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
 
             AcceptButton.gameObject.SetActive(false);
             AcceptButton.enabled = false;
@@ -188,11 +332,33 @@ namespace Fika.Core.UI.Custom
             BackButton.gameObject.SetActive(false);
         }
 
+        private void ToggleLoading(bool enabled)
+        {
+            fikaMatchMakerUi.RaidGroupHostButton.interactable = !enabled;
+            fikaMatchMakerUi.StartButton.interactable = !enabled;
+            fikaMatchMakerUi.ServerBrowserPanel.SetActive(!enabled);
+
+            fikaMatchMakerUi.LoadingScreen.SetActive(enabled);
+
+            if (enabled)
+            {
+                if (serverQueryRoutine != null)
+                {
+                    StopCoroutine(serverQueryRoutine);
+                    serverQueryRoutine = null;
+                }
+            }
+            else if (!enabled)
+            {
+                serverQueryRoutine = StartCoroutine(ServerQuery());
+            }
+        }
+
         private void AutoRefresh()
         {
             Matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
-            _lastRefreshed = Time.time;
+            lastRefreshed = Time.time;
 
             RefreshUI();
         }
@@ -202,12 +368,12 @@ namespace Fika.Core.UI.Custom
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
             Matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
-            _lastRefreshed = Time.time;
+            lastRefreshed = Time.time;
 
             RefreshUI();
         }
 
-        private IEnumerator JoinMatch(string profileId, string serverId, Button button)
+        public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action successCallback)
         {
             if (button != null)
             {
@@ -256,7 +422,11 @@ namespace Fika.Core.UI.Custom
             }
             else
             {
-                ConsoleScreen.Log("ERROR");
+                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                    "ERROR CONNECTING",
+                    "Could not start the FikaPinger!",
+                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                yield break;
             }
 
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
@@ -264,6 +434,9 @@ namespace Fika.Core.UI.Custom
                 FikaBackendUtils.SetGroupId(result.ServerId);
                 FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
                 FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
+
+                AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
+                FikaRequestHandler.UpdateAddPlayer(data);
 
                 if (FikaBackendUtils.IsHostNatPunch)
                 {
@@ -274,9 +447,11 @@ namespace Fika.Core.UI.Custom
                     NetManagerUtils.DestroyPingingClient();
                 }
 
-                DestroyThis();
+                //DestroyThis();
 
-                AcceptButton.OnClick.Invoke();
+                //AcceptButton.OnClick.Invoke();
+
+                successCallback?.Invoke();
             }
             else
             {
@@ -337,18 +512,24 @@ namespace Fika.Core.UI.Custom
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                    StartCoroutine(JoinMatch(ProfileId, server.name, button));
+                    //StartCoroutine(JoinMatch(ProfileId, server.name, button));
+                    FikaBackendUtils.HostLocationId = entry.Location;
+                    StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
+                    {
+                        DestroyThis();
+                        AcceptButton.OnClick.Invoke();
+                    }));
                 });
 
                 TooltipTextGetter tooltipTextGetter;
                 HoverTooltipArea tooltipArea;
                 Image image = server.GetComponent<Image>();
 
-                if (RaidSettings.LocationId != entry.Location)
+                if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
                 {
                     tooltipTextGetter = new()
                     {
-                        TooltipText = "Cannot join a raid that is on another map."
+                        TooltipText = $"Cannot join a raid that is on another map.\nRaid map: {ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized())}"
                     };
 
                     button.enabled = false;
@@ -368,7 +549,7 @@ namespace Fika.Core.UI.Custom
                 {
                     tooltipTextGetter = new()
                     {
-                        TooltipText = "Cannot join a raid that is on another time."
+                        TooltipText = $"Cannot join a raid that is on another time."
                     };
 
                     button.enabled = false;
@@ -477,11 +658,11 @@ namespace Fika.Core.UI.Custom
 
         public IEnumerator ServerQuery()
         {
-            while (!StopQuery)
+            while (!stopQuery)
             {
                 AutoRefresh();
 
-                while (Time.time < _lastRefreshed + FikaPlugin.AutoRefreshRate.Value)
+                while (Time.time < lastRefreshed + FikaPlugin.AutoRefreshRate.Value)
                 {
                     yield return null;
                 }

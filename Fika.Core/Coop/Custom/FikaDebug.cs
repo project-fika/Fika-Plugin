@@ -22,6 +22,14 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
+        private int ServerFPS
+        {
+            get
+            {
+                return Singleton<FikaClient>.Instance.ServerFPS;
+            }
+        }
+
         private int RTT
         {
             get
@@ -68,16 +76,17 @@ namespace Fika.Core.Coop.Custom
 
         private void CheckAndAdd()
         {
+            foreach (CoopPlayer player in coopHandler.HumanPlayers)
+            {
+                if (!alivePlayers.Contains(player) && player.HealthController.IsAlive)
+                {
+                    AddPlayer(player);
+                }
+            }
+
             foreach (CoopPlayer player in coopHandler.Players.Values)
             {
-                if (player.gameObject.name.StartsWith("Player_") || player.IsYourPlayer)
-                {
-                    if (!alivePlayers.Contains(player) && player.HealthController.IsAlive)
-                    {
-                        AddPlayer(player);
-                    }
-                }
-                else
+                if (!player.gameObject.name.StartsWith("Player_") && !player.IsYourPlayer)
                 {
                     if (!aliveBots.Contains(player) && player.HealthController.IsAlive)
                     {
@@ -154,6 +163,7 @@ namespace Fika.Core.Coop.Custom
             {
                 GUILayout.Label($"Ping: {Ping}");
                 GUILayout.Label($"RTT: {RTT}");
+                GUILayout.Label($"Server FPS: {ServerFPS}");
             }
 
             GUILayout.EndVertical();

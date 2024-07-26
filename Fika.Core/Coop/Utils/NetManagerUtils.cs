@@ -3,6 +3,7 @@ using Comfort.Common;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ namespace Fika.Core.Coop.Utils
         public static void CreateFikaGameObject()
         {
             FikaGameObject = new GameObject("FikaGameObject");
-            Object.DontDestroyOnLoad(FikaGameObject);
+            GameObject.DontDestroyOnLoad(FikaGameObject);
             logger.LogInfo("FikaGameObject has been created!");
         }
 
@@ -60,7 +61,14 @@ namespace Fika.Core.Coop.Utils
                 if (isServer)
                 {
                     FikaServer server = Singleton<FikaServer>.Instance;
-                    server.NetServer.Stop();
+                    try
+                    {
+                        server.NetServer.Stop();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError("DestroyNetManager: " + ex.Message);
+                    }
                     Singleton<FikaServer>.TryRelease(server);
                     GameObject.Destroy(server);
                     logger.LogInfo("Destroyed FikaServer");
@@ -68,7 +76,14 @@ namespace Fika.Core.Coop.Utils
                 else
                 {
                     FikaClient client = Singleton<FikaClient>.Instance;
-                    client.NetClient.Stop();
+                    try
+                    {
+                        client.NetClient.Stop();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError("DestroyNetManager: " + ex.Message);
+                    }
                     Singleton<FikaClient>.TryRelease(client);
                     GameObject.Destroy(client);
                     logger.LogInfo("Destroyed FikaClient");
@@ -114,7 +129,7 @@ namespace Fika.Core.Coop.Utils
             }
 
             logger.LogError("InitNetManager: FikaGameObject was null!");
-            return Task.CompletedTask;
+            throw new NullReferenceException("FikaGameObject was null");
         }
 
         public static Task SetupGameVariables(bool isServer, CoopPlayer coopPlayer)
@@ -147,7 +162,7 @@ namespace Fika.Core.Coop.Utils
                 FikaPinger fikaPinger = FikaGameObject.GetComponent<FikaPinger>();
                 if (fikaPinger != null)
                 {
-                    Object.Destroy(fikaPinger);
+                    GameObject.Destroy(fikaPinger);
                 }
                 else
                 {

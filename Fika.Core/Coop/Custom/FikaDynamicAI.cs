@@ -109,12 +109,14 @@ namespace Fika.Core.Coop.Custom
 
         public void AddHumans()
         {
-            foreach (CoopPlayer player in coopHandler.Players.Values)
+            foreach (CoopPlayer player in coopHandler.HumanPlayers)
             {
-                if (player.IsYourPlayer || player is ObservedCoopPlayer)
+                // Do not count the dedicated profile as an active player
+                if (player.Profile.Nickname.Contains("dedicated_"))
                 {
-                    humanPlayers.Add(player);
+                    continue;
                 }
+                humanPlayers.Add(player);
             }
         }
 

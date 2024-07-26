@@ -12,6 +12,7 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Networking;
+using Fika.Core.Utils;
 using LiteNetLib.Utils;
 using System;
 using System.Collections;
@@ -19,6 +20,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
 {
@@ -176,7 +178,7 @@ namespace Fika.Core.Coop.Players
                     if (LastAggressor is CoopPlayer aggressor)
                     {
                         if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
-                            NotificationManagerClass.DisplayMessageNotification($"{LastAggressor.Profile.Nickname} killed boss {name}", iconType: EFT.Communications.ENotificationIconType.Friend);
+                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname)} killed boss {ColorizeText(Colors.BROWN, name)}</color>", iconType: EFT.Communications.ENotificationIconType.Friend);
                     }
                 }
             }

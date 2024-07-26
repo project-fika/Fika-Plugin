@@ -6,6 +6,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -24,6 +25,7 @@ namespace Fika.Core.Coop.Utils
         public static EMatchmakerType MatchingType = EMatchmakerType.Single;
         public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
         public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
+        public static bool IsDedicated = false;
         public static bool IsSinglePlayer
         {
             get
@@ -32,7 +34,7 @@ namespace Fika.Core.Coop.Utils
                     && Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0;
             }
         }
-        public static bool IsDedicated = false;
+        public static bool IsDedicatedGame = false;
         public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         public static MatchMakerGroupPreview MatchMakerGroupPreview;
         public static int HostExpectedNumberOfPlayers = 1;
@@ -41,6 +43,7 @@ namespace Fika.Core.Coop.Utils
         public static int RemotePort;
         public static int LocalPort = 0;
         public static bool IsHostNatPunch = false;
+        public static string HostLocationId;
         private static string groupId;
         private static string raidCode;
 
@@ -97,14 +100,15 @@ namespace Fika.Core.Coop.Utils
             return true;
         }
 
-        public static void CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
+        public static async Task CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
         {
+            NotificationManagerClass.DisplayWarningNotification("Starting raid, please wait...");
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             string raidCode = GenerateRaidCode(6);
             CreateMatch body = new(raidCode, profileId, hostUsername, timestamp, raidSettings,
                 HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
-            FikaRequestHandler.RaidCreate(body);
+            await FikaRequestHandler.RaidCreate(body);
 
             SetGroupId(profileId);
             MatchingType = EMatchmakerType.GroupLeader;

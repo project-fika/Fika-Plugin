@@ -2,10 +2,12 @@
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets;
+using Fika.Core.Utils;
+using Fika.Core.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -16,7 +18,6 @@ namespace Fika.Core.Coop.ClientClasses
         private readonly List<string> lastFromNetwork = [];
         private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
-        private readonly HashSet<string> droppedZoneIds = [];
         private bool canSendAndReceive = true;
 
         public override void Init()
@@ -62,12 +63,6 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void Profile_OnItemZoneDropped(string itemId, string zoneId)
         {
-            if (droppedZoneIds.Contains(itemId))
-            {
-                return;
-            }
-
-            droppedZoneIds.Add(zoneId);
             QuestDropItemPacket packet = new(player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
@@ -167,7 +162,8 @@ namespace Fika.Core.Coop.ClientClasses
                         counter.Value++;
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"Received shared quest progression from {packet.Nickname}",
+                            NotificationManagerClass.DisplayMessageNotification(
+                                $"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.GREEN, quest.Template.Name)}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -198,7 +194,7 @@ namespace Fika.Core.Coop.ClientClasses
                         playerInventory.RunNetworkTransaction(pickupResult.Value);
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} picked up {item.Name.Localized()}",
+                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} picked up {(Colors.BLUE, item.Name.Localized())}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -213,33 +209,79 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
+            if (!acceptedTypes.Contains("PlaceBeacon"))
+            {
+                return;
+            }
+
             string itemId = packet.ItemId;
             string zoneId = packet.ZoneId;
 
-            if (DroppedItemAlreadyExists(itemId, zoneId))
+            if (!HasQuestForItem(itemId, zoneId, out string questName))
             {
                 return;
             }
 
             if (FikaPlugin.QuestSharingNotifications.Value)
             {
-                NotificationManagerClass.DisplayMessageNotification($"{packet.Nickname} planted an item.",
+                NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} planted an item for {ColorizeText(Colors.BROWN, questName)}",
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
-            droppedZoneIds.Add(zoneId);
             player.Profile.ItemDroppedAtPlace(itemId, zoneId);
         }
 
-        private bool DroppedItemAlreadyExists(string itemId, string zoneId)
+        private bool HasQuestForItem(string itemId, string zoneId, out string questName)
         {
-            if (player.Profile.EftStats.DroppedItems.Any(x => x.ItemId == itemId && x.ZoneId == zoneId) || droppedZoneIds.Contains(zoneId))
+            foreach (QuestClass quest in Quests)
             {
+                foreach (ConditionPlaceBeacon conditionPlaceBeacon in quest.GetConditions<ConditionPlaceBeacon>(EQuestStatus.AvailableForFinish))
+                {
+                    if (conditionPlaceBeacon.target.Contains(itemId) && conditionPlaceBeacon.zoneId == zoneId)
+                    {
+                        if (!quest.CompletedConditions.Contains(conditionPlaceBeacon.id))
+                        {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogWarning($"Quest already existed in 'DroppedItems', itemId: {itemId}, zoneId: {zoneId}");
+                            FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
 #endif
-                return true;
+                            questName = quest.Template.Name;
+                            return true;
+                        }
+#if DEBUG
+                        else
+                        {
+                            FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
+                        }
+#endif
+                    }
+                }
+
+                foreach (ConditionLeaveItemAtLocation conditionLeaveItemAtLocation in quest.GetConditions<ConditionLeaveItemAtLocation>(EQuestStatus.AvailableForFinish))
+                {
+                    if (conditionLeaveItemAtLocation.target.Contains(itemId) && conditionLeaveItemAtLocation.zoneId == zoneId)
+                    {
+                        if (!quest.CompletedConditions.Contains(conditionLeaveItemAtLocation.id))
+                        {
+#if DEBUG
+                            FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
+#endif
+                            questName = quest.Template.Name;
+                            return true;
+                        }
+#if DEBUG
+                        else
+                        {
+                            FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
+                        }
+#endif
+                    }
+                }
             }
+
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogWarning($"Did not have quest for Place Beacon/Item, itemId: {itemId}, zoneId: {zoneId}");
+#endif
+            questName = null;
             return false;
         }
 

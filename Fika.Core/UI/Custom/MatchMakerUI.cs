@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class MatchMakerUI : MonoBehaviour
 {
     [SerializeField]
-    public TextMeshProUGUI serversNumberAmount;
+    public GameObject ServerBrowserPanel;
     [SerializeField]
     public Button RefreshButton;
     [SerializeField]
@@ -22,9 +22,10 @@ public class MatchMakerUI : MonoBehaviour
     public TextMeshProUGUI PlayerAmountText;
     [SerializeField]
     public Toggle DedicatedToggle;
-
-    public void SetServerNumberText(string text)
-    {
-        serversNumberAmount.SetText(text);
-    }
+    [SerializeField]
+    public GameObject LoadingScreen;
+    [SerializeField]
+    public Image LoadingImage;
+    [SerializeField]
+    public TextMeshProUGUI LoadingText;
 }

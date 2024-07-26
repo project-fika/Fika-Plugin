@@ -1,7 +1,7 @@
 ﻿using EFT;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Player
+namespace Fika.Core.Networking
 {
     public struct OperationCallbackPacket(int netId, uint callbackId, EOperationStatus operationStatus, string error = null) : INetSerializable
     {

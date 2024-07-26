@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.BTR;
@@ -26,11 +25,11 @@ namespace Fika.Core.Coop.Components
     public class CoopHandler : MonoBehaviour
     {
         #region Fields/Properties        
-        public Dictionary<string, WorldInteractiveObject> ListOfInteractiveObjects { get; private set; } = [];
         public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
         public Dictionary<int, CoopPlayer> Players = [];
-        public int HumanPlayers = 1;
+        public List<CoopPlayer> HumanPlayers = [];
+        public int AmountOfHumans = 1;
         public List<int> ExtractedPlayers = [];
         ManualLogSource Logger;
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
@@ -113,22 +112,18 @@ namespace Fika.Core.Coop.Components
                 _ = Task.Run(ReadFromServerCharactersLoop);
             }
 
-            StartCoroutine(ProcessSpawnQueue());
-
-            WorldInteractiveObject[] interactiveObjects = FindObjectsOfType<WorldInteractiveObject>();
-            foreach (WorldInteractiveObject interactiveObject in interactiveObjects)
+            if (FikaBackendUtils.IsServer)
             {
-                ListOfInteractiveObjects.Add(interactiveObject.Id, interactiveObject);
+                Singleton<GameWorld>.Instance.World_0.RegisterNetworkInteractionObjects(null);
             }
         }
 
         protected void OnDestroy()
         {
             Players.Clear();
+            HumanPlayers.Clear();
 
             RunAsyncTasks = false;
-
-            StopCoroutine(ProcessSpawnQueue());
         }
 
         private bool requestQuitGame = false;
@@ -237,9 +232,14 @@ namespace Fika.Core.Coop.Components
 
         protected private void Update()
         {
-            if (!Singleton<IFikaGame>.Instantiated)
+            if (LocalGameInstance == null)
             {
                 return;
+            }
+
+            if (spawnQueue.Count > 0)
+            {
+                SpawnPlayer(spawnQueue.Dequeue());
             }
 
             ProcessQuitting();
@@ -262,7 +262,6 @@ namespace Fika.Core.Coop.Components
                 if (Players == null)
                 {
                     continue;
-
                 }
 
                 ReadFromServerCharacters();
@@ -291,7 +290,7 @@ namespace Fika.Core.Coop.Components
         {
             if (spawnObject.Profile == null)
             {
-                Logger.LogError("SpawnPlayer Profile is NULL!");
+                Logger.LogError("SpawnPlayer: Profile was null!");
                 queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
                 return;
             }
@@ -323,26 +322,29 @@ namespace Fika.Core.Coop.Components
 
             await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
                 PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.General).ContinueWith(x =>
-            {
-                if (x.IsCompleted)
                 {
-                    Logger.LogDebug($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
-                }
-                else if (x.IsFaulted)
-                {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
-                }
-                else if (x.IsCanceled)
-                {
-                    Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
-                }
-            });
+                    if (x.IsCompleted)
+                    {
+#if DEBUG
+                        Logger.LogInfo($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete"); 
+#endif
+                    }
+                    else if (x.IsFaulted)
+                    {
+                        Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
+                    }
+                    else if (x.IsCanceled)
+                    {
+                        Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
+                    }
+                });
 
             ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
 
             if (!spawnObject.IsAlive)
             {
                 // TODO: Spawn them as corpses?
+                // Run 'OnDead'
             }
 
             if (FikaBackendUtils.IsServer)
@@ -353,7 +355,9 @@ namespace Fika.Core.Coop.Components
                     if (botController != null)
                     {
                         // Start Coroutine as botController might need a while to start sometimes...
-                        Logger.LogInfo("Starting AddClientToBotEnemies routine.");
+#if DEBUG
+                        Logger.LogInfo("Starting AddClientToBotEnemies routine."); 
+#endif
                         StartCoroutine(AddClientToBotEnemies(botController, otherPlayer));
                     }
                     else
@@ -368,30 +372,6 @@ namespace Fika.Core.Coop.Components
             }
 
             queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
-        }
-
-        private IEnumerator ProcessSpawnQueue()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(1f);
-
-                if (Singleton<AbstractGame>.Instantiated)
-                {
-                    if (spawnQueue.Count > 0)
-                    {
-                        SpawnPlayer(spawnQueue.Dequeue());
-                    }
-                    else
-                    {
-                        yield return new WaitForSeconds(2);
-                    }
-                }
-                else
-                {
-                    yield return new WaitForSeconds(1);
-                }
-            }
         }
 
         public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
@@ -418,21 +398,16 @@ namespace Fika.Core.Coop.Components
             }
 
             queuedProfileIds.Add(profile.ProfileId);
-            Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
+#if DEBUG
+            Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}"); 
+#endif
             spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId));
-        }
-
-        public WorldInteractiveObject GetInteractiveObject(string objectId, out WorldInteractiveObject worldInteractiveObject)
-        {
-            if (ListOfInteractiveObjects.TryGetValue(objectId, out worldInteractiveObject))
-            {
-                return worldInteractiveObject;
-            }
-            return null;
         }
 
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
+            bool isDedicatedProfile = profile.Nickname.Contains("dedicated_");
+
             ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position,
                 Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
                 EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
@@ -447,10 +422,12 @@ namespace Fika.Core.Coop.Components
             }
 
             otherPlayer.NetId = netId;
-            Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
+#if DEBUG
+            Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}"); 
+#endif
             if (!isAI)
             {
-                HumanPlayers++;
+                AmountOfHumans++;
             }
 
             if (!Players.ContainsKey(netId))
@@ -460,6 +437,11 @@ namespace Fika.Core.Coop.Components
             else
             {
                 Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
+            }
+
+            if (!isAI && !isDedicatedProfile && !HumanPlayers.Contains(otherPlayer))
+            {
+                HumanPlayers.Add(otherPlayer);
             }
 
             if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))
@@ -512,9 +494,11 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            otherPlayer.InitObservedPlayer();
+            otherPlayer.InitObservedPlayer(isDedicatedProfile);
 
-            Logger.LogDebug($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
+#if DEBUG
+            Logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned."); 
+#endif
 
             SetWeaponInHandsOfNewPlayer(otherPlayer);
 
@@ -537,7 +521,9 @@ namespace Fika.Core.Coop.Components
                 yield return null;
             }
 
-            Logger.LogInfo($"Adding Client {playerToAdd.Profile.Nickname} to enemy list");
+#if DEBUG
+            Logger.LogInfo($"Adding Client {playerToAdd.Profile.Nickname} to enemy list"); 
+#endif
             botController.AddActivePLayer(playerToAdd);
 
             bool found = false;
@@ -553,11 +539,13 @@ namespace Fika.Core.Coop.Components
 
             if (found)
             {
-                Logger.LogInfo($"Verified that {playerToAdd.Profile.Nickname} was added to the enemy list.");
+#if DEBUG
+                Logger.LogInfo($"Verified that {playerToAdd.Profile.Nickname} was added to the enemy list."); 
+#endif
             }
             else
             {
-                Logger.LogInfo($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
+                Logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
             }
         }
 

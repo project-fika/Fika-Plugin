@@ -10,11 +10,11 @@ using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Airdrop;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
-using Fika.Core.Coop.World;
+using Fika.Core.Coop.Patches.Weather;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
-using Fika.Core.SPTSupport.Scav;
+using Fika.Core.Networking.Websocket;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
@@ -62,6 +62,7 @@ namespace Fika.Core
         public FikaModHandler ModHandler = new();
         public string Locale { get; private set; } = "en";
         public string[] LocalIPs;
+        public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
         public static Dictionary<string, string> RespectedPlayersList = new()
         {
@@ -215,6 +216,7 @@ namespace Fika.Core
             new DisableReadyButton_Patch().Enable();
             new DisableInsuranceReadyButton_Patch().Enable();
             new DisableMatchSettingsReadyButton_Patch().Enable();
+            new TarkovApplication_LocalGamePreparer_Patch().Enable();
             new TarkovApplication_LocalGameCreator_Patch().Enable();
             new DeathFade_Patch().Enable();
             new NonWaveSpawnScenario_Patch().Enable();
@@ -224,11 +226,13 @@ namespace Fika.Core
             new MatchmakerAcceptScreen_Show_Patch().Enable();
             new Minefield_method_2_Patch().Enable();
             new BotCacher_Patch().Enable();
-            //new InventoryScroll_Patch().Enable();
             new AbstractGame_InRaid_Patch().Enable();
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
             new MenuTaskBar_Patch().Enable();
+
+            gameObject.AddComponent<MainThreadDispatcher>();
+
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
