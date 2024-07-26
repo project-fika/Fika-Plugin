@@ -106,7 +106,6 @@ namespace Fika.Core.Coop.Players
             {
                 if (aggressor.Profile.Info.GroupId == "Fika")
                 {
-                    ConsoleScreen.Log("Killer was of my group");
                     CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                     if (mainPlayer != null)
                     {

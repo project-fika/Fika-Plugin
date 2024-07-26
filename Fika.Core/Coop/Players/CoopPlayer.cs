@@ -465,8 +465,6 @@ namespace Fika.Core.Coop.Players
                 playerSide = EPlayerSide.Bear;
             }
 
-            ConsoleScreen.Log("HandleTeammateKill");
-
             List<string> list = ["Any"];
 
             switch (playerSide)
