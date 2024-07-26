@@ -73,7 +73,6 @@ namespace Fika.Core.Coop.ClientClasses
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
         {
             base.OnConditionValueChanged(conditional, status, condition, notify);
-
             if (!canSendAndReceive)
             {
                 return;
@@ -303,6 +302,17 @@ namespace Fika.Core.Coop.ClientClasses
         /// <returns>Returns true if the quest type is valid, returns false if not</returns>
         internal bool ValidateQuestType(TaskConditionCounterClass counter)
         {
+            if (FikaPlugin.EasyKillConditions.Value)
+            {
+                if (counter.Type == "Kills")
+                {
+#if DEBUG
+                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: EasyMode was enabled and found a match!");
+#endif
+                    return false;
+                }
+            }
+
             if (acceptedTypes.Contains(counter.Type))
             {
                 return true;
@@ -313,7 +323,7 @@ namespace Fika.Core.Coop.ClientClasses
                 ConditionCounterCreator CounterCreator = (ConditionCounterCreator)counter.Template;
 
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController:: ValidateQuestType: CounterCreator Type {CounterCreator.type}");
+                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: CounterCreator Type {CounterCreator.type}");
 #endif
 
                 if (acceptedTypes.Contains(CounterCreator.type.ToString()))
