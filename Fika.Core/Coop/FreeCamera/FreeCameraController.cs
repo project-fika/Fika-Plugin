@@ -26,7 +26,7 @@ namespace Fika.Core.Coop.FreeCamera
     {
         private FreeCamera freeCamScript;
 
-        private EftBattleUIScreen _playerUi;
+        private EftBattleUIScreen playerUi;
         private bool uiHidden;
 
         private bool effectsCleared = false;
@@ -324,7 +324,7 @@ namespace Fika.Core.Coop.FreeCamera
             }
 
             // If we don't have the UI Component cached, go look for it in the scene
-            if (_playerUi == null)
+            if (playerUi == null)
             {
                 GameObject gameObject = GameObject.Find("BattleUIScreen");
                 if (gameObject == null)
@@ -332,21 +332,21 @@ namespace Fika.Core.Coop.FreeCamera
                     return;
                 }
 
-                _playerUi = gameObject.GetComponent<EftBattleUIScreen>();
+                playerUi = gameObject.GetComponent<EftBattleUIScreen>();
 
-                if (_playerUi == null)
+                if (playerUi == null)
                 {
                     //FreecamPlugin.Logger.LogError("Failed to locate player UI");
                     return;
                 }
             }
 
-            if (_playerUi == null || _playerUi.gameObject == null)
+            if (playerUi == null || playerUi.gameObject == null)
             {
                 return;
             }
 
-            _playerUi.gameObject.SetActive(uiHidden);
+            playerUi.gameObject.SetActive(uiHidden);
             uiHidden = !uiHidden;
         }
 
