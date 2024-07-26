@@ -48,7 +48,7 @@ namespace Fika.Core.Networking
         {
             get
             {
-                return _netServer;
+                return netServer;
             }
         }
         public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
@@ -57,20 +57,20 @@ namespace Fika.Core.Networking
         {
             get
             {
-                if (_netServer == null)
+                if (netServer == null)
                 {
                     return false;
                 }
-                return _netServer.IsRunning;
+                return netServer.IsRunning;
             }
         }
 
-        private NetManager _netServer;
+        private NetManager netServer;
         private readonly NetDataWriter _dataWriter = new();
         private int Port => FikaPlugin.UDPPort.Value;
         private CoopHandler coopHandler;
         private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
-        private int _currentNetId;
+        private int currentNetId;
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
         private int statisticsCounter = 0;
@@ -81,7 +81,7 @@ namespace Fika.Core.Networking
             NetworkGameSession.LossPercent = 0;
 
             // Start at 1 to avoid having 0 and making us think it's working when it's not
-            _currentNetId = 1;
+            currentNetId = 1;
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
@@ -108,7 +108,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
 
-            _netServer = new NetManager(this)
+            netServer = new NetManager(this)
             {
                 BroadcastReceiveEnabled = true,
                 UnconnectedMessagesEnabled = true,
@@ -167,8 +167,8 @@ namespace Fika.Core.Networking
 
             if (FikaPlugin.UseNatPunching.Value)
             {
-                _netServer.NatPunchModule.Init(this);
-                _netServer.Start();
+                netServer.NatPunchModule.Init(this);
+                netServer.Start();
 
                 natIntroduceRoutineCts = new CancellationTokenSource();
 
@@ -182,17 +182,17 @@ namespace Fika.Core.Networking
             {
                 if (FikaPlugin.ForceBindIP.Value != "Disabled")
                 {
-                    _netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
+                    netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
                 }
                 else
                 {
-                    _netServer.Start(Port);
+                    netServer.Start(Port);
                 }
             }
 
             logger.LogInfo("Started Fika Server");
 
-            NotificationManagerClass.DisplayMessageNotification($"Server started on port {_netServer.LocalPort}.",
+            NotificationManagerClass.DisplayMessageNotification($"Server started on port {netServer.LocalPort}.",
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
             string[] Ips = [];
@@ -299,7 +299,7 @@ namespace Fika.Core.Networking
 
             while (!ct.IsCancellationRequested)
             {
-                _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
+                netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
                 logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
 
@@ -352,8 +352,8 @@ namespace Fika.Core.Networking
 
         public int PopNetId()
         {
-            int netId = _currentNetId;
-            _currentNetId++;
+            int netId = currentNetId;
+            currentNetId++;
 
             return netId;
         }
@@ -596,7 +596,7 @@ namespace Fika.Core.Networking
 
             InformationPacket respondPackage = new(false)
             {
-                NumberOfPlayers = _netServer.ConnectedPeersCount,
+                NumberOfPlayers = netServer.ConnectedPeersCount,
                 ReadyPlayers = ReadyClients,
             };
 
@@ -826,8 +826,8 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            _netServer?.PollEvents();
-            _netServer?.NatPunchModule?.PollEvents();
+            netServer?.PollEvents();
+            netServer?.NatPunchModule?.PollEvents();
 
             statisticsCounter++;
             if (statisticsCounter > 600)
@@ -848,7 +848,7 @@ namespace Fika.Core.Networking
 
         protected void OnDestroy()
         {
-            _netServer?.Stop();
+            netServer?.Stop();
 
             if (fikaChat != null)
             {
@@ -866,13 +866,13 @@ namespace Fika.Core.Networking
                 if (NetServer.ConnectedPeersCount > 1)
                 {
                     packetProcessor.WriteNetSerializable(writer, ref packet);
-                    _netServer.SendToAll(writer, deliveryMethod, peerToExclude);
+                    netServer.SendToAll(writer, deliveryMethod, peerToExclude);
                 }
             }
             else
             {
                 packetProcessor.WriteNetSerializable(writer, ref packet);
-                _netServer.SendToAll(writer, deliveryMethod);
+                netServer.SendToAll(writer, deliveryMethod);
             }
         }
 
@@ -902,7 +902,7 @@ namespace Fika.Core.Networking
                 logger.LogInfo("[SERVER] Received discovery request. Send discovery response");
                 NetDataWriter resp = new();
                 resp.Put(1);
-                _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                netServer.SendUnconnectedMessage(resp, remoteEndPoint);
             }
             else
             {
@@ -915,14 +915,14 @@ namespace Fika.Core.Networking
                         case "fika.hello":
                             resp = new();
                             resp.Put(data);
-                            _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                            netServer.SendUnconnectedMessage(resp, remoteEndPoint);
                             logger.LogInfo("PingingRequest: Correct ping query, sending response");
                             break;
 
                         case "fika.keepalive":
                             resp = new();
                             resp.Put(data);
-                            _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                            netServer.SendUnconnectedMessage(resp, remoteEndPoint);
 
                             if (!natIntroduceRoutineCts.IsCancellationRequested)
                             {
@@ -955,14 +955,14 @@ namespace Fika.Core.Networking
         {
             logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
             NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
-            if (_netServer.ConnectedPeersCount == 0)
+            if (netServer.ConnectedPeersCount == 0)
             {
                 timeSinceLastPeerDisconnected = DateTime.Now;
             }
 
             if (FikaBackendUtils.IsDedicatedGame)
             {
-                if (_netServer.ConnectedPeersCount == 0)
+                if (netServer.ConnectedPeersCount == 0)
                 {
                     foreach (Profile profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
                     {
@@ -1020,8 +1020,8 @@ namespace Fika.Core.Networking
 
                 for (int i = 0; i < 20; i++)
                 {
-                    _netServer.SendUnconnectedMessage(data, localEndPoint);
-                    _netServer.SendUnconnectedMessage(data, remoteEndPoint);
+                    netServer.SendUnconnectedMessage(data, localEndPoint);
+                    netServer.SendUnconnectedMessage(data, remoteEndPoint);
                     await Task.Delay(250);
                 }
             });
