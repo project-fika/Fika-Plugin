@@ -6,7 +6,6 @@ using EFT.Ballistics;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
-using EFT.UI;
 using EFT.Vaulting;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
@@ -730,7 +729,6 @@ namespace Fika.Core.Coop.Players
             {
                 if (aggressor.Profile.Info.GroupId == "Fika")
                 {
-                    ConsoleScreen.Log("Killer was of my group");
                     CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                     if (mainPlayer != null)
                     {
