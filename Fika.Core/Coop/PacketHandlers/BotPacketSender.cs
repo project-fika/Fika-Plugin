@@ -52,6 +52,11 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
+            if (player.AIData.BotOwner.Mover == null)
+            {
+                return;
+            }
+
             PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation,
                 player.HeadRotation, player.LastDirection, player.CurrentManagedState.Name,
                 player.MovementContext.SmoothedTilt, player.MovementContext.Step, player.CurrentAnimatorStateIndex,
