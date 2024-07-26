@@ -161,6 +161,11 @@ namespace Fika.Core.UI.Custom
             if (!response.Available)
             {
                 fikaMatchMakerUi.DedicatedToggle.interactable = false;
+                TextMeshProUGUI dedicatedText = fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
+                if (dedicatedText != null)
+                {
+                    dedicatedText.color = new(1f, 1f, 1f, 0.5f);
+                }
 
                 TooltipTextGetter dediTooltipTextGetter = new()
                 {
