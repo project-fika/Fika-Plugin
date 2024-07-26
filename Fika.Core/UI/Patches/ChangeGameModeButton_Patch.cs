@@ -1,10 +1,10 @@
 ﻿using EFT.UI;
+using Fika.Core.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Fika.Core.Utils;
 using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.UI.Patches

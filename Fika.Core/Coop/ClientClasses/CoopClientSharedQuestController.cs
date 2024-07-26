@@ -2,8 +2,8 @@
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
-using Fika.Core.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;

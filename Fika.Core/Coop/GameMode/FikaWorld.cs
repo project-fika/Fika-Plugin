@@ -7,6 +7,6 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     public class FikaWorld : World
     {
-        
+
     }
 }

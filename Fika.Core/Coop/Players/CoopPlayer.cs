@@ -488,7 +488,7 @@ namespace Fika.Core.Coop.Players
             }
 
             foreach (string value in list)
-            {                
+            {
                 AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                                 bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
                                 killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
@@ -498,7 +498,7 @@ namespace Fika.Core.Coop.Players
                     killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
             }
 
-            
+
         }
 
 #if DEBUG
@@ -1032,7 +1032,7 @@ namespace Fika.Core.Coop.Players
             // Set own group id, ignore if dedicated
             if (!Profile.Info.Nickname.Contains("dedicated_"))
             {
-                Profile.Info.GroupId = "Fika"; 
+                Profile.Info.GroupId = "Fika";
             }
 
             // Setup own dog tag

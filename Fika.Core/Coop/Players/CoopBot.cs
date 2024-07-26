@@ -99,7 +99,7 @@ namespace Fika.Core.Coop.Players
         {
             if (aggressor.IsYourPlayer)
             {
-                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType); 
+                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
             }
 
             if (FikaPlugin.EasyKillConditions.Value)
@@ -115,7 +115,7 @@ namespace Fika.Core.Coop.Players
                             distance, CurrentHour, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
                             (CoopPlayer)aggressor);
                     }
-                } 
+                }
             }
         }
 

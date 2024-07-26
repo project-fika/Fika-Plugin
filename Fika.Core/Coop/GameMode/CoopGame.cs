@@ -20,7 +20,6 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
-using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;

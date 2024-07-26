@@ -874,7 +874,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (!isDedicatedHost)
                 {
-                    Profile.Info.GroupId = "Fika"; 
+                    Profile.Info.GroupId = "Fika";
                 }
 
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;

@@ -102,7 +102,7 @@ namespace Fika.Core.UI.Custom
                     {
                         text = ".";
                     }
-                    tmpText.text = text; 
+                    tmpText.text = text;
                 }
             }
         }
