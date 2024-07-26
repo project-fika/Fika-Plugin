@@ -87,6 +87,11 @@ namespace Fika.Core.Coop.ClientClasses
             SendQuestPacket(conditional, condition);
         }
 
+        public bool ContainsAcceptedType(string type)
+        {
+            return acceptedTypes.Contains(type);
+        }
+
         public void AddNetworkId(string id)
         {
             if (!lastFromNetwork.Contains(id))
@@ -163,7 +168,7 @@ namespace Fika.Core.Coop.ClientClasses
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
                             NotificationManagerClass.DisplayMessageNotification(
-                                $"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.GREEN, quest.Template.Name)}",
+                                $"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.BROWN, quest.Template.Name)}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -194,7 +199,7 @@ namespace Fika.Core.Coop.ClientClasses
                         playerInventory.RunNetworkTransaction(pickupResult.Value);
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} picked up {(Colors.BLUE, item.Name.Localized())}",
+                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} picked up {ColorizeText(Colors.BLUE, item.Name.Localized())}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -228,6 +233,12 @@ namespace Fika.Core.Coop.ClientClasses
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
+            Item item = player.Inventory.QuestRaidItems.GetAllItems().FirstOrDefault(x => x.TemplateId == itemId);
+            if (item != null)
+            {
+                GStruct414<GClass2801> removeResult = InteractionsHandlerClass.Remove(item, player.InventoryControllerClass, true, false);
+                player.InventoryControllerClass.TryRunNetworkTransaction(removeResult);
+            }
             player.Profile.ItemDroppedAtPlace(itemId, zoneId);
         }
 
