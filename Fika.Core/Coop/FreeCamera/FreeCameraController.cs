@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         private bool effectsCleared = false;
 
-        private GamePlayerOwner _gamePlayerOwner;
+        private GamePlayerOwner gamePlayerOwner;
         private CoopPlayer player => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         private CoopHandler coopHandler;
 
@@ -71,8 +71,8 @@ namespace Fika.Core.Coop.FreeCamera
             }
 
             // Get GamePlayerOwner component
-            _gamePlayerOwner = GetLocalPlayerFromWorld().GetComponentInChildren<GamePlayerOwner>();
-            if (_gamePlayerOwner == null)
+            gamePlayerOwner = GetLocalPlayerFromWorld().GetComponentInChildren<GamePlayerOwner>();
+            if (gamePlayerOwner == null)
             {
                 return;
             }
@@ -106,7 +106,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         protected void Update()
         {
-            if (_gamePlayerOwner == null)
+            if (gamePlayerOwner == null)
             {
                 return;
             }
@@ -366,7 +366,7 @@ namespace Fika.Core.Coop.FreeCamera
                 localPlayer.GetComponent<PlayerCameraController>().UpdatePointOfView();
             }
 
-            _gamePlayerOwner.enabled = false;
+            gamePlayerOwner.enabled = false;
             freeCamScript.SetActive(true);
         }
 
@@ -377,7 +377,7 @@ namespace Fika.Core.Coop.FreeCamera
         private void SetPlayerToFirstPersonMode(Player localPlayer)
         {
             // re-enable _gamePlayerOwner
-            _gamePlayerOwner.enabled = true;
+            gamePlayerOwner.enabled = true;
             freeCamScript.SetActive(false);
 
             localPlayer.PointOfView = EPointOfView.FirstPerson;
