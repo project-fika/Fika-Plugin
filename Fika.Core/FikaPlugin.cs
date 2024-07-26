@@ -230,6 +230,10 @@ namespace Fika.Core
             new ChangeGameModeButton_Patch().Enable();
             new MenuTaskBar_Patch().Enable();
             new GameWorld_Create_Patch().Enable();
+            if (AllowItemSending)
+            {
+                new ItemContext_Patch().Enable();
+            }
 
             gameObject.AddComponent<MainThreadDispatcher>();
 
@@ -250,11 +254,6 @@ namespace Fika.Core
 
             FikaAirdropUtil.GetConfigFromServer();
             BotSettingsRepoAbstractClass.Init();
-
-            if (AllowItemSending)
-            {
-                new ItemContext_Patch().Enable();
-            }
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
@@ -619,12 +618,12 @@ namespace Fika.Core
         [Flags]
         public enum EQuestSharingTypes
         {
-            Kill = 1,
+            Kills = 1,
             Item = 2,
             Location = 4,
             PlaceBeacon = 8,
 
-            All = Kill | Item | Location | PlaceBeacon
+            All = Kills | Item | Location | PlaceBeacon
         }
     }
 }

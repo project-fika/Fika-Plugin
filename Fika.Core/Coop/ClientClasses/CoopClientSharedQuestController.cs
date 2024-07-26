@@ -29,9 +29,12 @@ namespace Fika.Core.Coop.ClientClasses
                 {
                     switch (shareType)
                     {
-                        case FikaPlugin.EQuestSharingTypes.Kill:
-                            acceptedTypes.Add("Elimination");
-                            acceptedTypes.Add(shareType.ToString());
+                        case FikaPlugin.EQuestSharingTypes.Kills:
+                            if (!FikaPlugin.EasyKillConditions.Value)
+                            {
+                                acceptedTypes.Add("Elimination");
+                                acceptedTypes.Add(shareType.ToString()); 
+                            }
                             break;
                         case FikaPlugin.EQuestSharingTypes.Item:
                             acceptedTypes.Add("FindItem");
@@ -302,17 +305,6 @@ namespace Fika.Core.Coop.ClientClasses
         /// <returns>Returns true if the quest type is valid, returns false if not</returns>
         internal bool ValidateQuestType(TaskConditionCounterClass counter)
         {
-            if (FikaPlugin.EasyKillConditions.Value)
-            {
-                if (counter.Type == "Kills")
-                {
-#if DEBUG
-                    FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: EasyMode was enabled and found a match!");
-#endif
-                    return false;
-                }
-            }
-
             if (acceptedTypes.Contains(counter.Type))
             {
                 return true;
