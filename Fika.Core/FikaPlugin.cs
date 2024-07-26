@@ -413,7 +413,7 @@ namespace Fika.Core
 
             PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f,
                 new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 0, IsAdvanced = true }));
-            PingSound = Config.Bind("Coop | Custom", "Ping Sound", EPingSound.InsuranceInsured,
+            PingSound = Config.Bind("Coop | Custom", "Ping Sound", EPingSound.SubQuestComplete,
                 new ConfigDescription("The audio that plays on ping"));
 
             // Coop | Debug
