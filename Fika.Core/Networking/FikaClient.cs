@@ -105,6 +105,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
             packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnStatisticsPacketReceived);
 
             _netClient = new NetManager(this)
             {
@@ -148,6 +149,15 @@ namespace Fika.Core.Networking
             }
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnStatisticsPacketReceived(ThrowablePacket packet)
+        {
+            GClass724<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
+            if (grenades.TryGetByKey(packet.Data.Id, out Throwable throwable))
+            {
+                throwable.ApplyNetPacket(packet.Data);
+            }
         }
 
         private void OnStatisticsPacketReceived(StatisticsPacket packet)
