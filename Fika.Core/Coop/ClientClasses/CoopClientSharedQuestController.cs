@@ -307,7 +307,7 @@ namespace Fika.Core.Coop.ClientClasses
                 if (counter.Type == "Kills")
                 {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: EasyMode was enabled and found a match!");
+                    FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: EasyMode was enabled and found a match!");
 #endif
                     return false;
                 }
