@@ -574,7 +574,7 @@ namespace Fika.Core.Coop.ClientClasses
             private CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
         }
 
-        private class FirearmClass2(Player.FirearmController controller) : GClass1600(controller)
+        private class FirearmClass2(Player.FirearmController controller) : GClass1601(controller)
         {
             public override void SetTriggerPressed(bool pressed)
             {
@@ -595,7 +595,7 @@ namespace Fika.Core.Coop.ClientClasses
             private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
         }
 
-        private class FirearmClass3(Player.FirearmController controller) : GClass1601(controller)
+        private class FirearmClass3(Player.FirearmController controller) : GClass1602(controller)
         {
             public override void SetTriggerPressed(bool pressed)
             {
