@@ -32,6 +32,7 @@ using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -136,6 +137,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> PingUseOpticZoom { get; set; }
         public static ConfigEntry<bool> PingScaleWithDistance { get; set; }
         public static ConfigEntry<float> PingMinimumOpacity { get; set; }
+        public static ConfigEntry<EPingSound> PingSound { get; set; }
 
         // Coop | Debug
         public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
@@ -411,6 +413,8 @@ namespace Fika.Core
 
             PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f,
                 new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 0, IsAdvanced = true }));
+            PingSound = Config.Bind("Coop | Custom", "Ping Sound", EPingSound.SubQuestComplete,
+                new ConfigDescription("The audio that plays on ping"));
 
             // Coop | Debug
 
@@ -609,6 +613,19 @@ namespace Fika.Core
             Low,
             Medium,
             High
+        }
+        public enum EPingSound
+        {
+            SubQuestComplete,
+            InsuranceInsured,
+            ButtonClick,
+            ButtonHover,
+            InsuranceItemInsured,
+            MenuButtonBottom,
+            ErrorMessage,
+            InspectWindow,
+            InspectWindowClose,
+            MenuEscape,
         }
 
         [Flags]

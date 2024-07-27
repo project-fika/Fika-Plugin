@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
 using Fika.Core.Utils;
@@ -20,6 +21,24 @@ public static class PingFactory
         LootContainer,
         Door,
         Interactable
+    }
+
+    public static EUISoundType GetPingSound()
+    {
+        return FikaPlugin.PingSound.Value switch
+        {
+            FikaPlugin.EPingSound.InsuranceInsured => EUISoundType.InsuranceInsured,
+            FikaPlugin.EPingSound.SubQuestComplete => EUISoundType.QuestSubTrackComplete,
+            FikaPlugin.EPingSound.ButtonClick => EUISoundType.ButtonClick,
+            FikaPlugin.EPingSound.ButtonHover => EUISoundType.ButtonOver,
+            FikaPlugin.EPingSound.InsuranceItemInsured => EUISoundType.InsuranceItemOnInsure,
+            FikaPlugin.EPingSound.MenuButtonBottom => EUISoundType.ButtonBottomBarClick,
+            FikaPlugin.EPingSound.ErrorMessage => EUISoundType.ErrorMessage,
+            FikaPlugin.EPingSound.InspectWindow => EUISoundType.MenuInspectorWindowOpen,
+            FikaPlugin.EPingSound.InspectWindowClose => EUISoundType.MenuInspectorWindowClose,
+            FikaPlugin.EPingSound.MenuEscape => EUISoundType.MenuEscape,
+            _ => EUISoundType.QuestSubTrackComplete,
+        };
     }
 
     public static AbstractPing FromPingType(EPingType type, GameObject gameObject)
