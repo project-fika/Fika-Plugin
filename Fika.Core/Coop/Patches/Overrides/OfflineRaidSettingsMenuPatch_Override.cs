@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.Patches.Overrides
         private static RaidSettingsWindow instance;
         private static List<CanvasGroup> weatherCanvasGroups;
         private static bool randomWeather;
-        public static bool UseRandomWeather
+        public static bool UseCustomWeather
         {
             get => randomWeather;
             set => randomWeather = value;

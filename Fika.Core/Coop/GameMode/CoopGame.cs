@@ -149,13 +149,13 @@ namespace Fika.Core.Coop.GameMode
             BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.BossSpawnWaveManagerClass = BossSpawnWaveManagerClass.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
-            if (OfflineRaidSettingsMenuPatch_Override.UseRandomWeather && coopGame.isServer)
+            if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
             {
                 Logger.LogInfo("Custom weather enabled, initializing curves");
                 coopGame.SetupCustomWeather(timeAndWeather);
             }
 
-            OfflineRaidSettingsMenuPatch_Override.UseRandomWeather = false;
+            OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
             SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
             coopGame.func_1 = new Func<Player, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);

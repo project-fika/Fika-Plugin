@@ -2,6 +2,7 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
+using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
@@ -286,7 +287,8 @@ namespace Fika.Core.UI.Custom
                         BotSettings = raidSettings.BotSettings,
                         Side = raidSettings.Side,
                         TimeAndWeatherSettings = raidSettings.TimeAndWeatherSettings,
-                        WavesSettings = raidSettings.WavesSettings
+                        WavesSettings = raidSettings.WavesSettings,
+                        CustomWeather = OfflineRaidSettingsMenuPatch_Override.UseCustomWeather
                     };
 
                     StartDedicatedResponse response = await FikaRequestHandler.StartDedicated(request);

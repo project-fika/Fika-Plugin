@@ -34,5 +34,8 @@ namespace Fika.Core.Networking.Models.Dedicated
 
         [DataMember(Name = "side")]
         public ESideType Side { readonly get; set; }
+
+        [DataMember(Name = "customWeather")]
+        public bool CustomWeather { readonly get; set; }
     }
 }
