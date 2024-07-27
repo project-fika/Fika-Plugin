@@ -47,7 +47,7 @@ namespace Fika.Core.Networking
         {
             get
             {
-                return _netClient;
+                return netClient;
             }
         }
         public NetPeer ServerConnection { get; private set; }
@@ -56,15 +56,15 @@ namespace Fika.Core.Networking
         {
             get
             {
-                if (_netClient == null)
+                if (netClient == null)
                 {
                     return false;
                 }
-                return _netClient.IsRunning;
+                return netClient.IsRunning;
             }
         }
 
-        private NetManager _netClient;
+        private NetManager netClient;
         private CoopHandler coopHandler;
         private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         private FikaChat fikaChat;
@@ -107,7 +107,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
             packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnStatisticsPacketReceived);
 
-            _netClient = new NetManager(this)
+            netClient = new NetManager(this)
             {
                 UnconnectedMessagesEnabled = true,
                 UpdateTime = 15,
@@ -125,7 +125,7 @@ namespace Fika.Core.Networking
                 NetManagerUtils.DestroyPingingClient();
             }
 
-            _netClient.Start(FikaBackendUtils.LocalPort);
+            netClient.Start(FikaBackendUtils.LocalPort);
 
             string ip = FikaBackendUtils.RemoteIp;
             int port = FikaBackendUtils.RemotePort;
@@ -136,7 +136,7 @@ namespace Fika.Core.Networking
             }
             else
             {
-                ServerConnection = _netClient.Connect(ip, port, "fika.core");
+                ServerConnection = netClient.Connect(ip, port, "fika.core");
             };
 
             while (ServerConnection.ConnectionState != ConnectionState.Connected)
@@ -145,7 +145,7 @@ namespace Fika.Core.Networking
                 FikaPlugin.Instance.FikaLogger.LogWarning("FikaClient was not able to connect in time!");
 #endif
                 await Task.Delay(1 * 6000);
-                ServerConnection = _netClient.Connect(ip, port, "fika.core");
+                ServerConnection = netClient.Connect(ip, port, "fika.core");
             }
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
@@ -827,7 +827,7 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            _netClient?.PollEvents();
+            netClient?.PollEvents();
 
             /*if (_netClient.FirstPeer == null)
             {
@@ -837,7 +837,7 @@ namespace Fika.Core.Networking
 
         protected void OnDestroy()
         {
-            _netClient?.Stop();
+            netClient?.Stop();
 
             if (fikaChat != null)
             {
@@ -850,7 +850,7 @@ namespace Fika.Core.Networking
         public void SendData<T>(NetDataWriter writer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
         {
             packetProcessor.WriteNetSerializable(writer, ref packet);
-            _netClient.FirstPeer.Send(writer, deliveryMethod);
+            netClient.FirstPeer.Send(writer, deliveryMethod);
         }
 
         public void OnPeerConnected(NetPeer peer)
@@ -871,10 +871,10 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
-            if (messageType == UnconnectedMessageType.BasicMessage && _netClient.ConnectedPeersCount == 0 && reader.GetInt() == 1)
+            if (messageType == UnconnectedMessageType.BasicMessage && netClient.ConnectedPeersCount == 0 && reader.GetInt() == 1)
             {
                 logger.LogInfo("[CLIENT] Received discovery response. Connecting to: " + remoteEndPoint);
-                _netClient.Connect(remoteEndPoint, "fika.core");
+                netClient.Connect(remoteEndPoint, "fika.core");
             }
         }
 

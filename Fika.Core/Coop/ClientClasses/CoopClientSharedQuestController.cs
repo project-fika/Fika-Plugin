@@ -2,8 +2,8 @@
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
-using Fika.Core.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +29,12 @@ namespace Fika.Core.Coop.ClientClasses
                 {
                     switch (shareType)
                     {
-                        case FikaPlugin.EQuestSharingTypes.Kill:
-                            acceptedTypes.Add("Elimination");
-                            acceptedTypes.Add(shareType.ToString());
+                        case FikaPlugin.EQuestSharingTypes.Kills:
+                            if (!FikaPlugin.EasyKillConditions.Value)
+                            {
+                                acceptedTypes.Add("Elimination");
+                                acceptedTypes.Add(shareType.ToString()); 
+                            }
                             break;
                         case FikaPlugin.EQuestSharingTypes.Item:
                             acceptedTypes.Add("FindItem");
@@ -73,7 +76,6 @@ namespace Fika.Core.Coop.ClientClasses
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
         {
             base.OnConditionValueChanged(conditional, status, condition, notify);
-
             if (!canSendAndReceive)
             {
                 return;
@@ -85,6 +87,11 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
             SendQuestPacket(conditional, condition);
+        }
+
+        public bool ContainsAcceptedType(string type)
+        {
+            return acceptedTypes.Contains(type);
         }
 
         public void AddNetworkId(string id)
@@ -163,7 +170,7 @@ namespace Fika.Core.Coop.ClientClasses
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
                             NotificationManagerClass.DisplayMessageNotification(
-                                $"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.GREEN, quest.Template.Name)}",
+                                $"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.BROWN, quest.Template.Name)}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -194,7 +201,7 @@ namespace Fika.Core.Coop.ClientClasses
                         playerInventory.RunNetworkTransaction(pickupResult.Value);
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} picked up {(Colors.BLUE, item.Name.Localized())}",
+                            NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} picked up {ColorizeText(Colors.BLUE, item.Name.Localized())}",
                                                 iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
@@ -228,6 +235,12 @@ namespace Fika.Core.Coop.ClientClasses
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
+            Item item = player.Inventory.QuestRaidItems.GetAllItems().FirstOrDefault(x => x.TemplateId == itemId);
+            if (item != null)
+            {
+                GStruct414<GClass2801> removeResult = InteractionsHandlerClass.Remove(item, player.InventoryControllerClass, true, false);
+                player.InventoryControllerClass.TryRunNetworkTransaction(removeResult);
+            }
             player.Profile.ItemDroppedAtPlace(itemId, zoneId);
         }
 
@@ -302,7 +315,7 @@ namespace Fika.Core.Coop.ClientClasses
                 ConditionCounterCreator CounterCreator = (ConditionCounterCreator)counter.Template;
 
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController:: ValidateQuestType: CounterCreator Type {CounterCreator.type}");
+                FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: CounterCreator Type {CounterCreator.type}");
 #endif
 
                 if (acceptedTypes.Contains(CounterCreator.type.ToString()))

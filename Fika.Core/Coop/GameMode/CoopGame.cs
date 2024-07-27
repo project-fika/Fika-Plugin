@@ -20,7 +20,6 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
-using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -150,13 +149,13 @@ namespace Fika.Core.Coop.GameMode
             BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(wavesSettings, location.BossLocationSpawn);
             coopGame.BossSpawnWaveManagerClass = BossSpawnWaveManagerClass.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 
-            if (OfflineRaidSettingsMenuPatch_Override.UseRandomWeather && coopGame.isServer)
+            if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
             {
                 Logger.LogInfo("Custom weather enabled, initializing curves");
                 coopGame.SetupCustomWeather(timeAndWeather);
             }
 
-            OfflineRaidSettingsMenuPatch_Override.UseRandomWeather = false;
+            OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
             SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
             coopGame.func_1 = new Func<Player, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);
@@ -174,21 +173,6 @@ namespace Fika.Core.Coop.GameMode
             if (endByTimerScenario != null)
             {
                 Destroy(endByTimerScenario);
-            }
-
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            if (coopGame.isServer)
-            {
-                gameWorld.gameObject.AddComponent<FikaHostWorld>();
-
-                Traverse.Create(gameWorld).Field<GClass676>("gclass676_0").Value = new HostGrenadeFactory();
-            }
-            else
-            {
-                gameWorld.gameObject.AddComponent<FikaWorld>();
-
-                // Check for GClass increments
-                Traverse.Create(gameWorld).Field<GClass676>("gclass676_0").Value = new GClass677();
             }
 
             coopGame.timeManager = CoopTimeManager.Create(coopGame);

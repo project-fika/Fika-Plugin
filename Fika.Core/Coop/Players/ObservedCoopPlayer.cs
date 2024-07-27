@@ -240,11 +240,15 @@ namespace Fika.Core.Coop.Players
                 player.ExecuteShotSkill(damageInfo.Weapon);
             }
 
-            bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface244>(bodyPart) != null;
-            player.StatisticsManager.OnEnemyDamage(damageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
-                GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
-                Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
-                Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones);
+            if (player.IsYourPlayer)
+            {
+                bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface244>(bodyPart) != null;
+                player.StatisticsManager.OnEnemyDamage(damageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
+                    GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
+                    Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
+                    Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones);
+                return;
+            }
         }
 
         public override void UpdateArmsCondition()
@@ -718,6 +722,22 @@ namespace Fika.Core.Coop.Players
             if (LastAggressor.IsYourPlayer)
             {
                 base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
+                return;
+            }
+
+            if (FikaPlugin.EasyKillConditions.Value)
+            {
+                if (aggressor.Profile.Info.GroupId == "Fika")
+                {
+                    CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                    if (mainPlayer != null)
+                    {
+                        float distance = Vector3.Distance(aggressor.Position, Position);
+                        mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
+                            distance, CurrentHour, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
+                            (CoopPlayer)aggressor);
+                    }
+                }
             }
         }
 
@@ -854,7 +874,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (!isDedicatedHost)
                 {
-                    Profile.Info.GroupId = "Fika"; 
+                    Profile.Info.GroupId = "Fika";
                 }
 
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;

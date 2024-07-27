@@ -1,7 +1,4 @@
-﻿using EFT;
-using EFT.Bots;
-using JsonType;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Models.Dedicated
 {

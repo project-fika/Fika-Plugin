@@ -71,7 +71,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
             if (!player.AIData.BotOwner.Mover.IsMoving)
             {
-                player.LastDirection = Vector2.zero; 
+                player.LastDirection = Vector2.zero;
             }
         }
 

@@ -448,6 +448,57 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public void HandleTeammateKill(DamageInfo damage, EBodyPart bodyPart,
+            EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
+            float distance, int hour, List<string> targetEquipment,
+            HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer)
+        {
+            if (role != WildSpawnType.pmcBEAR)
+            {
+                if (role == WildSpawnType.pmcUSEC)
+                {
+                    playerSide = EPlayerSide.Usec;
+                }
+            }
+            else
+            {
+                playerSide = EPlayerSide.Bear;
+            }
+
+            List<string> list = ["Any"];
+
+            switch (playerSide)
+            {
+                case EPlayerSide.Usec:
+                    list.Add("Usec");
+                    list.Add("AnyPmc");
+                    list.Add("Enemy");
+                    break;
+                case EPlayerSide.Bear:
+                    list.Add("Bear");
+                    list.Add("AnyPmc");
+                    list.Add("Enemy");
+                    break;
+                case EPlayerSide.Savage:
+                    list.Add("Savage");
+                    list.Add("Bot");
+                    break;
+            }
+
+            foreach (string value in list)
+            {
+                AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
+                                bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
+                                killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
+
+                AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
+                    bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
+                    killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
+            }
+
+
+        }
+
 #if DEBUG
         public override void ShowStringNotification(string message)
         {
@@ -978,7 +1029,7 @@ namespace Fika.Core.Coop.Players
             // Set own group id, ignore if dedicated
             if (!Profile.Info.Nickname.Contains("dedicated_"))
             {
-                Profile.Info.GroupId = "Fika"; 
+                Profile.Info.GroupId = "Fika";
             }
 
             // Setup own dog tag

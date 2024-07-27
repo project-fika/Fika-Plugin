@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.MovingPlatforms;
+using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
@@ -164,6 +165,10 @@ namespace Fika.Core.Coop.PacketHandlers
                 && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                 && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey))
             {
+                if (MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible)
+                {
+                    return;
+                }
                 player.Ping();
             }
         }

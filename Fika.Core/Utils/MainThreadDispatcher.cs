@@ -5,7 +5,7 @@ using UnityEngine;
 public class MainThreadDispatcher : MonoBehaviour
 {
     private static MainThreadDispatcher _instance;
-    private readonly Queue<Action> _actions = new Queue<Action>();
+    private readonly Queue<Action> _actions = new();
 
     private void Awake()
     {

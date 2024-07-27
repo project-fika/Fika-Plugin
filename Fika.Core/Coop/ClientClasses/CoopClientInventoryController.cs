@@ -40,7 +40,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.Template.QuestItem)
                 {
-                    if (CoopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                    if (CoopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
                     {
                         if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                         {

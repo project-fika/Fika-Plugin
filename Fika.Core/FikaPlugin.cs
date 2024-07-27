@@ -125,6 +125,7 @@ namespace Fika.Core
         // Coop | Quest Sharing
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
         public static ConfigEntry<bool> QuestSharingNotifications { get; set; }
+        public static ConfigEntry<bool> EasyKillConditions { get; set; }
 
         // Coop | Custom
         public static ConfigEntry<bool> UsePingSystem { get; set; }
@@ -230,6 +231,11 @@ namespace Fika.Core
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
             new MenuTaskBar_Patch().Enable();
+            new GameWorld_Create_Patch().Enable();
+            if (AllowItemSending)
+            {
+                new ItemContext_Patch().Enable();
+            }
 
             gameObject.AddComponent<MainThreadDispatcher>();
 
@@ -250,11 +256,6 @@ namespace Fika.Core
 
             FikaAirdropUtil.GetConfigFromServer();
             BotSettingsRepoAbstractClass.Init();
-
-            if (AllowItemSending)
-            {
-                new ItemContext_Patch().Enable();
-            }
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
@@ -381,6 +382,9 @@ namespace Fika.Core
 
             QuestSharingNotifications = Config.Bind("Coop | Quest Sharing", "Show Notifications", true,
                 new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+            EasyKillConditions = Config.Bind("Coop | Quest Sharing", "Easy Kill Conditions", false,
+                new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for quest progression only.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Custom
 
@@ -631,12 +635,12 @@ namespace Fika.Core
         [Flags]
         public enum EQuestSharingTypes
         {
-            Kill = 1,
+            Kills = 1,
             Item = 2,
             Location = 4,
             PlaceBeacon = 8,
 
-            All = Kill | Item | Location | PlaceBeacon
+            All = Kills | Item | Location | PlaceBeacon
         }
     }
 }
