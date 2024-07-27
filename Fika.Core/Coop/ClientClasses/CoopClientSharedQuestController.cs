@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.ClientClasses
                             if (!FikaPlugin.EasyKillConditions.Value)
                             {
                                 acceptedTypes.Add("Elimination");
-                                acceptedTypes.Add(shareType.ToString()); 
+                                acceptedTypes.Add(shareType.ToString());
                             }
                             break;
                         case FikaPlugin.EQuestSharingTypes.Item:
