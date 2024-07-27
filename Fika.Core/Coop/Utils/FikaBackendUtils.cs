@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.UI.Matchmaker;
-using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
@@ -107,8 +106,7 @@ namespace Fika.Core.Coop.Utils
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             string raidCode = GenerateRaidCode(6);
             CreateMatch body = new(raidCode, profileId, hostUsername, timestamp, raidSettings,
-                HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime,
-                OfflineRaidSettingsMenuPatch_Override.UseCustomWeather);
+                HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
             await FikaRequestHandler.RaidCreate(body);
 
