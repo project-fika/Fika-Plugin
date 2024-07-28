@@ -903,8 +903,7 @@ namespace Fika.Core.Coop.Players
                     lastPingTime = DateTime.Now;
                     //GameObject gameObject = new("Ping", typeof(FikaPing));
                     //gameObject.transform.localPosition = hit.point;
-                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestSubTrackComplete);
-
+                    Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
                     GameObject hitGameObject = hit.collider.gameObject;
                     int hitLayer = hitGameObject.layer;
 
@@ -996,7 +995,7 @@ namespace Fika.Core.Coop.Players
             if (abstractPing != null)
             {
                 abstractPing.Initialize(ref location, null, pingColor);
-                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestSubTrackComplete);
+                Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
                 if (string.IsNullOrEmpty(localeId))
                 {
                     NotificationManagerClass.DisplayMessageNotification($"Received a ping from {ColorizeText(Colors.GREEN, nickname)}",

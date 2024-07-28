@@ -5,7 +5,6 @@ using EFT;
 using EFT.Ballistics;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
-using EFT.UI;
 using Fika.Core.Coop.BotClasses;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
