@@ -878,8 +878,6 @@ namespace Fika.Core.Coop.Players
                     waitForStartRoutine = StartCoroutine(CreateHealthBar());
                 }
 
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
                 IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
                 if (vaultingComponent != null)
                 {
