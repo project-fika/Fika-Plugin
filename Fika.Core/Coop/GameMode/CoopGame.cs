@@ -1278,7 +1278,10 @@ namespace Fika.Core.Coop.GameMode
                 };
 
                 botsController_0.SetSettings(numberOfBots, iSession.BackEndConfig.BotPresets, iSession.BackEndConfig.BotWeaponScatterings);
-                botsController_0.AddActivePLayer(PlayerOwner.Player);
+                if (!FikaBackendUtils.IsDedicated)
+                {
+                    botsController_0.AddActivePLayer(PlayerOwner.Player); 
+                }
 
                 if (FikaPlugin.EnforcedSpawnLimits.Value)
                 {

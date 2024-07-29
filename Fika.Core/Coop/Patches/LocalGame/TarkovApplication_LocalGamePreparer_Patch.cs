@@ -1,4 +1,6 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using Diz.Jobs;
+using EFT;
 using EFT.Communications;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
@@ -7,6 +9,7 @@ using SPT.Reflection.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {
@@ -57,6 +60,19 @@ namespace Fika.Core.Coop.Patches.LocalGame
             {
                 SetStatusModel status = new(FikaBackendUtils.GetGroupId(), LobbyEntry.ELobbyStatus.COMPLETE);
                 await FikaRequestHandler.UpdateSetStatus(status);
+            }
+        }
+
+        [PatchPostfix]
+        public static void Postfix()
+        {
+            GClass959 settings = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings;
+            if (settings.VSync.Value)
+            {
+                int refreshRate = Screen.currentResolution.refreshRate;
+                JobScheduler jobScheduler = Singleton<JobScheduler>.Instance;
+                jobScheduler.SetTargetFrameRate(refreshRate);
+                jobScheduler.SetForceMode(false);
             }
         }
 

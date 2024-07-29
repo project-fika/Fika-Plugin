@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Custom
             mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
             effects = [];
-            ignoredTypes = [typeof(GInterface279), typeof(GInterface281), typeof(GInterface282)];
+            ignoredTypes = [typeof(GInterface279), typeof(GInterface281), typeof(GInterface282), typeof(GInterface294), typeof(GInterface295), typeof(GInterface296)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
             CreateHealthBar();
         }
 
@@ -181,18 +181,7 @@ namespace Fika.Core.Coop.Custom
             SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
             SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
 
-            if (currentPlayer.ProfileId == FikaBackendUtils.GetGroupId())
-            {
-                if (FikaBackendUtils.IsDedicatedGame)
-                {
-                    // Do not show dedicated client name plate
-                    Destroy(this);
-                }
-            }
-            else
-            {
-                playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
-            }
+            playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
 
             if (FikaPlugin.ShowEffects.Value)
             {

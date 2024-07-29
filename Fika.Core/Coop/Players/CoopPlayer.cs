@@ -94,16 +94,18 @@ namespace Fika.Core.Coop.Players
 
             if (FikaBackendUtils.IsServer)
             {
-                player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
+                if (FikaBackendUtils.IsDedicated)
+                {
+                    player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
+                }
+                else
+                {
+                    player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>(); 
+                }
             }
             else if (FikaBackendUtils.IsClient)
             {
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
-            }
-            else if (FikaBackendUtils.IsDedicated)
-            {
-                FikaPlugin.Instance.FikaLogger.LogError("I AM DEDICATED");
-                player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
             }
 
             player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
