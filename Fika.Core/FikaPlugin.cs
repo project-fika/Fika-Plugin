@@ -207,8 +207,7 @@ namespace Fika.Core
         protected void Awake()
         {
             Instance = this;
-
-            GetClientConfig();
+            
             GetNatPunchServerConfig();
             SetupConfig();
 
@@ -230,11 +229,7 @@ namespace Fika.Core
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
             new MenuTaskBar_Patch().Enable();
-            new GameWorld_Create_Patch().Enable();
-            if (AllowItemSending)
-            {
-                new ItemContext_Patch().Enable();
-            }
+            new GameWorld_Create_Patch().Enable();            
 
             gameObject.AddComponent<MainThreadDispatcher>();
 
@@ -245,6 +240,8 @@ namespace Fika.Core
 
             DisableSPTPatches();
             EnableOverridePatches();
+
+            GetClientConfig();
 
             string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
 
@@ -258,6 +255,11 @@ namespace Fika.Core
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
+
+            if (AllowItemSending)
+            {
+                new ItemContext_Patch().Enable();
+            }
 
             StartCoroutine(RunModHandler());
         }
