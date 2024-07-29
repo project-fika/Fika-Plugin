@@ -875,6 +875,7 @@ namespace Fika.Core.Coop.Players
                 if (!isDedicatedHost)
                 {
                     Profile.Info.GroupId = "Fika";
+                    waitForStartRoutine = StartCoroutine(CreateHealthBar());
                 }
 
                 CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
@@ -895,9 +896,7 @@ namespace Fika.Core.Coop.Players
                 {
                     NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, (Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname))} has spawned",
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
-                }
-
-                waitForStartRoutine = StartCoroutine(CreateHealthBar());
+                }                
 
                 Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
 
