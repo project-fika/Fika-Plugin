@@ -181,18 +181,7 @@ namespace Fika.Core.Coop.Custom
             SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
             SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
 
-            if (currentPlayer.ProfileId == FikaBackendUtils.GetGroupId())
-            {
-                if (FikaBackendUtils.IsDedicatedGame)
-                {
-                    // Do not show dedicated client name plate
-                    Destroy(this);
-                }
-            }
-            else
-            {
-                playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
-            }
+            playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
 
             if (FikaPlugin.ShowEffects.Value)
             {
