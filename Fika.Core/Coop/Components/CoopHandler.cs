@@ -406,7 +406,7 @@ namespace Fika.Core.Coop.Components
 
         private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
         {
-            bool isDedicatedProfile = profile.Info.MainProfileNickname.Contains("dedicated_");
+            bool isDedicatedProfile = !isAI && profile.Info.MainProfileNickname.Contains("dedicated_");
 
             ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position,
                 Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
