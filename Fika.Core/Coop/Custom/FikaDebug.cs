@@ -145,7 +145,7 @@ namespace Fika.Core.Coop.Custom
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             GUI.skin.window.alignment = TextAnchor.UpperCenter;
 
-            GUI.Window(0, windowRect, DrawWindow, "Fika Debug");
+            windowRect = GUI.Window(0, windowRect, DrawWindow, "Fika Debug");
         }
 
         private void DrawWindow(int windowId)
@@ -168,6 +168,7 @@ namespace Fika.Core.Coop.Custom
 
             GUILayout.EndVertical();
             GUILayout.EndArea();
+            GUI.DragWindow();
         }
     }
 }
