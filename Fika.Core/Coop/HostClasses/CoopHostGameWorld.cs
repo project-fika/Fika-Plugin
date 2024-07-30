@@ -26,5 +26,11 @@ namespace Fika.Core.Coop.ClientClasses
         {
             return new HostGrenadeFactory();
         }
+
+        public override void Start()
+        {
+            base.Start();
+            RegisterBorderZones();
+        }
     }
 }

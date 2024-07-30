@@ -1406,9 +1406,9 @@ namespace Fika.Core.Coop.GameMode
             Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FikaAirdropsManager>();
             FikaAirdropsManager.ContainerCount = 0;
 
-            SetupBorderzones();
             SetupRaidCode();
 
+            // Need to move to separate classes later
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
                 Singleton<GameWorld>.Instance.MineManager.OnExplosion += OnMineExplode;
@@ -1461,52 +1461,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 DynamicAI.EnabledChange(FikaPlugin.DynamicAI.Value);
             }
-        }
-
-        /// <summary>
-        /// Sets up all the <see cref="BorderZone"/>s on the map
-        /// </summary>
-        private void SetupBorderzones()
-        {
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            gameWorld.BorderZones = LocationScene.GetAllObjects<BorderZone>(false).ToArray();
-            for (int i = 0; i < gameWorld.BorderZones.Length; i++)
-            {
-                gameWorld.BorderZones[i].Id = i;
-            }
-
-            if (isServer)
-            {
-                foreach (BorderZone borderZone in gameWorld.BorderZones)
-                {
-                    borderZone.PlayerShotEvent += OnBorderZoneShot;
-                }
-            }
-            else
-            {
-                foreach (BorderZone borderZone in gameWorld.BorderZones)
-                {
-                    borderZone.RemoveAuthority();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Triggered when a <see cref="BorderZone"/> triggers (only runs on host)
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="zone"></param>
-        /// <param name="arg3"></param>
-        /// <param name="arg4"></param>
-        private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
-        {
-            BorderZonePacket packet = new()
-            {
-                ProfileId = player.iPlayer.ProfileId,
-                ZoneId = zone.Id
-            };
-            Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-        }
+        }     
 
         /// <summary>
         /// Triggers when a <see cref="MineDirectional"/> explodes

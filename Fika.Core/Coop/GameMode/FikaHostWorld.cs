@@ -1,6 +1,8 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using Fika.Core.Networking;
+using LiteNetLib;
 using LiteNetLib.Utils;
 
 namespace Fika.Core.Coop.GameMode
@@ -47,6 +49,34 @@ namespace Fika.Core.Coop.GameMode
             }
 
             gameWorld_0.GrenadesCriticalStates.Clear();
+        }
+
+        /// <summary>
+        /// Sets up all the <see cref="BorderZone"/>s on the map
+        /// </summary>
+        public override void SubscribeToBorderZones(BorderZone[] zones)
+        {
+            foreach (BorderZone borderZone in zones)
+            {
+                borderZone.PlayerShotEvent += OnBorderZoneShot;
+            }
+        }
+
+        /// <summary>
+        /// Triggered when a <see cref="BorderZone"/> triggers (only runs on host)
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="zone"></param>
+        /// <param name="arg3"></param>
+        /// <param name="arg4"></param>
+        private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
+        {
+            BorderZonePacket packet = new()
+            {
+                ProfileId = player.iPlayer.ProfileId,
+                ZoneId = zone.Id
+            };
+            Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
         }
     }
 }
