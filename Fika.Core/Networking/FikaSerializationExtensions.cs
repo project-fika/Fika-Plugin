@@ -188,7 +188,7 @@ namespace Fika.Core.Networking
         {
             using MemoryStream memoryStream = new();
             using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.Write(GClass1535.SerializeItem(item));
+            binaryWriter.Write(GClass1555.SerializeItem(item));
             writer.PutByteArray(memoryStream.ToArray());
         }
 
@@ -202,7 +202,7 @@ namespace Fika.Core.Networking
             using MemoryStream memoryStream = new(reader.GetByteArray());
             using BinaryReader binaryReader = new(memoryStream);
 
-            return GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+            return GClass1555.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
         }
     }
 }
