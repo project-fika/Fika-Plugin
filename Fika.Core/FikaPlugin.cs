@@ -4,10 +4,8 @@ using BepInEx.Logging;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
-using Fika.Core.Coop.Airdrops.Utils;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
-using Fika.Core.Coop.Patches.Airdrop;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Patches.Weather;
@@ -21,8 +19,6 @@ using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
 using SPT.Common.Http;
-using SPT.Custom.Airdrops.Patches;
-using SPT.Custom.BTR.Patches;
 using SPT.Custom.Patches;
 using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.Progression;
@@ -250,7 +246,6 @@ namespace Fika.Core
             BundleLoaderPlugin = new();
             BundleLoaderPlugin.Create();
 
-            FikaAirdropUtil.GetConfigFromServer();
             BotSettingsRepoAbstractClass.Init();
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
@@ -578,27 +573,14 @@ namespace Fika.Core
         {
             // Disable these as they interfere with Fika
             new BotDifficultyPatch().Disable();
-            new AirdropPatch().Disable();
-            new AirdropFlarePatch().Disable();
             new VersionLabelPatch().Disable();
             new EmptyInfilFixPatch().Disable();
-            new OfflineSpawnPointPatch().Disable();
             new BotTemplateLimitPatch().Disable();
-            new OfflineRaidSettingsMenuPatch().Disable();
-            new AddEnemyToAllGroupsInBotZonePatch().Disable();
             new MaxBotPatch().Disable();
             new LabsKeycardRemovalPatch().Disable(); // We handle this locally instead
             new AmmoUsedCounterPatch().Disable();
             new ArmorDamageCounterPatch().Disable();
-            new DogtagPatch().Disable();
-            new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
-            new DisablePvEPatch().Disable();
-            new ClampRagdollPatch().Disable();
-
-            new BTRInteractionPatch().Disable();
-            new BTRExtractPassengersPatch().Disable();
-            new BTRPatch().Disable();
         }
 
         private void EnableOverridePatches()
@@ -609,8 +591,6 @@ namespace Fika.Core
             new BotTemplateLimitPatch_Override().Enable();
             new OfflineRaidSettingsMenuPatch_Override().Enable();
             new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
-            new AirdropBox_Patch().Enable();
-            new FikaAirdropFlare_Patch().Enable();
         }
 
         public enum EDynamicAIRates

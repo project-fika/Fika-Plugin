@@ -101,7 +101,6 @@ namespace Fika.Core.Networking
         LoadBot,
         DisposeBot,
         EnableBot,
-        DisableBot,
-        RemoveAirdropManager
+        DisableBot
     }
 }

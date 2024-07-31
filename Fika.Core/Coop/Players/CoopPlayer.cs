@@ -185,64 +185,6 @@ namespace Fika.Core.Coop.Players
                 masterSkill.Level.ToString()), ENotificationDurationType.Default, ENotificationIconType.Default, null);
         }
 
-        public override void BtrInteraction(BTRSide btr, byte placeId, EInteractionType interaction)
-        {
-            base.BtrInteraction(btr, placeId, interaction);
-            if (FikaBackendUtils.IsClient)
-            {
-                BTRInteractionPacket packet = new(NetId)
-                {
-                    HasInteractPacket = true,
-                    InteractPacket = btr.GetInteractWithBtrPacket(placeId, interaction)
-                };
-
-                PacketSender.Writer.Reset();
-                PacketSender.Client.SendData(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-            }
-            else if (FikaBackendUtils.IsServer)
-            {
-                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                {
-                    PlayerInteractPacket interactPacket = btr.GetInteractWithBtrPacket(placeId, interaction);
-
-                    bool success = coopHandler.serverBTR.HostInteraction(this, interactPacket);
-                    if (success)
-                    {
-                        BTRInteractionPacket packet = new(NetId)
-                        {
-                            HasInteractPacket = true,
-                            InteractPacket = interactPacket
-                        };
-
-                        PacketSender.Writer.Reset();
-                        PacketSender.Server.SendDataToAll(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-                    }
-                }
-            }
-            UpdateInteractionCast();
-        }
-
-        public void ProcessInteractWithBTR(BTRInteractionPacket packet)
-        {
-            if (packet.HasInteractPacket)
-            {
-                if (packet.InteractPacket.HasInteraction)
-                {
-                    if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                    {
-                        if (coopHandler.clientBTR != null)
-                        {
-                            coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket);
-                        }
-                    }
-                }
-            }
-            else if (IsYourPlayer)
-            {
-                GlobalEventHandlerClass.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(PlayerId, EBtrInteractionStatus.Blacklisted);
-            }
-        }
-
         public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
         {
             if (IsYourPlayer)

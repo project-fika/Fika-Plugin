@@ -3,7 +3,6 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
-using Fika.Core.Coop.BTR;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -46,9 +45,6 @@ namespace Fika.Core.Coop.Components
         }
 
         public bool RunAsyncTasks { get; set; } = true;
-
-        internal FikaBTRManager_Client clientBTR = null;
-        internal FikaBTRManager_Host serverBTR = null;
 
         internal static GameObject CoopHandlerParent;
 

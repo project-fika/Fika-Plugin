@@ -98,8 +98,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<GenericPacket, NetPeer>(OnGenericPacketReceived);
             packetProcessor.SubscribeNetSerializable<ExfiltrationPacket, NetPeer>(OnExfiltrationPacketReceived);
             packetProcessor.SubscribeNetSerializable<WeatherPacket, NetPeer>(OnWeatherPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRServicePacket, NetPeer>(OnBTRServicePacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
@@ -418,42 +416,6 @@ namespace Fika.Core.Networking
                 mineDirectional.Explosion();
             }
         }
-
-        private void OnBTRServicePacketReceived(BTRServicePacket packet, NetPeer peer)
-        {
-            if (coopHandler.serverBTR != null)
-            {
-                coopHandler.serverBTR.NetworkBtrTraderServicePurchased(packet);
-            }
-        }
-
-        private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
-        {
-            if (coopHandler.serverBTR != null)
-            {
-                if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
-                {
-                    if (coopHandler.serverBTR.CanPlayerEnter(player))
-                    {
-                        coopHandler.serverBTR.HostObservedInteraction(player, packet.InteractPacket);
-
-                        dataWriter.Reset();
-                        SendDataToAll(dataWriter, ref packet, DeliveryMethod.ReliableOrdered);
-                    }
-                    else
-                    {
-                        BTRInteractionPacket newPacket = new(packet.NetId)
-                        {
-                            HasInteractPacket = false
-                        };
-
-                        dataWriter.Reset();
-                        SendDataToAll(dataWriter, ref newPacket, DeliveryMethod.ReliableOrdered);
-                    }
-                }
-            }
-        }
-
         private void OnWeatherPacketReceived(WeatherPacket packet, NetPeer peer)
         {
             if (packet.IsRequest)

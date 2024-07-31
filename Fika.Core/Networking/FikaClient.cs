@@ -85,14 +85,10 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
             packetProcessor.SubscribeNetSerializable<AllCharacterRequestPacket>(OnAllCharacterRequestPacketReceived);
             packetProcessor.SubscribeNetSerializable<InformationPacket>(OnInformationPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AirdropPacket>(OnAirdropPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AirdropLootPacket>(OnAirdropLootPacketReceived);
             packetProcessor.SubscribeNetSerializable<HealthSyncPacket>(OnHealthSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<GenericPacket>(OnGenericPacketReceived);
             packetProcessor.SubscribeNetSerializable<ExfiltrationPacket>(OnExfiltrationPacketReceived);
             packetProcessor.SubscribeNetSerializable<WeatherPacket>(OnWeatherPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
@@ -371,22 +367,6 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet)
-        {
-            if (Players.TryGetValue(packet.NetId, out CoopPlayer player))
-            {
-                player.ProcessInteractWithBTR(packet);
-            }
-        }
-
-        private void OnBTRPacketReceived(BTRPacket packet)
-        {
-            if (coopHandler.clientBTR != null)
-            {
-                coopHandler.clientBTR.btrPackets.Enqueue(packet);
-            }
-        }
-
         private void OnWeatherPacketReceived(WeatherPacket packet)
         {
             if (!packet.IsRequest)
@@ -560,10 +540,6 @@ namespace Fika.Core.Networking
                     break;
                 case EPackageType.TraderServiceNotification:
                     {
-                        if (coopHandler.clientBTR)
-                        {
-                            coopHandler.clientBTR.DisplayNetworkNotification(packet.TraderServiceType);
-                        }
                     }
                     break;
                 case EPackageType.DisposeBot:
@@ -589,14 +565,6 @@ namespace Fika.Core.Networking
                         else
                         {
                             logger.LogWarning("Unable to dispose of bot: " + packet.BotNetId + ", unable to find GameObject");
-                        }
-                    }
-                    break;
-                case EPackageType.RemoveAirdropManager:
-                    {
-                        if (Singleton<FikaAirdropsManager>.Instance != null)
-                        {
-                            Destroy(Singleton<FikaAirdropsManager>.Instance);
                         }
                     }
                     break;
@@ -644,45 +612,6 @@ namespace Fika.Core.Networking
             if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
                 playerToApply.PacketReceiver.HealthSyncPackets?.Enqueue(packet);
-            }
-        }
-
-        private void OnAirdropLootPacketReceived(AirdropLootPacket packet)
-        {
-            if (Singleton<FikaAirdropsManager>.Instance != null)
-            {
-                Singleton<FikaAirdropsManager>.Instance.ReceiveBuildLootContainer(packet);
-            }
-            else
-            {
-                logger.LogError("OnAirdropLootPacketReceived: Received loot package but manager is not instantiated!");
-            }
-        }
-
-        private void OnAirdropPacketReceived(AirdropPacket packet)
-        {
-            if (Singleton<FikaAirdropsManager>.Instance != null)
-            {
-                Singleton<FikaAirdropsManager>.Instance.AirdropParameters = new()
-                {
-                    Config = packet.Config,
-                    AirdropAvailable = packet.AirdropAvailable,
-                    PlaneSpawned = packet.PlaneSpawned,
-                    BoxSpawned = packet.BoxSpawned,
-                    DistanceTraveled = packet.DistanceTraveled,
-                    DistanceToTravel = packet.DistanceToTravel,
-                    DistanceToDrop = packet.DistanceToDrop,
-                    Timer = packet.Timer,
-                    DropHeight = packet.DropHeight,
-                    TimeToStart = packet.TimeToStart,
-                    RandomAirdropPoint = packet.BoxPoint,
-                    SpawnPoint = packet.SpawnPoint,
-                    LookPoint = packet.LookPoint
-                };
-            }
-            else
-            {
-                logger.LogError("OnAirdropPacketReceived: Received package but manager is not instantiated!");
             }
         }
 
