@@ -66,7 +66,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
         [PatchPostfix]
         public static void Postfix()
         {
-            GClass959 settings = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings;
+            GClass977 settings = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings;
             if (settings.VSync.Value)
             {
                 int refreshRate = Screen.currentResolution.refreshRate;
