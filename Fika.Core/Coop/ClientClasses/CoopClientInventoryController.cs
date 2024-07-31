@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
-        public override void Execute(GClass2854 operation, [CanBeNull] Callback callback)
+        public override void Execute(GClass2897 operation, [CanBeNull] Callback callback)
         {
 #if DEBUG
             ConsoleScreen.Log("InvOperation: " + operation.GetType().Name);
@@ -107,7 +107,7 @@ namespace Fika.Core.Coop.ClientClasses
                     inventoryController = this
                 };
 
-                clientOperationManager.callback ??= new Callback(ClientPlayer.Control0.Class1426.class1426_0.method_0);
+                clientOperationManager.callback ??= new Callback(ClientPlayer.Control0.Class1452.class1452_0.method_0);
                 uint operationNum = AddOperationCallback(operation, new Callback<EOperationStatus>(clientOperationManager.HandleResult));
 
                 using MemoryStream memoryStream = new();
@@ -124,17 +124,17 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
-        private uint AddOperationCallback(GClass2854 operation, Callback<EOperationStatus> callback)
+        private uint AddOperationCallback(GClass2897 operation, Callback<EOperationStatus> callback)
         {
             ushort id = operation.Id;
             CoopPlayer.OperationCallbacks.Add(id, callback);
             return id;
         }
 
-        private class HostInventoryOperationManager(CoopClientInventoryController inventoryController, GClass2854 operation, Callback callback)
+        private class HostInventoryOperationManager(CoopClientInventoryController inventoryController, GClass2897 operation, Callback callback)
         {
             public readonly CoopClientInventoryController inventoryController = inventoryController;
-            public GClass2854 operation = operation;
+            public GClass2897 operation = operation;
             public readonly Callback callback = callback;
 
             public void HandleResult(IResult result)
@@ -151,7 +151,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             public EOperationStatus? serverOperationStatus;
             public EOperationStatus? localOperationStatus;
-            public GClass2854 operation;
+            public GClass2897 operation;
             public Callback callback;
             public CoopClientInventoryController inventoryController;
 

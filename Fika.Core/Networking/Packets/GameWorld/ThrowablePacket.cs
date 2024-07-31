@@ -4,7 +4,7 @@ namespace Fika.Core.Networking
 {
     internal struct ThrowablePacket : INetSerializable
     {
-        public GStruct128 Data;
+        public GStruct129 Data;
 
         public void Deserialize(NetDataReader reader)
         {

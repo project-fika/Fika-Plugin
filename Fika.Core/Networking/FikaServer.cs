@@ -404,7 +404,7 @@ namespace Fika.Core.Networking
         {
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
-                NetworkGame<EftGamePlayerOwner>.Class1407 mineSeeker = new()
+                NetworkGame<EftGamePlayerOwner>.Class1433 mineSeeker = new()
                 {
                     minePosition = packet.MinePositon
                 };
@@ -640,7 +640,7 @@ namespace Fika.Core.Networking
                 using BinaryReader binaryReader = new(memoryStream);
                 try
                 {
-                    GStruct411 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
+                    GStruct417 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1563>());
 
                     InventoryOperationHandler opHandler = new()
                     {
@@ -933,7 +933,7 @@ namespace Fika.Core.Networking
 
                         if (profile.ProfileId == RequestHandler.SessionId)
                         {
-                            foreach (Profile.ProfileHealthClass.GClass1770 bodyPartHealth in profile.Health.BodyParts.Values)
+                            foreach (Profile.ProfileHealthClass.GClass1793 bodyPartHealth in profile.Health.BodyParts.Values)
                             {
                                 bodyPartHealth.Effects.Clear();
                                 bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
@@ -989,7 +989,7 @@ namespace Fika.Core.Networking
 
         private class InventoryOperationHandler
         {
-            public GStruct411 opResult;
+            public GStruct417 opResult;
             public uint operationId;
             public int netId;
             public NetPeer peer;

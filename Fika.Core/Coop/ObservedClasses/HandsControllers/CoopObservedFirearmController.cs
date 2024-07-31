@@ -26,7 +26,7 @@ namespace Fika.Core.Coop.ObservedClasses
         private float aimMovementSpeed = 1f;
         private bool hasFired = false;
         private WeaponPrefab weaponPrefab;
-        private GClass1593 underBarrelManager;
+        private GClass1616 underBarrelManager;
         public override bool IsAiming
         {
             get => base.IsAiming;
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.ObservedClasses
             weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
             if (UnderbarrelWeapon != null)
             {
-                underBarrelManager = Traverse.Create(this).Field<GClass1593>("gclass1593_0").Value;
+                underBarrelManager = Traverse.Create(this).Field<GClass1616>("gclass1616_0").Value;
             }
         }
 
@@ -327,7 +327,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     }
 
                     // Remember to check if classes increment
-                    if (Weapon is GClass2711)
+                    if (Weapon is GClass2754)
                     {
                         Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
 
@@ -360,7 +360,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     {
                         if (Item.HasChambers)
                         {
-                            magazine.Cartridges.PopTo(inventoryController, new GClass2783(Item.Chambers[0]));
+                            magazine.Cartridges.PopTo(inventoryController, new GClass2826(Item.Chambers[0]));
                         }
                         else
                         {
@@ -559,7 +559,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 
             }*/
 
-            if (packet.HasRollCylinder && Weapon is GClass2711 rollWeapon)
+            if (packet.HasRollCylinder && Weapon is GClass2754 rollWeapon)
             {
                 RollCylinder(packet.RollToZeroCamora);
             }
@@ -657,7 +657,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             if (magazine != null && magazine is not CylinderMagazineClass && weapon.HasChambers)
             {
-                magazine.Cartridges.PopTo(inventoryController, new GClass2783(controller.Item.Chambers[0]));
+                magazine.Cartridges.PopTo(inventoryController, new GClass2826(controller.Item.Chambers[0]));
             }
 
             animator.SetBoltActionReload(false);
@@ -682,7 +682,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 weaponEffectsManager.SetRoundIntoWeapon(ammo, 0);
             }
 
-            if (Weapon is GClass2711 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || Weapon.BoltAction)
+            if (Weapon is GClass2754 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || Weapon.BoltAction)
             {
                 return;
             }

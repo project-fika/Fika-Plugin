@@ -171,7 +171,7 @@ namespace Fika.Core.Coop.Players
             base.PlayGroundedSound(fallHeight, jumpHeight);
         }
 
-        public override void OnSkillLevelChanged(GClass1778 skill)
+        public override void OnSkillLevelChanged(GClass1801 skill)
         {
             //base.OnSkillLevelChanged(skill);
         }
@@ -242,7 +242,7 @@ namespace Fika.Core.Coop.Players
 
             if (player.IsYourPlayer)
             {
-                bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface244>(bodyPart) != null;
+                bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface245>(bodyPart) != null;
                 player.StatisticsManager.OnEnemyDamage(damageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
                     GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
                     Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
@@ -307,7 +307,7 @@ namespace Fika.Core.Coop.Players
             LastDamageType = damageInfo.DamageType;
         }
 
-        public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+        public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct395 shotId)
         {
             ShotReactions(damageInfo, bodyPartType);
 
@@ -765,8 +765,8 @@ namespace Fika.Core.Coop.Players
             {
                 Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
                 Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-                PlayerBody.GClass1875 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-                PlayerBody.GClass1875 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+                PlayerBody.GClass1902 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
+                PlayerBody.GClass1902 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
                 if (gclass2 != null)
                 {
                     gclass2.Dispose();
@@ -1398,13 +1398,13 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class CreateHandsControllerHandler(Class1082 setInHandsOperation)
+        private class CreateHandsControllerHandler(Class1097 setInHandsOperation)
         {
-            public readonly Class1082 setInHandsOperation = setInHandsOperation;
+            public readonly Class1097 setInHandsOperation = setInHandsOperation;
 
             internal void DisposeHandler()
             {
-                Class1082 handler = setInHandsOperation;
+                Class1097 handler = setInHandsOperation;
                 if (handler == null)
                     return;
                 handler.Dispose();

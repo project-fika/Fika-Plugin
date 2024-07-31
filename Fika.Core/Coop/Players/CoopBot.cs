@@ -78,7 +78,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public override void OnSkillLevelChanged(GClass1778 skill)
+        public override void OnSkillLevelChanged(GClass1801 skill)
         {
             // Do nothing
         }
@@ -117,7 +117,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+        public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct395 shotId)
         {
             if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
             {

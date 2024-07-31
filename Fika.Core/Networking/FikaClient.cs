@@ -2,7 +2,6 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
-using Coop.Airdrops;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
@@ -151,7 +150,7 @@ namespace Fika.Core.Networking
 
         private void OnStatisticsPacketReceived(ThrowablePacket packet)
         {
-            GClass724<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
+            GClass738<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
             if (grenades.TryGetByKey(packet.Data.Id, out Throwable throwable))
             {
                 throwable.ApplyNetPacket(packet.Data);
@@ -354,7 +353,7 @@ namespace Fika.Core.Networking
         {
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
-                NetworkGame<EftGamePlayerOwner>.Class1407 mineSeeker = new()
+                NetworkGame<EftGamePlayerOwner>.Class1433 mineSeeker = new()
                 {
                     minePosition = packet.MinePositon
                 };

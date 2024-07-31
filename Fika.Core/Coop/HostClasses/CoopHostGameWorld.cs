@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.ClientClasses
             return gameWorld;
         }
 
-        public override GClass676 CreateGrenadeFactory()
+        public override GClass690 CreateGrenadeFactory()
         {
             return new HostGrenadeFactory();
         }
