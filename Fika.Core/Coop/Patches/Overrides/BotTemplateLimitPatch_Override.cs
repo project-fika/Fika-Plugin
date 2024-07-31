@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Patches.Overrides
             _ = nameof(WaveInfo.Difficulty);
         }
 
-        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsPresets), nameof(BotsPresets.method_1));
+        protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(BotsPresets), nameof(BotsPresets.method_3));
 
         [PatchPostfix]
         private static void PatchPostfix(List<WaveInfo> __result, List<WaveInfo> wavesProfiles, List<WaveInfo> delayed)
