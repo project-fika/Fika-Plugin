@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
-using Coop.Airdrops;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
@@ -1413,8 +1412,6 @@ namespace Fika.Core.Coop.GameMode
             // Add FreeCamController to GameWorld GameObject
             FreeCameraController freeCamController = Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
             Singleton<FreeCameraController>.Create(freeCamController);
-            Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FikaAirdropsManager>();
-            FikaAirdropsManager.ContainerCount = 0;
 
             await SetupRaidCode();
 
@@ -2131,11 +2128,6 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Destroy(CoopHandler.CoopHandlerParent);
                 }
-            }
-
-            if (Singleton<FikaAirdropsManager>.Instance != null)
-            {
-                Destroy(Singleton<FikaAirdropsManager>.Instance);
             }
 
             base.Dispose();
