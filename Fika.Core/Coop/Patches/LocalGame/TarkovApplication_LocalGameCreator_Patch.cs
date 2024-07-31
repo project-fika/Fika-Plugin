@@ -9,6 +9,8 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using HarmonyLib;
+using JsonType;
 using SPT.Reflection.Patching;
 using System;
 using System.Linq;
@@ -28,29 +30,22 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
         [PatchPrefix]
         public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl)
+            RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
+            LocalRaidSettings ___localRaidSettings_0)
         {
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
-            __result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings, ____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl);
+            __result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings,
+                ____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl, metricsEvents, metricsConfig, ___localRaidSettings_0);
             return false;
         }
 
         public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-            RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl)
+            RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig, LocalRaidSettings localRaidSettings)
         {
-            if (raidSettings == null)
-            {
-                Logger.LogError("RaidSettings is Null");
-                throw new ArgumentNullException("RaidSettings");
-            }
-
-            if (timeHasComeScreenController == null)
-            {
-                Logger.LogError("timeHasComeScreenController is Null");
-                throw new ArgumentNullException("timeHasComeScreenController");
-            }
             bool isServer = FikaBackendUtils.IsServer;
+
+            metricsEvents.SetGamePrepared();
 
             LocationSettingsClass.Location location = raidSettings.SelectedLocation;
 
@@ -61,12 +56,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
             }
 
-            ISession session = instance.GetClientBackEndSession();
-
-            if (session == null)
-            {
-                throw new NullReferenceException("Backend session was null when initializing game!");
-            }
+            ISession session = instance.Session;
 
             Profile profile = session.GetProfileBySide(raidSettings.Side);
 
@@ -83,6 +73,25 @@ namespace Fika.Core.Coop.Patches.LocalGame
             Logger.LogDebug("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
 
             await session.SendRaidSettings(raidSettings);
+            LocalRaidSettings localRaidSettings1 = new()
+            {
+                location = raidSettings.LocationId,
+                timeVariant = raidSettings.SelectedDateTime,
+                mode = ELocalMode.PVE_OFFLINE,
+                playerSide = raidSettings.Side
+            };
+            Traverse applicationTraverse = Traverse.Create(instance);
+            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings1;
+
+            LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings1);
+            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
+            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
+
+            GClass1222 profileInsurance = localSettings.profileInsurance;
+            if ((profileInsurance?.insuredItems) != null)
+            {
+                profile.InsuredItems = localSettings.profileInsurance.insuredItems;
+            }
 
             if (!isServer)
             {
@@ -103,9 +112,11 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
             TimeSpan raidLimits = instance.method_48(raidSettings.SelectedLocation.EscapeTimeLimit);
 
-            CoopGame coopGame = CoopGame.Create(inputTree, profile, localGameDateTime, session.InsuranceCompany, MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance,
-                raidSettings.SelectedLocation, timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, new Callback<ExitStatus, TimeSpan, MetricsClass>(startHandler.HandleStop),
-                fixedDeltaTime, EUpdateQueue.Update, session, raidLimits, raidSettings);
+            CoopGame coopGame = CoopGame.Create(inputTree, profile, localGameDateTime, instance.Session.InsuranceCompany,
+                MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
+                timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
+                fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
+                new GClass2182(metricsConfig, instance), localRaidSettings);
 
             Singleton<AbstractGame>.Create(coopGame);
             FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));

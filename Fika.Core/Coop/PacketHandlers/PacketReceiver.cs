@@ -70,7 +70,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     for (int i = 0; i < healthSyncPackets; i++)
                     {
                         HealthSyncPacket packet = HealthSyncPackets.Dequeue();
-                        if (packet.Packet.SyncType == GStruct346.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
+                        if (packet.Packet.SyncType == GStruct349.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
                         {
                             observedPlayer.SetAggressor(packet.KillerId);
                             observedPlayer.SetInventory(packet.Equipment);

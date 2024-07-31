@@ -243,10 +243,10 @@ namespace Fika.Core.Coop.FreeCamera
                 Destroy(bloodOnScreen);
             }
 
-            List<EffectsController.Class576> effectsManagerList = effectsController.Field<List<EffectsController.Class576>>("list_0").Value;
+            List<EffectsController.Class587> effectsManagerList = effectsController.Field<List<EffectsController.Class587>>("list_0").Value;
             if (effectsManagerList != null)
             {
-                foreach (EffectsController.Class576 effectsManager in effectsManagerList)
+                foreach (EffectsController.Class587 effectsManager in effectsManagerList)
                 {
                     while (effectsManager.ActiveEffects.Count > 0)
                     {
