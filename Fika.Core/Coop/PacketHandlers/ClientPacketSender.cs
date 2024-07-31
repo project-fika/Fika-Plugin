@@ -50,7 +50,7 @@ namespace Fika.Core.Coop.PacketHandlers
             StartCoroutine(SyncWeather());
         }
 
-        public void SendQuestPacket<T>(ref T packet) where T : INetSerializable
+        public void SendPacket<T>(ref T packet) where T : INetSerializable
         {
             Writer.Reset();
             Client.SendData(Writer, ref packet, DeliveryMethod.ReliableUnordered);

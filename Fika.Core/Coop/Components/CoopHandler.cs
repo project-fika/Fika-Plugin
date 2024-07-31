@@ -278,7 +278,7 @@ namespace Fika.Core.Coop.Components
                 requestPacket.Characters = [.. Players.Values.Select(p => p.ProfileId), .. queuedProfileIds];
             }
 
-            NetDataWriter writer = Singleton<FikaClient>.Instance.DataWriter;
+            NetDataWriter writer = Singleton<FikaClient>.Instance.Writer;
             if (writer != null)
             {
                 writer.Reset();

@@ -987,14 +987,13 @@ namespace Fika.Core.Coop.Players
                         LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                     };
 
-                    PacketSender.Writer.Reset();
-                    if (FikaBackendUtils.IsServer)
+                    if (PacketSender != null)
                     {
-                        PacketSender.Server.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.SendPacket(ref genericPacket); 
                     }
-                    else if (FikaBackendUtils.IsClient)
+                    else
                     {
-                        PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        NetManagerUtils.SendPacket(ref genericPacket);
                     }
 
                     if (FikaPlugin.PlayPingAnimation.Value)

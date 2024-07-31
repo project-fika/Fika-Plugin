@@ -76,7 +76,7 @@ namespace Fika.Core.Coop.ClientClasses
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
 #endif
-            player.PacketSender.SendQuestPacket(ref packet);
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
@@ -147,7 +147,7 @@ namespace Fika.Core.Coop.ClientClasses
 #if DEBUG
                     FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
 #endif
-                    player.PacketSender.SendQuestPacket(ref packet);
+                    player.PacketSender.SendPacket(ref packet);
                 }
             }
         }

@@ -3,6 +3,8 @@ using Comfort.Common;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -39,6 +41,32 @@ namespace Fika.Core.Coop.Utils
                 FikaClient client = FikaGameObject.AddComponent<FikaClient>();
                 Singleton<FikaClient>.Create(client);
                 logger.LogInfo("FikaClient has started!");
+            }
+        }
+
+        /// <summary>
+        /// Sends a <see cref="INetSerializable"/> reliable unordered packet
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="packet"></param>
+        public static void SendPacket<T>(ref T packet) where T : INetSerializable
+        {
+            if (FikaBackendUtils.IsServer)
+            {
+                FikaServer server = Singleton<FikaServer>.Instance;
+                if (server != null)
+                {
+                    server.Writer.Reset();
+                    server.SendDataToAll(server.Writer, ref packet, DeliveryMethod.ReliableUnordered);
+                    return;
+                }
+            }
+
+            FikaClient client = Singleton<FikaClient>.Instance;
+            if (client != null)
+            {
+                client.Writer.Reset();
+                client.SendData(client.Writer, ref packet, DeliveryMethod.ReliableUnordered);
             }
         }
 

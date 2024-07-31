@@ -34,7 +34,7 @@ namespace Fika.Core.Networking
 {
     public class FikaClient : MonoBehaviour, INetEventListener
     {
-        public NetDataWriter DataWriter = new();
+        public NetDataWriter Writer => dataWriter;
         public CoopPlayer MyPlayer;
         public Dictionary<int, CoopPlayer> Players => coopHandler.Players;
         public NetPacketProcessor packetProcessor = new();
@@ -67,6 +67,7 @@ namespace Fika.Core.Networking
         private NetManager netClient;
         private CoopHandler coopHandler;
         private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
+        private NetDataWriter dataWriter = new();
         private FikaChat fikaChat;
 
         public async void Init()
@@ -727,8 +728,8 @@ namespace Fika.Core.Networking
                     Position = MyPlayer.Transform.position,
                     NetId = MyPlayer.NetId
                 };
-                DataWriter.Reset();
-                SendData(DataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
+                dataWriter.Reset();
+                SendData(dataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
             }
         }
 
