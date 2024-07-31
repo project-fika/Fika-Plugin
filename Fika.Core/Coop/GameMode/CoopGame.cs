@@ -1402,7 +1402,8 @@ namespace Fika.Core.Coop.GameMode
             }
 
             // Add FreeCamController to GameWorld GameObject
-            Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
+            FreeCameraController freeCamController = Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
+            Singleton<FreeCameraController>.Create(freeCamController);
             Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FikaAirdropsManager>();
             FikaAirdropsManager.ContainerCount = 0;
 
@@ -2145,7 +2146,7 @@ namespace Fika.Core.Coop.GameMode
             if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Destroy(Singleton<FikaAirdropsManager>.Instance);
-            }
+            }            
 
             base.Dispose();
         }

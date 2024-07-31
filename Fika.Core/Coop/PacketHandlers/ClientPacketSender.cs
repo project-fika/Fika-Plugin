@@ -157,7 +157,6 @@ namespace Fika.Core.Coop.PacketHandlers
             }
             if (FikaPlugin.UsePingSystem.Value
                 && player.IsYourPlayer
-                && player.HealthController.IsAlive
                 && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                 && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey))
             {

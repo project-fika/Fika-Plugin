@@ -13,6 +13,7 @@ using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Factories;
+using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
@@ -893,12 +894,25 @@ namespace Fika.Core.Coop.Players
         {
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Status != GameStatus.Started)
+            {
                 return;
+            }
 
             if (lastPingTime < DateTime.Now.AddSeconds(-3))
             {
-                Ray sourceRaycast = new(CameraPosition.position + CameraPosition.forward / 2f,
-                    CameraPosition.forward);
+                Transform origin;
+                FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
+                if (freeCamController != null && freeCamController.IsScriptActive)
+                {
+                    origin = freeCamController.CameraMain.gameObject.transform;
+                }
+                else
+                {
+                    origin = CameraPosition;
+                }
+
+                Ray sourceRaycast = new(origin.position + origin.forward / 2f,
+                    origin.forward);
                 int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
                 if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
                 {
@@ -913,7 +927,9 @@ namespace Fika.Core.Coop.Players
                     object userData = null;
                     string localeId = null;
 
-                    //ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
+#if DEBUG
+                    ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}"); 
+#endif
 
                     if (LayerMask.LayerToName(hitLayer) == "Player")
                     {
