@@ -19,6 +19,7 @@ namespace Fika.Core.Coop.ClientClasses
         private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
         private bool canSendAndReceive = true;
+        private bool isPlacing = false;
 
         public override void Init()
         {
@@ -66,6 +67,11 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void Profile_OnItemZoneDropped(string itemId, string zoneId)
         {
+            if(isPlacing)
+            {
+                return;
+            }
+
             QuestDropItemPacket packet = new(player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
@@ -221,6 +227,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
+            isPlacing = true;
             string itemId = packet.ItemId;
             string zoneId = packet.ZoneId;
 
@@ -242,6 +249,7 @@ namespace Fika.Core.Coop.ClientClasses
                 player.InventoryControllerClass.TryRunNetworkTransaction(removeResult);
             }
             player.Profile.ItemDroppedAtPlace(itemId, zoneId);
+            isPlacing = false;
         }
 
         private bool HasQuestForItem(string itemId, string zoneId, out string questName)
