@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             QuestDropItemPacket packet = new(player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
+            FikaPlugin.Instance.FikaLogger.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
 #endif
             player.PacketSender.SendQuestPacket(ref packet);
         }
