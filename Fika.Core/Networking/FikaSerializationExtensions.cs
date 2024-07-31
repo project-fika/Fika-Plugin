@@ -180,41 +180,6 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Same as <see cref="PutItem(NetDataWriter, Item)"/>, however this one is specifically for airdrops to handle bundle loading
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="item">The <see cref="Item"/> to serialize</param>
-        public static void PutAirdropItem(this NetDataWriter writer, Item item)
-        {
-            using MemoryStream memoryStream = new();
-            using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.Write(GClass1535.SerializeItem(item));
-            writer.PutByteArray(memoryStream.ToArray());
-        }
-
-        /// <summary>
-        /// Same as <see cref="GetItem(NetDataReader)"/>, however this one is specifically for airdrops to handle bundle loading
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>An <see cref="Item"/></returns>
-        public static Item GetAirdropItem(this NetDataReader reader)
-        {
-            using MemoryStream memoryStream = new(reader.GetByteArray());
-            using BinaryReader binaryReader = new(memoryStream);
-
-            Item item = GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
-
-            ContainerCollection[] containerCollections = [item as ContainerCollection];
-            ResourceKey[] resourceKeys = containerCollections.GetAllItemsFromCollections()
-                .Concat(containerCollections.Where(new Func<Item, bool>(AirdropSynchronizableObject.Class1832.class1832_0.method_2)))
-                .SelectMany(new Func<Item, IEnumerable<ResourceKey>>(AirdropSynchronizableObject.Class1832.class1832_0.method_3))
-                .ToArray();
-            Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online, resourceKeys, JobPriority.Immediate, null, default);
-
-            return item;
-        }
-
-        /// <summary>
         /// This write and serializes an <see cref="Item"/>, which can be cast to different types of inherited classes. Casting should be handled inside packet for consistency.
         /// </summary>
         /// <param name="writer"></param>
