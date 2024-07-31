@@ -385,7 +385,7 @@ namespace Fika.Core
                 new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             EasyKillConditions = Config.Bind("Coop | Quest Sharing", "Easy Kill Conditions", false,
-                new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for quest progression only.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+                new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for your quests as long as all conditions are met.\nThis can be inconsistent and does not always work.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Custom
 
