@@ -20,6 +20,7 @@ using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -65,7 +66,8 @@ namespace Fika.Core.Coop.Players
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-            Func<float> getAimingSensitivity, IViewFilter filter, int netId, IStatisticsManager statisticsManager)
+            Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
+            ELocalMode localMode, int netId)
         {
             CoopPlayer player = Create<CoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
                         bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
@@ -73,9 +75,7 @@ namespace Fika.Core.Coop.Players
             player.IsYourPlayer = true;
             player.NetId = netId;
 
-            CoopClientInventoryController inventoryController = new(player, profile, false);
-
-            ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
+            CoopClientInventoryController inventoryController = new(player, profile);
 
             LocalQuestControllerClass questController;
             if (FikaPlugin.Instance.SharedQuestProgression)
@@ -89,7 +89,7 @@ namespace Fika.Core.Coop.Players
             questController.Init();
             questController.Run();
 
-            GClass3233 achievementsController = new(profile, inventoryController, session, true);
+            GClass3284 achievementsController = new(profile, inventoryController, session, true);
             achievementsController.Init();
             achievementsController.Run();
 
@@ -116,19 +116,36 @@ namespace Fika.Core.Coop.Players
                 statisticsManager, questController, achievementsController, filter,
                 EVoipState.NotAvailable, false, false);
 
+            Traverse playerTraverse = Traverse.Create(player);
+            playerTraverse.Field<SinglePlayerInventoryController>("singlePlayerInventoryController_0").Value = inventoryController;
+
             foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
             {
                 player.InventoryControllerClass.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
             }
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, new Action(Class1526.class1526_0.method_0));
+            player._handsController.Spawn(1f, new Action(Class1554.class1554_0.method_0));
 
             player.AIData = new AIData(null, player);
-
             player.AggressorFound = false;
-
             player._animators[0].enabled = true;
+
+            Profile.TraderInfo traderInfo;
+            if (player.Profile.TryGetTraderInfo("638f541a29ffd1183d187f57", out traderInfo))
+            {
+                playerTraverse.Field<Profile.TraderInfo>("traderInfo_0").Value = traderInfo;
+                playerTraverse.Field<Profile.TraderInfo>("traderInfo_0").Value.OnStandingChanged += player.method_127;
+            }
+            RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
+            if (radioTransmitterRecodableComponent != null)
+            {
+                radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += player.method_128;
+                if (player.Profile.GetTraderStanding("638f541a29ffd1183d187f57").IsZero())
+                {
+                    radioTransmitterRecodableComponent.SetEncoded(false);
+                }
+            }
 
             player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
 
