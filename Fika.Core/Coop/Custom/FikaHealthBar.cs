@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Custom
             mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
             effects = [];
-            ignoredTypes = [typeof(GInterface279), typeof(GInterface281), typeof(GInterface282), typeof(GInterface294), typeof(GInterface295), typeof(GInterface296)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
+            ignoredTypes = [typeof(GInterface280), typeof(GInterface282), typeof(GInterface283), typeof(GInterface295), typeof(GInterface296), typeof(GInterface297)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
             CreateHealthBar();
         }
 

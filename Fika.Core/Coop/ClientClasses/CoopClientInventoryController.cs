@@ -58,7 +58,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             // Do not replicate quest operations
             // Check for GClass increments
-            if (operation is GClass2897 or GClass2898 or QuestHandoverOperationClass)
+            if (operation is GClass2943 or GClass2944 or QuestHandoverOperationClass)
             {
                 base.Execute(operation, callback);
                 return;

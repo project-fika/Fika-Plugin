@@ -438,7 +438,7 @@ namespace Fika.Core.Coop.Players
         public override void OnHealthEffectAdded(IEffect effect)
         {
             // Remember to check if classes increment
-            if (effect is GInterface260 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
+            if (effect is GInterface261 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
             {
                 Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraClass.Instance.Distance(Position),
                     BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);

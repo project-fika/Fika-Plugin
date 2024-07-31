@@ -41,7 +41,6 @@ namespace Fika.Core.Coop.ClientClasses
         public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
         {
             // Check for GClass increments..
-            //Todo: Lacyway, Need to check if this is correct
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(GClass1622)] = new OperationFactoryDelegate(Weapon1);
             operationFactoryDelegates[typeof(GClass1623)] = new OperationFactoryDelegate(Weapon2);
@@ -81,7 +80,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 return new GClass1638(this);
             }
-            if (Item is GClass2754)
+            if (Item is GClass2754) // This is a revolver
             {
                 return new GClass1637(this);
             }
