@@ -113,8 +113,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
                     timeHasComeScreenController.ChangeStatus("Creating coop game...");
                 }
 
-                FikaPlugin.Instance.FikaLogger.LogWarning(localRaidSettings.serverId);
-
                 StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation, timeHasComeScreenController);
 
                 TimeSpan raidLimits = instance.method_48(raidSettings.SelectedLocation.EscapeTimeLimit);
