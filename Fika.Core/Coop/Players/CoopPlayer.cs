@@ -671,13 +671,6 @@ namespace Fika.Core.Coop.Players
             });
         }
 
-        public override Corpse CreateCorpse()
-        {
-            Vector3 normalized = Velocity.normalized;
-            Vector3 velocityToApply = normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(Velocity, 2f);
-            return CreateCorpse<Corpse>(velocityToApply);
-        }
-
         public override void ApplyCorpseImpulse()
         {
             Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);

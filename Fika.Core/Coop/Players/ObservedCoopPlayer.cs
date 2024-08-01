@@ -413,13 +413,6 @@ namespace Fika.Core.Coop.Players
             Proceed(false, new Callback<GInterface137>(handler.Handle), false);
         }
 
-        public override Corpse CreateCorpse()
-        {
-            Vector3 normalized = RagdollPacket.OverallVelocity.normalized;
-            Vector3 velocityToApply = normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(RagdollPacket.OverallVelocity, 2f);
-            return CreateCorpse<Corpse>(velocityToApply);
-        }
-
         public override void ApplyCorpseImpulse()
         {
             if (RagdollPacket.BodyPartColliderType != EBodyPartColliderType.None)
