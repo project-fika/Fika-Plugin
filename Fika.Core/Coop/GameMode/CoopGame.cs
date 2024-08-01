@@ -1758,7 +1758,7 @@ namespace Fika.Core.Coop.GameMode
         /// Triggers when the main player dies
         /// </summary>
         /// <param name="damageType"></param>
-        private void HealthController_DiedEvent(EDamageType damageType)
+        private async void HealthController_DiedEvent(EDamageType damageType)
         {
             Player player = gparam_0.Player;
             if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -1783,7 +1783,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                Task.Run(() => SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true));
+                await SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true);
             }
         }
 
@@ -2187,11 +2187,11 @@ namespace Fika.Core.Coop.GameMode
                 staticManager.WaitSeconds(num, EndAction);
             }
 
-            private void FireCallback()
+            private async void FireCallback()
             {
                 Callback<ExitStatus, TimeSpan, MetricsClass> endCallback = Traverse.Create(localGame).Field<Callback<ExitStatus, TimeSpan, MetricsClass>>("callback_0").Value;
 
-                Task.Run(() => localGame.SavePlayer(localPlayer, exitStatus, exitName, false));
+                await localGame.SavePlayer(localPlayer, exitStatus, exitName, false);
 
                 endCallback(new Result<ExitStatus, TimeSpan, MetricsClass>(exitStatus, EFTDateTimeClass.Now - localGame.dateTime_0, new MetricsClass()));
                 UIEventSystem.Instance.Enable();
