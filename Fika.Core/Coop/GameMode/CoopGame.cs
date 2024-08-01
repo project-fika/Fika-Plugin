@@ -32,6 +32,7 @@ using HarmonyLib;
 using JsonType;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1743,7 +1744,7 @@ namespace Fika.Core.Coop.GameMode
         /// Triggers when the main player dies
         /// </summary>
         /// <param name="damageType"></param>
-        private void HealthController_DiedEvent(EDamageType damageType)
+        private async void HealthController_DiedEvent(EDamageType damageType)
         {
             Player player = gparam_0.Player;
             if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -1768,7 +1769,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                Task.Run(() => SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true));
+                await SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true);
             }
         }
 
@@ -1906,8 +1907,7 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         private async Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
         {
-            // TODO: ARCHANGEL
-            /*if (hasSaved)
+            if (hasSaved)
             {
                 return;
             }
@@ -1920,24 +1920,23 @@ namespace Fika.Core.Coop.GameMode
                 player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
             }
 
-            //Method taken directly from SPT, can be found in the aki-singleplayer assembly as OfflineSaveProfilePatch
-            Type converterClass = typeof(AbstractGame).Assembly.GetTypes().First(t => t.GetField("Converters", BindingFlags.Static | BindingFlags.Public) != null);
+            TimeSpan playTimeDuration = EFTDateTimeClass.Now - this.dateTime_0;
 
-            JsonConverter[] converters = Traverse.Create(converterClass).Field<JsonConverter[]>("Converters").Value;
-            converters = [.. converters, new NotesJsonConverter()];
-
-            SaveProfileRequest saveRequest = new()
+            GClass1785 parameters = new GClass1785
             {
-                Exit = exitStatus.ToString().ToLowerInvariant(),
-                Profile = player.Profile,
-                Health = HealthListener.Instance.CurrentHealth,
-                Insurance = InsuredItemManager.Instance.GetTrackedItems(),
-                IsPlayerScav = player.Side is EPlayerSide.Savage
+                profile = Profile_0.ToUnparsedData(Array.Empty<JsonConverter>()),
+                result = exitStatus,
+                killerId = gparam_0.Player.KillerId,
+                killerAid = gparam_0.Player.KillerAccountId,
+                exitName = exitName,
+                inSession = true,
+                favorite = (Profile_0.Info.Side == EPlayerSide.Savage),
+                //Todo: this is not correct
+                playTime = (int)playTimeDuration.Duration().TotalSeconds
             };
 
-            await RequestHandler.PutJsonAsync("/raid/profile/save", saveRequest.ToJson(converters));
+            await iSession.LocalRaidEnded(LocalRaidSettings, parameters, this.method_13(), this.method_14());
             hasSaved = true;
-            return;*/
         }
 
         /// <summary>
