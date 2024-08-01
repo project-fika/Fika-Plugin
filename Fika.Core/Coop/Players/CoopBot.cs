@@ -13,6 +13,7 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
+using HarmonyLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections;
@@ -47,7 +48,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = false;
 
-            InventoryControllerClass inventoryController = new CoopBotInventoryController(player, profile, true);
+            SinglePlayerInventoryController inventoryController = new CoopBotInventoryController(player, profile);
 
             player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
             player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
@@ -56,6 +57,8 @@ namespace Fika.Core.Coop.Players
                 new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
                 new CoopObservedStatisticsManager(), null, null, filter,
                 EVoipState.NotAvailable, aiControl, false);
+            Traverse playerTraverse = Traverse.Create(player);
+            playerTraverse.Field<SinglePlayerInventoryController>("singlePlayerInventoryController_0").Value = inventoryController;
 
             player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
@@ -64,6 +67,9 @@ namespace Fika.Core.Coop.Players
             {
                 IsAI = true
             };
+
+            playerTraverse.Field<GClass830>("gclass830_0").Value = new();
+            playerTraverse.Field<GClass830>("gclass830_0").Value.Initialize(player, player.PlayerBones);
 
             player.AggressorFound = false;
 

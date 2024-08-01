@@ -203,6 +203,11 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        public override void vmethod_0()
+        {
+            gclass641_0 = new(LoggerMode.None, dictionary_0, Bots);
+        }
+
         /// <summary>
         /// Sets up a custom weather curve
         /// </summary>
@@ -456,81 +461,79 @@ namespace Fika.Core.Coop.GameMode
             {
                 localPlayer = null;
             }
-            else if (Bots.ContainsKey(profile.Id))
+            if (Bots.ContainsKey(profile.Id))
             {
                 localPlayer = null;
             }
-            else
+            int num = method_16();
+            profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
+
+            FikaServer server = Singleton<FikaServer>.Instance;
+            netId = server.PopNetId();
+
+            if (server.NetServer.ConnectedPeersCount > 0)
             {
-                int num = method_16();
-                profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
-
-                FikaServer server = Singleton<FikaServer>.Instance;
-                netId = server.PopNetId();
-
                 SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile), true, true, position, netId);
                 Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableUnordered);
 
-                if (server.NetServer.ConnectedPeersCount > 0)
-                {
-                    await WaitForPlayersToLoadBotProfile(netId);
-                }
+                await WaitForPlayersToLoadBotProfile(netId);
+            }
 
-                localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
-                   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
-                   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(Class1406.class1406_0.method_1),
-                    new Func<float>(Class1406.class1406_0.method_2), GClass1477.Default);
+            localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
+               "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
+               Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(Class1406.class1406_0.method_1),
+                new Func<float>(Class1406.class1406_0.method_2), GClass1477.Default);
 
-                localPlayer.Location = Location_0.Id;
+            localPlayer.Location = Location_0.Id;
 
-                if (Bots.ContainsKey(localPlayer.ProfileId))
-                {
-                    Logger.LogError($"{profile.ProfileId} already exists in the bots list, cancelling...");
-                    Destroy(localPlayer);
-                    return null;
-                }
-                else
-                {
+            if (Bots.ContainsKey(localPlayer.ProfileId))
+            {
+                Logger.LogError($"{profile.ProfileId} already exists in the bots list, cancelling...");                
+                gclass641_0?.LogError("Bot duplication ProfileId:" + localPlayer.ProfileId + " bots:" + string.Join(", ", this.Bots.Keys), Array.Empty<object>());
+                Destroy(localPlayer);
+                return null;
+            }
+            else
+            {
 #if DEBUG
-                    Logger.LogInfo($"Bot {profile.Info.Settings.Role} created at {position} SUCCESSFULLY!");
+                Logger.LogInfo($"Bot {profile.Info.Settings.Role} created at {position} SUCCESSFULLY!");
 #endif
-                    Bots.Add(localPlayer.ProfileId, localPlayer);
-                }
+                Bots.Add(localPlayer.ProfileId, localPlayer);
+            }
 
-                if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
+            if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
+            {
+                Slot backpackSlot = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
+                Item backpack = backpackSlot.ContainedItem;
+                if (backpack != null)
                 {
-                    Slot backpackSlot = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
-                    Item backpack = backpackSlot.ContainedItem;
-                    if (backpack != null)
+                    Item[] items = backpack.GetAllItems()?.ToArray();
+                    if (items != null)
                     {
-                        Item[] items = backpack.GetAllItems()?.ToArray();
-                        if (items != null)
+                        for (int i = 0; i < items.Count(); i++)
                         {
-                            for (int i = 0; i < items.Count(); i++)
+                            Item item = items[i];
+                            if (item == backpack)
                             {
-                                Item item = items[i];
-                                if (item == backpack)
-                                {
-                                    continue;
-                                }
-
-                                item.SpawnedInSession = true;
+                                continue;
                             }
+
+                            item.SpawnedInSession = true;
                         }
                     }
                 }
+            }
 
-                if (Singleton<GameWorld>.Instance != null)
+            if (Singleton<GameWorld>.Instance != null)
+            {
+                if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == localPlayer.ProfileId))
                 {
-                    if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == localPlayer.ProfileId))
-                    {
-                        Singleton<GameWorld>.Instance.RegisterPlayer(localPlayer);
-                    }
+                    Singleton<GameWorld>.Instance.RegisterPlayer(localPlayer);
                 }
-                else
-                {
-                    Logger.LogError("Cannot add player because GameWorld is NULL");
-                }
+            }
+            else
+            {
+                Logger.LogError("Cannot add player because GameWorld is NULL");
             }
 
             CoopBot coopBot = (CoopBot)localPlayer;
@@ -1293,7 +1296,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 BotsPresets botsPresets = new(iSession, wavesSpawnScenario_0.SpawnWaves,
                     BossSpawnWaveManagerClass.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1498_0, false);
-
+                await botsPresets.TryLoadBotsProfilesOnStart();
                 GClass832 botCreator = new(this, botsPresets, CreateBot);
                 BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 

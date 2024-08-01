@@ -10,7 +10,7 @@ using static EFT.Player;
 
 namespace Fika.Core.Coop.BotClasses
 {
-    public class CoopBotInventoryController(Player player, Profile profile, bool examined) : PlayerInventoryController(player, profile, examined)
+    public class CoopBotInventoryController(Player player, Profile profile) : SinglePlayerInventoryController(player, profile)
     {
         private readonly CoopBot CoopBot = (CoopBot)player;
 
