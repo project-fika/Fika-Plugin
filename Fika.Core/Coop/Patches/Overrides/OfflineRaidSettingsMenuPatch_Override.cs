@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.Patches.Overrides
             List<CanvasGroup> ____weatherCanvasGroups, UpdatableToggle ____randomTimeToggle,
             UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups,
             List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown,
-            RaidSettings raidSettings)
+            ref RaidSettings raidSettings)
         {
             randomWeather = false;
             // Always disable the Coop Mode checkbox

@@ -581,6 +581,7 @@ namespace Fika.Core
             new AmmoUsedCounterPatch().Disable();
             new ArmorDamageCounterPatch().Disable();
             new ScavRepAdjustmentPatch().Disable();
+            new FixSavageInventoryScreenPatch().Disable();
         }
 
         private void EnableOverridePatches()

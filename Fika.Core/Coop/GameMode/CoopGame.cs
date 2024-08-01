@@ -125,15 +125,14 @@ namespace Fika.Core.Coop.GameMode
             ISession backEndSession, TimeSpan sessionTime, MetricsEventsClass metricsEvents,
             GClass2182 metricsCollector, LocalRaidSettings raidSettings)
         {
-            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
+            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");            
+
+            Singleton<SharedGameSettingsClass>.Instance.Sound.Controller.VoipDisabledInLocalGame();
 
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, backendDateTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
                 new TimeSpan?(sessionTime), metricsEvents, metricsCollector, raidSettings);
-
             coopGame.isServer = FikaBackendUtils.IsServer;
-
-            Singleton<SharedGameSettingsClass>.Instance.Sound.Controller.VoipDisabledInLocalGame();
 
             // Non Waves Scenario setup
             coopGame.nonWavesSpawnScenario_0 = NonWavesSpawnScenario.smethod_0(coopGame, location, coopGame.botsController_0);
@@ -971,95 +970,103 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="backendUrl"></param>
         /// <param name="runCallback"></param>
         /// <returns></returns>
-        public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl, Callback runCallback)
+        public async Task InitPlayer(BotControllerSettings botsSettings, Callback runCallback)
         {
-            Status = GameStatus.Running;
-            Singleton<GameWorld>.Instance.RegisterRestrictableZones();
-            UnityEngine.Random.InitState((int)EFTDateTimeClass.Now.Ticks);
-
-            LocationSettingsClass.Location location = (Location_0.IsHideout ? Location_0 : localRaidSettings_0.selectedLocation);
-            Singleton<GameWorld>.Instance.LocationId = Location_0.Id;
-
-            SpawnPointManagerClass spawnPointManagerClass = SpawnPointManagerClass.CreateFromScene(
-                new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime((double)Location_0.UnixDateTime)),
-                Location_0.SpawnPointParams);
-            int num = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-            GStruct385 gstruct = new((float)Location_0.MinDistToFreePoint, (float)Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, num);
-            SpawnSystem = GClass2996.CreateSpawnSystem(gstruct,
-                new Func<float>(Class1406.class1406_0.method_0),
-                Singleton<GameWorld>.Instance,
-                this.botsController_0,
-                spawnPointManagerClass);
-
-            BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
-            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
+            try
             {
-                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
-                if (gameObject != null)
+                Status = GameStatus.Running;
+                Singleton<GameWorld>.Instance.RegisterRestrictableZones();
+                UnityEngine.Random.InitState((int)EFTDateTimeClass.Now.Ticks);
+
+                LocationSettingsClass.Location location = (Location_0.IsHideout ? Location_0 : localRaidSettings_0.selectedLocation);
+                Singleton<GameWorld>.Instance.LocationId = Location_0.Id;
+
+                SpawnPointManagerClass spawnPointManagerClass = SpawnPointManagerClass.CreateFromScene(
+                    new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime((double)Location_0.UnixDateTime)),
+                    Location_0.SpawnPointParams);
+                int num = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+                GStruct385 gstruct = new((float)Location_0.MinDistToFreePoint, (float)Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, num);
+                SpawnSystem = GClass2996.CreateSpawnSystem(gstruct,
+                    new Func<float>(Class1406.class1406_0.method_0),
+                    Singleton<GameWorld>.Instance,
+                    botsController_0,
+                    spawnPointManagerClass);
+
+                BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+                if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
                 {
-                    transform.InstantiatePrefab(gameObject);
+                    GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
+                    if (gameObject != null)
+                    {
+                        transform.InstantiatePrefab(gameObject);
+                    }
+                    else
+                    {
+                        Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
+                    }
                 }
-                else
+
+                // TODO: BTR
+                /*if (instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
                 {
-                    Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
-                }
-            }
+                    Singleton<GameWorld>.Instance.BtrController = new BTRControllerClass();
+                }*/
 
-            // TODO: BTR
-            /*if (instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
-            {
-                Singleton<GameWorld>.Instance.BtrController = new BTRControllerClass();
-            }*/
-
-            ApplicationConfigClass config = BackendConfigAbstractClass.Config;
-            if (config.FixedFrameRate > 0f)
-            {
-                FixedDeltaTime = 1f / config.FixedFrameRate;
-            }
-            using (CounterCreatorAbstractClass.StartWithToken("player create"))
-            {
-                MetricsEventsClass metricsEventsClass = this.metricsEventsClass;
-                if (metricsEventsClass != null)
+                ApplicationConfigClass config = BackendConfigAbstractClass.Config;
+                if (config.FixedFrameRate > 0f)
                 {
-                    metricsEventsClass.SetPlayerSpawnEvent();
+                    FixedDeltaTime = 1f / config.FixedFrameRate;
                 }
-                Player player = await CreateLocalPlayer();
-                dictionary_0.Add(player.ProfileId, player);
-                gparam_0 = func_1(player);
-                PlayerCameraController.Create(gparam_0.Player);
-                CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
-                CameraClass.Instance.IsActive = false;
+                using (CounterCreatorAbstractClass.StartWithToken("player create"))
+                {
+                    MetricsEventsClass metricsEventsClass = this.metricsEventsClass;
+                    if (metricsEventsClass != null)
+                    {
+                        metricsEventsClass.SetPlayerSpawnEvent();
+                    }
+                    Player player = await CreateLocalPlayer();
+                    dictionary_0.Add(player.ProfileId, player);
+                    gparam_0 = func_1(player);
+                    PlayerCameraController.Create(gparam_0.Player);
+                    CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
+                    CameraClass.Instance.IsActive = false;
+                }
+
+                await method_12(location, new Action(Class1406.class1406_0.method_3));
+                await vmethod_1(botsSettings, SpawnSystem);
+
+                if (isServer && Singleton<IBotGame>.Instantiated)
+                {
+                    Singleton<IBotGame>.Instance.BotsController.CoversData.Patrols.RestoreLoot(Location_0.Loot, LocationScene.GetAllObjects<LootableContainer>(false));
+                }
+
+                GClass2199 gclass = new()
+                {
+                    AirdropParameters = Location_0.airdropParameters
+                };
+                gclass.Init(Singleton<AbstractGame>.Instance.GameType == EGameType.Offline);
+                (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
+
+                method_6(runCallback);
             }
-
-            await this.method_12(location, new Action(Class1406.class1406_0.method_3));
-            await this.vmethod_1(botsSettings, SpawnSystem);
-
-            if (isServer && Singleton<IBotGame>.Instantiated)
+            catch (Exception ex)
             {
-                Singleton<IBotGame>.Instance.BotsController.CoversData.Patrols.RestoreLoot(this.Location_0.Loot, LocationScene.GetAllObjects<LootableContainer>(false));
+                FikaPlugin.Instance.FikaLogger.LogError(ex.Message);
+                throw;
             }
-
-            GClass2199 gclass = new()
-            {
-                AirdropParameters = this.Location_0.airdropParameters
-            };
-            gclass.Init(Singleton<AbstractGame>.Instance.GameType == EGameType.Offline);
-            (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
-
-            method_6(runCallback);
         }
 
         public override IEnumerator vmethod_5(Callback runCallback)
         {
-            if (WeatherController.Instance != null && this.localRaidSettings_0.mode == ELocalMode.PVE_OFFLINE)
+            if (WeatherController.Instance != null && localRaidSettings_0.mode == ELocalMode.PVE_OFFLINE)
             {
                 LocalGame.Class1417 class2 = new();
-                class2.weather = this.iSession.WeatherRequest();
+                class2.weather = iSession.WeatherRequest();
                 yield return new WaitUntil(new Func<bool>(class2.method_0));
                 WeatherController.Instance.method_0(class2.weather.Result.Weathers);
                 class2 = null;
             }
-            ESeason season = this.iSession.Season;
+            ESeason season = iSession.Season;
             Class402 class3 = new();
             Singleton<GameWorld>.Instance.GInterface26_0 = class3;
             Task seasonInit = class3.Run(season);
