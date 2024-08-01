@@ -975,88 +975,80 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public async Task InitPlayer(BotControllerSettings botsSettings, Callback runCallback)
         {
-            try
+            Status = GameStatus.Running;
+            Singleton<GameWorld>.Instance.RegisterRestrictableZones();
+            UnityEngine.Random.InitState((int)EFTDateTimeClass.Now.Ticks);
+
+            LocationSettingsClass.Location location = (Location_0.IsHideout ? Location_0 : localRaidSettings_0.selectedLocation);
+            Singleton<GameWorld>.Instance.LocationId = Location_0.Id;
+
+            spawnPoints = SpawnPointManagerClass.CreateFromScene(
+                new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime((double)Location_0.UnixDateTime)),
+                Location_0.SpawnPointParams);
+            int num = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+            GStruct385 gstruct = new((float)Location_0.MinDistToFreePoint, (float)Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, num);
+            SpawnSystem = GClass2996.CreateSpawnSystem(gstruct,
+                new Func<float>(Class1406.class1406_0.method_0),
+                Singleton<GameWorld>.Instance,
+                botsController_0,
+                spawnPoints);
+
+            BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+            if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
             {
-                Status = GameStatus.Running;
-                Singleton<GameWorld>.Instance.RegisterRestrictableZones();
-                UnityEngine.Random.InitState((int)EFTDateTimeClass.Now.Ticks);
-
-                LocationSettingsClass.Location location = (Location_0.IsHideout ? Location_0 : localRaidSettings_0.selectedLocation);
-                Singleton<GameWorld>.Instance.LocationId = Location_0.Id;
-
-                spawnPoints = SpawnPointManagerClass.CreateFromScene(
-                    new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime((double)Location_0.UnixDateTime)),
-                    Location_0.SpawnPointParams);
-                int num = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-                GStruct385 gstruct = new((float)Location_0.MinDistToFreePoint, (float)Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, num);
-                SpawnSystem = GClass2996.CreateSpawnSystem(gstruct,
-                    new Func<float>(Class1406.class1406_0.method_0),
-                    Singleton<GameWorld>.Instance,
-                    botsController_0,
-                    spawnPoints);
-
-                BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
-                if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
+                GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
+                if (gameObject != null)
                 {
-                    GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
-                    if (gameObject != null)
-                    {
-                        transform.InstantiatePrefab(gameObject);
-                    }
-                    else
-                    {
-                        Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
-                    }
+                    transform.InstantiatePrefab(gameObject);
                 }
-
-                // TODO: BTR
-                /*if (instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
+                else
                 {
-                    Singleton<GameWorld>.Instance.BtrController = new BTRControllerClass();
-                }*/
-
-                ApplicationConfigClass config = BackendConfigAbstractClass.Config;
-                if (config.FixedFrameRate > 0f)
-                {
-                    FixedDeltaTime = 1f / config.FixedFrameRate;
+                    Logger.LogError("Can't find event prefab in resources. Path : Prefabs/HALLOWEEN_CONTROLLER");
                 }
-                using (CounterCreatorAbstractClass.StartWithToken("player create"))
-                {
-                    MetricsEventsClass metricsEventsClass = this.metricsEventsClass;
-                    if (metricsEventsClass != null)
-                    {
-                        metricsEventsClass.SetPlayerSpawnEvent();
-                    }
-                    Player player = await CreateLocalPlayer();
-                    dictionary_0.Add(player.ProfileId, player);
-                    gparam_0 = func_1(player);
-                    PlayerCameraController.Create(gparam_0.Player);
-                    CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
-                    CameraClass.Instance.IsActive = false;
-                }
-
-                await method_12(location, new Action(Class1406.class1406_0.method_3));
-                await vmethod_1(botsSettings, SpawnSystem);
-
-                if (isServer && Singleton<IBotGame>.Instantiated)
-                {
-                    Singleton<IBotGame>.Instance.BotsController.CoversData.Patrols.RestoreLoot(Location_0.Loot, LocationScene.GetAllObjects<LootableContainer>(false));
-                }
-
-                GClass2199 gclass = new()
-                {
-                    AirdropParameters = Location_0.airdropParameters
-                };
-                gclass.Init(Singleton<AbstractGame>.Instance.GameType == EGameType.Offline);
-                (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
-
-                method_6(runCallback);
             }
-            catch (Exception ex)
+
+            // TODO: BTR
+            /*if (instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
             {
-                FikaPlugin.Instance.FikaLogger.LogError(ex.Message);
-                throw;
+                Singleton<GameWorld>.Instance.BtrController = new BTRControllerClass();
+            }*/
+
+            ApplicationConfigClass config = BackendConfigAbstractClass.Config;
+            if (config.FixedFrameRate > 0f)
+            {
+                FixedDeltaTime = 1f / config.FixedFrameRate;
             }
+            using (CounterCreatorAbstractClass.StartWithToken("player create"))
+            {
+                MetricsEventsClass metricsEventsClass = this.metricsEventsClass;
+                if (metricsEventsClass != null)
+                {
+                    metricsEventsClass.SetPlayerSpawnEvent();
+                }
+                Player player = await CreateLocalPlayer();
+                dictionary_0.Add(player.ProfileId, player);
+                gparam_0 = func_1(player);
+                PlayerCameraController.Create(gparam_0.Player);
+                CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
+                CameraClass.Instance.IsActive = false;
+            }
+
+            await method_12(location, new Action(Class1406.class1406_0.method_3));
+            await vmethod_1(botsSettings, SpawnSystem);
+
+            if (isServer && Singleton<IBotGame>.Instantiated)
+            {
+                Singleton<IBotGame>.Instance.BotsController.CoversData.Patrols.RestoreLoot(Location_0.Loot, LocationScene.GetAllObjects<LootableContainer>(false));
+            }
+
+            GClass2199 gclass = new()
+            {
+                AirdropParameters = Location_0.airdropParameters
+            };
+            gclass.Init(Singleton<AbstractGame>.Instance.GameType == EGameType.Offline);
+            (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
+
+            method_6(runCallback);
         }
 
         public override IEnumerator vmethod_5(Callback runCallback)

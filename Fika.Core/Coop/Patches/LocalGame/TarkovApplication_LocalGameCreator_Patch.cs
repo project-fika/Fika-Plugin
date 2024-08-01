@@ -44,106 +44,97 @@ namespace Fika.Core.Coop.Patches.LocalGame
         public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
             RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig)
         {
-            try
+            bool isServer = FikaBackendUtils.IsServer;
+
+            metricsEvents.SetGamePrepared();
+
+            LocationSettingsClass.Location location = raidSettings.SelectedLocation;
+
+            FikaBackendUtils.ScreenController = timeHasComeScreenController;
+
+            if (Singleton<NotificationManagerClass>.Instantiated)
             {
-                bool isServer = FikaBackendUtils.IsServer;
+                Singleton<NotificationManagerClass>.Instance.Deactivate();
+            }
 
-                metricsEvents.SetGamePrepared();
+            ISession session = instance.Session;
 
-                LocationSettingsClass.Location location = raidSettings.SelectedLocation;
+            Profile profile = session.GetProfileBySide(raidSettings.Side);
 
-                FikaBackendUtils.ScreenController = timeHasComeScreenController;
+            bool isDedicatedHost = session.Profile.Nickname.StartsWith("dedicated_");
+            if (isDedicatedHost)
+            {
+                FikaBackendUtils.IsDedicated = true;
+            }
 
-                if (Singleton<NotificationManagerClass>.Instantiated)
-                {
-                    Singleton<NotificationManagerClass>.Instance.Deactivate();
-                }
-
-                ISession session = instance.Session;
-
-                Profile profile = session.GetProfileBySide(raidSettings.Side);
-
-                bool isDedicatedHost = session.Profile.Nickname.StartsWith("dedicated_");
-                if (isDedicatedHost)
-                {
-                    FikaBackendUtils.IsDedicated = true;
-                }
-
-                profile.Inventory.Stash = null;
-                profile.Inventory.QuestStashItems = null;
-                profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();
+            profile.Inventory.Stash = null;
+            profile.Inventory.QuestStashItems = null;
+            profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();
 
 #if DEBUG
-                Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings"); 
+            Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
 #endif
 
-                await session.SendRaidSettings(raidSettings);
-                LocalRaidSettings localRaidSettings = new()
-                {
-                    location = raidSettings.LocationId,
-                    timeVariant = raidSettings.SelectedDateTime,
-                    mode = ELocalMode.PVE_OFFLINE,
-                    playerSide = raidSettings.Side
-                };
-                Traverse applicationTraverse = Traverse.Create(instance);
-                applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
-
-                LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
-                applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
-                applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
-
-                GClass1222 profileInsurance = localSettings.profileInsurance;
-                if ((profileInsurance?.insuredItems) != null)
-                {
-                    profile.InsuredItems = localSettings.profileInsurance.insuredItems;
-                }
-
-                if (!isServer)
-                {
-                    timeHasComeScreenController.ChangeStatus("Joining coop game...");
-
-                    RaidSettingsRequest data = new();
-                    RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
-
-                    raidSettings.MetabolismDisabled = raidSettingsResponse.MetabolismDisabled;
-                    raidSettings.PlayersSpawnPlace = (EPlayersSpawnPlace)Enum.Parse(typeof(EPlayersSpawnPlace), raidSettingsResponse.PlayersSpawnPlace);
-                }
-                else
-                {
-                    timeHasComeScreenController.ChangeStatus("Creating coop game...");
-                }
-
-                StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation, timeHasComeScreenController);
-
-                TimeSpan raidLimits = instance.method_48(raidSettings.SelectedLocation.EscapeTimeLimit);
-
-                CoopGame coopGame = CoopGame.Create(inputTree, profile, localGameDateTime, instance.Session.InsuranceCompany,
-                    MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
-                    timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
-                    fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-                    new GClass2182(metricsConfig, instance), localRaidSettings);
-
-                Singleton<AbstractGame>.Create(coopGame);
-                metricsEvents.SetGameCreated();
-                FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
-
-                if (!isServer)
-                {
-                    coopGame.SetMatchmakerStatus("Coop game joined");
-                }
-                else
-                {
-                    coopGame.SetMatchmakerStatus("Coop game created");
-                }
-
-                await coopGame.InitPlayer(raidSettings.BotSettings, new Callback(startHandler.HandleLoadComplete));
-
-            }
-            catch (Exception ex)
+            await session.SendRaidSettings(raidSettings);
+            LocalRaidSettings localRaidSettings = new()
             {
-                FikaPlugin.Instance.FikaLogger.LogError(ex.Message);
-                throw;
+                location = raidSettings.LocationId,
+                timeVariant = raidSettings.SelectedDateTime,
+                mode = ELocalMode.PVE_OFFLINE,
+                playerSide = raidSettings.Side
+            };
+            Traverse applicationTraverse = Traverse.Create(instance);
+            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
+
+            LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
+            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
+            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
+
+            GClass1222 profileInsurance = localSettings.profileInsurance;
+            if ((profileInsurance?.insuredItems) != null)
+            {
+                profile.InsuredItems = localSettings.profileInsurance.insuredItems;
             }
+
+            if (!isServer)
+            {
+                timeHasComeScreenController.ChangeStatus("Joining coop game...");
+
+                RaidSettingsRequest data = new();
+                RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
+
+                raidSettings.MetabolismDisabled = raidSettingsResponse.MetabolismDisabled;
+                raidSettings.PlayersSpawnPlace = (EPlayersSpawnPlace)Enum.Parse(typeof(EPlayersSpawnPlace), raidSettingsResponse.PlayersSpawnPlace);
+            }
+            else
+            {
+                timeHasComeScreenController.ChangeStatus("Creating coop game...");
+            }
+
+            StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation, timeHasComeScreenController);
+
+            TimeSpan raidLimits = instance.method_48(raidSettings.SelectedLocation.EscapeTimeLimit);
+
+            CoopGame coopGame = CoopGame.Create(inputTree, profile, localGameDateTime, instance.Session.InsuranceCompany,
+                MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
+                timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
+                fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
+                new GClass2182(metricsConfig, instance), localRaidSettings);
+
+            Singleton<AbstractGame>.Create(coopGame);
+            metricsEvents.SetGameCreated();
+            FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
+
+            if (!isServer)
+            {
+                coopGame.SetMatchmakerStatus("Coop game joined");
+            }
+            else
+            {
+                coopGame.SetMatchmakerStatus("Coop game created");
+            }
+
+            await coopGame.InitPlayer(raidSettings.BotSettings, new Callback(startHandler.HandleLoadComplete));
         }
 
         private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController)
