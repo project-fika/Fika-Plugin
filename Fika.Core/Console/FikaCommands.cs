@@ -115,7 +115,7 @@ namespace Fika.Core.Console
             coopGame.Extract(localPlayer, null);
         }
 
-        [ConsoleCommand("despawnallai", "", null, "Despawns all AI Bots", [])]
+        [ConsoleCommand("despawnallai", "", null, "Despawns all AI bots", [])]
         public static void DespawnAllAI()
         {
             if (Singleton<IFikaGame>.Instance is CoopGame game)
@@ -142,6 +142,24 @@ namespace Fika.Core.Console
                     game.DespawnBot(coopHandler, bot);
                 }
             }
+        }
+
+        [ConsoleCommand("stoptimer", "", null, "Stops the game timer", [])]
+        public static void StopTimer()
+        {
+            if (Singleton<IFikaGame>.Instance is CoopGame game)
+            {
+                if (game.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
+                {
+                    ConsoleScreen.LogError("GameTimer is already stopped at: " + game.GameTimer.PastTime.ToString());
+                    return;
+                }
+                game.GameTimer.TryStop();
+                if (game.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
+                {
+                    ConsoleScreen.Log("GameTimer stopped at: " + game.GameTimer.PastTime.ToString());
+                }
+            }            
         }
 
 #endif
