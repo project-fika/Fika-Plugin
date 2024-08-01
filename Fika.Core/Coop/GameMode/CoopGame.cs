@@ -1935,7 +1935,7 @@ namespace Fika.Core.Coop.GameMode
                 playTime = (int)playTimeDuration.Duration().TotalSeconds
             };
 
-            await iSession.LocalRaidEnded(LocalRaidSettings, parameters, this.method_13(), this.method_14());
+            await iSession.LocalRaidEnded(localRaidSettings_0, parameters, this.method_13(), this.method_14());
             hasSaved = true;
         }
 
