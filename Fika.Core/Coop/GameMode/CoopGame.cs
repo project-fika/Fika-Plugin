@@ -874,7 +874,7 @@ namespace Fika.Core.Coop.GameMode
                 "Main_", EPointOfView.FirstPerson, profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
                 getSensitivity, getAimingSensitivity,
-                new CoopClientStatisticsManager(profile), new GClass1476(), session, localMode, isServer ? 0 : 1000);
+                new GClass1826(), new GClass1476(), session, localMode, isServer ? 0 : 1000);
 
             myPlayer.Location = Location_0.Id;
 
@@ -2073,6 +2073,22 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
             dictionary_0.Clear();
+            foreach (Player player in Bots.Values)
+            {
+                try
+                {
+                    if (player != null)
+                    {
+                        player.Dispose();
+                        AssetPoolObject.ReturnToPool(player.gameObject, true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
+            Bots.Clear();
             // Reset MatchingType to Single when the game ends.
             FikaBackendUtils.MatchingType = EMatchmakerType.Single;
         }
