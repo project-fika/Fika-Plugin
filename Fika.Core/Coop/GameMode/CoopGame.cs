@@ -840,7 +840,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogInfo($"Retrieved spawn point id '{SpawnId}' from server");
 
                 if (SpawnId != "RANDOM")
-                {
+                {                    
                     Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field<Dictionary<ISpawnPoint, SpawnPointMarker>>("dictionary_0").Value;
                     foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
                     {
@@ -984,7 +984,7 @@ namespace Fika.Core.Coop.GameMode
                 LocationSettingsClass.Location location = (Location_0.IsHideout ? Location_0 : localRaidSettings_0.selectedLocation);
                 Singleton<GameWorld>.Instance.LocationId = Location_0.Id;
 
-                SpawnPointManagerClass spawnPointManagerClass = SpawnPointManagerClass.CreateFromScene(
+                spawnPoints = SpawnPointManagerClass.CreateFromScene(
                     new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime((double)Location_0.UnixDateTime)),
                     Location_0.SpawnPointParams);
                 int num = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
@@ -993,7 +993,7 @@ namespace Fika.Core.Coop.GameMode
                     new Func<float>(Class1406.class1406_0.method_0),
                     Singleton<GameWorld>.Instance,
                     botsController_0,
-                    spawnPointManagerClass);
+                    spawnPoints);
 
                 BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
                 if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
