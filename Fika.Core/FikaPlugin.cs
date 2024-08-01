@@ -594,7 +594,6 @@ namespace Fika.Core
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
             new DisablePvEPatch().Disable();
-            new ClampRagdollPatch().Disable();
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
@@ -608,7 +607,7 @@ namespace Fika.Core
             new MaxBotPatch_Override().Enable();
             new BotTemplateLimitPatch_Override().Enable();
             new OfflineRaidSettingsMenuPatch_Override().Enable();
-            new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
+            //new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
             new AirdropBox_Patch().Enable();
             new FikaAirdropFlare_Patch().Enable();
         }
@@ -619,6 +618,7 @@ namespace Fika.Core
             Medium,
             High
         }
+
         public enum EPingSound
         {
             SubQuestComplete,
