@@ -1004,33 +1004,6 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname, string localeId)
-        {
-            GameObject prefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
-            GameObject pingGameObject = Instantiate(prefab);
-            PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, pingGameObject);
-            if (abstractPing != null)
-            {
-                abstractPing.Initialize(ref location, null, pingColor);
-                Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
-                if (string.IsNullOrEmpty(localeId))
-                {
-                    NotificationManagerClass.DisplayMessageNotification($"Received a ping from {ColorizeText(Colors.GREEN, nickname)}",
-                                ENotificationDurationType.Default, ENotificationIconType.Friend);
-                }
-                else
-                {
-                    string localizedName = localeId.Localized();
-                    NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, nickname)} has pinged {LocaleUtils.GetPrefix(localizedName)} {ColorizeText(Colors.BLUE, localizedName)}",
-                                ENotificationDurationType.Default, ENotificationIconType.Friend);
-                }
-            }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"Received {pingType} from {nickname} but factory failed to handle it");
-            }
-        }
-
         public override void TryInteractionCallback(LootableContainer container)
         {
             LootableContainerInteractionHandler handler = new(this, container);

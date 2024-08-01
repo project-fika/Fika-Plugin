@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
@@ -21,6 +22,33 @@ public static class PingFactory
         LootContainer,
         Door,
         Interactable
+    }
+
+    public static void ReceivePing(Vector3 location, EPingType pingType, Color pingColor, string nickname, string localeId)
+    {
+        GameObject prefab = AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
+        GameObject pingGameObject = UnityEngine.Object.Instantiate(prefab);
+        AbstractPing abstractPing = FromPingType(pingType, pingGameObject);
+        if (abstractPing != null)
+        {
+            abstractPing.Initialize(ref location, null, pingColor);
+            Singleton<GUISounds>.Instance.PlayUISound(GetPingSound());
+            if (string.IsNullOrEmpty(localeId))
+            {
+                NotificationManagerClass.DisplayMessageNotification($"Received a ping from {ColorUtils.ColorizeText(Colors.GREEN, nickname)}",
+                            ENotificationDurationType.Default, ENotificationIconType.Friend);
+            }
+            else
+            {
+                string localizedName = localeId.Localized();
+                NotificationManagerClass.DisplayMessageNotification($"{ColorUtils.ColorizeText(Colors.GREEN, nickname)} has pinged {LocaleUtils.GetPrefix(localizedName)} {ColorUtils.ColorizeText(Colors.BLUE, localizedName)}",
+                            ENotificationDurationType.Default, ENotificationIconType.Friend);
+            }
+        }
+        else
+        {
+            FikaPlugin.Instance.FikaLogger.LogError($"Received {pingType} from {nickname} but factory failed to handle it");
+        }
     }
 
     public static EUISoundType GetPingSound()

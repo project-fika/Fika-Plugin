@@ -12,6 +12,7 @@ using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
+using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -520,10 +521,7 @@ namespace Fika.Core.Networking
                     break;
                 case EPackageType.Ping:
                     {
-                        if (Players.TryGetValue(packet.NetId, out CoopPlayer pingPlayerToApply))
-                        {
-                            pingPlayerToApply.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
-                        }
+                        PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
                     }
                     break;
                 case EPackageType.TrainSync:
