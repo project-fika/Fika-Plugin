@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.GameMode
         private List<string> localTriggerZones;
 
         public FikaDynamicAI DynamicAI { get; private set; }
-        public LocalRaidSettings LocalRaidSettings { get; private set; }
+        public RaidSettings RaidSettings { get; private set; }
         BotsController IBotGame.BotsController
         {
             get
@@ -116,14 +116,14 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="updateQueue"></param>
         /// <param name="backEndSession"></param>
         /// <param name="sessionTime"></param>
-        /// <param name="raidSettings"></param>
+        /// <param name="localRaidSettings"></param>
         /// <returns></returns>
         internal static CoopGame Create(IInputTree inputTree, Profile profile, GameDateTime backendDateTime,
             InsuranceCompanyClass insurance, MenuUI menuUI, GameUI gameUI, LocationSettingsClass.Location location,
             TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
             Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
             ISession backEndSession, TimeSpan sessionTime, MetricsEventsClass metricsEvents,
-            GClass2182 metricsCollector, LocalRaidSettings raidSettings)
+            GClass2182 metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");            
 
@@ -131,7 +131,7 @@ namespace Fika.Core.Coop.GameMode
 
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, backendDateTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
-                new TimeSpan?(sessionTime), metricsEvents, metricsCollector, raidSettings);
+                new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
             coopGame.isServer = FikaBackendUtils.IsServer;
 
             // Non Waves Scenario setup
@@ -172,7 +172,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             coopGame.timeManager = CoopTimeManager.Create(coopGame);
-            coopGame.LocalRaidSettings = raidSettings;
+            coopGame.RaidSettings = raidSettings;
 
             return coopGame;
         }
@@ -808,7 +808,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogInfo($"Setting spawn point to name: '{spawnPoint.Name}', id: '{spawnPoint.Id}'");
                 SpawnId = spawnPoint.Id;
 
-                /*bool spawnTogether = LocalRaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
+                bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
                 if (spawnTogether)
                 {
                     Logger.LogInfo($"Setting spawn point to name: '{spawnPoint.Name}', id: '{spawnPoint.Id}'");
@@ -819,7 +819,7 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogInfo("Using random spawn points!");
                     NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
                     SpawnId = "RANDOM";
-                }*/
+                }
             }
             else
             {
@@ -877,6 +877,10 @@ namespace Fika.Core.Coop.GameMode
                 new GClass1826(), new GClass1476(), session, localMode, isServer ? 0 : 1000);
 
             myPlayer.Location = Location_0.Id;
+            if (RaidSettings.MetabolismDisabled)
+            {
+                myPlayer.HealthController.DisableMetabolism();
+            }
 
             if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {

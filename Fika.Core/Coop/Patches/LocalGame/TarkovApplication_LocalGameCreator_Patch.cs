@@ -119,7 +119,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
                 timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
                 fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-                new GClass2182(metricsConfig, instance), localRaidSettings);
+                new GClass2182(metricsConfig, instance), localRaidSettings, raidSettings);
 
             Singleton<AbstractGame>.Create(coopGame);
             metricsEvents.SetGameCreated();
