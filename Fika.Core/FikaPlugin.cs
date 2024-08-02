@@ -594,6 +594,13 @@ namespace Fika.Core
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
             new DisablePvEPatch().Disable();
+            new AddEnemyToAllGroupsInBotZonePatch().Disable();
+            new BotOwnerDisposePatch().Disable();
+            new BotCalledDataTryCallPatch().Disable();
+            new BotCallForHelpCallBotPatch().Disable();
+            new BotEnemyTargetPatch().Disable();
+            new IsEnemyPatch().Disable();
+            new BotSelfEnemyPatch().Disable();
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();

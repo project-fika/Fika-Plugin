@@ -414,9 +414,9 @@ namespace Fika.Core.Coop.GameMode
                 return null;
             }
 
-            while (!this.Status.IsRunned())
+            while (!Status.IsRunned())
             {
-                if (this.Status == GameStatus.Stopped)
+                if (Status == GameStatus.Stopped)
                 {
                     return null;
                 }
@@ -466,7 +466,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                int num = method_12();
+                //int num = method_12();
                 profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
 
                 FikaServer server = Singleton<FikaServer>.Instance;
@@ -480,7 +480,7 @@ namespace Fika.Core.Coop.GameMode
                     await WaitForPlayersToLoadBotProfile(netId);
                 }
 
-                localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
+                localPlayer = await CoopBot.CreateBot(netId, position, Quaternion.identity, "Player",
                    "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
                    Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(LocalGame.Class1394.class1394_0.method_4),
                    new Func<float>(LocalGame.Class1394.class1394_0.method_5), GClass1457.Default);
@@ -1064,7 +1064,7 @@ namespace Fika.Core.Coop.GameMode
         /// <returns>A <see cref="Player"/></returns>
         private async Task<Player> CreateLocalPlayer()
         {
-            int num = method_12();
+            int num = 0;
 
             Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
             if (BackendConfigAbstractClass.Config.UseHandsFastAnimator)
