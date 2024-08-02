@@ -36,8 +36,18 @@ namespace Fika.Core.Coop.FreeCamera
         private CoopHandler coopHandler;
 
         public GameObject CameraParent;
-        public Camera CameraFreeCamera { get; private set; }
         public Camera CameraMain { get; private set; }
+        public bool IsScriptActive
+        {
+            get
+            {
+                if (freeCamScript != null)
+                {
+                    return freeCamScript.IsActive;
+                }
+                return false;
+            }
+        }
 
         private TextMeshProUGUI extractText = null;
         private bool extracted = false;
@@ -496,6 +506,10 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void OnDestroy()
         {
+            if (!Singleton<FreeCameraController>.TryRelease(this))
+            {
+                FikaPlugin.Instance.FikaLogger.LogWarning("Unable to release FreeCameraController singleton");
+            }
             Destroy(CameraParent);
 
             // Destroy FreeCamScript before FreeCamController if exists

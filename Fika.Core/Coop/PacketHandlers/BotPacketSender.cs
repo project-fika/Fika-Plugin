@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         }
 
-        public void SendQuestPacket<T>(ref T packet) where T : INetSerializable
+        public void SendPacket<T>(ref T packet) where T : INetSerializable
         {
 
         }

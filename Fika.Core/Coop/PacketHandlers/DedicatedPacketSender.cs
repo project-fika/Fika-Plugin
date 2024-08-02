@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.PacketHandlers
             StartCoroutine(SendTrainTime());
         }
 
-        public void SendQuestPacket<T>(ref T packet) where T : INetSerializable
+        public void SendPacket<T>(ref T packet) where T : INetSerializable
         {
             Writer.Reset();
             Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);

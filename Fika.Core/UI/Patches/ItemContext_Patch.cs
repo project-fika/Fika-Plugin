@@ -5,6 +5,7 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
+using Fika.Core.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Collections.Generic;
@@ -72,10 +73,25 @@ namespace Fika.Core.UI.Patches
                 {
                     foreach (string itemId in FikaPlugin.Instance.BlacklistedItems)
                     {
-                        if (itemId == item.TemplateId)
+                        foreach (Item attachedItem in item.GetAllItems())
                         {
-                            NotificationManagerClass.DisplayMessageNotification($"{item.ShortName.Localized()} is blacklisted from being sent.", iconType: EFT.Communications.ENotificationIconType.Alert);
-                            return;
+                            if (attachedItem.TemplateId == itemId)
+                            {
+                                string itemText = ColorUtils.ColorizeText(Colors.BLUE, item.ShortName.Localized());
+                                if (attachedItem == item)
+                                {
+                                    NotificationManagerClass.DisplayMessageNotification($"{itemText} is blacklisted from being sent.",
+                                        iconType: EFT.Communications.ENotificationIconType.Alert);
+                                }
+                                else
+                                {
+                                    string itemName = attachedItem.ShortName.Localized();
+                                    string attachedItemText = ColorUtils.ColorizeText(Colors.BLUE, itemName);
+                                    NotificationManagerClass.DisplayMessageNotification($"{itemText} contains {LocaleUtils.GetPrefix(itemName)} {attachedItemText} which is blacklisted from being sent.",
+                                        iconType: EFT.Communications.ENotificationIconType.Alert); 
+                                }
+                                return;
+                            }
                         }
                     }
 

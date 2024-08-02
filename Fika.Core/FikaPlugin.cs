@@ -24,6 +24,7 @@ using SPT.Common.Http;
 using SPT.Custom.Airdrops.Patches;
 using SPT.Custom.BTR.Patches;
 using SPT.Custom.Patches;
+using SPT.Reflection.Patching;
 using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.Progression;
 using SPT.SinglePlayer.Patches.Quests;
@@ -45,7 +46,7 @@ namespace Fika.Core
     /// Originally by: Paulov <br/>
     /// Re-written by: Lacyway
     /// </summary>
-    [BepInPlugin("com.fika.core", "Fika.Core", "0.9.8976")]
+    [BepInPlugin("com.fika.core", "Fika.Core", "0.9.8980")]
     [BepInProcess("EscapeFromTarkov.exe")]
     [BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-custom, that way we can disable its patches
     [BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
@@ -95,6 +96,7 @@ namespace Fika.Core
 
         //Advanced
         public static ConfigEntry<bool> OfficialVersion { get; set; }
+        public static ConfigEntry<bool> DisableSPTAIPatches { get; set; }
 
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
@@ -207,7 +209,7 @@ namespace Fika.Core
         protected void Awake()
         {
             Instance = this;
-            
+
             GetNatPunchServerConfig();
             SetupConfig();
 
@@ -229,7 +231,8 @@ namespace Fika.Core
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
             new MenuTaskBar_Patch().Enable();
-            new GameWorld_Create_Patch().Enable();            
+            new GameWorld_Create_Patch().Enable();
+            new World_AddSpawnQuestLootPacket_Patch().Enable();
 
             gameObject.AddComponent<MainThreadDispatcher>();
 
@@ -315,6 +318,9 @@ namespace Fika.Core
             OfficialVersion = Config.Bind("Advanced", "Official Version", false,
                 new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
 
+            DisableSPTAIPatches = Config.Bind("Advanced", "Disable SPT AI Patches", false,
+                new ConfigDescription("Disable SPT AI patches that are most likely redundant in Fika.", tags: new ConfigurationManagerAttributes { IsAdvanced = true }));
+
             // Coop
 
             ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true,
@@ -385,7 +391,7 @@ namespace Fika.Core
                 new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
             EasyKillConditions = Config.Bind("Coop | Quest Sharing", "Easy Kill Conditions", false,
-                new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for quest progression only.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+                new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for your quests as long as all conditions are met.\nThis can be inconsistent and does not always work.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Custom
 
@@ -594,7 +600,37 @@ namespace Fika.Core
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
             new DisablePvEPatch().Disable();
-            new ClampRagdollPatch().Disable();
+
+            new AddEnemyToAllGroupsInBotZonePatch().Disable();
+
+            Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
+            //new BotCallForHelpCallBotPatch().Disable();
+            Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
+            ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
+            botCallForHelpCallBotPatch.Disable();
+
+            if (DisableSPTAIPatches.Value)
+            {
+                new BotEnemyTargetPatch().Disable();
+                new IsEnemyPatch().Disable();
+
+                // Temp until SPT makes patches public
+                //new BotOwnerDisposePatch().Disable();
+                
+                Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
+                ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
+                botOwnerDisposePatch.Disable();
+
+                //new BotCalledDataTryCallPatch().Disable();
+                Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
+                ModulePatch botCalledDataTryCallPatch = (ModulePatch)Activator.CreateInstance(botCalledDataTryCallPatchType);
+                botCalledDataTryCallPatch.Disable();
+
+                //new BotSelfEnemyPatch().Disable();
+                Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
+                ModulePatch botSelfEnemyPatch = (ModulePatch)Activator.CreateInstance(botSelfEnemyPatchType);
+                botSelfEnemyPatch.Disable(); 
+            }
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
@@ -619,6 +655,7 @@ namespace Fika.Core
             Medium,
             High
         }
+
         public enum EPingSound
         {
             SubQuestComplete,

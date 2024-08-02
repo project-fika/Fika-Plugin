@@ -25,6 +25,8 @@ namespace Fika.Core.Coop.Patches.LocalGame
         {
             Logger.LogDebug("TarkovApplication_LocalGamePreparer_Patch:Prefix");
 
+            FikaBackendUtils.RequestFikaWorld = true;
+
             bool isServer = FikaBackendUtils.IsServer;
             if (!isServer)
             {
@@ -60,19 +62,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
             {
                 SetStatusModel status = new(FikaBackendUtils.GetGroupId(), LobbyEntry.ELobbyStatus.COMPLETE);
                 await FikaRequestHandler.UpdateSetStatus(status);
-            }
-        }
-
-        [PatchPostfix]
-        public static void Postfix()
-        {
-            GClass959 settings = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings;
-            if (settings.VSync.Value)
-            {
-                int refreshRate = Screen.currentResolution.refreshRate;
-                JobScheduler jobScheduler = Singleton<JobScheduler>.Instance;
-                jobScheduler.SetTargetFrameRate(refreshRate);
-                jobScheduler.SetForceMode(false);
             }
         }
 

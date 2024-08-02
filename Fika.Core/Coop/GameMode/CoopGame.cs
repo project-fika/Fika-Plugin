@@ -414,9 +414,9 @@ namespace Fika.Core.Coop.GameMode
                 return null;
             }
 
-            while (!this.Status.IsRunned())
+            while (!Status.IsRunned())
             {
-                if (this.Status == GameStatus.Stopped)
+                if (Status == GameStatus.Stopped)
                 {
                     return null;
                 }
@@ -466,7 +466,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                int num = method_12();
+                //int num = method_12();
                 profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
 
                 FikaServer server = Singleton<FikaServer>.Instance;
@@ -480,7 +480,7 @@ namespace Fika.Core.Coop.GameMode
                     await WaitForPlayersToLoadBotProfile(netId);
                 }
 
-                localPlayer = await CoopBot.CreateBot(num, position, Quaternion.identity, "Player",
+                localPlayer = await CoopBot.CreateBot(netId, position, Quaternion.identity, "Player",
                    "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
                    Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(LocalGame.Class1394.class1394_0.method_4),
                    new Func<float>(LocalGame.Class1394.class1394_0.method_5), GClass1457.Default);
@@ -1064,7 +1064,7 @@ namespace Fika.Core.Coop.GameMode
         /// <returns>A <see cref="Player"/></returns>
         private async Task<Player> CreateLocalPlayer()
         {
-            int num = method_12();
+            int num = 0;
 
             Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
             if (BackendConfigAbstractClass.Config.UseHandsFastAnimator)
@@ -1402,13 +1402,14 @@ namespace Fika.Core.Coop.GameMode
             }
 
             // Add FreeCamController to GameWorld GameObject
-            Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
+            FreeCameraController freeCamController = Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
+            Singleton<FreeCameraController>.Create(freeCamController);
             Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FikaAirdropsManager>();
             FikaAirdropsManager.ContainerCount = 0;
 
-            SetupBorderzones();
             SetupRaidCode();
 
+            // Need to move to separate classes later
             if (Singleton<GameWorld>.Instance.MineManager != null)
             {
                 Singleton<GameWorld>.Instance.MineManager.OnExplosion += OnMineExplode;
@@ -1461,52 +1462,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 DynamicAI.EnabledChange(FikaPlugin.DynamicAI.Value);
             }
-        }
-
-        /// <summary>
-        /// Sets up all the <see cref="BorderZone"/>s on the map
-        /// </summary>
-        private void SetupBorderzones()
-        {
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            gameWorld.BorderZones = LocationScene.GetAllObjects<BorderZone>(false).ToArray();
-            for (int i = 0; i < gameWorld.BorderZones.Length; i++)
-            {
-                gameWorld.BorderZones[i].Id = i;
-            }
-
-            if (isServer)
-            {
-                foreach (BorderZone borderZone in gameWorld.BorderZones)
-                {
-                    borderZone.PlayerShotEvent += OnBorderZoneShot;
-                }
-            }
-            else
-            {
-                foreach (BorderZone borderZone in gameWorld.BorderZones)
-                {
-                    borderZone.RemoveAuthority();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Triggered when a <see cref="BorderZone"/> triggers (only runs on host)
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="zone"></param>
-        /// <param name="arg3"></param>
-        /// <param name="arg4"></param>
-        private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
-        {
-            BorderZonePacket packet = new()
-            {
-                ProfileId = player.iPlayer.ProfileId,
-                ZoneId = zone.Id
-            };
-            Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-        }
+        }     
 
         /// <summary>
         /// Triggers when a <see cref="MineDirectional"/> explodes
@@ -1802,7 +1758,7 @@ namespace Fika.Core.Coop.GameMode
         /// Triggers when the main player dies
         /// </summary>
         /// <param name="damageType"></param>
-        private void HealthController_DiedEvent(EDamageType damageType)
+        private async void HealthController_DiedEvent(EDamageType damageType)
         {
             Player player = gparam_0.Player;
             if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -1827,7 +1783,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                Task.Run(() => SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true));
+                await SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true);
             }
         }
 
@@ -2175,6 +2131,7 @@ namespace Fika.Core.Coop.GameMode
 
             FikaBackendUtils.Nodes = null;
             FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
+            FikaBackendUtils.RequestFikaWorld = false;
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
@@ -2190,7 +2147,7 @@ namespace Fika.Core.Coop.GameMode
             if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Destroy(Singleton<FikaAirdropsManager>.Instance);
-            }
+            }            
 
             base.Dispose();
         }
@@ -2231,11 +2188,11 @@ namespace Fika.Core.Coop.GameMode
                 staticManager.WaitSeconds(num, EndAction);
             }
 
-            private void FireCallback()
+            private async void FireCallback()
             {
                 Callback<ExitStatus, TimeSpan, MetricsClass> endCallback = Traverse.Create(localGame).Field<Callback<ExitStatus, TimeSpan, MetricsClass>>("callback_0").Value;
 
-                Task.Run(() => localGame.SavePlayer(localPlayer, exitStatus, exitName, false));
+                await localGame.SavePlayer(localPlayer, exitStatus, exitName, false);
 
                 endCallback(new Result<ExitStatus, TimeSpan, MetricsClass>(exitStatus, EFTDateTimeClass.Now - localGame.dateTime_0, new MetricsClass()));
                 UIEventSystem.Instance.Enable();

@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.PacketHandlers
             StartCoroutine(SendTrainTime());
         }
 
-        public void SendQuestPacket<T>(ref T packet) where T : INetSerializable
+        public void SendPacket<T>(ref T packet) where T : INetSerializable
         {
             Writer.Reset();
             Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);
@@ -161,7 +161,6 @@ namespace Fika.Core.Coop.PacketHandlers
             }
             if (FikaPlugin.UsePingSystem.Value
                 && player.IsYourPlayer
-                && player.HealthController.IsAlive
                 && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                 && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey))
             {

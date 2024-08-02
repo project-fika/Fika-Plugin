@@ -25,5 +25,11 @@ namespace Fika.Core.Coop.ClientClasses
         {
             return new GClass677();
         }
+
+        public override void Start()
+        {
+            base.Start();
+            RegisterBorderZones();
+        }
     }
 }

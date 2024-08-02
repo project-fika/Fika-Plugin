@@ -13,6 +13,7 @@ using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Factories;
+using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
@@ -670,13 +671,6 @@ namespace Fika.Core.Coop.Players
             });
         }
 
-        public override Corpse CreateCorpse()
-        {
-            Vector3 normalized = Velocity.normalized;
-            Vector3 velocityToApply = normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(Velocity, 2f);
-            return CreateCorpse<Corpse>(velocityToApply);
-        }
-
         public override void ApplyCorpseImpulse()
         {
             Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
@@ -893,12 +887,25 @@ namespace Fika.Core.Coop.Players
         {
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             if (coopGame.Status != GameStatus.Started)
+            {
                 return;
+            }
 
             if (lastPingTime < DateTime.Now.AddSeconds(-3))
             {
-                Ray sourceRaycast = new(CameraPosition.position + CameraPosition.forward / 2f,
-                    CameraPosition.forward);
+                Transform origin;
+                FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
+                if (freeCamController != null && freeCamController.IsScriptActive)
+                {
+                    origin = freeCamController.CameraMain.gameObject.transform;
+                }
+                else
+                {
+                    origin = CameraPosition;
+                }
+
+                Ray sourceRaycast = new(origin.position + origin.forward / 2f,
+                    origin.forward);
                 int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
                 if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
                 {
@@ -913,7 +920,9 @@ namespace Fika.Core.Coop.Players
                     object userData = null;
                     string localeId = null;
 
-                    //ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
+#if DEBUG
+                    ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}"); 
+#endif
 
                     if (LayerMask.LayerToName(hitLayer) == "Player")
                     {
@@ -971,14 +980,13 @@ namespace Fika.Core.Coop.Players
                         LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                     };
 
-                    PacketSender.Writer.Reset();
-                    if (FikaBackendUtils.IsServer)
+                    if (PacketSender != null)
                     {
-                        PacketSender.Server.SendDataToAll(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        PacketSender.SendPacket(ref genericPacket); 
                     }
-                    else if (FikaBackendUtils.IsClient)
+                    else
                     {
-                        PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                        NetManagerUtils.SendPacket(ref genericPacket);
                     }
 
                     if (FikaPlugin.PlayPingAnimation.Value)
@@ -986,33 +994,6 @@ namespace Fika.Core.Coop.Players
                         vmethod_3(EGesture.ThatDirection);
                     }
                 }
-            }
-        }
-
-        public void ReceivePing(Vector3 location, PingFactory.EPingType pingType, Color pingColor, string nickname, string localeId)
-        {
-            GameObject prefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
-            GameObject pingGameObject = Instantiate(prefab);
-            PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, pingGameObject);
-            if (abstractPing != null)
-            {
-                abstractPing.Initialize(ref location, null, pingColor);
-                Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
-                if (string.IsNullOrEmpty(localeId))
-                {
-                    NotificationManagerClass.DisplayMessageNotification($"Received a ping from {ColorizeText(Colors.GREEN, nickname)}",
-                                ENotificationDurationType.Default, ENotificationIconType.Friend);
-                }
-                else
-                {
-                    string localizedName = localeId.Localized();
-                    NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, nickname)} has pinged {LocaleUtils.GetPrefix(localizedName)} {ColorizeText(Colors.BLUE, localizedName)}",
-                                ENotificationDurationType.Default, ENotificationIconType.Friend);
-                }
-            }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"Received {pingType} from {nickname} but factory failed to handle it");
             }
         }
 

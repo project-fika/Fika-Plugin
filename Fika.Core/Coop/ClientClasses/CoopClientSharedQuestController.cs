@@ -19,6 +19,7 @@ namespace Fika.Core.Coop.ClientClasses
         private readonly HashSet<string> acceptedTypes = [];
         private readonly HashSet<string> lootedTemplateIds = [];
         private bool canSendAndReceive = true;
+        private bool isItemBeingDropped = false;
 
         public override void Init()
         {
@@ -66,11 +67,16 @@ namespace Fika.Core.Coop.ClientClasses
 
         private void Profile_OnItemZoneDropped(string itemId, string zoneId)
         {
+            if (isItemBeingDropped)
+            {
+                return;
+            }
+
             QuestDropItemPacket packet = new(player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo("Profile_OnItemZoneDropped: Sending quest progress");
+            FikaPlugin.Instance.FikaLogger.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
 #endif
-            player.PacketSender.SendQuestPacket(ref packet);
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
@@ -141,7 +147,7 @@ namespace Fika.Core.Coop.ClientClasses
 #if DEBUG
                     FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
 #endif
-                    player.PacketSender.SendQuestPacket(ref packet);
+                    player.PacketSender.SendPacket(ref packet);
                 }
             }
         }
@@ -221,6 +227,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
+            isItemBeingDropped = true;
             string itemId = packet.ItemId;
             string zoneId = packet.ZoneId;
 
@@ -242,6 +249,7 @@ namespace Fika.Core.Coop.ClientClasses
                 player.InventoryControllerClass.TryRunNetworkTransaction(removeResult);
             }
             player.Profile.ItemDroppedAtPlace(itemId, zoneId);
+            isItemBeingDropped = false;
         }
 
         private bool HasQuestForItem(string itemId, string zoneId, out string questName)
