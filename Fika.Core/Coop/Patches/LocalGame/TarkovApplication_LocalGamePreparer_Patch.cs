@@ -65,19 +65,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
             }
         }
 
-        [PatchPostfix]
-        public static void Postfix()
-        {
-            GClass959 settings = Singleton<SharedGameSettingsClass>.Instance.Graphics.Settings;
-            if (settings.VSync.Value)
-            {
-                int refreshRate = Screen.currentResolution.refreshRate;
-                JobScheduler jobScheduler = Singleton<JobScheduler>.Instance;
-                jobScheduler.SetTargetFrameRate(refreshRate);
-                jobScheduler.SetForceMode(false);
-            }
-        }
-
         private static bool IsSandboxHigh(LocationSettingsClass.Location location)
         {
             return location.Id.ToLower() == "sandbox_high";

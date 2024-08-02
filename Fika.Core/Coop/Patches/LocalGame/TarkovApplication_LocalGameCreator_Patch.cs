@@ -9,8 +9,10 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using HarmonyLib;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -61,7 +63,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
             }
 
-            ISession session = instance.GetClientBackEndSession();
+            ISession session = instance.Session;
 
             if (session == null)
             {
