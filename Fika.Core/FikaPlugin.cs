@@ -24,6 +24,7 @@ using SPT.Common.Http;
 using SPT.Custom.Airdrops.Patches;
 using SPT.Custom.BTR.Patches;
 using SPT.Custom.Patches;
+using SPT.Reflection.Patching;
 using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.Progression;
 using SPT.SinglePlayer.Patches.Quests;
@@ -594,14 +595,33 @@ namespace Fika.Core
             new DogtagPatch().Disable();
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
-            new DisablePvEPatch().Disable();
+            new DisablePvEPatch().Disable();            
+
             new AddEnemyToAllGroupsInBotZonePatch().Disable();
-            new BotOwnerDisposePatch().Disable();
-            new BotCalledDataTryCallPatch().Disable();
-            new BotCallForHelpCallBotPatch().Disable();
             new BotEnemyTargetPatch().Disable();
             new IsEnemyPatch().Disable();
-            new BotSelfEnemyPatch().Disable();
+
+            // Temp until SPT makes patches public
+            //new BotOwnerDisposePatch().Disable();
+            Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
+            Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
+            ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
+            botOwnerDisposePatch.Disable();
+
+            //new BotCalledDataTryCallPatch().Disable();
+            Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
+            ModulePatch botCalledDataTryCallPatch = (ModulePatch)Activator.CreateInstance(botCalledDataTryCallPatchType);
+            botCalledDataTryCallPatch.Disable();
+
+            //new BotCallForHelpCallBotPatch().Disable();
+            Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
+            ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
+            botCallForHelpCallBotPatch.Disable();
+
+            //new BotSelfEnemyPatch().Disable();
+            Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
+            ModulePatch botSelfEnemyPatch = (ModulePatch)Activator.CreateInstance(botSelfEnemyPatchType);
+            botSelfEnemyPatch.Disable();
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
