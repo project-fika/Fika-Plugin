@@ -1001,6 +1001,12 @@ namespace Fika.Core.Coop.GameMode
             BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
             if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location._Id))
             {
+                //BSG initialized this in LocalGame, since we don't derive from that we initialize it here
+                //This will probably have to be re-added here every client update, check for Prefabs/HALLOWEEN_CONTROLLER in dnSpy
+                //Or if the HalloweenEventController instance is null in Unity Explorer
+                Singleton<GameWorld>.Instance.HalloweenEventController = new HalloweenEventControllerClass();
+                halloweenEventManager = Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
+
                 GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
                 if (gameObject != null)
                 {
