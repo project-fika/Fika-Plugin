@@ -603,6 +603,12 @@ namespace Fika.Core
 
             new AddEnemyToAllGroupsInBotZonePatch().Disable();
 
+            Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
+            //new BotCallForHelpCallBotPatch().Disable();
+            Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
+            ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
+            botCallForHelpCallBotPatch.Disable();
+
             if (DisableSPTAIPatches.Value)
             {
                 new BotEnemyTargetPatch().Disable();
@@ -610,7 +616,7 @@ namespace Fika.Core
 
                 // Temp until SPT makes patches public
                 //new BotOwnerDisposePatch().Disable();
-                Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
+                
                 Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
                 ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
                 botOwnerDisposePatch.Disable();
@@ -619,11 +625,6 @@ namespace Fika.Core
                 Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
                 ModulePatch botCalledDataTryCallPatch = (ModulePatch)Activator.CreateInstance(botCalledDataTryCallPatchType);
                 botCalledDataTryCallPatch.Disable();
-
-                //new BotCallForHelpCallBotPatch().Disable();
-                Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
-                ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
-                botCallForHelpCallBotPatch.Disable();
 
                 //new BotSelfEnemyPatch().Disable();
                 Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
