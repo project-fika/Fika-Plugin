@@ -2131,6 +2131,7 @@ namespace Fika.Core.Coop.GameMode
 
             FikaBackendUtils.Nodes = null;
             FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
+            FikaBackendUtils.RequestFikaWorld = false;
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {

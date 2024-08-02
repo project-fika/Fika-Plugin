@@ -44,6 +44,7 @@ namespace Fika.Core.Coop.Utils
         public static int LocalPort = 0;
         public static bool IsHostNatPunch = false;
         public static string HostLocationId;
+        public static bool RequestFikaWorld = false;
         private static string groupId;
         private static string raidCode;
 

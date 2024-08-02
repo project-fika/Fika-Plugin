@@ -25,6 +25,8 @@ namespace Fika.Core.Coop.Patches.LocalGame
         {
             Logger.LogDebug("TarkovApplication_LocalGamePreparer_Patch:Prefix");
 
+            FikaBackendUtils.RequestFikaWorld = true;
+
             bool isServer = FikaBackendUtils.IsServer;
             if (!isServer)
             {
