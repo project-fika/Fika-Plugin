@@ -96,6 +96,7 @@ namespace Fika.Core
 
         //Advanced
         public static ConfigEntry<bool> OfficialVersion { get; set; }
+        public static ConfigEntry<bool> DisableSPTAIPatches { get; set; }
 
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
@@ -316,6 +317,9 @@ namespace Fika.Core
 
             OfficialVersion = Config.Bind("Advanced", "Official Version", false,
                 new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
+
+            DisableSPTAIPatches = Config.Bind("Advanced", "Disable SPT AI Patches", false,
+                new ConfigDescription("Disable SPT AI patches that are most likely redundant in Fika.", tags: new ConfigurationManagerAttributes { IsAdvanced = true }));
 
             // Coop
 
@@ -595,33 +599,37 @@ namespace Fika.Core
             new DogtagPatch().Disable();
             new OfflineSaveProfilePatch().Disable(); // We handle this with our own exit manager
             new ScavRepAdjustmentPatch().Disable();
-            new DisablePvEPatch().Disable();            
+            new DisablePvEPatch().Disable();
 
             new AddEnemyToAllGroupsInBotZonePatch().Disable();
-            new BotEnemyTargetPatch().Disable();
-            new IsEnemyPatch().Disable();
 
-            // Temp until SPT makes patches public
-            //new BotOwnerDisposePatch().Disable();
-            Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
-            Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
-            ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
-            botOwnerDisposePatch.Disable();
+            if (DisableSPTAIPatches.Value)
+            {
+                new BotEnemyTargetPatch().Disable();
+                new IsEnemyPatch().Disable();
 
-            //new BotCalledDataTryCallPatch().Disable();
-            Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
-            ModulePatch botCalledDataTryCallPatch = (ModulePatch)Activator.CreateInstance(botCalledDataTryCallPatchType);
-            botCalledDataTryCallPatch.Disable();
+                // Temp until SPT makes patches public
+                //new BotOwnerDisposePatch().Disable();
+                Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
+                Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
+                ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
+                botOwnerDisposePatch.Disable();
 
-            //new BotCallForHelpCallBotPatch().Disable();
-            Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
-            ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
-            botCallForHelpCallBotPatch.Disable();
+                //new BotCalledDataTryCallPatch().Disable();
+                Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
+                ModulePatch botCalledDataTryCallPatch = (ModulePatch)Activator.CreateInstance(botCalledDataTryCallPatchType);
+                botCalledDataTryCallPatch.Disable();
 
-            //new BotSelfEnemyPatch().Disable();
-            Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
-            ModulePatch botSelfEnemyPatch = (ModulePatch)Activator.CreateInstance(botSelfEnemyPatchType);
-            botSelfEnemyPatch.Disable();
+                //new BotCallForHelpCallBotPatch().Disable();
+                Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
+                ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
+                botCallForHelpCallBotPatch.Disable();
+
+                //new BotSelfEnemyPatch().Disable();
+                Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
+                ModulePatch botSelfEnemyPatch = (ModulePatch)Activator.CreateInstance(botSelfEnemyPatchType);
+                botSelfEnemyPatch.Disable(); 
+            }
 
             new BTRInteractionPatch().Disable();
             new BTRExtractPassengersPatch().Disable();
@@ -635,7 +643,7 @@ namespace Fika.Core
             new MaxBotPatch_Override().Enable();
             new BotTemplateLimitPatch_Override().Enable();
             new OfflineRaidSettingsMenuPatch_Override().Enable();
-            //new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
+            new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
             new AirdropBox_Patch().Enable();
             new FikaAirdropFlare_Patch().Enable();
         }
