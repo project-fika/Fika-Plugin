@@ -1876,7 +1876,7 @@ namespace Fika.Core.Coop.GameMode
                 Destroy(CoopHandler.CoopHandlerParent);
             }
 
-            Class1409 stopManager = new()
+            ExitManager stopManager = new()
             {
                 baseLocalGame_0 = this,
                 profileId = profileId,
@@ -1899,7 +1899,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 EnvironmentManager.Instance.Stop();
             }
-            MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.method_0));
+            MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
             BackendConfigAbstractClass.Config.UseSpiritPlayer = false;
         }
 
@@ -1937,7 +1937,6 @@ namespace Fika.Core.Coop.GameMode
                 exitName = exitName,
                 inSession = true,
                 favorite = (Profile_0.Info.Side == EPlayerSide.Savage),
-                //Todo: this is not correct
                 playTime = (int)playTimeDuration.Duration().TotalSeconds
             };
 
@@ -2158,6 +2157,43 @@ namespace Fika.Core.Coop.GameMode
             }
 
             base.Dispose();
+        }
+
+        private class ExitManager : Class1409
+        {
+            public new CoopGame baseLocalGame_0;
+
+            public void ExitOverride()
+            {
+                this.baseLocalGame_0.GameUi.TimerPanel.Close();
+
+                if (this.baseLocalGame_0.gparam_0 != null)
+                {
+                    this.baseLocalGame_0.gparam_0.vmethod_1();
+                }
+
+                CurrentScreenSingleton.Instance.CloseAllScreensForced();
+
+                //If we haven't saved, run the original method and stop running here.
+                if (!baseLocalGame_0.hasSaved)
+                {
+                    this.baseLocalGame_0.method_15(profileId, exitStatus, exitName, delay).HandleExceptions();
+                    return;
+                }
+
+                //Most of this is from method_15, minus the saving player part.
+                this.baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(this.exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
+                baseLocalGame_0.CleanUp();
+
+                Class1410 exitCallback = new Class1410()
+                {
+                    baseLocalGame_0 = baseLocalGame_0,
+                    duration = EFTDateTimeClass.Now - this.baseLocalGame_0.dateTime_0,
+                    exitStatus = exitStatus
+                };
+
+                StaticManager.Instance.WaitSeconds(delay, new Action(exitCallback.method_0));
+            }
         }
 
         /// <summary>
