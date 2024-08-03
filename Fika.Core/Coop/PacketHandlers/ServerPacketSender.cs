@@ -3,9 +3,12 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.MovingPlatforms;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
+using Fika.Core.Coop.Factories;
+using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
@@ -34,6 +37,7 @@ namespace Fika.Core.Coop.PacketHandlers
         public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
         public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
         public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+        private DateTime lastPingTime;
 
         private ManualLogSource logger;
 
@@ -42,6 +46,7 @@ namespace Fika.Core.Coop.PacketHandlers
             logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
             player = GetComponent<CoopPlayer>();
             enabled = false;
+            lastPingTime = DateTime.Now;
         }
 
         public void Init()
@@ -62,7 +67,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void FixedUpdate()
         {
-            if (player == null || Writer == null || Server == null)
+            if (player == null || Writer == null || Server == null || !Enabled)
             {
                 return;
             }
@@ -168,7 +173,118 @@ namespace Fika.Core.Coop.PacketHandlers
                 {
                     return;
                 }
-                player.Ping();
+                SendPing();
+            }
+        }
+
+        private void SendPing()
+        {
+            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            if (coopGame.Status != GameStatus.Started)
+            {
+                return;
+            }
+
+            if (lastPingTime < DateTime.Now.AddSeconds(-3))
+            {
+                Transform origin;
+                FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
+                if (freeCamController != null && freeCamController.IsScriptActive)
+                {
+                    origin = freeCamController.CameraMain.gameObject.transform;
+                }
+                else if (player.HealthController.IsAlive)
+                {
+                    origin = player.CameraPosition;
+                }
+                else
+                {
+                    return;
+                }
+
+                Ray sourceRaycast = new(origin.position + origin.forward / 2f,
+                    origin.forward);
+                int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
+                if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
+                {
+                    lastPingTime = DateTime.Now;
+                    //GameObject gameObject = new("Ping", typeof(FikaPing));
+                    //gameObject.transform.localPosition = hit.point;
+                    Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
+                    GameObject hitGameObject = hit.collider.gameObject;
+                    int hitLayer = hitGameObject.layer;
+
+                    PingFactory.EPingType pingType = PingFactory.EPingType.Point;
+                    object userData = null;
+                    string localeId = null;
+
+#if DEBUG
+                    ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}"); 
+#endif
+
+                    if (LayerMask.LayerToName(hitLayer) == "Player")
+                    {
+                        if (hitGameObject.TryGetComponent(out Player player))
+                        {
+                            pingType = PingFactory.EPingType.Player;
+                            userData = player;
+                        }
+                    }
+                    else if (LayerMask.LayerToName(hitLayer) == "Deadbody")
+                    {
+                        pingType = PingFactory.EPingType.DeadBody;
+                        userData = hitGameObject;
+                    }
+                    else if (hitGameObject.TryGetComponent(out LootableContainer container))
+                    {
+                        pingType = PingFactory.EPingType.LootContainer;
+                        userData = container;
+                        localeId = container.ItemOwner.Name;
+                    }
+                    else if (hitGameObject.TryGetComponent(out LootItem lootItem))
+                    {
+                        pingType = PingFactory.EPingType.LootItem;
+                        userData = lootItem;
+                        localeId = lootItem.Item.ShortName;
+                    }
+                    else if (hitGameObject.TryGetComponent(out Door door))
+                    {
+                        pingType = PingFactory.EPingType.Door;
+                        userData = door;
+                    }
+                    else if (hitGameObject.TryGetComponent(out InteractableObject interactable))
+                    {
+                        pingType = PingFactory.EPingType.Interactable;
+                        userData = interactable;
+                    }
+
+                    GameObject basePingPrefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
+                    GameObject basePing = GameObject.Instantiate(basePingPrefab);
+                    Vector3 hitPoint = hit.point;
+                    PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);
+                    Color pingColor = FikaPlugin.PingColor.Value;
+                    pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
+                    // ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
+                    abstractPing.Initialize(ref hitPoint, userData, pingColor);
+
+                    GenericPacket genericPacket = new()
+                    {
+                        NetId = player.NetId,
+                        PacketType = EPackageType.Ping,
+                        PingLocation = hitPoint,
+                        PingType = pingType,
+                        PingColor = pingColor,
+                        Nickname = player.Profile.Nickname,
+                        LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
+                    };
+
+                    SendPacket(ref genericPacket);
+
+                    if (FikaPlugin.PlayPingAnimation.Value)
+                    {
+                        player.vmethod_3(EGesture.ThatDirection);
+                    }
+                }
             }
         }
 
