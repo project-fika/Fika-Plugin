@@ -620,7 +620,7 @@ namespace Fika.Core
 
                 // Temp until SPT makes patches public
                 //new BotOwnerDisposePatch().Disable();
-                
+
                 Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
                 ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
                 botOwnerDisposePatch.Disable();
@@ -633,7 +633,7 @@ namespace Fika.Core
                 //new BotSelfEnemyPatch().Disable();
                 Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
                 ModulePatch botSelfEnemyPatch = (ModulePatch)Activator.CreateInstance(botSelfEnemyPatchType);
-                botSelfEnemyPatch.Disable(); 
+                botSelfEnemyPatch.Disable();
             }
 
             new BTRInteractionPatch().Disable();

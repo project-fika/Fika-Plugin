@@ -564,7 +564,7 @@ namespace Fika.Core.Coop.Players
                 MovementContext.PlayerAnimatorEnableJump(true);
                 if (isServer)
                 {
-                    MovementContext.method_2(1f); 
+                    MovementContext.method_2(1f);
                 }
             }
             if (MovementContext.PlayerAnimator.IsJumpSetted() && newState.IsGrounded)
@@ -623,7 +623,7 @@ namespace Fika.Core.Coop.Players
                 Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolate));
                 if (isServer)
                 {
-                    MovementContext.method_1(newState.MovementDirection); 
+                    MovementContext.method_1(newState.MovementDirection);
                 }
             }
 
@@ -898,7 +898,7 @@ namespace Fika.Core.Coop.Players
                 {
                     NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, (Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname))} has spawned",
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
-                }                
+                }
 
                 Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
 

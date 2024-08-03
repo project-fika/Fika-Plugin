@@ -6,9 +6,7 @@ using EFT.Animations;
 using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
@@ -56,7 +54,7 @@ namespace Fika.Core.Coop.Custom
                     {
                         counter = 0;
                         CheckForOcclusion();
-                    } 
+                    }
                 }
             }
             else
@@ -84,7 +82,7 @@ namespace Fika.Core.Coop.Custom
                     {
                         playerPlate.ScalarObjectScreen.SetActive(true);
                         updatePos = true;
-                        UpdateScreenSpacePosition(); 
+                        UpdateScreenSpacePosition();
                     }
                 }
             }

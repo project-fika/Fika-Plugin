@@ -1,6 +1,4 @@
-﻿using Comfort.Common;
-using Diz.Jobs;
-using EFT;
+﻿using EFT;
 using EFT.Communications;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
@@ -9,7 +7,6 @@ using SPT.Reflection.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {

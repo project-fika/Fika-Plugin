@@ -1280,7 +1280,7 @@ namespace Fika.Core.Coop.GameMode
                 botsController_0.SetSettings(numberOfBots, iSession.BackEndConfig.BotPresets, iSession.BackEndConfig.BotWeaponScatterings);
                 if (!FikaBackendUtils.IsDedicated)
                 {
-                    botsController_0.AddActivePLayer(PlayerOwner.Player); 
+                    botsController_0.AddActivePLayer(PlayerOwner.Player);
                 }
 
                 if (FikaPlugin.EnforcedSpawnLimits.Value)
@@ -1462,7 +1462,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 DynamicAI.EnabledChange(FikaPlugin.DynamicAI.Value);
             }
-        }     
+        }
 
         /// <summary>
         /// Triggers when a <see cref="MineDirectional"/> explodes
@@ -2147,7 +2147,7 @@ namespace Fika.Core.Coop.GameMode
             if (Singleton<FikaAirdropsManager>.Instance != null)
             {
                 Destroy(Singleton<FikaAirdropsManager>.Instance);
-            }            
+            }
 
             base.Dispose();
         }
