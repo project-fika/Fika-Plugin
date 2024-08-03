@@ -102,10 +102,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
-            if (aggressor.IsYourPlayer)
-            {
-                base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
-            }
+            base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
             if (FikaPlugin.EasyKillConditions.Value)
             {

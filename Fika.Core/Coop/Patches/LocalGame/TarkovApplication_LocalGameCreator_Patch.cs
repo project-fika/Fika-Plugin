@@ -13,6 +13,7 @@ using HarmonyLib;
 using JsonType;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -58,6 +59,11 @@ namespace Fika.Core.Coop.Patches.LocalGame
             }
 
             ISession session = instance.Session;
+
+            if (session == null)
+            {
+                throw new NullReferenceException("Backend session was null when initializing game!");
+            }
 
             Profile profile = session.GetProfileBySide(raidSettings.Side);
 

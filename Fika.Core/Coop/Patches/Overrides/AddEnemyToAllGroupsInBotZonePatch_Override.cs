@@ -55,11 +55,14 @@ namespace Fika.Core.Coop.Patches.Overrides
                     bool differentSide = aggressor.Side != group.Side;
                     bool sameSide = aggressor.Side == target.Side;
 
-                    if (!group.Enemies.ContainsKey(aggressor)
+                    if (!group.HaveFollowTarget(aggressor)
+                        && !group.Enemies.ContainsKey(aggressor)
                         && (differentSide || !sameSide)
                         && !group.HaveMemberWithRole(WildSpawnType.gifter)
-                        && group.ShallRevengeFor(target)
-                        )
+                        && !group.HaveMemberWithRole(WildSpawnType.sectantWarrior)
+                        && !group.HaveMemberWithRole(WildSpawnType.sectantPriest)
+                        && !group.InitialFileSettings.Boss.NOT_ADD_TO_ENEMY_ON_KILLS
+                        && group.ShallRevengeFor(target))
                     {
                         group.AddEnemy(aggressor, EBotEnemyCause.AddEnemyToAllGroupsInBotZone);
                     }

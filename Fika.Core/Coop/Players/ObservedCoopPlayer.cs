@@ -38,6 +38,7 @@ namespace Fika.Core.Coop.Players
         private float observedFixedTime = 0f;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
+        private bool isServer;
         public NetworkHealthControllerAbstractClass NetworkHealthController
         {
             get => HealthController as NetworkHealthControllerAbstractClass;
@@ -149,6 +150,8 @@ namespace Fika.Core.Coop.Players
 
             player._animators[0].enabled = true;
             player._armsUpdateQueue = EUpdateQueue.Update;
+
+            player.isServer = FikaBackendUtils.IsServer;
 
             return player;
         }
@@ -413,13 +416,6 @@ namespace Fika.Core.Coop.Players
             Proceed(false, new Callback<GInterface137>(handler.Handle), false);
         }
 
-        public override Corpse CreateCorpse()
-        {
-            Vector3 normalized = RagdollPacket.OverallVelocity.normalized;
-            Vector3 velocityToApply = normalized.Equals(Vector3.up) ? normalized : Vector3.ClampMagnitude(RagdollPacket.OverallVelocity, 2f);
-            return CreateCorpse<Corpse>(velocityToApply);
-        }
-
         public override void ApplyCorpseImpulse()
         {
             if (RagdollPacket.BodyPartColliderType != EBodyPartColliderType.None)
@@ -566,6 +562,10 @@ namespace Fika.Core.Coop.Players
             if (newMovementState == EPlayerState.Jump)
             {
                 MovementContext.PlayerAnimatorEnableJump(true);
+                if (isServer)
+                {
+                    MovementContext.method_2(1f); 
+                }
             }
             if (MovementContext.PlayerAnimator.IsJumpSetted() && newState.IsGrounded)
             {
@@ -621,6 +621,10 @@ namespace Fika.Core.Coop.Players
             if (!IsInventoryOpened)
             {
                 Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolate));
+                if (isServer)
+                {
+                    MovementContext.method_1(newState.MovementDirection); 
+                }
             }
 
             Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolate);

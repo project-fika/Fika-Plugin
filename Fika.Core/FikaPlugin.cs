@@ -20,6 +20,7 @@ using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
+using SPT.Reflection.Patching;
 using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.Progression;
 using SPT.SinglePlayer.Patches.Quests;
@@ -41,7 +42,7 @@ namespace Fika.Core
     /// Originally by: Paulov <br/>
     /// Re-written by: Lacyway
     /// </summary>
-    [BepInPlugin("com.fika.core", "Fika.Core", "0.9.8976")]
+    [BepInPlugin("com.fika.core", "Fika.Core", "0.9.8980")]
     [BepInProcess("EscapeFromTarkov.exe")]
     [BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-custom, that way we can disable its patches
     [BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
@@ -91,6 +92,7 @@ namespace Fika.Core
 
         //Advanced
         public static ConfigEntry<bool> OfficialVersion { get; set; }
+        public static ConfigEntry<bool> DisableSPTAIPatches { get; set; }
 
         // Coop
         public static ConfigEntry<bool> ShowNotifications { get; set; }
@@ -116,6 +118,7 @@ namespace Fika.Core
         public static ConfigEntry<float> MinimumOpacity { get; set; }
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
         public static ConfigEntry<bool> ShowEffects { get; set; }
+        public static ConfigEntry<bool> UseOcclusion { get; set; }
 
         // Coop | Quest Sharing
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
@@ -225,7 +228,8 @@ namespace Fika.Core
             new DisconnectButton_Patch().Enable();
             new ChangeGameModeButton_Patch().Enable();
             new MenuTaskBar_Patch().Enable();
-            new GameWorld_Create_Patch().Enable();            
+            new GameWorld_Create_Patch().Enable();
+            new World_AddSpawnQuestLootPacket_Patch().Enable();
 
             gameObject.AddComponent<MainThreadDispatcher>();
 
@@ -310,6 +314,9 @@ namespace Fika.Core
             OfficialVersion = Config.Bind("Advanced", "Official Version", false,
                 new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
 
+            DisableSPTAIPatches = Config.Bind("Advanced", "Disable SPT AI Patches", false,
+                new ConfigDescription("Disable SPT AI patches that are most likely redundant in Fika.", tags: new ConfigurationManagerAttributes { IsAdvanced = true }));
+
             // Coop
 
             ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true,
@@ -333,43 +340,46 @@ namespace Fika.Core
             // Coop | Name Plates
 
             UseNamePlates = Config.Bind("Coop | Name Plates", "Show Player Name Plates", false,
-                new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 12 }));
+                new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 13 }));
 
             HideHealthBar = Config.Bind("Coop | Name Plates", "Hide Health Bar", false,
-                new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
+                new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 12 }));
 
             UseHealthNumber = Config.Bind("Coop | Name Plates", "Show HP% instead of bar", false,
-                new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+                new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
 
             ShowEffects = Config.Bind("Coop | Name Plates", "Show Effects", true,
-                new ConfigDescription("If status effects should be displayed below the health bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+                new ConfigDescription("If status effects should be displayed below the health bar.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
             UsePlateFactionSide = Config.Bind("Coop | Name Plates", "Show Player Faction Icon", true,
-                new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+                new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
             HideNamePlateInOptic = Config.Bind("Coop | Name Plates", "Hide Name Plate in Optic", true,
-                new ConfigDescription("Hides the name plate when viewing through PiP scopes.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+                new ConfigDescription("Hides the name plate when viewing through PiP scopes.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
             NamePlateUseOpticZoom = Config.Bind("Coop | Name Plates", "Name Plates Use Optic Zoom", true,
-                new ConfigDescription("If name plate location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 6, IsAdvanced = true }));
+                new ConfigDescription("If name plate location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 7, IsAdvanced = true }));
 
             DecreaseOpacityNotLookingAt = Config.Bind("Coop | Name Plates", "Decrease Opacity In Peripheral", true,
-                new ConfigDescription("Decreases the opacity of the name plates when not looking at a player.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+                new ConfigDescription("Decreases the opacity of the name plates when not looking at a player.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
             NamePlateScale = Config.Bind("Coop | Name Plates", "Name Plate Scale", 0.22f,
-                new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
+                new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 5 }));
 
             OpacityInADS = Config.Bind("Coop | Name Plates", "Opacity in ADS", 0.75f,
-                new ConfigDescription("The opacity of the name plates when aiming down sights.", new AcceptableValueRange<float>(0.1f, 1f), new ConfigurationManagerAttributes() { Order = 3 }));
+                new ConfigDescription("The opacity of the name plates when aiming down sights.", new AcceptableValueRange<float>(0.1f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
 
             MaxDistanceToShow = Config.Bind("Coop | Name Plates", "Max Distance to Show", 500f,
-                new ConfigDescription("The maximum distance at which name plates will become invisible, starts to fade at half the input value.", new AcceptableValueRange<float>(10f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
+                new ConfigDescription("The maximum distance at which name plates will become invisible, starts to fade at half the input value.", new AcceptableValueRange<float>(10f, 1000f), new ConfigurationManagerAttributes() { Order = 3 }));
 
             MinimumOpacity = Config.Bind("Coop | Name Plates", "Minimum Opacity", 0.1f,
-                new ConfigDescription("The minimum opacity of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+                new ConfigDescription("The minimum opacity of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
             MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f,
-                new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 0 }));
+                new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+
+            UseOcclusion = Config.Bind("Coop | Name Plates", "Use Occlusion", false,
+                new ConfigDescription("Use occlusion to hide the name plate when the player is out of sight.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
             // Coop | Quest Sharing
 
@@ -583,6 +593,11 @@ namespace Fika.Core
             new ScavRepAdjustmentPatch().Disable();
             new FixSavageInventoryScreenPatch().Disable();
             new FixQuestAchieveControllersPatch().Disable();
+
+            if (DisableSPTAIPatches.Value)
+            {
+                new IsEnemyPatch().Disable();
+            }
         }
 
         private void EnableOverridePatches()
@@ -601,6 +616,7 @@ namespace Fika.Core
             Medium,
             High
         }
+
         public enum EPingSound
         {
             SubQuestComplete,

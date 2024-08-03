@@ -307,7 +307,7 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            int playerId = Players.Count + Singleton<GameWorld>.Instance.RegisteredPlayers.Count + 1;
+            int playerId = LocalGameInstance.method_16();
 
             IEnumerable<ResourceKey> allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths();
             if (allPrefabPaths.Count() == 0)
@@ -404,7 +404,7 @@ namespace Fika.Core.Coop.Components
         {
             bool isDedicatedProfile = !isAI && profile.Info.MainProfileNickname.Contains("dedicated_");
 
-            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(playerId, position,
+            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(netId, position,
                 Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
                 EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
                 Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,

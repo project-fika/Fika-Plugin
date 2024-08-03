@@ -6,6 +6,7 @@ using EFT.Animations;
 using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
+using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
@@ -30,6 +31,8 @@ namespace Fika.Core.Coop.Custom
         private Dictionary<Type, Sprite> effectIcons;
         private List<HealthBarEffect> effects;
         private List<Type> ignoredTypes; // Check for GClass increments
+        private float counter = 0;
+        private bool updatePos = true;
 
         protected void Awake()
         {
@@ -46,6 +49,15 @@ namespace Fika.Core.Coop.Custom
             if (currentPlayer != null)
             {
                 UpdateScreenSpacePosition();
+                if (FikaPlugin.UseOcclusion.Value)
+                {
+                    counter += Time.deltaTime;
+                    if (counter > 1)
+                    {
+                        counter = 0;
+                        CheckForOcclusion();
+                    } 
+                }
             }
             else
             {
@@ -53,8 +65,38 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
+        private void CheckForOcclusion()
+        {
+            Vector3 camPos = CameraClass.Instance.Camera.transform.position;
+            Vector3 targetPos = currentPlayer.PlayerBones.Neck.position;
+            int layer = LayerMask.GetMask(["HighPolyCollider", "Terrain", "Player"]);
+
+            if (Physics.Raycast(camPos, targetPos - camPos, out RaycastHit hitinfo, 800f, layer))
+            {
+                if (LayerMask.LayerToName(hitinfo.collider.gameObject.layer) != "Player")
+                {
+                    playerPlate.ScalarObjectScreen.SetActive(false);
+                    updatePos = false;
+                }
+                else
+                {
+                    if (!playerPlate.ScalarObjectScreen.activeSelf)
+                    {
+                        playerPlate.ScalarObjectScreen.SetActive(true);
+                        updatePos = true;
+                        UpdateScreenSpacePosition(); 
+                    }
+                }
+            }
+        }
+
         private void UpdateScreenSpacePosition()
         {
+            if (!updatePos)
+            {
+                return;
+            }
+
             // ADS opacity handling
             float opacityMultiplier = 1f;
             ProceduralWeaponAnimation proceduralWeaponAnimation = mainPlayer.ProceduralWeaponAnimation;
@@ -62,7 +104,7 @@ namespace Fika.Core.Coop.Custom
             {
                 if (proceduralWeaponAnimation.CurrentScope.IsOptic && FikaPlugin.HideNamePlateInOptic.Value)
                 {
-                    playerPlate.ScalarObjectScreen.active = false;
+                    playerPlate.ScalarObjectScreen.SetActive(false);
                     return;
                 }
                 opacityMultiplier = FikaPlugin.OpacityInADS.Value;
@@ -76,12 +118,12 @@ namespace Fika.Core.Coop.Custom
             float maxDistanceToShow = FikaPlugin.MaxDistanceToShow.Value * FikaPlugin.MaxDistanceToShow.Value;
             if (sqrDistance > maxDistanceToShow)
             {
-                playerPlate.ScalarObjectScreen.active = false;
+                playerPlate.ScalarObjectScreen.SetActive(false);
                 return;
             }
 
             // If we're here, we can show the name plate
-            playerPlate.ScalarObjectScreen.active = true;
+            playerPlate.ScalarObjectScreen.SetActive(true);
 
             float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
             Vector3 position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), currentPlayer.PlayerBones.Neck.position.z);
