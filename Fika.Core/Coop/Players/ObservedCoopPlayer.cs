@@ -314,7 +314,7 @@ namespace Fika.Core.Coop.Players
         {
             ShotReactions(damageInfo, bodyPartType);
 
-            if (damageInfo.DamageType == EDamageType.Sniper && FikaBackendUtils.IsServer)
+            if (damageInfo.DamageType == EDamageType.Sniper && isServer)
             {
                 PacketSender.DamagePackets.Enqueue(new()
                 {
