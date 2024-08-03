@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.GameMode
                         Data = gameWorld_0.GrenadesCriticalStates[i]
                     };
                     writer.Reset();
-                    server.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
                 }
             }
 

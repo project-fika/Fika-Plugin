@@ -8,6 +8,7 @@ using EFT.GlobalEvents;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
