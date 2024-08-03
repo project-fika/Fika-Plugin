@@ -1952,7 +1952,7 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         /// <param name="profileId"></param>
         /// <param name="exitStatus"></param>
-        private void StopFromCancel(string profileId, ExitStatus exitStatus)
+        public void StopFromCancel(string profileId, ExitStatus exitStatus)
         {
             Logger.LogWarning("Game init was cancelled!");
 
