@@ -1073,6 +1073,9 @@ namespace Fika.Core.Coop.GameMode
                     await Task.Delay(2000);
                 }
             } while (!HasReceivedLoot);
+
+            RegisterPlayerRequest request = new(0, Location_0.Id, 0);
+            await FikaRequestHandler.RegisterPlayer(request);
         }
 
         /// <summary>
