@@ -52,7 +52,8 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
-            if (player.AIData.BotOwner.Mover == null)
+            BotMover mover = player.AIData.BotOwner.Mover;
+            if (mover == null)
             {
                 return;
             }
@@ -68,8 +69,8 @@ namespace Fika.Core.Coop.PacketHandlers
 
             Writer.Reset();
             Server.SendDataToAll(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
-
-            if (!player.AIData.BotOwner.Mover.IsMoving)
+            
+            if (!mover.IsMoving || mover.Pause)
             {
                 player.LastDirection = Vector2.zero;
             }
