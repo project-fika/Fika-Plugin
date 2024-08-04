@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using EFT.UI;
@@ -586,6 +587,16 @@ namespace Fika.Core
 
         private void DisableSPTPatches()
         {
+            Chainloader.PluginInfos.TryGetValue("com.SPT.core", out PluginInfo pluginInfo);
+
+            bool OlderSPTVersion = false;
+
+            if (pluginInfo.Metadata.Version < Version.Parse("3.9.5"))
+            {
+                FikaLogger.LogWarning("Older SPT version found!");
+                OlderSPTVersion = true;
+            }
+
             // Disable these as they interfere with Fika
             new BotDifficultyPatch().Disable();
             new AirdropPatch().Disable();
@@ -609,21 +620,29 @@ namespace Fika.Core
 
             Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
             //new BotCallForHelpCallBotPatch().Disable();
-            Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
-            ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
-            botCallForHelpCallBotPatch.Disable();
+            if (OlderSPTVersion)
+            {
+                Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
+                ModulePatch botCallForHelpCallBotPatch = (ModulePatch)Activator.CreateInstance(botCallForHelpCallBotPatchType);
+                botCallForHelpCallBotPatch.Disable();
+            }
 
             if (DisableSPTAIPatches.Value)
             {
                 new BotEnemyTargetPatch().Disable();
                 new IsEnemyPatch().Disable();
 
-                // Temp until SPT makes patches public
-                //new BotOwnerDisposePatch().Disable();
-
-                Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
-                ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
-                botOwnerDisposePatch.Disable();
+                if (!OlderSPTVersion)
+                {
+                    // Temp until SPT makes patches public
+                    new BotOwnerDisposePatch().Disable();
+                }
+                else
+                {
+                    Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
+                    ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
+                    botOwnerDisposePatch.Disable();
+                }
 
                 //new BotCalledDataTryCallPatch().Disable();
                 Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
