@@ -619,7 +619,7 @@ namespace Fika.Core
             new AddEnemyToAllGroupsInBotZonePatch().Disable();
 
             Assembly sptCustomAssembly = typeof(IsEnemyPatch).Assembly;
-            //new BotCallForHelpCallBotPatch().Disable();
+
             if (OlderSPTVersion)
             {
                 Type botCallForHelpCallBotPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCallForHelpCallBotPatch");
@@ -634,25 +634,24 @@ namespace Fika.Core
 
                 if (!OlderSPTVersion)
                 {
-                    // Temp until SPT makes patches public
                     new BotOwnerDisposePatch().Disable();
+                    new BotCalledDataTryCallPatch().Disable();
+                    new BotSelfEnemyPatch().Disable();
                 }
                 else
                 {
                     Type botOwnerDisposePatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotOwnerDisposePatch");
                     ModulePatch botOwnerDisposePatch = (ModulePatch)Activator.CreateInstance(botOwnerDisposePatchType);
                     botOwnerDisposePatch.Disable();
+
+                    Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
+                    ModulePatch botCalledDataTryCallPatch = (ModulePatch)Activator.CreateInstance(botCalledDataTryCallPatchType);
+                    botCalledDataTryCallPatch.Disable();
+
+                    Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
+                    ModulePatch botSelfEnemyPatch = (ModulePatch)Activator.CreateInstance(botSelfEnemyPatchType);
+                    botSelfEnemyPatch.Disable();
                 }
-
-                //new BotCalledDataTryCallPatch().Disable();
-                Type botCalledDataTryCallPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotCalledDataTryCallPatch");
-                ModulePatch botCalledDataTryCallPatch = (ModulePatch)Activator.CreateInstance(botCalledDataTryCallPatchType);
-                botCalledDataTryCallPatch.Disable();
-
-                //new BotSelfEnemyPatch().Disable();
-                Type botSelfEnemyPatchType = sptCustomAssembly.GetType("SPT.Custom.Patches.BotSelfEnemyPatch");
-                ModulePatch botSelfEnemyPatch = (ModulePatch)Activator.CreateInstance(botSelfEnemyPatchType);
-                botSelfEnemyPatch.Disable();
             }
 
             new BTRInteractionPatch().Disable();
