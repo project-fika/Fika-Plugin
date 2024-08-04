@@ -18,6 +18,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -109,6 +110,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
+            packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
 
             netServer = new NetManager(this)
             {
@@ -220,6 +222,19 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnWorldLootPacketReceived(WorldLootPacket packet, NetPeer peer)
+        {
+            if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
+            {
+                WorldLootPacket response = new(false)
+                {
+                    Data = coopGame.HostLootItems
+                };
+                dataWriter.Reset();
+                SendDataToPeer(peer, dataWriter, ref response, DeliveryMethod.ReliableUnordered);
+            }
+        }
+
         private void OnInteractableInitPacketReceived(InteractableInitPacket packet, NetPeer peer)
         {
             if (packet.IsRequest)
@@ -243,8 +258,7 @@ namespace Fika.Core.Networking
 
         private void OnSpawnPointPacketReceived(SpawnpointPacket packet, NetPeer peer)
         {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-            if (coopGame != null)
+            if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
             {
                 if (packet.IsRequest)
                 {
@@ -256,10 +270,6 @@ namespace Fika.Core.Networking
                     dataWriter.Reset();
                     SendDataToPeer(peer, dataWriter, ref response, DeliveryMethod.ReliableUnordered);
                 }
-            }
-            else
-            {
-                logger.LogError("OnSpawnPointPacketReceived: CoopGame was null upon receiving packet!"); ;
             }
         }
 

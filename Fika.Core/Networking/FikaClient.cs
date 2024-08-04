@@ -2,6 +2,7 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using ComponentAce.Compression.Libs.zlib;
 using Coop.Airdrops;
 using EFT;
 using EFT.AssetsManager;
@@ -18,10 +19,12 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using SPT.Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,6 +111,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
             packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
             packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnStatisticsPacketReceived);
+            packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
 
             netClient = new NetManager(this)
             {
@@ -151,6 +155,16 @@ namespace Fika.Core.Networking
             }
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnWorldLootPacketReceived(WorldLootPacket packet)
+        {
+            if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
+            {
+                GClass1211 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1211>();
+                coopGame.LootItems = lootItems;
+                coopGame.HasReceivedLoot = true;
+            }
         }
 
         private void OnStatisticsPacketReceived(ThrowablePacket packet)
