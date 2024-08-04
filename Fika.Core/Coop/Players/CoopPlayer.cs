@@ -487,9 +487,9 @@ namespace Fika.Core.Coop.Players
                                 bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
                                 killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
 
-                AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
+                /*AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                     bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
-                    killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
+                    killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
             }
 
 
