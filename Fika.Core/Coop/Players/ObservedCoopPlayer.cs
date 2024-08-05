@@ -731,7 +731,7 @@ namespace Fika.Core.Coop.Players
 
             if (FikaPlugin.EasyKillConditions.Value)
             {
-                if (aggressor.Profile.Info.GroupId == "Fika")
+                if (aggressor.Profile.Info.GroupId == "Fika" && !aggressor.IsYourPlayer)
                 {
                     CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                     if (mainPlayer != null)
