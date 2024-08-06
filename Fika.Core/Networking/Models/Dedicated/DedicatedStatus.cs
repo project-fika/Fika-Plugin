@@ -2,6 +2,6 @@
 
 public enum DedicatedStatus
 {
-    READY,
-    IN_RAID
+    READY = 1,
+    IN_RAID = 2
 }
