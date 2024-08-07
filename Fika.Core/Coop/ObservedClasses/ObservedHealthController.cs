@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			foreach (NetworkBodyEffectsAbstractClass gclass in IReadOnlyList_0)
 			{
-				if (gclass.State != EEffectState.Residued)
+				if (gclass is GInterface251 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments
 				{
 					Profile.ProfileHealthClass.GClass1770 gclass2 = health.BodyParts[gclass.BodyPart];
 					gclass2.Effects ??= [];

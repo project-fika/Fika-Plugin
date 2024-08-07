@@ -10,6 +10,7 @@ using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
+using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -1044,6 +1045,13 @@ namespace Fika.Core.Coop.GameMode
             if (FikaBackendUtils.IsReconnect)
             {
                 await Reconnect();
+                foreach (KeyValuePair<EBodyPart, GClass2430<ActiveHealthController.GClass2429>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
+                {
+                    if (item.Value.Health.AtMinimum)
+                    {
+                        item.Value.IsDestroyed = true;
+					}
+                }
             }
 
             handler.SetReady(true);
