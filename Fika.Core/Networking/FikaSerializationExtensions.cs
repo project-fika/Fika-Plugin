@@ -291,8 +291,8 @@ namespace Fika.Core.Networking
 		{
 			int amount = reader.GetInt();
 			List<WorldInteractiveObject.GStruct384> interactivesStates = new(amount);
-            for (int i = 0; i < amount; i++)
-            {
+			for (int i = 0; i < amount; i++)
+			{
 				WorldInteractiveObject.GStruct384 data = new()
 				{
 					NetId = reader.GetInt(),
@@ -300,10 +300,10 @@ namespace Fika.Core.Networking
 					IsBroken = reader.GetBool()
 				};
 				interactivesStates.Add(data);
-            }
+			}
 
 			return interactivesStates;
-        }
+		}
 
 		public static void PutLampStates(this NetDataWriter writer, Dictionary<int, byte> lampStates)
 		{
@@ -314,19 +314,19 @@ namespace Fika.Core.Networking
 				writer.Put(lampState.Key);
 				writer.Put(lampState.Value);
 			}
-        }
+		}
 
 		public static Dictionary<int, byte> GetLampStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
 			Dictionary<int, byte> states = new(amount);
-            for (int i = 0; i < amount; i++)
-            {
+			for (int i = 0; i < amount; i++)
+			{
 				states.Add(reader.GetInt(), reader.GetByte());
-            }
+			}
 
 			return states;
-        }
+		}
 
 		public static void PutWindowBreakerStates(this NetDataWriter writer, Dictionary<int, Vector3> windowBreakerStates)
 		{
@@ -337,18 +337,18 @@ namespace Fika.Core.Networking
 				writer.Put(windowBreakerState.Key);
 				writer.Put(windowBreakerState.Value);
 			}
-        }
+		}
 
 		public static Dictionary<int, Vector3> GetWindowBreakerStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
 			Dictionary<int, Vector3> states = new(amount);
-            for (int i = 0; i < amount; i++)
-            {
+			for (int i = 0; i < amount; i++)
+			{
 				states.Add(reader.GetInt(), reader.GetVector3());
-            }
+			}
 
 			return states;
-        }
+		}
 	}
 }
