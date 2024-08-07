@@ -9,6 +9,7 @@ using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.MovingPlatforms;
 using EFT.UI;
+using EFT.UI.BattleTimer;
 using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -895,18 +896,23 @@ namespace Fika.Core.Networking
             GameTimerClass gameTimer = coopGame.GameTimer;
             if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
             {
-                if (gameTimer.PastTime.TotalSeconds < 3)
-                {
-                    return;
-                }
+				TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
 
-                TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
+				gameTimer.ChangeSessionTime(timeRemain);
 
-                gameTimer.ChangeSessionTime(timeRemain);
+				Traverse timerPanel = Traverse.Create(coopGame.GameUi.TimerPanel);
+				timerPanel.Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds));
 
-                Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
-            }
-        }
+				MainTimerPanel mainTimerPanel = timerPanel.Field<MainTimerPanel>("_mainTimerPanel").Value;
+				if (mainTimerPanel != null)
+				{
+					Traverse.Create(mainTimerPanel).Field<DateTime>("dateTime_0").Value = gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds);
+					mainTimerPanel.UpdateTimer();
+				}
+
+				Traverse.Create(gameTimer).Field<DateTime?>("nullable_0").Value = new DateTime(packet.StartTime);
+			}
+		}
 
         private void OnHalloweenEventPacketReceived(HalloweenEventPacket packet)
         {
