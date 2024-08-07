@@ -849,8 +849,8 @@ namespace Fika.Core.Coop.GameMode
             EUpdateQueue updateQueue, Player.EUpdateMode armsUpdateMode, Player.EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity, Func<float> getAimingSensitivity,
             IStatisticsManager statisticsManager, AbstractQuestControllerClass questController, AbstractAchievementControllerClass achievementsController)
-        {			
-			profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
+        {
+            profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
             LocalPlayer myPlayer = await CoopPlayer.Create(playerId, spawnPoint.Position, spawnPoint.Rotation, "Player",
                 "Main_", EPointOfView.FirstPerson, profile, false, UpdateQueue, armsUpdateMode, bodyUpdateMode,
@@ -977,14 +977,14 @@ namespace Fika.Core.Coop.GameMode
             CoopHandler handler = CoopHandler.GetCoopHandler();
             if (handler != null)
             {
-				handler.LocalGameInstance = this;
-			}
+                handler.LocalGameInstance = this;
+            }
             else
             {
                 throw new NullReferenceException("CoopHandler was missing!");
             }
 
-			LocationSettingsClass.Location location;
+            LocationSettingsClass.Location location;
             if (Location_0.IsHideout)
             {
                 location = Location_0;
@@ -1005,7 +1005,7 @@ namespace Fika.Core.Coop.GameMode
                         FikaBackendUtils.ScreenController.ChangeStatus("Retrieving loot from server...");
                         if (!FikaBackendUtils.IsReconnect)
                         {
-                            await RetrieveLootFromServer(true); 
+                            await RetrieveLootFromServer(true);
                         }
                         else
                         {
@@ -1019,7 +1019,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-			ApplicationConfigClass config = BackendConfigAbstractClass.Config;
+            ApplicationConfigClass config = BackendConfigAbstractClass.Config;
             if (config.FixedFrameRate > 0f)
             {
                 FixedDeltaTime = 1f / config.FixedFrameRate;
@@ -1050,7 +1050,7 @@ namespace Fika.Core.Coop.GameMode
                     if (item.Value.Health.AtMinimum)
                     {
                         item.Value.IsDestroyed = true;
-					}
+                    }
                 }
             }
 
@@ -1059,8 +1059,8 @@ namespace Fika.Core.Coop.GameMode
             await method_11(location, startHandler.FinishLoading);
         }
 
-		private async Task GetReconnectProfile(string profileId)
-		{
+        private async Task GetReconnectProfile(string profileId)
+        {
             Profile_0 = null;
 
             ReconnectPacket reconnectPacket = new(true)
@@ -1068,19 +1068,19 @@ namespace Fika.Core.Coop.GameMode
                 InitialRequest = true,
                 ProfileId = profileId
             };
-			FikaClient client = Singleton<FikaClient>.Instance;
-			client.Writer.Reset();
-			client.SendData(client.Writer, ref reconnectPacket, DeliveryMethod.ReliableUnordered);
+            FikaClient client = Singleton<FikaClient>.Instance;
+            client.Writer.Reset();
+            client.SendData(client.Writer, ref reconnectPacket, DeliveryMethod.ReliableUnordered);
 
-			do
+            do
             {
                 await Task.Delay(250);
             } while (Profile_0 == null);
-		}
+        }
 
-		private async Task Reconnect()
-		{
-			FikaBackendUtils.ScreenController.ChangeStatus($"Reconnecting...");
+        private async Task Reconnect()
+        {
+            FikaBackendUtils.ScreenController.ChangeStatus($"Reconnecting...");
 
             ReconnectPacket reconnectPacket = new(true)
             {
@@ -1094,9 +1094,9 @@ namespace Fika.Core.Coop.GameMode
             {
                 await Task.Delay(1000);
             } while (!client.ReconnectDone);
-		}
+        }
 
-		private async Task RetrieveLootFromServer(bool register)
+        private async Task RetrieveLootFromServer(bool register)
         {
             FikaClient client = Singleton<FikaClient>.Instance;
             WorldLootPacket packet = new(true);
@@ -1114,7 +1114,7 @@ namespace Fika.Core.Coop.GameMode
             if (register)
             {
                 RegisterPlayerRequest request = new(0, Location_0.Id, 0);
-                await FikaRequestHandler.RegisterPlayer(request); 
+                await FikaRequestHandler.RegisterPlayer(request);
             }
         }
 
@@ -2313,16 +2313,16 @@ namespace Fika.Core.Coop.GameMode
             return;
         }
 
-		public byte[] GetHostLootItems()
-		{
+        public byte[] GetHostLootItems()
+        {
             if (HostLootItems == null || HostLootItems.Length == 0)
             {
                 GClass1211 lootItems = new(Singleton<GameWorld>.Instance.GetJsonLootItems()
                     .Where(x => x as CorpseLootItemClass is null));
-				return SimpleZlib.CompressToBytes(lootItems.ToJson([]), 6);
-			}
+                return SimpleZlib.CompressToBytes(lootItems.ToJson([]), 6);
+            }
 
             return HostLootItems;
-		}
-	}
+        }
+    }
 }

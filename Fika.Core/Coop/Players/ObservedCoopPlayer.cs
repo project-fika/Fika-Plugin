@@ -36,11 +36,11 @@ namespace Fika.Core.Coop.Players
         #region Fields and Properties
         public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         private float observedFixedTime = 0f;
-		public FikaHealthBar HealthBar
-		{
-			get => healthBar;
-		}
-		private FikaHealthBar healthBar = null;
+        public FikaHealthBar HealthBar
+        {
+            get => healthBar;
+        }
+        private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
         private bool isServer;
         public ObservedHealthController NetworkHealthController
@@ -118,10 +118,10 @@ namespace Fika.Core.Coop.Players
                 }
                 return base.SqrCameraDistance;
             }
-        }		
-		#endregion
+        }
+        #endregion
 
-		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
+        public static async Task<ObservedCoopPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,

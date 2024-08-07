@@ -30,35 +30,35 @@ namespace Fika.Core.Networking
         {
             NetId = reader.GetInt();
             PacketType = (EPackageType)reader.GetInt();
-			switch (PacketType)
-			{
-				case EPackageType.Ping:
-					PingLocation = reader.GetVector3();
-					PingType = (PingFactory.EPingType)reader.GetByte();
-					PingColor = reader.GetColor();
-					Nickname = reader.GetString();
-					LocaleId = reader.GetString();
-					break;
-				case EPackageType.TrainSync:
-					DepartureTime = reader.GetLong();
-					break;
-				case EPackageType.ExfilCountdown:
-					ExfilName = reader.GetString();
-					ExfilStartTime = reader.GetFloat();
-					break;
-				case EPackageType.TraderServiceNotification:
-					TraderServiceType = (ETraderServiceType)reader.GetInt();
-					break;
-				case EPackageType.LoadBot:
-				case EPackageType.DisposeBot:
-				case EPackageType.EnableBot:
-				case EPackageType.DisableBot:
-					BotNetId = reader.GetInt();
-					break;
-			}
-		}
+            switch (PacketType)
+            {
+                case EPackageType.Ping:
+                    PingLocation = reader.GetVector3();
+                    PingType = (PingFactory.EPingType)reader.GetByte();
+                    PingColor = reader.GetColor();
+                    Nickname = reader.GetString();
+                    LocaleId = reader.GetString();
+                    break;
+                case EPackageType.TrainSync:
+                    DepartureTime = reader.GetLong();
+                    break;
+                case EPackageType.ExfilCountdown:
+                    ExfilName = reader.GetString();
+                    ExfilStartTime = reader.GetFloat();
+                    break;
+                case EPackageType.TraderServiceNotification:
+                    TraderServiceType = (ETraderServiceType)reader.GetInt();
+                    break;
+                case EPackageType.LoadBot:
+                case EPackageType.DisposeBot:
+                case EPackageType.EnableBot:
+                case EPackageType.DisableBot:
+                    BotNetId = reader.GetInt();
+                    break;
+            }
+        }
 
-		public void Serialize(NetDataWriter writer)
+        public void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.Put((int)PacketType);
@@ -89,9 +89,9 @@ namespace Fika.Core.Networking
                     break;
             }
         }
-	}
+    }
 
-	public enum EPackageType
+    public enum EPackageType
     {
         ClientExtract,
         Ping,

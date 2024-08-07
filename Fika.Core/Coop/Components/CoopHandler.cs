@@ -14,7 +14,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Components
@@ -381,7 +380,7 @@ namespace Fika.Core.Coop.Components
         public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
-			if (gameWorld == null)
+            if (gameWorld == null)
             {
                 return;
             }

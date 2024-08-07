@@ -199,41 +199,41 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
-		public static Task CreateCoopHandler()
-		{
-			logger.LogInfo("Creating CoopHandler...");
-			CoopHandler coopHandler = CoopHandler.GetCoopHandler();
-			if (coopHandler != null)
-			{
-				GameObject.Destroy(coopHandler);
-			}
+        public static Task CreateCoopHandler()
+        {
+            logger.LogInfo("Creating CoopHandler...");
+            CoopHandler coopHandler = CoopHandler.GetCoopHandler();
+            if (coopHandler != null)
+            {
+                GameObject.Destroy(coopHandler);
+            }
 
-			if (CoopHandler.CoopHandlerParent != null)
-			{
-				GameObject.Destroy(CoopHandler.CoopHandlerParent);
-				CoopHandler.CoopHandlerParent = null;
-			}
+            if (CoopHandler.CoopHandlerParent != null)
+            {
+                GameObject.Destroy(CoopHandler.CoopHandlerParent);
+                CoopHandler.CoopHandlerParent = null;
+            }
 
-			if (CoopHandler.CoopHandlerParent == null)
-			{
-				CoopHandler.CoopHandlerParent = new GameObject("CoopHandlerParent");
-				GameObject.DontDestroyOnLoad(CoopHandler.CoopHandlerParent);
-			}
+            if (CoopHandler.CoopHandlerParent == null)
+            {
+                CoopHandler.CoopHandlerParent = new GameObject("CoopHandlerParent");
+                GameObject.DontDestroyOnLoad(CoopHandler.CoopHandlerParent);
+            }
 
-			coopHandler = CoopHandler.CoopHandlerParent.AddComponent<CoopHandler>();
+            coopHandler = CoopHandler.CoopHandlerParent.AddComponent<CoopHandler>();
 
-			if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
-			{
-				coopHandler.ServerId = FikaBackendUtils.GetGroupId();
-			}
-			else
-			{
-				GameObject.Destroy(coopHandler);
-				logger.LogError("No Server Id found, Deleting Coop Handler");
-				throw new MissingReferenceException("No Server Id found");
-			}
+            if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
+            {
+                coopHandler.ServerId = FikaBackendUtils.GetGroupId();
+            }
+            else
+            {
+                GameObject.Destroy(coopHandler);
+                logger.LogError("No Server Id found, Deleting Coop Handler");
+                throw new MissingReferenceException("No Server Id found");
+            }
 
-			return Task.CompletedTask;
-		}
-	}
+            return Task.CompletedTask;
+        }
+    }
 }

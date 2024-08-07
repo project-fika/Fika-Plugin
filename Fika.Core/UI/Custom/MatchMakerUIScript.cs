@@ -504,19 +504,19 @@ namespace Fika.Core.UI.Custom
 
                 server.name = entry.ServerId;
 
-				bool localPlayerInRaid = false;
-				bool localPlayerDead = false;
-				foreach (KeyValuePair<string, bool> player in entry.Players)
-				{
-					if (player.Key == ProfileId)
-					{
-						localPlayerInRaid = true;
-						localPlayerDead = player.Value;
-					}
-				}
+                bool localPlayerInRaid = false;
+                bool localPlayerDead = false;
+                foreach (KeyValuePair<string, bool> player in entry.Players)
+                {
+                    if (player.Key == ProfileId)
+                    {
+                        localPlayerInRaid = true;
+                        localPlayerDead = player.Value;
+                    }
+                }
 
-				// player label
-				GameObject playerLabel = GameObject.Find("PlayerLabel");
+                // player label
+                GameObject playerLabel = GameObject.Find("PlayerLabel");
                 playerLabel.name = "PlayerLabel" + i;
                 playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = entry.HostUsername;
 
@@ -617,7 +617,7 @@ namespace Fika.Core.UI.Custom
                     tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
 
                     continue;
-                }                
+                }
 
                 switch (entry.Status)
                 {
@@ -661,32 +661,32 @@ namespace Fika.Core.UI.Custom
                         {
                             if (!localPlayerDead)
                             {
-								tooltipTextGetter = new()
-								{
-									TooltipText = "Click to rejoin raid."
-								};
+                                tooltipTextGetter = new()
+                                {
+                                    TooltipText = "Click to rejoin raid."
+                                };
 
-								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
-								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
-							}
+                                tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                                tooltipArea.enabled = true;
+                                tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+                            }
                             else
                             {
-								tooltipTextGetter = new()
-								{
-									TooltipText = "Cannot rejoin a raid where you died."
-								};
+                                tooltipTextGetter = new()
+                                {
+                                    TooltipText = "Cannot rejoin a raid where you died."
+                                };
 
-								button.enabled = false;
-								if (image != null)
-								{
-									image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
-								}
+                                button.enabled = false;
+                                if (image != null)
+                                {
+                                    image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
+                                }
 
-								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
-								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
-							}
+                                tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                                tooltipArea.enabled = true;
+                                tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+                            }
                         }
                         break;
                     case LobbyEntry.ELobbyStatus.COMPLETE:
