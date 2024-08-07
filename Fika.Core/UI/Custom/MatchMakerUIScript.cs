@@ -605,7 +605,7 @@ namespace Fika.Core.UI.Custom
                 switch (entry.Status)
                 {
                     case LobbyEntry.ELobbyStatus.LOADING:
-                        {
+                        /*{
                             tooltipTextGetter = new()
                             {
                                 TooltipText = "Host is still loading."
@@ -621,9 +621,9 @@ namespace Fika.Core.UI.Custom
                             tooltipArea.enabled = true;
                             tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
                         }
-                        break;
+                        break;*/
                     case LobbyEntry.ELobbyStatus.IN_GAME:
-                        tooltipTextGetter = new()
+                        /*tooltipTextGetter = new()
                         {
                             TooltipText = "Raid is already in progress."
                         };
@@ -637,7 +637,7 @@ namespace Fika.Core.UI.Custom
                         tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
                         tooltipArea.enabled = true;
                         tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
-                        break;
+                        break;*/
                     case LobbyEntry.ELobbyStatus.COMPLETE:
                         tooltipTextGetter = new()
                         {

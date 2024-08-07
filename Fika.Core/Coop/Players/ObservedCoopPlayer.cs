@@ -36,12 +36,16 @@ namespace Fika.Core.Coop.Players
         #region Fields and Properties
         public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         private float observedFixedTime = 0f;
-        private FikaHealthBar healthBar = null;
+		public FikaHealthBar HealthBar
+		{
+			get => healthBar;
+		}
+		private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
         private bool isServer;
-        public NetworkHealthControllerAbstractClass NetworkHealthController
+        public ObservedHealthController NetworkHealthController
         {
-            get => HealthController as NetworkHealthControllerAbstractClass;
+            get => HealthController as ObservedHealthController;
         }
         private readonly ObservedVaultingParametersClass ObservedVaultingParameters = new();
         public override bool CanBeSnapped => false;
@@ -114,10 +118,10 @@ namespace Fika.Core.Coop.Players
                 }
                 return base.SqrCameraDistance;
             }
-        }
-        #endregion
+        }		
+		#endregion
 
-        public static async Task<ObservedCoopPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
+		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
@@ -646,9 +650,9 @@ namespace Fika.Core.Coop.Players
         {
             StartCoroutine(DestroyNetworkedComponents());
 
-            if (healthBar != null)
+            if (HealthBar != null)
             {
-                Destroy(healthBar);
+                Destroy(HealthBar);
             }
 
             if (FikaPlugin.ShowNotifications.Value)
@@ -1139,9 +1143,9 @@ namespace Fika.Core.Coop.Players
                     HandsController.Destroy();
                 }
             }
-            if (healthBar != null)
+            if (HealthBar != null)
             {
-                Destroy(healthBar);
+                Destroy(HealthBar);
             }
             if (Singleton<BetterAudio>.Instantiated)
             {
