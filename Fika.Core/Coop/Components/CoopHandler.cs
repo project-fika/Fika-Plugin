@@ -49,8 +49,6 @@ namespace Fika.Core.Coop.Components
             public int NetId { get; set; } = netId;
         }
 
-        public bool RunAsyncTasks { get; set; } = true;
-
         internal FikaBTRManager_Client clientBTR = null;
         internal FikaBTRManager_Host serverBTR = null;
         internal static GameObject CoopHandlerParent;
@@ -102,8 +100,6 @@ namespace Fika.Core.Coop.Components
 
         protected void Start()
         {
-            RunAsyncTasks = true;
-
             if (FikaBackendUtils.IsClient)
             {
                 //_ = Task.Run(ReadFromServerCharactersLoop);
@@ -123,8 +119,6 @@ namespace Fika.Core.Coop.Components
         {
             Players.Clear();
             HumanPlayers.Clear();
-
-            RunAsyncTasks = false;
         }
 
         private bool requestQuitGame = false;

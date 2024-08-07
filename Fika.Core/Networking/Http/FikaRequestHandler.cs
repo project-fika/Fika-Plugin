@@ -172,5 +172,10 @@ namespace Fika.Core.Networking.Http
         {
             await PutJsonAsync("/fika/raid/registerPlayer", request);
         }
+
+        public static async Task PlayerDied(AddPlayerRequest request)
+        {
+            await PutJsonAsync("/fika/update/playerdied", request);
+        }
     }
 }

@@ -1,5 +1,7 @@
 using EFT;
+using EFT.UI;
 using JsonType;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.UI.Models
@@ -28,7 +30,10 @@ namespace Fika.Core.UI.Models
         [DataMember]
         public EDateTime Time;
 
-        public LobbyEntry(string serverId, string hostUsername, int playerCount, ELobbyStatus status, string location, ESideType side, EDateTime time)
+        [DataMember]
+        public Dictionary<string, bool> Players;
+
+        public LobbyEntry(string serverId, string hostUsername, int playerCount, ELobbyStatus status, string location, ESideType side, EDateTime time, Dictionary<string, bool> players)
         {
             ServerId = serverId;
             HostUsername = hostUsername;
@@ -37,6 +42,7 @@ namespace Fika.Core.UI.Models
             Location = location;
             Side = side;
             Time = time;
+            Players = players;
         }
 
         public enum ELobbyStatus

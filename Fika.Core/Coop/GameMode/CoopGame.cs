@@ -1949,7 +1949,6 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogError("Stop: Could not find CoopHandler!");
             }
 
-            coopHandler.RunAsyncTasks = false;
             Destroy(coopHandler);
 
             if (CoopHandler.CoopHandlerParent != null)
@@ -2070,7 +2069,6 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogError("Stop: Could not find CoopHandler!");
             }
 
-            coopHandler.RunAsyncTasks = false;
             Destroy(coopHandler);
 
             if (CoopHandler.CoopHandlerParent != null)
@@ -2210,7 +2208,6 @@ namespace Fika.Core.Coop.GameMode
 
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                coopHandler.RunAsyncTasks = false;
                 Destroy(coopHandler);
 
                 if (CoopHandler.CoopHandlerParent != null)
