@@ -42,6 +42,15 @@ namespace Fika.Core.Coop.Custom
             CreateHealthBar();
         }
 
+        public void ClearEffects()
+        {
+            foreach (HealthBarEffect effect in effects)
+            {
+                effect.Remove();
+            }
+            effects.Clear();
+        }
+
         protected void Update()
         {
             if (currentPlayer != null)
@@ -466,8 +475,6 @@ namespace Fika.Core.Coop.Custom
             currentPlayer.HealthController.DiedEvent -= HealthController_DiedEvent;
             currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
             currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
-
-
 
             playerPlate.gameObject.SetActive(false);
             effects.Clear();

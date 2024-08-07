@@ -9,6 +9,7 @@ using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.MovingPlatforms;
 using EFT.UI;
+using EFT.UI.BattleTimer;
 using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -24,7 +25,6 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using SPT.Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +47,7 @@ namespace Fika.Core.Networking
         public int ConnectedClients = 0;
         public int ReadyClients = 0;
         public bool HostReady = false;
+        public bool ReconnectDone = false;
         public NetManager NetClient
         {
             get
@@ -73,11 +74,14 @@ namespace Fika.Core.Networking
         private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
         private NetDataWriter dataWriter = new();
         private FikaChat fikaChat;
+        private string myProfileId;
 
         public async void Init()
         {
             NetworkGameSession.RTT = 0;
             NetworkGameSession.LossPercent = 0;
+
+            myProfileId = FikaBackendUtils.Profile.ProfileId;
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
@@ -112,6 +116,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
             packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnStatisticsPacketReceived);
             packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
 
             netClient = new NetManager(this)
             {
@@ -125,6 +130,9 @@ namespace Fika.Core.Networking
                 MaxConnectAttempts = 5,
                 ReconnectDelay = 1 * 1000
             };
+
+            await NetManagerUtils.CreateCoopHandler();
+            coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
 
             if (FikaBackendUtils.IsHostNatPunch)
             {
@@ -155,6 +163,88 @@ namespace Fika.Core.Networking
             }
 
             FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+        }
+
+        private void OnReconnectPacketReceived(ReconnectPacket packet)
+        {
+            if (!packet.IsRequest)
+            {
+                switch (packet.Type)
+                {
+                    case ReconnectPacket.EReconnectDataType.Throwable:
+                        Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
+                        break;
+                    case ReconnectPacket.EReconnectDataType.Interactives:
+                        {
+                            WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
+                            Dictionary<int, WorldInteractiveObject.GStruct384> netIdDictionary = [];
+                            {
+                                foreach (WorldInteractiveObject.GStruct384 data in packet.InteractivesData)
+                                {
+                                    netIdDictionary.Add(data.NetId, data);
+                                }
+                            }
+                            foreach (WorldInteractiveObject item in worldInteractiveObjects)
+                            {
+                                if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct384 value))
+                                {
+                                    item.SetInitialSyncState(value);
+                                }
+                            }
+                            break;
+                        }
+                    case ReconnectPacket.EReconnectDataType.LampControllers:
+                        {
+                            Dictionary<int, LampController> lampControllerDictionary = LocationScene.GetAllObjects<LampController>(true)
+                                .Where(new Func<LampController, bool>(ClientWorld.Class1231.class1231_0.method_0))
+                                .ToDictionary(new Func<LampController, int>(ClientWorld.Class1231.class1231_0.method_1));
+
+                            foreach (KeyValuePair<int, byte> lampState in packet.LampStates)
+                            {
+                                if (lampControllerDictionary.TryGetValue(lampState.Key, out LampController lampController))
+                                {
+                                    if (lampController.LampState != (Turnable.EState)lampState.Value)
+                                    {
+                                        lampController.Switch((Turnable.EState)lampState.Value);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    case ReconnectPacket.EReconnectDataType.Windows:
+                        {
+                            Dictionary<int, Vector3> windowBreakerStates = packet.WindowBreakerStates;
+                            foreach (WindowBreaker windowBreaker in LocationScene.GetAllObjects<WindowBreaker>(true)
+                                .Where(new Func<WindowBreaker, bool>(ClientWorld.Class1231.class1231_0.method_2)))
+                            {
+                                if (windowBreakerStates.TryGetValue(windowBreaker.NetId, out Vector3 hitPosition))
+                                {
+                                    try
+                                    {
+                                        DamageInfo damageInfo = default;
+                                        damageInfo.HitPoint = hitPosition;
+                                        windowBreaker.MakeHit(in damageInfo, true);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        logger.LogError("OnReconnectPacketReceived: Exception caught while setting up WindowBreakers: " + ex.Message);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    case ReconnectPacket.EReconnectDataType.OwnCharacter:
+                        coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
+                        coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
+                        FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
+                        break;
+                    case ReconnectPacket.EReconnectDataType.Finished:
+                        ReconnectDone = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         private void OnWorldLootPacketReceived(WorldLootPacket packet)
@@ -259,7 +349,6 @@ namespace Fika.Core.Networking
 
         public void SetupGameVariables(CoopPlayer coopPlayer)
         {
-            coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
             MyPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
@@ -336,7 +425,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
+            if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
             {
                 coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
             }
@@ -650,6 +739,17 @@ namespace Fika.Core.Networking
                         }
                     }
                     break;
+                case EPackageType.ClearEffects:
+                    {
+                        if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+                        {
+                            if (playerToApply is ObservedCoopPlayer observedPlayer)
+                            {
+                                observedPlayer.HealthBar.ClearEffects();
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
@@ -794,16 +894,21 @@ namespace Fika.Core.Networking
             GameTimerClass gameTimer = coopGame.GameTimer;
             if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
             {
-                if (gameTimer.PastTime.TotalSeconds < 3)
-                {
-                    return;
-                }
-
                 TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
 
                 gameTimer.ChangeSessionTime(timeRemain);
 
-                Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
+                Traverse timerPanel = Traverse.Create(coopGame.GameUi.TimerPanel);
+                timerPanel.Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds));
+
+                MainTimerPanel mainTimerPanel = timerPanel.Field<MainTimerPanel>("_mainTimerPanel").Value;
+                if (mainTimerPanel != null)
+                {
+                    Traverse.Create(mainTimerPanel).Field<DateTime>("dateTime_0").Value = gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds);
+                    mainTimerPanel.UpdateTimer();
+                }
+
+                Traverse.Create(gameTimer).Field<DateTime?>("nullable_0").Value = new DateTime(packet.StartTime);
             }
         }
 

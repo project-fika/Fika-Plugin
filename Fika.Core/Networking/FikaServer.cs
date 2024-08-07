@@ -20,6 +20,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
+using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
@@ -34,6 +35,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Networking.Packets.GameWorld.ReconnectPacket;
 using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
@@ -111,6 +113,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
             packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
 
             netServer = new NetManager(this)
             {
@@ -222,13 +225,171 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
         }
 
+        private void OnReconnectPacketReceived(ReconnectPacket packet, NetPeer peer)
+        {
+            if (packet.IsRequest)
+            {
+                if (packet.InitialRequest)
+                {
+                    NotificationManagerClass.DisplayMessageNotification("Reconnect requested, expect lag...", iconType: EFT.Communications.ENotificationIconType.Alert);
+                    foreach (CoopPlayer player in coopHandler.HumanPlayers)
+                    {
+                        if (player.ProfileId == packet.ProfileId && player is ObservedCoopPlayer observedCoopPlayer)
+                        {
+                            ReconnectPacket ownCharacterPacket = new(false)
+                            {
+                                Type = EReconnectDataType.OwnCharacter,
+                                Profile = observedCoopPlayer.Profile,
+                                ProfileHealthClass = observedCoopPlayer.NetworkHealthController.Store(),
+                                PlayerPosition = observedCoopPlayer.Position
+                            };
+
+                            dataWriter.Reset();
+                            SendDataToPeer(peer, dataWriter, ref ownCharacterPacket, DeliveryMethod.ReliableOrdered);
+
+                            observedCoopPlayer.HealthBar.ClearEffects();
+                            GenericPacket clearEffectsPacket = new(EPackageType.ClearEffects)
+                            {
+                                NetId = observedCoopPlayer.NetId
+                            };
+
+                            dataWriter.Reset();
+                            SendDataToAll(dataWriter, ref clearEffectsPacket, DeliveryMethod.ReliableUnordered, peer);
+                        }
+                    }
+
+                    return;
+                }
+
+                GameWorld gameWorld = Singleton<GameWorld>.Instance;
+                Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
+
+                GClass724<int, Throwable>.GStruct43 grenades = gameWorld.Grenades.GetValuesEnumerator();
+                List<GStruct35> smokeData = [];
+                foreach (Throwable item in grenades)
+                {
+                    if (item is SmokeGrenade smokeGrenade)
+                    {
+                        smokeData.Add(smokeGrenade.NetworkData);
+                    }
+                }
+
+                if (smokeData.Count > 0)
+                {
+                    ReconnectPacket throwablePacket = new(false)
+                    {
+                        Type = EReconnectDataType.Throwable,
+                        ThrowableData = smokeData
+                    };
+
+                    dataWriter.Reset();
+                    SendDataToPeer(peer, dataWriter, ref throwablePacket, DeliveryMethod.ReliableOrdered);
+                }
+
+                List<WorldInteractiveObject.GStruct384> interactivesData = [];
+                WorldInteractiveObject[] worldInteractiveObjects = worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
+                foreach (WorldInteractiveObject interactiveObject in worldInteractiveObjects)
+                {
+                    if ((interactiveObject.DoorState != interactiveObject.InitialDoorState && interactiveObject.DoorState != EDoorState.Interacting)
+                        || (interactiveObject is Door door && door.IsBroken))
+                    {
+                        interactivesData.Add(interactiveObject.GetStatusInfo(true));
+                    }
+                }
+
+                if (interactivesData.Count > 0)
+                {
+                    ReconnectPacket interactivePacket = new(false)
+                    {
+                        Type = EReconnectDataType.Interactives,
+                        InteractivesData = interactivesData
+                    };
+
+                    dataWriter.Reset();
+                    SendDataToPeer(peer, dataWriter, ref interactivePacket, DeliveryMethod.ReliableOrdered);
+                }
+
+                IEnumerable<LampController> lampControllers = LocationScene.GetAllObjects<LampController>(false);
+                Dictionary<int, byte> lampStates = [];
+                foreach (LampController controller in lampControllers)
+                {
+                    lampStates.Add(controller.NetId, (byte)controller.LampState);
+                }
+
+                if (lampStates.Count > 0)
+                {
+                    ReconnectPacket lampPacket = new(false)
+                    {
+                        Type = EReconnectDataType.LampControllers,
+                        LampStates = lampStates
+                    };
+
+                    dataWriter.Reset();
+                    SendDataToPeer(peer, dataWriter, ref lampPacket, DeliveryMethod.ReliableOrdered);
+                }
+
+                GClass724<int, WindowBreaker>.GStruct43 windows = gameWorld.Windows.GetValuesEnumerator();
+                Dictionary<int, Vector3> windowData = [];
+                foreach (WindowBreaker window in windows)
+                {
+                    if (window.AvailableToSync && window.IsDamaged)
+                    {
+                        windowData.Add(window.NetId, window.FirstHitPosition.Value);
+                    }
+                }
+
+                if (windowData.Count > 0)
+                {
+                    ReconnectPacket windowPacket = new(false)
+                    {
+                        Type = EReconnectDataType.Windows,
+                        WindowBreakerStates = windowData
+                    };
+
+                    dataWriter.Reset();
+                    SendDataToPeer(peer, dataWriter, ref windowPacket, DeliveryMethod.ReliableOrdered);
+                }
+
+                foreach (CoopPlayer player in coopHandler.Players.Values)
+                {
+                    SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile),
+                        player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
+
+                    dataWriter.Reset();
+                    SendDataToPeer(peer, dataWriter, ref characterPacket, DeliveryMethod.ReliableOrdered);
+                }
+
+                foreach (CoopPlayer player in coopHandler.HumanPlayers)
+                {
+                    if (player.ProfileId == packet.ProfileId)
+                    {
+                        AssignNetIdPacket assignPacket = new()
+                        {
+                            NetId = player.NetId
+                        };
+
+                        dataWriter.Reset();
+                        SendDataToPeer(peer, dataWriter, ref assignPacket, DeliveryMethod.ReliableOrdered);
+                    }
+                }
+
+                ReconnectPacket finishPacket = new(false)
+                {
+                    Type = EReconnectDataType.Finished
+                };
+
+                dataWriter.Reset();
+                SendDataToPeer(peer, dataWriter, ref finishPacket, DeliveryMethod.ReliableOrdered);
+            }
+        }
+
         private void OnWorldLootPacketReceived(WorldLootPacket packet, NetPeer peer)
         {
             if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
             {
                 WorldLootPacket response = new(false)
                 {
-                    Data = coopGame.HostLootItems
+                    Data = coopGame.GetHostLootItems()
                 };
                 dataWriter.Reset();
                 SendDataToPeer(peer, dataWriter, ref response, DeliveryMethod.ReliableUnordered);
@@ -607,6 +768,7 @@ namespace Fika.Core.Networking
             {
                 NumberOfPlayers = netServer.ConnectedPeersCount,
                 ReadyPlayers = ReadyClients,
+                HostReady = coopHandler != null && coopHandler.LocalGameInstance.Status == GameStatus.Started
             };
 
             dataWriter.Reset();
@@ -812,7 +974,7 @@ namespace Fika.Core.Networking
             CoopGame game = coopHandler.LocalGameInstance;
             if (game != null)
             {
-                GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks);
+                GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks, game.GameTimer.StartDateTime.Value.Ticks);
                 dataWriter.Reset();
                 SendDataToPeer(peer, dataWriter, ref gameTimerPacket, DeliveryMethod.ReliableOrdered);
             }

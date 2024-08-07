@@ -159,7 +159,7 @@ namespace Fika.Core.Console
                 {
                     ConsoleScreen.Log("GameTimer stopped at: " + game.GameTimer.PastTime.ToString());
                 }
-            }            
+            }
         }
 
 #endif

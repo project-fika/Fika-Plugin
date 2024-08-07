@@ -7,6 +7,7 @@ using Fika.Core.Networking.Http.Models;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -26,6 +27,7 @@ namespace Fika.Core.Coop.Utils
         public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
         public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
         public static bool IsDedicated = false;
+        public static bool IsReconnect = false;
         public static bool IsSinglePlayer
         {
             get
@@ -45,6 +47,7 @@ namespace Fika.Core.Coop.Utils
         public static bool IsHostNatPunch = false;
         public static string HostLocationId;
         public static bool RequestFikaWorld = false;
+        public static Vector3 ReconnectPosition = Vector3.zero;
         private static string groupId;
         private static string raidCode;
 
@@ -119,7 +122,7 @@ namespace Fika.Core.Coop.Utils
 
         public static string GenerateRaidCode(int length)
         {
-            Random random = new();
+            System.Random random = new();
             char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
             string raidCode = "";
             for (int i = 0; i < length; i++)

@@ -69,7 +69,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
             Writer.Reset();
             Server.SendDataToAll(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
-            
+
             if (!mover.IsMoving || mover.Pause)
             {
                 player.LastDirection = Vector2.zero;

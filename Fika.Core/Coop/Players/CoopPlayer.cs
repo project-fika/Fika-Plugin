@@ -16,6 +16,8 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -702,6 +704,10 @@ namespace Fika.Core.Coop.Players
             base.OnDead(damageType);
 
             StartCoroutine(DisableNetworkedComponents());
+            if (IsYourPlayer)
+            {
+                StartCoroutine(LocalPlayerDied());
+            }
         }
 
         private IEnumerator DisableNetworkedComponents()
@@ -711,6 +717,16 @@ namespace Fika.Core.Coop.Players
             if (PacketSender != null)
             {
                 PacketSender.Enabled = false;
+            }
+        }
+
+        private IEnumerator LocalPlayerDied()
+        {
+            AddPlayerRequest request = new(FikaBackendUtils.GetGroupId(), ProfileId);
+            Task diedTask = FikaRequestHandler.PlayerDied(request);
+            while (!diedTask.IsCompleted)
+            {
+                yield return new WaitForEndOfFrame();
             }
         }
 

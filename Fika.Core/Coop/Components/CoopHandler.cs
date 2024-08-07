@@ -14,7 +14,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Components
@@ -24,17 +23,21 @@ namespace Fika.Core.Coop.Components
     /// </summary>
     public class CoopHandler : MonoBehaviour
     {
-        #region Fields/Properties        
+        #region Fields/Properties
         public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; set; } = null;
         public Dictionary<int, CoopPlayer> Players = [];
         public List<CoopPlayer> HumanPlayers = [];
         public int AmountOfHumans = 1;
         public List<int> ExtractedPlayers = [];
-        ManualLogSource Logger;
         public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         public List<string> queuedProfileIds = [];
+
+        private ManualLogSource Logger;
         private Queue<SpawnObject> spawnQueue = new(50);
+        private bool ready;
+        private bool isClient;
+        private float charSyncCounter;
 
         public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId)
         {
@@ -45,11 +48,8 @@ namespace Fika.Core.Coop.Components
             public int NetId { get; set; } = netId;
         }
 
-        public bool RunAsyncTasks { get; set; } = true;
-
         internal FikaBTRManager_Client clientBTR = null;
         internal FikaBTRManager_Host serverBTR = null;
-
         internal static GameObject CoopHandlerParent;
 
         #endregion
@@ -92,28 +92,24 @@ namespace Fika.Core.Coop.Components
 
         #region Unity Component Methods
 
-        /// <summary>
-        /// Unity Component Awake Method
-        /// </summary>
         protected void Awake()
         {
-            // ----------------------------------------------------
-            // Create a BepInEx Logger for CoopHandler
             Logger = BepInEx.Logging.Logger.CreateLogSource("CoopHandler");
         }
 
-        /// <summary>
-        /// Unity Component Start Method
-        /// </summary>
         protected void Start()
         {
             if (FikaBackendUtils.IsClient)
             {
-                _ = Task.Run(ReadFromServerCharactersLoop);
+                //_ = Task.Run(ReadFromServerCharactersLoop);
+                isClient = true;
+                charSyncCounter = 0f;
             }
 
             if (FikaBackendUtils.IsServer)
             {
+                isClient = false;
+                ready = true;
                 Singleton<GameWorld>.Instance.World_0.RegisterNetworkInteractionObjects(null);
             }
         }
@@ -122,8 +118,6 @@ namespace Fika.Core.Coop.Components
         {
             Players.Clear();
             HumanPlayers.Clear();
-
-            RunAsyncTasks = false;
         }
 
         private bool requestQuitGame = false;
@@ -186,7 +180,7 @@ namespace Fika.Core.Coop.Components
         /// <summary>
         /// This handles the ways of exiting the active game session
         /// </summary>
-        void ProcessQuitting()
+        private void ProcessQuitting()
         {
             EQuitState quitState = GetQuitState();
 
@@ -230,9 +224,19 @@ namespace Fika.Core.Coop.Components
             }
         }
 
+        public void SetReady(bool state)
+        {
+            ready = state;
+        }
+
         protected private void Update()
         {
             if (LocalGameInstance == null)
+            {
+                return;
+            }
+
+            if (!ready)
             {
                 return;
             }
@@ -243,32 +247,29 @@ namespace Fika.Core.Coop.Components
             }
 
             ProcessQuitting();
+
+            if (isClient)
+            {
+                charSyncCounter += Time.deltaTime;
+                int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
+
+                if (charSyncCounter > waitTime)
+                {
+                    charSyncCounter = 0f;
+
+                    if (Players == null)
+                    {
+                        return;
+                    }
+
+                    SyncPlayersWithServer();
+                }
+            }
         }
 
         #endregion
 
-        private async Task ReadFromServerCharactersLoop()
-        {
-            while (RunAsyncTasks)
-            {
-                CoopGame coopGame = LocalGameInstance;
-                int waitTime = 2500;
-                if (coopGame.Status == GameStatus.Started)
-                {
-                    waitTime = 15000;
-                }
-                await Task.Delay(waitTime);
-
-                if (Players == null)
-                {
-                    continue;
-                }
-
-                ReadFromServerCharacters();
-            }
-        }
-
-        private void ReadFromServerCharacters()
+        private void SyncPlayersWithServer()
         {
             AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
 
@@ -345,6 +346,8 @@ namespace Fika.Core.Coop.Components
             {
                 // TODO: Spawn them as corpses?
                 // Run 'OnDead'
+                otherPlayer.OnDead(EDamageType.Undefined);
+                otherPlayer.NetworkHealthController.IsAlive = false;
             }
 
             if (FikaBackendUtils.IsServer)
@@ -376,7 +379,13 @@ namespace Fika.Core.Coop.Components
 
         public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
         {
-            foreach (IPlayer player in Singleton<GameWorld>.Instance.RegisteredPlayers)
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld == null)
+            {
+                return;
+            }
+
+            foreach (IPlayer player in gameWorld.RegisteredPlayers)
             {
                 if (player.ProfileId == profile.ProfileId)
                 {
@@ -384,7 +393,7 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            foreach (IPlayer player in Singleton<GameWorld>.Instance.AllAlivePlayersList)
+            foreach (IPlayer player in gameWorld.AllAlivePlayersList)
             {
                 if (player.ProfileId == profile.ProfileId)
                 {

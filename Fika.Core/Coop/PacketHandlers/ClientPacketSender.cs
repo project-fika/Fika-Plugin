@@ -216,7 +216,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     string localeId = null;
 
 #if DEBUG
-                    ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}"); 
+                    ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
 #endif
 
                     if (LayerMask.LayerToName(hitLayer) == "Player")

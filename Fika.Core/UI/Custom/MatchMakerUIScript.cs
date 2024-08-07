@@ -380,12 +380,14 @@ namespace Fika.Core.UI.Custom
             RefreshUI();
         }
 
-        public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action successCallback)
+        public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action successCallback, bool reconnect)
         {
             if (button != null)
             {
                 button.enabled = false;
             }
+
+            FikaBackendUtils.IsReconnect = reconnect;
 
             NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
@@ -490,12 +492,28 @@ namespace Fika.Core.UI.Custom
             {
                 LobbyEntry entry = Matches[i];
 
+                if (entry.ServerId == ProfileId)
+                {
+                    continue;
+                }
+
                 // server object
                 GameObject server = Instantiate(fikaMatchMakerUi.RaidGroupDefaultToClone, fikaMatchMakerUi.RaidGroupDefaultToClone.transform.parent);
                 server.SetActive(true);
                 MatchesListObjects.Add(server);
 
                 server.name = entry.ServerId;
+
+                bool localPlayerInRaid = false;
+                bool localPlayerDead = false;
+                foreach (KeyValuePair<string, bool> player in entry.Players)
+                {
+                    if (player.Key == ProfileId)
+                    {
+                        localPlayerInRaid = true;
+                        localPlayerDead = player.Value;
+                    }
+                }
 
                 // player label
                 GameObject playerLabel = GameObject.Find("PlayerLabel");
@@ -519,13 +537,12 @@ namespace Fika.Core.UI.Custom
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                    //StartCoroutine(JoinMatch(ProfileId, server.name, button));
                     FikaBackendUtils.HostLocationId = entry.Location;
                     StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
                     {
                         DestroyThis();
                         AcceptButton.OnClick.Invoke();
-                    }));
+                    }, localPlayerInRaid));
                 });
 
                 TooltipTextGetter tooltipTextGetter;
@@ -623,20 +640,54 @@ namespace Fika.Core.UI.Custom
                         }
                         break;
                     case LobbyEntry.ELobbyStatus.IN_GAME:
-                        tooltipTextGetter = new()
+                        if (!localPlayerInRaid)
                         {
-                            TooltipText = "Raid is already in progress."
-                        };
+                            tooltipTextGetter = new()
+                            {
+                                TooltipText = "Raid is already in progress."
+                            };
 
-                        button.enabled = false;
-                        if (image != null)
-                        {
-                            image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
+                            button.enabled = false;
+                            if (image != null)
+                            {
+                                image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
+                            }
+
+                            tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                            tooltipArea.enabled = true;
+                            tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
                         }
+                        else
+                        {
+                            if (!localPlayerDead)
+                            {
+                                tooltipTextGetter = new()
+                                {
+                                    TooltipText = "Click to rejoin raid."
+                                };
 
-                        tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
-                        tooltipArea.enabled = true;
-                        tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+                                tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                                tooltipArea.enabled = true;
+                                tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+                            }
+                            else
+                            {
+                                tooltipTextGetter = new()
+                                {
+                                    TooltipText = "Cannot rejoin a raid where you died."
+                                };
+
+                                button.enabled = false;
+                                if (image != null)
+                                {
+                                    image.color = new(0.5f, image.color.g / 2, image.color.b / 2, 0.75f);
+                                }
+
+                                tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
+                                tooltipArea.enabled = true;
+                                tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+                            }
+                        }
                         break;
                     case LobbyEntry.ELobbyStatus.COMPLETE:
                         tooltipTextGetter = new()

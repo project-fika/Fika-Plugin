@@ -14,10 +14,10 @@ namespace Fika.Core.Networking.Http.Models
         [DataMember(Name = "variantId")]
         public int VariantId;
 
-        public RegisterPlayerRequest(int crc, string profileId, int variantId)
+        public RegisterPlayerRequest(int crc, string locationId, int variantId)
         {
             Crc = crc;
-            LocationId = profileId;
+            LocationId = locationId;
             VariantId = variantId;
         }
     }
