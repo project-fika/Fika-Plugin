@@ -2,7 +2,6 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
-using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
@@ -229,7 +228,7 @@ namespace Fika.Core.Networking
 		private void OnReconnectPacketReceived(ReconnectPacket packet, NetPeer peer)
 		{
 			if (packet.IsRequest)
-			{				
+			{
 				if (packet.InitialRequest)
 				{
 					NotificationManagerClass.DisplayMessageNotification("Reconnect requested, expect lag...", iconType: EFT.Communications.ENotificationIconType.Alert);
@@ -351,8 +350,8 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, dataWriter, ref windowPacket, DeliveryMethod.ReliableOrdered);
 				}
 
-                foreach (CoopPlayer player in coopHandler.Players.Values)
-                {
+				foreach (CoopPlayer player in coopHandler.Players.Values)
+				{
 					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile),
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
 
@@ -381,7 +380,7 @@ namespace Fika.Core.Networking
 
 				dataWriter.Reset();
 				SendDataToPeer(peer, dataWriter, ref finishPacket, DeliveryMethod.ReliableOrdered);
-            }
+			}
 		}
 
 		private void OnWorldLootPacketReceived(WorldLootPacket packet, NetPeer peer)
