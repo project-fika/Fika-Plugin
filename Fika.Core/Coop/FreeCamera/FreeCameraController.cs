@@ -214,7 +214,7 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			ShowExtractMessage();
 
-			if (!effectsCleared)
+            if (!effectsCleared)
 			{
 				if (player != null)
 				{
@@ -312,15 +312,31 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-			if (!freeCamScript.IsActive)
-			{
-				SetPlayerToFreecamMode(player);
-			}
-			else
-			{
-				SetPlayerToFirstPersonMode(player);
-			}
-		}
+            if (!freeCamScript.IsActive)
+            {
+                SetPlayerToFreecamMode(player);
+                if (!FikaPlugin.Instance.AllowSpectateFreeCam)
+                {
+                    if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                    {
+                        foreach (CoopPlayer player in coopHandler.HumanPlayers)
+                        {
+                            if (player.HealthController.IsAlive && !player.IsYourPlayer)
+                            {
+                                freeCamScript.SetCurrentPlayer(player);
+                                FikaPlugin.Instance.FikaLogger.LogInfo("FreecamController: New player: " + player.Profile.Info.MainProfileNickname);
+                                freeCamScript.Attach3rdPerson();
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                SetPlayerToFirstPersonMode(player);
+            }
+        }
 
 		/// <summary>
 		/// Hides the main UI (health, stamina, stance, hotbar, etc.)

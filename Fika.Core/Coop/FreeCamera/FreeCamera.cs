@@ -71,11 +71,17 @@ namespace Fika.Core.Coop.FreeCamera
 			showOverlay = FikaPlugin.KeybindOverlay.Value;
 		}
 
-		protected void OnGUI()
-		{
-			if (IsActive && showOverlay)
-			{
-				string visionText = "Enable nightvision";
+        public void SetCurrentPlayer(CoopPlayer player)
+        {
+            CurrentPlayer = player;
+            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Setting player to {CurrentPlayer}");
+        }
+
+        protected void OnGUI()
+        {
+            if (IsActive && showOverlay)
+            {
+                string visionText = "Enable nightvision";
 
 				if (nightVision != null && nightVision.On)
 				{
@@ -104,23 +110,30 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 		}
 
-		public void SwitchSpectateMode()
-		{
-			bool shouldHeadCam = Input.GetKey(KeyCode.Space);
-			bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
-			if (shouldHeadCam)
-			{
-				AttachToPlayer();
-			}
-			else if (should3rdPerson)
-			{
-				Attach3rdPerson();
-			}
-			else
-			{
-				JumpToPlayer();
-			}
-		}
+        public void SwitchSpectateMode()
+        {
+            bool shouldHeadCam = Input.GetKey(KeyCode.Space);
+            bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
+            if (shouldHeadCam)
+            {
+                AttachToPlayer();
+            }
+            else if (should3rdPerson)
+            {
+                Attach3rdPerson();
+            }
+            else
+            {
+                if (FikaPlugin.Instance.AllowSpectateFreeCam)
+                {
+                    JumpToPlayer();
+                }
+                else
+                {
+                    Attach3rdPerson();
+                }
+            }
+        }
 
 		/// <summary>
 		/// Helper method to cycle spectating players
@@ -268,57 +281,44 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-			bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-			bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-			float movementSpeed = fastMode ? 20f : 2f;
+            // If we are currently dead/extracted and we don't allow spectate freecam
+            // Disable this section
+            // Do we need to check that the camera is parented to something?
+            if (!IsExtractedOrDead || FikaPlugin.Instance.AllowSpectateFreeCam)
+            {
+                bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+                float movementSpeed = fastMode ? 20f : 2f;
 
-			if (superFastMode)
-			{
-				movementSpeed *= 8;
-			}
+                if (superFastMode)
+                {
+                    movementSpeed *= 8;
+                }
 
-			if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
-			{
-				transform.position += -transform.right * (movementSpeed * Time.deltaTime);
-			}
+                if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
+                {
+                    transform.position += -transform.right * (movementSpeed * Time.deltaTime);
+                }
 
-			if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
-			{
-				transform.position += transform.right * (movementSpeed * Time.deltaTime);
-			}
+                if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
+                {
+                    transform.position += transform.right * (movementSpeed * Time.deltaTime);
+                }
 
-			if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
-			{
-				transform.position += transform.forward * (movementSpeed * Time.deltaTime);
-			}
+                if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
+                {
+                    transform.position += transform.forward * (movementSpeed * Time.deltaTime);
+                }
 
-			if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
-			{
-				transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
-			}
+                if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
+                {
+                    transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
+                }
 
-			// Teleportation
-			if (Input.GetKeyDown(KeyCode.T))
-			{
-				if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-				{
-					return;
-				}
-
-				Player player = Singleton<GameWorld>.Instance.MainPlayer;
-
-				if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
-				{
-					player?.Teleport(transform.position);
-				}
-			}
-
-			if (true)
-			{
-				if (Input.GetKey(relUpKey))
-				{
-					transform.position += transform.up * (movementSpeed * Time.deltaTime);
-				}
+                if (Input.GetKey(relUpKey))
+                {
+                    transform.position += transform.up * (movementSpeed * Time.deltaTime);
+                }
 
 				if (Input.GetKey(relDownKey))
 				{
@@ -336,8 +336,24 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
-			float x = Input.GetAxis("Mouse X");
-			float y = Input.GetAxis("Mouse Y");
+            // Teleportation
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                {
+                    return;
+                }
+
+                Player player = Singleton<GameWorld>.Instance.MainPlayer;
+
+                if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
+                {
+                    player?.Teleport(transform.position);
+                }
+            }
+
+            float x = Input.GetAxis("Mouse X");
+            float y = Input.GetAxis("Mouse Y");
 
 			pitch += y * lookSensitivity;
 			pitch = Mathf.Clamp(pitch, -89, 89);
