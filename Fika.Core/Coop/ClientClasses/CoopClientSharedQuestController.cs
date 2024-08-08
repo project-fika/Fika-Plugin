@@ -260,7 +260,7 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					if (conditionPlaceBeacon.target.Contains(itemId) && conditionPlaceBeacon.zoneId == zoneId)
 					{
-						if (!quest.CompletedConditions.Contains(conditionPlaceBeacon.id))
+						if (!quest.CompletedConditions.Contains(conditionPlaceBeacon.id) && quest.CheckVisibilityStatus(conditionPlaceBeacon))
 						{
 #if DEBUG
 							FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
@@ -281,7 +281,7 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					if (conditionLeaveItemAtLocation.target.Contains(itemId) && conditionLeaveItemAtLocation.zoneId == zoneId)
 					{
-						if (!quest.CompletedConditions.Contains(conditionLeaveItemAtLocation.id))
+						if (!quest.CompletedConditions.Contains(conditionLeaveItemAtLocation.id) && quest.CheckVisibilityStatus(conditionLeaveItemAtLocation))
 						{
 #if DEBUG
 							FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
