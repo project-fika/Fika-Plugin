@@ -10,6 +10,7 @@ namespace Fika.Core.Networking
 		public int NumberOfPlayers = 0;
 		public int ReadyPlayers = 0;
 		public bool HostReady = false;
+		public bool HostLoaded = false;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -17,6 +18,7 @@ namespace Fika.Core.Networking
 			NumberOfPlayers = reader.GetInt();
 			ReadyPlayers = reader.GetInt();
 			HostReady = reader.GetBool();
+			HostLoaded = reader.GetBool();
 		}
 
 		public void Serialize(NetDataWriter writer)
@@ -25,6 +27,7 @@ namespace Fika.Core.Networking
 			writer.Put(NumberOfPlayers);
 			writer.Put(ReadyPlayers);
 			writer.Put(HostReady);
+			writer.Put(HostLoaded);
 		}
 	}
 }

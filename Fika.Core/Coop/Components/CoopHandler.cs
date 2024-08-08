@@ -205,7 +205,7 @@ namespace Fika.Core.Coop.Components
 					}
 					else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0
 						&& Singleton<FikaServer>.Instance.timeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
-						&& Singleton<FikaServer>.Instance.hasHadPeer)
+						&& Singleton<FikaServer>.Instance.HasHadPeer)
 					{
 						NotificationManagerClass.DisplayWarningNotification($"HOSTING: Please wait at least 5 seconds after the last peer disconnected before quitting.");
 						requestQuitGame = false;

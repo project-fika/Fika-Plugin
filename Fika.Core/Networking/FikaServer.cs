@@ -56,7 +56,8 @@ namespace Fika.Core.Networking
 			}
 		}
 		public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
-		public bool hasHadPeer = false;
+		public bool HasHadPeer = false;
+		public bool RaidInitialized = false;
 		public bool Started
 		{
 			get
@@ -772,11 +773,12 @@ namespace Fika.Core.Networking
 			{
 				NumberOfPlayers = netServer.ConnectedPeersCount,
 				ReadyPlayers = ReadyClients,
-				HostReady = coopHandler != null && coopHandler.LocalGameInstance.Status == GameStatus.Started
+				HostReady = coopHandler != null && coopHandler.LocalGameInstance.Status == GameStatus.Started,
+				HostLoaded = RaidInitialized
 			};
 
 			dataWriter.Reset();
-			SendDataToAll(dataWriter, ref respondPackage, DeliveryMethod.ReliableOrdered);
+			SendDataToPeer(peer, dataWriter, ref respondPackage, DeliveryMethod.ReliableUnordered);
 		}
 
 		private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
@@ -1068,7 +1070,7 @@ namespace Fika.Core.Networking
 			NotificationManagerClass.DisplayMessageNotification($"Peer connected to server on port {peer.Port}.", iconType: EFT.Communications.ENotificationIconType.Friend);
 			logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
 
-			hasHadPeer = true;
+			HasHadPeer = true;
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)

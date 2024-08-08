@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Comfort.Net;
 using CommonAssets.Scripts.Game;
 using ComponentAce.Compression.Libs.zlib;
 using Coop.Airdrops;
@@ -900,7 +901,7 @@ namespace Fika.Core.Coop.GameMode
 				client.SendData(writer, ref packet, DeliveryMethod.ReliableUnordered);
 			}
 
-			await WaitForPlayers();
+			await WaitForPlayersToConnect();
 
 			fikaDebug = gameObject.AddComponent<FikaDebug>();
 
@@ -972,6 +973,10 @@ namespace Fika.Core.Coop.GameMode
 			if (isServer)
 			{
 				await NetManagerUtils.CreateCoopHandler();
+			}
+			else
+			{
+				await WaitForHostToLoad();
 			}
 
 			CoopHandler handler = CoopHandler.GetCoopHandler();
@@ -1057,6 +1062,22 @@ namespace Fika.Core.Coop.GameMode
 			handler.SetReady(true);
 
 			await method_11(location, startHandler.FinishLoading);
+		}
+
+		private async Task WaitForHostToLoad()
+		{
+			FikaClient client = Singleton<FikaClient>.Instance;
+
+			InformationPacket packet = new(true);
+			NetDataWriter writer = client.Writer;
+			do
+			{
+				FikaBackendUtils.ScreenController.ChangeStatus($"Waiting for host to initialize raid...");
+				writer.Reset();
+				client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
+
+				await Task.Delay(1000);
+			} while (!client.HostLoaded);
 		}
 
 		private async Task GetReconnectProfile(string profileId)
@@ -1211,7 +1232,7 @@ namespace Fika.Core.Coop.GameMode
 		/// <see cref="Task"/> used to wait for all other players to join the game
 		/// </summary>
 		/// <returns></returns>
-		private async Task WaitForPlayers()
+		private async Task WaitForPlayersToConnect()
 		{
 			Logger.LogInfo("Starting task to wait for other players.");
 
@@ -1224,6 +1245,7 @@ namespace Fika.Core.Coop.GameMode
 			if (isServer)
 			{
 				FikaServer server = Singleton<FikaServer>.Instance;
+				server.RaidInitialized = true;
 
 				do
 				{
@@ -1277,9 +1299,9 @@ namespace Fika.Core.Coop.GameMode
 				}
 
 				InformationPacket packet = new(true);
-				NetDataWriter writer = new();
+				NetDataWriter writer = client.Writer;
 				writer.Reset();
-				client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
+				client.SendData(writer, ref packet, DeliveryMethod.ReliableUnordered);
 				do
 				{
 					numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
@@ -1298,9 +1320,8 @@ namespace Fika.Core.Coop.GameMode
 					{
 						Logger.LogError("WaitForPlayers::GClass3163 was null!");
 					}
-					packet = new(true);
 					writer.Reset();
-					client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
+					client.SendData(writer, ref packet, DeliveryMethod.ReliableUnordered);
 					await Task.Delay(1000);
 				} while (numbersOfPlayersToWaitFor > 0);
 			}

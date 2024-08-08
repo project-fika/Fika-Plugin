@@ -47,6 +47,7 @@ namespace Fika.Core.Networking
 		public int ConnectedClients = 0;
 		public int ReadyClients = 0;
 		public bool HostReady = false;
+		public bool HostLoaded = false;
 		public bool ReconnectDone = false;
 		public NetManager NetClient
 		{
@@ -824,6 +825,7 @@ namespace Fika.Core.Networking
 				ConnectedClients = packet.NumberOfPlayers;
 				ReadyClients = packet.ReadyPlayers;
 				HostReady = packet.HostReady;
+				HostLoaded = packet.HostLoaded;
 			}
 		}
 
