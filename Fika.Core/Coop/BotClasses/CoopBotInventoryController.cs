@@ -10,30 +10,30 @@ using static EFT.Player;
 
 namespace Fika.Core.Coop.BotClasses
 {
-    public class CoopBotInventoryController(Player player, Profile profile, bool examined) : PlayerInventoryController(player, profile, examined)
-    {
-        private readonly CoopBot CoopBot = (CoopBot)player;
+	public class CoopBotInventoryController(Player player, Profile profile, bool examined) : PlayerInventoryController(player, profile, examined)
+	{
+		private readonly CoopBot CoopBot = (CoopBot)player;
 
-        public override void Execute(GClass2854 operation, [CanBeNull] Callback callback)
-        {
-            base.Execute(operation, callback);
+		public override void Execute(GClass2854 operation, [CanBeNull] Callback callback)
+		{
+			base.Execute(operation, callback);
 
-            InventoryPacket packet = new()
-            {
-                HasItemControllerExecutePacket = true
-            };
+			InventoryPacket packet = new()
+			{
+				HasItemControllerExecutePacket = true
+			};
 
-            using MemoryStream memoryStream = new();
-            using BinaryWriter binaryWriter = new(memoryStream);
-            binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
-            byte[] opBytes = memoryStream.ToArray();
-            packet.ItemControllerExecutePacket = new()
-            {
-                CallbackId = operation.Id,
-                OperationBytes = opBytes
-            };
+			using MemoryStream memoryStream = new();
+			using BinaryWriter binaryWriter = new(memoryStream);
+			binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
+			byte[] opBytes = memoryStream.ToArray();
+			packet.ItemControllerExecutePacket = new()
+			{
+				CallbackId = operation.Id,
+				OperationBytes = opBytes
+			};
 
-            CoopBot.PacketSender.InventoryPackets.Enqueue(packet);
-        }
-    }
+			CoopBot.PacketSender.InventoryPackets.Enqueue(packet);
+		}
+	}
 }

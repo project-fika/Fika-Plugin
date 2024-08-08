@@ -2,27 +2,27 @@
 
 namespace Fika.Core.Networking.Packets.GameWorld
 {
-    public struct WorldLootPacket(bool isRequest) : INetSerializable
-    {
-        public bool IsRequest = isRequest;
-        public byte[] Data;
+	public struct WorldLootPacket(bool isRequest) : INetSerializable
+	{
+		public bool IsRequest = isRequest;
+		public byte[] Data;
 
-        public void Deserialize(NetDataReader reader)
-        {
-            IsRequest = reader.GetBool();
-            if (!IsRequest)
-            {
-                Data = reader.GetByteArray();
-            }
-        }
+		public void Deserialize(NetDataReader reader)
+		{
+			IsRequest = reader.GetBool();
+			if (!IsRequest)
+			{
+				Data = reader.GetByteArray();
+			}
+		}
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(IsRequest);
-            if (!IsRequest)
-            {
-                writer.PutByteArray(Data);
-            }
-        }
-    }
+		public void Serialize(NetDataWriter writer)
+		{
+			writer.Put(IsRequest);
+			if (!IsRequest)
+			{
+				writer.PutByteArray(Data);
+			}
+		}
+	}
 }

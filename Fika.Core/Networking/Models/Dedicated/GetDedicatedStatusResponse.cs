@@ -2,10 +2,10 @@
 
 namespace Fika.Core.Networking.Models.Dedicated
 {
-    [DataContract]
-    public struct GetDedicatedStatusResponse(bool available)
-    {
-        [DataMember(Name = "available")]
-        public bool Available = available;
-    }
+	[DataContract]
+	public struct GetDedicatedStatusResponse(bool available)
+	{
+		[DataMember(Name = "available")]
+		public bool Available = available;
+	}
 }

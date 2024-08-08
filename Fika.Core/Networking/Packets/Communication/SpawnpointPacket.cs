@@ -2,21 +2,21 @@
 
 namespace Fika.Core.Networking
 {
-    public struct SpawnpointPacket(bool isRequest) : INetSerializable
-    {
-        public bool IsRequest = isRequest;
-        public string Name;
+	public struct SpawnpointPacket(bool isRequest) : INetSerializable
+	{
+		public bool IsRequest = isRequest;
+		public string Name;
 
-        public void Deserialize(NetDataReader reader)
-        {
-            IsRequest = reader.GetBool();
-            Name = reader.GetString();
-        }
+		public void Deserialize(NetDataReader reader)
+		{
+			IsRequest = reader.GetBool();
+			Name = reader.GetString();
+		}
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(IsRequest);
-            writer.Put(Name);
-        }
-    }
+		public void Serialize(NetDataWriter writer)
+		{
+			writer.Put(IsRequest);
+			writer.Put(Name);
+		}
+	}
 }

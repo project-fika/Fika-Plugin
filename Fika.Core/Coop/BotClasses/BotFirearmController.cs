@@ -5,19 +5,19 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.BotClasses
 {
-    public class BotFirearmController : CoopClientFirearmController
-    {
-        public override Vector3 WeaponDirection
-        {
-            get
-            {
-                return _player.LookDirection;
-            }
-        }
+	public class BotFirearmController : CoopClientFirearmController
+	{
+		public override Vector3 WeaponDirection
+		{
+			get
+			{
+				return _player.LookDirection;
+			}
+		}
 
-        public static BotFirearmController Create(CoopBot player, Weapon weapon)
-        {
-            return smethod_5<BotFirearmController>(player, weapon);
-        }
-    }
+		public static BotFirearmController Create(CoopBot player, Weapon weapon)
+		{
+			return smethod_5<BotFirearmController>(player, weapon);
+		}
+	}
 }
