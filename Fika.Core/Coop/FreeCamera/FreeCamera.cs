@@ -104,6 +104,97 @@ namespace Fika.Core.Coop.FreeCamera
             }
         }
 
+        public void SwitchSpectateMode()
+        {
+            bool shouldHeadCam = Input.GetKey(KeyCode.Space);
+            bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
+            if (shouldHeadCam)
+            {
+                AttachToPlayer();
+            }
+            else if (should3rdPerson)
+            {
+                Attach3rdPerson();
+            }
+            else
+            {
+                JumpToPlayer();
+            }
+        }
+
+        /// <summary>
+        /// Helper method to cycle spectating players
+        /// </summary>
+        /// <param name="reverse">
+        /// If true, cycle players in reverse direction
+        /// </param>
+        public void CycleSpectatePlayers(bool reverse = false)
+        {
+            CoopHandler coopHandler = CoopHandler.GetCoopHandler();
+            if (coopHandler == null)
+            {
+                return;
+            }
+            List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+
+            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: There are {players.Count} players");
+            if (players.Count() <= 0 )
+            {
+                // Clear out all spectate positions
+                CurrentPlayer = null;
+                if (isFollowing)
+                {
+                    isFollowing = false;
+                    transform.parent = null;
+                }
+                return;
+            }
+
+            // Start spectating a player if we haven't before
+            if (CurrentPlayer == null && players[0])
+            {
+                CurrentPlayer = players[0];
+                FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}");
+                SwitchSpectateMode();
+                return;
+            }
+
+            // Cycle through spectate-able players
+            int nextIndex = reverse ? players.IndexOf(CurrentPlayer) - 1 : players.IndexOf(CurrentPlayer) + 1;
+            if (!reverse)
+            {
+                if (nextIndex <= players.Count - 1)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Setting to next player");
+                    CurrentPlayer = players[nextIndex];
+                    SwitchSpectateMode();
+                }
+                else
+                {
+                    // hit end of list, loop from start
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Looping back to start player");
+                    CurrentPlayer = players[0];
+                    SwitchSpectateMode();
+                }
+            }
+            else
+            {
+                if (nextIndex >= 0)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Setting to previous player");
+                    CurrentPlayer = players[nextIndex];
+                    SwitchSpectateMode();
+                }
+                else
+                {
+                    // hit beginning of list, loop from end
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Looping back to end player");
+                    CurrentPlayer = players[players.Count - 1];
+                    SwitchSpectateMode();
+                }
+            }
+        }
+
         protected void Update()
         {
             if (!IsActive)
@@ -131,175 +222,13 @@ namespace Fika.Core.Coop.FreeCamera
             // Spectate next player
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                CoopHandler coopHandler = CoopHandler.GetCoopHandler();
-                if (coopHandler == null)
-                {
-                    return;
-                }
-
-                List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
-
-                if (players.Count > 0)
-                {
-                    bool shouldHeadCam = Input.GetKey(KeyCode.Space);
-                    bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
-                    foreach (CoopPlayer player in players)
-                    {
-                        if (CurrentPlayer == null && players[0] != null)
-                        {
-                            CurrentPlayer = players[0];
-                            if (shouldHeadCam)
-                            {
-                                AttachToPlayer();
-                            }
-                            else if (should3rdPerson)
-                            {
-                                Attach3rdPerson();
-                            }
-                            else
-                            {
-                                JumpToPlayer();
-                            }
-                            break;
-                        }
-
-                        int nextPlayer = players.IndexOf(CurrentPlayer) + 1;
-
-                        if (players.Count - 1 >= nextPlayer)
-                        {
-                            CurrentPlayer = players[nextPlayer];
-                            if (shouldHeadCam)
-                            {
-                                AttachToPlayer();
-                            }
-                            else if (should3rdPerson)
-                            {
-                                Attach3rdPerson();
-                            }
-                            else
-                            {
-                                JumpToPlayer();
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            CurrentPlayer = players[0];
-                            if (shouldHeadCam)
-                            {
-                                AttachToPlayer();
-                            }
-                            else if (should3rdPerson)
-                            {
-                                Attach3rdPerson();
-                            }
-                            else
-                            {
-                                JumpToPlayer();
-                            }
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (CurrentPlayer != null)
-                    {
-                        CurrentPlayer = null;
-                    }
-                    if (isFollowing)
-                    {
-                        isFollowing = false;
-                        transform.parent = null;
-                    }
-                }
+                CycleSpectatePlayers(false);
             }
 
             // Spectate previous player
             if (Input.GetKeyDown(KeyCode.Mouse1))
             {
-                CoopHandler coopHandler = CoopHandler.GetCoopHandler();
-                if (coopHandler == null)
-                {
-                    return;
-                }
-
-                List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
-
-                if (players.Count > 0)
-                {
-                    bool shouldFollow = Input.GetKey(KeyCode.Space);
-                    bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
-                    foreach (CoopPlayer player in players)
-                    {
-                        if (CurrentPlayer == null && players[0] != null)
-                        {
-                            CurrentPlayer = players[0];
-                            if (shouldFollow)
-                            {
-                                AttachToPlayer();
-                            }
-                            else if (should3rdPerson)
-                            {
-                                Attach3rdPerson();
-                            }
-                            else
-                            {
-                                JumpToPlayer();
-                            }
-                            break;
-                        }
-
-                        int previousPlayer = players.IndexOf(CurrentPlayer) - 1;
-
-                        if (previousPlayer >= 0)
-                        {
-                            CurrentPlayer = players[previousPlayer];
-                            if (shouldFollow)
-                            {
-                                AttachToPlayer();
-                            }
-                            else if (should3rdPerson)
-                            {
-                                Attach3rdPerson();
-                            }
-                            else
-                            {
-                                JumpToPlayer();
-                            }
-                            break;
-                        }
-                        else
-                        {
-                            CurrentPlayer = players[players.Count - 1];
-                            if (shouldFollow)
-                            {
-                                AttachToPlayer();
-                            }
-                            else if (should3rdPerson)
-                            {
-                                Attach3rdPerson();
-                            }
-                            else
-                            {
-                                JumpToPlayer();
-                            }
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (CurrentPlayer != null)
-                    {
-                        CurrentPlayer = null;
-                    }
-                    if (isFollowing)
-                    {
-                        isFollowing = false;
-                        transform.parent = null;
-                    }
-                }
+                CycleSpectatePlayers(true);
             }
 
             // Toggle vision
@@ -323,10 +252,12 @@ namespace Fika.Core.Coop.FreeCamera
                 {
                     if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
                     {
+                        FikaPlugin.Instance.FikaLogger.LogDebug("Setting left shoulder mode");
                         SetLeftShoulderMode(true);
                     }
                     else if (!CurrentPlayer.MovementContext.LeftStanceEnabled && leftMode)
                     {
+                        FikaPlugin.Instance.FikaLogger.LogDebug("Unsetting left shoulder mode");
                         SetLeftShoulderMode(false);
                     }
                 }
@@ -474,6 +405,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void AttachToPlayer()
         {
+            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
             transform.parent = CurrentPlayer.PlayerBones.Head.Original;
             transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
             transform.localEulerAngles = new Vector3(260, 80, 0);
@@ -482,6 +414,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void Attach3rdPerson()
         {
+            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
             transform.parent = CurrentPlayer.RaycastCameraTransform;
             transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
             transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
