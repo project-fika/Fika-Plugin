@@ -223,18 +223,21 @@ namespace Fika.Core.Coop.FreeCamera
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
                 CycleSpectatePlayers(false);
+                return;
             }
 
             // Spectate previous player
             if (Input.GetKeyDown(KeyCode.Mouse1))
             {
                 CycleSpectatePlayers(true);
+                return;
             }
 
             // Toggle vision
             if (Input.GetKeyDown(KeyCode.N))
             {
                 ToggleVision();
+                return;
             }
 
             // Disable culling
@@ -243,6 +246,7 @@ namespace Fika.Core.Coop.FreeCamera
                 if (freeCameraController != null)
                 {
                     freeCameraController.DisableAllCullingObjects();
+                    return;
                 }
             }
 
@@ -393,9 +397,14 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void JumpToPlayer()
         {
-            transform.position = new Vector3(CurrentPlayer.Transform.position.x - 2, CurrentPlayer.Transform.position.y + 2, CurrentPlayer.Transform.position.z);
-            transform.LookAt(new Vector3(CurrentPlayer.Transform.position.x, CurrentPlayer.Transform.position.y + 1, CurrentPlayer.Transform.position.z));
-            if (isFollowing)
+            Vector3 position = CurrentPlayer.PlayerBones.Neck.position;
+			transform.position = position + Vector3.back + (Vector3.up / 2);
+			transform.LookAt(position);
+
+            pitch = -transform.eulerAngles.x;
+            yaw = transform.eulerAngles.y;
+
+			if (isFollowing)
             {
                 isFollowing = false;
                 leftMode = false;
