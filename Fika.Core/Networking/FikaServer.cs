@@ -80,6 +80,10 @@ namespace Fika.Core.Networking
 		private CancellationTokenSource natIntroduceRoutineCts;
 		private int statisticsCounter = 0;
 
+#if DEBUG
+		private bool simulateFail = false;
+#endif
+
 		public async Task Init()
 		{
 			NetworkGameSession.RTT = 0;
@@ -861,8 +865,14 @@ namespace Fika.Core.Networking
 						server = this
 					};
 
+					dataWriter.Reset();
+#if DEBUG
+					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
+						simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
+#else
 					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
-					SendDataToPeer(peer, new(), ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+#endif
+					SendDataToPeer(peer, dataWriter, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
 					opHandler.opResult.Value.vmethod_0(new Callback(opHandler.HandleResult), false);
 
@@ -928,7 +938,8 @@ namespace Fika.Core.Networking
 				{
 					FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
 					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-					SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+					dataWriter.Reset();
+					SendDataToAll(dataWriter, ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
