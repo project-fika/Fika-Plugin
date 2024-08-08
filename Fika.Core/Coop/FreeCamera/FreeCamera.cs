@@ -412,10 +412,22 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 		}
 
+		public void AttachDedicated(CoopPlayer player)
+		{
+			FikaPlugin.Instance.FikaLogger.LogInfo("Attaching camera to: " + player.Profile.Info.MainProfileNickname);
+			transform.SetParent(player.Transform.Original);
+			transform.localPosition = new(0, 25, 0);
+			transform.LookAt(player.PlayerBones.Head.position);
+			isFollowing = true;
+
+			pitch = -transform.eulerAngles.x;
+			yaw = transform.eulerAngles.y;
+		}
+
 		public void AttachToPlayer()
 		{
 			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
-			transform.parent = CurrentPlayer.PlayerBones.Head.Original;
+			transform.SetParent(CurrentPlayer.PlayerBones.Head.Original);
 			transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
 			transform.localEulerAngles = new Vector3(260, 80, 0);
 			isFollowing = true;
@@ -424,7 +436,7 @@ namespace Fika.Core.Coop.FreeCamera
 		public void Attach3rdPerson()
 		{
 			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
-			transform.parent = CurrentPlayer.RaycastCameraTransform;
+			transform.SetParent(CurrentPlayer.RaycastCameraTransform);
 			transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
 			transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
 			isFollowing = true;
