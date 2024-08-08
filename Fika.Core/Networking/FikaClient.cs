@@ -172,6 +172,7 @@ namespace Fika.Core.Networking
 				switch (packet.Type)
 				{
 					case ReconnectPacket.EReconnectDataType.Throwable:
+						FikaBackendUtils.ScreenController.ChangeStatus("Syncing throwables...");
 						Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
 						break;
 					case ReconnectPacket.EReconnectDataType.Interactives:
@@ -184,10 +185,15 @@ namespace Fika.Core.Networking
 									netIdDictionary.Add(data.NetId, data);
 								}
 							}
+
+							float total = packet.LampStates.Count();
+							float progress = 0f;
 							foreach (WorldInteractiveObject item in worldInteractiveObjects)
 							{
 								if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct384 value))
 								{
+									progress++;
+									FikaBackendUtils.ScreenController.ChangeStatus("Syncing interactables...", progress / total);
 									item.SetInitialSyncState(value);
 								}
 							}
@@ -199,8 +205,12 @@ namespace Fika.Core.Networking
 								.Where(new Func<LampController, bool>(ClientWorld.Class1231.class1231_0.method_0))
 								.ToDictionary(new Func<LampController, int>(ClientWorld.Class1231.class1231_0.method_1));
 
+							float total = packet.LampStates.Count();
+							float progress = 0f;
 							foreach (KeyValuePair<int, byte> lampState in packet.LampStates)
 							{
+								progress++;
+								FikaBackendUtils.ScreenController.ChangeStatus("Syncing lamp states...", progress / total);
 								if (lampControllerDictionary.TryGetValue(lampState.Key, out LampController lampController))
 								{
 									if (lampController.LampState != (Turnable.EState)lampState.Value)
@@ -214,11 +224,16 @@ namespace Fika.Core.Networking
 					case ReconnectPacket.EReconnectDataType.Windows:
 						{
 							Dictionary<int, Vector3> windowBreakerStates = packet.WindowBreakerStates;
+
+							float total = packet.WindowBreakerStates.Count();
+							float progress = 0f;
 							foreach (WindowBreaker windowBreaker in LocationScene.GetAllObjects<WindowBreaker>(true)
 								.Where(new Func<WindowBreaker, bool>(ClientWorld.Class1231.class1231_0.method_2)))
 							{
 								if (windowBreakerStates.TryGetValue(windowBreaker.NetId, out Vector3 hitPosition))
 								{
+									progress++;
+									FikaBackendUtils.ScreenController.ChangeStatus("Syncing windows...", progress / total);
 									try
 									{
 										DamageInfo damageInfo = default;
@@ -234,11 +249,13 @@ namespace Fika.Core.Networking
 							break;
 						}
 					case ReconnectPacket.EReconnectDataType.OwnCharacter:
+						FikaBackendUtils.ScreenController.ChangeStatus("Receiving own player...");
 						coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
 						coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
 						FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
 						break;
 					case ReconnectPacket.EReconnectDataType.Finished:
+						FikaBackendUtils.ScreenController.ChangeStatus("Finishing reconnect...");
 						ReconnectDone = true;
 						break;
 					default:
