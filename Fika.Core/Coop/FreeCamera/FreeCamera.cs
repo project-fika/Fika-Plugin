@@ -1,5 +1,4 @@
-﻿using BepInEx.Logging;
-using BSG.CameraEffects;
+﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -151,13 +150,16 @@ namespace Fika.Core.Coop.FreeCamera
                 return;
             }
 
+            // Start spectating a player if we haven't before
             if (CurrentPlayer == null && players[0])
             {
                 CurrentPlayer = players[0];
                 FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}");
                 SwitchSpectateMode();
+                return;
             }
 
+            // Cycle through spectate-able players
             int nextIndex = reverse ? players.IndexOf(CurrentPlayer) - 1 : players.IndexOf(CurrentPlayer) + 1;
             if (!reverse)
             {
@@ -250,10 +252,12 @@ namespace Fika.Core.Coop.FreeCamera
                 {
                     if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
                     {
+                        FikaPlugin.Instance.FikaLogger.LogDebug("Setting left shoulder mode");
                         SetLeftShoulderMode(true);
                     }
                     else if (!CurrentPlayer.MovementContext.LeftStanceEnabled && leftMode)
                     {
+                        FikaPlugin.Instance.FikaLogger.LogDebug("Unsetting left shoulder mode");
                         SetLeftShoulderMode(false);
                     }
                 }
