@@ -124,7 +124,7 @@ namespace Fika.Core.Coop.FreeCamera
         }
 
         /// <summary>
-        /// Helper method to cycle spectating players 
+        /// Helper method to cycle spectating players
         /// </summary>
         /// <param name="reverse">
         /// If true, cycle players in reverse direction
@@ -138,7 +138,7 @@ namespace Fika.Core.Coop.FreeCamera
             }
             List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {players.Count} players");
+            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: There are {players.Count} players");
             if (players.Count() <= 0 )
             {
                 // Clear out all spectate positions
@@ -154,7 +154,7 @@ namespace Fika.Core.Coop.FreeCamera
             if (CurrentPlayer == null && players[0])
             {
                 CurrentPlayer = players[0];
-                FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}");
+                FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}");
                 SwitchSpectateMode();
             }
 
@@ -163,30 +163,30 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 if (nextIndex <= players.Count - 1)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to next player");
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Setting to next player");
                     CurrentPlayer = players[nextIndex];
                     SwitchSpectateMode();
                 }
                 else
                 {
                     // hit end of list, loop from start
-                    FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to start player");
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Looping back to start player");
                     CurrentPlayer = players[0];
                     SwitchSpectateMode();
                 }
             }
-            else 
+            else
             {
                 if (nextIndex >= 0)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to previous player");
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Setting to previous player");
                     CurrentPlayer = players[nextIndex];
                     SwitchSpectateMode();
                 }
                 else
                 {
                     // hit beginning of list, loop from end
-                    FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to end player");
+                    FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Looping back to end player");
                     CurrentPlayer = players[players.Count - 1];
                     SwitchSpectateMode();
                 }
@@ -401,7 +401,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void AttachToPlayer()
         {
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
+            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
             transform.parent = CurrentPlayer.PlayerBones.Head.Original;
             transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
             transform.localEulerAngles = new Vector3(260, 80, 0);
@@ -410,7 +410,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         public void Attach3rdPerson()
         {
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
+            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
             transform.parent = CurrentPlayer.RaycastCameraTransform;
             transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
             transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
