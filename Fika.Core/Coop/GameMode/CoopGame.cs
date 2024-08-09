@@ -633,6 +633,8 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		public override IEnumerator vmethod_1()
 		{
+			int timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;			
+
 			if (!isServer)
 			{
 				FikaBackendUtils.ScreenController.ChangeStatus("Waiting for host to finish raid initialization...");
@@ -648,8 +650,9 @@ namespace Fika.Core.Coop.GameMode
 			{
 				FikaServer server = Singleton<FikaServer>.Instance;
 
-				gameTime = EFTDateTimeClass.UtcNow;
-				server.GameStartTime = gameTime.Value;
+				DateTime startTime = EFTDateTimeClass.UtcNow.AddSeconds((double)timeBeforeDeployLocal);
+				gameTime = startTime;
+				server.GameStartTime = startTime;
 				sessionTime = GameTimer.SessionTime;
 
 				InformationPacket packet = new(false)
@@ -667,8 +670,7 @@ namespace Fika.Core.Coop.GameMode
 
 			CoopPlayer coopPlayer = (CoopPlayer)PlayerOwner.Player;
 			coopPlayer.PacketSender.Init();
-
-			int timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
+			
 			DateTime dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
 			new MatchmakerFinalCountdown.FinalCountdownScreenClass(Profile_0, dateTime).ShowScreen(EScreenState.Root);
 			MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeployLocal);

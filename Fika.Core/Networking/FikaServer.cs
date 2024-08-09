@@ -804,11 +804,10 @@ namespace Fika.Core.Networking
 
 			if (hostReady)
 			{
+				respondPackage.GameTime = gameStartTime.Value;
 				GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
-				TimeSpan? passedTime = gameTimer.SessionTime - gameTimer.PastTime;
-				DateTime? convertedPastTime = gameStartTime - passedTime;
-				respondPackage.GameTime = convertedPastTime.Value;
-				respondPackage.SessionTime = coopHandler.LocalGameInstance.GameTimer.SessionTime.Value;
+				//TimeSpan? passedTime = gameTimer.SessionTime - gameTimer.PastTime;
+				respondPackage.SessionTime = gameTimer.SessionTime.Value;
 			}
 
 			dataWriter.Reset();
