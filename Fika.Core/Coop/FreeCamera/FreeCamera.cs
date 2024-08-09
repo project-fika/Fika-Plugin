@@ -71,6 +71,12 @@ namespace Fika.Core.Coop.FreeCamera
 			showOverlay = FikaPlugin.KeybindOverlay.Value;
 		}
 
+		public void SetCurrentPlayer(CoopPlayer player)
+		{
+			CurrentPlayer = player;
+			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Setting player to {CurrentPlayer}");
+		}
+
 		protected void OnGUI()
 		{
 			if (IsActive && showOverlay)
@@ -118,7 +124,14 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			else
 			{
-				JumpToPlayer();
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					JumpToPlayer();
+				}
+				else
+				{
+					Attach3rdPerson();
+				}
 			}
 		}
 
@@ -297,6 +310,26 @@ namespace Fika.Core.Coop.FreeCamera
 				transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
 			}
 
+			if (Input.GetKey(relUpKey))
+			{
+				transform.position += transform.up * (movementSpeed * Time.deltaTime);
+			}
+
+			if (Input.GetKey(relDownKey))
+			{
+				transform.position += -transform.up * (movementSpeed * Time.deltaTime);
+			}
+
+			if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
+			{
+				transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
+			}
+
+			if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
+			{
+				transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
+			}
+
 			// Teleportation
 			if (Input.GetKeyDown(KeyCode.T))
 			{
@@ -310,29 +343,6 @@ namespace Fika.Core.Coop.FreeCamera
 				if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
 				{
 					player?.Teleport(transform.position);
-				}
-			}
-
-			if (true)
-			{
-				if (Input.GetKey(relUpKey))
-				{
-					transform.position += transform.up * (movementSpeed * Time.deltaTime);
-				}
-
-				if (Input.GetKey(relDownKey))
-				{
-					transform.position += -transform.up * (movementSpeed * Time.deltaTime);
-				}
-
-				if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
-				{
-					transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
-				}
-
-				if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
-				{
-					transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
 				}
 			}
 

@@ -135,7 +135,15 @@ namespace Fika.Core.Coop.FreeCamera
 
 			if (extracted && !freeCamScript.IsActive)
 			{
-				ToggleCamera();
+				ToggleUi();
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					ToggleCamera();
+				}
+				else
+				{
+					ToggleSpectateCamera();
+				}
 			}
 
 			if (FikaPlugin.FreeCamButton.Value.IsDown())
@@ -164,8 +172,15 @@ namespace Fika.Core.Coop.FreeCamera
 
 				if (!freeCamScript.IsActive)
 				{
-					ToggleCamera();
 					ToggleUi();
+					if (FikaPlugin.Instance.AllowSpectateFreeCam)
+					{
+						ToggleCamera();
+					}
+					else
+					{
+						ToggleSpectateCamera();
+					}
 				}
 
 				if (!effectsCleared)
@@ -209,8 +224,15 @@ namespace Fika.Core.Coop.FreeCamera
 			deathFade.DisableEffect();
 			if (!freeCamScript.IsActive)
 			{
-				ToggleCamera();
 				ToggleUi();
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					ToggleCamera();
+				}
+				else
+				{
+					ToggleSpectateCamera();
+				}
 			}
 			ShowExtractMessage();
 
@@ -319,6 +341,42 @@ namespace Fika.Core.Coop.FreeCamera
 			else
 			{
 				SetPlayerToFirstPersonMode(player);
+			}
+		}
+
+		public void ToggleSpectateCamera()
+		{
+			if (player == null)
+			{
+				return;
+			}
+			if (!freeCamScript.IsActive)
+			{
+				if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+				{
+					List<CoopPlayer> alivePlayers = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+					if (alivePlayers.Count <= 0)
+					{
+						// No alive players to attach to at this time, so let's fallback to freecam
+						ToggleCamera();
+						return;
+					}
+					CoopPlayer coopPlayer = alivePlayers[0];
+					freeCamScript.SetCurrentPlayer(coopPlayer);
+					FikaPlugin.Instance.FikaLogger.LogDebug("FreecamController: Spectating new player: " + coopPlayer.Profile.Info.MainProfileNickname);
+
+					player.PointOfView = EPointOfView.ThirdPerson;
+					if (player.PlayerBody != null)
+					{
+						player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
+						player.GetComponent<PlayerCameraController>().UpdatePointOfView();
+					}
+					gamePlayerOwner.enabled = false;
+					freeCamScript.SetActive(true);
+
+					freeCamScript.Attach3rdPerson();
+					return;
+				}
 			}
 		}
 
