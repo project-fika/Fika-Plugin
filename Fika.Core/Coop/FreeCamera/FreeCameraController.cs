@@ -133,10 +133,18 @@ namespace Fika.Core.Coop.FreeCamera
 
 			CoopHandler.EQuitState quitState = coopHandler.GetQuitState();
 
-			if (extracted && !freeCamScript.IsActive)
-			{
-				ToggleCamera();
-			}
+            if (extracted && !freeCamScript.IsActive)
+            {
+                ToggleUi();
+                if (FikaPlugin.Instance.AllowSpectateFreeCam)
+                {
+                    ToggleCamera();
+                }
+                else
+                {
+                    ToggleSpectateCamera();
+                }
+            }
 
 			if (FikaPlugin.FreeCamButton.Value.IsDown())
 			{
@@ -162,11 +170,18 @@ namespace Fika.Core.Coop.FreeCamera
 					ShowExtractMessage();
 				}
 
-				if (!freeCamScript.IsActive)
-				{
-					ToggleCamera();
-					ToggleUi();
-				}
+                if (!freeCamScript.IsActive)
+                {
+                    ToggleUi();
+                    if (FikaPlugin.Instance.AllowSpectateFreeCam)
+                    {
+                        ToggleCamera();
+                    }
+                    else
+                    {
+                        ToggleSpectateCamera();
+                    }
+                }
 
 				if (!effectsCleared)
 				{
@@ -205,14 +220,22 @@ namespace Fika.Core.Coop.FreeCamera
 				cameraClassInstance.Camera.fieldOfView = Singleton<SharedGameSettingsClass>.Instance.Game.Settings.FieldOfView;
 			}
 
-			// Disable the DeathFade effect & Toggle the Camera
-			deathFade.DisableEffect();
-			if (!freeCamScript.IsActive)
-			{
-				ToggleCamera();
-				ToggleUi();
-			}
-			ShowExtractMessage();
+            // Disable the DeathFade effect & Toggle the Camera
+            deathFade.DisableEffect();
+            if (!freeCamScript.IsActive)
+            {
+                ToggleUi();
+                freeCamScript.IsExtractedOrDead = true;
+                if (FikaPlugin.Instance.AllowSpectateFreeCam)
+                {
+                    ToggleCamera();
+                }
+                else
+                {
+                    ToggleSpectateCamera();
+                }
+            }
+            ShowExtractMessage();
 
             if (!effectsCleared)
 			{
@@ -315,22 +338,6 @@ namespace Fika.Core.Coop.FreeCamera
             if (!freeCamScript.IsActive)
             {
                 SetPlayerToFreecamMode(player);
-                if (!FikaPlugin.Instance.AllowSpectateFreeCam)
-                {
-                    if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                    {
-                        foreach (CoopPlayer player in coopHandler.HumanPlayers)
-                        {
-                            if (player.HealthController.IsAlive && !player.IsYourPlayer)
-                            {
-                                freeCamScript.SetCurrentPlayer(player);
-                                FikaPlugin.Instance.FikaLogger.LogInfo("FreecamController: New player: " + player.Profile.Info.MainProfileNickname);
-                                freeCamScript.Attach3rdPerson();
-                                return;
-                            }
-                        }
-                    }
-                }
             }
             else
             {
@@ -338,16 +345,50 @@ namespace Fika.Core.Coop.FreeCamera
             }
         }
 
-		/// <summary>
-		/// Hides the main UI (health, stamina, stance, hotbar, etc.)
-		/// </summary>
-		private void ToggleUi()
-		{
-			// Check if we're currently in a raid
-			if (player == null)
-			{
-				return;
-			}
+        public void ToggleSpectateCamera()
+        {
+            if (player == null)
+            {
+                return;
+            }
+            if (!freeCamScript.IsActive)
+            {
+                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                {
+                    foreach (CoopPlayer coopPlayer in coopHandler.HumanPlayers)
+                    {
+                        if (coopPlayer.HealthController.IsAlive && !coopPlayer.IsYourPlayer)
+                        {
+                            freeCamScript.SetCurrentPlayer(coopPlayer);
+                            FikaPlugin.Instance.FikaLogger.LogInfo("FreecamController: New player: " + coopPlayer.Profile.Info.MainProfileNickname);
+
+                            player.PointOfView = EPointOfView.ThirdPerson;
+                            if (player.PlayerBody != null)
+                            {
+                                player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
+                                player.GetComponent<PlayerCameraController>().UpdatePointOfView();
+                            }
+                            gamePlayerOwner.enabled = false;
+                            freeCamScript.SetActive(true);
+
+                            freeCamScript.Attach3rdPerson();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Hides the main UI (health, stamina, stance, hotbar, etc.)
+        /// </summary>
+        private void ToggleUi()
+        {
+            // Check if we're currently in a raid
+            if (player == null)
+            {
+                return;
+            }
 
 			// If we don't have the UI Component cached, go look for it in the scene
 			if (playerUi == null)

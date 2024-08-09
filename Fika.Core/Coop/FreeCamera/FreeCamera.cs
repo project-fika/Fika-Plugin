@@ -281,60 +281,54 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-            // If we are currently dead/extracted and we don't allow spectate freecam
-            // Disable this section
-            // Do we need to check that the camera is parented to something?
-            if (!IsExtractedOrDead || FikaPlugin.Instance.AllowSpectateFreeCam)
+            bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            float movementSpeed = fastMode ? 20f : 2f;
+
+            if (superFastMode)
             {
-                bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-                bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-                float movementSpeed = fastMode ? 20f : 2f;
+                movementSpeed *= 8;
+            }
 
-                if (superFastMode)
-                {
-                    movementSpeed *= 8;
-                }
+            if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
+            {
+                transform.position += -transform.right * (movementSpeed * Time.deltaTime);
+            }
 
-                if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
-                {
-                    transform.position += -transform.right * (movementSpeed * Time.deltaTime);
-                }
+            if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
+            {
+                transform.position += transform.right * (movementSpeed * Time.deltaTime);
+            }
 
-                if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
-                {
-                    transform.position += transform.right * (movementSpeed * Time.deltaTime);
-                }
+            if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
+            {
+                transform.position += transform.forward * (movementSpeed * Time.deltaTime);
+            }
 
-                if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
-                {
-                    transform.position += transform.forward * (movementSpeed * Time.deltaTime);
-                }
+            if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
+            {
+                transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
+            }
 
-                if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
-                {
-                    transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
-                }
+            if (Input.GetKey(relUpKey))
+            {
+                transform.position += transform.up * (movementSpeed * Time.deltaTime);
+            }
 
-                if (Input.GetKey(relUpKey))
-                {
-                    transform.position += transform.up * (movementSpeed * Time.deltaTime);
-                }
+            if (Input.GetKey(relDownKey))
+            {
+                transform.position += -transform.up * (movementSpeed * Time.deltaTime);
+            }
 
-				if (Input.GetKey(relDownKey))
-				{
-					transform.position += -transform.up * (movementSpeed * Time.deltaTime);
-				}
+            if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
+            {
+                transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
+            }
 
-				if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
-				{
-					transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
-				}
-
-				if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
-				{
-					transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
-				}
-			}
+            if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
+            {
+                transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
+            }
 
             // Teleportation
             if (Input.GetKeyDown(KeyCode.T))
