@@ -12,9 +12,11 @@ namespace Fika.Core.Networking
 		public bool IsRequest = isRequest;
 		public int ExfiltrationAmount;
 		public Dictionary<string, EExfiltrationStatus> ExfiltrationPoints;
+		public List<int> StartTimes;
 		public bool HasScavExfils = false;
 		public int ScavExfiltrationAmount;
 		public Dictionary<string, EExfiltrationStatus> ScavExfiltrationPoints;
+		public List<int> ScavStartTimes;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -23,18 +25,22 @@ namespace Fika.Core.Networking
 			{
 				ExfiltrationAmount = reader.GetInt();
 				ExfiltrationPoints = [];
+				StartTimes = [];
 				for (int i = 0; i < ExfiltrationAmount; i++)
 				{
 					ExfiltrationPoints.Add(reader.GetString(), (EExfiltrationStatus)reader.GetInt());
+					StartTimes.Add(reader.GetInt());
 				}
 				HasScavExfils = reader.GetBool();
 				if (HasScavExfils)
 				{
 					ScavExfiltrationAmount = reader.GetInt();
 					ScavExfiltrationPoints = [];
+					ScavStartTimes = [];
 					for (int i = 0; i < ScavExfiltrationAmount; i++)
 					{
 						ScavExfiltrationPoints.Add(reader.GetString(), (EExfiltrationStatus)reader.GetInt());
+						ScavStartTimes.Add(reader.GetInt());
 					}
 				}
 			}
@@ -50,6 +56,7 @@ namespace Fika.Core.Networking
 				{
 					writer.Put(ExfiltrationPoints.ElementAt(i).Key);
 					writer.Put((int)ExfiltrationPoints.ElementAt(i).Value);
+					writer.Put(StartTimes[i]);
 				}
 				writer.Put(HasScavExfils);
 				if (HasScavExfils)
@@ -59,6 +66,7 @@ namespace Fika.Core.Networking
 					{
 						writer.Put(ScavExfiltrationPoints.ElementAt(i).Key);
 						writer.Put((int)ScavExfiltrationPoints.ElementAt(i).Value);
+						writer.Put(ScavStartTimes[i]);
 					}
 				}
 			}

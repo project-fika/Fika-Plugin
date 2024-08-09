@@ -52,7 +52,6 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				sharedQuestController.LateInit();
 			}
-			StartCoroutine(SyncWorld());
 			StartCoroutine(SyncWeather());
 		}
 
@@ -283,36 +282,6 @@ namespace Fika.Core.Coop.PacketHandlers
 					}
 				}
 			}
-		}
-
-		private IEnumerator SyncWorld()
-		{
-			while (Client.NetClient.FirstPeer == null)
-			{
-				yield return null;
-			}
-
-			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-			if (coopGame == null)
-			{
-				yield break;
-			}
-
-			while (coopGame.Status != GameStatus.Started)
-			{
-				yield return null;
-			}
-
-			yield return new WaitForSeconds(10f);
-
-			Writer.Reset();
-			GameTimerPacket gameTimerPacket = new(true);
-			Client.SendData(Writer, ref gameTimerPacket, DeliveryMethod.ReliableOrdered);
-
-			Writer.Reset();
-			ExfiltrationPacket exfilPacket = new(true);
-			Client.SendData(Writer, ref exfilPacket, DeliveryMethod.ReliableOrdered);
 		}
 
 		private IEnumerator SyncWeather()

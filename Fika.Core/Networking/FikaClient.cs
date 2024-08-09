@@ -57,7 +57,7 @@ namespace Fika.Core.Networking
 			}
 		}
 		public NetPeer ServerConnection { get; private set; }
-		public bool SpawnPointsReceived { get; private set; } = false;
+		public bool ExfilPointsReceived { get; private set; } = false;
 		public bool Started
 		{
 			get
@@ -179,7 +179,7 @@ namespace Fika.Core.Networking
 							logger.LogWarning("Received reconnect packet for throwables: " + packet.ThrowableData.Count);
 #endif
 							FikaBackendUtils.ScreenController.ChangeStatus("Syncing throwables...");
-							Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData); 
+							Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
 						}
 						break;
 					case ReconnectPacket.EReconnectDataType.Interactives:
@@ -187,7 +187,7 @@ namespace Fika.Core.Networking
 							if (packet.InteractivesData != null)
 							{
 #if DEBUG
-								logger.LogWarning("Received reconnect packet for interactives: " + packet.InteractivesData.Count); 
+								logger.LogWarning("Received reconnect packet for interactives: " + packet.InteractivesData.Count);
 #endif
 								WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
 								Dictionary<int, WorldInteractiveObject.GStruct384> netIdDictionary = [];
@@ -208,7 +208,7 @@ namespace Fika.Core.Networking
 										FikaBackendUtils.ScreenController.ChangeStatus("Syncing interactables...", progress / total);
 										item.SetInitialSyncState(value);
 									}
-								} 
+								}
 							}
 							break;
 						}
@@ -238,7 +238,7 @@ namespace Fika.Core.Networking
 									}
 								}
 							}
-							break; 
+							break;
 						}
 					case ReconnectPacket.EReconnectDataType.Windows:
 						{
@@ -269,7 +269,7 @@ namespace Fika.Core.Networking
 											logger.LogError("OnReconnectPacketReceived: Exception caught while setting up WindowBreakers: " + ex.Message);
 										}
 									}
-								} 
+								}
 							}
 							break;
 						}
@@ -559,17 +559,29 @@ namespace Fika.Core.Networking
 					ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
 
 					if (exfilController.ExfiltrationPoints == null)
+					{
 						return;
+					}
 
-					CoopGame coopGame = coopHandler.LocalGameInstance;
+					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+					if (coopGame == null)
+					{
+#if DEBUG
+						logger.LogError("OnExfiltrationPacketReceived: coopGame was null!");
+#endif
+						return;
+					}
 
 					CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
 
+					int index = 0;
 					foreach (KeyValuePair<string, EExfiltrationStatus> exfilPoint in packet.ExfiltrationPoints)
 					{
 						ExfiltrationPoint point = exfilController.ExfiltrationPoints.Where(x => x.Settings.Name == exfilPoint.Key).FirstOrDefault();
 						if (point != null || point != default)
 						{
+							point.Settings.StartTime = packet.StartTimes[index];
+							index++;
 							if (point.Status != exfilPoint.Value && (exfilPoint.Value == EExfiltrationStatus.RegularMode || exfilPoint.Value == EExfiltrationStatus.UncompleteRequirements))
 							{
 								point.Enable();
@@ -588,7 +600,6 @@ namespace Fika.Core.Networking
 									}
 								}
 							}
-							coopGame.UpdateExfiltrationUi(point, false, true);
 						}
 						else
 						{
@@ -596,13 +607,16 @@ namespace Fika.Core.Networking
 						}
 					}
 
-					if (MyPlayer.Side == EPlayerSide.Savage && exfilController.ScavExfiltrationPoints != null && packet.HasScavExfils)
+					if (coopGame.RaidSettings.Side == ESideType.Savage && exfilController.ScavExfiltrationPoints != null && packet.HasScavExfils)
 					{
+						int scavIndex = 0;
 						foreach (KeyValuePair<string, EExfiltrationStatus> scavExfilPoint in packet.ScavExfiltrationPoints)
 						{
 							ScavExfiltrationPoint scavPoint = exfilController.ScavExfiltrationPoints.Where(x => x.Settings.Name == scavExfilPoint.Key).FirstOrDefault();
 							if (scavPoint != null || scavPoint != default)
 							{
+								scavPoint.Settings.StartTime = packet.ScavStartTimes[scavIndex];
+								scavIndex++;
 								if (scavPoint.Status != scavExfilPoint.Value && scavExfilPoint.Value == EExfiltrationStatus.RegularMode)
 								{
 									scavPoint.Enable();
@@ -623,12 +637,9 @@ namespace Fika.Core.Networking
 								logger.LogWarning($"ExfiltrationPacketPacketReceived::ScavExfiltrationPoints: Could not find exfil point with name '{scavExfilPoint.Key}'");
 							}
 						}
-
-						ExfiltrationPoint[] points = exfilController.ScavExfiltrationPoints.Where(x => x.Status == EExfiltrationStatus.RegularMode).ToArray();
-						coopGame.ResetExfilPointsFromServer(points);
 					}
 
-					SpawnPointsReceived = true;
+					ExfilPointsReceived = true;
 				}
 				else
 				{
@@ -674,7 +685,18 @@ namespace Fika.Core.Networking
 					break;
 				case EPackageType.TrainSync:
 					{
-						Locomotive locomotive = FindObjectOfType<Locomotive>();
+						MovingPlatform.GClass2952 adapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
+						if (adapter != null)
+						{
+							GStruct129 data = new()
+							{
+								Id = packet.PlatformId,
+								Position = packet.PlatformPosition
+							};
+							adapter.StoreNetPacket(data);
+							adapter.ApplyStoredPackets();
+						}
+						/*Locomotive locomotive = FindObjectOfType<Locomotive>();
 						if (locomotive != null)
 						{
 							DateTime depart = new(packet.DepartureTime);
@@ -683,7 +705,7 @@ namespace Fika.Core.Networking
 						else
 						{
 							logger.LogWarning("GenericPacketReceived: Could not find locomotive!");
-						}
+						}*/
 					}
 					break;
 				case EPackageType.ExfilCountdown:
@@ -853,6 +875,12 @@ namespace Fika.Core.Networking
 				ReadyClients = packet.ReadyPlayers;
 				HostReady = packet.HostReady;
 				HostLoaded = packet.HostLoaded;
+
+				if (packet.HostReady)
+				{
+					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+					coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
+				}
 			}
 		}
 
