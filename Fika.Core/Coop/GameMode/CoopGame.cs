@@ -1550,6 +1550,7 @@ namespace Fika.Core.Coop.GameMode
 				gameWorld.MineManager.OnExplosion += OnMineExplode;
 			}
 
+			// This will be implemented later, suspect it's used for reconnects?
 			/*if (isServer && gameWorld.PlatformAdapters.Length > 0)
 			{
 				MovingPlatform.GClass2952 adapter = gameWorld.PlatformAdapters[0];
@@ -1564,6 +1565,11 @@ namespace Fika.Core.Coop.GameMode
 			yield break;
 		}
 
+		/// <summary>
+		/// Currently unused
+		/// </summary>
+		/// <param name="state"></param>
+		[Obsolete("Not implemented yet", true)]
 		private void HandleHostTrain(Locomotive.ETravelState state)
 		{
 			MovingPlatform.GClass2952 platformAdapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
