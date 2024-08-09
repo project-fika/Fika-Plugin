@@ -189,18 +189,18 @@ namespace Fika.Core
 		public static ConfigEntry<bool> DisableBotMetabolism { get; set; }
 		#endregion
 
-        #region client config
-        public bool UseBTR;
-        public bool FriendlyFire;
-        public bool DynamicVExfils;
-        public bool AllowFreeCam;
-        public bool AllowSpectateFreeCam;
-        public bool AllowItemSending;
-        public string[] BlacklistedItems;
-        public bool ForceSaveOnDeath;
-        public bool UseInertia;
-        public bool SharedQuestProgression;
-        #endregion
+		#region client config
+		public bool UseBTR;
+		public bool FriendlyFire;
+		public bool DynamicVExfils;
+		public bool AllowFreeCam;
+		public bool AllowSpectateFreeCam;
+		public bool AllowItemSending;
+		public string[] BlacklistedItems;
+		public bool ForceSaveOnDeath;
+		public bool UseInertia;
+		public bool SharedQuestProgression;
+		#endregion
 
 		#region natpunch config
 		public bool NatPunchServerEnable;
@@ -284,16 +284,16 @@ namespace Fika.Core
 		{
 			ClientConfigModel clientConfig = FikaRequestHandler.GetClientConfig();
 
-            UseBTR = clientConfig.UseBTR;
-            FriendlyFire = clientConfig.FriendlyFire;
-            DynamicVExfils = clientConfig.DynamicVExfils;
-            AllowFreeCam = clientConfig.AllowFreeCam;
-            AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
-            AllowItemSending = clientConfig.AllowItemSending;
-            BlacklistedItems = clientConfig.BlacklistedItems;
-            ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
-            UseInertia = clientConfig.UseInertia;
-            SharedQuestProgression = clientConfig.SharedQuestProgression;
+			UseBTR = clientConfig.UseBTR;
+			FriendlyFire = clientConfig.FriendlyFire;
+			DynamicVExfils = clientConfig.DynamicVExfils;
+			AllowFreeCam = clientConfig.AllowFreeCam;
+			AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
+			AllowItemSending = clientConfig.AllowItemSending;
+			BlacklistedItems = clientConfig.BlacklistedItems;
+			ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
+			UseInertia = clientConfig.UseInertia;
+			SharedQuestProgression = clientConfig.SharedQuestProgression;
 
 			clientConfig.LogValues();
 		}

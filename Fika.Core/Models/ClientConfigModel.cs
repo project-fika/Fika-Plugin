@@ -37,14 +37,14 @@ namespace Fika.Core.UI.Models
 		[DataMember(Name = "sharedQuestProgression")]
 		public bool SharedQuestProgression;
 
-		public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowDeathFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
+		public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowSpectateFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
 			bool sharedQuestProgression)
 		{
 			UseBTR = useBTR;
 			FriendlyFire = friendlyFire;
 			DynamicVExfils = dynamicVExfils;
 			AllowFreeCam = allowFreeCam;
-			AllowSpectateFreeCam = allowDeathFreeCam;
+			AllowSpectateFreeCam = allowSpectateFreeCam;
 			AllowItemSending = allowItemSending;
 			BlacklistedItems = blacklistedItems;
 			ForceSaveOnDeath = forceSaveOnDeath;
