@@ -374,6 +374,8 @@ namespace Fika.Core.Coop.FreeCamera
 							return;
 						}
 					}
+					// If we got here, it means there were no players to attach to at this time, so let's fallback to freecam
+					ToggleCamera();
 				}
 			}
 		}
