@@ -76,7 +76,7 @@ namespace Coop.Airdrops
 			}
 
 			string location = gameWorld.MainPlayer.Location;
-			if (location.Contains("factory") || location.Contains("laboratory") || location.Contains("Sandbox"))
+			if (location.Contains("factory") || location.Contains("laboratory") || location == "sandbox")
 			{
 				Destroy(this);
 				return;
