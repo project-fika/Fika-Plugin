@@ -225,7 +225,6 @@ namespace Fika.Core.Coop.FreeCamera
             if (!freeCamScript.IsActive)
             {
                 ToggleUi();
-                freeCamScript.IsExtractedOrDead = true;
                 if (FikaPlugin.Instance.AllowSpectateFreeCam)
                 {
                     ToggleCamera();
