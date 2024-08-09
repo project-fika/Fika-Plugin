@@ -1559,7 +1559,7 @@ namespace Fika.Core.Coop.GameMode
 				adapter.Platform.TravelState.Bind(HandleHostTrain);
 			}*/
 
-			Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 5);
+			Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
 
 			FikaBackendUtils.ScreenController.ChangeStatus("Finishing raid initialization...");
 
