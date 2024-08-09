@@ -11,29 +11,29 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.FreeCamera
 {
-    /// <summary>
-    /// A simple free camera to be added to a Unity game object. <br/><br/>
-    /// 
-    /// Full credit to Ashley Davis on GitHub for the inital code:<br/>
-    /// https://gist.github.com/ashleydavis/f025c03a9221bc840a2b<br/><br/>
-    /// 
-    /// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
-    /// https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs
-    /// </summary>
-    public class FreeCamera : MonoBehaviour
-    {
-        public bool IsActive = false;
-        private CoopPlayer CurrentPlayer;
-        private bool isFollowing = false;
-        private bool leftMode = false;
-        private bool disableInput = false;
-        private bool showOverlay;
-        private NightVision nightVision;
-        private ThermalVision thermalVision;
-        private FreeCameraController freeCameraController;
-        private float yaw = 0f;
-        private float pitch = 0f;
-        private float lookSensitivity = 3f;
+	/// <summary>
+	/// A simple free camera to be added to a Unity game object. <br/><br/>
+	/// 
+	/// Full credit to Ashley Davis on GitHub for the inital code:<br/>
+	/// https://gist.github.com/ashleydavis/f025c03a9221bc840a2b<br/><br/>
+	/// 
+	/// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
+	/// https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs
+	/// </summary>
+	public class FreeCamera : MonoBehaviour
+	{
+		public bool IsActive = false;
+		private CoopPlayer CurrentPlayer;
+		private bool isFollowing = false;
+		private bool leftMode = false;
+		private bool disableInput = false;
+		private bool showOverlay;
+		private NightVision nightVision;
+		private ThermalVision thermalVision;
+		private FreeCameraController freeCameraController;
+		private float yaw = 0f;
+		private float pitch = 0f;
+		private float lookSensitivity = 3f;
 
 		private KeyCode forwardKey = KeyCode.W;
 		private KeyCode backKey = KeyCode.S;
@@ -71,17 +71,17 @@ namespace Fika.Core.Coop.FreeCamera
 			showOverlay = FikaPlugin.KeybindOverlay.Value;
 		}
 
-        public void SetCurrentPlayer(CoopPlayer player)
-        {
-            CurrentPlayer = player;
-            FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Setting player to {CurrentPlayer}");
-        }
+		public void SetCurrentPlayer(CoopPlayer player)
+		{
+			CurrentPlayer = player;
+			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Setting player to {CurrentPlayer}");
+		}
 
-        protected void OnGUI()
-        {
-            if (IsActive && showOverlay)
-            {
-                string visionText = "Enable nightvision";
+		protected void OnGUI()
+		{
+			if (IsActive && showOverlay)
+			{
+				string visionText = "Enable nightvision";
 
 				if (nightVision != null && nightVision.On)
 				{
@@ -110,30 +110,30 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 		}
 
-        public void SwitchSpectateMode()
-        {
-            bool shouldHeadCam = Input.GetKey(KeyCode.Space);
-            bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
-            if (shouldHeadCam)
-            {
-                AttachToPlayer();
-            }
-            else if (should3rdPerson)
-            {
-                Attach3rdPerson();
-            }
-            else
-            {
-                if (FikaPlugin.Instance.AllowSpectateFreeCam)
-                {
-                    JumpToPlayer();
-                }
-                else
-                {
-                    Attach3rdPerson();
-                }
-            }
-        }
+		public void SwitchSpectateMode()
+		{
+			bool shouldHeadCam = Input.GetKey(KeyCode.Space);
+			bool should3rdPerson = Input.GetKey(KeyCode.LeftControl);
+			if (shouldHeadCam)
+			{
+				AttachToPlayer();
+			}
+			else if (should3rdPerson)
+			{
+				Attach3rdPerson();
+			}
+			else
+			{
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					JumpToPlayer();
+				}
+				else
+				{
+					Attach3rdPerson();
+				}
+			}
+		}
 
 		/// <summary>
 		/// Helper method to cycle spectating players
@@ -281,73 +281,73 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-            bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            float movementSpeed = fastMode ? 20f : 2f;
+			bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+			bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+			float movementSpeed = fastMode ? 20f : 2f;
 
-            if (superFastMode)
-            {
-                movementSpeed *= 8;
-            }
+			if (superFastMode)
+			{
+				movementSpeed *= 8;
+			}
 
-            if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
-            {
-                transform.position += -transform.right * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
+			{
+				transform.position += -transform.right * (movementSpeed * Time.deltaTime);
+			}
 
-            if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
-            {
-                transform.position += transform.right * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
+			{
+				transform.position += transform.right * (movementSpeed * Time.deltaTime);
+			}
 
-            if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
-            {
-                transform.position += transform.forward * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
+			{
+				transform.position += transform.forward * (movementSpeed * Time.deltaTime);
+			}
 
-            if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
-            {
-                transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
+			{
+				transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
+			}
 
-            if (Input.GetKey(relUpKey))
-            {
-                transform.position += transform.up * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(relUpKey))
+			{
+				transform.position += transform.up * (movementSpeed * Time.deltaTime);
+			}
 
-            if (Input.GetKey(relDownKey))
-            {
-                transform.position += -transform.up * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(relDownKey))
+			{
+				transform.position += -transform.up * (movementSpeed * Time.deltaTime);
+			}
 
-            if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
-            {
-                transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
+			{
+				transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
+			}
 
-            if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
-            {
-                transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
-            }
+			if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
+			{
+				transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
+			}
 
-            // Teleportation
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                {
-                    return;
-                }
+			// Teleportation
+			if (Input.GetKeyDown(KeyCode.T))
+			{
+				if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+				{
+					return;
+				}
 
-                Player player = Singleton<GameWorld>.Instance.MainPlayer;
+				Player player = Singleton<GameWorld>.Instance.MainPlayer;
 
-                if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
-                {
-                    player?.Teleport(transform.position);
-                }
-            }
+				if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
+				{
+					player?.Teleport(transform.position);
+				}
+			}
 
-            float x = Input.GetAxis("Mouse X");
-            float y = Input.GetAxis("Mouse Y");
+			float x = Input.GetAxis("Mouse X");
+			float y = Input.GetAxis("Mouse Y");
 
 			pitch += y * lookSensitivity;
 			pitch = Mathf.Clamp(pitch, -89, 89);
