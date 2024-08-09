@@ -9,6 +9,7 @@ using Fika.Core.Coop.Airdrops.Utils;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Airdrop;
+using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Patches.Weather;
@@ -616,6 +617,7 @@ namespace Fika.Core
 			new ScavRepAdjustmentPatch().Disable();
 			new DisablePvEPatch().Disable();
 			new ClampRagdollPatch().Disable();
+			new LighthouseBridgePatch().Disable();
 
 			new AddEnemyToAllGroupsInBotZonePatch().Disable();
 
@@ -670,7 +672,8 @@ namespace Fika.Core
 			new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
 			new AirdropBox_Patch().Enable();
 			new FikaAirdropFlare_Patch().Enable();
-		}
+			new LighthouseBridge_Patch().Enable();
+        }
 
 		public enum EDynamicAIRates
 		{
