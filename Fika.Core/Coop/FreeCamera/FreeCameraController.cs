@@ -354,28 +354,28 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 				{
-					foreach (CoopPlayer coopPlayer in coopHandler.HumanPlayers)
+					List<CoopPlayer> alivePlayers = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+					if (alivePlayers.Count <= 0)
 					{
-						if (coopPlayer.HealthController.IsAlive && !coopPlayer.IsYourPlayer)
-						{
-							freeCamScript.SetCurrentPlayer(coopPlayer);
-							FikaPlugin.Instance.FikaLogger.LogInfo("FreecamController: New player: " + coopPlayer.Profile.Info.MainProfileNickname);
-
-							player.PointOfView = EPointOfView.ThirdPerson;
-							if (player.PlayerBody != null)
-							{
-								player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
-								player.GetComponent<PlayerCameraController>().UpdatePointOfView();
-							}
-							gamePlayerOwner.enabled = false;
-							freeCamScript.SetActive(true);
-
-							freeCamScript.Attach3rdPerson();
-							return;
-						}
+						// No alive players to attach to at this time, so let's fallback to freecam
+						ToggleCamera();
+						return;
 					}
-					// If we got here, it means there were no players to attach to at this time, so let's fallback to freecam
-					ToggleCamera();
+					CoopPlayer coopPlayer = alivePlayers[0];
+					freeCamScript.SetCurrentPlayer(coopPlayer);
+					FikaPlugin.Instance.FikaLogger.LogDebug("FreecamController: Spectating new player: " + coopPlayer.Profile.Info.MainProfileNickname);
+
+					player.PointOfView = EPointOfView.ThirdPerson;
+					if (player.PlayerBody != null)
+					{
+						player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
+						player.GetComponent<PlayerCameraController>().UpdatePointOfView();
+					}
+					gamePlayerOwner.enabled = false;
+					freeCamScript.SetActive(true);
+
+					freeCamScript.Attach3rdPerson();
+					return;
 				}
 			}
 		}
