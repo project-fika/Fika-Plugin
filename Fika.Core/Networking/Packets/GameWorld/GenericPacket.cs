@@ -15,15 +15,21 @@ namespace Fika.Core.Networking
 	{
 		public int NetId;
 		public EPackageType PacketType = packageType;
+
 		public Vector3 PingLocation;
 		public PingFactory.EPingType PingType;
 		public Color PingColor = Color.white;
 		public string Nickname;
 		public string LocaleId;
+
 		public int BotNetId;
-		public long DepartureTime;
+
+		public byte PlatformId;
+		public float PlatformPosition;
+
 		public string ExfilName;
 		public float ExfilStartTime;
+
 		public ETraderServiceType TraderServiceType;
 
 		public void Deserialize(NetDataReader reader)
@@ -40,7 +46,8 @@ namespace Fika.Core.Networking
 					LocaleId = reader.GetString();
 					break;
 				case EPackageType.TrainSync:
-					DepartureTime = reader.GetLong();
+					PlatformId = reader.GetByte();
+					PlatformPosition = reader.GetFloat();
 					break;
 				case EPackageType.ExfilCountdown:
 					ExfilName = reader.GetString();
@@ -72,7 +79,8 @@ namespace Fika.Core.Networking
 					writer.Put(LocaleId);
 					break;
 				case EPackageType.TrainSync:
-					writer.Put(DepartureTime);
+					writer.Put(PlatformId);
+					writer.Put(PlatformPosition);
 					break;
 				case EPackageType.ExfilCountdown:
 					writer.Put(ExfilName);

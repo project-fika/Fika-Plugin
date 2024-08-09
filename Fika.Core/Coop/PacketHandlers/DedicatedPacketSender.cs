@@ -2,16 +2,10 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
-using EFT;
-using EFT.MovingPlatforms;
-using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -44,7 +38,6 @@ namespace Fika.Core.Coop.PacketHandlers
 		public void Init()
 		{
 			enabled = true;
-			StartCoroutine(SendTrainTime());
 		}
 
 		public void SendPacket<T>(ref T packet) where T : INetSerializable
@@ -128,59 +121,6 @@ namespace Fika.Core.Coop.PacketHandlers
 				}
 			}
 		}
-
-		private IEnumerator SendTrainTime()
-		{
-			while (!Singleton<GameWorld>.Instantiated)
-			{
-				yield return null;
-			}
-
-			while (string.IsNullOrEmpty(Singleton<GameWorld>.Instance.MainPlayer.Location))
-			{
-				yield return null;
-			}
-
-			string location = Singleton<GameWorld>.Instance.MainPlayer.Location;
-
-			if (location.Contains("RezervBase") || location.Contains("Lighthouse"))
-			{
-				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-				while (coopGame.Status != GameStatus.Started)
-				{
-					yield return null;
-				}
-
-				// Trains take around 20 minutes to come in by default so we can safely wait 20 seconds to make sure everyone is loaded in
-				yield return new WaitForSeconds(20);
-
-				Locomotive locomotive = FindObjectOfType<Locomotive>();
-				if (locomotive != null)
-				{
-					long time = Traverse.Create(locomotive).Field<DateTime>("_depart").Value.Ticks;
-
-					GenericPacket packet = new()
-					{
-						NetId = player.NetId,
-						PacketType = EPackageType.TrainSync,
-						DepartureTime = time
-					};
-
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableOrdered);
-				}
-				else
-				{
-					logger.LogError("SendTrainTime: Could not find locomotive!");
-				}
-			}
-			else
-			{
-				yield break;
-			}
-		}
-
 		public void DestroyThis()
 		{
 			Writer = null;

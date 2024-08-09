@@ -4,7 +4,6 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
-using EFT.MovingPlatforms;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Factories;
@@ -12,7 +11,6 @@ using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
@@ -290,7 +288,8 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		private IEnumerator SendTrainTime()
 		{
-			while (!Singleton<GameWorld>.Instantiated)
+			yield break;
+			/*while (!Singleton<GameWorld>.Instantiated)
 			{
 				yield return null;
 			}
@@ -337,7 +336,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			else
 			{
 				yield break;
-			}
+			}*/
 		}
 
 		public void DestroyThis()

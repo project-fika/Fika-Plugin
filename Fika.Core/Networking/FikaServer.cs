@@ -69,11 +69,28 @@ namespace Fika.Core.Networking
 				return netServer.IsRunning;
 			}
 		}
+		public DateTime? GameStartTime
+		{
+			get
+			{
+				if (gameStartTime == null)
+				{
+					gameStartTime = EFTDateTimeClass.UtcNow;
+				}
+				return gameStartTime;
+			}
+			set
+			{
+				gameStartTime = value;
+			}
+		}
 
 		private NetManager netServer;
 		public NetDataWriter Writer => dataWriter;
+		private DateTime? gameStartTime;
 		private readonly NetDataWriter dataWriter = new();
 		private int Port => FikaPlugin.UDPPort.Value;
+
 		private CoopHandler coopHandler;
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
 		private int currentNetId;
@@ -658,17 +675,21 @@ namespace Fika.Core.Networking
 					ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
 
 					if (exfilController.ExfiltrationPoints == null)
+					{
 						return;
+					}
 
 					ExfiltrationPacket exfilPacket = new(false)
 					{
 						ExfiltrationAmount = exfilController.ExfiltrationPoints.Length,
-						ExfiltrationPoints = []
+						ExfiltrationPoints = [],
+						StartTimes = []
 					};
 
 					foreach (ExfiltrationPoint exfilPoint in exfilController.ExfiltrationPoints)
 					{
 						exfilPacket.ExfiltrationPoints.Add(exfilPoint.Settings.Name, exfilPoint.Status);
+						exfilPacket.StartTimes.Add(exfilPoint.Settings.StartTime);
 					}
 
 					if (MyPlayer.Side == EPlayerSide.Savage && exfilController.ScavExfiltrationPoints != null)
@@ -676,10 +697,12 @@ namespace Fika.Core.Networking
 						exfilPacket.HasScavExfils = true;
 						exfilPacket.ScavExfiltrationAmount = exfilController.ScavExfiltrationPoints.Length;
 						exfilPacket.ScavExfiltrationPoints = [];
+						exfilPacket.ScavStartTimes = [];
 
 						foreach (ScavExfiltrationPoint scavExfilPoint in exfilController.ScavExfiltrationPoints)
 						{
 							exfilPacket.ScavExfiltrationPoints.Add(scavExfilPoint.Settings.Name, scavExfilPoint.Status);
+							exfilPacket.ScavStartTimes.Add(scavExfilPoint.Settings.StartTime);
 						}
 					}
 
@@ -769,13 +792,24 @@ namespace Fika.Core.Networking
 		{
 			ReadyClients += packet.ReadyPlayers;
 
+			bool hostReady = coopHandler != null && coopHandler.LocalGameInstance.Status == GameStatus.Started;
+
 			InformationPacket respondPackage = new(false)
 			{
 				NumberOfPlayers = netServer.ConnectedPeersCount,
 				ReadyPlayers = ReadyClients,
-				HostReady = coopHandler != null && coopHandler.LocalGameInstance.Status == GameStatus.Started,
+				HostReady = hostReady,
 				HostLoaded = RaidInitialized
 			};
+
+			if (hostReady)
+			{
+				GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
+				TimeSpan? passedTime = gameTimer.SessionTime - gameTimer.PastTime;
+				DateTime? convertedPastTime = gameStartTime - passedTime;
+				respondPackage.GameTime = convertedPastTime.Value;
+				respondPackage.SessionTime = coopHandler.LocalGameInstance.GameTimer.SessionTime.Value;
+			}
 
 			dataWriter.Reset();
 			SendDataToPeer(peer, dataWriter, ref respondPackage, DeliveryMethod.ReliableUnordered);
