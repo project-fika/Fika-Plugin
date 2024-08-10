@@ -1,6 +1,7 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
@@ -24,6 +25,7 @@ namespace Fika.Core.Coop.FreeCamera
 	{
 		public bool IsActive = false;
 		private CoopPlayer CurrentPlayer;
+		private Vector3 CurrentPlayerExfilPosition;
 		private bool isFollowing = false;
 		private bool leftMode = false;
 		private bool disableInput = false;
@@ -267,6 +269,11 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				if (CurrentPlayer != null)
 				{
+					if (CurrentPlayer.ExfiltrationPoint != null && CurrentPlayerExfilPosition != CurrentPlayer.ExfiltrationPoint.transform.position)
+					{
+						CurrentPlayerExfilPosition = CurrentPlayer.ExfiltrationPoint.transform.position;
+						FikaPlugin.Instance.FikaLogger.LogDebug($"Tracking currentplayer's new exfil point {CurrentPlayerExfilPosition}");
+					}
 					if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
 					{
 						FikaPlugin.Instance.FikaLogger.LogDebug("Setting left shoulder mode");
@@ -276,6 +283,17 @@ namespace Fika.Core.Coop.FreeCamera
 					{
 						FikaPlugin.Instance.FikaLogger.LogDebug("Unsetting left shoulder mode");
 						SetLeftShoulderMode(false);
+					}
+				}
+				else
+				{
+					// Find next player
+					FikaPlugin.Instance.FikaLogger.LogDebug("CurrentPlayer vanished while we were following, finding next player to attach to");
+					CycleSpectatePlayers();
+					if (CurrentPlayer == null)
+					{
+						// still no players, let's go to map
+						AttachToMap();
 					}
 				}
 				return;
@@ -441,6 +459,16 @@ namespace Fika.Core.Coop.FreeCamera
 			transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
 			transform.localEulerAngles = new Vector3(260, 80, 0);
 			isFollowing = true;
+		}
+
+		public void AttachToMap()
+		{
+			if (CurrentPlayerExfilPosition != null)
+			{
+				FikaPlugin.Instance.FikaLogger.LogDebug($"Attaching to last tracked exfil position {CurrentPlayerExfilPosition}");
+				transform.position = CurrentPlayerExfilPosition;
+				return;
+			}
 		}
 
 		public void Attach3rdPerson()
