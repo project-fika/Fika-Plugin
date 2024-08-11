@@ -4,6 +4,7 @@ using EFT;
 using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace Fika.Core.Coop.FreeCamera
 	{
 		public bool IsActive = false;
 		private CoopPlayer CurrentPlayer;
-		private Vector3 CurrentPlayerExfilPosition;
+		private Vector3 LastKnownPlayerPosition;
 		private bool isFollowing = false;
 		private bool leftMode = false;
 		private bool disableInput = false;
@@ -269,11 +270,7 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				if (CurrentPlayer != null)
 				{
-					if (CurrentPlayer.ExfiltrationPoint != null && CurrentPlayerExfilPosition != CurrentPlayer.ExfiltrationPoint.transform.position)
-					{
-						CurrentPlayerExfilPosition = CurrentPlayer.ExfiltrationPoint.transform.position;
-						FikaPlugin.Instance.FikaLogger.LogDebug($"Tracking currentplayer's new exfil point {CurrentPlayerExfilPosition}");
-					}
+					LastKnownPlayerPosition = CurrentPlayer.PlayerBones.Neck.position;
 					if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
 					{
 						FikaPlugin.Instance.FikaLogger.LogDebug("Setting left shoulder mode");
@@ -287,8 +284,7 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 				else
 				{
-					// Find next player
-					FikaPlugin.Instance.FikaLogger.LogDebug("CurrentPlayer vanished while we were following, finding next player to attach to");
+					FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: CurrentPlayer vanished while we were following, finding next player to attach to");
 					CycleSpectatePlayers();
 					if (CurrentPlayer == null)
 					{
@@ -463,10 +459,10 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void AttachToMap()
 		{
-			if (CurrentPlayerExfilPosition != null)
+			if (LastKnownPlayerPosition != null)
 			{
-				FikaPlugin.Instance.FikaLogger.LogDebug($"Attaching to last tracked exfil position {CurrentPlayerExfilPosition}");
-				transform.position = CurrentPlayerExfilPosition;
+				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to last tracked player position {LastKnownPlayerPosition}");
+				transform.position = LastKnownPlayerPosition;
 				return;
 			}
 		}

@@ -33,6 +33,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		private GamePlayerOwner gamePlayerOwner;
 		private CoopPlayer player => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+		private Vector3 LastKnownPosition;
 		private CoopHandler coopHandler;
 
 		public GameObject CameraParent;
@@ -132,6 +133,10 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 
 			CoopHandler.EQuitState quitState = coopHandler.GetQuitState();
+			if (quitState != CoopHandler.EQuitState.YouHaveExtracted)
+			{
+				LastKnownPosition = player.PlayerBones.Neck.position;
+			}
 
 			if (extracted && !freeCamScript.IsActive)
 			{
@@ -163,6 +168,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 			if (quitState == CoopHandler.EQuitState.YouHaveExtracted && !extracted)
 			{
+				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: player has extracted");
 				CoopGame coopGame = coopHandler.LocalGameInstance;
 				if (coopGame.ExtractedPlayers.Contains(player.NetId))
 				{
@@ -357,7 +363,8 @@ namespace Fika.Core.Coop.FreeCamera
 					List<CoopPlayer> alivePlayers = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 					if (alivePlayers.Count <= 0)
 					{
-						// No alive players to attach to at this time, so let's fallback to freecam
+						// No alive players to attach to at this time, so let's fallback to freecam on last known position
+						freeCamScript.transform.position = LastKnownPosition;
 						ToggleCamera();
 						return;
 					}
