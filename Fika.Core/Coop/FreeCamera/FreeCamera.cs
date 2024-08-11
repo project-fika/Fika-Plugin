@@ -1,8 +1,10 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using System;
 using System.Collections.Generic;
@@ -24,6 +26,7 @@ namespace Fika.Core.Coop.FreeCamera
 	{
 		public bool IsActive = false;
 		private CoopPlayer CurrentPlayer;
+		private Vector3 LastKnownPlayerPosition;
 		private bool isFollowing = false;
 		private bool leftMode = false;
 		private bool disableInput = false;
@@ -69,6 +72,12 @@ namespace Fika.Core.Coop.FreeCamera
 		private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
 		{
 			showOverlay = FikaPlugin.KeybindOverlay.Value;
+		}
+
+		public void SetCurrentPlayer(CoopPlayer player)
+		{
+			CurrentPlayer = player;
+			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Setting player to {CurrentPlayer}");
 		}
 
 		protected void OnGUI()
@@ -118,7 +127,14 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			else
 			{
-				JumpToPlayer();
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					JumpToPlayer();
+				}
+				else
+				{
+					Attach3rdPerson();
+				}
 			}
 		}
 
@@ -254,6 +270,7 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				if (CurrentPlayer != null)
 				{
+					LastKnownPlayerPosition = CurrentPlayer.PlayerBones.Neck.position;
 					if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
 					{
 						FikaPlugin.Instance.FikaLogger.LogDebug("Setting left shoulder mode");
@@ -263,6 +280,16 @@ namespace Fika.Core.Coop.FreeCamera
 					{
 						FikaPlugin.Instance.FikaLogger.LogDebug("Unsetting left shoulder mode");
 						SetLeftShoulderMode(false);
+					}
+				}
+				else
+				{
+					FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: CurrentPlayer vanished while we were following, finding next player to attach to");
+					CycleSpectatePlayers();
+					if (CurrentPlayer == null)
+					{
+						// still no players, let's go to map
+						AttachToMap();
 					}
 				}
 				return;
@@ -297,6 +324,26 @@ namespace Fika.Core.Coop.FreeCamera
 				transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
 			}
 
+			if (Input.GetKey(relUpKey))
+			{
+				transform.position += transform.up * (movementSpeed * Time.deltaTime);
+			}
+
+			if (Input.GetKey(relDownKey))
+			{
+				transform.position += -transform.up * (movementSpeed * Time.deltaTime);
+			}
+
+			if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
+			{
+				transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
+			}
+
+			if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
+			{
+				transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
+			}
+
 			// Teleportation
 			if (Input.GetKeyDown(KeyCode.T))
 			{
@@ -310,29 +357,6 @@ namespace Fika.Core.Coop.FreeCamera
 				if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
 				{
 					player?.Teleport(transform.position);
-				}
-			}
-
-			if (true)
-			{
-				if (Input.GetKey(relUpKey))
-				{
-					transform.position += transform.up * (movementSpeed * Time.deltaTime);
-				}
-
-				if (Input.GetKey(relDownKey))
-				{
-					transform.position += -transform.up * (movementSpeed * Time.deltaTime);
-				}
-
-				if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
-				{
-					transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
-				}
-
-				if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
-				{
-					transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
 				}
 			}
 
@@ -431,6 +455,16 @@ namespace Fika.Core.Coop.FreeCamera
 			transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
 			transform.localEulerAngles = new Vector3(260, 80, 0);
 			isFollowing = true;
+		}
+
+		public void AttachToMap()
+		{
+			if (LastKnownPlayerPosition != null)
+			{
+				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to last tracked player position {LastKnownPlayerPosition}");
+				transform.position = LastKnownPlayerPosition;
+				return;
+			}
 		}
 
 		public void Attach3rdPerson()

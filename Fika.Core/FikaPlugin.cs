@@ -195,6 +195,7 @@ namespace Fika.Core
 		public bool FriendlyFire;
 		public bool DynamicVExfils;
 		public bool AllowFreeCam;
+		public bool AllowSpectateFreeCam;
 		public bool AllowItemSending;
 		public string[] BlacklistedItems;
 		public bool ForceSaveOnDeath;
@@ -288,6 +289,7 @@ namespace Fika.Core
 			FriendlyFire = clientConfig.FriendlyFire;
 			DynamicVExfils = clientConfig.DynamicVExfils;
 			AllowFreeCam = clientConfig.AllowFreeCam;
+			AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
 			AllowItemSending = clientConfig.AllowItemSending;
 			BlacklistedItems = clientConfig.BlacklistedItems;
 			ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
