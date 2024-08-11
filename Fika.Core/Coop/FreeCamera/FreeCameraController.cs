@@ -181,6 +181,7 @@ namespace Fika.Core.Coop.FreeCamera
 					ToggleUi();
 					if (FikaPlugin.Instance.AllowSpectateFreeCam)
 					{
+						freeCamScript.transform.position = LastKnownPosition;
 						ToggleCamera();
 					}
 					else
