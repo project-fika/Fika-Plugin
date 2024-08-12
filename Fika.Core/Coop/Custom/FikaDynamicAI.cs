@@ -59,7 +59,7 @@ namespace Fika.Core.Coop.Custom
 		private void Spawner_OnBotRemoved(BotOwner botOwner)
 		{
 			CoopBot bot = (CoopBot)botOwner.GetPlayer;
-			if (!bots.Remove(bot))
+			if (!bots.Remove(bot) && !FikaPlugin.DynamicAI.Value)
 			{
 				logger.LogWarning($"Could not remove {botOwner.gameObject.name} from bots list.");
 			}
