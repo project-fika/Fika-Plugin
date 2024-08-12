@@ -11,6 +11,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using LiteNetLib.Utils;
@@ -35,6 +36,18 @@ namespace Fika.Core.Coop.Players
 		/// </summary>
 		public int loadedPlayers = 0;
 		private bool firstEnabled;
+
+		public override bool IsVisible
+		{
+			get
+			{
+				return FikaBackendUtils.IsDedicated ? true : OnScreen;
+			}
+			set
+			{
+
+			}
+		}
 
 		public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
