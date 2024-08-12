@@ -715,7 +715,7 @@ namespace Fika.Core.Coop.Players
                 }
             }*/
 
-			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= SetSoundRollOff;
+			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateStepSoundRolloff;
 			/*if (FikaPlugin.CullPlayers.Value)
             {
                 UnregisterCulling();
@@ -1106,15 +1106,7 @@ namespace Fika.Core.Coop.Players
 		public override void InitAudioController()
 		{
 			base.InitAudioController();
-			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged += SetSoundRollOff;
-		}
-
-		private void SetSoundRollOff()
-		{
-			if (NestedStepSoundSource != null)
-			{
-				NestedStepSoundSource.SetRolloff(60f * ProtagonistHearing);
-			}
+			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged += UpdateStepSoundRolloff;
 		}
 
 		public override bool UpdateGrenadeAnimatorDuePoV()
@@ -1149,7 +1141,7 @@ namespace Fika.Core.Coop.Players
 			}
 			if (Singleton<BetterAudio>.Instantiated)
 			{
-				Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= SetSoundRollOff;
+				Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateStepSoundRolloff;
 			}
 			base.OnDestroy();
 		}
