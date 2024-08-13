@@ -130,7 +130,12 @@ public static class PingFactory
 				screenScale = outputWidth / inputWidth;
 			}
 
-			if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value))
+			float minX = image.GetPixelAdjustedRect().width / 2;
+			float maxX = Screen.width - minX;
+			float minY = image.GetPixelAdjustedRect().height / 2;
+			float maxY = Screen.height - minY;
+
+			if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value, true))
 			{
 				float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
 
@@ -141,6 +146,21 @@ public static class PingFactory
 				else
 				{
 					image.color = _pingColor;
+				}
+
+				screenPoint.x = Mathf.Clamp(screenPoint.x, minX, maxX);
+				screenPoint.y = Mathf.Clamp(screenPoint.y, minY, maxY);
+
+				if (Vector3.Dot((hitPoint - mainPlayer.Transform.position), mainPlayer.Transform.forward) < 0)
+				{
+					if (screenPoint.x < Screen.width / 2)
+					{
+						screenPoint.x = maxX;
+					}
+					else
+					{
+						screenPoint.x = minX;
+					}
 				}
 
 				image.transform.position = screenScale < 1 ? screenPoint : screenPoint * screenScale;

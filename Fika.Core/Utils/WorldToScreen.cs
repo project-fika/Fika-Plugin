@@ -8,7 +8,7 @@ namespace Fika.Core.Utils
 {
 	public static class WorldToScreen
 	{
-		public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true)
+		public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true, bool skip = false)
 		{
 			CameraClass worldCameraInstance = CameraClass.Instance;
 			Camera worldCamera = worldCameraInstance.Camera;
@@ -49,14 +49,14 @@ namespace Fika.Core.Utils
 			if (screenPoint == Vector3.zero)
 			{
 				screenPoint = worldCamera.WorldToScreenPoint(worldPosition);
-			}
+			}			
 
 			if (screenPoint.z > 0f)
 			{
 				return true;
 			}
 
-			return false;
+			return skip;
 		}
 
 		private static float GetScopeZoomLevel(ProceduralWeaponAnimation weaponAnimation)
