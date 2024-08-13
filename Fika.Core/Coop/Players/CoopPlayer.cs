@@ -8,7 +8,6 @@ using EFT.GlobalEvents;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
-using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -809,6 +808,11 @@ namespace Fika.Core.Coop.Players
 						name = "Cultist Priest";
 						break;
 					}
+				case WildSpawnType.bossKolontay:
+					{
+						name = "Kollontay";
+						break;
+					}
 			}
 			return name != null;
 		}
@@ -1141,7 +1145,7 @@ namespace Fika.Core.Coop.Players
 		{
 			if (IsYourPlayer)
 			{
-				Singleton<BetterAudio>.Instance.SetProtagonist(this); 
+				Singleton<BetterAudio>.Instance.SetProtagonist(this);
 			}
 		}
 
