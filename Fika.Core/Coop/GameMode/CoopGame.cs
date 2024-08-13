@@ -2330,14 +2330,27 @@ namespace Fika.Core.Coop.GameMode
 				if (screenManager.CheckCurrentScreen(EEftScreenType.Reconnect))
 				{
 					screenManager.CloseAllScreensForced();
-				}
+				}				
 				localGame.gparam_0.Player.OnGameSessionEnd(exitStatus, localGame.PastTime, localGame.Location_0.Id, exitName);
 				localGame.CleanUp();
 				localGame.Status = GameStatus.Stopped;
 				TimeSpan timeSpan = EFTDateTimeClass.Now - localGame.dateTime_0;
+				if (FikaBackendUtils.IsReconnect)
+				{
+					bool isScav = localPlayer.Side == EPlayerSide.Savage;
+					ProfileStats stats = localPlayer.Profile.EftStats;
+					if (isScav)
+					{
+						localGame.iSession.ProfileOfPet.EftStats = stats;
+					}
+					else
+					{
+						localGame.iSession.Profile.EftStats = stats;
+					}
+				}
 				localGame.iSession.OfflineRaidEnded(exitStatus, exitName, timeSpan.TotalSeconds).HandleExceptions();
 				MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
-				StaticManager staticManager = StaticManager.Instance;
+				StaticManager staticManager = StaticManager.Instance;				
 				float num = delay;
 				EndAction = new Action(FireCallback);
 				staticManager.WaitSeconds(num, EndAction);
