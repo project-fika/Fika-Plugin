@@ -49,7 +49,7 @@ namespace Fika.Core.Utils
 			if (screenPoint == Vector3.zero)
 			{
 				screenPoint = worldCamera.WorldToScreenPoint(worldPosition);
-			}			
+			}
 
 			if (screenPoint.z > 0f)
 			{
