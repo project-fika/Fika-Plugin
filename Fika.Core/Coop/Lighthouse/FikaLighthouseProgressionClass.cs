@@ -154,7 +154,7 @@ namespace Fika.Core.Coop.Lighthouse
                     continue;
                 }
 
-                if (player.IsYourPlayer)
+                if (player.IsYourPlayer || player.AIData.BotOwner == null)
                 {
                     continue;
                 }
