@@ -48,7 +48,6 @@ namespace Fika.Core.Coop.FreeCamera
 		private KeyCode relDownKey = KeyCode.Q;
 		private readonly KeyCode upKey = KeyCode.R;
 		private readonly KeyCode downKey = KeyCode.F;
-		private TextMeshProUGUI spectateInfoText = null;
 
 		protected void Start()
 		{
@@ -155,23 +154,23 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 			List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+			// If no alive players, add bots to spectate pool if we allow it serverside
+			if (players.Count <= 0 && FikaPlugin.Instance.AllowSpectateBots)
+			{
+				players = Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList();
+			}
 
 			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: There are {players.Count} players");
 			if (players.Count() <= 0)
 			{
-				// TODO only attempt to get bots if we allow this serverside
-				players = Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList();
-				if (players.Count() <= 0)
+				// Clear out all spectate positions
+				CurrentPlayer = null;
+				if (isFollowing)
 				{
-					// Clear out all spectate positions
-					CurrentPlayer = null;
-					if (isFollowing)
-					{
-						isFollowing = false;
-						transform.parent = null;
-					}
-					return;
+					isFollowing = false;
+					transform.parent = null;
 				}
+				return;
 			}
 
 			// Start spectating a player if we haven't before
@@ -489,19 +488,9 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			else
 			{
-				float posX = ((float) FikaPlugin.PosX.Value) / 10;
-				float posY = ((float) FikaPlugin.PosY.Value) / 10;
-				float posZ = ((float) FikaPlugin.PosZ.Value) / 10;
-				float rotX = ((float) FikaPlugin.RotX.Value) / 10;
-				float rotY = ((float) FikaPlugin.RotY.Value) / 10;
-				float rotZ = ((float) FikaPlugin.RotZ.Value) / 10;
 				transform.SetParent(CurrentPlayer.PlayerBones.Neck);
-				transform.localPosition = new Vector3(posX, posY, posZ);
-				transform.localEulerAngles = new Vector3(rotX, rotY, rotZ);
-				transform.SetParent(CurrentPlayer.PlayerBones.Neck);
-
-				//transform.localPosition = new Vector3(0f, -0.32f, -0.53f);
-				//transform.localEulerAngles = new Vector3(-130f, 75f, 0);
+				transform.localPosition = new Vector3(0f, -0.32f, -0.53f);
+				transform.localEulerAngles = new Vector3(-115f, 99f, 5f);
 			}
 			isFollowing = true;
 		}
