@@ -42,27 +42,23 @@ namespace Fika.Core.Coop.Lighthouse
 			_transmitter = GetTransmitterFromInventory();
 
 			// Exit if transmitter does not exist and isnt green
-			if (!PlayerHasActiveTransmitterInInventory())
+			if (PlayerHasActiveTransmitterInInventory())
 			{
-				Destroy(this);
+				List<AIPlaceInfo> places = Singleton<IBotGame>.Instance.BotsController.CoversData.AIPlaceInfoHolder.Places;
 
-				return;
+				places.First(x => x.name == "Attack").gameObject.SetActive(false);
+
+				// Zone was added in a newer version and the gameObject actually has a \
+				places.First(y => y.name == "CloseZone\\").gameObject.SetActive(false);
+
+				// Give access to Lightkeepers door
+				_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, true);
+
+				_bridgeMines = _gameWorld.MineManager.Mines;
+
+				// Set mines to be non-active
+				SetBridgeMinesStatus(false);
 			}
-
-			List<AIPlaceInfo> places = Singleton<IBotGame>.Instance.BotsController.CoversData.AIPlaceInfoHolder.Places;
-
-			places.First(x => x.name == "Attack").gameObject.SetActive(false);
-
-			// Zone was added in a newer version and the gameObject actually has a \
-			places.First(y => y.name == "CloseZone\\").gameObject.SetActive(false);
-
-			// Give access to Lightkeepers door
-			_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, true);
-
-			_bridgeMines = _gameWorld.MineManager.Mines;
-
-			// Set mines to be non-active
-			SetBridgeMinesStatus(false);
 		}
 
 		public void Update()
