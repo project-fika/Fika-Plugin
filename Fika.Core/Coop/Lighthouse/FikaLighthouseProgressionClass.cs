@@ -21,8 +21,6 @@ namespace Fika.Core.Coop.Lighthouse
 		private List<MineDirectional> _bridgeMines;
 		private RecodableItemClass _transmitter;
 		private List<string> ZryachiyAndFollowersIds = new List<string>();
-		private bool _aggressor;
-		private bool _isDoorDisabled;
 		private readonly string _transmitterId = "62e910aaf957f2915e0a5e36";
 		private readonly string _lightKeeperTid = "638f541a29ffd1183d187f57";
 
@@ -166,11 +164,14 @@ namespace Fika.Core.Coop.Lighthouse
 			{
 				// If player kills zryachiy or follower, force aggressor state
 				// Also set players Lk standing to negative (allows access to quest chain (Making Amends))
+				/*
 				_aggressor = true;
 				coopHandler.MyPlayer.Profile.TradersInfo[_lightKeeperTid].SetStanding(-0.01);
+				*/
 			}
 		}
 
+		/*
 		/// <summary>
 		/// Disable door + set transmitter to 'red'
 		/// </summary>
@@ -180,7 +181,7 @@ namespace Fika.Core.Coop.Lighthouse
 			_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, false);
 			_transmitter?.RecodableComponent?.SetStatus(RadioTransmitterStatus.Yellow);
 			_transmitter?.RecodableComponent?.SetEncoded(false);
-			_isDoorDisabled = true;
 		}
+		*/
 	}
 }
