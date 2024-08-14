@@ -1071,9 +1071,9 @@ namespace Fika.Core.Networking
 
 		public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
 		{
-			Writer.Reset();
-			packetProcessor.WriteNetSerializable(Writer, ref packet);
-			netClient.FirstPeer.Send(Writer, deliveryMethod);
+			dataWriter.Reset();
+			packetProcessor.WriteNetSerializable(dataWriter, ref packet);
+			netClient.FirstPeer.Send(dataWriter, deliveryMethod);
 		}
 
 		public void OnPeerConnected(NetPeer peer)

@@ -1056,20 +1056,20 @@ namespace Fika.Core.Networking
 
 		public void SendDataToAll<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToExclude = null) where T : INetSerializable
 		{
-			Writer.Reset();
+			dataWriter.Reset();
 
 			if (peerToExclude != null)
 			{
 				if (NetServer.ConnectedPeersCount > 1)
 				{
-					packetProcessor.WriteNetSerializable(Writer, ref packet);
-					netServer.SendToAll(Writer, deliveryMethod, peerToExclude);
+					packetProcessor.WriteNetSerializable(dataWriter, ref packet);
+					netServer.SendToAll(dataWriter, deliveryMethod, peerToExclude);
 				}
 			}
 			else
 			{
-				packetProcessor.WriteNetSerializable(Writer, ref packet);
-				netServer.SendToAll(Writer, deliveryMethod);
+				packetProcessor.WriteNetSerializable(dataWriter, ref packet);
+				netServer.SendToAll(dataWriter, deliveryMethod);
 			}
 		}
 
@@ -1081,9 +1081,9 @@ namespace Fika.Core.Networking
 
 		public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
 		{
-			Writer.Reset();
-			packetProcessor.WriteNetSerializable(Writer, ref packet);
-			peer.Send(Writer, deliveryMethod);
+			dataWriter.Reset();
+			packetProcessor.WriteNetSerializable(dataWriter, ref packet);
+			peer.Send(dataWriter, deliveryMethod);
 		}
 
 		public void OnPeerConnected(NetPeer peer)
