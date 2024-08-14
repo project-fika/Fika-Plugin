@@ -25,7 +25,6 @@ namespace Fika.Core.Coop.Lighthouse
 		private CoopHandler CoopHandler;
 		private GameWorld GameWorld;
 		private FikaServer Server;
-		private NetDataWriter Writer = new();
 
 		private List<string> ZryachiyAndFollowersIds = new List<string>();
 		private bool Aggressor = false;
@@ -186,8 +185,8 @@ namespace Fika.Core.Coop.Lighthouse
 				packet.WildType = WildSpawnType.followerZryachiy;
 			}
 
-			Writer.Reset();
-			Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableOrdered);
+			Server.Writer.Reset();
+			Server.SendDataToAll(Server.Writer, ref packet, DeliveryMethod.ReliableOrdered);
 
 			// Process for server immediately.
 			this.HandlePacket(packet);
