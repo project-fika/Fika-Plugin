@@ -235,7 +235,8 @@ namespace Fika.Core.Coop.FreeCamera
 			if (Input.GetKeyDown(KeyCode.Home))
 			{
 				disableInput = !disableInput;
-				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.FREECAM_INPUT_DISABLED.Localized(), (disableInput ? "disabled" : "enabled")));
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.FREECAM_INPUT_TOGGLED.Localized(),
+					(disableInput ? LocaleUtils.LANG_DISABLED.Localized() : LocaleUtils.LANG_ENABLED.Localized())));
 			}
 
 			if (disableInput)

@@ -1276,6 +1276,10 @@ namespace Fika.Core.Coop.GameMode
 			}
 			int numbersOfPlayersToWaitFor = 0;
 
+			string localizedText = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
+			string localizedPlayer = LocaleUtils.LANG_PLAYER.Localized();
+			string localizedPlayers = LocaleUtils.LANG_PLAYERS.Localized();
+
 			if (isServer)
 			{
 				FikaServer server = Singleton<FikaServer>.Instance;
@@ -1286,12 +1290,12 @@ namespace Fika.Core.Coop.GameMode
 					numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
 					if (FikaBackendUtils.ScreenController != null)
 					{
-						string localizedText = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
+						
 						if (numbersOfPlayersToWaitFor > 0)
 						{
 							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(localizedText,
 								numbersOfPlayersToWaitFor,
-								(numbersOfPlayersToWaitFor > 1 ? "players" : "player")));
+								(numbersOfPlayersToWaitFor > 1 ? localizedPlayers : localizedPlayer)));
 						}
 						else
 						{
@@ -1344,12 +1348,11 @@ namespace Fika.Core.Coop.GameMode
 					numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
 					if (FikaBackendUtils.ScreenController != null)
 					{
-						string localizedText = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
 						if (numbersOfPlayersToWaitFor > 0)
 						{
 							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(localizedText,
 								numbersOfPlayersToWaitFor,
-								(numbersOfPlayersToWaitFor > 1 ? "players" : "player")));
+								(numbersOfPlayersToWaitFor > 1 ? localizedPlayers : localizedPlayer)));
 						}
 						else
 						{

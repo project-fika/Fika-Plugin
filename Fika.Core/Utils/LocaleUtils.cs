@@ -30,7 +30,7 @@ namespace Fika.Core.Utils
 		public const string RECEIVED_SHARED_ITEM_PLANT = "F_Client_ReceivedSharedItemPlant";
 		public const string RECEIVE_PING = "F_Client_ReceivePing";
 		public const string RECEIVE_PING_OBJECT = "F_Client_ReceivePingObject";
-		public const string FREECAM_INPUT_DISABLED = "F_Client_FreeCamInputDisabled";
+		public const string FREECAM_INPUT_TOGGLED = "F_Client_FreeCamInputToggled";
 		public const string RANDOM_SPAWNPOINTS = "F_Client_RandomSpawnPoints";
 		public const string METABOLISM_DISABLED = "F_Client_MetabolismDisabled";
 		public const string PLAYER_MIA = "F_Client_YouAreMIA";
@@ -106,5 +106,9 @@ namespace Fika.Core.Utils
 		public const string UI_SYNC_WINDOWS = "F_UI_SyncWindows";
 		public const string UI_RECEIVE_OWN_PLAYERS = "F_UI_ReceiveOwnPlayer";
 		public const string UI_FINISH_RECONNECT = "F_UI_FinishReconnect";
+		public const string LANG_ENABLED = "F_LANG_Enabled";
+		public const string LANG_DISABLED = "F_LANG_Disabled";
+		public const string LANG_PLAYER = "F_LANG_Player";
+		public const string LANG_PLAYERS = "F_LANG_Players";
 	}
 }
