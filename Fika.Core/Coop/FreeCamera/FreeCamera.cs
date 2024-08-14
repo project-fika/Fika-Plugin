@@ -155,7 +155,7 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 			// If no alive players, add bots to spectate pool if we allow it serverside
-			if (players.Count <= 0 && FikaPlugin.Instance.AllowSpectateBots)
+			if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
 			{
 				players = Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList();
 			}

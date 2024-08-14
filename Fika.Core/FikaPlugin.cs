@@ -141,6 +141,7 @@ namespace Fika.Core
 
 		// Coop | Debug
 		public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
+		public static ConfigEntry<bool> AllowSpectateBots;
 		public static ConfigEntry<bool> AZERTYMode { get; set; }
 		public static ConfigEntry<bool> KeybindOverlay { get; set; }
 
@@ -189,7 +190,6 @@ namespace Fika.Core
 		public bool DynamicVExfils;
 		public bool AllowFreeCam;
 		public bool AllowSpectateFreeCam;
-		public bool AllowSpectateBots;
 		public bool AllowItemSending;
 		public string[] BlacklistedItems;
 		public bool ForceSaveOnDeath;
@@ -331,7 +331,6 @@ namespace Fika.Core
 			DynamicVExfils = clientConfig.DynamicVExfils;
 			AllowFreeCam = clientConfig.AllowFreeCam;
 			AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
-			AllowSpectateBots = clientConfig.AllowSpectateBots;
 			AllowItemSending = clientConfig.AllowItemSending;
 			BlacklistedItems = clientConfig.BlacklistedItems;
 			ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
@@ -482,6 +481,9 @@ namespace Fika.Core
 
 			FreeCamButton = Config.Bind("Coop | Debug", "Free Camera Button", new KeyboardShortcut(KeyCode.F9),
 				"Button used to toggle free camera.");
+
+			AllowSpectateBots = Config.Bind("Coop | Debug", "Allow Spectating Bots", true,
+				"If we should allow spectating bots if all players are dead/extracted");
 
 			AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false,
 				"If free camera should use AZERTY keys for input.");
