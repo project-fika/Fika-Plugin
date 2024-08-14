@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Fika.Core.Utils
 {
@@ -6,6 +7,12 @@ namespace Fika.Core.Utils
 	{
 		private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
 
+		/// <summary>
+		/// Used to get the prefix of a word for EN locale, no longer used
+		/// </summary>
+		/// <param name="word"></param>
+		/// <returns></returns>
+		[Obsolete("No longer used")]
 		public static string GetPrefix(string word)
 		{
 			char firstLetter = char.ToUpper(word[0]);

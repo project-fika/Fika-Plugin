@@ -42,7 +42,7 @@ public static class PingFactory
 			{
 				string localizedName = localeId.Localized();
 				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
-					[ColorUtils.ColorizeText(Colors.GREEN, nickname), LocaleUtils.GetPrefix(localizedName), ColorUtils.ColorizeText(Colors.BLUE, localizedName)]),
+					[ColorUtils.ColorizeText(Colors.GREEN, nickname), ColorUtils.ColorizeText(Colors.BLUE, localizedName)]),
 					ENotificationDurationType.Default, ENotificationIconType.Friend);
 			}
 		}

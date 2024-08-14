@@ -88,7 +88,7 @@ namespace Fika.Core.UI.Patches
 									string itemName = attachedItem.ShortName.Localized();
 									string attachedItemText = ColorUtils.ColorizeText(Colors.BLUE, itemName);
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
-										[itemText, LocaleUtils.GetPrefix(itemName), attachedItemText]),
+										[itemText, attachedItemText]),
 										iconType: EFT.Communications.ENotificationIconType.Alert);
 								}
 								return;
