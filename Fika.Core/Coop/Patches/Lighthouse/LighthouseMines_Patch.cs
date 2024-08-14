@@ -1,17 +1,12 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using Fika.Core.Coop.Lighthouse;
+using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using Fika.Core.Coop.Players;
-using Comfort.Common;
 using UnityEngine;
-using Fika.Core.Coop.Utils;
-using System.Numerics;
 
 namespace Fika.Core.Coop.Patches.Lighthouse
 {
@@ -38,11 +33,11 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 				return;
 			}
 
-			if(FikaBackendUtils.IsServer)
+			if (FikaBackendUtils.IsServer)
 			{
 				CoopPlayer player = (CoopPlayer)gameWorld.GetPlayerByCollider(other);
 
-				if(LighthouseProgressionClass.PlayersWithDSP.Contains(player))
+				if (LighthouseProgressionClass.PlayersWithDSP.Contains(player))
 				{
 					//Do not make player go kaboom if he has a transmitter in this area.
 					__result = true;

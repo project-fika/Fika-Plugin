@@ -188,7 +188,7 @@ namespace Fika.Core.Coop.Lighthouse
 
 			Writer.Reset();
 			Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableOrdered);
-			
+
 			// Process for server immediately.
 			this.HandlePacket(packet);
 		}
