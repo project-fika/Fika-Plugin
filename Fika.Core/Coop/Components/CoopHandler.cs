@@ -280,12 +280,7 @@ namespace Fika.Core.Coop.Components
 				requestPacket.Characters = [.. Players.Values.Select(p => p.ProfileId), .. queuedProfileIds];
 			}
 
-			NetDataWriter writer = Singleton<FikaClient>.Instance.Writer;
-			if (writer != null)
-			{
-				writer.Reset();
-				Singleton<FikaClient>.Instance.SendData(writer, ref requestPacket, DeliveryMethod.ReliableOrdered);
-			}
+			Singleton<FikaClient>.Instance.SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
 		}
 
 		private async void SpawnPlayer(SpawnObject spawnObject)

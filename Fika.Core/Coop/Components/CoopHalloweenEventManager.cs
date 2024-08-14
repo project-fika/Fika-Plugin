@@ -19,7 +19,6 @@ namespace Fika.Core.Coop.Components
 		private Action syncExitsEvent;
 
 		private FikaServer server;
-		private NetDataWriter writer = new();
 
 		protected void Awake()
 		{
@@ -56,8 +55,7 @@ namespace Fika.Core.Coop.Components
 				SummonPosition = summonStartedEvent.PointPosition
 			};
 
-			writer.Reset();
-			server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		private void OnHalloweenSyncStateEvent(HalloweenSyncStateEvent syncStateEvent)
@@ -69,8 +67,7 @@ namespace Fika.Core.Coop.Components
 				EventState = syncStateEvent.EventState
 			};
 
-			writer.Reset();
-			server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		private void OnHalloweenSyncExitsEvent(HalloweenSyncExitsEvent syncStateEvent)
@@ -82,8 +79,7 @@ namespace Fika.Core.Coop.Components
 				Exit = syncStateEvent.ExitName
 			};
 
-			writer.Reset();
-			server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 	}
 }

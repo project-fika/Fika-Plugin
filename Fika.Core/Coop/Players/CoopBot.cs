@@ -299,7 +299,7 @@ namespace Fika.Core.Coop.Players
 						NetId = MainPlayer.NetId,
 						BotNetId = NetId
 					};
-					server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
@@ -317,7 +317,7 @@ namespace Fika.Core.Coop.Players
 						NetId = MainPlayer.NetId,
 						BotNetId = NetId
 					};
-					server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
@@ -338,7 +338,8 @@ namespace Fika.Core.Coop.Players
 						NetId = MainPlayer.NetId,
 						BotNetId = NetId
 					};
-					server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
 					if (!coopGame.Bots.Remove(ProfileId))
 					{

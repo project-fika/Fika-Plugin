@@ -857,8 +857,8 @@ namespace Fika.Core.Coop.Players
 					NetId = NetId,
 					BotNetId = NetId
 				};
-				PacketSender.Writer.Reset();
-				PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+				PacketSender.Client.SendData(ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
 				IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
 				if (vaultingComponent != null)

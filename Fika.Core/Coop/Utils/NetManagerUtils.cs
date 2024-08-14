@@ -56,8 +56,7 @@ namespace Fika.Core.Coop.Utils
 				FikaServer server = Singleton<FikaServer>.Instance;
 				if (server != null)
 				{
-					server.Writer.Reset();
-					server.SendDataToAll(server.Writer, ref packet, DeliveryMethod.ReliableUnordered);
+					server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 					return;
 				}
 			}
@@ -65,8 +64,7 @@ namespace Fika.Core.Coop.Utils
 			FikaClient client = Singleton<FikaClient>.Instance;
 			if (client != null)
 			{
-				client.Writer.Reset();
-				client.SendData(client.Writer, ref packet, DeliveryMethod.ReliableUnordered);
+				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 			}
 		}
 

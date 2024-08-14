@@ -11,7 +11,6 @@ namespace Fika.Core.Coop.PacketHandlers
 		public bool Enabled { get; set; }
 		public FikaServer Server { get; set; }
 		public FikaClient Client { get; set; }
-		public NetDataWriter Writer { get; set; }
 		public Queue<WeaponPacket> FirearmPackets { get; set; }
 		public Queue<DamagePacket> DamagePackets { get; set; }
 		public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; }

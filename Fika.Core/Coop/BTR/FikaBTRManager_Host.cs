@@ -69,7 +69,6 @@ namespace Fika.Core.Coop.BTR
 		private float originalDamageCoeff;
 
 		private FikaServer server;
-		private NetDataWriter writer = new();
 		Queue<KeyValuePair<Vector3, Vector3>> shotQueue = new(20);
 		private Player lastInteractPlayer = null;
 		private ManualLogSource btrLogger;
@@ -150,8 +149,7 @@ namespace Fika.Core.Coop.BTR
 				BotNetId = ((CoopPlayer)btrBotShooter.GetPlayer).NetId
 			};
 
-			writer.Reset();
-			server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableUnordered);
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 		}
 
 		public void OnPlayerInteractDoor(Player player, PlayerInteractPacket interactPacket)
@@ -401,9 +399,7 @@ namespace Fika.Core.Coop.BTR
 				TraderServiceType = serviceType
 			};
 
-			NetDataWriter writer = new();
-			writer.Reset();
-			server.SendDataToAll(writer, ref responsePacket, DeliveryMethod.ReliableUnordered);
+			server.SendDataToAll(ref responsePacket, DeliveryMethod.ReliableUnordered);
 		}
 
 		public void NetworkBtrTraderServicePurchased(BTRServicePacket packet)
@@ -435,9 +431,7 @@ namespace Fika.Core.Coop.BTR
 				TraderServiceType = packet.TraderServiceType
 			};
 
-			NetDataWriter writer = new();
-			writer.Reset();
-			server.SendDataToAll(writer, ref responsePacket, DeliveryMethod.ReliableUnordered);
+			server.SendDataToAll(ref responsePacket, DeliveryMethod.ReliableUnordered);
 		}
 
 		private void StartCoverFireTimer(float time)
@@ -527,8 +521,7 @@ namespace Fika.Core.Coop.BTR
 				packet.ShotDirection = shotInfo.Value;
 			}
 
-			writer.Reset();
-			server.SendDataToAll(writer, ref packet, DeliveryMethod.Unreliable);
+			server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
 
 			return btrDataPacket;
 		}

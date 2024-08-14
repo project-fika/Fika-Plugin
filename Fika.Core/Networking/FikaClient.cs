@@ -922,8 +922,8 @@ namespace Fika.Core.Networking
 					Position = MyPlayer.Transform.position,
 					NetId = MyPlayer.NetId
 				};
-				dataWriter.Reset();
-				SendData(dataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
+
+				SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
 			}
 		}
 
@@ -1061,10 +1061,19 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaClientDestroyedEvent(this));
 		}
 
+
+		[Obsolete("SendData with a NetDataWriter specified is deprecated and will be removed in newer versions of Fika, please use SendData without a writer.")]
 		public void SendData<T>(NetDataWriter writer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
 		{
 			packetProcessor.WriteNetSerializable(writer, ref packet);
 			netClient.FirstPeer.Send(writer, deliveryMethod);
+		}
+
+		public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
+		{
+			Writer.Reset();
+			packetProcessor.WriteNetSerializable(Writer, ref packet);
+			netClient.FirstPeer.Send(Writer, deliveryMethod);
 		}
 
 		public void OnPeerConnected(NetPeer peer)

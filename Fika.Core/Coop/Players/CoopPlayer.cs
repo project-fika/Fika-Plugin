@@ -174,8 +174,7 @@ namespace Fika.Core.Coop.Players
 					InteractPacket = btr.GetInteractWithBtrPacket(placeId, interaction)
 				};
 
-				PacketSender.Writer.Reset();
-				PacketSender.Client.SendData(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+				PacketSender.Client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 			}
 			else if (FikaBackendUtils.IsServer)
 			{
@@ -192,8 +191,7 @@ namespace Fika.Core.Coop.Players
 							InteractPacket = interactPacket
 						};
 
-						PacketSender.Writer.Reset();
-						PacketSender.Server.SendDataToAll(PacketSender.Writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+						PacketSender.Server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 					}
 				}
 			}
@@ -1244,7 +1242,7 @@ namespace Fika.Core.Coop.Players
 						if (FikaBackendUtils.IsServer)
 						{
 							OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-							Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+							Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 						}
 					}
 				}
@@ -1254,7 +1252,7 @@ namespace Fika.Core.Coop.Players
 					if (FikaBackendUtils.IsServer)
 					{
 						OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-						Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+						Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 					}
 				}
 			}

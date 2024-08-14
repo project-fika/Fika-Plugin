@@ -3,7 +3,6 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
 using LiteNetLib;
-using LiteNetLib.Utils;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -13,12 +12,10 @@ namespace Fika.Core.Coop.GameMode
 	public class FikaHostWorld : World
 	{
 		private FikaServer server;
-		private NetDataWriter writer;
 
 		protected void Start()
 		{
 			server = Singleton<FikaServer>.Instance;
-			writer = new();
 			gameWorld_0 = GetComponent<GameWorld>();
 		}
 
@@ -43,8 +40,8 @@ namespace Fika.Core.Coop.GameMode
 					{
 						Data = gameWorld_0.GrenadesCriticalStates[i]
 					};
-					writer.Reset();
-					server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
+
+					server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 				}
 			}
 
@@ -76,7 +73,8 @@ namespace Fika.Core.Coop.GameMode
 				ProfileId = player.iPlayer.ProfileId,
 				ZoneId = zone.Id
 			};
-			Singleton<FikaServer>.Instance.SendDataToAll(new NetDataWriter(), ref packet, DeliveryMethod.ReliableOrdered);
+
+			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 	}
 }

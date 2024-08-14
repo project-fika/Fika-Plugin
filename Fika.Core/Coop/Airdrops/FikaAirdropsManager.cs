@@ -101,7 +101,7 @@ namespace Coop.Airdrops
 					PacketType = EPackageType.RemoveAirdropManager
 				};
 
-				Singleton<FikaServer>.Instance.SendDataToAll(new(), ref packet, DeliveryMethod.ReliableOrdered);
+				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
 				Destroy(this);
 				return;
@@ -152,8 +152,8 @@ namespace Coop.Airdrops
 				SpawnPoint = airdropPlane.newPosition,
 				LookPoint = airdropPlane.newRotation
 			};
-			NetDataWriter writer = new();
-			Singleton<FikaServer>.Instance.SendDataToAll(writer, ref airdropPacket, DeliveryMethod.ReliableOrdered);
+
+			Singleton<FikaServer>.Instance.SendDataToAll(ref airdropPacket, DeliveryMethod.ReliableOrdered);
 		}
 
 		protected async void FixedUpdate()
@@ -352,8 +352,7 @@ namespace Coop.Airdrops
 				ContainerNetId = airdropBox.container.NetId,
 			};
 
-			NetDataWriter writer = new();
-			Singleton<FikaServer>.Instance.SendDataToAll(writer, ref lootPacket, DeliveryMethod.ReliableOrdered);
+			Singleton<FikaServer>.Instance.SendDataToAll(ref lootPacket, DeliveryMethod.ReliableOrdered);
 
 			yield break;
 		}

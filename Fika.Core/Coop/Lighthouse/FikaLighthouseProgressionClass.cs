@@ -185,8 +185,7 @@ namespace Fika.Core.Coop.Lighthouse
 				packet.WildType = WildSpawnType.followerZryachiy;
 			}
 
-			Server.Writer.Reset();
-			Server.SendDataToAll(Server.Writer, ref packet, DeliveryMethod.ReliableOrdered);
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
 			// Process for server immediately.
 			this.HandlePacket(packet);

@@ -28,7 +28,6 @@ namespace Fika.Core.Coop.PacketHandlers
 		public bool Enabled { get; set; } = true;
 		public FikaServer Server { get; set; }
 		public FikaClient Client { get; set; }
-		public NetDataWriter Writer { get; set; } = new();
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
 		public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
@@ -57,13 +56,12 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		public void SendPacket<T>(ref T packet) where T : INetSerializable
 		{
-			Writer.Reset();
-			Client.SendData(Writer, ref packet, DeliveryMethod.ReliableUnordered);
+			Client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 		}
 
 		protected void FixedUpdate()
 		{
-			if (player == null || Writer == null || Client == null || !Enabled)
+			if (player == null || Client == null || !Enabled)
 			{
 				return;
 			}
@@ -77,8 +75,7 @@ namespace Fika.Core.Coop.PacketHandlers
 				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface,
 				player.MovementContext.SurfaceNormal);
 
-			Writer.Reset();
-			Client.SendData(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
+			Client.SendData(ref playerStatePacket, DeliveryMethod.Unreliable);
 
 			if (player.MovementIdlingTime > 0.05f)
 			{
@@ -96,8 +93,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					WeaponPacket firearmPacket = FirearmPackets.Dequeue();
 					firearmPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Client.SendData(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
+					Client.SendData(ref firearmPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int damagePackets = DamagePackets.Count;
@@ -108,8 +104,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					DamagePacket damagePacket = DamagePackets.Dequeue();
 					damagePacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Client.SendData(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+					Client.SendData(ref damagePacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int armorDamagePackets = ArmorDamagePackets.Count;
@@ -120,8 +115,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
 					armorDamagePacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Client.SendData(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
+					Client.SendData(ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int inventoryPackets = InventoryPackets.Count;
@@ -132,8 +126,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					InventoryPacket inventoryPacket = InventoryPackets.Dequeue();
 					inventoryPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Client.SendData(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
+					Client.SendData(ref inventoryPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int commonPlayerPackets = CommonPlayerPackets.Count;
@@ -144,8 +137,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					CommonPlayerPacket commonPlayerPacket = CommonPlayerPackets.Dequeue();
 					commonPlayerPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Client.SendData(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
+					Client.SendData(ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int healthSyncPackets = HealthSyncPackets.Count;
@@ -156,8 +148,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					HealthSyncPacket healthSyncPacket = HealthSyncPackets.Dequeue();
 					healthSyncPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Client.SendData(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
+					Client.SendData(ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			if (FikaPlugin.UsePingSystem.Value
@@ -309,13 +300,11 @@ namespace Fika.Core.Coop.PacketHandlers
 				HasData = false
 			};
 
-			Writer.Reset();
-			Client.SendData(Writer, ref packet, DeliveryMethod.ReliableOrdered);
+			Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void DestroyThis()
 		{
-			Writer = null;
 			FirearmPackets.Clear();
 			DamagePackets.Clear();
 			InventoryPackets.Clear();

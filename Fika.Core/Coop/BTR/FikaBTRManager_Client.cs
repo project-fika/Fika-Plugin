@@ -360,9 +360,7 @@ namespace Fika.Core.Coop.BTR
 				packet.SubserviceId = subserviceId;
 			}
 
-			NetDataWriter writer = new();
-			writer.Reset();
-			client.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+			client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 		}
 
 		private BTRDataPacket UpdateDataPacket()
