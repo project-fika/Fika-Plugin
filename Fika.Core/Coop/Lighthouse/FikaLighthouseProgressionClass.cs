@@ -214,9 +214,9 @@ namespace Fika.Core.Coop.Lighthouse
 				Transmitter?.RecodableComponent?.SetStatus(RadioTransmitterStatus.Red);
 				Transmitter?.RecodableComponent?.SetEncoded(false);
 				CoopHandler.MyPlayer.Profile.TradersInfo[_lightKeeperTid].SetStanding(-0.01);
-			}
 
-			Aggressor = true;
+				Aggressor = true;
+			}
 		}
 	}
 }
