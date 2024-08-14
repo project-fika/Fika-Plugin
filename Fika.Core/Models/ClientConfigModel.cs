@@ -22,9 +22,6 @@ namespace Fika.Core.UI.Models
 		[DataMember(Name = "AllowSpectateFreeCam")]
 		public bool AllowSpectateFreeCam;
 
-		[DataMember(Name = "AllowSpectateBots")]
-		public bool AllowSpectateBots;
-
 		[DataMember(Name = "allowItemSending")]
 		public bool AllowItemSending;
 
@@ -40,7 +37,7 @@ namespace Fika.Core.UI.Models
 		[DataMember(Name = "sharedQuestProgression")]
 		public bool SharedQuestProgression;
 
-		public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowSpectateFreeCam, bool allowSpectateBots, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
+		public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowSpectateFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
 			bool sharedQuestProgression)
 		{
 			UseBTR = useBTR;
@@ -48,7 +45,6 @@ namespace Fika.Core.UI.Models
 			DynamicVExfils = dynamicVExfils;
 			AllowFreeCam = allowFreeCam;
 			AllowSpectateFreeCam = allowSpectateFreeCam;
-			AllowSpectateBots = allowSpectateBots;
 			AllowItemSending = allowItemSending;
 			BlacklistedItems = blacklistedItems;
 			ForceSaveOnDeath = forceSaveOnDeath;
