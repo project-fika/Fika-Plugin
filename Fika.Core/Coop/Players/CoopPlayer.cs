@@ -825,7 +825,7 @@ namespace Fika.Core.Coop.Players
 				WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
 				if (worldInteractiveObject != null)
 				{
-					if (worldInteractiveObject.isActiveAndEnabled)
+					if (worldInteractiveObject.isActiveAndEnabled && !worldInteractiveObject.ForceLocalInteraction)
 					{
 						InteractionResult interactionResult;
 						Action action;
