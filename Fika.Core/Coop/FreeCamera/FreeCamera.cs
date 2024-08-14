@@ -1,13 +1,16 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 namespace Fika.Core.Coop.FreeCamera
@@ -45,6 +48,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private KeyCode relDownKey = KeyCode.Q;
 		private readonly KeyCode upKey = KeyCode.R;
 		private readonly KeyCode downKey = KeyCode.F;
+		private TextMeshProUGUI spectateInfoText = null;
 
 		protected void Start()
 		{
@@ -76,9 +80,7 @@ namespace Fika.Core.Coop.FreeCamera
 		public void SetCurrentPlayer(CoopPlayer player)
 		{
 			CurrentPlayer = player;
-#if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Setting player to {CurrentPlayer}");
-#endif
+			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Setting player to {CurrentPlayer}"); 
 		}
 
 		protected void OnGUI()
@@ -154,28 +156,29 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 
-#if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {players.Count} players");
-#endif
+			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: There are {players.Count} players");
 			if (players.Count() <= 0)
 			{
-				// Clear out all spectate positions
-				CurrentPlayer = null;
-				if (isFollowing)
+				// TODO only attempt to get bots if we allow this serverside
+				players = Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList();
+				if (players.Count() <= 0)
 				{
-					isFollowing = false;
-					transform.parent = null;
+					// Clear out all spectate positions
+					CurrentPlayer = null;
+					if (isFollowing)
+					{
+						isFollowing = false;
+						transform.parent = null;
+					}
+					return;
 				}
-				return;
 			}
 
 			// Start spectating a player if we haven't before
 			if (CurrentPlayer == null && players[0])
 			{
 				CurrentPlayer = players[0];
-#if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}");
-#endif
+				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}"); 
 				SwitchSpectateMode();
 				return;
 			}
@@ -186,18 +189,14 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				if (nextIndex <= players.Count - 1)
 				{
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to next player");
-#endif
+					FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Setting to next player"); 
 					CurrentPlayer = players[nextIndex];
 					SwitchSpectateMode();
 				}
 				else
 				{
 					// hit end of list, loop from start
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to start player");
-#endif
+					FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Looping back to start player"); 
 					CurrentPlayer = players[0];
 					SwitchSpectateMode();
 				}
@@ -206,18 +205,14 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				if (nextIndex >= 0)
 				{
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to previous player");
-#endif
+					FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Setting to previous player"); 
 					CurrentPlayer = players[nextIndex];
 					SwitchSpectateMode();
 				}
 				else
 				{
 					// hit beginning of list, loop from end
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to end player");
-#endif
+					FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: Looping back to end player"); 
 					CurrentPlayer = players[players.Count - 1];
 					SwitchSpectateMode();
 				}
@@ -286,24 +281,18 @@ namespace Fika.Core.Coop.FreeCamera
 					LastKnownPlayerPosition = CurrentPlayer.PlayerBones.Neck.position;
 					if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
 					{
-#if DEBUG
-						FikaPlugin.Instance.FikaLogger.LogInfo("Setting left shoulder mode");
-#endif
+						FikaPlugin.Instance.FikaLogger.LogDebug("Setting left shoulder mode"); 
 						SetLeftShoulderMode(true);
 					}
 					else if (!CurrentPlayer.MovementContext.LeftStanceEnabled && leftMode)
 					{
-#if DEBUG
-						FikaPlugin.Instance.FikaLogger.LogInfo("Unsetting left shoulder mode");
-#endif
+						FikaPlugin.Instance.FikaLogger.LogDebug("Unsetting left shoulder mode"); 
 						SetLeftShoulderMode(false);
 					}
 				}
 				else
 				{
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: CurrentPlayer vanished while we were following, finding next player to attach to");
-#endif
+					FikaPlugin.Instance.FikaLogger.LogDebug("Freecam: CurrentPlayer vanished while we were following, finding next player to attach to"); 
 					CycleSpectatePlayers();
 					if (CurrentPlayer == null)
 					{
@@ -457,7 +446,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void AttachDedicated(CoopPlayer player)
 		{
-			FikaPlugin.Instance.FikaLogger.LogInfo("Attaching camera to: " + player.Profile.Info.MainProfileNickname);
+			FikaPlugin.Instance.FikaLogger.LogDebug("Attaching camera to: " + player.Profile.Info.MainProfileNickname);
 			transform.SetParent(player.Transform.Original);
 			transform.localPosition = new(0, 125, 0);
 			transform.LookAt(player.PlayerBones.Head.position);
@@ -468,9 +457,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void AttachToPlayer()
 		{
-#if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
-#endif
+			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}"); 
 			transform.SetParent(CurrentPlayer.PlayerBones.Head.Original);
 			transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
 			transform.localEulerAngles = new Vector3(260, 80, 0);
@@ -481,9 +468,7 @@ namespace Fika.Core.Coop.FreeCamera
 		{
 			if (LastKnownPlayerPosition != null)
 			{
-#if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to last tracked player position {LastKnownPlayerPosition}");
-#endif
+				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to last tracked player position {LastKnownPlayerPosition}"); 
 				transform.position = LastKnownPlayerPosition;
 				return;
 			}
@@ -491,12 +476,33 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void Attach3rdPerson()
 		{
-#if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
-#endif
-			transform.SetParent(CurrentPlayer.RaycastCameraTransform);
-			transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
-			transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
+			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}"); 
+			if (freeCameraController != null)
+			{
+				freeCameraController.DisableAllCullingObjects();
+			}
+			if (!CurrentPlayer.IsAI)
+			{
+				transform.SetParent(CurrentPlayer.RaycastCameraTransform);
+				transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
+				transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
+			}
+			else
+			{
+				float posX = ((float) FikaPlugin.PosX.Value) / 10;
+				float posY = ((float) FikaPlugin.PosY.Value) / 10;
+				float posZ = ((float) FikaPlugin.PosZ.Value) / 10;
+				float rotX = ((float) FikaPlugin.RotX.Value) / 10;
+				float rotY = ((float) FikaPlugin.RotY.Value) / 10;
+				float rotZ = ((float) FikaPlugin.RotZ.Value) / 10;
+				transform.SetParent(CurrentPlayer.PlayerBones.Neck);
+				transform.localPosition = new Vector3(posX, posY, posZ);
+				transform.localEulerAngles = new Vector3(rotX, rotY, rotZ);
+				transform.SetParent(CurrentPlayer.PlayerBones.Neck);
+
+				//transform.localPosition = new Vector3(0f, -0.32f, -0.53f);
+				//transform.localEulerAngles = new Vector3(-130f, 75f, 0);
+			}
 			isFollowing = true;
 		}
 

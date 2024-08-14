@@ -181,6 +181,14 @@ namespace Fika.Core
 		public static ConfigEntry<float> ArmpitDamageMultiplier { get; set; }
 		public static ConfigEntry<float> StomachDamageMultiplier { get; set; }
 		public static ConfigEntry<bool> DisableBotMetabolism { get; set; }
+
+		// Cam stuff for testing
+		public static ConfigEntry<int> PosX {get; set;}
+		public static ConfigEntry<int> PosY {get; set;}
+		public static ConfigEntry<int> PosZ {get; set;}
+		public static ConfigEntry<int> RotX {get; set;}
+		public static ConfigEntry<int> RotY {get; set;}
+		public static ConfigEntry<int> RotZ {get; set;}
 		#endregion
 
 		#region client config
@@ -581,6 +589,19 @@ namespace Fika.Core
 
 			DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false,
 				new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+			
+			PosX = Config.Bind("Cam", "Pos X",0,
+				new ConfigDescription("Pos X",  new AcceptableValueRange<int>(-100, 100), new ConfigurationManagerAttributes() { Order = 6 }));
+			PosY = Config.Bind("Cam", "Pos Y",0,
+				new ConfigDescription("Pos Y", new AcceptableValueRange<int>(-100, 100), new ConfigurationManagerAttributes() { Order = 5 }));
+			PosZ = Config.Bind("Cam", "Pos Z",0,
+				new ConfigDescription("Pos Z", new AcceptableValueRange<int>(-100, 100), new ConfigurationManagerAttributes() { Order = 4 }));
+			RotX = Config.Bind("Cam", "Rotation X",0,
+				new ConfigDescription("Rotation X", new AcceptableValueRange<int>(-3600, 3600), new ConfigurationManagerAttributes() { Order = 3 }));
+			RotY = Config.Bind("Cam", "Rotation Y",0,
+				new ConfigDescription("Rotation Y", new AcceptableValueRange<int>(-3600, 3600), new ConfigurationManagerAttributes() { Order = 2 }));
+			RotZ = Config.Bind("Cam", "Rotation Z",0,
+				new ConfigDescription("Rotation Z", new AcceptableValueRange<int>(-3600, 3600), new ConfigurationManagerAttributes() { Order = 1 }));
 		}
 
 		private void OfficialVersion_SettingChanged(object sender, EventArgs e)
