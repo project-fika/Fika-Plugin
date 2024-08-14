@@ -4,6 +4,7 @@ using EFT;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -234,7 +235,7 @@ namespace Fika.Core.Coop.FreeCamera
 			if (Input.GetKeyDown(KeyCode.Home))
 			{
 				disableInput = !disableInput;
-				NotificationManagerClass.DisplayMessageNotification($"Free cam input is now {(disableInput ? "disabled" : "enabled")}.");
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.FREECAM_INPUT_DISABLED.Localized(), (disableInput ? "disabled" : "enabled")));
 			}
 
 			if (disableInput)

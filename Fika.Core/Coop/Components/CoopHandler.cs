@@ -8,6 +8,7 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
@@ -199,7 +200,7 @@ namespace Fika.Core.Coop.Components
 					// A host needs to wait for the team to extract or die!
 					if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
 					{
-						NotificationManagerClass.DisplayWarningNotification("HOSTING: You cannot exit the game until all clients have disconnected.");
+						NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
 						requestQuitGame = false;
 						return;
 					}
@@ -207,7 +208,7 @@ namespace Fika.Core.Coop.Components
 						&& Singleton<FikaServer>.Instance.timeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
 						&& Singleton<FikaServer>.Instance.HasHadPeer)
 					{
-						NotificationManagerClass.DisplayWarningNotification($"HOSTING: Please wait at least 5 seconds after the last peer disconnected before quitting.");
+						NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_WAIT_5_SECONDS.Localized());
 						requestQuitGame = false;
 						return;
 					}

@@ -35,14 +35,15 @@ public static class PingFactory
 			Singleton<GUISounds>.Instance.PlayUISound(GetPingSound());
 			if (string.IsNullOrEmpty(localeId))
 			{
-				NotificationManagerClass.DisplayMessageNotification($"Received a ping from {ColorUtils.ColorizeText(Colors.GREEN, nickname)}",
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING.Localized(), ColorUtils.ColorizeText(Colors.GREEN, nickname)),
 							ENotificationDurationType.Default, ENotificationIconType.Friend);
 			}
 			else
 			{
 				string localizedName = localeId.Localized();
-				NotificationManagerClass.DisplayMessageNotification($"{ColorUtils.ColorizeText(Colors.GREEN, nickname)} has pinged {LocaleUtils.GetPrefix(localizedName)} {ColorUtils.ColorizeText(Colors.BLUE, localizedName)}",
-							ENotificationDurationType.Default, ENotificationIconType.Friend);
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
+					[ColorUtils.ColorizeText(Colors.GREEN, nickname), LocaleUtils.GetPrefix(localizedName), ColorUtils.ColorizeText(Colors.BLUE, localizedName)]),
+					ENotificationDurationType.Default, ENotificationIconType.Friend);
 			}
 		}
 		else

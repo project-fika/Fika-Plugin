@@ -221,7 +221,7 @@ namespace Fika.Core.Networking
 
 			logger.LogInfo("Started Fika Server");
 
-			NotificationManagerClass.DisplayMessageNotification($"Server started on port {netServer.LocalPort}.",
+			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SERVER_STARTED.Localized(), netServer.LocalPort),
 				EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
 			string[] Ips = [];
@@ -237,8 +237,8 @@ namespace Fika.Core.Networking
 			if (Ips.Length < 1)
 			{
 				Ips = [MyExternalIP, ""];
-				NotificationManagerClass.DisplayMessageNotification("Could not find a valid local IP!",
-				iconType: EFT.Communications.ENotificationIconType.Alert);
+				NotificationManagerClass.DisplayMessageNotification(LocaleUtils.NO_VALID_IP.Localized(),
+					iconType: EFT.Communications.ENotificationIconType.Alert);
 			}
 
 			SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
@@ -253,7 +253,8 @@ namespace Fika.Core.Networking
 			{
 				if (packet.InitialRequest)
 				{
-					NotificationManagerClass.DisplayMessageNotification("Reconnect requested, expect lag...", iconType: EFT.Communications.ENotificationIconType.Alert);
+					NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RECONNECT_REQUESTED.Localized(),
+						iconType: EFT.Communications.ENotificationIconType.Alert);
 					foreach (CoopPlayer player in coopHandler.HumanPlayers)
 					{
 						if (player.ProfileId == packet.ProfileId && player is ObservedCoopPlayer observedCoopPlayer)
@@ -734,8 +735,9 @@ namespace Fika.Core.Networking
 						if (FikaPlugin.ShowNotifications.Value)
 						{
 							string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-							NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has extracted.",
-											EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+								ColorizeText(Colors.GREEN, nickname)),
+							EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 						}
 					}
 
@@ -1100,7 +1102,8 @@ namespace Fika.Core.Networking
 
 		public void OnPeerConnected(NetPeer peer)
 		{
-			NotificationManagerClass.DisplayMessageNotification($"Peer connected to server on port {peer.Port}.", iconType: EFT.Communications.ENotificationIconType.Friend);
+			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
+				iconType: EFT.Communications.ENotificationIconType.Friend);
 			logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
 
 			HasHadPeer = true;
@@ -1170,7 +1173,8 @@ namespace Fika.Core.Networking
 		public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
 		{
 			logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
-			NotificationManagerClass.DisplayMessageNotification($"Peer disconnected {peer.Port}, info: {disconnectInfo.Reason}", iconType: EFT.Communications.ENotificationIconType.Alert);
+			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
+				iconType: EFT.Communications.ENotificationIconType.Alert);
 			if (netServer.ConnectedPeersCount == 0)
 			{
 				timeSinceLastPeerDisconnected = DateTime.Now;

@@ -4,6 +4,7 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Utils;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -106,7 +107,7 @@ namespace Fika.Core.Coop.Utils
 
 		public static async Task CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
 		{
-			NotificationManagerClass.DisplayWarningNotification("Starting raid, please wait...");
+			NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
 			long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
 			string raidCode = GenerateRaidCode(6);
 			CreateMatch body = new(raidCode, profileId, hostUsername, timestamp, raidSettings,

@@ -32,6 +32,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
+using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
 using LiteNetLib;
@@ -791,7 +792,7 @@ namespace Fika.Core.Coop.GameMode
 				else
 				{
 					Logger.LogInfo("Using random spawn points!");
-					NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
+					NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
 					SpawnId = "RANDOM";
 				}
 			}
@@ -827,7 +828,7 @@ namespace Fika.Core.Coop.GameMode
 				else
 				{
 					Logger.LogInfo("Spawn Point was random");
-					NotificationManagerClass.DisplayMessageNotification("Using random spawn points", iconType: EFT.Communications.ENotificationIconType.Alert);
+					NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
 					spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
 				}
 			}
@@ -879,7 +880,7 @@ namespace Fika.Core.Coop.GameMode
 			if (RaidSettings.MetabolismDisabled)
 			{
 				myPlayer.HealthController.DisableMetabolism();
-				NotificationManagerClass.DisplayMessageNotification("Metabolism disabled", iconType: EFT.Communications.ENotificationIconType.Alert);
+				NotificationManagerClass.DisplayMessageNotification(LocaleUtils.METABOLISM_DISABLED.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
 			}
 
 			CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
@@ -1760,7 +1761,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (MyExitStatus == ExitStatus.MissingInAction)
 			{
-				NotificationManagerClass.DisplayMessageNotification("You have gone missing in action...", iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
+				NotificationManagerClass.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
 			}
 
 			if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)

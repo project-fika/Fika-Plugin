@@ -88,7 +88,8 @@ namespace Fika.Core.UI.Patches
 										}
 
 										File.WriteAllText(@$"{fikaDir}\{profileId}.json", profile.ToString());
-										NotificationManagerClass.DisplayMessageNotification($"Saved profile {ColorizeText(Colors.BLUE, profileId)} to {fikaDir}");
+										NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
+											[ColorizeText(Colors.BLUE, profileId), fikaDir]));
 
 										GameObject.Destroy(downloadProfileGameObject);
 									}
@@ -100,7 +101,7 @@ namespace Fika.Core.UI.Patches
 							}
 							catch (Exception ex)
 							{
-								NotificationManagerClass.DisplayWarningNotification("An unknown exception was thrown, check your log file");
+								NotificationManagerClass.DisplayWarningNotification(LocaleUtils.UNKNOWN_ERROR.Localized());
 								FikaPlugin.Instance.FikaLogger.LogError(ex.Message);
 							}
 						});

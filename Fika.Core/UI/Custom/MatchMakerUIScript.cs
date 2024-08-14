@@ -89,8 +89,8 @@ namespace Fika.Core.UI.Custom
 			if (fikaMatchMakerUi.LoadingScreen.activeSelf)
 			{
 				fikaMatchMakerUi.LoadingImage.transform.Rotate(0, 0, 3f);
-				string text = fikaMatchMakerUi.LoadingText.text;
-				TextMeshProUGUI tmpText = fikaMatchMakerUi.LoadingText;
+				string text = fikaMatchMakerUi.LoadingAnimationText.text;
+				TextMeshProUGUI tmpText = fikaMatchMakerUi.LoadingAnimationText;
 
 				loadingTextTick++;
 
@@ -151,7 +151,7 @@ namespace Fika.Core.UI.Custom
 				fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
 			}
 
-			fikaMatchMakerUi.LoadingText.text = "";
+			fikaMatchMakerUi.LoadingAnimationText.text = "";
 
 			fikaMatchMakerUi.DedicatedToggle.isOn = false;
 			fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
@@ -170,7 +170,7 @@ namespace Fika.Core.UI.Custom
 
 				TooltipTextGetter dediTooltipTextGetter = new()
 				{
-					TooltipText = $"No dedicated clients are available."
+					TooltipText = LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized()
 				};
 
 				HoverTooltipArea dediTooltipArea = fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
@@ -237,8 +237,8 @@ namespace Fika.Core.UI.Custom
 
 						if (!IPAddress.TryParse(ip, out _))
 						{
-							Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR FORCING IP",
-								$"'{ip}' is not a valid IP address to connect to! Check your 'Force IP' setting.",
+							Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_FORCE_IP_HEADER.Localized(),
+								string.Format(LocaleUtils.UI_ERROR_FORCE_IP.Localized(), ip),
 								ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
 							ToggleLoading(false);
@@ -250,8 +250,8 @@ namespace Fika.Core.UI.Custom
 					{
 						if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
 						{
-							Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR BINDING",
-								$"'{FikaPlugin.ForceBindIP.Value}' is not a valid IP address to bind to! Check your 'Force Bind IP' setting.",
+							Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_BIND_IP_HEADER.Localized(),
+								string.Format(LocaleUtils.UI_ERROR_BIND_IP.Localized(), FikaPlugin.ForceBindIP.Value),
 								ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
 							ToggleLoading(false);
@@ -295,13 +295,13 @@ namespace Fika.Core.UI.Custom
 
 					if (!string.IsNullOrEmpty(response.Error))
 					{
-						PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", response.Error);
+						PreloaderUI.Instance.ShowErrorScreen(LocaleUtils.UI_DEDICATED_ERROR.Localized(), response.Error);
 
 						ToggleLoading(false);
 					}
 					else
 					{
-						NotificationManagerClass.DisplaySingletonWarningNotification("Starting raid on dedicated client... please wait.");
+						NotificationManagerClass.DisplaySingletonWarningNotification(LocaleUtils.STARTING_RAID_ON_DEDICATED.Localized());
 					}
 				}
 			});
@@ -310,7 +310,7 @@ namespace Fika.Core.UI.Custom
 
 			TooltipTextGetter tooltipTextGetter = new()
 			{
-				TooltipText = "Refresh list of active raids"
+				TooltipText = LocaleUtils.UI_REFRESH_RAIDS.Localized()
 			};
 
 			HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
@@ -389,7 +389,7 @@ namespace Fika.Core.UI.Custom
 
 			FikaBackendUtils.IsReconnect = reconnect;
 
-			NotificationManagerClass.DisplayMessageNotification("Connecting to session...", iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+			NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(), iconType: EFT.Communications.ENotificationIconType.EntryPoint);
 
 			NetManagerUtils.CreatePingingClient();
 
@@ -416,8 +416,8 @@ namespace Fika.Core.UI.Custom
 				if (!success)
 				{
 					Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-					"ERROR CONNECTING",
-					"Unable to connect to the server. Make sure that all ports are open and that all settings are configured correctly.",
+					LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+					LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
 					ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
 					FikaPlugin.Instance.FikaLogger.LogError("Unable to connect to the session!");
@@ -432,8 +432,8 @@ namespace Fika.Core.UI.Custom
 			else
 			{
 				Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-					"ERROR CONNECTING",
-					"Could not start the FikaPinger!",
+					LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+					LocaleUtils.UI_PINGER_START_FAIL.Localized(),
 					ErrorScreen.EButtonType.OkButton, 10f, null, null);
 				yield break;
 			}
@@ -466,7 +466,8 @@ namespace Fika.Core.UI.Custom
 			{
 				NetManagerUtils.DestroyPingingClient();
 
-				Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage, ErrorScreen.EButtonType.OkButton, 15, null, null);
+				Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage,
+					ErrorScreen.EButtonType.OkButton, 15, null, null);
 			}
 		}
 
@@ -553,7 +554,8 @@ namespace Fika.Core.UI.Custom
 				{
 					tooltipTextGetter = new()
 					{
-						TooltipText = $"Cannot join a raid that is on another map.\nRaid map: {ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized())}"
+						TooltipText = string.Format(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_MAP.Localized(),
+						ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized()))
 					};
 
 					button.enabled = false;
@@ -573,7 +575,7 @@ namespace Fika.Core.UI.Custom
 				{
 					tooltipTextGetter = new()
 					{
-						TooltipText = $"Cannot join a raid that is on another time."
+						TooltipText = LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_TIME.Localized()
 					};
 
 					button.enabled = false;
@@ -591,14 +593,14 @@ namespace Fika.Core.UI.Custom
 
 				if (RaidSettings.Side != entry.Side)
 				{
-					string errorText = "Cannot join a raid that is on another map.";
+					string errorText = "ERROR";
 					if (RaidSettings.Side == ESideType.Pmc)
 					{
-						errorText = "You cannot join a scav raid as a PMC.";
+						errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_SCAV_AS_PMC.Localized();
 					}
 					else if (RaidSettings.Side == ESideType.Savage)
 					{
-						errorText = "You cannot join a PMC raid as a scav.";
+						errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_PMC_AS_SCAV.Localized();
 					}
 
 					tooltipTextGetter = new()
@@ -625,7 +627,7 @@ namespace Fika.Core.UI.Custom
 						{
 							tooltipTextGetter = new()
 							{
-								TooltipText = "Host is still loading."
+								TooltipText = LocaleUtils.UI_HOST_STILL_LOADING.Localized()
 							};
 
 							button.enabled = false;
@@ -644,7 +646,7 @@ namespace Fika.Core.UI.Custom
 						{
 							tooltipTextGetter = new()
 							{
-								TooltipText = "Raid is already in progress."
+								TooltipText = LocaleUtils.UI_RAID_IN_PROGRESS.Localized()
 							};
 
 							button.enabled = false;
@@ -663,7 +665,7 @@ namespace Fika.Core.UI.Custom
 							{
 								tooltipTextGetter = new()
 								{
-									TooltipText = "Click to rejoin raid."
+									TooltipText = LocaleUtils.UI_REJOIN_RAID.Localized()
 								};
 
 								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
@@ -674,7 +676,7 @@ namespace Fika.Core.UI.Custom
 							{
 								tooltipTextGetter = new()
 								{
-									TooltipText = "Cannot rejoin a raid where you died."
+									TooltipText = LocaleUtils.UI_CANNOT_REJOIN_RAID_DIED.Localized()
 								};
 
 								button.enabled = false;
@@ -692,7 +694,7 @@ namespace Fika.Core.UI.Custom
 					case LobbyEntry.ELobbyStatus.COMPLETE:
 						tooltipTextGetter = new()
 						{
-							TooltipText = "Click to join raid."
+							TooltipText = LocaleUtils.UI_JOIN_RAID.Localized()
 						};
 
 						tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();

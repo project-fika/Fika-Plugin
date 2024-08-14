@@ -662,11 +662,13 @@ namespace Fika.Core.Coop.Players
 					string nickname = !string.IsNullOrEmpty(Profile.Info.MainProfileNickname) ? Profile.Info.MainProfileNickname : Profile.Nickname;
 					if (damageType != EDamageType.Undefined)
 					{
-						NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died from {ColorizeText(Colors.RED, ("DamageType_" + damageType.ToString()).Localized())}");
+						NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.GROUP_MEMBER_DIED_FROM.Localized(),
+							[ColorizeText(Colors.GREEN, nickname), ColorizeText(Colors.RED, ("DamageType_" + damageType.ToString()).Localized())]));
 					}
 					else
 					{
-						NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died");
+						NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.GROUP_MEMBER_DIED.Localized(),
+							ColorizeText(Colors.GREEN, nickname)));
 					}
 				}
 				if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
@@ -676,7 +678,9 @@ namespace Fika.Core.Coop.Players
 						string aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
 						if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
 						{
-							NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname)} killed boss {ColorizeText(Colors.BROWN, name)}", iconType: EFT.Communications.ENotificationIconType.Friend);
+							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+							[ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(Colors.BROWN, name)]),
+							iconType: EFT.Communications.ENotificationIconType.Friend);
 						}
 					}
 				}
@@ -900,7 +904,8 @@ namespace Fika.Core.Coop.Players
 
 				if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
 				{
-					NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, (Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname))} has spawned",
+					NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(), 
+						ColorizeText(Colors.GREEN, Profile.Info.MainProfileNickname)),
 					EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
 				}
 

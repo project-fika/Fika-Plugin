@@ -668,8 +668,9 @@ namespace Fika.Core.Networking
 								if (FikaPlugin.ShowNotifications.Value)
 								{
 									string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-									NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has extracted.",
-													EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+										ColorizeText(Colors.GREEN, nickname)),
+										EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 								}
 							}
 
@@ -1047,7 +1048,7 @@ namespace Fika.Core.Networking
 
 		public void OnPeerConnected(NetPeer peer)
 		{
-			NotificationManagerClass.DisplayMessageNotification($"Connected to server on port {peer.Port}.",
+			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
 				EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
 		}
 
@@ -1087,7 +1088,7 @@ namespace Fika.Core.Networking
 			logger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
 			if (disconnectInfo.Reason is DisconnectReason.Timeout)
 			{
-				NotificationManagerClass.DisplayWarningNotification("Lost connection to host!");
+				NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized());
 				Destroy(MyPlayer.PacketReceiver);
 				MyPlayer.PacketSender.DestroyThis();
 				Destroy(this);

@@ -2,6 +2,7 @@
 using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
@@ -22,7 +23,8 @@ namespace Fika.Core.UI.Patches
 				FikaServer server = Singleton<FikaServer>.Instance;
 				if (server != null && server.NetServer.ConnectedPeersCount > 0)
 				{
-					NotificationManagerClass.DisplayWarningNotification($"You cannot disconnect while there are still peers connected! Remaining: {server.NetServer.ConnectedPeersCount}");
+					NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.HOST_CANNOT_EXTRACT_MENU.Localized(),
+						server.NetServer.ConnectedPeersCount));
 					return false;
 				}
 			}
