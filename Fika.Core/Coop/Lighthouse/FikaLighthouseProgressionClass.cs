@@ -63,37 +63,26 @@ namespace Fika.Core.Coop.Lighthouse
 
 		public void Update()
 		{
-			IncrementLastUpdateTimer();
-
-			// Exit early if last update() run time was < 10 secs ago
-			if (_timer < 10f)
-			{
-				return;
-			}
-
-			// Skip if:
-			// GameWorld missing
-			// Player not an enemy to Zryachiy
-			// Lk door not accessible
-			// Player has no transmitter on thier person
-			if (_gameWorld == null || _isDoorDisabled || _transmitter == null)
-			{
-				return;
-			}
-
 			if (FikaBackendUtils.IsServer)
 			{
+				IncrementLastUpdateTimer();
+
+				// Exit early if last update() run time was < 10 secs ago
+				if (_timer < 10f)
+				{
+					return;
+				}
+
+				if (_gameWorld == null)
+				{
+					return;
+				}
+
 				// Find Zryachiy and prep him
 				if (ZryachiyAndFollowersIds.Count == 0)
 				{
 					SetupZryachiyAndFollowerHostility();
 				}
-			}
-
-			// If player becomes aggressor, block access to LK
-			if (_aggressor)
-			{
-				DisableAccessToLightKeeper();
 			}
 		}
 
