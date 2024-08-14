@@ -1277,8 +1277,8 @@ namespace Fika.Core.Coop.GameMode
 			int numbersOfPlayersToWaitFor = 0;
 
 			string localizedText = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
-			string localizedPlayer = LocaleUtils.LANG_PLAYER.Localized();
-			string localizedPlayers = LocaleUtils.LANG_PLAYERS.Localized();
+			string localizedPlayer = LocaleUtils.LANG_PLAYER.Localized().ToLower();
+			string localizedPlayers = LocaleUtils.LANG_PLAYERS.Localized().ToLower();
 
 			if (isServer)
 			{
