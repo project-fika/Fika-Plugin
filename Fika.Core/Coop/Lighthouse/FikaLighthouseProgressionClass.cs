@@ -21,8 +21,6 @@ namespace Fika.Core.Coop.Lighthouse
 		private List<MineDirectional> _bridgeMines;
 		private RecodableItemClass _transmitter;
 		private List<string> ZryachiyAndFollowersIds = new List<string>();
-		private bool _aggressor;
-		private bool _isDoorDisabled;
 		private readonly string _transmitterId = "62e910aaf957f2915e0a5e36";
 		private readonly string _lightKeeperTid = "638f541a29ffd1183d187f57";
 
@@ -42,62 +40,47 @@ namespace Fika.Core.Coop.Lighthouse
 			_transmitter = GetTransmitterFromInventory();
 
 			// Exit if transmitter does not exist and isnt green
-			if (!PlayerHasActiveTransmitterInInventory())
+			if (PlayerHasActiveTransmitterInInventory())
 			{
-				Destroy(this);
+				List<AIPlaceInfo> places = Singleton<IBotGame>.Instance.BotsController.CoversData.AIPlaceInfoHolder.Places;
 
-				return;
+				places.First(x => x.name == "Attack").gameObject.SetActive(false);
+
+				// Zone was added in a newer version and the gameObject actually has a \
+				places.First(y => y.name == "CloseZone\\").gameObject.SetActive(false);
+
+				// Give access to Lightkeepers door
+				_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, true);
+
+				_bridgeMines = _gameWorld.MineManager.Mines;
+
+				// Set mines to be non-active
+				SetBridgeMinesStatus(false);
 			}
-
-			List<AIPlaceInfo> places = Singleton<IBotGame>.Instance.BotsController.CoversData.AIPlaceInfoHolder.Places;
-
-			places.First(x => x.name == "Attack").gameObject.SetActive(false);
-
-			// Zone was added in a newer version and the gameObject actually has a \
-			places.First(y => y.name == "CloseZone\\").gameObject.SetActive(false);
-
-			// Give access to Lightkeepers door
-			_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, true);
-
-			_bridgeMines = _gameWorld.MineManager.Mines;
-
-			// Set mines to be non-active
-			SetBridgeMinesStatus(false);
 		}
 
 		public void Update()
 		{
-			IncrementLastUpdateTimer();
-
-			// Exit early if last update() run time was < 10 secs ago
-			if (_timer < 10f)
-			{
-				return;
-			}
-
-			// Skip if:
-			// GameWorld missing
-			// Player not an enemy to Zryachiy
-			// Lk door not accessible
-			// Player has no transmitter on thier person
-			if (_gameWorld == null || _isDoorDisabled || _transmitter == null)
-			{
-				return;
-			}
-
 			if (FikaBackendUtils.IsServer)
 			{
+				IncrementLastUpdateTimer();
+
+				// Exit early if last update() run time was < 10 secs ago
+				if (_timer < 10f)
+				{
+					return;
+				}
+
+				if (_gameWorld == null)
+				{
+					return;
+				}
+
 				// Find Zryachiy and prep him
 				if (ZryachiyAndFollowersIds.Count == 0)
 				{
 					SetupZryachiyAndFollowerHostility();
 				}
-			}
-
-			// If player becomes aggressor, block access to LK
-			if (_aggressor)
-			{
-				DisableAccessToLightKeeper();
 			}
 		}
 
@@ -181,11 +164,14 @@ namespace Fika.Core.Coop.Lighthouse
 			{
 				// If player kills zryachiy or follower, force aggressor state
 				// Also set players Lk standing to negative (allows access to quest chain (Making Amends))
+				/*
 				_aggressor = true;
 				coopHandler.MyPlayer.Profile.TradersInfo[_lightKeeperTid].SetStanding(-0.01);
+				*/
 			}
 		}
 
+		/*
 		/// <summary>
 		/// Disable door + set transmitter to 'red'
 		/// </summary>
@@ -195,7 +181,7 @@ namespace Fika.Core.Coop.Lighthouse
 			_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, false);
 			_transmitter?.RecodableComponent?.SetStatus(RadioTransmitterStatus.Yellow);
 			_transmitter?.RecodableComponent?.SetEncoded(false);
-			_isDoorDisabled = true;
 		}
+		*/
 	}
 }
