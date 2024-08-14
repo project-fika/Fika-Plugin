@@ -675,6 +675,7 @@ namespace Fika.Core
 			new AirdropBox_Patch().Enable();
 			new FikaAirdropFlare_Patch().Enable();
 			new LighthouseBridge_Patch().Enable();
+			new LighthouseMines_Patch().Enable();
 		}
 
 		public enum EDynamicAIRates
