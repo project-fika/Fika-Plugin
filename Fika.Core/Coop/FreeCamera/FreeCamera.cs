@@ -1,16 +1,13 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 
 namespace Fika.Core.Coop.FreeCamera
