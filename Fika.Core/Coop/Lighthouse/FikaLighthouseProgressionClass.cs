@@ -3,6 +3,10 @@ using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.GameWorld;
+using LiteNetLib;
+using LiteNetLib.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,21 +19,26 @@ namespace Fika.Core.Coop.Lighthouse
 	/// </summary>
 	public class FikaLighthouseProgressionClass : MonoBehaviour
 	{
-		private CoopHandler coopHandler;
-		private GameWorld _gameWorld;
-		private float _timer;
-		private List<MineDirectional> _bridgeMines;
-		private RecodableItemClass _transmitter;
+		public RecodableItemClass Transmitter { get; private set; }
+		public List<CoopPlayer> PlayersWithDSP { get; private set; } = new();
+
+		private CoopHandler CoopHandler;
+		private GameWorld GameWorld;
+		private FikaServer Server;
+		private NetDataWriter Writer = new();
+
 		private List<string> ZryachiyAndFollowersIds = new List<string>();
+		private bool Aggressor = false;
+		private float _timer;
 		private readonly string _transmitterId = "62e910aaf957f2915e0a5e36";
 		private readonly string _lightKeeperTid = "638f541a29ffd1183d187f57";
 
 		public void Start()
 		{
-			coopHandler = CoopHandler.GetCoopHandler();
-			_gameWorld = Singleton<GameWorld>.Instance;
+			CoopHandler = CoopHandler.GetCoopHandler();
+			GameWorld = Singleton<GameWorld>.Instance;
 
-			if (_gameWorld == null || coopHandler.MyPlayer == null)
+			if (CoopHandler == null || CoopHandler.MyPlayer == null)
 			{
 				Destroy(this);
 
@@ -37,25 +46,35 @@ namespace Fika.Core.Coop.Lighthouse
 			}
 
 			// Get transmitter from players inventory
-			_transmitter = GetTransmitterFromInventory();
+			Transmitter = GetTransmitterFromInventory();
 
-			// Exit if transmitter does not exist and isnt green
 			if (PlayerHasActiveTransmitterInInventory())
 			{
-				List<AIPlaceInfo> places = Singleton<IBotGame>.Instance.BotsController.CoversData.AIPlaceInfoHolder.Places;
-
-				places.First(x => x.name == "Attack").gameObject.SetActive(false);
-
-				// Zone was added in a newer version and the gameObject actually has a \
-				places.First(y => y.name == "CloseZone\\").gameObject.SetActive(false);
-
 				// Give access to Lightkeepers door
-				_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, true);
+				GameWorld.BufferZoneController.SetPlayerAccessStatus(CoopHandler.MyPlayer.ProfileId, true);
+			}
 
-				_bridgeMines = _gameWorld.MineManager.Mines;
+			if (FikaBackendUtils.IsServer)
+			{
+				Server = Singleton<FikaServer>.Instance;
 
-				// Set mines to be non-active
-				SetBridgeMinesStatus(false);
+				foreach (CoopPlayer player in CoopHandler.HumanPlayers)
+				{
+					RecodableItemClass DSP = (RecodableItemClass)player.Profile.Inventory.AllRealPlayerItems.FirstOrDefault(x => x.TemplateId == _transmitterId);
+
+					if (DSP == null)
+					{
+						FikaPlugin.Instance.FikaLogger.LogDebug($"No valid DSP found on {player.Profile.Nickname}");
+						continue;
+					}
+
+					if (DSP?.RecodableComponent?.Status == RadioTransmitterStatus.Green)
+					{
+						FikaPlugin.Instance.FikaLogger.LogDebug($"DSP found on {player.Profile.Nickname}");
+
+						PlayersWithDSP.Add(player);
+					}
+				}
 			}
 		}
 
@@ -71,7 +90,7 @@ namespace Fika.Core.Coop.Lighthouse
 					return;
 				}
 
-				if (_gameWorld == null)
+				if (GameWorld == null)
 				{
 					return;
 				}
@@ -89,7 +108,7 @@ namespace Fika.Core.Coop.Lighthouse
 		/// </summary>
 		private RecodableItemClass GetTransmitterFromInventory()
 		{
-			return (RecodableItemClass)coopHandler.MyPlayer.Profile.Inventory.AllRealPlayerItems.FirstOrDefault(x => x.TemplateId == _transmitterId);
+			return (RecodableItemClass)CoopHandler.MyPlayer.Profile.Inventory.AllRealPlayerItems.FirstOrDefault(x => x.TemplateId == _transmitterId);
 		}
 
 		/// <summary>
@@ -97,8 +116,8 @@ namespace Fika.Core.Coop.Lighthouse
 		/// </summary>
 		private bool PlayerHasActiveTransmitterInInventory()
 		{
-			return _transmitter != null &&
-				   _transmitter?.RecodableComponent?.Status == RadioTransmitterStatus.Green;
+			return Transmitter != null &&
+				   Transmitter?.RecodableComponent?.Status == RadioTransmitterStatus.Green;
 		}
 
 		/// <summary>
@@ -110,27 +129,13 @@ namespace Fika.Core.Coop.Lighthouse
 		}
 
 		/// <summary>
-		/// Set all brdige mines to desire state
-		/// </summary>
-		/// <param name="desiredMineState">What state should bridge mines be set to</param>
-		private void SetBridgeMinesStatus(bool desiredMineState)
-		{
-			// Find mines with opposite state of what we want
-			IEnumerable<MineDirectional> mines = _bridgeMines.Where(mine => mine.gameObject.activeSelf == !desiredMineState && mine.transform.parent.gameObject.name == "Directional_mines_LHZONE");
-			foreach (MineDirectional mine in mines)
-			{
-				mine.gameObject.SetActive(desiredMineState);
-			}
-		}
-
-		/// <summary>
 		/// Put Zryachiy and followers into a list and sub to their death event
 		/// Make player agressor if player kills them.
 		/// </summary>
 		private void SetupZryachiyAndFollowerHostility()
 		{
 			// Only process non-players (ai)
-			foreach (CoopPlayer player in coopHandler.Players.Values)
+			foreach (CoopPlayer player in CoopHandler.Players.Values)
 			{
 				if (ZryachiyAndFollowersIds.Contains(player.ProfileId))
 				{
@@ -152,7 +157,14 @@ namespace Fika.Core.Coop.Lighthouse
 
 		private void AddZryachiyOrFollower(CoopPlayer bot)
 		{
+			// Remove valid players from being targetted by the boss & his followers
+			foreach (CoopPlayer player in PlayersWithDSP)
+			{
+				bot.AIData.BotOwner.BotsGroup.RemoveEnemy(player);
+			}
+
 			bot.OnPlayerDead += OnZryachiyOrFollowerDeath;
+
 			ZryachiyAndFollowersIds.Add(bot.ProfileId);
 		}
 
@@ -160,28 +172,51 @@ namespace Fika.Core.Coop.Lighthouse
 		{
 			player.OnPlayerDead -= OnZryachiyOrFollowerDeath;
 
-			if (player.KillerId == coopHandler.MyPlayer.ProfileId)
+			LightkeeperGuardDeathPacket packet = new LightkeeperGuardDeathPacket()
 			{
-				// If player kills zryachiy or follower, force aggressor state
-				// Also set players Lk standing to negative (allows access to quest chain (Making Amends))
-				/*
-				_aggressor = true;
-				coopHandler.MyPlayer.Profile.TradersInfo[_lightKeeperTid].SetStanding(-0.01);
-				*/
+				ProfileId = player.KillerId
+			};
+
+			if (player.AIData.BotOwner.IsRole(WildSpawnType.bossZryachiy))
+			{
+				packet.WildType = WildSpawnType.bossZryachiy;
 			}
+			else
+			{
+				packet.WildType = WildSpawnType.followerZryachiy;
+			}
+
+			Writer.Reset();
+			Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableOrdered);
+			
+			// Process for server immediately.
+			this.HandlePacket(packet);
 		}
 
-		/*
-		/// <summary>
-		/// Disable door + set transmitter to 'red'
-		/// </summary>
-		private void DisableAccessToLightKeeper()
+		public void HandlePacket(LightkeeperGuardDeathPacket packet)
 		{
-			// Disable access to Lightkeepers door for the player
-			_gameWorld.BufferZoneController.SetPlayerAccessStatus(coopHandler.MyPlayer.ProfileId, false);
-			_transmitter?.RecodableComponent?.SetStatus(RadioTransmitterStatus.Yellow);
-			_transmitter?.RecodableComponent?.SetEncoded(false);
+			// Do not run this if player does not have a DSP
+			if (Transmitter == null || Aggressor)
+			{
+				return;
+			}
+
+			// bossZryachiy dead, close off access to LK for all players
+			if (packet.WildType == WildSpawnType.bossZryachiy)
+			{
+				GameWorld.BufferZoneController.SetInnerZoneAvailabilityStatus(false, EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead);
+			}
+
+			// Deny access to LK for player and decode DSP
+			if (CoopHandler.MyPlayer.ProfileId == packet.ProfileId)
+			{
+				GameWorld.BufferZoneController.SetPlayerAccessStatus(packet.ProfileId, false);
+				Transmitter?.RecodableComponent?.SetStatus(RadioTransmitterStatus.Red);
+				Transmitter?.RecodableComponent?.SetEncoded(false);
+				CoopHandler.MyPlayer.Profile.TradersInfo[_lightKeeperTid].SetStanding(-0.01);
+			}
+
+			Aggressor = true;
 		}
-		*/
 	}
 }
