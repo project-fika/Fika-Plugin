@@ -154,7 +154,7 @@ namespace Fika.Core.Coop.FreeCamera
 			// If no alive players, add bots to spectate pool if enabled
 			if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
 			{
-				players = Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList();
+				players = [.. Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList().Where(x => !x.IsYourPlayer)];
 			}
 
 			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: There are {players.Count} players");
@@ -473,7 +473,7 @@ namespace Fika.Core.Coop.FreeCamera
 		public void Attach3rdPerson()
 		{
 			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}"); 
-			if (freeCameraController != null)
+			if (freeCameraController != null && freeCameraController.hasEnabledCulling)
 			{
 				freeCameraController.DisableAllCullingObjects();
 			}
@@ -485,7 +485,7 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			else
 			{
-				transform.SetParent(CurrentPlayer.PlayerBones.Neck);
+				transform.SetParent(CurrentPlayer.PlayerBones.Head.Original);
 				transform.localPosition = new Vector3(0f, -0.32f, -0.53f);
 				transform.localEulerAngles = new Vector3(-115f, 99f, 5f);
 			}

@@ -56,7 +56,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private bool deathFadeEnabled;
 		private DisablerCullingObjectBase[] allCullingObjects;
 		private List<PerfectCullingBakeGroup> previouslyActiveBakeGroups;
-		private bool hasEnabledCulling = false;
+		public bool hasEnabledCulling = false;
 
 		protected void Awake()
 		{
