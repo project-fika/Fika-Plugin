@@ -1170,7 +1170,7 @@ namespace Fika.Core.Networking
 		public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
 		{
 			logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
-			NotificationManagerClass.DisplayMessageNotification("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason, iconType: EFT.Communications.ENotificationIconType.Alert);
+			NotificationManagerClass.DisplayMessageNotification($"Peer disconnected {peer.Port}, info: {disconnectInfo.Reason}", iconType: EFT.Communications.ENotificationIconType.Alert);
 			if (netServer.ConnectedPeersCount == 0)
 			{
 				timeSinceLastPeerDisconnected = DateTime.Now;
