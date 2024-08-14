@@ -86,5 +86,25 @@ namespace Fika.Core.Utils
 		public const string UI_ERROR_BIND_IP_HEADER = "F_UI_ErrorBindIPHeader";
 		public const string UI_ERROR_BIND_IP = "F_UI_ErrorBindIP";
 		public const string UI_NO_DEDICATED_CLIENTS = "F_UI_NoDedicatedClients";
+		public const string UI_WAIT_FOR_HOST_FINISH_INIT = "F_UI_WaitForHostFinishInit";
+		public const string UI_WAIT_FOR_OTHER_PLAYERS = "F_UI_WaitForOtherPlayers";
+		public const string UI_RETRIEVE_SPAWN_INFO = "F_UI_RetrieveSpawnInfo";
+		public const string UI_RETRIEVE_LOOT = "F_UI_RetrieveLoot";
+		public const string UI_WAIT_FOR_HOST_INIT = "F_UI_WaitForHostInit";
+		public const string UI_RECONNECTING = "F_UI_Reconnecting";
+		public const string UI_RETRIEVE_EXFIL_DATA = "F_UI_RetrieveExfilData";
+		public const string UI_RETRIEVE_INTERACTABLES = "F_UI_RetrieveInteractables";
+		public const string UI_INIT_COOP_GAME = "F_UI_InitCoopGame";
+		public const string UI_WAIT_FOR_PLAYERS = "F_UI_WaitForPlayers";
+		public const string UI_ALL_PLAYERS_JOINED = "F_UI_AllPlayersJoined";
+		public const string UI_WAITING_FOR_CONNECT = "F_UI_WaitingForConnect";
+		public const string UI_ERROR_CONNECTING_TO_RAID = "F_UI_ErrorConnectingToRaid";
+		public const string UI_FINISHING_RAID_INIT = "F_UI_FinishingRaidInit";
+		public const string UI_SYNC_THROWABLES = "F_UI_SyncThrowables";
+		public const string UI_SYNC_INTERACTABLES = "F_UI_SyncInteractables";
+		public const string UI_SYNC_LAMP_STATES = "F_UI_SyncLampStates";
+		public const string UI_SYNC_WINDOWS = "F_UI_SyncWindows";
+		public const string UI_RECEIVE_OWN_PLAYERS = "F_UI_ReceiveOwnPlayer";
+		public const string UI_FINISH_RECONNECT = "F_UI_FinishReconnect";
 	}
 }

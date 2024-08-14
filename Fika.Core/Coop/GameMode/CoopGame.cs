@@ -638,7 +638,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!isServer)
 			{
-				FikaBackendUtils.ScreenController.ChangeStatus("Waiting for host to finish raid initialization...");
+				FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_HOST_FINISH_INIT.Localized());
 
 				FikaClient client = Singleton<FikaClient>.Instance;
 				do
@@ -703,7 +703,7 @@ namespace Fika.Core.Coop.GameMode
 				NetDataWriter writer = new();
 
 				float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
-				FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)(1 / expectedPlayers));
+				FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)(1 / expectedPlayers));
 
 				if (isServer)
 				{
@@ -724,7 +724,7 @@ namespace Fika.Core.Coop.GameMode
 
 					do
 					{
-						FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)server.ReadyClients / expectedPlayers);
+						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
 						yield return new WaitForEndOfFrame();
 					} while (server.ReadyClients < expectedPlayers);
 
@@ -758,7 +758,7 @@ namespace Fika.Core.Coop.GameMode
 
 					do
 					{
-						FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)client.ReadyClients / expectedPlayers);
+						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
 						yield return new WaitForEndOfFrame();
 					} while (client.ReadyClients < expectedPlayers);
 				}
@@ -780,7 +780,7 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		private async Task SendOrReceiveSpawnPoint()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus($"Retrieving spawn info from server...");
+			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_SPAWN_INFO.Localized());
 			if (isServer)
 			{
 				bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
@@ -1018,7 +1018,7 @@ namespace Fika.Core.Coop.GameMode
 					}
 					else
 					{
-						FikaBackendUtils.ScreenController.ChangeStatus("Retrieving loot from server...");
+						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_LOOT.Localized());
 						if (!FikaBackendUtils.IsReconnect)
 						{
 							await RetrieveLootFromServer(true);
@@ -1085,7 +1085,7 @@ namespace Fika.Core.Coop.GameMode
 			NetDataWriter writer = client.Writer;
 			do
 			{
-				FikaBackendUtils.ScreenController.ChangeStatus($"Waiting for host to initialize raid...");
+				FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_HOST_INIT.Localized());
 				writer.Reset();
 				client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
 
@@ -1114,7 +1114,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private async Task Reconnect()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus($"Reconnecting...");
+			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RECONNECTING.Localized());
 
 			ReconnectPacket reconnectPacket = new(true)
 			{
@@ -1225,7 +1225,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private async Task InitExfils()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus($"Retrieving exfiltration data from server...");
+			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_EXFIL_DATA.Localized());
 			FikaClient client = Singleton<FikaClient>.Instance;
 			NetDataWriter writer = client.Writer;
 			ExfiltrationPacket exfilPacket = new(true);
@@ -1245,7 +1245,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private async Task InitInteractables()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus($"Retrieving interactable objects from server...");
+			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_INTERACTABLES.Localized());
 			NetDataWriter writer = new();
 			FikaClient client = Singleton<FikaClient>.Instance;
 			InteractableInitPacket packet = new(true);
@@ -1272,7 +1272,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (FikaBackendUtils.ScreenController != null)
 			{
-				FikaBackendUtils.ScreenController.ChangeStatus($"Initializing Coop Game...");
+				FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_INIT_COOP_GAME.Localized());
 			}
 			int numbersOfPlayersToWaitFor = 0;
 
@@ -1286,13 +1286,16 @@ namespace Fika.Core.Coop.GameMode
 					numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
 					if (FikaBackendUtils.ScreenController != null)
 					{
+						string localizedText = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
 						if (numbersOfPlayersToWaitFor > 0)
 						{
-							FikaBackendUtils.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
+							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(localizedText,
+								numbersOfPlayersToWaitFor,
+								(numbersOfPlayersToWaitFor > 1 ? "players" : "player")));
 						}
 						else
 						{
-							FikaBackendUtils.ScreenController.ChangeStatus($"All players joined, starting game...");
+							FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_ALL_PLAYERS_JOINED.Localized());
 						}
 					}
 					else
@@ -1316,14 +1319,14 @@ namespace Fika.Core.Coop.GameMode
 				while (client.ServerConnection == null && connectionAttempts < 5)
 				{
 					// Server retries 10 times with a 500ms interval, we give it 5 seconds to try
-					FikaBackendUtils.ScreenController.ChangeStatus("Waiting for client to connect to server... If there is no notification it failed.");
+					FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAITING_FOR_CONNECT.Localized());
 					connectionAttempts++;
 					await Task.Delay(1000);
 
 					if (client.ServerConnection == null && connectionAttempts == 5)
 					{
-						Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error",
-							"Unable to connect to the raid server. Make sure ports are forwarded and/or UPnP is enabled and supported.");
+						Singleton<PreloaderUI>.Instance.ShowErrorScreen(LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+							LocaleUtils.UI_ERROR_CONNECTING_TO_RAID.Localized());
 					}
 				}
 
@@ -1341,13 +1344,16 @@ namespace Fika.Core.Coop.GameMode
 					numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
 					if (FikaBackendUtils.ScreenController != null)
 					{
+						string localizedText = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
 						if (numbersOfPlayersToWaitFor > 0)
 						{
-							FikaBackendUtils.ScreenController.ChangeStatus($"Waiting for {numbersOfPlayersToWaitFor} {(numbersOfPlayersToWaitFor > 1 ? "players" : "player")}");
+							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(localizedText,
+								numbersOfPlayersToWaitFor,
+								(numbersOfPlayersToWaitFor > 1 ? "players" : "player")));
 						}
 						else
 						{
-							FikaBackendUtils.ScreenController.ChangeStatus($"All players joined, starting game...");
+							FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_ALL_PLAYERS_JOINED.Localized());
 						}
 					}
 					else
@@ -1562,7 +1568,7 @@ namespace Fika.Core.Coop.GameMode
 
 			Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
 
-			FikaBackendUtils.ScreenController.ChangeStatus("Finishing raid initialization...");
+			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
 			yield return base.vmethod_4(controllerSettings, spawnSystem, runCallback);
 			yield break;

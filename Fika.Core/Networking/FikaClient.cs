@@ -178,7 +178,8 @@ namespace Fika.Core.Networking
 #if DEBUG
 							logger.LogWarning("Received reconnect packet for throwables: " + packet.ThrowableData.Count);
 #endif
-							FikaBackendUtils.ScreenController.ChangeStatus("Syncing throwables...");
+							string localizedString = LocaleUtils.UI_SYNC_THROWABLES.Localized();
+							FikaBackendUtils.ScreenController.ChangeStatus(localizedString);
 							Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
 						}
 						break;
@@ -189,6 +190,7 @@ namespace Fika.Core.Networking
 #if DEBUG
 								logger.LogWarning("Received reconnect packet for interactives: " + packet.InteractivesData.Count);
 #endif
+								string localizedString = LocaleUtils.UI_SYNC_INTERACTABLES.Localized();
 								WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
 								Dictionary<int, WorldInteractiveObject.GStruct384> netIdDictionary = [];
 								{
@@ -205,7 +207,7 @@ namespace Fika.Core.Networking
 									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct384 value))
 									{
 										progress++;
-										FikaBackendUtils.ScreenController.ChangeStatus("Syncing interactables...", progress / total);
+										FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
 										item.SetInitialSyncState(value);
 									}
 								}
@@ -219,6 +221,7 @@ namespace Fika.Core.Networking
 #if DEBUG
 								logger.LogWarning("Received reconnect packet for lampStates: " + packet.LampStates.Count);
 #endif
+								string localizedString = LocaleUtils.UI_SYNC_LAMP_STATES.Localized();
 								Dictionary<int, LampController> lampControllerDictionary = LocationScene.GetAllObjects<LampController>(true)
 														.Where(new Func<LampController, bool>(ClientWorld.Class1231.class1231_0.method_0))
 														.ToDictionary(new Func<LampController, int>(ClientWorld.Class1231.class1231_0.method_1));
@@ -228,7 +231,7 @@ namespace Fika.Core.Networking
 								foreach (KeyValuePair<int, byte> lampState in packet.LampStates)
 								{
 									progress++;
-									FikaBackendUtils.ScreenController.ChangeStatus("Syncing lamp states...", progress / total);
+									FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
 									if (lampControllerDictionary.TryGetValue(lampState.Key, out LampController lampController))
 									{
 										if (lampController.LampState != (Turnable.EState)lampState.Value)
@@ -248,6 +251,7 @@ namespace Fika.Core.Networking
 							if (packet.WindowBreakerStates != null)
 							{
 								Dictionary<int, Vector3> windowBreakerStates = packet.WindowBreakerStates;
+								string localizedString = LocaleUtils.UI_SYNC_WINDOWS.Localized();
 
 								float total = packet.WindowBreakerStates.Count;
 								float progress = 0f;
@@ -257,7 +261,8 @@ namespace Fika.Core.Networking
 									if (windowBreakerStates.TryGetValue(windowBreaker.NetId, out Vector3 hitPosition))
 									{
 										progress++;
-										FikaBackendUtils.ScreenController.ChangeStatus("Syncing windows...", progress / total);
+
+										FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
 										try
 										{
 											DamageInfo damageInfo = default;
@@ -277,13 +282,13 @@ namespace Fika.Core.Networking
 #if DEBUG
 						logger.LogWarning("Received reconnect packet for own player");
 #endif
-						FikaBackendUtils.ScreenController.ChangeStatus("Receiving own player...");
+						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RECEIVE_OWN_PLAYERS.Localized());
 						coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
 						coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
 						FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
 						break;
 					case ReconnectPacket.EReconnectDataType.Finished:
-						FikaBackendUtils.ScreenController.ChangeStatus("Finishing reconnect...");
+						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
 						ReconnectDone = true;
 						break;
 					default:
