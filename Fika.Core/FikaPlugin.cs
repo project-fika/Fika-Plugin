@@ -216,8 +216,6 @@ namespace Fika.Core
 		{
 			Instance = this;
 
-			VerifyServerVersion();
-
 			GetNatPunchServerConfig();
 			SetupConfig();
 
@@ -272,7 +270,7 @@ namespace Fika.Core
 				new ItemContext_Patch().Enable();
 			}
 
-			StartCoroutine(RunModHandler());
+			StartCoroutine(RunChecks());
 		}
 
 		private void VerifyServerVersion()
@@ -304,9 +302,10 @@ namespace Fika.Core
 		/// Coroutine to ensure all mods are loaded by waiting 5 seconds
 		/// </summary>
 		/// <returns></returns>
-		private IEnumerator RunModHandler()
+		private IEnumerator RunChecks()
 		{
 			yield return new WaitForSeconds(5);
+			VerifyServerVersion();
 			ModHandler.VerifyMods();
 		}
 
