@@ -2,16 +2,16 @@
 
 namespace Fika.Core.Networking.Http.Models
 {
-    [DataContract]
-    public struct ModValidationResponse
-    {
-        [DataMember(Name = "forbidden")]
-        public string[] Forbidden;
+	[DataContract]
+	public struct ModValidationResponse
+	{
+		[DataMember(Name = "forbidden")]
+		public string[] Forbidden;
 
-        [DataMember(Name = "missingRequired")]
-        public string[] MissingRequired;
+		[DataMember(Name = "missingRequired")]
+		public string[] MissingRequired;
 
-        [DataMember(Name = "hashMismatch")]
-        public string[] HashMismatch;
-    }
+		[DataMember(Name = "hashMismatch")]
+		public string[] HashMismatch;
+	}
 }

@@ -2,13 +2,13 @@
 
 namespace Fika.Core.Modding.Events
 {
-    public class FikaClientDestroyedEvent : FikaEvent
-    {
-        public FikaClient Client { get; }
+	public class FikaClientDestroyedEvent : FikaEvent
+	{
+		public FikaClient Client { get; }
 
-        internal FikaClientDestroyedEvent(FikaClient client)
-        {
-            Client = client;
-        }
-    }
+		internal FikaClientDestroyedEvent(FikaClient client)
+		{
+			Client = client;
+		}
+	}
 }

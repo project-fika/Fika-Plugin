@@ -2,18 +2,18 @@
 
 namespace Fika.Core.Networking
 {
-    public struct StatisticsPacket(int serverFps) : INetSerializable
-    {
-        public int ServerFPS = serverFps;
+	public struct StatisticsPacket(int serverFps) : INetSerializable
+	{
+		public int ServerFPS = serverFps;
 
-        public void Deserialize(NetDataReader reader)
-        {
-            ServerFPS = reader.GetInt();
-        }
+		public void Deserialize(NetDataReader reader)
+		{
+			ServerFPS = reader.GetInt();
+		}
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(ServerFPS);
-        }
-    }
+		public void Serialize(NetDataWriter writer)
+		{
+			writer.Put(ServerFPS);
+		}
+	}
 }
