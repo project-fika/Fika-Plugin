@@ -207,7 +207,8 @@ namespace Fika.Core.Coop.ClientClasses
 						playerInventory.RunNetworkTransaction(pickupResult.Value);
 						if (FikaPlugin.QuestSharingNotifications.Value)
 						{
-							NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} picked up {ColorizeText(Colors.BLUE, item.Name.Localized())}",
+							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PICKUP.Localized(),
+								[ColorizeText(Colors.GREEN, packet.Nickname), ColorizeText(Colors.BLUE, item.Name.Localized())]),
 												iconType: EFT.Communications.ENotificationIconType.Quest);
 						}
 					}
@@ -238,7 +239,8 @@ namespace Fika.Core.Coop.ClientClasses
 
 			if (FikaPlugin.QuestSharingNotifications.Value)
 			{
-				NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, packet.Nickname)} planted an item for {ColorizeText(Colors.BROWN, questName)}",
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PLANT.Localized(),
+					[ColorizeText(Colors.GREEN, packet.Nickname), ColorizeText(Colors.BROWN, questName)]),
 									iconType: EFT.Communications.ENotificationIconType.Quest);
 			}
 
@@ -260,7 +262,7 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					if (conditionPlaceBeacon.target.Contains(itemId) && conditionPlaceBeacon.zoneId == zoneId)
 					{
-						if (!quest.CompletedConditions.Contains(conditionPlaceBeacon.id))
+						if (!quest.CompletedConditions.Contains(conditionPlaceBeacon.id) && quest.CheckVisibilityStatus(conditionPlaceBeacon))
 						{
 #if DEBUG
 							FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
@@ -281,7 +283,7 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					if (conditionLeaveItemAtLocation.target.Contains(itemId) && conditionLeaveItemAtLocation.zoneId == zoneId)
 					{
-						if (!quest.CompletedConditions.Contains(conditionLeaveItemAtLocation.id))
+						if (!quest.CompletedConditions.Contains(conditionLeaveItemAtLocation.id) && quest.CheckVisibilityStatus(conditionLeaveItemAtLocation))
 						{
 #if DEBUG
 							FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");

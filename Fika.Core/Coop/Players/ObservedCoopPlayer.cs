@@ -36,12 +36,16 @@ namespace Fika.Core.Coop.Players
 		#region Fields and Properties
 		public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 		private float observedFixedTime = 0f;
+		public FikaHealthBar HealthBar
+		{
+			get => healthBar;
+		}
 		private FikaHealthBar healthBar = null;
 		private Coroutine waitForStartRoutine;
 		private bool isServer;
-		public NetworkHealthControllerAbstractClass NetworkHealthController
+		public ObservedHealthController NetworkHealthController
 		{
-			get => HealthController as NetworkHealthControllerAbstractClass;
+			get => HealthController as ObservedHealthController;
 		}
 		private readonly ObservedVaultingParametersClass ObservedVaultingParameters = new();
 		public override bool CanBeSnapped => false;
@@ -314,7 +318,7 @@ namespace Fika.Core.Coop.Players
 		{
 			ShotReactions(damageInfo, bodyPartType);
 
-			if (damageInfo.DamageType == EDamageType.Sniper && FikaBackendUtils.IsServer)
+			if (damageInfo.DamageType == EDamageType.Sniper && isServer)
 			{
 				PacketSender.DamagePackets.Enqueue(new()
 				{
@@ -646,9 +650,9 @@ namespace Fika.Core.Coop.Players
 		{
 			StartCoroutine(DestroyNetworkedComponents());
 
-			if (healthBar != null)
+			if (HealthBar != null)
 			{
-				Destroy(healthBar);
+				Destroy(HealthBar);
 			}
 
 			if (FikaPlugin.ShowNotifications.Value)
@@ -658,21 +662,25 @@ namespace Fika.Core.Coop.Players
 					string nickname = !string.IsNullOrEmpty(Profile.Info.MainProfileNickname) ? Profile.Info.MainProfileNickname : Profile.Nickname;
 					if (damageType != EDamageType.Undefined)
 					{
-						NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died from {ColorizeText(Colors.RED, ("DamageType_" + damageType.ToString()).Localized())}");
+						NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.GROUP_MEMBER_DIED_FROM.Localized(),
+							[ColorizeText(Colors.GREEN, nickname), ColorizeText(Colors.RED, ("DamageType_" + damageType.ToString()).Localized())]));
 					}
 					else
 					{
-						NotificationManagerClass.DisplayWarningNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has died");
+						NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.GROUP_MEMBER_DIED.Localized(),
+							ColorizeText(Colors.GREEN, nickname)));
 					}
 				}
-				if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
+				if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
 				{
 					if (LastAggressor is CoopPlayer aggressor)
 					{
 						string aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
 						if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
 						{
-							NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname)} killed boss {ColorizeText(Colors.BROWN, name)}", iconType: EFT.Communications.ENotificationIconType.Friend);
+							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+							[ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(Colors.BROWN, name)]),
+							iconType: EFT.Communications.ENotificationIconType.Friend);
 						}
 					}
 				}
@@ -711,7 +719,7 @@ namespace Fika.Core.Coop.Players
                 }
             }*/
 
-			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= SetSoundRollOff;
+			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateStepSoundRolloff;
 			/*if (FikaPlugin.CullPlayers.Value)
             {
                 UnregisterCulling();
@@ -731,7 +739,7 @@ namespace Fika.Core.Coop.Players
 
 			if (FikaPlugin.EasyKillConditions.Value)
 			{
-				if (aggressor.Profile.Info.GroupId == "Fika")
+				if (aggressor.Profile.Info.GroupId == "Fika" && !aggressor.IsYourPlayer)
 				{
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 					if (mainPlayer != null)
@@ -849,8 +857,8 @@ namespace Fika.Core.Coop.Players
 					NetId = NetId,
 					BotNetId = NetId
 				};
-				PacketSender.Writer.Reset();
-				PacketSender.Client.SendData(PacketSender.Writer, ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+				PacketSender.Client.SendData(ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
 				IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
 				if (vaultingComponent != null)
@@ -896,7 +904,8 @@ namespace Fika.Core.Coop.Players
 
 				if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
 				{
-					NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, (Side == EPlayerSide.Savage ? Profile.Info.MainProfileNickname : Profile.Nickname))} has spawned",
+					NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(), 
+						ColorizeText(Colors.GREEN, Profile.Info.MainProfileNickname)),
 					EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
 				}
 
@@ -1102,15 +1111,7 @@ namespace Fika.Core.Coop.Players
 		public override void InitAudioController()
 		{
 			base.InitAudioController();
-			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged += SetSoundRollOff;
-		}
-
-		private void SetSoundRollOff()
-		{
-			if (NestedStepSoundSource != null)
-			{
-				NestedStepSoundSource.SetRolloff(60f * ProtagonistHearing);
-			}
+			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged += UpdateStepSoundRolloff;
 		}
 
 		public override bool UpdateGrenadeAnimatorDuePoV()
@@ -1139,13 +1140,13 @@ namespace Fika.Core.Coop.Players
 					HandsController.Destroy();
 				}
 			}
-			if (healthBar != null)
+			if (HealthBar != null)
 			{
-				Destroy(healthBar);
+				Destroy(HealthBar);
 			}
 			if (Singleton<BetterAudio>.Instantiated)
 			{
-				Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= SetSoundRollOff;
+				Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateStepSoundRolloff;
 			}
 			base.OnDestroy();
 		}

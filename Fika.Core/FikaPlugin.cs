@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using EFT.UI;
@@ -18,6 +19,7 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
+using Fika.Core.Coop.Patches.Lighthouse;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.SinglePlayer.Patches.MainMenu;
@@ -31,6 +33,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using UnityEngine;
+using SPT.Custom.Utils;
 
 namespace Fika.Core
 {
@@ -39,7 +42,7 @@ namespace Fika.Core
 	/// Originally by: Paulov <br/>
 	/// Re-written by: Lacyway
 	/// </summary>
-	[BepInPlugin("com.fika.core", "Fika.Core", "0.9.8980")]
+	[BepInPlugin("com.fika.core", "Fika.Core", "0.9.8983")]
 	[BepInProcess("EscapeFromTarkov.exe")]
 	[BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-custom, that way we can disable its patches
 	[BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
@@ -50,10 +53,11 @@ namespace Fika.Core
 		public static FikaPlugin Instance;
 		public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
 		public static string EFTVersionMajor { get; internal set; }
+		public static string ServerModVersion { get; private set; }
+		private static Version RequiredServerVersion = new("2.2.8");
 		public ManualLogSource FikaLogger { get => Logger; }
 		public BotDifficulties BotDifficulties;
 		public FikaModHandler ModHandler = new();
-		public string Locale { get; private set; } = "en";
 		public string[] LocalIPs;
 		public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
@@ -186,6 +190,7 @@ namespace Fika.Core
 		public bool FriendlyFire;
 		public bool DynamicVExfils;
 		public bool AllowFreeCam;
+		public bool AllowSpectateFreeCam;
 		public bool AllowItemSending;
 		public string[] BlacklistedItems;
 		public bool ForceSaveOnDeath;
@@ -233,7 +238,7 @@ namespace Fika.Core
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
+			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;			
 
 			DisableSPTPatches();
 			EnableOverridePatches();
@@ -257,16 +262,42 @@ namespace Fika.Core
 				new ItemContext_Patch().Enable();
 			}
 
-			StartCoroutine(RunModHandler());
+			StartCoroutine(RunChecks());
+		}
+
+		private void VerifyServerVersion()
+		{
+			string version = FikaRequestHandler.CheckServerVersion().Version;
+			bool failed = true;
+			if (Version.TryParse(version, out Version serverVersion))
+			{
+				if (serverVersion >= RequiredServerVersion)
+				{
+					failed = false;
+				}
+			}
+
+			if (failed)
+			{
+				FikaLogger.LogError($"Server version check failed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
+				MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {RequiredServerVersion}",
+					"FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
+				Application.Quit();
+			}
+			else
+			{
+				FikaLogger.LogInfo($"Server version check passed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
+			}			
 		}
 
 		/// <summary>
 		/// Coroutine to ensure all mods are loaded by waiting 5 seconds
 		/// </summary>
 		/// <returns></returns>
-		private IEnumerator RunModHandler()
+		private IEnumerator RunChecks()
 		{
 			yield return new WaitForSeconds(5);
+			VerifyServerVersion();
 			ModHandler.VerifyMods();
 		}
 
@@ -278,6 +309,7 @@ namespace Fika.Core
 			FriendlyFire = clientConfig.FriendlyFire;
 			DynamicVExfils = clientConfig.DynamicVExfils;
 			AllowFreeCam = clientConfig.AllowFreeCam;
+			AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
 			AllowItemSending = clientConfig.AllowItemSending;
 			BlacklistedItems = clientConfig.BlacklistedItems;
 			ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
@@ -588,8 +620,6 @@ namespace Fika.Core
 			new AmmoUsedCounterPatch().Disable();
 			new ArmorDamageCounterPatch().Disable();
 			new ScavRepAdjustmentPatch().Disable();
-			new FixSavageInventoryScreenPatch().Disable();
-			new FixQuestAchieveControllersPatch().Disable();
 
 			if (DisableSPTAIPatches.Value)
 			{
@@ -605,6 +635,8 @@ namespace Fika.Core
 			new BotTemplateLimitPatch_Override().Enable();
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
 			new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
+			new LighthouseBridge_Patch().Enable();
+			new LighthouseMines_Patch().Enable();
 		}
 
 		public enum EDynamicAIRates

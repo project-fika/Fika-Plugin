@@ -2,16 +2,10 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
-using EFT;
-using EFT.MovingPlatforms;
-using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,7 +18,6 @@ namespace Fika.Core.Coop.PacketHandlers
 		public bool Enabled { get; set; } = true;
 		public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
 		public FikaClient Client { get; set; }
-		public NetDataWriter Writer { get; set; } = new();
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
 		public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
@@ -44,13 +37,11 @@ namespace Fika.Core.Coop.PacketHandlers
 		public void Init()
 		{
 			enabled = true;
-			StartCoroutine(SendTrainTime());
 		}
 
 		public void SendPacket<T>(ref T packet) where T : INetSerializable
 		{
-			Writer.Reset();
-			Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 		}
 
 		protected void Update()
@@ -63,8 +54,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					WeaponPacket firearmPacket = FirearmPackets.Dequeue();
 					firearmPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref firearmPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int damagePackets = DamagePackets.Count;
@@ -75,8 +65,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					DamagePacket damagePacket = DamagePackets.Dequeue();
 					damagePacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref damagePacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int armorDamagePackets = ArmorDamagePackets.Count;
@@ -87,8 +76,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
 					armorDamagePacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int inventoryPackets = InventoryPackets.Count;
@@ -99,8 +87,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					InventoryPacket inventoryPacket = InventoryPackets.Dequeue();
 					inventoryPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref inventoryPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int commonPlayerPackets = CommonPlayerPackets.Count;
@@ -111,8 +98,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					CommonPlayerPacket commonPlayerPacket = CommonPlayerPackets.Dequeue();
 					commonPlayerPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int healthSyncPackets = HealthSyncPackets.Count;
@@ -123,67 +109,13 @@ namespace Fika.Core.Coop.PacketHandlers
 					HealthSyncPacket healthSyncPacket = HealthSyncPackets.Dequeue();
 					healthSyncPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
-
-		private IEnumerator SendTrainTime()
-		{
-			while (!Singleton<GameWorld>.Instantiated)
-			{
-				yield return null;
-			}
-
-			while (string.IsNullOrEmpty(Singleton<GameWorld>.Instance.MainPlayer.Location))
-			{
-				yield return null;
-			}
-
-			string location = Singleton<GameWorld>.Instance.MainPlayer.Location;
-
-			if (location.Contains("RezervBase") || location.Contains("Lighthouse"))
-			{
-				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-				while (coopGame.Status != GameStatus.Started)
-				{
-					yield return null;
-				}
-
-				// Trains take around 20 minutes to come in by default so we can safely wait 20 seconds to make sure everyone is loaded in
-				yield return new WaitForSeconds(20);
-
-				Locomotive locomotive = FindObjectOfType<Locomotive>();
-				if (locomotive != null)
-				{
-					long time = Traverse.Create(locomotive).Field<DateTime>("_depart").Value.Ticks;
-
-					GenericPacket packet = new()
-					{
-						NetId = player.NetId,
-						PacketType = EPackageType.TrainSync,
-						DepartureTime = time
-					};
-
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableOrdered);
-				}
-				else
-				{
-					logger.LogError("SendTrainTime: Could not find locomotive!");
-				}
-			}
-			else
-			{
-				yield break;
-			}
-		}
-
+		
 		public void DestroyThis()
 		{
-			Writer = null;
 			FirearmPackets.Clear();
 			DamagePackets.Clear();
 			InventoryPackets.Clear();

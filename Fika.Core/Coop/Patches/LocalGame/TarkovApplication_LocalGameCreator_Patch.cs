@@ -30,19 +30,19 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
 		[PatchPrefix]
 		public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-			RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig)
+			RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig)
 		{
 #if DEBUG
 			Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
 #endif
 			__result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings,
-				____inputTree, ____localGameDateTime, ____fixedDeltaTime, metricsEvents, metricsConfig);
+				____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl, metricsEvents, metricsConfig);
 			return false;
 		}
 
 		public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-			RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig)
+			RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig)
 		{
 			bool isServer = FikaBackendUtils.IsServer;
 
@@ -139,7 +139,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 				coopGame.SetMatchmakerStatus("Coop game created");
 			}
 
-			await coopGame.InitPlayer(raidSettings.BotSettings, new Callback(startHandler.HandleLoadComplete));
+			await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl, new Callback(startHandler.HandleLoadComplete));
 		}
 
 		private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController)

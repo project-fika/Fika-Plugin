@@ -35,14 +35,15 @@ public static class PingFactory
 			Singleton<GUISounds>.Instance.PlayUISound(GetPingSound());
 			if (string.IsNullOrEmpty(localeId))
 			{
-				NotificationManagerClass.DisplayMessageNotification($"Received a ping from {ColorUtils.ColorizeText(Colors.GREEN, nickname)}",
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING.Localized(), ColorUtils.ColorizeText(Colors.GREEN, nickname)),
 							ENotificationDurationType.Default, ENotificationIconType.Friend);
 			}
 			else
 			{
 				string localizedName = localeId.Localized();
-				NotificationManagerClass.DisplayMessageNotification($"{ColorUtils.ColorizeText(Colors.GREEN, nickname)} has pinged {LocaleUtils.GetPrefix(localizedName)} {ColorUtils.ColorizeText(Colors.BLUE, localizedName)}",
-							ENotificationDurationType.Default, ENotificationIconType.Friend);
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
+					[ColorUtils.ColorizeText(Colors.GREEN, nickname), ColorUtils.ColorizeText(Colors.BLUE, localizedName)]),
+					ENotificationDurationType.Default, ENotificationIconType.Friend);
 			}
 		}
 		else
@@ -90,6 +91,7 @@ public static class PingFactory
 
 		protected Image image;
 		protected Vector3 hitPoint;
+		private RectTransform canvasRect;
 		private float screenScale = 1f;
 		private Color _pingColor = Color.white;
 		private CoopPlayer mainPlayer;
@@ -104,6 +106,7 @@ public static class PingFactory
 			image = GetComponentInChildren<Image>();
 			image.color = Color.clear;
 			mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+			canvasRect = GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
 			if (mainPlayer == null)
 			{
 				Destroy(gameObject);
@@ -130,17 +133,45 @@ public static class PingFactory
 				screenScale = outputWidth / inputWidth;
 			}
 
-			if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value))
+			/*
+			* Positioning based on https://github.com/Omti90/Off-Screen-Target-Indicator-Tutorial/blob/main/Scripts/TargetIndicator.cs
+			*/
+
+			if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value, true))
 			{
 				float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
 
 				if (distanceToCenter < 200)
 				{
-					image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200));
+					image.color = new(_pingColor.r, _pingColor.g, _pingColor.b, Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200));
 				}
 				else
 				{
 					image.color = _pingColor;
+				}
+
+				if (screenPoint.z >= 0f
+					& screenPoint.x <= canvasRect.rect.width * canvasRect.localScale.x
+					& screenPoint.y <= canvasRect.rect.height * canvasRect.localScale.x
+					& screenPoint.x >= 0f
+					& screenPoint.y >= 0f)
+				{
+					screenPoint.z = 0f;
+					WorldToScreen.TargetOutOfSight(false, screenPoint, image.rectTransform, canvasRect);
+				}
+
+				else if (screenPoint.z >= 0f)
+				{
+					screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, canvasRect, 20f);
+					WorldToScreen.TargetOutOfSight(true, screenPoint, image.rectTransform, canvasRect);
+				}
+				else
+				{
+					screenPoint *= -1f;
+
+					screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, canvasRect, 20f);
+					WorldToScreen.TargetOutOfSight(true, screenPoint, image.rectTransform, canvasRect);
+
 				}
 
 				image.transform.position = screenScale < 1 ? screenPoint : screenPoint * screenScale;

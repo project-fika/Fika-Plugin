@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public sealed class CoopClientInventoryController(Player player, Profile profile) : Player.SinglePlayerInventoryController(player, profile)
+	public sealed class CoopClientInventoryController(Player player, Profile profile, bool examined) : Player.PlayerOwnerInventoryController(player, profile, examined)
 	{
 		public override bool HasDiscardLimits => false;
 		ManualLogSource BepInLogger { get; set; } = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));

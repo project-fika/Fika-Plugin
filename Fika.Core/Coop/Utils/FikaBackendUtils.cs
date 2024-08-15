@@ -4,9 +4,11 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Utils;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -26,6 +28,7 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
 		public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
 		public static bool IsDedicated = false;
+		public static bool IsReconnect = false;
 		public static bool IsSinglePlayer
 		{
 			get
@@ -45,6 +48,7 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsHostNatPunch = false;
 		public static string HostLocationId;
 		public static bool RequestFikaWorld = false;
+		public static Vector3 ReconnectPosition = Vector3.zero;
 		private static string groupId;
 		private static string raidCode;
 
@@ -103,7 +107,7 @@ namespace Fika.Core.Coop.Utils
 
 		public static async Task CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
 		{
-			NotificationManagerClass.DisplayWarningNotification("Starting raid, please wait...");
+			NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
 			long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
 			string raidCode = GenerateRaidCode(6);
 			CreateMatch body = new(raidCode, profileId, hostUsername, timestamp, raidSettings,
@@ -119,7 +123,7 @@ namespace Fika.Core.Coop.Utils
 
 		public static string GenerateRaidCode(int length)
 		{
-			Random random = new();
+			System.Random random = new();
 			char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
 			string raidCode = "";
 			for (int i = 0; i < length; i++)

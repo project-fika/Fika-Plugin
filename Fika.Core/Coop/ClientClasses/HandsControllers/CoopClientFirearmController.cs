@@ -233,7 +233,7 @@ namespace Fika.Core.Coop.ClientClasses
 					AmmoAfterShot = weapon.GetCurrentMagazineCount(),
 					ShotPosition = shotPosition,
 					ShotDirection = shotDirection,
-					FireportPosition = fireportPosition,
+					//FireportPosition = fireportPosition,
 					ChamberIndex = chamberIndex,
 					Overheat = overheat,
 					UnderbarrelShot = Weapon.IsUnderBarrelDeviceActive,

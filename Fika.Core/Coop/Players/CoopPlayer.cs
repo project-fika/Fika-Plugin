@@ -10,14 +10,12 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Factories;
-using Fika.Core.Coop.FreeCamera;
-using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using HarmonyLib;
+using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Http.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -37,9 +35,7 @@ namespace Fika.Core.Coop.Players
 		#region Fields and Properties
 		public PacketReceiver PacketReceiver;
 		public IPacketSender PacketSender;
-		private DateTime lastPingTime;
 		public bool hasSkilledScav = false;
-		//public bool hasKilledScav = false;
 		public float observedOverlap = 0f;
 		public bool leftStanceDisabled = false;
 		public Vector2 LastDirection = Vector2.zero;
@@ -71,7 +67,7 @@ namespace Fika.Core.Coop.Players
 			player.IsYourPlayer = true;
 			player.NetId = netId;
 
-			CoopClientInventoryController inventoryController = new(player, profile);
+			CoopClientInventoryController inventoryController = new(player, profile, false);
 
 			LocalQuestControllerClass questController;
 			if (FikaPlugin.Instance.SharedQuestProgression)
@@ -112,9 +108,6 @@ namespace Fika.Core.Coop.Players
 				statisticsManager, questController, achievementsController, filter,
 				EVoipState.NotAvailable, false, false);
 
-			Traverse playerTraverse = Traverse.Create(player);
-			playerTraverse.Field<SinglePlayerInventoryController>("singlePlayerInventoryController_0").Value = inventoryController;
-
 			foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
 			{
 				player.InventoryControllerClass.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
@@ -124,24 +117,10 @@ namespace Fika.Core.Coop.Players
 			player._handsController.Spawn(1f, new Action(Class1554.class1554_0.method_0));
 
 			player.AIData = new AIData(null, player);
-			player.AggressorFound = false;
-			player._animators[0].enabled = true;
 
-			Profile.TraderInfo traderInfo;
-			if (player.Profile.TryGetTraderInfo("638f541a29ffd1183d187f57", out traderInfo))
-			{
-				playerTraverse.Field<Profile.TraderInfo>("traderInfo_0").Value = traderInfo;
-				playerTraverse.Field<Profile.TraderInfo>("traderInfo_0").Value.OnStandingChanged += player.method_127;
-			}
-			RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
-			if (radioTransmitterRecodableComponent != null)
-			{
-				radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += player.method_128;
-				if (player.Profile.GetTraderStanding("638f541a29ffd1183d187f57").IsZero())
-				{
-					radioTransmitterRecodableComponent.SetEncoded(false);
-				}
-			}
+			player.AggressorFound = false;
+
+			player._animators[0].enabled = true;
 
 			player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
 
@@ -449,9 +428,9 @@ namespace Fika.Core.Coop.Players
 								bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
 								killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
 
-				AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
-					bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
-					killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
+				/*AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
+                    bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
+                    killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
 			}
 
 
@@ -663,16 +642,30 @@ namespace Fika.Core.Coop.Players
 		{
 			base.OnDead(damageType);
 
-			StartCoroutine(DestroyNetworkedComponents());
+			StartCoroutine(DisableNetworkedComponents());
+			if (IsYourPlayer)
+			{
+				StartCoroutine(LocalPlayerDied());
+			}
 		}
 
-		private IEnumerator DestroyNetworkedComponents()
+		private IEnumerator DisableNetworkedComponents()
 		{
 			yield return new WaitForSeconds(2);
 
 			if (PacketSender != null)
 			{
-				PacketSender.DestroyThis();
+				PacketSender.Enabled = false;
+			}
+		}
+
+		private IEnumerator LocalPlayerDied()
+		{
+			AddPlayerRequest request = new(FikaBackendUtils.GetGroupId(), ProfileId);
+			Task diedTask = FikaRequestHandler.PlayerDied(request);
+			while (!diedTask.IsCompleted)
+			{
+				yield return new WaitForEndOfFrame();
 			}
 		}
 
@@ -683,81 +676,7 @@ namespace Fika.Core.Coop.Players
 				base.Move(direction);
 				LastDirection = direction;
 			}
-		}
-
-		/// <summary>
-		/// Used to determine whether this player was a boss
-		/// </summary>
-		/// <param name="wildSpawnType"></param>
-		/// <returns>true if it's a boss, false if not</returns>
-		public bool IsBoss(WildSpawnType wildSpawnType, out string name)
-		{
-			name = null;
-			switch (wildSpawnType)
-			{
-				case WildSpawnType.bossBoar:
-					{
-						name = "Kaban";
-						break;
-					}
-				case WildSpawnType.bossBully:
-					{
-						name = "Reshala";
-						break;
-					}
-				case WildSpawnType.bossGluhar:
-					{
-						name = "Glukhar";
-						break;
-					}
-				case WildSpawnType.bossKilla:
-					{
-						name = "Killa";
-						break;
-					}
-				case WildSpawnType.bossKnight:
-					{
-						name = "Knight";
-						break;
-					}
-				case WildSpawnType.bossKojaniy:
-					{
-						name = "Shturman";
-						break;
-					}
-				case WildSpawnType.bossSanitar:
-					{
-						name = "Sanitar";
-						break;
-					}
-				case WildSpawnType.bossTagilla:
-					{
-						name = "Tagilla";
-						break;
-					}
-				case WildSpawnType.bossZryachiy:
-					{
-						name = "Zryachiy";
-						break;
-					}
-				case WildSpawnType.followerBigPipe:
-					{
-						name = "Big Pipe";
-						break;
-					}
-				case WildSpawnType.followerBirdEye:
-					{
-						name = "Bird Eye";
-						break;
-					}
-				case WildSpawnType.sectantPriest:
-					{
-						name = "Cultist Priest";
-						break;
-					}
-			}
-			return name != null;
-		}
+		}				
 
 		private void HandleInteractPacket(WorldInteractionPacket packet)
 		{
@@ -766,7 +685,7 @@ namespace Fika.Core.Coop.Players
 				WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
 				if (worldInteractiveObject != null)
 				{
-					if (worldInteractiveObject.isActiveAndEnabled)
+					if (worldInteractiveObject.isActiveAndEnabled && !worldInteractiveObject.ForceLocalInteraction)
 					{
 						InteractionResult interactionResult;
 						Action action;
@@ -835,120 +754,6 @@ namespace Fika.Core.Coop.Players
 			else
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("HandleInteractPacket: CoopHandler was null!");
-			}
-		}
-
-		public void Ping()
-		{
-			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-			if (coopGame.Status != GameStatus.Started)
-			{
-				return;
-			}
-
-			if (lastPingTime < DateTime.Now.AddSeconds(-3))
-			{
-				Transform origin;
-				FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
-				if (freeCamController != null && freeCamController.IsScriptActive)
-				{
-					origin = freeCamController.CameraMain.gameObject.transform;
-				}
-				else
-				{
-					origin = CameraPosition;
-				}
-
-				Ray sourceRaycast = new(origin.position + origin.forward / 2f,
-					origin.forward);
-				int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
-				if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
-				{
-					lastPingTime = DateTime.Now;
-					//GameObject gameObject = new("Ping", typeof(FikaPing));
-					//gameObject.transform.localPosition = hit.point;
-					Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
-					GameObject hitGameObject = hit.collider.gameObject;
-					int hitLayer = hitGameObject.layer;
-
-					PingFactory.EPingType pingType = PingFactory.EPingType.Point;
-					object userData = null;
-					string localeId = null;
-
-#if DEBUG
-					ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
-#endif
-
-					if (LayerMask.LayerToName(hitLayer) == "Player")
-					{
-						if (hitGameObject.TryGetComponent(out Player player))
-						{
-							pingType = PingFactory.EPingType.Player;
-							userData = player;
-						}
-					}
-					else if (LayerMask.LayerToName(hitLayer) == "Deadbody")
-					{
-						pingType = PingFactory.EPingType.DeadBody;
-						userData = hitGameObject;
-					}
-					else if (hitGameObject.TryGetComponent(out LootableContainer container))
-					{
-						pingType = PingFactory.EPingType.LootContainer;
-						userData = container;
-						localeId = container.ItemOwner.Name;
-					}
-					else if (hitGameObject.TryGetComponent(out LootItem lootItem))
-					{
-						pingType = PingFactory.EPingType.LootItem;
-						userData = lootItem;
-						localeId = lootItem.Item.ShortName;
-					}
-					else if (hitGameObject.TryGetComponent(out Door door))
-					{
-						pingType = PingFactory.EPingType.Door;
-						userData = door;
-					}
-					else if (hitGameObject.TryGetComponent(out InteractableObject interactable))
-					{
-						pingType = PingFactory.EPingType.Interactable;
-						userData = interactable;
-					}
-
-					GameObject basePingPrefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
-					GameObject basePing = Instantiate(basePingPrefab);
-					Vector3 hitPoint = hit.point;
-					PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);
-					Color pingColor = FikaPlugin.PingColor.Value;
-					pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
-					// ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
-					abstractPing.Initialize(ref hitPoint, userData, pingColor);
-
-					GenericPacket genericPacket = new()
-					{
-						NetId = NetId,
-						PacketType = EPackageType.Ping,
-						PingLocation = hitPoint,
-						PingType = pingType,
-						PingColor = pingColor,
-						Nickname = Profile.Nickname,
-						LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
-					};
-
-					if (PacketSender != null)
-					{
-						PacketSender.SendPacket(ref genericPacket);
-					}
-					else
-					{
-						NetManagerUtils.SendPacket(ref genericPacket);
-					}
-
-					if (FikaPlugin.PlayPingAnimation.Value)
-					{
-						vmethod_3(EGesture.ThatDirection);
-					}
-				}
 			}
 		}
 
@@ -1197,6 +1002,14 @@ namespace Fika.Core.Coop.Players
 
 		}
 
+		public override void SetAudioProtagonist()
+		{
+			if (IsYourPlayer)
+			{
+				Singleton<BetterAudio>.Instance.SetProtagonist(this);
+			}
+		}
+
 		public void HandleCallbackFromServer(in OperationCallbackPacket operationCallbackPacket)
 		{
 			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Callback<EOperationStatus> callback))
@@ -1291,7 +1104,7 @@ namespace Fika.Core.Coop.Players
 						if (FikaBackendUtils.IsServer)
 						{
 							OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-							Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+							Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 						}
 					}
 				}
@@ -1301,7 +1114,7 @@ namespace Fika.Core.Coop.Players
 					if (FikaBackendUtils.IsServer)
 					{
 						OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-						Singleton<FikaServer>.Instance.SendDataToAll(new(), ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+						Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
 					}
 				}
 			}

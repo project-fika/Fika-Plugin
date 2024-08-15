@@ -9,6 +9,6 @@ namespace Fika.Core.Networking.Models.Dedicated
 		public string SessionId { get; set; }
 
 		[DataMember(Name = "status")]
-		public string Status { get; set; }
+		public DedicatedStatus Status { get; set; }
 	}
 }

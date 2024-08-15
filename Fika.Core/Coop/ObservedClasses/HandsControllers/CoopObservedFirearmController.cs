@@ -249,7 +249,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					BulletClass ammo = (BulletClass)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
 					InitiateShot(Item, ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
-						packet.ShotInfoPacket.FireportPosition, packet.ShotInfoPacket.ChamberIndex, packet.ShotInfoPacket.Overheat);
+						CurrentFireport.position, packet.ShotInfoPacket.ChamberIndex, packet.ShotInfoPacket.Overheat);
 
 					if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
 					{

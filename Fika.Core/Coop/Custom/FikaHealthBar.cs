@@ -42,6 +42,15 @@ namespace Fika.Core.Coop.Custom
 			CreateHealthBar();
 		}
 
+		public void ClearEffects()
+		{
+			foreach (HealthBarEffect effect in effects)
+			{
+				effect.Remove();
+			}
+			effects.Clear();
+		}
+
 		protected void Update()
 		{
 			if (currentPlayer != null)
@@ -126,7 +135,7 @@ namespace Fika.Core.Coop.Custom
 			float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
 			Vector3 position = new(currentPlayer.PlayerBones.Neck.position.x, currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), currentPlayer.PlayerBones.Neck.position.z);
 
-			if (!WorldToScreen.GetScreenPoint(position, mainPlayer, out Vector3 screenPoint, FikaPlugin.NamePlateUseOpticZoom.Value))
+			if (!WorldToScreen.GetScreenPoint(position, mainPlayer, out Vector3 screenPoint, FikaPlugin.NamePlateUseOpticZoom.Value, false))
 			{
 				UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, 0);
 				UpdateColorImage(playerPlate.healthBarScreen, 0);
@@ -466,8 +475,6 @@ namespace Fika.Core.Coop.Custom
 			currentPlayer.HealthController.DiedEvent -= HealthController_DiedEvent;
 			currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
 			currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
-
-
 
 			playerPlate.gameObject.SetActive(false);
 			effects.Clear();

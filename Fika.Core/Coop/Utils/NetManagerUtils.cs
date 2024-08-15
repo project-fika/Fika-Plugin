@@ -56,8 +56,7 @@ namespace Fika.Core.Coop.Utils
 				FikaServer server = Singleton<FikaServer>.Instance;
 				if (server != null)
 				{
-					server.Writer.Reset();
-					server.SendDataToAll(server.Writer, ref packet, DeliveryMethod.ReliableUnordered);
+					server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 					return;
 				}
 			}
@@ -65,8 +64,7 @@ namespace Fika.Core.Coop.Utils
 			FikaClient client = Singleton<FikaClient>.Instance;
 			if (client != null)
 			{
-				client.Writer.Reset();
-				client.SendData(client.Writer, ref packet, DeliveryMethod.ReliableUnordered);
+				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 			}
 		}
 
@@ -197,6 +195,43 @@ namespace Fika.Core.Coop.Utils
 					logger.LogError("StopPinger: Could not find FikaPinger!");
 				}
 			}
+		}
+
+		public static Task CreateCoopHandler()
+		{
+			logger.LogInfo("Creating CoopHandler...");
+			CoopHandler coopHandler = CoopHandler.GetCoopHandler();
+			if (coopHandler != null)
+			{
+				GameObject.Destroy(coopHandler);
+			}
+
+			if (CoopHandler.CoopHandlerParent != null)
+			{
+				GameObject.Destroy(CoopHandler.CoopHandlerParent);
+				CoopHandler.CoopHandlerParent = null;
+			}
+
+			if (CoopHandler.CoopHandlerParent == null)
+			{
+				CoopHandler.CoopHandlerParent = new GameObject("CoopHandlerParent");
+				GameObject.DontDestroyOnLoad(CoopHandler.CoopHandlerParent);
+			}
+
+			coopHandler = CoopHandler.CoopHandlerParent.AddComponent<CoopHandler>();
+
+			if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
+			{
+				coopHandler.ServerId = FikaBackendUtils.GetGroupId();
+			}
+			else
+			{
+				GameObject.Destroy(coopHandler);
+				logger.LogError("No Server Id found, Deleting Coop Handler");
+				throw new MissingReferenceException("No Server Id found");
+			}
+
+			return Task.CompletedTask;
 		}
 	}
 }

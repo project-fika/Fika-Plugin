@@ -3,17 +3,17 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
-using EFT.MovingPlatforms;
+using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
+using Fika.Core.Coop.Factories;
+using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -27,13 +27,13 @@ namespace Fika.Core.Coop.PacketHandlers
 		public bool Enabled { get; set; } = true;
 		public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
 		public FikaClient Client { get; set; }
-		public NetDataWriter Writer { get; set; } = new();
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
 		public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
 		public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+		private DateTime lastPingTime;
 
 		private ManualLogSource logger;
 
@@ -42,6 +42,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
 			player = GetComponent<CoopPlayer>();
 			enabled = false;
+			lastPingTime = DateTime.Now;
 		}
 
 		public void Init()
@@ -51,18 +52,16 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				sharedQuestController.LateInit();
 			}
-			StartCoroutine(SendTrainTime());
 		}
 
 		public void SendPacket<T>(ref T packet) where T : INetSerializable
 		{
-			Writer.Reset();
-			Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableUnordered);
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 		}
 
 		protected void FixedUpdate()
 		{
-			if (player == null || Writer == null || Server == null)
+			if (player == null || Server == null || !Enabled)
 			{
 				return;
 			}
@@ -76,10 +75,9 @@ namespace Fika.Core.Coop.PacketHandlers
 				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface,
 				player.MovementContext.SurfaceNormal);
 
-			Writer.Reset();
-			Server.SendDataToAll(Writer, ref playerStatePacket, DeliveryMethod.Unreliable);
+			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
 
-			if (player.MovementIdlingTime > 0f)
+			if (player.MovementIdlingTime > 0.05f)
 			{
 				player.LastDirection = Vector2.zero;
 			}
@@ -95,8 +93,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					WeaponPacket firearmPacket = FirearmPackets.Dequeue();
 					firearmPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref firearmPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref firearmPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int damagePackets = DamagePackets.Count;
@@ -107,8 +104,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					DamagePacket damagePacket = DamagePackets.Dequeue();
 					damagePacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref damagePacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref damagePacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int armorDamagePackets = ArmorDamagePackets.Count;
@@ -119,8 +115,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
 					armorDamagePacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int inventoryPackets = InventoryPackets.Count;
@@ -131,8 +126,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					InventoryPacket inventoryPacket = InventoryPackets.Dequeue();
 					inventoryPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref inventoryPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref inventoryPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int commonPlayerPackets = CommonPlayerPackets.Count;
@@ -143,8 +137,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					CommonPlayerPacket commonPlayerPacket = CommonPlayerPackets.Dequeue();
 					commonPlayerPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			int healthSyncPackets = HealthSyncPackets.Count;
@@ -155,8 +148,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					HealthSyncPacket healthSyncPacket = HealthSyncPackets.Dequeue();
 					healthSyncPacket.NetId = player.NetId;
 
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
+					Server.SendDataToAll(ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 			if (FikaPlugin.UsePingSystem.Value
@@ -168,65 +160,123 @@ namespace Fika.Core.Coop.PacketHandlers
 				{
 					return;
 				}
-				player.Ping();
+				SendPing();
 			}
 		}
 
-		private IEnumerator SendTrainTime()
+		private void SendPing()
 		{
-			while (!Singleton<GameWorld>.Instantiated)
+			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+			if (coopGame.Status != GameStatus.Started)
 			{
-				yield return null;
+				return;
 			}
 
-			while (string.IsNullOrEmpty(Singleton<GameWorld>.Instance.MainPlayer.Location))
+			if (lastPingTime < DateTime.Now.AddSeconds(-3))
 			{
-				yield return null;
-			}
-
-			string location = Singleton<GameWorld>.Instance.MainPlayer.Location;
-
-			if (location.Contains("RezervBase") || location.Contains("Lighthouse"))
-			{
-				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-				while (coopGame.Status != GameStatus.Started)
+				Transform origin;
+				FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
+				if (freeCamController != null && freeCamController.IsScriptActive)
 				{
-					yield return null;
+					origin = freeCamController.CameraMain.gameObject.transform;
 				}
-
-				// Trains take around 20 minutes to come in by default so we can safely wait 20 seconds to make sure everyone is loaded in
-				yield return new WaitForSeconds(20);
-
-				Locomotive locomotive = FindObjectOfType<Locomotive>();
-				if (locomotive != null)
+				else if (player.HealthController.IsAlive)
 				{
-					long time = Traverse.Create(locomotive).Field<DateTime>("_depart").Value.Ticks;
-
-					GenericPacket packet = new()
-					{
-						NetId = player.NetId,
-						PacketType = EPackageType.TrainSync,
-						DepartureTime = time
-					};
-
-					Writer.Reset();
-					Server.SendDataToAll(Writer, ref packet, DeliveryMethod.ReliableOrdered);
+					origin = player.CameraPosition;
 				}
 				else
 				{
-					logger.LogError("SendTrainTime: Could not find locomotive!");
+					return;
 				}
-			}
-			else
-			{
-				yield break;
+
+				Ray sourceRaycast = new(origin.position + origin.forward / 2f,
+					origin.forward);
+				int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
+				if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
+				{
+					lastPingTime = DateTime.Now;
+					//GameObject gameObject = new("Ping", typeof(FikaPing));
+					//gameObject.transform.localPosition = hit.point;
+					Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
+					GameObject hitGameObject = hit.collider.gameObject;
+					int hitLayer = hitGameObject.layer;
+
+					PingFactory.EPingType pingType = PingFactory.EPingType.Point;
+					object userData = null;
+					string localeId = null;
+
+#if DEBUG
+					ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
+#endif
+
+					if (LayerMask.LayerToName(hitLayer) == "Player")
+					{
+						if (hitGameObject.TryGetComponent(out Player player))
+						{
+							pingType = PingFactory.EPingType.Player;
+							userData = player;
+						}
+					}
+					else if (LayerMask.LayerToName(hitLayer) == "Deadbody")
+					{
+						pingType = PingFactory.EPingType.DeadBody;
+						userData = hitGameObject;
+					}
+					else if (hitGameObject.TryGetComponent(out LootableContainer container))
+					{
+						pingType = PingFactory.EPingType.LootContainer;
+						userData = container;
+						localeId = container.ItemOwner.Name;
+					}
+					else if (hitGameObject.TryGetComponent(out LootItem lootItem))
+					{
+						pingType = PingFactory.EPingType.LootItem;
+						userData = lootItem;
+						localeId = lootItem.Item.ShortName;
+					}
+					else if (hitGameObject.TryGetComponent(out Door door))
+					{
+						pingType = PingFactory.EPingType.Door;
+						userData = door;
+					}
+					else if (hitGameObject.TryGetComponent(out InteractableObject interactable))
+					{
+						pingType = PingFactory.EPingType.Interactable;
+						userData = interactable;
+					}
+
+					GameObject basePingPrefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
+					GameObject basePing = GameObject.Instantiate(basePingPrefab);
+					Vector3 hitPoint = hit.point;
+					PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);
+					Color pingColor = FikaPlugin.PingColor.Value;
+					pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
+					// ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
+					abstractPing.Initialize(ref hitPoint, userData, pingColor);
+
+					GenericPacket genericPacket = new()
+					{
+						NetId = player.NetId,
+						PacketType = EPackageType.Ping,
+						PingLocation = hitPoint,
+						PingType = pingType,
+						PingColor = pingColor,
+						Nickname = player.Profile.Nickname,
+						LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
+					};
+
+					SendPacket(ref genericPacket);
+
+					if (FikaPlugin.PlayPingAnimation.Value)
+					{
+						player.vmethod_3(EGesture.ThatDirection);
+					}
+				}
 			}
 		}
 
 		public void DestroyThis()
 		{
-			Writer = null;
 			FirearmPackets.Clear();
 			DamagePackets.Clear();
 			InventoryPackets.Clear();

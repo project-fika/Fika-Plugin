@@ -11,7 +11,7 @@ namespace Fika.Core.Coop.Custom
 	internal class FikaDebug : MonoBehaviour
 	{
 		private CoopHandler coopHandler;
-		private Rect windowRect = new(20, 20, 200, 200);
+		private Rect windowRect = new(20, 20, 200, 10);
 		private int frameCounter = 0;
 
 		private int Ping
@@ -145,14 +145,17 @@ namespace Fika.Core.Coop.Custom
 			GUI.skin.label.alignment = TextAnchor.MiddleLeft;
 			GUI.skin.window.alignment = TextAnchor.UpperCenter;
 
-			windowRect = GUI.Window(0, windowRect, DrawWindow, "Fika Debug");
+			GUILayout.BeginArea(windowRect);
+			GUILayout.BeginVertical();
+
+			windowRect = GUILayout.Window(1, windowRect, DrawWindow, "Fika Debug");
+
+			GUILayout.EndVertical();
+			GUILayout.EndArea();
 		}
 
 		private void DrawWindow(int windowId)
 		{
-			GUILayout.BeginArea(new(5, 15, 150, 150));
-			GUILayout.BeginVertical();
-
 			GUILayout.Label($"Alive Players: {alivePlayers.Count}");
 			GUILayout.Label($"Alive Bots: {aliveBots.Count}");
 			if (isServer)
@@ -165,9 +168,6 @@ namespace Fika.Core.Coop.Custom
 				GUILayout.Label($"RTT: {RTT}");
 				GUILayout.Label($"Server FPS: {ServerFPS}");
 			}
-
-			GUILayout.EndVertical();
-			GUILayout.EndArea();
 			GUI.DragWindow();
 		}
 	}

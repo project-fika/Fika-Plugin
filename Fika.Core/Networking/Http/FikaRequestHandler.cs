@@ -167,5 +167,20 @@ namespace Fika.Core.Networking.Http
 		{
 			return GetJson<GetDedicatedStatusResponse>("/fika/raid/dedicated/getstatus");
 		}
+
+		public static async Task RegisterPlayer(RegisterPlayerRequest request)
+		{
+			await PutJsonAsync("/fika/raid/registerPlayer", request);
+		}
+
+		public static async Task PlayerDied(AddPlayerRequest request)
+		{
+			await PutJsonAsync("/fika/update/playerdied", request);
+		}
+
+		public static CheckVersionResponse CheckServerVersion()
+		{
+			return GetJson<CheckVersionResponse>("/fika/client/check/version");
+		}
 	}
 }

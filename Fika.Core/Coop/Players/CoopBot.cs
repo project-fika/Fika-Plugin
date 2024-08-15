@@ -11,6 +11,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -37,6 +38,18 @@ namespace Fika.Core.Coop.Players
 		public int loadedPlayers = 0;
 		private bool firstEnabled;
 
+		public override bool IsVisible
+		{
+			get
+			{
+				return FikaBackendUtils.IsDedicated ? true : OnScreen;
+			}
+			set
+			{
+
+			}
+		}
+
 		public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
@@ -48,7 +61,7 @@ namespace Fika.Core.Coop.Players
 
 			player.IsYourPlayer = false;
 
-			SinglePlayerInventoryController inventoryController = new CoopBotInventoryController(player, profile);
+			InventoryControllerClass inventoryController = new CoopBotInventoryController(player, profile, true);
 
 			player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
 			player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
@@ -57,8 +70,6 @@ namespace Fika.Core.Coop.Players
 				new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
 				new CoopObservedStatisticsManager(), null, null, filter,
 				EVoipState.NotAvailable, aiControl, false);
-			Traverse playerTraverse = Traverse.Create(player);
-			playerTraverse.Field<SinglePlayerInventoryController>("singlePlayerInventoryController_0").Value = inventoryController;
 
 			player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
@@ -67,9 +78,6 @@ namespace Fika.Core.Coop.Players
 			{
 				IsAI = true
 			};
-
-			playerTraverse.Field<GClass830>("gclass830_0").Value = new();
-			playerTraverse.Field<GClass830>("gclass830_0").Value.Initialize(player, player.PlayerBones);
 
 			player.AggressorFound = false;
 
@@ -106,7 +114,7 @@ namespace Fika.Core.Coop.Players
 
 			if (FikaPlugin.EasyKillConditions.Value)
 			{
-				if (aggressor.Profile.Info.GroupId == "Fika")
+				if (aggressor.Profile.Info.GroupId == "Fika" && !aggressor.IsYourPlayer)
 				{
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 					if (mainPlayer != null)
@@ -199,12 +207,14 @@ namespace Fika.Core.Coop.Players
 
 			if (FikaPlugin.ShowNotifications.Value)
 			{
-				if (IsBoss(Profile.Info.Settings.Role, out string name) && LastAggressor != null)
+				if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out string name) && LastAggressor != null)
 				{
 					if (LastAggressor is CoopPlayer aggressor)
 					{
 						if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
-							NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname)} killed boss {ColorizeText(Colors.BROWN, name)}</color>", iconType: EFT.Communications.ENotificationIconType.Friend);
+						NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+							[ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(Colors.BROWN, name)]),
+							iconType: EFT.Communications.ENotificationIconType.Friend);
 					}
 				}
 			}
@@ -290,7 +300,7 @@ namespace Fika.Core.Coop.Players
 						NetId = MainPlayer.NetId,
 						BotNetId = NetId
 					};
-					server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
@@ -308,7 +318,7 @@ namespace Fika.Core.Coop.Players
 						NetId = MainPlayer.NetId,
 						BotNetId = NetId
 					};
-					server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
@@ -329,7 +339,8 @@ namespace Fika.Core.Coop.Players
 						NetId = MainPlayer.NetId,
 						BotNetId = NetId
 					};
-					server.SendDataToAll(new NetDataWriter(), ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+
+					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
 					if (!coopGame.Bots.Remove(ProfileId))
 					{

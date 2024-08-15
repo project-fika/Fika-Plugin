@@ -2,21 +2,25 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.MovingPlatforms;
 using EFT.UI;
+using EFT.UI.BattleTimer;
 using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Lighthouse;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -43,6 +47,8 @@ namespace Fika.Core.Networking
 		public int ConnectedClients = 0;
 		public int ReadyClients = 0;
 		public bool HostReady = false;
+		public bool HostLoaded = false;
+		public bool ReconnectDone = false;
 		public NetManager NetClient
 		{
 			get
@@ -51,7 +57,7 @@ namespace Fika.Core.Networking
 			}
 		}
 		public NetPeer ServerConnection { get; private set; }
-		public bool SpawnPointsReceived { get; private set; } = false;
+		public bool ExfilPointsReceived { get; private set; } = false;
 		public bool Started
 		{
 			get
@@ -69,11 +75,14 @@ namespace Fika.Core.Networking
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
 		private NetDataWriter dataWriter = new();
 		private FikaChat fikaChat;
+		private string myProfileId;
 
 		public async void Init()
 		{
 			NetworkGameSession.RTT = 0;
 			NetworkGameSession.LossPercent = 0;
+
+			myProfileId = FikaBackendUtils.Profile.ProfileId;
 
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
@@ -103,6 +112,9 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
 			packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnStatisticsPacketReceived);
+			packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
+			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
+			packetProcessor.SubscribeNetSerializable<LightkeeperGuardDeathPacket>(OnLightkeeperGuardDeathPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -116,6 +128,9 @@ namespace Fika.Core.Networking
 				MaxConnectAttempts = 5,
 				ReconnectDelay = 1 * 1000
 			};
+
+			await NetManagerUtils.CreateCoopHandler();
+			coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
 
 			if (FikaBackendUtils.IsHostNatPunch)
 			{
@@ -146,6 +161,147 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnReconnectPacketReceived(ReconnectPacket packet)
+		{
+			if (!packet.IsRequest)
+			{
+				switch (packet.Type)
+				{
+					case ReconnectPacket.EReconnectDataType.Throwable:
+						if (packet.ThrowableData != null)
+						{
+#if DEBUG
+							logger.LogWarning("Received reconnect packet for throwables: " + packet.ThrowableData.Count);
+#endif
+							string localizedString = LocaleUtils.UI_SYNC_THROWABLES.Localized();
+							FikaBackendUtils.ScreenController.ChangeStatus(localizedString);
+							Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
+						}
+						break;
+					case ReconnectPacket.EReconnectDataType.Interactives:
+						{
+							if (packet.InteractivesData != null)
+							{
+#if DEBUG
+								logger.LogWarning("Received reconnect packet for interactives: " + packet.InteractivesData.Count);
+#endif
+								string localizedString = LocaleUtils.UI_SYNC_INTERACTABLES.Localized();
+								WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
+								Dictionary<int, WorldInteractiveObject.GStruct390> netIdDictionary = [];
+								{
+									foreach (WorldInteractiveObject.GStruct390 data in packet.InteractivesData)
+									{
+										netIdDictionary.Add(data.NetId, data);
+									}
+								}
+
+								float total = packet.InteractivesData.Count;
+								float progress = 0f;
+								foreach (WorldInteractiveObject item in worldInteractiveObjects)
+								{
+									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct390 value))
+									{
+										progress++;
+										FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
+										item.SetInitialSyncState(value);
+									}
+								}
+							}
+							break;
+						}
+					case ReconnectPacket.EReconnectDataType.LampControllers:
+						{
+							if (packet.LampStates != null)
+							{
+#if DEBUG
+								logger.LogWarning("Received reconnect packet for lampStates: " + packet.LampStates.Count);
+#endif
+								string localizedString = LocaleUtils.UI_SYNC_LAMP_STATES.Localized();
+								Dictionary<int, LampController> lampControllerDictionary = LocationScene.GetAllObjects<LampController>(true)
+														.Where(new Func<LampController, bool>(ClientWorld.Class1248.class1248_0.method_0))
+														.ToDictionary(new Func<LampController, int>(ClientWorld.Class1248.class1248_0.method_1));
+
+								float total = packet.LampStates.Count;
+								float progress = 0f;
+								foreach (KeyValuePair<int, byte> lampState in packet.LampStates)
+								{
+									progress++;
+									FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
+									if (lampControllerDictionary.TryGetValue(lampState.Key, out LampController lampController))
+									{
+										if (lampController.LampState != (Turnable.EState)lampState.Value)
+										{
+											lampController.Switch((Turnable.EState)lampState.Value);
+										}
+									}
+								}
+							}
+							break;
+						}
+					case ReconnectPacket.EReconnectDataType.Windows:
+						{
+#if DEBUG
+							logger.LogWarning("Received reconnect packet for windowBreakers: " + packet.WindowBreakerStates.Count);
+#endif
+							if (packet.WindowBreakerStates != null)
+							{
+								Dictionary<int, Vector3> windowBreakerStates = packet.WindowBreakerStates;
+								string localizedString = LocaleUtils.UI_SYNC_WINDOWS.Localized();
+
+								float total = packet.WindowBreakerStates.Count;
+								float progress = 0f;
+								foreach (WindowBreaker windowBreaker in LocationScene.GetAllObjects<WindowBreaker>(true)
+									.Where(new Func<WindowBreaker, bool>(ClientWorld.Class1248.class1248_0.method_2)))
+								{
+									if (windowBreakerStates.TryGetValue(windowBreaker.NetId, out Vector3 hitPosition))
+									{
+										progress++;
+
+										FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
+										try
+										{
+											DamageInfo damageInfo = default;
+											damageInfo.HitPoint = hitPosition;
+											windowBreaker.MakeHit(in damageInfo, true);
+										}
+										catch (Exception ex)
+										{
+											logger.LogError("OnReconnectPacketReceived: Exception caught while setting up WindowBreakers: " + ex.Message);
+										}
+									}
+								}
+							}
+							break;
+						}
+					case ReconnectPacket.EReconnectDataType.OwnCharacter:
+#if DEBUG
+						logger.LogWarning("Received reconnect packet for own player");
+#endif
+						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RECEIVE_OWN_PLAYERS.Localized());
+						coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
+						coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
+						FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
+						break;
+					case ReconnectPacket.EReconnectDataType.Finished:
+						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
+						ReconnectDone = true;
+						break;
+					default:
+						break;
+				}
+			}
+		}
+
+		private void OnWorldLootPacketReceived(WorldLootPacket packet)
+		{
+			if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
+			{
+				GClass1230 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1230>();
+				coopGame.LootItems = lootItems;
+				coopGame.HasReceivedLoot = true;
+			}
 		}
 
 		private void OnStatisticsPacketReceived(ThrowablePacket packet)
@@ -240,7 +396,6 @@ namespace Fika.Core.Networking
 
 		public void SetupGameVariables(CoopPlayer coopPlayer)
 		{
-			coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
 			MyPlayer = coopPlayer;
 			if (FikaPlugin.EnableChat.Value)
 			{
@@ -317,7 +472,7 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
+			if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
 			{
 				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
 			}
@@ -390,17 +545,29 @@ namespace Fika.Core.Networking
 					ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
 
 					if (exfilController.ExfiltrationPoints == null)
+					{
 						return;
+					}
 
-					CoopGame coopGame = coopHandler.LocalGameInstance;
+					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+					if (coopGame == null)
+					{
+#if DEBUG
+						logger.LogError("OnExfiltrationPacketReceived: coopGame was null!");
+#endif
+						return;
+					}
 
 					CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
 
+					int index = 0;
 					foreach (KeyValuePair<string, EExfiltrationStatus> exfilPoint in packet.ExfiltrationPoints)
 					{
 						ExfiltrationPoint point = exfilController.ExfiltrationPoints.Where(x => x.Settings.Name == exfilPoint.Key).FirstOrDefault();
 						if (point != null || point != default)
 						{
+							point.Settings.StartTime = packet.StartTimes[index];
+							index++;
 							if (point.Status != exfilPoint.Value && (exfilPoint.Value == EExfiltrationStatus.RegularMode || exfilPoint.Value == EExfiltrationStatus.UncompleteRequirements))
 							{
 								point.Enable();
@@ -419,7 +586,6 @@ namespace Fika.Core.Networking
 									}
 								}
 							}
-							coopGame.UpdateExfiltrationUi(point, false, true);
 						}
 						else
 						{
@@ -427,13 +593,16 @@ namespace Fika.Core.Networking
 						}
 					}
 
-					if (MyPlayer.Side == EPlayerSide.Savage && exfilController.ScavExfiltrationPoints != null && packet.HasScavExfils)
+					if (coopGame.RaidSettings.Side == ESideType.Savage && exfilController.ScavExfiltrationPoints != null && packet.HasScavExfils)
 					{
+						int scavIndex = 0;
 						foreach (KeyValuePair<string, EExfiltrationStatus> scavExfilPoint in packet.ScavExfiltrationPoints)
 						{
 							ScavExfiltrationPoint scavPoint = exfilController.ScavExfiltrationPoints.Where(x => x.Settings.Name == scavExfilPoint.Key).FirstOrDefault();
 							if (scavPoint != null || scavPoint != default)
 							{
+								scavPoint.Settings.StartTime = packet.ScavStartTimes[scavIndex];
+								scavIndex++;
 								if (scavPoint.Status != scavExfilPoint.Value && scavExfilPoint.Value == EExfiltrationStatus.RegularMode)
 								{
 									scavPoint.Enable();
@@ -454,12 +623,9 @@ namespace Fika.Core.Networking
 								logger.LogWarning($"ExfiltrationPacketPacketReceived::ScavExfiltrationPoints: Could not find exfil point with name '{scavExfilPoint.Key}'");
 							}
 						}
-
-						ExfiltrationPoint[] points = exfilController.ScavExfiltrationPoints.Where(x => x.Status == EExfiltrationStatus.RegularMode).ToArray();
-						coopGame.ResetExfilPointsFromServer(points);
 					}
 
-					SpawnPointsReceived = true;
+					ExfilPointsReceived = true;
 				}
 				else
 				{
@@ -488,8 +654,9 @@ namespace Fika.Core.Networking
 								if (FikaPlugin.ShowNotifications.Value)
 								{
 									string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-									NotificationManagerClass.DisplayMessageNotification($"Group member {ColorizeText(Colors.GREEN, nickname)} has extracted.",
-													EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+										ColorizeText(Colors.GREEN, nickname)),
+										EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 								}
 							}
 
@@ -505,7 +672,18 @@ namespace Fika.Core.Networking
 					break;
 				case EPackageType.TrainSync:
 					{
-						Locomotive locomotive = FindObjectOfType<Locomotive>();
+						MovingPlatform.GClass2998 adapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
+						if (adapter != null)
+						{
+							GStruct130 data = new()
+							{
+								Id = packet.PlatformId,
+								Position = packet.PlatformPosition
+							};
+							adapter.StoreNetPacket(data);
+							adapter.ApplyStoredPackets();
+						}
+						/*Locomotive locomotive = FindObjectOfType<Locomotive>();
 						if (locomotive != null)
 						{
 							DateTime depart = new(packet.DepartureTime);
@@ -514,7 +692,7 @@ namespace Fika.Core.Networking
 						else
 						{
 							logger.LogWarning("GenericPacketReceived: Could not find locomotive!");
-						}
+						}*/
 					}
 					break;
 				case EPackageType.ExfilCountdown:
@@ -535,10 +713,6 @@ namespace Fika.Core.Networking
 								}
 							}
 						}
-					}
-					break;
-				case EPackageType.TraderServiceNotification:
-					{
 					}
 					break;
 				case EPackageType.DisposeBot:
@@ -603,6 +777,17 @@ namespace Fika.Core.Networking
 						}
 					}
 					break;
+				case EPackageType.ClearEffects:
+					{
+						if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+						{
+							if (playerToApply is ObservedCoopPlayer observedPlayer)
+							{
+								observedPlayer.HealthBar.ClearEffects();
+							}
+						}
+					}
+					break;
 			}
 		}
 
@@ -621,6 +806,13 @@ namespace Fika.Core.Networking
 				ConnectedClients = packet.NumberOfPlayers;
 				ReadyClients = packet.ReadyPlayers;
 				HostReady = packet.HostReady;
+				HostLoaded = packet.HostLoaded;
+
+				if (packet.HostReady)
+				{
+					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+					coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
+				}
 			}
 		}
 
@@ -654,8 +846,8 @@ namespace Fika.Core.Networking
 					Position = MyPlayer.Transform.position,
 					NetId = MyPlayer.NetId
 				};
-				dataWriter.Reset();
-				SendData(dataWriter, ref requestPacket, DeliveryMethod.ReliableOrdered);
+
+				SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
 			}
 		}
 
@@ -708,16 +900,21 @@ namespace Fika.Core.Networking
 			GameTimerClass gameTimer = coopGame.GameTimer;
 			if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
 			{
-				if (gameTimer.PastTime.TotalSeconds < 3)
-				{
-					return;
-				}
-
 				TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
 
 				gameTimer.ChangeSessionTime(timeRemain);
 
-				Traverse.Create(coopGame.GameUi.TimerPanel).Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value);
+				Traverse timerPanel = Traverse.Create(coopGame.GameUi.TimerPanel);
+				timerPanel.Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds));
+
+				MainTimerPanel mainTimerPanel = timerPanel.Field<MainTimerPanel>("_mainTimerPanel").Value;
+				if (mainTimerPanel != null)
+				{
+					Traverse.Create(mainTimerPanel).Field<DateTime>("dateTime_0").Value = gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds);
+					mainTimerPanel.UpdateTimer();
+				}
+
+				Traverse.Create(gameTimer).Field<DateTime?>("nullable_0").Value = new DateTime(packet.StartTime);
 			}
 		}
 
@@ -741,6 +938,20 @@ namespace Fika.Core.Networking
 				case EHalloweenPacketType.Exit:
 					controller.method_3(packet.Exit);
 					break;
+			}
+		}
+
+		private void OnLightkeeperGuardDeathPacketReceived(LightkeeperGuardDeathPacket packet)
+		{
+			FikaLighthouseProgressionClass Component = Singleton<GameWorld>.Instance.gameObject.GetComponent<FikaLighthouseProgressionClass>();
+
+			if (Component != null)
+			{
+				Component.HandlePacket(packet);
+			}
+			else
+			{
+				logger.LogError("OnLightkeeperGuardDeathPacketReceived: Received packet but manager is not initialized");
 			}
 		}
 
@@ -774,15 +985,24 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaClientDestroyedEvent(this));
 		}
 
+
+		[Obsolete("SendData with a NetDataWriter specified is deprecated and will be removed in newer versions of Fika, please use SendData without a writer.")]
 		public void SendData<T>(NetDataWriter writer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
 		{
 			packetProcessor.WriteNetSerializable(writer, ref packet);
 			netClient.FirstPeer.Send(writer, deliveryMethod);
 		}
 
+		public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
+		{
+			dataWriter.Reset();
+			packetProcessor.WriteNetSerializable(dataWriter, ref packet);
+			netClient.FirstPeer.Send(dataWriter, deliveryMethod);
+		}
+
 		public void OnPeerConnected(NetPeer peer)
 		{
-			NotificationManagerClass.DisplayMessageNotification($"Connected to server on port {peer.Port}.",
+			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
 				EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
 		}
 
@@ -822,7 +1042,7 @@ namespace Fika.Core.Networking
 			logger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
 			if (disconnectInfo.Reason is DisconnectReason.Timeout)
 			{
-				NotificationManagerClass.DisplayWarningNotification("Lost connection to host!");
+				NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized());
 				Destroy(MyPlayer.PacketReceiver);
 				MyPlayer.PacketSender.DestroyThis();
 				Destroy(this);

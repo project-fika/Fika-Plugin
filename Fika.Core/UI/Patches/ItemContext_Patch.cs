@@ -80,14 +80,15 @@ namespace Fika.Core.UI.Patches
 								string itemText = ColorUtils.ColorizeText(Colors.BLUE, item.ShortName.Localized());
 								if (attachedItem == item)
 								{
-									NotificationManagerClass.DisplayMessageNotification($"{itemText} is blacklisted from being sent.",
+									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_BLACKLISTED.Localized(), itemText),
 										iconType: EFT.Communications.ENotificationIconType.Alert);
 								}
 								else
 								{
 									string itemName = attachedItem.ShortName.Localized();
 									string attachedItemText = ColorUtils.ColorizeText(Colors.BLUE, itemName);
-									NotificationManagerClass.DisplayMessageNotification($"{itemText} contains {LocaleUtils.GetPrefix(itemName)} {attachedItemText} which is blacklisted from being sent.",
+									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
+										[itemText, attachedItemText]),
 										iconType: EFT.Communications.ENotificationIconType.Alert);
 								}
 								return;

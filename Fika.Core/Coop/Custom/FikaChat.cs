@@ -89,11 +89,11 @@ namespace Fika.Core.Coop.Custom
 
 				if (isServer)
 				{
-					Singleton<FikaServer>.Instance.SendDataToAll(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+					Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
 				}
 				else
 				{
-					Singleton<FikaClient>.Instance.SendData(writer, ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
+					Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableUnordered);
 				}
 				AudioClip outgoingClip = soundsWrapper.GetSocialNetworkClip(ESocialNetworkSoundType.OutgoingMessage);
 				Singleton<GUISounds>.Instance.PlaySound(outgoingClip);

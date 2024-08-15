@@ -836,7 +836,7 @@ namespace Fika.Core.Networking
 			public int AmmoAfterShot = 0;
 			public Vector3 ShotPosition = Vector3.zero;
 			public Vector3 ShotDirection = Vector3.zero;
-			public Vector3 FireportPosition = Vector3.zero;
+			//public Vector3 FireportPosition = Vector3.zero;
 			public int ChamberIndex = 0;
 			public float Overheat = 0f;
 			public bool UnderbarrelShot = false;
@@ -853,7 +853,7 @@ namespace Fika.Core.Networking
 					AmmoAfterShot = reader.GetInt(),
 					ShotPosition = reader.GetVector3(),
 					ShotDirection = reader.GetVector3(),
-					FireportPosition = reader.GetVector3(),
+					//FireportPosition = reader.GetVector3(),
 					ChamberIndex = reader.GetInt(),
 					Overheat = reader.GetFloat(),
 					UnderbarrelShot = reader.GetBool(),
@@ -871,7 +871,7 @@ namespace Fika.Core.Networking
 				writer.Put(packet.AmmoAfterShot);
 				writer.Put(packet.ShotPosition);
 				writer.Put(packet.ShotDirection);
-				writer.Put(packet.FireportPosition);
+				//writer.Put(packet.FireportPosition);
 				writer.Put(packet.ChamberIndex);
 				writer.Put(packet.Overheat);
 				writer.Put(packet.UnderbarrelShot);

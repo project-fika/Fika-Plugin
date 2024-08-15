@@ -1,8 +1,13 @@
 ﻿using Comfort.Common;
+using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using static BasePhysicalClass; // Physical struct
 
@@ -199,6 +204,116 @@ namespace Fika.Core.Networking
 			using BinaryReader binaryReader = new(memoryStream);
 
 			return GClass1555.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+		}
+
+		public static void PutThrowableData(this NetDataWriter writer, List<GStruct35> throwables)
+		{
+			writer.Put(throwables.Count);
+			foreach (GStruct35 data in throwables)
+			{
+				writer.Put(data.Id);
+				writer.Put(data.Position);
+				writer.Put(data.Template);
+				writer.Put(data.Time);
+				writer.Put(data.Orientation);
+				writer.Put(data.PlatformId);
+			}
+		}
+
+		public static List<GStruct35> GetThrowableData(this NetDataReader reader)
+		{
+			int amount = reader.GetInt();
+			List<GStruct35> throwables = new(amount);
+			for (int i = 0; i < amount; i++)
+			{
+				GStruct35 data = new()
+				{
+					Id = reader.GetString(),
+					Position = reader.GetVector3(),
+					Template = reader.GetString(),
+					Time = reader.GetInt(),
+					Orientation = reader.GetQuaternion(),
+					PlatformId = reader.GetShort()
+				};
+				throwables.Add(data);
+			}
+
+			return throwables;
+		}
+
+		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct390> interactiveObjectsData)
+		{
+			writer.Put(interactiveObjectsData.Count);
+			for (int i = 0; i < interactiveObjectsData.Count; i++)
+			{
+				writer.Put(interactiveObjectsData[i].NetId);
+				writer.Put(interactiveObjectsData[i].State);
+				writer.Put(interactiveObjectsData[i].IsBroken);
+			}
+		}
+
+		public static List<WorldInteractiveObject.GStruct390> GetInteractivesStates(this NetDataReader reader)
+		{
+			int amount = reader.GetInt();
+			List<WorldInteractiveObject.GStruct390> interactivesStates = new(amount);
+			for (int i = 0; i < amount; i++)
+			{
+				WorldInteractiveObject.GStruct390 data = new()
+				{
+					NetId = reader.GetInt(),
+					State = reader.GetByte(),
+					IsBroken = reader.GetBool()
+				};
+				interactivesStates.Add(data);
+			}
+
+			return interactivesStates;
+		}
+
+		public static void PutLampStates(this NetDataWriter writer, Dictionary<int, byte> lampStates)
+		{
+			int amount = lampStates.Count;
+			writer.Put(amount);
+			foreach (KeyValuePair<int, byte> lampState in lampStates)
+			{
+				writer.Put(lampState.Key);
+				writer.Put(lampState.Value);
+			}
+		}
+
+		public static Dictionary<int, byte> GetLampStates(this NetDataReader reader)
+		{
+			int amount = reader.GetInt();
+			Dictionary<int, byte> states = new(amount);
+			for (int i = 0; i < amount; i++)
+			{
+				states.Add(reader.GetInt(), reader.GetByte());
+			}
+
+			return states;
+		}
+
+		public static void PutWindowBreakerStates(this NetDataWriter writer, Dictionary<int, Vector3> windowBreakerStates)
+		{
+			int amount = windowBreakerStates.Count;
+			writer.Put(amount);
+			foreach (KeyValuePair<int, Vector3> windowBreakerState in windowBreakerStates)
+			{
+				writer.Put(windowBreakerState.Key);
+				writer.Put(windowBreakerState.Value);
+			}
+		}
+
+		public static Dictionary<int, Vector3> GetWindowBreakerStates(this NetDataReader reader)
+		{
+			int amount = reader.GetInt();
+			Dictionary<int, Vector3> states = new(amount);
+			for (int i = 0; i < amount; i++)
+			{
+				states.Add(reader.GetInt(), reader.GetVector3());
+			}
+
+			return states;
 		}
 	}
 }

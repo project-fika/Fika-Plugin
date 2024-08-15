@@ -201,16 +201,13 @@ namespace Fika.Core.Coop.Components
 						ExfilStartTime = point.ExfiltrationStartTime
 					};
 
-					NetDataWriter writer = mainPlayer.PacketSender.Writer;
-					writer.Reset();
-
 					if (FikaBackendUtils.IsServer)
 					{
-						mainPlayer.PacketSender.Server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
+						mainPlayer.PacketSender.Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 					}
 					else if (FikaBackendUtils.IsClient)
 					{
-						mainPlayer.PacketSender.Client.SendData(writer, ref packet, DeliveryMethod.ReliableOrdered);
+						mainPlayer.PacketSender.Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 					}
 				}
 				countdownPoints.Add(point);

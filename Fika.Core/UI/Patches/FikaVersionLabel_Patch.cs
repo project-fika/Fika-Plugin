@@ -64,7 +64,7 @@ namespace Fika.Core.EssentialPatches
 			}
 
 			// Game mode
-			//preloaderUiTraverse.Field("string_4").SetValue("PvE");
+			preloaderUiTraverse.Field("string_4").SetValue("PvE");
 			// Update version label
 			preloaderUiTraverse.Method("method_6").GetValue();
 		}

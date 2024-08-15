@@ -33,6 +33,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		private GamePlayerOwner gamePlayerOwner;
 		private CoopPlayer player => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+		private Vector3 LastKnownPosition;
 		private CoopHandler coopHandler;
 
 		public GameObject CameraParent;
@@ -132,10 +133,22 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 
 			CoopHandler.EQuitState quitState = coopHandler.GetQuitState();
+			if (quitState != CoopHandler.EQuitState.YouHaveExtracted)
+			{
+				LastKnownPosition = player.PlayerBones.Neck.position;
+			}
 
 			if (extracted && !freeCamScript.IsActive)
 			{
-				ToggleCamera();
+				ToggleUi();
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					ToggleCamera();
+				}
+				else
+				{
+					ToggleSpectateCamera();
+				}
 			}
 
 			if (FikaPlugin.FreeCamButton.Value.IsDown())
@@ -155,6 +168,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 			if (quitState == CoopHandler.EQuitState.YouHaveExtracted && !extracted)
 			{
+				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: player has extracted");
 				CoopGame coopGame = coopHandler.LocalGameInstance;
 				if (coopGame.ExtractedPlayers.Contains(player.NetId))
 				{
@@ -164,8 +178,16 @@ namespace Fika.Core.Coop.FreeCamera
 
 				if (!freeCamScript.IsActive)
 				{
-					ToggleCamera();
 					ToggleUi();
+					if (FikaPlugin.Instance.AllowSpectateFreeCam)
+					{
+						freeCamScript.transform.position = LastKnownPosition;
+						ToggleCamera();
+					}
+					else
+					{
+						ToggleSpectateCamera();
+					}
 				}
 
 				if (!effectsCleared)
@@ -209,8 +231,15 @@ namespace Fika.Core.Coop.FreeCamera
 			deathFade.DisableEffect();
 			if (!freeCamScript.IsActive)
 			{
-				ToggleCamera();
 				ToggleUi();
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					ToggleCamera();
+				}
+				else
+				{
+					ToggleSpectateCamera();
+				}
 			}
 			ShowExtractMessage();
 
@@ -319,6 +348,43 @@ namespace Fika.Core.Coop.FreeCamera
 			else
 			{
 				SetPlayerToFirstPersonMode(player);
+			}
+		}
+
+		public void ToggleSpectateCamera()
+		{
+			if (player == null)
+			{
+				return;
+			}
+			if (!freeCamScript.IsActive)
+			{
+				if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+				{
+					List<CoopPlayer> alivePlayers = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+					if (alivePlayers.Count <= 0)
+					{
+						// No alive players to attach to at this time, so let's fallback to freecam on last known position
+						freeCamScript.transform.position = LastKnownPosition;
+						ToggleCamera();
+						return;
+					}
+					CoopPlayer coopPlayer = alivePlayers[0];
+					freeCamScript.SetCurrentPlayer(coopPlayer);
+					FikaPlugin.Instance.FikaLogger.LogDebug("FreecamController: Spectating new player: " + coopPlayer.Profile.Info.MainProfileNickname);
+
+					player.PointOfView = EPointOfView.ThirdPerson;
+					if (player.PlayerBody != null)
+					{
+						player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
+						player.GetComponent<PlayerCameraController>().UpdatePointOfView();
+					}
+					gamePlayerOwner.enabled = false;
+					freeCamScript.SetActive(true);
+
+					freeCamScript.Attach3rdPerson();
+					return;
+				}
 			}
 		}
 
