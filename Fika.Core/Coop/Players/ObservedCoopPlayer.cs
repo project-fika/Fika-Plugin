@@ -671,7 +671,7 @@ namespace Fika.Core.Coop.Players
 							ColorizeText(Colors.GREEN, nickname)));
 					}
 				}
-				if (IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
+				if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
 				{
 					if (LastAggressor is CoopPlayer aggressor)
 					{

@@ -206,7 +206,7 @@ namespace Fika.Core.Coop.Players
 
 			if (FikaPlugin.ShowNotifications.Value)
 			{
-				if (IsBoss(Profile.Info.Settings.Role, out string name) && LastAggressor != null)
+				if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out string name) && LastAggressor != null)
 				{
 					if (LastAggressor is CoopPlayer aggressor)
 					{
