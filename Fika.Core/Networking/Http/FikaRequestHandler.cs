@@ -177,5 +177,10 @@ namespace Fika.Core.Networking.Http
 		{
 			await PutJsonAsync("/fika/update/playerdied", request);
 		}
+
+		public static CheckVersionResponse CheckServerVersion()
+		{
+			return GetJson<CheckVersionResponse>("/fika/client/check/version");
+		}
 	}
 }

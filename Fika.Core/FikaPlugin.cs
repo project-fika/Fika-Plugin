@@ -26,6 +26,7 @@ using SPT.Common.Http;
 using SPT.Custom.Airdrops.Patches;
 using SPT.Custom.BTR.Patches;
 using SPT.Custom.Patches;
+using SPT.Custom.Utils;
 using SPT.Reflection.Patching;
 using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.Progression;
@@ -59,10 +60,11 @@ namespace Fika.Core
 		public static FikaPlugin Instance;
 		public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
 		public static string EFTVersionMajor { get; internal set; }
+		public static string ServerModVersion { get; private set; }
+		private static Version RequiredServerVersion = new("2.2.8");
 		public ManualLogSource FikaLogger { get => Logger; }
 		public BotDifficulties BotDifficulties;
 		public FikaModHandler ModHandler = new();
-		public string Locale { get; private set; } = "en";
 		public string[] LocalIPs;
 		public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
@@ -214,6 +216,8 @@ namespace Fika.Core
 		{
 			Instance = this;
 
+			VerifyServerVersion();
+
 			GetNatPunchServerConfig();
 			SetupConfig();
 
@@ -243,7 +247,7 @@ namespace Fika.Core
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
+			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;			
 
 			DisableSPTPatches();
 			EnableOverridePatches();
@@ -269,6 +273,31 @@ namespace Fika.Core
 			}
 
 			StartCoroutine(RunModHandler());
+		}
+
+		private void VerifyServerVersion()
+		{
+			string version = FikaRequestHandler.CheckServerVersion().Version;
+			bool failed = true;
+			if (Version.TryParse(version, out Version serverVersion))
+			{
+				if (serverVersion >= RequiredServerVersion)
+				{
+					failed = false;
+				}
+			}
+
+			if (failed)
+			{
+				FikaLogger.LogError($"Server version check failed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
+				MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {RequiredServerVersion}",
+					"FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
+				Application.Quit();
+			}
+			else
+			{
+				FikaLogger.LogInfo($"Server version check passed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
+			}			
 		}
 
 		/// <summary>
