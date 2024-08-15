@@ -30,7 +30,6 @@ namespace Fika.Core.Utils
 		public const string RECEIVED_SHARED_ITEM_PLANT = "F_Client_ReceivedSharedItemPlant";
 		public const string RECEIVE_PING = "F_Client_ReceivePing";
 		public const string RECEIVE_PING_OBJECT = "F_Client_ReceivePingObject";
-		public const string FREECAM_INPUT_TOGGLED = "F_Client_FreeCamInputToggled";
 		public const string RANDOM_SPAWNPOINTS = "F_Client_RandomSpawnPoints";
 		public const string METABOLISM_DISABLED = "F_Client_MetabolismDisabled";
 		public const string PLAYER_MIA = "F_Client_YouAreMIA";
@@ -95,6 +94,7 @@ namespace Fika.Core.Utils
 		public const string UI_RETRIEVE_EXFIL_DATA = "F_UI_RetrieveExfilData";
 		public const string UI_RETRIEVE_INTERACTABLES = "F_UI_RetrieveInteractables";
 		public const string UI_INIT_COOP_GAME = "F_UI_InitCoopGame";
+		public const string UI_WAIT_FOR_PLAYER = "F_UI_WaitForPlayer";
 		public const string UI_WAIT_FOR_PLAYERS = "F_UI_WaitForPlayers";
 		public const string UI_ALL_PLAYERS_JOINED = "F_UI_AllPlayersJoined";
 		public const string UI_WAITING_FOR_CONNECT = "F_UI_WaitingForConnect";
@@ -106,9 +106,7 @@ namespace Fika.Core.Utils
 		public const string UI_SYNC_WINDOWS = "F_UI_SyncWindows";
 		public const string UI_RECEIVE_OWN_PLAYERS = "F_UI_ReceiveOwnPlayer";
 		public const string UI_FINISH_RECONNECT = "F_UI_FinishReconnect";
-		public const string LANG_ENABLED = "F_LANG_Enabled";
-		public const string LANG_DISABLED = "F_LANG_Disabled";
-		public const string LANG_PLAYER = "F_LANG_Player";
-		public const string LANG_PLAYERS = "F_LANG_Players";
+		public const string FREECAM_ENABLED = "F_Client_FreeCamInputEnabled";
+		public const string FREECAM_DISABLED = "F_Client_FreeCamInputDisabled";
 	}
 }

@@ -7,6 +7,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using UnityEngine;
 
@@ -235,8 +236,7 @@ namespace Fika.Core.Coop.FreeCamera
 			if (Input.GetKeyDown(KeyCode.Home))
 			{
 				disableInput = !disableInput;
-				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.FREECAM_INPUT_TOGGLED.Localized(),
-					(disableInput ? LocaleUtils.LANG_DISABLED.Localized().ToLower() : LocaleUtils.LANG_ENABLED.Localized().ToLower())));
+				NotificationManagerClass.DisplayMessageNotification(disableInput ? LocaleUtils.FREECAM_DISABLED.Localized() : LocaleUtils.FREECAM_ENABLED.Localized());
 			}
 
 			if (disableInput)

@@ -1262,9 +1262,8 @@ namespace Fika.Core.Coop.GameMode
 			}
 			int numbersOfPlayersToWaitFor = 0;
 
-			string localizedText = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
-			string localizedPlayer = LocaleUtils.LANG_PLAYER.Localized().ToLower();
-			string localizedPlayers = LocaleUtils.LANG_PLAYERS.Localized().ToLower();
+			string localizedPlayer = LocaleUtils.UI_WAIT_FOR_PLAYER.Localized();
+			string localizedPlayers = LocaleUtils.UI_WAIT_FOR_PLAYERS.Localized();
 
 			if (isServer)
 			{
@@ -1279,9 +1278,9 @@ namespace Fika.Core.Coop.GameMode
 						
 						if (numbersOfPlayersToWaitFor > 0)
 						{
-							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(localizedText,
-								numbersOfPlayersToWaitFor,
-								(numbersOfPlayersToWaitFor > 1 ? localizedPlayers : localizedPlayer)));
+							bool multiple = numbersOfPlayersToWaitFor > 1;
+							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(multiple ? localizedPlayers : localizedPlayer,
+								numbersOfPlayersToWaitFor));
 						}
 						else
 						{
@@ -1334,9 +1333,9 @@ namespace Fika.Core.Coop.GameMode
 					{
 						if (numbersOfPlayersToWaitFor > 0)
 						{
-							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(localizedText,
-								numbersOfPlayersToWaitFor,
-								(numbersOfPlayersToWaitFor > 1 ? localizedPlayers : localizedPlayer)));
+							bool multiple = numbersOfPlayersToWaitFor > 1;
+							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(multiple ? localizedPlayers : localizedPlayer,
+								numbersOfPlayersToWaitFor));
 						}
 						else
 						{
