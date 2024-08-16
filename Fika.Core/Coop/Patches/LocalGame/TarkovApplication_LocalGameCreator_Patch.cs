@@ -54,8 +54,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
 			LocationSettingsClass.Location location = raidSettings.SelectedLocation;
 
-			FikaBackendUtils.ScreenController = timeHasComeScreenController;
-
 			if (Singleton<NotificationManagerClass>.Instantiated)
 			{
 				Singleton<NotificationManagerClass>.Instance.Deactivate();

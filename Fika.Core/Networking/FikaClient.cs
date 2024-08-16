@@ -172,6 +172,12 @@ namespace Fika.Core.Networking
 		{
 			if (!packet.IsRequest)
 			{
+				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+				if (coopGame == null)
+				{
+					return;
+				}
+
 				switch (packet.Type)
 				{
 					case ReconnectPacket.EReconnectDataType.Throwable:
@@ -181,7 +187,7 @@ namespace Fika.Core.Networking
 							logger.LogWarning("Received reconnect packet for throwables: " + packet.ThrowableData.Count);
 #endif
 							string localizedString = LocaleUtils.UI_SYNC_THROWABLES.Localized();
-							FikaBackendUtils.ScreenController.ChangeStatus(localizedString);
+							coopGame.SetMatchmakerStatus(localizedString);
 							Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
 						}
 						break;
@@ -209,7 +215,7 @@ namespace Fika.Core.Networking
 									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct384 value))
 									{
 										progress++;
-										FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
+										coopGame.SetMatchmakerStatus(localizedString, progress / total);
 										item.SetInitialSyncState(value);
 									}
 								}
@@ -233,7 +239,7 @@ namespace Fika.Core.Networking
 								foreach (KeyValuePair<int, byte> lampState in packet.LampStates)
 								{
 									progress++;
-									FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
+									coopGame.SetMatchmakerStatus(localizedString, progress / total);
 									if (lampControllerDictionary.TryGetValue(lampState.Key, out LampController lampController))
 									{
 										if (lampController.LampState != (Turnable.EState)lampState.Value)
@@ -264,7 +270,7 @@ namespace Fika.Core.Networking
 									{
 										progress++;
 
-										FikaBackendUtils.ScreenController.ChangeStatus(localizedString, progress / total);
+										coopGame.SetMatchmakerStatus(localizedString, progress / total);
 										try
 										{
 											DamageInfo damageInfo = default;
@@ -284,13 +290,13 @@ namespace Fika.Core.Networking
 #if DEBUG
 						logger.LogWarning("Received reconnect packet for own player");
 #endif
-						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RECEIVE_OWN_PLAYERS.Localized());
+						coopGame.SetMatchmakerStatus(LocaleUtils.UI_RECEIVE_OWN_PLAYERS.Localized());
 						coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
 						coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
 						FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
 						break;
 					case ReconnectPacket.EReconnectDataType.Finished:
-						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
+						coopGame.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
 						ReconnectDone = true;
 						break;
 					default:
