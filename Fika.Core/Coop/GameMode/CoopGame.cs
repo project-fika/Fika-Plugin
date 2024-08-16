@@ -243,9 +243,9 @@ namespace Fika.Core.Coop.GameMode
 
 		public override void SetMatchmakerStatus(string status, float? progress = null)
 		{
-			if (CurrentScreenSingleton.Instance.CurrentScreenController is MatchmakerTimeHasCome.TimeHasComeScreenClass gclass)
+			if (CurrentScreenSingleton.Instance.CurrentScreenController is MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreen)
 			{
-				gclass.ChangeStatus(status, progress);
+				timeHasComeScreen.ChangeStatus(status, progress);
 			}
 		}
 
@@ -637,7 +637,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!isServer)
 			{
-				FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_HOST_FINISH_INIT.Localized());
+				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_FINISH_INIT.Localized());
 
 				FikaClient client = Singleton<FikaClient>.Instance;
 				do
@@ -702,7 +702,7 @@ namespace Fika.Core.Coop.GameMode
 				NetDataWriter writer = new();
 
 				float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
-				FikaBackendUtils.ScreenController.ChangeStatus("Waiting for other players to finish loading...", (float)(1 / expectedPlayers));
+				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)(1 / expectedPlayers));
 
 				if (isServer)
 				{
@@ -724,7 +724,7 @@ namespace Fika.Core.Coop.GameMode
 					do
 					{
 						await Task.Yield();
-						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
+						SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
 					} while (server.ReadyClients < expectedPlayers);
 
 					foreach (CoopPlayer player in coopHandler.Players.Values)
@@ -757,7 +757,7 @@ namespace Fika.Core.Coop.GameMode
 					do
 					{
 						await Task.Yield();
-						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
+						SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
 					} while (client.ReadyClients < expectedPlayers);
 				}
 			}
@@ -778,7 +778,7 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		private async Task SendOrReceiveSpawnPoint()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_SPAWN_INFO.Localized());
+			SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_SPAWN_INFO.Localized());
 			if (isServer)
 			{
 				bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
@@ -1018,7 +1018,7 @@ namespace Fika.Core.Coop.GameMode
 					}
 					else
 					{
-						FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_LOOT.Localized());
+						SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_LOOT.Localized());
 						if (!FikaBackendUtils.IsReconnect)
 						{
 							await RetrieveLootFromServer(true);
@@ -1097,7 +1097,7 @@ namespace Fika.Core.Coop.GameMode
 			InformationPacket packet = new(true);
 			do
 			{
-				FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAIT_FOR_HOST_INIT.Localized());
+				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_INIT.Localized());
 				client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
 				await Task.Delay(1000);
@@ -1124,7 +1124,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private async Task Reconnect()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RECONNECTING.Localized());
+			SetMatchmakerStatus(LocaleUtils.UI_RECONNECTING.Localized());
 
 			ReconnectPacket reconnectPacket = new(true)
 			{
@@ -1217,7 +1217,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private async Task InitExfils()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_EXFIL_DATA.Localized());
+			SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_EXFIL_DATA.Localized());
 			FikaClient client = Singleton<FikaClient>.Instance;
 			ExfiltrationPacket exfilPacket = new(true);
 
@@ -1235,7 +1235,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private async Task InitInteractables()
 		{
-			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_RETRIEVE_INTERACTABLES.Localized());
+			SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_INTERACTABLES.Localized());
 			FikaClient client = Singleton<FikaClient>.Instance;
 			InteractableInitPacket packet = new(true);
 
@@ -1250,6 +1250,7 @@ namespace Fika.Core.Coop.GameMode
 			} while (!InteractablesInitialized);
 		}
 
+
 		/// <summary>
 		/// <see cref="Task"/> used to wait for all other players to join the game
 		/// </summary>
@@ -1258,10 +1259,7 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Logger.LogInfo("Starting task to wait for other players.");
 
-			if (FikaBackendUtils.ScreenController != null)
-			{
-				FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_INIT_COOP_GAME.Localized());
-			}
+			SetMatchmakerStatus(LocaleUtils.UI_INIT_COOP_GAME.Localized());
 			int numbersOfPlayersToWaitFor = 0;
 
 			string localizedPlayer = LocaleUtils.UI_WAIT_FOR_PLAYER.Localized();
@@ -1275,23 +1273,15 @@ namespace Fika.Core.Coop.GameMode
 				do
 				{
 					numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (server.NetServer.ConnectedPeersCount + 1);
-					if (FikaBackendUtils.ScreenController != null)
+					if (numbersOfPlayersToWaitFor > 0)
 					{
-						
-						if (numbersOfPlayersToWaitFor > 0)
-						{
-							bool multiple = numbersOfPlayersToWaitFor > 1;
-							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(multiple ? localizedPlayers : localizedPlayer,
-								numbersOfPlayersToWaitFor));
-						}
-						else
-						{
-							FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_ALL_PLAYERS_JOINED.Localized());
-						}
+						bool multiple = numbersOfPlayersToWaitFor > 1;
+						SetMatchmakerStatus(string.Format(multiple ? localizedPlayers : localizedPlayer,
+							numbersOfPlayersToWaitFor));
 					}
 					else
 					{
-						Logger.LogError("WaitForPlayers::GClass3163 was null!");
+						SetMatchmakerStatus(LocaleUtils.UI_ALL_PLAYERS_JOINED.Localized());
 					}
 					await Task.Delay(100);
 				} while (numbersOfPlayersToWaitFor > 0);
@@ -1310,7 +1300,7 @@ namespace Fika.Core.Coop.GameMode
 				while (client.ServerConnection == null && connectionAttempts < 5)
 				{
 					// Server retries 10 times with a 500ms interval, we give it 5 seconds to try
-					FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_WAITING_FOR_CONNECT.Localized());
+					SetMatchmakerStatus(LocaleUtils.UI_WAITING_FOR_CONNECT.Localized());
 					connectionAttempts++;
 					await Task.Delay(1000);
 
@@ -1331,22 +1321,15 @@ namespace Fika.Core.Coop.GameMode
 				do
 				{
 					numbersOfPlayersToWaitFor = FikaBackendUtils.HostExpectedNumberOfPlayers - (client.ConnectedClients + 1);
-					if (FikaBackendUtils.ScreenController != null)
+					if (numbersOfPlayersToWaitFor > 0)
 					{
-						if (numbersOfPlayersToWaitFor > 0)
-						{
-							bool multiple = numbersOfPlayersToWaitFor > 1;
-							FikaBackendUtils.ScreenController.ChangeStatus(string.Format(multiple ? localizedPlayers : localizedPlayer,
-								numbersOfPlayersToWaitFor));
-						}
-						else
-						{
-							FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_ALL_PLAYERS_JOINED.Localized());
-						}
+						bool multiple = numbersOfPlayersToWaitFor > 1;
+						SetMatchmakerStatus(string.Format(multiple ? localizedPlayers : localizedPlayer,
+							numbersOfPlayersToWaitFor));
 					}
 					else
 					{
-						Logger.LogError("WaitForPlayers::GClass3163 was null!");
+						SetMatchmakerStatus(LocaleUtils.UI_ALL_PLAYERS_JOINED.Localized());
 					}
 					client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 					await Task.Delay(1000);
@@ -1547,7 +1530,7 @@ namespace Fika.Core.Coop.GameMode
 
 			Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
 
-			FikaBackendUtils.ScreenController.ChangeStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 		}
 
 		/// <summary>

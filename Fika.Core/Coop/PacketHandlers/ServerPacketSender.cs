@@ -174,23 +174,32 @@ namespace Fika.Core.Coop.PacketHandlers
 
 			if (lastPingTime < DateTime.Now.AddSeconds(-3))
 			{
-				Transform origin;
+				Transform originTransform;
+				Ray sourceRaycast;
 				FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
 				if (freeCamController != null && freeCamController.IsScriptActive)
 				{
-					origin = freeCamController.CameraMain.gameObject.transform;
+					originTransform = freeCamController.CameraMain.gameObject.transform;
+					sourceRaycast = new(originTransform.position + originTransform.forward / 2f,
+					player.LookDirection);
 				}
 				else if (player.HealthController.IsAlive)
 				{
-					origin = player.CameraPosition;
+					if (player.HandsController is CoopClientFirearmController controller)
+					{
+						sourceRaycast = new(controller.FireportPosition, controller.WeaponDirection);
+					}
+					else
+					{
+						originTransform = player.CameraPosition;
+						sourceRaycast = new(originTransform.position + originTransform.forward / 2f,
+						player.LookDirection);
+					}
 				}
 				else
 				{
 					return;
 				}
-
-				Ray sourceRaycast = new(origin.position + origin.forward / 2f,
-					origin.forward);
 				int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
 				if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
 				{
