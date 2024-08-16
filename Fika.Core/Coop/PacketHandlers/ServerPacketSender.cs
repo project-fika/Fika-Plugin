@@ -185,7 +185,7 @@ namespace Fika.Core.Coop.PacketHandlers
 				}
 				else if (player.HealthController.IsAlive)
 				{
-					if (player.HandsController is CoopClientFirearmController controller)
+					if (player.HandsController is CoopClientFirearmController controller && controller.IsAiming)
 					{
 						sourceRaycast = new(controller.FireportPosition, controller.WeaponDirection);
 					}
