@@ -10,80 +10,76 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Components
 {
-    internal class CoopHalloweenEventManager : MonoBehaviour
-    {
-        ManualLogSource Logger;
+	internal class CoopHalloweenEventManager : MonoBehaviour
+	{
+		ManualLogSource Logger;
 
-        private Action summonStartedAction;
-        private Action syncStateEvent;
-        private Action syncExitsEvent;
+		private Action summonStartedAction;
+		private Action syncStateEvent;
+		private Action syncExitsEvent;
 
-        private FikaServer server;
-        private NetDataWriter writer = new();
+		private FikaServer server;
 
-        protected void Awake()
-        {
-            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopHalloweenEventManager");
-        }
+		protected void Awake()
+		{
+			Logger = BepInEx.Logging.Logger.CreateLogSource("CoopHalloweenEventManager");
+		}
 
-        protected void Start()
-        {
-            Logger.LogInfo("Initializing");
+		protected void Start()
+		{
+			Logger.LogInfo("Initializing");
 
-            //Destroy on client as we dont need to listen to these events, and receive them from the host.
-            if (FikaBackendUtils.IsClient)
-            {
-                Logger.LogInfo("Running on client, destroying");
+			//Destroy on client as we dont need to listen to these events, and receive them from the host.
+			if (FikaBackendUtils.IsClient)
+			{
+				Logger.LogInfo("Running on client, destroying");
 
-                Destroy(this);
+				Destroy(this);
 
-                return;
-            }
+				return;
+			}
 
-            server = Singleton<FikaServer>.Instance;
+			server = Singleton<FikaServer>.Instance;
 
-            summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSummonStartedEvent>(this.OnHalloweenSummonStarted));
-            syncStateEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncStateEvent>(this.OnHalloweenSyncStateEvent));
-            syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncExitsEvent>(this.OnHalloweenSyncExitsEvent));
-        }
+			summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSummonStartedEvent>(this.OnHalloweenSummonStarted));
+			syncStateEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncStateEvent>(this.OnHalloweenSyncStateEvent));
+			syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncExitsEvent>(this.OnHalloweenSyncExitsEvent));
+		}
 
-        private void OnHalloweenSummonStarted(HalloweenSummonStartedEvent summonStartedEvent)
-        {
-            Logger.LogDebug("OnHalloweenSummonStarted");
+		private void OnHalloweenSummonStarted(HalloweenSummonStartedEvent summonStartedEvent)
+		{
+			Logger.LogDebug("OnHalloweenSummonStarted");
 
-            HalloweenEventPacket packet = new(EHalloweenPacketType.Summon)
-            {
-                SummonPosition = summonStartedEvent.PointPosition
-            };
+			HalloweenEventPacket packet = new(EHalloweenPacketType.Summon)
+			{
+				SummonPosition = summonStartedEvent.PointPosition
+			};
 
-            writer.Reset();
-            server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
-        }
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
 
-        private void OnHalloweenSyncStateEvent(HalloweenSyncStateEvent syncStateEvent)
-        {
-            Logger.LogDebug("OnHalloweenSyncStateEvent");
+		private void OnHalloweenSyncStateEvent(HalloweenSyncStateEvent syncStateEvent)
+		{
+			Logger.LogDebug("OnHalloweenSyncStateEvent");
 
-            HalloweenEventPacket packet = new(EHalloweenPacketType.Sync)
-            {
-                EventState = syncStateEvent.EventState
-            };
+			HalloweenEventPacket packet = new(EHalloweenPacketType.Sync)
+			{
+				EventState = syncStateEvent.EventState
+			};
 
-            writer.Reset();
-            server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
-        }
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
 
-        private void OnHalloweenSyncExitsEvent(HalloweenSyncExitsEvent syncStateEvent)
-        {
-            Logger.LogDebug("OnHalloweenSyncExitsEvent");
+		private void OnHalloweenSyncExitsEvent(HalloweenSyncExitsEvent syncStateEvent)
+		{
+			Logger.LogDebug("OnHalloweenSyncExitsEvent");
 
-            HalloweenEventPacket packet = new(EHalloweenPacketType.Exit)
-            {
-                Exit = syncStateEvent.ExitName
-            };
+			HalloweenEventPacket packet = new(EHalloweenPacketType.Exit)
+			{
+				Exit = syncStateEvent.ExitName
+			};
 
-            writer.Reset();
-            server.SendDataToAll(writer, ref packet, DeliveryMethod.ReliableOrdered);
-        }
-    }
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
+	}
 }

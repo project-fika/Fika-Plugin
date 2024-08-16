@@ -5,18 +5,18 @@ using UnityEngine.UI;
 
 namespace Fika.Core.Coop.Custom
 {
-    internal class FikaPing : MonoBehaviour
-    {
-        Image image;
+	internal class FikaPing : MonoBehaviour
+	{
+		Image image;
 
-        private void Awake()
-        {
-            image = GetComponent<Image>();
-        }
+		private void Awake()
+		{
+			image = GetComponent<Image>();
+		}
 
-        private void Update()
-        {
+		private void Update()
+		{
 
-        }
-    }
+		}
+	}
 }
