@@ -180,20 +180,18 @@ namespace Fika.Core.Coop.PacketHandlers
 				if (freeCamController != null && freeCamController.IsScriptActive)
 				{
 					originTransform = freeCamController.CameraMain.gameObject.transform;
-					sourceRaycast = new(originTransform.position + originTransform.forward / 2f,
-					player.LookDirection);
+					sourceRaycast = new(originTransform.position + originTransform.forward / 2f, originTransform.forward);
 				}
 				else if (player.HealthController.IsAlive)
 				{
-					if (player.HandsController is CoopClientFirearmController controller)
+					if (player.HandsController is CoopClientFirearmController controller && controller.IsAiming)
 					{
 						sourceRaycast = new(controller.FireportPosition, controller.WeaponDirection);
 					}
 					else
 					{
 						originTransform = player.CameraPosition;
-						sourceRaycast = new(originTransform.position + originTransform.forward / 2f,
-						player.LookDirection);
+						sourceRaycast = new(originTransform.position + originTransform.forward / 2f, player.LookDirection);
 					}
 				}
 				else
