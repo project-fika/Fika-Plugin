@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0169
-using System.Collections;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -24,13 +23,13 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
 		while (handleImage.color.a > 0)
 		{
 			yield return new WaitForFixedUpdate();
-			handleImage.color = new Color(255, 255, 255, handleImage.color.a - 0.15f);
+			handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a - 0.15f);
 			handleText.color = new Color(0, 0, 0, handleText.color.a - 0.15f);
 		}
 		while (handleText.color.a < 1)
 		{
 			yield return new WaitForFixedUpdate();
-			handleText.color = new Color(255, 255, 255, handleText.color.a + 0.15f);
+			handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a + 0.15f);
 		}
 	}
 
@@ -39,12 +38,12 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
 		while (handleText.color.a > 0)
 		{
 			yield return new WaitForFixedUpdate();
-			handleText.color = new Color(255, 255, 255, handleText.color.a - 0.15f);
+			handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a - 0.15f);
 		}
 		while (handleImage.color.a < 1)
 		{
 			yield return new WaitForFixedUpdate();
-			handleImage.color = new Color(255, 255, 255, handleImage.color.a + 0.15f);
+			handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a + 0.15f);
 			handleText.color = new Color(0, 0, 0, handleText.color.a + 0.15f);
 		}
 	}
