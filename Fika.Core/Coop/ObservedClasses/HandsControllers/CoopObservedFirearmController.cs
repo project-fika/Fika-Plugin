@@ -128,22 +128,28 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public override void OnPlayerDead()
 		{
-			triggerPressed = false;
-			SetTriggerPressed(false);
-
-			needsReset = false;
-			WeaponSoundPlayer.OnBreakLoop();
-
-			coopPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
-			ManualUpdate(Time.fixedDeltaTime);
-			if (CurrentOperation.State != EOperationState.Finished)
+			try
 			{
-				CurrentOperation.FastForward();
+				base.OnPlayerDead();
+				triggerPressed = false;
+				SetTriggerPressed(false);
+
+				needsReset = false;
+				WeaponSoundPlayer.OnBreakLoop();
+
+				coopPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
+				ManualUpdate(Time.fixedDeltaTime);
+				if (CurrentOperation.State != EOperationState.Finished)
+				{
+					CurrentOperation.FastForward();
+				}
+
+				StartCoroutine(BreakFiringLoop());
 			}
-
-			StartCoroutine(BreakFiringLoop());
-
-			base.OnPlayerDead();
+			catch (Exception ex)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController: Exception was caught: " + ex.Message);
+			}	
 		}
 
 		private IEnumerator BreakFiringLoop()
