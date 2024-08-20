@@ -111,7 +111,7 @@ namespace Fika.Core.Coop.Players
 
 			foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
 			{
-				player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+				player.InventoryControllerClass.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
 			}
 
 			player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
