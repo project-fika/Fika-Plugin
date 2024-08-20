@@ -247,6 +247,8 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 
 			// Spectate previous player
+			// TODO there is this bug when there are no more bots, we snap to the player in space and get 'empty' entries in the player list so we have to spam click to swap to the map, and map position is 0,0,0 too
+			// We should also keep refreshing the bot list if more spawn
 			if (Input.GetKeyDown(KeyCode.Mouse1))
 			{
 				CycleSpectatePlayers(true);
