@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Interactive;
 using EFT.UI;
 using EFT.Weather;
@@ -276,7 +277,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 					if (FikaPlugin.PlayPingAnimation.Value)
 					{
-						player.vmethod_3(EGesture.ThatDirection);
+						player.vmethod_3(EGesture.There);
 					}
 				}
 			}

@@ -1540,7 +1540,7 @@ namespace Fika.Core.Coop.GameMode
 		[Obsolete("Not implemented yet", true)]
 		private void HandleHostTrain(Locomotive.ETravelState state)
 		{
-			MovingPlatform.GClass2998 platformAdapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
+			MovingPlatform.GClass3195 platformAdapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
 			if (!platformAdapter.HasNetPacket)
 			{
 				return;

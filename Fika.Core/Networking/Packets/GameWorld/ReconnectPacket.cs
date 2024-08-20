@@ -19,7 +19,7 @@ namespace Fika.Core.Networking.Packets.GameWorld
 		public Vector3 PlayerPosition;
 
 		public List<GStruct35> ThrowableData;
-		public List<WorldInteractiveObject.GStruct390> InteractivesData;
+		public List<WorldInteractiveObject.GStruct388> InteractivesData;
 		public Dictionary<int, byte> LampStates;
 		public Dictionary<int, Vector3> WindowBreakerStates;
 

@@ -104,7 +104,7 @@ namespace Fika.Core.Networking
 
 		public async Task Init()
 		{
-			NetworkGameSession.RTT = 0;
+			NetworkGameSession.Rtt = 0;
 			NetworkGameSession.LossPercent = 0;
 
 			// Start at 1 to avoid having 0 and making us think it's working when it's not
@@ -283,7 +283,7 @@ namespace Fika.Core.Networking
 				GameWorld gameWorld = Singleton<GameWorld>.Instance;
 				Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
-				GClass738<int, Throwable>.GStruct43 grenades = gameWorld.Grenades.GetValuesEnumerator();
+				GClass759<int, Throwable>.GStruct44 grenades = gameWorld.Grenades.GetValuesEnumerator();
 				List<GStruct35> smokeData = [];
 				foreach (Throwable item in grenades)
 				{
@@ -304,7 +304,7 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref throwablePacket, DeliveryMethod.ReliableOrdered);
 				}
 
-				List<WorldInteractiveObject.GStruct390> interactivesData = [];
+				List<WorldInteractiveObject.GStruct388> interactivesData = [];
 				WorldInteractiveObject[] worldInteractiveObjects = worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
 				foreach (WorldInteractiveObject interactiveObject in worldInteractiveObjects)
 				{
@@ -346,7 +346,7 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
 				}
 
-				GClass738<int, WindowBreaker>.GStruct43 windows = gameWorld.Windows.GetValuesEnumerator();
+				GClass759<int, WindowBreaker>.GStruct44 windows = gameWorld.Windows.GetValuesEnumerator();
 				Dictionary<int, Vector3> windowData = [];
 				foreach (WindowBreaker window in windows)
 				{
@@ -586,7 +586,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<GameWorld>.Instance.MineManager != null)
 			{
-				NetworkGame<EftGamePlayerOwner>.Class1433 mineSeeker = new()
+				NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
 				{
 					minePosition = packet.MinePositon
 				};

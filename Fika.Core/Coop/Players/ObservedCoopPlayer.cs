@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Ballistics;
 using EFT.HealthSystem;
 using EFT.Interactive;
@@ -510,7 +511,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void vmethod_3(EGesture gesture)
 		{
-			if (gesture == EGesture.Hello)
+			if (gesture == EGesture.Friendly)
 			{
 				InteractionRaycast();
 				if (InteractablePlayer != null)

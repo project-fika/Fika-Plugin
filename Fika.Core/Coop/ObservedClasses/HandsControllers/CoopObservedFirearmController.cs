@@ -195,7 +195,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			// Do nothing
 		}
 
-		public void HandleFirearmPacket(in WeaponPacket packet, InventoryControllerClass inventoryController)
+		public void HandleFirearmPacket(in WeaponPacket packet, InventoryController inventoryController)
 		{
 			if (packet.HasShotInfo)
 			{
@@ -588,7 +588,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					AmmoPackReloadingClass ammoPack = new(ammo);
 
-					ItemAddressClass gridItemAddress = null;
+					ItemAddress gridItemAddress = null;
 
 					using MemoryStream memoryStream = new(packet.ReloadBarrels.LocationDescription);
 					using BinaryReader binaryReader = new(memoryStream);

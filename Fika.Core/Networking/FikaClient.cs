@@ -79,7 +79,7 @@ namespace Fika.Core.Networking
 
 		public async void Init()
 		{
-			NetworkGameSession.RTT = 0;
+			NetworkGameSession.Rtt = 0;
 			NetworkGameSession.LossPercent = 0;
 
 			myProfileId = FikaBackendUtils.Profile.ProfileId;
@@ -195,9 +195,9 @@ namespace Fika.Core.Networking
 #endif
 								string localizedString = LocaleUtils.UI_SYNC_INTERACTABLES.Localized();
 								WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
-								Dictionary<int, WorldInteractiveObject.GStruct390> netIdDictionary = [];
+								Dictionary<int, WorldInteractiveObject.GStruct388> netIdDictionary = [];
 								{
-									foreach (WorldInteractiveObject.GStruct390 data in packet.InteractivesData)
+									foreach (WorldInteractiveObject.GStruct388 data in packet.InteractivesData)
 									{
 										netIdDictionary.Add(data.NetId, data);
 									}
@@ -207,7 +207,7 @@ namespace Fika.Core.Networking
 								float progress = 0f;
 								foreach (WorldInteractiveObject item in worldInteractiveObjects)
 								{
-									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct390 value))
+									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct388 value))
 									{
 										progress++;
 										coopGame.SetMatchmakerStatus(localizedString, progress / total);
@@ -226,8 +226,8 @@ namespace Fika.Core.Networking
 #endif
 								string localizedString = LocaleUtils.UI_SYNC_LAMP_STATES.Localized();
 								Dictionary<int, LampController> lampControllerDictionary = LocationScene.GetAllObjects<LampController>(true)
-														.Where(new Func<LampController, bool>(ClientWorld.Class1248.class1248_0.method_0))
-														.ToDictionary(new Func<LampController, int>(ClientWorld.Class1248.class1248_0.method_1));
+														.Where(new Func<LampController, bool>(ClientWorld.Class1282.class1282_0.method_0))
+														.ToDictionary(new Func<LampController, int>(ClientWorld.Class1282.class1282_0.method_1));
 
 								float total = packet.LampStates.Count;
 								float progress = 0f;
@@ -259,7 +259,7 @@ namespace Fika.Core.Networking
 								float total = packet.WindowBreakerStates.Count;
 								float progress = 0f;
 								foreach (WindowBreaker windowBreaker in LocationScene.GetAllObjects<WindowBreaker>(true)
-									.Where(new Func<WindowBreaker, bool>(ClientWorld.Class1248.class1248_0.method_2)))
+									.Where(new Func<WindowBreaker, bool>(ClientWorld.Class1282.class1282_0.method_2)))
 								{
 									if (windowBreakerStates.TryGetValue(windowBreaker.NetId, out Vector3 hitPosition))
 									{
@@ -312,7 +312,7 @@ namespace Fika.Core.Networking
 
 		private void OnStatisticsPacketReceived(ThrowablePacket packet)
 		{
-			GClass738<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
+			GClass759<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
 			if (grenades.TryGetByKey(packet.Data.Id, out Throwable throwable))
 			{
 				throwable.ApplyNetPacket(packet.Data);
@@ -514,7 +514,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<GameWorld>.Instance.MineManager != null)
 			{
-				NetworkGame<EftGamePlayerOwner>.Class1433 mineSeeker = new()
+				NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
 				{
 					minePosition = packet.MinePositon
 				};
@@ -678,7 +678,7 @@ namespace Fika.Core.Networking
 					break;
 				case EPackageType.TrainSync:
 					{
-						MovingPlatform.GClass2998 adapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
+						MovingPlatform.GClass3195 adapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
 						if (adapter != null)
 						{
 							GStruct130 data = new()
@@ -1034,7 +1034,7 @@ namespace Fika.Core.Networking
 		public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
 		{
 			Ping = latency;
-			NetworkGameSession.RTT = peer.RoundTripTime;
+			NetworkGameSession.Rtt = peer.RoundTripTime;
 			NetworkGameSession.LossPercent = (int)NetClient.Statistics.PacketLossPercent;
 		}
 

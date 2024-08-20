@@ -241,7 +241,7 @@ namespace Fika.Core.Networking
 			return throwables;
 		}
 
-		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct390> interactiveObjectsData)
+		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct388> interactiveObjectsData)
 		{
 			writer.Put(interactiveObjectsData.Count);
 			for (int i = 0; i < interactiveObjectsData.Count; i++)
@@ -252,13 +252,13 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public static List<WorldInteractiveObject.GStruct390> GetInteractivesStates(this NetDataReader reader)
+		public static List<WorldInteractiveObject.GStruct388> GetInteractivesStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
-			List<WorldInteractiveObject.GStruct390> interactivesStates = new(amount);
+			List<WorldInteractiveObject.GStruct388> interactivesStates = new(amount);
 			for (int i = 0; i < amount; i++)
 			{
-				WorldInteractiveObject.GStruct390 data = new()
+				WorldInteractiveObject.GStruct388 data = new()
 				{
 					NetId = reader.GetInt(),
 					State = reader.GetByte(),

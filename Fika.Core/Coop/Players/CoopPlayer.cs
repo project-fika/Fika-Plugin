@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Ballistics;
 using EFT.Communications;
 using EFT.HealthSystem;
@@ -110,7 +111,7 @@ namespace Fika.Core.Coop.Players
 
 			foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
 			{
-				player.InventoryControllerClass.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+				player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
 			}
 
 			player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
@@ -610,7 +611,7 @@ namespace Fika.Core.Coop.Players
 			Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
 		}
 
-		public HealthSyncPacket SetupDeathPacket(GStruct349 packet)
+		public HealthSyncPacket SetupDeathPacket(GStruct352 packet)
 		{
 			float num = EFTHardSettings.Instance.HIT_FORCE;
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);

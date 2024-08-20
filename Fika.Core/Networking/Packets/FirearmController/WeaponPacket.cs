@@ -1,5 +1,6 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.InventoryLogic;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.FikaSerialization;
