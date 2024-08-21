@@ -7,7 +7,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -347,25 +346,25 @@ namespace Fika.Core.Coop.ClientClasses
 			CurrentOperation.ReloadWithAmmo(ammoPack, callback, new Callback(handler.Process));
 		}
 
-        public override bool SetLightsState(FirearmLightStateStruct[] lightsStates, bool force = false, bool animated = true)
-        {
-            if (force || CurrentOperation.CanChangeLightState(lightsStates))
-            {
-                coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
-                {
-                    ToggleTacticalCombo = true,
-                    LightStatesPacket = new()
-                    {
-                        Amount = lightsStates.Length,
-                        LightStates = lightsStates
-                    }
-                });
-            }
-           
-			return base.SetLightsState(lightsStates, force);
-        }
+		public override bool SetLightsState(FirearmLightStateStruct[] lightsStates, bool force = false, bool animated = true)
+		{
+			if (force || CurrentOperation.CanChangeLightState(lightsStates))
+			{
+				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+				{
+					ToggleTacticalCombo = true,
+					LightStatesPacket = new()
+					{
+						Amount = lightsStates.Length,
+						LightStates = lightsStates
+					}
+				});
+			}
 
-        public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
+			return base.SetLightsState(lightsStates, force);
+		}
+
+		public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
 		{
 			SendScopeStates(scopeStates);
 			base.SetScopeMode(scopeStates);

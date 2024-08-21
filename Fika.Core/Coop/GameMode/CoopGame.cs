@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
+using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
@@ -43,8 +44,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
-using ComponentAce.Compression.Libs.zlib;
-using static LocationSettingsClass;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -85,8 +84,8 @@ namespace Fika.Core.Coop.GameMode
 		public RaidSettings RaidSettings { get; private set; }
 		public byte[] HostLootItems { get; private set; }
 		public GClass1279 LootItems { get; internal set; } = [];
-		BossSpawnScenario IBotGame.BossSpawnScenario 
-		{ 
+		BossSpawnScenario IBotGame.BossSpawnScenario
+		{
 			get
 			{
 				return bossSpawnScenario;
@@ -112,7 +111,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				return WeatherController.Instance.WeatherCurve;
 			}
-		}		
+		}
 
 		private static ManualLogSource Logger;
 
@@ -1004,7 +1003,7 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				throw new NullReferenceException("CoopHandler was missing!");
-			}			
+			}
 
 			ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, !isServer, "");
 
@@ -2005,33 +2004,33 @@ namespace Fika.Core.Coop.GameMode
 		/// <param name="fromDeath"></param>
 		/// <returns></returns>
 		private async Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
-        {
-            if (hasSaved)
-            {
-                return;
-            }
-
-            if (fromDeath)
-            {
-                //Since we're bypassing saving on exiting, run this now.
-                player.Profile.EftStats.LastPlayerState = null;
-                player.StatisticsManager.EndStatisticsSession(exitStatus, PastTime);
-                player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
-            }
-
-            TimeSpan playTimeDuration = EFTDateTimeClass.Now - dateTime_0;
-
-            GClass1850 parameters = new()
+		{
+			if (hasSaved)
 			{
-                profile = Profile_0.ToUnparsedData(Array.Empty<JsonConverter>()),
-                result = exitStatus,
-                killerId = gparam_0.Player.KillerId,
-                killerAid = gparam_0.Player.KillerAccountId,
-                exitName = exitName,
-                inSession = true,
-                favorite = (Profile_0.Info.Side == EPlayerSide.Savage),
-                playTime = (int)playTimeDuration.Duration().TotalSeconds
-            };
+				return;
+			}
+
+			if (fromDeath)
+			{
+				//Since we're bypassing saving on exiting, run this now.
+				player.Profile.EftStats.LastPlayerState = null;
+				player.StatisticsManager.EndStatisticsSession(exitStatus, PastTime);
+				player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
+			}
+
+			TimeSpan playTimeDuration = EFTDateTimeClass.Now - dateTime_0;
+
+			GClass1850 parameters = new()
+			{
+				profile = Profile_0.ToUnparsedData(Array.Empty<JsonConverter>()),
+				result = exitStatus,
+				killerId = gparam_0.Player.KillerId,
+				killerAid = gparam_0.Player.KillerAccountId,
+				exitName = exitName,
+				inSession = true,
+				favorite = (Profile_0.Info.Side == EPlayerSide.Savage),
+				playTime = (int)playTimeDuration.Duration().TotalSeconds
+			};
 
 			try
 			{
@@ -2041,8 +2040,8 @@ namespace Fika.Core.Coop.GameMode
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("Exception caught when saving: " + ex.Message);
 			}
-            hasSaved = true;
-        }
+			hasSaved = true;
+		}
 
 		/// <summary>
 		/// Stops the local <see cref="CoopGame"/> when waiting for other players

@@ -1,7 +1,6 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using EFT;
-using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 

@@ -2,7 +2,6 @@
 
 using Comfort.Common;
 using EFT;
-using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Interactive;
 using EFT.UI;
 using EFT.Weather;

@@ -2,9 +2,7 @@
 
 using Comfort.Common;
 using EFT;
-using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Ballistics;
-using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
@@ -905,7 +903,7 @@ namespace Fika.Core.Coop.Players
 
 				if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
 				{
-					NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(), 
+					NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
 						ColorizeText(Colors.GREEN, Profile.Info.MainProfileNickname)),
 					EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
 				}

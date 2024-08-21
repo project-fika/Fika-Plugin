@@ -9,7 +9,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;

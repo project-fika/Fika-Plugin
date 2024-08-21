@@ -1,11 +1,4 @@
-﻿using EFT;
-using Fika.Core.Coop.Players;
-using HarmonyLib;
-using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Reflection;
-
-namespace Fika.Core.Coop.Patches.Overrides
+﻿namespace Fika.Core.Coop.Patches.Overrides
 {
 	//Todo: Delete? Was merged back in from dev?
 	/*

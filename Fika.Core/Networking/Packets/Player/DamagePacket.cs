@@ -2,7 +2,6 @@
 using EFT.Ballistics;
 using LiteNetLib.Utils;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace Fika.Core.Networking
 {

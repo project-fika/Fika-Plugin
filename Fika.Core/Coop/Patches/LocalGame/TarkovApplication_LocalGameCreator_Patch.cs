@@ -13,10 +13,8 @@ using HarmonyLib;
 using JsonType;
 using SPT.Reflection.Patching;
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {

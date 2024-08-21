@@ -5,7 +5,6 @@ using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
-using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -35,7 +34,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static Fika.Core.Networking.Packets.GameWorld.ReconnectPacket;
 using static Fika.Core.Utils.ColorUtils;
 
@@ -599,7 +597,7 @@ namespace Fika.Core.Networking
 				mineDirectional.Explosion();
 			}
 		}
-		
+
 		private void OnWeatherPacketReceived(WeatherPacket packet, NetPeer peer)
 		{
 			if (packet.IsRequest)

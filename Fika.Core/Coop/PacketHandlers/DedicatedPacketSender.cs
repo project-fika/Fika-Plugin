@@ -113,7 +113,7 @@ namespace Fika.Core.Coop.PacketHandlers
 				}
 			}
 		}
-		
+
 		public void DestroyThis()
 		{
 			FirearmPackets.Clear();

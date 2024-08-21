@@ -6,7 +6,6 @@ using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using JetBrains.Annotations;
-using System.IO;
 using static EFT.Player;
 
 namespace Fika.Core.Coop.BotClasses

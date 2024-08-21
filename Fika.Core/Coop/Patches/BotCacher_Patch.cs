@@ -1,5 +1,4 @@
 ﻿using EFT;
-using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System;
 using System.Reflection;

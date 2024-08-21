@@ -2,7 +2,6 @@
 
 using Comfort.Common;
 using EFT;
-using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Ballistics;
 using EFT.Communications;
 using EFT.HealthSystem;
@@ -11,18 +10,15 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.InventoryLogic;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -673,7 +669,7 @@ namespace Fika.Core.Coop.Players
 				base.Move(direction);
 				LastDirection = direction;
 			}
-		}				
+		}
 
 		private void HandleInteractPacket(WorldInteractionPacket packet)
 		{
@@ -978,7 +974,7 @@ namespace Fika.Core.Coop.Players
 			{
 				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy) ? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
 				base.OperateStationaryWeapon(stationaryWeapon, (GStruct171.EStationaryCommand)packet.StationaryPacket.Command);
-			}			
+			}
 
 			if (packet.Interaction != EInteraction.None)
 			{
@@ -1449,7 +1445,7 @@ namespace Fika.Core.Coop.Players
 				{
 					FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
 				}
-				return itemResult.Value; 
+				return itemResult.Value;
 			}
 			else
 			{

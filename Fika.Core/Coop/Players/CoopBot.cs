@@ -15,7 +15,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
-using LiteNetLib.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -211,9 +210,9 @@ namespace Fika.Core.Coop.Players
 					if (LastAggressor is CoopPlayer aggressor)
 					{
 						if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
-						NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
-							[ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(Colors.BROWN, name)]),
-							iconType: EFT.Communications.ENotificationIconType.Friend);
+							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+								[ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(Colors.BROWN, name)]),
+								iconType: EFT.Communications.ENotificationIconType.Friend);
 					}
 				}
 			}

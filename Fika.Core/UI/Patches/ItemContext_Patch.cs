@@ -51,7 +51,7 @@ namespace Fika.Core.UI.Patches
 				}
 
 				IEnumerable<Item> parentItems = item.GetAllParentItems();
-                if (parentItems.Any(x => x is InventoryEquipment))
+				if (parentItems.Any(x => x is InventoryEquipment))
 				{
 					return;
 				}

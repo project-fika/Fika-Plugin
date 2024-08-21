@@ -9,9 +9,7 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
-using static Class281;
 using static EFT.InventoryLogic.Slot;
 using static EFT.Player;
 
@@ -151,7 +149,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			catch (Exception ex)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController: Exception was caught: " + ex.Message);
-			}	
+			}
 		}
 
 		private IEnumerator BreakFiringLoop()
@@ -462,7 +460,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
 						throw;
 					}
-                    ItemAddress gridItemAddress = null;
+					ItemAddress gridItemAddress = null;
 					if (packet.ReloadMagPacket.LocationDescription != null)
 					{
 						try
@@ -589,7 +587,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					AmmoPackReloadingClass ammoPack = new(ammo);
 
-                    ItemAddress gridItemAddress = null;
+					ItemAddress gridItemAddress = null;
 
 					GClass1157 reader = new(packet.ReloadBarrels.LocationDescription);
 					try

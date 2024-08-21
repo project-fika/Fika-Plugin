@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using EFT.UI;
@@ -7,6 +6,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
+using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Patches.Weather;
@@ -19,9 +19,9 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
-using Fika.Core.Coop.Patches.Lighthouse;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
+using SPT.Custom.Utils;
 using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
@@ -33,7 +33,6 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using UnityEngine;
-using SPT.Custom.Utils;
 
 namespace Fika.Core
 {
@@ -238,7 +237,7 @@ namespace Fika.Core
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;			
+			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
 
 			DisableSPTPatches();
 			EnableOverridePatches();
@@ -287,7 +286,7 @@ namespace Fika.Core
 			else
 			{
 				FikaLogger.LogInfo($"Server version check passed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
-			}			
+			}
 		}
 
 		/// <summary>
