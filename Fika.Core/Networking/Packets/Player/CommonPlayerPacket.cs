@@ -22,10 +22,9 @@ namespace Fika.Core.Networking
 		public DropPacket DropPacket;
 		public bool HasStationaryPacket = false;
 		public StationaryPacket StationaryPacket;
-		public bool Pickup = false;
-		public int PickupAnimation;
 		public bool HasVaultPacket = false;
 		public VaultPacket VaultPacket;
+		public EInteraction Interaction = EInteraction.None;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -54,12 +53,10 @@ namespace Fika.Core.Networking
 			HasStationaryPacket = reader.GetBool();
 			if (HasStationaryPacket)
 				StationaryPacket = StationaryPacket.Deserialize(reader);
-			Pickup = reader.GetBool();
-			if (Pickup)
-				PickupAnimation = reader.GetInt();
 			HasVaultPacket = reader.GetBool();
 			if (HasVaultPacket)
 				VaultPacket = VaultPacket.Deserialize(reader);
+			Interaction = (EInteraction)reader.GetByte();
 		}
 
 		public void Serialize(NetDataWriter writer)
@@ -89,12 +86,10 @@ namespace Fika.Core.Networking
 			writer.Put(HasStationaryPacket);
 			if (HasStationaryPacket)
 				StationaryPacket.Serialize(writer, StationaryPacket);
-			writer.Put(Pickup);
-			if (Pickup)
-				writer.Put(PickupAnimation);
 			writer.Put(HasVaultPacket);
 			if (HasVaultPacket)
 				VaultPacket.Serialize(writer, VaultPacket);
+			writer.Put((byte)Interaction);
 		}
 	}
 }

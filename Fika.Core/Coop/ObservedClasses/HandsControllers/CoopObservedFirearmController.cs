@@ -195,7 +195,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			// Do nothing
 		}
 
-		public void HandleFirearmPacket(in WeaponPacket packet, InventoryControllerClass inventoryController)
+		public void HandleFirearmPacket(in WeaponPacket packet, InventoryController inventoryController)
 		{
 			if (packet.HasShotInfo)
 			{
@@ -228,7 +228,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						return;
 					}
 
-					Weapon.MalfState.MalfunctionedAmmo = (BulletClass)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
+					Weapon.MalfState.MalfunctionedAmmo = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
 					if (weaponPrefab != null)
 					{
 						weaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
@@ -253,7 +253,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						return;
 					}
 
-					BulletClass ammo = (BulletClass)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
+					BulletClass ammo = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
 					InitiateShot(Item, ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
 						CurrentFireport.position, packet.ShotInfoPacket.ChamberIndex, packet.ShotInfoPacket.Overheat);
 
@@ -460,7 +460,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
 						throw;
 					}
-					ItemAddressClass gridItemAddress = null;
+					ItemAddress gridItemAddress = null;
 					if (packet.ReloadMagPacket.LocationDescription != null)
 					{
 						using MemoryStream memoryStream = new(packet.ReloadMagPacket.LocationDescription);

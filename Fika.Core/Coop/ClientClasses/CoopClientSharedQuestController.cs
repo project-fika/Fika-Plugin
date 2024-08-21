@@ -11,7 +11,7 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public sealed class CoopClientSharedQuestController(Profile profile, InventoryControllerClass inventoryController,
+	public sealed class CoopClientSharedQuestController(Profile profile, InventoryController inventoryController,
 		IQuestActions session, CoopPlayer player, bool fromServer = true) : LocalQuestControllerClass(profile, inventoryController, session, fromServer)
 	{
 		private readonly CoopPlayer player = player;

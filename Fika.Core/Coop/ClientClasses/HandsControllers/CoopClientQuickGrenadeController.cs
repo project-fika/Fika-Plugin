@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.ClientClasses
 	/// <summary>
 	/// This is only used by AI
 	/// </summary>
-	internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowController
+	internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
 		public CoopPlayer coopPlayer;
 
@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public static CoopClientQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
-			return smethod_8<CoopClientQuickGrenadeController>(player, item);
+			return smethod_9<CoopClientQuickGrenadeController>(player, item);
 		}
 
 		public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)

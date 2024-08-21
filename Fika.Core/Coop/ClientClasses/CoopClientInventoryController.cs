@@ -11,11 +11,11 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public sealed class CoopClientInventoryController(Player player, Profile profile, bool examined, IPlayerSearchController searchController) : Player.PlayerOwnerInventoryController(player, profile, examined)
+	public sealed class CoopClientInventoryController : Player.PlayerOwnerInventoryController
 	{
 		public override bool HasDiscardLimits => false;
 		ManualLogSource BepInLogger { get; set; } = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
-		private readonly Player Player = player;
+		private readonly Player Player;
 		private CoopPlayer CoopPlayer
 		{
 			get
@@ -23,7 +23,22 @@ namespace Fika.Core.Coop.ClientClasses
 				return (CoopPlayer)Player;
 			}
 		}
-		private IPlayerSearchController searchController = searchController;
+		private readonly IPlayerSearchController searchController;
+
+		public CoopClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+		{
+			Player = player;
+			if (!player.IsAI && !examined)
+			{
+				IPlayerSearchController playerSearchController = new GClass1865(profile, this);
+				searchController = playerSearchController;
+			}
+			else
+			{
+				IPlayerSearchController playerSearchController = new GClass1871(profile);
+				searchController = playerSearchController;
+			}
+		}
 
 		public override IPlayerSearchController PlayerSearchController
 		{

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	internal class CoopClientGrenadeController : EFT.Player.GrenadeController
+	internal class CoopClientGrenadeController : EFT.Player.GrenadeHandsController
 	{
 		public CoopPlayer coopPlayer;
 
@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public static CoopClientGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
-			return smethod_8<CoopClientGrenadeController>(player, item);
+			return smethod_9<CoopClientGrenadeController>(player, item);
 		}
 
 		public override void ExamineWeapon()

@@ -25,7 +25,7 @@ namespace Fika.Core.Networking
 		public bool ChangeSightMode = false;
 		public ScopeStatesPacket ScopeStatesPacket;
 		public bool ToggleLauncher = false;
-		public EGesture Gesture = EGesture.None;
+		public EInteraction Interaction = EInteraction.None;
 		public bool EnableInventory = false;
 		public bool InventoryStatus = false;
 		public bool Loot = false;
@@ -80,7 +80,7 @@ namespace Fika.Core.Networking
 			if (ChangeSightMode)
 				ScopeStatesPacket = ScopeStatesPacket.Deserialize(reader);
 			ToggleLauncher = reader.GetBool();
-			Gesture = (EGesture)reader.GetInt();
+			Interaction = (EInteraction)reader.GetByte();
 			EnableInventory = reader.GetBool();
 			InventoryStatus = reader.GetBool();
 			Loot = reader.GetBool();
@@ -152,7 +152,7 @@ namespace Fika.Core.Networking
 			if (ChangeSightMode)
 				ScopeStatesPacket.Serialize(writer, ScopeStatesPacket);
 			writer.Put(ToggleLauncher);
-			writer.Put((int)Gesture);
+			writer.Put((byte)Interaction);
 			writer.Put(EnableInventory);
 			writer.Put(InventoryStatus);
 			writer.Put(Loot);
