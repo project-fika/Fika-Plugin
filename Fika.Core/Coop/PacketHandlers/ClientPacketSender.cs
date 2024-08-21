@@ -277,7 +277,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 					if (FikaPlugin.PlayPingAnimation.Value)
 					{
-						player.vmethod_3(EGesture.There);
+						player.vmethod_3(EInteraction.ThereGesture);
 					}
 				}
 			}

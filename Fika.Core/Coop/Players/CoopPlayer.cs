@@ -1387,7 +1387,7 @@ namespace Fika.Core.Coop.Players
 			_achievementsController?.ResetCurrentNullableCounters();
 		}
 
-		public virtual void SetInventory(EquipmentClass equipmentClass)
+		public virtual void SetInventory(InventoryEquipment equipmentClass)
 		{
 			// Do nothing
 		}

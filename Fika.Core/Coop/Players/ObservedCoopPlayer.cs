@@ -509,9 +509,9 @@ namespace Fika.Core.Coop.Players
 		}
 		#endregion
 
-		public override void vmethod_3(EGesture gesture)
+		public override void vmethod_3(EInteraction gesture)
 		{
-			if (gesture == EGesture.Friendly)
+			if (gesture == EInteraction.FriendlyGesture)
 			{
 				InteractionRaycast();
 				if (InteractablePlayer != null)
@@ -759,7 +759,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void SetInventory(EquipmentClass equipmentClass)
+		public override void SetInventory(InventoryEquipment equipmentClass)
 		{
 			Inventory.Equipment = equipmentClass;
 

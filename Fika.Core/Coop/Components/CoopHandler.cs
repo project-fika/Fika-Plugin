@@ -557,7 +557,7 @@ namespace Fika.Core.Coop.Components
 		/// <param name="player">The player to set the item on</param>
 		public void SetWeaponInHandsOfNewPlayer(Player player)
 		{
-			EquipmentClass equipment = player.Profile.Inventory.Equipment;
+			InventoryEquipment equipment = player.Profile.Inventory.Equipment;
 			if (equipment == null)
 			{
 				Logger.LogError($"SetWeaponInHandsOfNewPlayer: {player.Profile.Nickname}, {player.Profile.ProfileId} has no Equipment!");
