@@ -108,7 +108,7 @@ namespace Fika.Core.Coop.Components
 			{
 				isClient = false;
 				ready = true;
-				Singleton<GameWorld>.Instance.World_0.RegisterNetworkInteractionObjects(null);
+				Singleton<GameWorld>.Instance.World_0.method_0(null);
 			}
 		}
 
@@ -305,7 +305,7 @@ namespace Fika.Core.Coop.Components
 				}
 			}
 
-			int playerId = LocalGameInstance.method_16();
+			int playerId = LocalGameInstance.method_15();
 
 			IEnumerable<ResourceKey> allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths();
 			if (allPrefabPaths.Count() == 0)
@@ -410,13 +410,13 @@ namespace Fika.Core.Coop.Components
 		{
 			bool isDedicatedProfile = !isAI && profile.Info.MainProfileNickname.Contains("dedicated_");
 
-			ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(netId, position,
+			ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(LocalGameInstance.GameWorld_0, netId, position,
 				Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
 				EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
 				Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
-				GClass1477.Default).Result;
+				GClass1547.Default).Result;
 
 			if (otherPlayer == null)
 			{

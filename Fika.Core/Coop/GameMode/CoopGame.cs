@@ -98,6 +98,13 @@ namespace Fika.Core.Coop.GameMode
 				return botsController_0;
 			}
 		}
+		public BotsController BotsController
+		{
+			get
+			{
+				return botsController_0;
+			}
+		}
 		public IWeatherCurve WeatherCurve
 		{
 			get
@@ -446,7 +453,7 @@ namespace Fika.Core.Coop.GameMode
 					await WaitForPlayersToLoadBotProfile(netId);
 				}
 
-				localPlayer = await CoopBot.CreateBot(netId, position, Quaternion.identity, "Player",
+				localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
 				   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
 				   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(LocalGame.Class1457.class1457_0.method_4),
 					new Func<float>(LocalGame.Class1457.class1457_0.method_5), GClass1547.Default);

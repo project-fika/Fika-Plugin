@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public static CoopClientKnifeController Create(CoopPlayer player, KnifeComponent item)
 		{
-			return smethod_8<CoopClientKnifeController>(player, item);
+			return smethod_9<CoopClientKnifeController>(player, item);
 		}
 
 		public override void ExamineWeapon()
