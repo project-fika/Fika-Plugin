@@ -78,7 +78,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			// Do nothing
 		}
 
-		public override bool IsAbleToRotate(Vector3 motion, float deltaYaw, Quaternion predictionRotation, Transform pivot, out ECantRotate cause)
+		public override bool IsAbleToRotateProne(Vector3 motion, float deltaYaw, Quaternion predictionRotation, Transform pivot, out ECantRotate cause)
 		{
 			cause = ECantRotate.NotGround;
 			return true;
