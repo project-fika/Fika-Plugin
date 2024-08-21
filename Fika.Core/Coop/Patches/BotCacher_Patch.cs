@@ -10,7 +10,7 @@ namespace Fika.Core.Coop.Patches
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass543).GetMethod(nameof(GClass543.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+			return typeof(GClass565).GetMethod(nameof(GClass565.LoadInternal), BindingFlags.Static | BindingFlags.Public);
 		}
 
 		[PatchPrefix]
@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.Patches
 			}
 			else
 			{
-				string text = GClass543.LoadCoreByString();
+				string text = GClass565.LoadCoreByString();
 				if (text == null)
 				{
 					core = null;
@@ -42,19 +42,19 @@ namespace Fika.Core.Coop.Patches
 						botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
 						if (botSettingsComponents != null)
 						{
-							if (!GClass543.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+							if (!GClass565.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 							{
-								GClass543.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                GClass565.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 							}
 						}
 						else
 						{
-							botSettingsComponents = GClass543.smethod_1(GClass543.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
+							botSettingsComponents = GClass565.smethod_1(GClass565.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
 							if (botSettingsComponents != null)
 							{
-								if (!GClass543.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+								if (!GClass565.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 								{
-									GClass543.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                    GClass565.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 								}
 							}
 							else
