@@ -44,6 +44,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using ComponentAce.Compression.Libs.zlib;
+using static LocationSettingsClass;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -1002,44 +1003,7 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				throw new NullReferenceException("CoopHandler was missing!");
-			}
-
-			LocationSettingsClass.Location location;
-			if (Location_0.IsHideout)
-			{
-				location = Location_0;
-			}
-			else
-			{
-				using (CounterCreatorAbstractClass.StartWithToken("LoadLocation"))
-				{
-					if (isServer)
-					{
-						int num = UnityEngine.Random.Range(1, 6);
-						//method_7(backendUrl, Location_0.Id, num);
-						//Lacyway, todo: this is causing loot not to generate properly as LoadLocationLoot in the newer version, needs to be fixed up
-						//location = await iSession.LoadLocationLoot(Location_0.Id, num);
-						location = Location_0;
-						HostLootItems = SimpleZlib.CompressToBytes(location.Loot.ToJson([]), 6);
-					}
-					else
-					{
-						SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_LOOT.Localized());
-						if (!FikaBackendUtils.IsReconnect)
-						{
-							await RetrieveLootFromServer(true);
-						}
-						else
-						{
-							await RetrieveLootFromServer(false);
-						}
-						location = new()
-						{
-							Loot = LootItems
-						};
-					}
-				}
-			}
+			}			
 
 			ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, !isServer, "");
 
@@ -1064,6 +1028,27 @@ namespace Fika.Core.Coop.GameMode
 				CameraClass.Instance.IsActive = false;
 			}
 
+			LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
+			if (isServer)
+			{
+				await method_11(location);
+				HostLootItems = SimpleZlib.CompressToBytes(location.Loot.ToJson([]), 6);
+			}
+			else
+			{
+				SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_LOOT.Localized());
+				if (!FikaBackendUtils.IsReconnect)
+				{
+					await RetrieveLootFromServer(true);
+				}
+				else
+				{
+					await RetrieveLootFromServer(false);
+				}
+				location.Loot = LootItems;
+				await method_11(location);
+			}
+
 			if (FikaBackendUtils.IsReconnect)
 			{
 				await Reconnect();
@@ -1076,10 +1061,8 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
-			handler.SetReady(true);
-
-			await method_11(location);
 			await vmethod_1(botsSettings, SpawnSystem);
+			handler.SetReady(true);
 
 			if (isServer && Singleton<IBotGame>.Instantiated)
 			{

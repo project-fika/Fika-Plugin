@@ -18,6 +18,7 @@ namespace Fika.Core.Coop.ClientClasses
 			gameWorld.BufferZoneController = new BufferZoneControllerClass();
 			gameWorld.CurrentProfileId = currentProfileId;
 			gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
+			gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
 			gameObject.AddComponent<FikaHostWorld>();
 			return gameWorld;
 		}
