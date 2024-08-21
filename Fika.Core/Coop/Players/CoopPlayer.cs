@@ -792,8 +792,7 @@ namespace Fika.Core.Coop.Players
 					Item item = Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), templateId, null);
 
 					Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
-					ItemFilter[] filters = dogtagSlot.Filters; // We need to temporarily remove and then re-add these as BSG did not include the new dog tags in their ItemFilter[]
-					GStruct419<GClass3029> addResult = dogtagSlot.Add(item, false);
+					GStruct419<GClass3029> addResult = dogtagSlot.AddWithoutRestrictions(item);
 
 					if (addResult.Error != null)
 					{
@@ -1045,7 +1044,7 @@ namespace Fika.Core.Coop.Players
 
 						InventoryOperationHandler opHandler = new(result);
 
-						opHandler.opResult.Value.method_0(new Callback(opHandler.HandleResult));
+						opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
 
 						// TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
 						/*if (result.Value is GClass3122 unloadOperation)

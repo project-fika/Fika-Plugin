@@ -54,14 +54,14 @@ namespace Fika.Core.Coop.Players
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-			Func<float> getAimingSensitivity, IViewFilter filter)
+			Func<float> getAimingSensitivity, IViewFilter filter, MongoID mongoId)
 		{
 			CoopBot player = Create<CoopBot>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
 				bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
 
 			player.IsYourPlayer = false;
 
-			CoopBotInventoryController inventoryController = new CoopBotInventoryController(player, profile, true);
+			CoopBotInventoryController inventoryController = new(player, profile, true);
 
 			player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
 			player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
@@ -78,6 +78,10 @@ namespace Fika.Core.Coop.Players
 			{
 				IsAI = true
 			};
+
+			Traverse botTraverse = Traverse.Create(player);
+			botTraverse.Field<GClass856>("gclass856_0").Value = new();
+			botTraverse.Field<GClass856>("gclass856_0").Value.Initialize(player, player.PlayerBones);
 
 			player.AggressorFound = false;
 

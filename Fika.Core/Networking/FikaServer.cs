@@ -855,7 +855,7 @@ namespace Fika.Core.Networking
 #endif
 					SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
-					opHandler.opResult.Value.method_0(new Callback(opHandler.HandleResult));
+					opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
 
 					// TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
 					// Unknown what problems this might cause so far.
@@ -907,7 +907,7 @@ namespace Fika.Core.Networking
 				{
 					FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
 					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-					SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+					SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}

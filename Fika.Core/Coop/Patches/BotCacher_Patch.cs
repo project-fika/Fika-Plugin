@@ -32,7 +32,40 @@ namespace Fika.Core.Coop.Patches
 				core = CoreBotSettingsClass.Create(text);
 			}
 
-			if (FikaBackendUtils.IsServer)
+			foreach (object type in Enum.GetValues(typeof(WildSpawnType)))
+			{
+				foreach (object difficulty in Enum.GetValues(typeof(BotDifficulty)))
+				{
+					BotSettingsComponents botSettingsComponents;
+					botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
+					if (botSettingsComponents != null)
+					{
+						if (!GClass565.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+						{
+							GClass565.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+						}
+					}
+					else
+					{
+						botSettingsComponents = GClass565.smethod_1(GClass565.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
+						if (botSettingsComponents != null)
+						{
+							if (!GClass565.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+							{
+								GClass565.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+							}
+						}
+						else
+						{
+							__result = false;
+							return false;
+						}
+					}
+				}
+			}
+			__result = true;
+
+			/*if (FikaBackendUtils.IsServer)
 			{
 				foreach (object type in Enum.GetValues(typeof(WildSpawnType)))
 				{
@@ -66,7 +99,7 @@ namespace Fika.Core.Coop.Patches
 					}
 				}
 				__result = true;
-			}
+			}*/
 
 			return false;
 		}

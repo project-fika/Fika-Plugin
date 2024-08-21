@@ -31,7 +31,13 @@ namespace Fika.Core.Coop.BotClasses
 			}
 		}
 
-		public override IPlayerSearchController PlayerSearchController => throw new System.NotImplementedException();
+		public override IPlayerSearchController PlayerSearchController
+		{
+			get
+			{
+				return searchController;
+			}
+		}
 
 		public override void vmethod_1(GClass3086 operation, [CanBeNull] Callback callback)
 		{

@@ -2,6 +2,7 @@
 using EFT.Ballistics;
 using LiteNetLib.Utils;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Fika.Core.Networking
 {
@@ -18,8 +19,8 @@ namespace Fika.Core.Networking
 		public Vector3 Point = Vector3.zero;
 		public Vector3 HitNormal = Vector3.zero;
 		public float PenetrationPower = 0f;
-		public string BlockedBy;
-		public string DeflectedBy;
+		public MongoID? BlockedBy;
+		public MongoID? DeflectedBy;
 		public string SourceId;
 		public string AmmoId;
 		public int FragmentIndex;
@@ -40,8 +41,8 @@ namespace Fika.Core.Networking
 			Point = reader.GetVector3();
 			HitNormal = reader.GetVector3();
 			PenetrationPower = reader.GetFloat();
-			BlockedBy = reader.GetString();
-			DeflectedBy = reader.GetString();
+			BlockedBy = reader.GetMongoID();
+			DeflectedBy = reader.GetMongoID();
 			SourceId = reader.GetString();
 			AmmoId = reader.GetString();
 			FragmentIndex = reader.GetInt();
@@ -63,8 +64,8 @@ namespace Fika.Core.Networking
 			writer.Put(Point);
 			writer.Put(HitNormal);
 			writer.Put(PenetrationPower);
-			writer.Put(BlockedBy);
-			writer.Put(DeflectedBy);
+			writer.PutMongoID(BlockedBy);
+			writer.PutMongoID(DeflectedBy);
 			writer.Put(SourceId);
 			writer.Put(AmmoId);
 			writer.Put(FragmentIndex);

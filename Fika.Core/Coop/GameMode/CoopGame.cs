@@ -446,7 +446,8 @@ namespace Fika.Core.Coop.GameMode
 				FikaServer server = Singleton<FikaServer>.Instance;
 				netId = server.PopNetId();
 
-				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile), true, true, position, netId);
+				MongoID mongoId = MongoID.Generate(true);
+				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile, mongoId), true, true, position, netId);
 				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 
 				if (server.NetServer.ConnectedPeersCount > 0)
@@ -457,7 +458,7 @@ namespace Fika.Core.Coop.GameMode
 				localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
 				   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
 				   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(LocalGame.Class1457.class1457_0.method_4),
-					new Func<float>(LocalGame.Class1457.class1457_0.method_5), GClass1547.Default);
+					new Func<float>(LocalGame.Class1457.class1457_0.method_5), GClass1547.Default, mongoId);
 
 				localPlayer.Location = Location_0.Id;
 
@@ -906,7 +907,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!isServer && !FikaBackendUtils.IsReconnect)
 			{
-				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(coopPlayer.Profile), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
+				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(coopPlayer.Profile, coopPlayer.InventoryController.CurrentId), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
 				FikaClient client = Singleton<FikaClient>.Instance;
 
 				do
@@ -1061,8 +1062,8 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
-			await vmethod_1(botsSettings, SpawnSystem);
 			handler.SetReady(true);
+			await vmethod_1(botsSettings, SpawnSystem);
 
 			if (isServer && Singleton<IBotGame>.Instantiated)
 			{

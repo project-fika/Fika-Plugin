@@ -7,6 +7,7 @@ namespace Fika.Core.Coop.ObservedClasses
 {
 	public class ObservedInventoryController : Player.PlayerInventoryController
 	{
+		private IPlayerSearchController searchController;
 
 		public override bool HasDiscardLimits => false;
 
@@ -14,13 +15,13 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			get
 			{
-				return null;
+				return searchController;
 			}
 		}
 
 		public ObservedInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
 		{
-
+			searchController = new GClass1867();
 		}
 
 		public override void StrictCheckMagazine(MagazineClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)

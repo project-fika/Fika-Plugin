@@ -470,7 +470,7 @@ namespace Fika.Core.Coop.ObservedClasses
 							GClass1157 reader = new(packet.ReloadMagPacket.LocationDescription);
 							if (packet.ReloadMagPacket.LocationDescription.Length != 0)
 							{
-								GClass1638 descriptor = reader.ReadEFTGridItemAddressDescriptor();
+								GClass1634 descriptor = reader.ReadPolymorph<GClass1634>();
 								gridItemAddress = inventoryController.ToItemAddress(descriptor);
 							}
 						}
@@ -596,7 +596,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					{
 						if (packet.ReloadBarrels.LocationDescription.Length > 0)
 						{
-							GClass1638 descriptor = reader.ReadEFTGridItemAddressDescriptor();
+							GClass1634 descriptor = reader.ReadPolymorph<GClass1634>();
 							gridItemAddress = inventoryController.ToItemAddress(descriptor);
 						}
 					}

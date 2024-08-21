@@ -2,12 +2,9 @@
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
-using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using UnityEngine;
 using static BasePhysicalClass; // Physical struct
 
@@ -200,11 +197,7 @@ namespace Fika.Core.Networking
 		/// <returns>An <see cref="Item"/></returns>
 		public static Item GetItem(this NetDataReader reader)
 		{
-			using MemoryStream memoryStream = new(reader.GetByteArray());
-			using BinaryReader binaryReader = new(memoryStream);
-
 			GClass1157 eftReader = new(reader.GetByteArray());
-
 			return GClass1632.DeserializeItem(Singleton<ItemFactoryClass>.Instance, [], eftReader.ReadEFTItemDescriptor());
 		}
 
@@ -316,6 +309,27 @@ namespace Fika.Core.Networking
 			}
 
 			return states;
+		}
+
+		public static void PutMongoID(this NetDataWriter writer, MongoID? mongoId)
+		{
+			if (!mongoId.HasValue)
+			{
+				writer.Put(0);
+				return;
+			}
+			writer.Put(1);
+			writer.Put(mongoId.Value.ToString());
+		}
+
+		public static MongoID? GetMongoID(this NetDataReader reader)
+		{
+			int value = reader.GetInt();
+			if (value == 0)
+			{
+				return null;
+			}
+			return new(reader.GetString());
 		}
 	}
 }

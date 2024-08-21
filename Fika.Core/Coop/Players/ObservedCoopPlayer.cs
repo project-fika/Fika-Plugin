@@ -151,6 +151,10 @@ namespace Fika.Core.Coop.Players
 
 			player.AIData = new GClass533(null, player);
 
+			Traverse botTraverse = Traverse.Create(player);
+			botTraverse.Field<GClass856>("gclass856_0").Value = new();
+			botTraverse.Field<GClass856>("gclass856_0").Value.Initialize(player, player.PlayerBones);
+
 			player.AggressorFound = false;
 
 			player._animators[0].enabled = true;

@@ -85,9 +85,9 @@ namespace Fika.Core.Coop.ClientClasses
 				}
 			}
 
-			// Do not replicate quest operations
+			// Do not replicate quest operations / search operations
 			// Check for GClass increments, ReadPolymorph
-			if (operation is GClass3129 or GClass3130 or GClass3131)
+			if (operation is GClass3124 or GClass3129 or GClass3130 or GClass3131)
 			{
 				base.vmethod_1(operation, callback);
 				return;
@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HostInventoryOperationManager operationManager = new(this, operation, callback);
 				if (vmethod_0(operationManager.operation))
 				{
-					operationManager.operation.method_0(operationManager.HandleResult);
+					operationManager.operation.method_1(operationManager.HandleResult);
 
 					InventoryPacket packet = new()
 					{
@@ -200,7 +200,7 @@ namespace Fika.Core.Coop.ClientClasses
 					{
 						localOperationStatus = EOperationStatus.Started;
 						serverOperationStatus = EOperationStatus.Started;
-						operation.method_0(new Callback(callbackManager.HandleResult));
+						operation.method_1(new Callback(callbackManager.HandleResult));
 						return;
 					}
 					if (value == EOperationStatus.Finished)
