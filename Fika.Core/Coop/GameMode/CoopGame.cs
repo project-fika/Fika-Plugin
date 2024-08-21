@@ -128,16 +128,16 @@ namespace Fika.Core.Coop.GameMode
 		/// <param name="sessionTime"></param>
 		/// <param name="raidSettings"></param>
 		/// <returns></returns>
-		internal static CoopGame Create(IInputTree inputTree, Profile profile, GameDateTime backendDateTime,
+		internal static CoopGame Create(IInputTree inputTree, Profile profile, GameWorld gameWorld, GameDateTime backendDateTime,
 			InsuranceCompanyClass insurance, MenuUI menuUI, GameUI gameUI, LocationSettingsClass.Location location,
 			TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
 			Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
 			ISession backEndSession, TimeSpan sessionTime, MetricsEventsClass metricsEvents,
-			GClass2182 metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
+			GClass2283 metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
 		{
 			Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
-			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, backendDateTime, insurance, menuUI, gameUI,
+			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, backendDateTime, insurance, menuUI, gameUI,
 				location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
 				new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
 			coopGame.isServer = FikaBackendUtils.IsServer;
@@ -1896,7 +1896,7 @@ namespace Fika.Core.Coop.GameMode
 				GameUi.TimerPanel.Close();
 			}
 
-			player.HealthController.DiedEvent -= method_19;
+			player.HealthController.DiedEvent -= method_18;
 			player.HealthController.DiedEvent -= HealthController_DiedEvent;
 
 			PlayerOwner.vmethod_1();
@@ -2089,8 +2089,8 @@ namespace Fika.Core.Coop.GameMode
 			{
 				if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
 				{
-					GStruct420<GClass2844> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
-						myPlayer.InventoryControllerClass, false, true);
+					GStruct419<GClass3025> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+						myPlayer.InventoryController, false);
 					if (result.Error != null)
 					{
 						Logger.LogWarning("StopFromError: Error removing dog tag!");

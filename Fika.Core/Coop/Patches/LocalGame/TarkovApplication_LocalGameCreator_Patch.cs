@@ -26,23 +26,26 @@ namespace Fika.Core.Coop.Patches.LocalGame
 	/// </summary>
 	internal class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_47));
+		protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_46));
 
 		[PatchPrefix]
 		public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-			RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig)
+			RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents,
+			MetricsConfigClass metricsConfig, GameWorld gameWorld)
 		{
 #if DEBUG
 			Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
 #endif
 			__result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings,
-				____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl, metricsEvents, metricsConfig);
+				____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl,
+				metricsEvents, metricsConfig, gameWorld);
 			return false;
 		}
 
 		public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-			RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig)
+			RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
+			GameWorld gameWorld)
 		{
 			bool isServer = FikaBackendUtils.IsServer;
 
@@ -72,7 +75,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
 			profile.Inventory.Stash = null;
 			profile.Inventory.QuestStashItems = null;
-			profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();
+			profile.Inventory.DiscardLimits = Singleton<ItemFactoryClass>.Instance.GetDiscardLimits();
 
 #if DEBUG
 			Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
@@ -93,7 +96,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
 
-			GClass1222 profileInsurance = localSettings.profileInsurance;
+			GClass1271 profileInsurance = localSettings.profileInsurance;
 			if ((profileInsurance?.insuredItems) != null)
 			{
 				profile.InsuredItems = localSettings.profileInsurance.insuredItems;
@@ -116,13 +119,13 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
 			StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation, timeHasComeScreenController);
 
-			TimeSpan raidLimits = instance.method_48(raidSettings.SelectedLocation.EscapeTimeLimit);
+			TimeSpan raidLimits = instance.method_47(raidSettings.SelectedLocation.EscapeTimeLimit);
 
-			CoopGame coopGame = CoopGame.Create(inputTree, profile, localGameDateTime, instance.Session.InsuranceCompany,
+			CoopGame coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
 				MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
 				timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
 				fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-				new GClass2182(metricsConfig, instance), localRaidSettings, raidSettings);
+				new GClass2283(metricsConfig, instance), localRaidSettings, raidSettings);
 
 			Singleton<AbstractGame>.Create(coopGame);
 			metricsEvents.SetGameCreated();
@@ -150,7 +153,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 
 			public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
 			{
-				tarkovApplication.method_50(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
+				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
 			}
 
 			public void HandleLoadComplete(IResult error)
