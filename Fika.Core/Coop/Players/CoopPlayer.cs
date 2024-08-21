@@ -597,7 +597,7 @@ namespace Fika.Core.Coop.Players
 			UpdateInteractionCast();
 		}
 
-		public override void vmethod_3(EGesture gesture)
+		public override void vmethod_3(EInteraction gesture)
 		{
 			base.vmethod_3(gesture);
 			PacketSender.FirearmPackets.Enqueue(new()
@@ -1149,7 +1149,7 @@ namespace Fika.Core.Coop.Players
 				firearmController.HandleFirearmPacket(packet, _inventoryController);
 			}
 
-			if (packet.Gesture != EGesture.None)
+			if (packet.Gesture != EInteraction.None)
 			{
 				vmethod_3(packet.Gesture);
 			}
