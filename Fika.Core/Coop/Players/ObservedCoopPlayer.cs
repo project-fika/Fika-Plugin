@@ -315,7 +315,7 @@ namespace Fika.Core.Coop.Players
 			LastDamageType = damageInfo.DamageType;
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct395 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
 		{
 			ShotReactions(damageInfo, bodyPartType);
 
@@ -418,7 +418,7 @@ namespace Fika.Core.Coop.Players
 		{
 			RemoveHandsControllerHandler handler = new(this, callback);
 			_removeFromHandsCallback = callback;
-			Proceed(false, new Callback<GInterface137>(handler.Handle), false);
+			Proceed(false, new Callback<GInterface149>(handler.Handle), false);
 		}
 
 		public override void ApplyCorpseImpulse()
@@ -463,15 +463,15 @@ namespace Fika.Core.Coop.Players
 		public override void Proceed(GrenadeClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this, throwWeap);
-			Func<GrenadeController> func = new(factory.CreateObservedGrenadeController);
-			new Process<GrenadeController, IHandsThrowController>(this, func, throwWeap, false).method_0(null, callback, scheduled);
+			Func<GrenadeHandsController> func = new(factory.CreateObservedGrenadeController);
+			new Process<GrenadeHandsController, IHandsThrowController>(this, func, throwWeap, false).method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(GrenadeClass throwWeap, Callback<GInterface145> callback, bool scheduled = true)
+		public override void Proceed(GrenadeClass throwWeap, Callback<GInterface157> callback, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this, throwWeap);
-			Func<QuickGrenadeThrowController> func = new(factory.CreateObservedQuickGrenadeController);
-			new Process<QuickGrenadeThrowController, GInterface145>(this, func, throwWeap, false).method_0(null, callback, scheduled);
+			Func<QuickGrenadeThrowHandsController> func = new(factory.CreateObservedQuickGrenadeController);
+			new Process<QuickGrenadeThrowHandsController, GInterface157>(this, func, throwWeap, false).method_0(null, callback, scheduled);
 		}
 
 		public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)
@@ -482,7 +482,7 @@ namespace Fika.Core.Coop.Players
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface154> callback, int animationVariant, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this)
 			{
@@ -491,11 +491,11 @@ namespace Fika.Core.Coop.Players
 				animationVariant = animationVariant
 			};
 			Func<MedsController> func = new(factory.CreateObservedMedsController);
-			new Process<MedsController, GInterface142>(this, func, meds, false)
+			new Process<MedsController, GInterface154>(this, func, meds, false)
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface154> callback, int animationVariant, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this)
 			{
@@ -504,12 +504,12 @@ namespace Fika.Core.Coop.Players
 				animationVariant = animationVariant
 			};
 			Func<MedsController> func = new(factory.CreateObservedMedsController);
-			new Process<MedsController, GInterface142>(this, func, foodDrink, false)
+			new Process<MedsController, GInterface154>(this, func, foodDrink, false)
 				.method_0(null, callback, scheduled);
 		}
 		#endregion
 
-		public override void vmethod_3(EInteraction gesture)
+		public override void vmethod_6(EInteraction gesture)
 		{
 			if (gesture == EInteraction.FriendlyGesture)
 			{
@@ -519,7 +519,7 @@ namespace Fika.Core.Coop.Players
 					InteractablePlayer.ShowHelloNotification(Profile.Nickname);
 				}
 			}
-			base.vmethod_3(gesture);
+			base.vmethod_6(gesture);
 		}
 
 		public override void OnFovUpdatedEvent(int fov)
@@ -532,11 +532,6 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void BtrInteraction()
-		{
-			// Do nothing
-		}
-
 		public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
 		{
 			base.DropCurrentController(callback, fastDrop, nextControllerItem);
@@ -544,7 +539,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
 		{
-			method_34(clip);
+			method_32(clip);
 		}
 
 		public PlayerStatePacket Interpolate(in PlayerStatePacket newState, in PlayerStatePacket lastState)
@@ -778,8 +773,9 @@ namespace Fika.Core.Coop.Players
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-				PlayerBody.GClass1902 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot, Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass1902 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+				PlayerBody.GClass1977 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
+					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
+				PlayerBody.GClass1977 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
 				if (gclass2 != null)
 				{
 					gclass2.Dispose();
@@ -939,11 +935,10 @@ namespace Fika.Core.Coop.Players
 		{
 			DistanceDirty = true;
 			OcclusionDirty = true;
-			if (UpdateQueue == EUpdateQueue.FixedUpdate && !_manuallyUpdated)
+			if (UpdateQueue == EUpdateQueue.FixedUpdate)
 			{
 				return;
 			}
-			_manuallyUpdated = false;
 			if (HealthController == null || !HealthController.IsAlive)
 			{
 				return;
@@ -984,7 +979,7 @@ namespace Fika.Core.Coop.Players
 				transform.SetParent(PlayerBones.Ribcage.Original, false);
 				transform.localRotation = Quaternion.identity;
 				transform.localPosition = Vector3.zero;
-				method_29(transform.gameObject);
+				method_27(transform.gameObject);
 				Traverse.Create(this).Field("_compassInstantiated").SetValue(true);
 				return;
 			}
@@ -1104,7 +1099,7 @@ namespace Fika.Core.Coop.Players
 			_bodyupdated = true;
 			_bodyTime = deltaTime;
 
-			method_15(deltaTime);
+			method_13(deltaTime);
 
 			UpdateTriggerColliderSearcher(deltaTime, SqrCameraDistance < 1600);
 		}
@@ -1223,7 +1218,7 @@ namespace Fika.Core.Coop.Players
 		#region handControllers
 		private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
 		{
-			CreateHandsControllerHandler handler = new((item != null) ? method_71(item) : null);
+			CreateHandsControllerHandler handler = new((item != null) ? method_72(item) : null);
 
 			handler.setInHandsOperation?.Confirm(true);
 
@@ -1389,7 +1384,7 @@ namespace Fika.Core.Coop.Players
 			private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
 			private readonly Callback callback = callback;
 
-			public void Handle(Result<GInterface137> result)
+			public void Handle(Result<GInterface149> result)
 			{
 				if (coopPlayer._removeFromHandsCallback == callback)
 				{
@@ -1399,15 +1394,17 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class CreateHandsControllerHandler(Class1097 setInHandsOperation)
+		private class CreateHandsControllerHandler(Class1130 setInHandsOperation)
 		{
-			public readonly Class1097 setInHandsOperation = setInHandsOperation;
+			public readonly Class1130 setInHandsOperation = setInHandsOperation;
 
 			internal void DisposeHandler()
 			{
-				Class1097 handler = setInHandsOperation;
+				Class1130 handler = setInHandsOperation;
 				if (handler == null)
+				{
 					return;
+				}
 				handler.Dispose();
 			}
 		}
@@ -1477,7 +1474,7 @@ namespace Fika.Core.Coop.Players
 
 			internal AbstractHandsController ReturnController()
 			{
-				return QuickKnifeKickController.smethod_8<QuickKnifeKickController>(coopPlayer, knife);
+				return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(coopPlayer, knife);
 			}
 		}
 
@@ -1488,7 +1485,7 @@ namespace Fika.Core.Coop.Players
 
 			internal AbstractHandsController ReturnController()
 			{
-				return QuickUseItemController.smethod_5<QuickUseItemController>(coopPlayer, item);
+				return QuickUseItemController.smethod_6<QuickUseItemController>(coopPlayer, item);
 			}
 		}
 	}
