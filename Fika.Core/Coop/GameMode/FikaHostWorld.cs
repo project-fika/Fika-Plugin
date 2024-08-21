@@ -12,40 +12,41 @@ namespace Fika.Core.Coop.GameMode
 	public class FikaHostWorld : World
 	{
 		private FikaServer server;
+		private GameWorld gameWorld;
 
 		protected void Start()
 		{
 			server = Singleton<FikaServer>.Instance;
-			gameWorld_0 = GetComponent<GameWorld>();
+			gameWorld = GetComponent<GameWorld>();
 		}
 
 		protected void FixedUpdate()
 		{
-			int grenadesCount = gameWorld_0.Grenades.Count;
+			int grenadesCount = gameWorld.Grenades.Count;
 			if (grenadesCount > 0)
 			{
 				for (int i = 0; i < grenadesCount; i++)
 				{
-					Throwable throwable = gameWorld_0.Grenades.GetByIndex(i);
-					gameWorld_0.method_2(throwable);
+					Throwable throwable = gameWorld.Grenades.GetByIndex(i);
+					gameWorld.method_2(throwable);
 				}
 			}
 
-			int grenadePacketsCount = gameWorld_0.GrenadesCriticalStates.Count;
+			int grenadePacketsCount = gameWorld.GrenadesCriticalStates.Count;
 			if (grenadePacketsCount > 0)
 			{
 				for (int i = 0; i < grenadePacketsCount; i++)
 				{
 					ThrowablePacket packet = new()
 					{
-						Data = gameWorld_0.GrenadesCriticalStates[i]
+						Data = gameWorld.GrenadesCriticalStates[i]
 					};
 
 					server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 				}
 			}
 
-			gameWorld_0.GrenadesCriticalStates.Clear();
+			gameWorld.GrenadesCriticalStates.Clear();
 		}
 
 		/// <summary>

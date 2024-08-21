@@ -304,7 +304,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
-				GClass1230 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1230>();
+				GClass1279 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1279>();
 				coopGame.LootItems = lootItems;
 				coopGame.HasReceivedLoot = true;
 			}
@@ -331,7 +331,7 @@ namespace Fika.Core.Networking
 				World world = Singleton<GameWorld>.Instance.World_0;
 				if (world.Interactables == null)
 				{
-					world.RegisterNetworkInteractionObjects(packet.Interactables);
+					world.method_0(packet.Interactables);
 					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 					if (coopGame != null)
 					{

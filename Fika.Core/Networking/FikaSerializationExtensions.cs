@@ -187,10 +187,10 @@ namespace Fika.Core.Networking
 		/// <param name="item">The <see cref="Item"/> to serialize</param>
 		public static void PutItem(this NetDataWriter writer, Item item)
 		{
-			using MemoryStream memoryStream = new();
-			using BinaryWriter binaryWriter = new(memoryStream);
-			binaryWriter.Write(GClass1555.SerializeItem(item));
-			writer.PutByteArray(memoryStream.ToArray());
+			GClass1162 eftWriter = new();
+			GClass1606 descriptor = GClass1632.SerializeItem(item, GClass1870.Instance);
+			eftWriter.WriteEFTItemDescriptor(descriptor);
+			writer.PutByteArray(eftWriter.ToArray());
 		}
 
 		/// <summary>
@@ -203,7 +203,9 @@ namespace Fika.Core.Networking
 			using MemoryStream memoryStream = new(reader.GetByteArray());
 			using BinaryReader binaryReader = new(memoryStream);
 
-			return GClass1555.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+			GClass1157 eftReader = new(reader.GetByteArray());
+
+			return GClass1632.DeserializeItem(Singleton<ItemFactoryClass>.Instance, [], eftReader.ReadEFTItemDescriptor());
 		}
 
 		public static void PutThrowableData(this NetDataWriter writer, List<GStruct35> throwables)

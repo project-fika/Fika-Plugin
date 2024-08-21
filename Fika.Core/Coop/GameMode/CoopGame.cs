@@ -2332,7 +2332,7 @@ namespace Fika.Core.Coop.GameMode
 			if (HostLootItems == null || HostLootItems.Length == 0)
 			{
 				GameWorld gameWorld = Singleton<GameWorld>.Instance;
-				List<LootItemPositionClass> list = new List<LootItemPositionClass>(gameWorld.LootList.Count);
+				List<LootItemPositionClass> list = new(gameWorld.LootList.Count);
 				using (List<IKillableLootItem>.Enumerator enumerator = gameWorld.LootList.GetEnumerator())
 				{
 					while (enumerator.MoveNext())

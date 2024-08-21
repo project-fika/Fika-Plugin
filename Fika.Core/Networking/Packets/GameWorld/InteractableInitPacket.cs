@@ -8,7 +8,7 @@ namespace Fika.Core.Networking
 	{
 		public bool IsRequest = isRequest;
 		public byte[] RawData;
-		public IReadOnlyDictionary<string, int> Interactables;
+		public IDictionary<string, int> Interactables;
 
 		public void Deserialize(NetDataReader reader)
 		{

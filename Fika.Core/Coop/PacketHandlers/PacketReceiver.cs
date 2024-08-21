@@ -78,7 +78,10 @@ namespace Fika.Core.Coop.PacketHandlers
 							if (packet.TriggerZones.Length > 0)
 							{
 								observedPlayer.TriggerZones.Clear();
-								observedPlayer.TriggerZones = new(packet.TriggerZones);
+								foreach (string triggerZone in packet.TriggerZones)
+								{
+									observedPlayer.TriggerZones.Add(triggerZone);
+								}
 							}
 						}
 						observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
