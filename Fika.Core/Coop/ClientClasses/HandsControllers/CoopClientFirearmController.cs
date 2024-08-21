@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public static CoopClientFirearmController Create(CoopPlayer player, Weapon weapon)
 		{
-			return smethod_5<CoopClientFirearmController>(player, weapon);
+			return smethod_6<CoopClientFirearmController>(player, weapon);
 		}
 
 		public override void SetWeaponOverlapValue(float overlap)
@@ -42,13 +42,13 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(GClass1622)] = new OperationFactoryDelegate(Weapon1);
-			operationFactoryDelegates[typeof(GClass1623)] = new OperationFactoryDelegate(Weapon2);
-			operationFactoryDelegates[typeof(GClass1635)] = new OperationFactoryDelegate(Weapon3);
+			operationFactoryDelegates[typeof(GClass1699)] = new OperationFactoryDelegate(Weapon1);
+			operationFactoryDelegates[typeof(GClass1700)] = new OperationFactoryDelegate(Weapon2);
+			operationFactoryDelegates[typeof(GClass1712)] = new OperationFactoryDelegate(Weapon3);
 			return operationFactoryDelegates;
 		}
 
-		public Player.GClass1617 Weapon1()
+		public Player.GClass1694 Weapon1()
 		{
 			if (Item.ReloadMode == Weapon.EReloadMode.InternalMagazine && Item.Chambers.Length == 0)
 			{
@@ -61,32 +61,32 @@ namespace Fika.Core.Coop.ClientClasses
 			return new FirearmClass2(this);
 		}
 
-		public Player.GClass1617 Weapon2()
+		public Player.GClass1694 Weapon2()
 		{
 			return new FirearmClass1(this);
 		}
 
-		public Player.GClass1617 Weapon3()
+		public Player.GClass1694 Weapon3()
 		{
 			if (Item.IsFlareGun)
 			{
-				return new GClass1639(this);
+				return new GClass1715(this);
 			}
 			if (Item.IsOneOff)
 			{
-				return new GClass1641(this);
+				return new GClass1717(this);
 			}
 			if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
 			{
-				return new GClass1638(this);
+				return new FireOnlyBarrelFireOperation(this);
 			}
-			if (Item is GClass2754) // This is a revolver
+			if (Item is GClass2941) // This is a revolver
 			{
-				return new GClass1637(this);
+				return new GClass1714(this);
 			}
 			if (!Item.BoltAction)
 			{
-				return new GClass1635(this);
+				return new GClass1712(this);
 			}
 			return new FirearmClass4(this);
 		}
@@ -269,7 +269,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddressClass placeToPutContainedAmmoMagazine, Callback callback)
+		public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
 		{
 			if (!CanStartReload() && ammoPack.AmmoCount < 1)
 			{
@@ -321,7 +321,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		public override void ReloadMag(MagazineClass magazine, ItemAddressClass gridItemAddress, Callback callback)
+		public override void ReloadMag(MagazineClass magazine, ItemAddress gridItemAddress, Callback callback)
 		{
 			if (!CanStartReload() || Blindfire)
 			{
@@ -551,7 +551,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		private class FirearmClass1(Player.FirearmController controller) : GClass1623(controller)
+		private class FirearmClass1(Player.FirearmController controller) : GClass1700(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -573,7 +573,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass2(Player.FirearmController controller) : GClass1624(controller)
+		private class FirearmClass2(Player.FirearmController controller) : GClass1701(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -594,7 +594,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass3(Player.FirearmController controller) : GClass1625(controller)
+		private class FirearmClass3(Player.FirearmController controller) : GClass1702(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -616,7 +616,7 @@ namespace Fika.Core.Coop.ClientClasses
 		}
 
 		// Check for GClass increments
-		private class FirearmClass4(Player.FirearmController controller) : GClass1636(controller)
+		private class FirearmClass4(Player.FirearmController controller) : GClass1713(controller)
 		{
 			public override void Start()
 			{
@@ -636,7 +636,7 @@ namespace Fika.Core.Coop.ClientClasses
 				SendBoltActionReloadPacket(true);
 			}
 
-			public override void ReloadMag(MagazineClass magazine, ItemAddressClass gridItemAddress, Callback finishCallback, Callback startCallback)
+			public override void ReloadMag(MagazineClass magazine, ItemAddress gridItemAddress, Callback finishCallback, Callback startCallback)
 			{
 				base.ReloadMag(magazine, gridItemAddress, finishCallback, startCallback);
 				SendBoltActionReloadPacket(true);
@@ -673,10 +673,10 @@ namespace Fika.Core.Coop.ClientClasses
 			private bool hasSent;
 		}
 
-		private class ReloadMagHandler(CoopPlayer coopPlayer, ItemAddressClass gridItemAddress, MagazineClass magazine)
+		private class ReloadMagHandler(CoopPlayer coopPlayer, ItemAddress gridItemAddress, MagazineClass magazine)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly ItemAddressClass gridItemAddress = gridItemAddress;
+			private readonly ItemAddress gridItemAddress = gridItemAddress;
 			private readonly MagazineClass magazine = magazine;
 
 			public void Process(IResult error)
@@ -743,10 +743,10 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		private class ReloadBarrelsHandler(CoopPlayer coopPlayer, ItemAddressClass placeToPutContainedAmmoMagazine, AmmoPackReloadingClass ammoPack)
+		private class ReloadBarrelsHandler(CoopPlayer coopPlayer, ItemAddress placeToPutContainedAmmoMagazine, AmmoPackReloadingClass ammoPack)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly ItemAddressClass placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
+			private readonly ItemAddress placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
 			private readonly AmmoPackReloadingClass ammoPack = ammoPack;
 
 			public void Process(IResult error)
