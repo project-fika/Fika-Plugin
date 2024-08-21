@@ -759,7 +759,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void SetInventory(EquipmentClass equipmentClass)
+		public override void SetInventory(InventoryEquipment equipmentClass)
 		{
 			Inventory.Equipment = equipmentClass;
 
