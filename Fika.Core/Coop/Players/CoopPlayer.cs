@@ -592,10 +592,13 @@ namespace Fika.Core.Coop.Players
 		public override void OnAnimatedInteraction(EInteraction interaction)
 		{
 			base.OnAnimatedInteraction(interaction);
-			PacketSender.CommonPlayerPackets.Enqueue(new()
+			if (!Constants.BlockedInteractions.Contains(interaction))
 			{
-				Interaction = interaction
-			});
+				PacketSender.CommonPlayerPackets.Enqueue(new()
+				{
+					Interaction = interaction
+				}); 
+			}
 		}
 
 		public override void ApplyCorpseImpulse()

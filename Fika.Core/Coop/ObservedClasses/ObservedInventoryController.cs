@@ -50,24 +50,14 @@ namespace Fika.Core.Coop.ObservedClasses
 			return false;
 		}
 
+		public override bool vmethod_0(GClass3086 operation)
+		{
+			return true;
+		}
+
 		public override SearchContentOperation vmethod_2(SearchableItemClass item)
 		{
 			return null;
 		}
-
-		/*public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface338 operation, Callback callback)
-        {
-            if (!succeed)
-            {
-                callback.Succeed();
-                return;
-            }
-            if (!executor.CheckTransferOwners(item, to, out Error error))
-            {
-                callback.Fail(error.ToString());
-                return;
-            }
-            callback.Succeed();
-        }*/
 	}
 }

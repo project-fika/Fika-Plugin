@@ -72,7 +72,7 @@ namespace Fika.Core.Coop.Players
 		public override float ProtagonistHearing => Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
 
 		private FollowerCullingObject followerCullingObject;
-		//private List<Renderer> cullingRenderers = new(256);
+		private GClass855 cullingHandler;
 		private List<DisablerCullingObject> cullingObjects = new();
 		private bool CollidingWithReporter
 		{
@@ -151,6 +151,7 @@ namespace Fika.Core.Coop.Players
 
 			Traverse botTraverse = Traverse.Create(player);
 			botTraverse.Field<GClass856>("gclass856_0").Value = new();
+			player.cullingHandler = botTraverse.Field<GClass856>("gclass856_0").Value;
 			botTraverse.Field<GClass856>("gclass856_0").Value.Initialize(player, player.PlayerBones);
 
 			player.AggressorFound = false;
@@ -416,12 +417,12 @@ namespace Fika.Core.Coop.Players
 			return null;
 		}
 
-		public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
+		/*public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
 		{
 			RemoveHandsControllerHandler handler = new(this, callback);
 			_removeFromHandsCallback = callback;
 			Proceed(false, new Callback<GInterface149>(handler.Handle), false);
-		}
+		}*/
 
 		public override void ApplyCorpseImpulse()
 		{
@@ -987,20 +988,9 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private void SetupCulling()
+		public override void OnAnimatedInteraction(EInteraction interaction)
 		{
-			followerCullingObject = gameObject.AddComponent<FollowerCullingObject>();
-			followerCullingObject.enabled = true;
-			followerCullingObject.CullByDistanceOnly = false;
-			followerCullingObject.Init(new Func<Transform>(GetPlayerBones));
-			//followerCullingObject.SetParams(EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_RADIUS, EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_SHIFT, FikaPlugin.CullingRange.Value);
-			//followerCullingObject.OnVisibilityChanged += OnObservedVisibilityChanged;
-
-			if (_triggerColliderSearcher != null)
-			{
-				_triggerColliderSearcher.OnEnter += AddColliderReporters;
-				_triggerColliderSearcher.OnExit += RemoveColliderReporters;
-			}
+			// Do nothing
 		}
 
 		private void UnregisterCulling()
@@ -1049,43 +1039,6 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		/*private void OnObservedVisibilityChanged(bool visible)
-        {
-            for (int i = 0; i < cullingRenderers.Count; i++)
-            {
-                cullingRenderers[i].forceRenderingOff = false;
-            }
-            cullingRenderers.Clear();
-            if (HealthController.IsAlive)
-            {
-                IAnimator bodyAnimatorCommon = GetBodyAnimatorCommon();
-                if (bodyAnimatorCommon.enabled != visible)
-                {
-                    bodyAnimatorCommon.enabled = visible;
-                    if (HandsController.FirearmsAnimator != null && HandsController.FirearmsAnimator.Animator.enabled != visible)
-                    {
-                        HandsController.FirearmsAnimator.Animator.enabled = visible;
-                    }
-                }
-                PlayerPoolObject playerPoolObject = gameObject.GetComponent<PlayerPoolObject>();
-                if (playerPoolObject != null)
-                {
-                    foreach (Collider collider in playerPoolObject.Colliders)
-                    {
-                        if (collider.enabled != visible)
-                        {
-                            collider.enabled = visible;
-                        }
-                    }
-                }
-                PlayerBody.GetRenderersNonAlloc(cullingRenderers);
-                for (int i = 0; i < cullingRenderers.Count; i++)
-                {
-                    cullingRenderers[i].forceRenderingOff = !visible;
-                }
-            }
-        }*/
-
 		private Transform GetPlayerBones()
 		{
 			return PlayerBones.BodyTransform.Original;
@@ -1104,6 +1057,7 @@ namespace Fika.Core.Coop.Players
 			method_13(deltaTime);
 
 			UpdateTriggerColliderSearcher(deltaTime, SqrCameraDistance < 1600);
+			cullingHandler.ManualUpdate(deltaTime);
 		}
 
 		public override void InitAudioController()
