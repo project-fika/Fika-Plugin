@@ -3,15 +3,20 @@
 using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
+using Fika.Core.Coop.Players;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public sealed class ObservedHealthController(byte[] serializedState, InventoryController inventory, SkillManager skills) : NetworkHealthControllerAbstractClass(serializedState, inventory, skills)
+	public sealed class ObservedHealthController(byte[] serializedState, ObservedCoopPlayer player, InventoryController inventory, SkillManager skills) : NetworkHealthControllerAbstractClass(serializedState, inventory, skills)
 	{
-
-		//Todo: Archangel: Might not be correct? Was forced to override this to get the error to disappear
-		public override Player Player => this.Player;
+		public override Player Player
+		{
+			get
+			{
+				return player;
+			}
+		}
 
 		public override bool ApplyItem(Item item, EBodyPart bodyPart, float? amount = null)
 		{

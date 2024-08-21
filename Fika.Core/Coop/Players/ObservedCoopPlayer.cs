@@ -139,7 +139,7 @@ namespace Fika.Core.Coop.Players
 			PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
 			byte[] healthBytes = tempController.SerializeState();
 
-			ObservedHealthController healthController = new(healthBytes, inventoryController, profile.Skills);
+			ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
 
 			CoopObservedStatisticsManager statisticsManager = new();
 
