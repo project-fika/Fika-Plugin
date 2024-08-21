@@ -1120,11 +1120,6 @@ namespace Fika.Core.Coop.Players
 			return true;
 		}
 
-		public override void InitialProfileExamineAll()
-		{
-			// Do nothing
-		}
-
 		public override void FixedUpdateTick()
 		{
 			// Do nothing
