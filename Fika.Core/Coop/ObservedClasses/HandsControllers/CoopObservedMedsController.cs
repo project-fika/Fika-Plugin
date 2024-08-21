@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public static CoopObservedMedsController Create(CoopPlayer player, Item item, EBodyPart bodyPart, float amount, int animationVariant)
 		{
-			return smethod_5<CoopObservedMedsController>(player, item, bodyPart, amount, animationVariant);
+			return smethod_6<CoopObservedMedsController>(player, item, bodyPart, amount, animationVariant);
 		}
 
 		public override bool CanChangeCompassState(bool newState)

@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public static CoopObservedKnifeController Create(CoopPlayer player, KnifeComponent item)
 		{
-			return smethod_8<CoopObservedKnifeController>(player, item);
+			return smethod_9<CoopObservedKnifeController>(player, item);
 		}
 	}
 }
