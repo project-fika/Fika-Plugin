@@ -2,40 +2,54 @@
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.InventoryLogic.Operations;
 using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using JetBrains.Annotations;
-using System.IO;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public sealed class CoopClientInventoryController(Player player, Profile profile, bool examined) : Player.PlayerOwnerInventoryController(player, profile, examined)
+	public sealed class CoopClientInventoryController(Player player, Profile profile, bool examined, IPlayerSearchController searchController) : Player.PlayerOwnerInventoryController(player, profile, examined)
 	{
 		public override bool HasDiscardLimits => false;
 		ManualLogSource BepInLogger { get; set; } = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 		private readonly Player Player = player;
-		private CoopPlayer CoopPlayer => (CoopPlayer)Player;
+		private CoopPlayer CoopPlayer
+		{
+			get
+			{
+				return (CoopPlayer)Player;
+			}
+		}
+		private IPlayerSearchController searchController = searchController;
+
+		public override IPlayerSearchController PlayerSearchController
+		{
+			get
+			{
+				return searchController;
+			}
+		}
 
 		public override void CallMalfunctionRepaired(Weapon weapon)
 		{
 			base.CallMalfunctionRepaired(weapon);
 			if (!Player.IsAI && (bool)Singleton<SharedGameSettingsClass>.Instance.Game.Settings.MalfunctionVisability)
 			{
-				MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.GlowType.Repaired, true, method_44());
+				MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.EGlowType.Repaired, true, method_42());
 			}
 		}
 
-		public override void Execute(GClass2897 operation, [CanBeNull] Callback callback)
+		public override void vmethod_1(GClass3086 operation, Callback callback)
 		{
 #if DEBUG
 			ConsoleScreen.Log("InvOperation: " + operation.GetType().Name);
 #endif
 
 			// Do not replicate picking up quest items, throws an error on the other clients            
-			if (operation is InventoryItemFromToClass moveOperation)
+			if (operation is GClass3089 moveOperation)
 			{
 				Item lootedItem = moveOperation.Item;
 				if (lootedItem.Template.QuestItem)
@@ -51,16 +65,16 @@ namespace Fika.Core.Coop.ClientClasses
 							CoopPlayer.PacketSender.SendPacket(ref packet);
 						}
 					}
-					base.Execute(operation, callback);
+					base.vmethod_1(operation, callback);
 					return;
 				}
 			}
 
 			// Do not replicate quest operations
-			// Check for GClass increments
-			if (operation is GClass2943 or GClass2944 or QuestHandoverOperationClass)
+			// Check for GClass increments, ReadPolymorph
+			if (operation is GClass3129 or GClass3130 or GClass3131)
 			{
-				base.Execute(operation, callback);
+				base.vmethod_1(operation, callback);
 				return;
 			}
 
@@ -69,21 +83,19 @@ namespace Fika.Core.Coop.ClientClasses
 				HostInventoryOperationManager operationManager = new(this, operation, callback);
 				if (vmethod_0(operationManager.operation))
 				{
-					operationManager.operation.vmethod_0(operationManager.HandleResult);
+					operationManager.operation.method_0(operationManager.HandleResult);
 
 					InventoryPacket packet = new()
 					{
 						HasItemControllerExecutePacket = true
 					};
 
-					using MemoryStream memoryStream = new();
-					using BinaryWriter binaryWriter = new(memoryStream);
-					binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
-					byte[] opBytes = memoryStream.ToArray();
+					GClass1162 writer = new();
+					writer.WritePolymorph(operation.ToDescriptor());
 					packet.ItemControllerExecutePacket = new()
 					{
 						CallbackId = operation.Id,
-						OperationBytes = opBytes
+						OperationBytes = writer.ToArray()
 					};
 
 					CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
@@ -107,34 +119,37 @@ namespace Fika.Core.Coop.ClientClasses
 					inventoryController = this
 				};
 
-				clientOperationManager.callback ??= new Callback(ClientPlayer.Control0.Class1452.class1452_0.method_0);
+				clientOperationManager.callback ??= new Callback(ClientPlayer.Control0.Class1488.class1488_0.method_0);
 				uint operationNum = AddOperationCallback(operation, new Callback<EOperationStatus>(clientOperationManager.HandleResult));
 
-				using MemoryStream memoryStream = new();
-				using BinaryWriter binaryWriter = new(memoryStream);
-				binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
-				byte[] opBytes = memoryStream.ToArray();
+				GClass1162 writer = new();
+				writer.WritePolymorph(operation.ToDescriptor());
 				packet.ItemControllerExecutePacket = new()
 				{
 					CallbackId = operationNum,
-					OperationBytes = opBytes
+					OperationBytes = writer.ToArray()
 				};
 
 				CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
 			}
 		}
 
-		private uint AddOperationCallback(GClass2897 operation, Callback<EOperationStatus> callback)
+		private uint AddOperationCallback(GClass3086 operation, Callback<EOperationStatus> callback)
 		{
 			ushort id = operation.Id;
 			CoopPlayer.OperationCallbacks.Add(id, callback);
 			return id;
 		}
 
-		private class HostInventoryOperationManager(CoopClientInventoryController inventoryController, GClass2897 operation, Callback callback)
+		public override SearchContentOperation vmethod_2(SearchableItemClass item)
+		{
+			return new GClass3124(method_12(), this, PlayerSearchController, Profile, item);
+		}
+
+		private class HostInventoryOperationManager(CoopClientInventoryController inventoryController, GClass3086 operation, Callback callback)
 		{
 			public readonly CoopClientInventoryController inventoryController = inventoryController;
-			public GClass2897 operation = operation;
+			public GClass3086 operation = operation;
 			public readonly Callback callback = callback;
 
 			public void HandleResult(IResult result)
@@ -151,7 +166,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			public EOperationStatus? serverOperationStatus;
 			public EOperationStatus? localOperationStatus;
-			public GClass2897 operation;
+			public GClass3086 operation;
 			public Callback callback;
 			public CoopClientInventoryController inventoryController;
 
@@ -170,7 +185,7 @@ namespace Fika.Core.Coop.ClientClasses
 					{
 						localOperationStatus = EOperationStatus.Started;
 						serverOperationStatus = EOperationStatus.Started;
-						operation.vmethod_0(new Callback(callbackManager.HandleResult), true);
+						operation.method_0(new Callback(callbackManager.HandleResult));
 						return;
 					}
 					if (value == EOperationStatus.Finished)
