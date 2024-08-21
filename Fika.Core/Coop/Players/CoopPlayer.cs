@@ -1406,19 +1406,6 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void SendHandsInteractionStateChanged(bool value, int animationId)
-		{
-			base.SendHandsInteractionStateChanged(value, animationId);
-			if (value)
-			{
-				PacketSender.CommonPlayerPackets.Enqueue(new()
-				{
-					Pickup = value,
-					PickupAnimation = animationId
-				});
-			}
-		}
-
 		public override void OnVaulting()
 		{
 			PacketSender.CommonPlayerPackets.Enqueue(new()
@@ -1455,26 +1442,27 @@ namespace Fika.Core.Coop.Players
 				FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
 				return null;
 			}
-
-			Item item = Inventory.Equipment.TryFindItem(itemId, out Item item);
-			if (item != null)
+			if (Inventory.Equipment.TryFindItem(itemId, out Item item))
 			{
-				return item;
+				GStruct421<Item> itemResult = FindItemById(itemId);
+				if (itemResult.Error != null)
+				{
+					FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
+				}
+				return itemResult.Value; 
 			}
-
-			GStruct422<Item> itemResult = FindItemById(itemId);
-			if (itemResult.Error != null)
+			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
+				FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem::Else Could not find item with id '{itemId}' in the world at all.");
+				return null;
 			}
-			return itemResult.Value;
 		}
 
 		#region handlers
 		private class KeyHandler(CoopPlayer player)
 		{
 			private readonly CoopPlayer player = player;
-			public GStruct422<KeyInteractionResultClass> unlockResult;
+			public GStruct421<GClass3228> unlockResult;
 
 			internal void HandleKeyEvent()
 			{
@@ -1570,7 +1558,7 @@ namespace Fika.Core.Coop.Players
 
 			internal QuickUseItemController ReturnController()
 			{
-				return QuickUseItemController.smethod_5<QuickUseItemController>(coopPlayer, item);
+				return QuickUseItemController.smethod_6<QuickUseItemController>(coopPlayer, item);
 			}
 
 			internal void SendPacket()
@@ -1607,7 +1595,7 @@ namespace Fika.Core.Coop.Players
 
 			internal MedsController ReturnController()
 			{
-				return MedsController.smethod_5<MedsController>(coopPlayer, meds, bodyPart, 1f, animationVariant);
+				return MedsController.smethod_6<MedsController>(coopPlayer, meds, bodyPart, 1f, animationVariant);
 			}
 
 			internal void SendPacket()
@@ -1647,7 +1635,7 @@ namespace Fika.Core.Coop.Players
 
 			internal MedsController ReturnController()
 			{
-				return MedsController.smethod_5<MedsController>(coopPlayer, foodDrink, EBodyPart.Head, amount, animationVariant);
+				return MedsController.smethod_6<MedsController>(coopPlayer, foodDrink, EBodyPart.Head, amount, animationVariant);
 			}
 
 			internal void SendPacket()
@@ -1720,7 +1708,7 @@ namespace Fika.Core.Coop.Players
 
 			internal QuickKnifeKickController ReturnController()
 			{
-				return QuickKnifeKickController.smethod_8<QuickKnifeKickController>(coopPlayer, knife);
+				return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(coopPlayer, knife);
 			}
 
 			internal void SendPacket()
