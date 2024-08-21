@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	internal class CoopObservedGrenadeController : EFT.Player.GrenadeController
+	internal class CoopObservedGrenadeController : EFT.Player.GrenadeHandsController
 	{
 		public CoopPlayer coopPlayer;
 
@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public static CoopObservedGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
-			return smethod_8<CoopObservedGrenadeController>(player, item);
+			return smethod_9<CoopObservedGrenadeController>(player, item);
 		}
 
 		/*public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()

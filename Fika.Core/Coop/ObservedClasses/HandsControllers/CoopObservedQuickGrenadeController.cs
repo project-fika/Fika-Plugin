@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.ObservedClasses
 	/// <summary>
 	/// This is only used by AI
 	/// </summary>
-	internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowController
+	internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
 		public CoopPlayer coopPlayer;
 
@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public static CoopObservedQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
-			return smethod_8<CoopObservedQuickGrenadeController>(player, item);
+			return smethod_9<CoopObservedQuickGrenadeController>(player, item);
 		}
 
 		public override bool CanChangeCompassState(bool newState)
