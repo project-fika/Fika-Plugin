@@ -4,8 +4,12 @@ using EFT;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public class ObservedInventoryController(Player player, Profile profile, bool examined) : Player.PlayerInventoryController(player, profile, examined)
+	public class ObservedInventoryController : Player.PlayerInventoryController
 	{
+		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID currentId) : base(player, profile, examined)
+		{
+			mongoID_0 = currentId;
+		}
 
 		public override bool HasDiscardLimits => false;
 

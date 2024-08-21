@@ -40,13 +40,14 @@ namespace Fika.Core.Coop.Components
 		private bool isClient;
 		private float charSyncCounter;
 
-		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId)
+		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId)
 		{
 			public Profile Profile { get; set; } = profile;
 			public Vector3 Position { get; set; } = position;
 			public bool IsAlive { get; set; } = isAlive;
 			public bool IsAI { get; set; } = isAI;
 			public int NetId { get; set; } = netId;
+			public MongoID CurrentId = currentId;
 		}
 
 		internal FikaBTRManager_Client clientBTR = null;
@@ -336,7 +337,7 @@ namespace Fika.Core.Coop.Components
 					}
 				});
 
-			ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId);
+			ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId, spawnObject.CurrentId);
 
 			if (!spawnObject.IsAlive)
 			{
@@ -373,7 +374,7 @@ namespace Fika.Core.Coop.Components
 			queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
 		}
 
-		public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive = true, bool isAI = false)
+		public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive, bool isAI, MongoID currentId)
 		{
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			if (gameWorld == null)
@@ -406,10 +407,10 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
 			Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
 #endif
-			spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId));
+			spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId, currentId));
 		}
 
-		private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId)
+		private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId, MongoID currentId)
 		{
 			bool isDedicatedProfile = !isAI && profile.Info.MainProfileNickname.Contains("dedicated_");
 
@@ -419,7 +420,7 @@ namespace Fika.Core.Coop.Components
 				Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
-				GClass1457.Default).Result;
+				GClass1457.Default, currentId).Result;
 
 			if (otherPlayer == null)
 			{

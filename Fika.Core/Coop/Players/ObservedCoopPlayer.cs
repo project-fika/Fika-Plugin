@@ -125,7 +125,7 @@ namespace Fika.Core.Coop.Players
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-			Func<float> getAimingSensitivity, IViewFilter filter)
+			Func<float> getAimingSensitivity, IViewFilter filter, MongoID currentId)
 		{
 			ObservedCoopPlayer player = Create<ObservedCoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
 				armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
@@ -133,7 +133,7 @@ namespace Fika.Core.Coop.Players
 
 			player.IsYourPlayer = false;
 
-			InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, true);
+			ObservedInventoryController inventoryController = new ObservedInventoryController(player, profile, true, currentId);
 
 			PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
 			byte[] healthBytes = tempController.SerializeState();

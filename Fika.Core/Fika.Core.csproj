@@ -43,6 +43,9 @@
     <Reference Include="AnimationSystem.Types" HintPath="..\References\AnimationSystem.Types.dll" Private="false" />
     <Reference Include="Assembly-CSharp" HintPath="..\References\hollowed.dll" Private="false" />
     <Reference Include="bsg.componentace.compression.libs.zlib" HintPath="..\References\bsg.componentace.compression.libs.zlib.dll" Private="false" />
+	<Reference Include="com.unity.multiplayer-hlapi.Runtime">
+		<HintPath>..\References\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
+	</Reference>
     <Reference Include="bsg.console.core" HintPath="..\References\bsg.console.core.dll" Private="false" />
     <Reference Include="Comfort" HintPath="..\References\Comfort.dll" Private="false" />
     <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />

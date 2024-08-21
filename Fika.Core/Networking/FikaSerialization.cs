@@ -249,20 +249,22 @@ namespace Fika.Core.Networking
             }
         }*/
 
-		public struct PlayerInfoPacket(Profile profile)
+		public struct PlayerInfoPacket(Profile profile, MongoID? controllerId)
 		{
 			public Profile Profile = profile;
+			public MongoID? ControllerId = controllerId;
 
 			public static void Serialize(NetDataWriter writer, PlayerInfoPacket packet)
 			{
 				byte[] profileBytes = SimpleZlib.CompressToBytes(packet.Profile.ToJson(), 4, null);
 				writer.PutByteArray(profileBytes);
+				writer.PutMongoID(packet.ControllerId);
 			}
 
 			public static PlayerInfoPacket Deserialize(NetDataReader reader)
 			{
 				byte[] profileBytes = reader.GetByteArray();
-				PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>());
+				PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>(), reader.GetMongoID());
 				return packet;
 			}
 		}
