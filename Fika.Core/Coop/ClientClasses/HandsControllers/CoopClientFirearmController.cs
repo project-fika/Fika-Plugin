@@ -682,15 +682,15 @@ namespace Fika.Core.Coop.ClientClasses
 
 			public void Process(IResult error)
 			{
-				GridItemAddressDescriptorClass gridItemAddressDescriptor = (gridItemAddress == null) ? null : FromObjectAbstractClass.FromGridItemAddress(gridItemAddress);
+				ItemAddress itemAddress = gridItemAddress;
+				GClass1634 descriptor = itemAddress?.ToDescriptor();
+				GClass1162 writer = new();
 
-				using MemoryStream memoryStream = new();
-				using BinaryWriter binaryWriter = new(memoryStream);
 				byte[] locationDescription;
-				if (gridItemAddressDescriptor != null)
+				if (descriptor != null)
 				{
-					binaryWriter.Write(gridItemAddressDescriptor);
-					locationDescription = memoryStream.ToArray();
+					writer.WritePolymorph(descriptor);
+					locationDescription = writer.ToArray();
 				}
 				else
 				{
@@ -752,17 +752,16 @@ namespace Fika.Core.Coop.ClientClasses
 
 			public void Process(IResult error)
 			{
-				GridItemAddressDescriptorClass gridItemAddressDescriptor = (placeToPutContainedAmmoMagazine == null) ? null : FromObjectAbstractClass.FromGridItemAddress(placeToPutContainedAmmoMagazine);
-
+				ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
+				GClass1634 descriptor = itemAddress?.ToDescriptor();
+				GClass1162 writer = new();
 				string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
-				using MemoryStream memoryStream = new();
-				using BinaryWriter binaryWriter = new(memoryStream);
 				byte[] locationDescription;
-				if (gridItemAddressDescriptor != null)
+				if (descriptor != null)
 				{
-					binaryWriter.Write(gridItemAddressDescriptor);
-					locationDescription = memoryStream.ToArray();
+					writer.WritePolymorph(descriptor);
+					locationDescription = writer.ToArray();
 				}
 				else
 				{
