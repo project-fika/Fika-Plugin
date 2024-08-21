@@ -16,9 +16,11 @@ namespace Fika.Core.Coop.BotClasses
 		private readonly CoopBot CoopBot;
 		private readonly IPlayerSearchController searchController;
 
-		public CoopBotInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+		public CoopBotInventoryController(Player player, Profile profile, bool examined, MongoID currentId) : base(player, profile, examined)
 		{
 			CoopBot = (CoopBot)player;
+			mongoID_0 = currentId;
+
 			if (!player.IsAI && !examined)
 			{
 				IPlayerSearchController playerSearchController = new GClass1865(profile, this);

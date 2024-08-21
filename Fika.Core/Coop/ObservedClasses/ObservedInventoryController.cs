@@ -19,8 +19,9 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public ObservedInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID currentId) : base(player, profile, examined)
 		{
+			mongoID_0 = currentId;
 			searchController = new GClass1867();
 		}
 

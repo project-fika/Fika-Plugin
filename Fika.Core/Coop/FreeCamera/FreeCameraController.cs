@@ -127,7 +127,7 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-			if (player.PlayerHealthController == null)
+			if (player.ActiveHealthController == null)
 			{
 				return;
 			}

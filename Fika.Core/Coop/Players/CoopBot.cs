@@ -54,14 +54,14 @@ namespace Fika.Core.Coop.Players
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-			Func<float> getAimingSensitivity, IViewFilter filter, MongoID mongoId)
+			Func<float> getAimingSensitivity, IViewFilter filter, MongoID currentId)
 		{
 			CoopBot player = Create<CoopBot>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
 				bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
 
 			player.IsYourPlayer = false;
 
-			CoopBotInventoryController inventoryController = new(player, profile, true);
+			CoopBotInventoryController inventoryController = new(player, profile, true, currentId);
 
 			player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
 			player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();

@@ -371,7 +371,7 @@ namespace Fika.Core.Networking
 
 				foreach (CoopPlayer player in coopHandler.Players.Values)
 				{
-					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile),
+					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile, player.InventoryController.CurrentId),
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
 
 					dataWriter.Reset();
@@ -565,7 +565,7 @@ namespace Fika.Core.Networking
 			packet.netId = netId;
 			if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
+				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
@@ -789,10 +789,7 @@ namespace Fika.Core.Networking
 					AllCharacterRequestPacket requestPacket = new(player.ProfileId)
 					{
 						IsRequest = false,
-						PlayerInfo = new()
-						{
-							Profile = player.Profile
-						},
+						PlayerInfo = new(player.Profile, player.InventoryController.CurrentId),
 						IsAlive = player.HealthController.IsAlive,
 						IsAI = player is CoopBot,
 						Position = player.Transform.position,
@@ -813,7 +810,8 @@ namespace Fika.Core.Networking
 				logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
-					coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
+					coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y),
+						packet.NetId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
 					PlayersMissing.Remove(packet.ProfileId);
 				}
 			}
@@ -856,52 +854,6 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
 					opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
-
-					// TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
-					// Unknown what problems this might cause so far.
-					/*if (result.Value is UnloadOperationClass unloadOperation)
-					{
-						if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
-						{
-							Item item = internalSplitOperation.To.Item;
-							if (item != null)
-							{
-								if (item.Id != internalSplitOperation.CloneId && item.TemplateId == internalSplitOperation.Item.TemplateId)
-								{
-									item.Id = internalSplitOperation.CloneId;
-								}
-								else
-								{
-									FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {item.Id}, SplitOperationItemID: {internalSplitOperation.To.Item.Id}");
-								}
-							}
-							else
-							{
-								FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
-							}
-						}
-					}
-
-					// TODO: Same as above.
-					if (result.Value is SplitOperationClass splitOperation)
-					{
-						Item item = splitOperation.To.Item;
-						if (item != null)
-						{
-							if (item.Id != splitOperation.CloneId && item.TemplateId == splitOperation.Item.TemplateId)
-							{
-								item.Id = splitOperation.CloneId;
-							}
-							else
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {item.Id}, SplitOperationItemID: {splitOperation.To.Item.Id}");
-							}
-						}
-						else
-						{
-							FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
-						}
-					}*/
 				}
 				catch (Exception exception)
 				{
