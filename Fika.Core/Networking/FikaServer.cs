@@ -833,11 +833,11 @@ namespace Fika.Core.Networking
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				using MemoryStream memoryStream = new(packet.ItemControllerExecutePacket.OperationBytes);
-				using BinaryReader binaryReader = new(memoryStream);
+				GClass1157 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
 				try
 				{
-					GStruct417 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1563>());
+					GClass1640 asd = reader.ReadPolymorph<GClass1640>();
+					GStruct417<GClass3086> result = asd.ToInventoryOperation(playerToApply);
 
 					InventoryOperationHandler opHandler = new()
 					{
@@ -855,11 +855,11 @@ namespace Fika.Core.Networking
 #endif
 					SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
-					opHandler.opResult.Value.vmethod_0(new Callback(opHandler.HandleResult), false);
+					opHandler.opResult.Value.method_0(new Callback(opHandler.HandleResult));
 
 					// TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
 					// Unknown what problems this might cause so far.
-					if (result.Value is UnloadOperationClass unloadOperation)
+					/*if (result.Value is UnloadOperationClass unloadOperation)
 					{
 						if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
 						{
@@ -901,19 +901,7 @@ namespace Fika.Core.Networking
 						{
 							FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
 						}
-					}
-
-					/*// Fix for folding not replicating
-                    if (result.Value is GClass2858 foldOperation)
-                    {
-                        if (playerToApply.HandsController is CoopObservedFirearmController observedFirearmController)
-                        {
-                            if (observedFirearmController.Weapon != null && observedFirearmController.Weapon.Foldable != null)
-                            {
-                                observedFirearmController.InitiateOperation<FirearmController.Class1020>().Start(foldOperation, null);
-                            }
-                        }
-                    }*/
+					}*/
 				}
 				catch (Exception exception)
 				{
@@ -1145,7 +1133,7 @@ namespace Fika.Core.Networking
 
 						if (profile.ProfileId == RequestHandler.SessionId)
 						{
-							foreach (Profile.ProfileHealthClass.GClass1793 bodyPartHealth in profile.Health.BodyParts.Values)
+							foreach (Profile.ProfileHealthClass.GClass1859 bodyPartHealth in profile.Health.BodyParts.Values)
 							{
 								bodyPartHealth.Effects.Clear();
 								bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
