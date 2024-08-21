@@ -140,10 +140,11 @@ namespace Fika.Core.Coop.Patches.LocalGame
 				coopGame.SetMatchmakerStatus("Coop game created");
 			}
 
-			await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl, new Callback(startHandler.HandleLoadComplete));
+			await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
 		}
 
-		private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile, LocationSettingsClass.Location location, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController)
+		private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile,
+			LocationSettingsClass.Location location, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController)
 		{
 			private readonly TarkovApplication tarkovApplication = tarkovApplication;
 			private readonly Profile pmcProfile = pmcProfile;
@@ -156,7 +157,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
 			}
 
-			public void HandleLoadComplete(IResult error)
+			/*public void HandleLoadComplete(IResult error)
 			{
 				using (CounterCreatorAbstractClass.StartWithToken("LoadingScreen.LoadComplete"))
 				{
@@ -164,10 +165,9 @@ namespace Fika.Core.Coop.Patches.LocalGame
 					MainMenuController mmc = (MainMenuController)typeof(TarkovApplication).GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(x => x.FieldType == typeof(MainMenuController)).FirstOrDefault().GetValue(tarkovApplication);
 					mmc?.Unsubscribe();
 					GameWorld gameWorld = Singleton<GameWorld>.Instance;
-					gameWorld.OnGameStarted();
-					FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(gameWorld));
+					gameWorld.OnGameStarted();					
 				}
-			}
+			}*/
 		}
 	}
 }

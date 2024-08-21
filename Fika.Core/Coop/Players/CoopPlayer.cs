@@ -55,14 +55,14 @@ namespace Fika.Core.Coop.Players
 		}
 		#endregion
 
-		public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
+		public static async Task<LocalPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
 			Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
 			ELocalMode localMode, int netId)
 		{
-			CoopPlayer player = Create<CoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+			CoopPlayer player = Create<CoopPlayer>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
 						bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
 
 			player.IsYourPlayer = true;
