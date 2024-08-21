@@ -347,6 +347,26 @@ namespace Fika.Core.Coop.ClientClasses
 			CurrentOperation.ReloadWithAmmo(ammoPack, callback, new Callback(handler.Process));
 		}
 
+		//Archangel: This was moved? No longer exists in 0.15
+		/*
+		public override void SetLightsState(FirearmLightStateStruct[] lightsStates, bool force = false)
+		{
+			if (force || CurrentOperation.CanChangeLightState(lightsStates))
+			{
+				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+				{
+					ToggleTacticalCombo = true,
+					LightStatesPacket = new()
+					{
+						Amount = lightsStates.Length,
+						LightStates = lightsStates
+					}
+				});
+			}
+			base.SetLightsState(lightsStates, force);
+		}
+		*/
+
 		public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
 		{
 			SendScopeStates(scopeStates);
