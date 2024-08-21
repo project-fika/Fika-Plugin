@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static EFT.InventoryLogic.Slot;
 using static EFT.Player;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -26,7 +27,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		private float aimMovementSpeed = 1f;
 		private bool hasFired = false;
 		private WeaponPrefab weaponPrefab;
-		private GClass1616 underBarrelManager;
+		private GClass1693 underBarrelManager;
 		public override bool IsAiming
 		{
 			get => base.IsAiming;
@@ -63,13 +64,13 @@ namespace Fika.Core.Coop.ObservedClasses
 			weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
 			if (UnderbarrelWeapon != null)
 			{
-				underBarrelManager = Traverse.Create(this).Field<GClass1616>("gclass1616_0").Value;
+				underBarrelManager = Traverse.Create(this).Field<GClass1693>("gclass1693_0").Value;
 			}
 		}
 
 		public static CoopObservedFirearmController Create(CoopPlayer player, Weapon weapon)
 		{
-			return smethod_5<CoopObservedFirearmController>(player, weapon);
+			return smethod_6<CoopObservedFirearmController>(player, weapon);
 		}
 
 		public override void ManualUpdate(float deltaTime)
@@ -262,7 +263,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						triggerPressed = true;
 					}
 
-					float pitchMult = method_57();
+					float pitchMult = method_61();
 					WeaponSoundPlayer.FireBullet(ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
 						pitchMult, Malfunction, false, IsBirstOf2Start);
 
@@ -333,7 +334,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					}
 
 					// Remember to check if classes increment
-					if (Weapon is GClass2754)
+					if (Weapon is GClass2941)
 					{
 						Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
 
@@ -366,7 +367,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					{
 						if (Item.HasChambers)
 						{
-							magazine.Cartridges.PopTo(inventoryController, new GClass2826(Item.Chambers[0]));
+							magazine.Cartridges.PopTo(inventoryController, new Class2243(Item.Chambers[0]));
 						}
 						else
 						{
@@ -381,7 +382,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					if (ammo.AmmoTemplate.IsLightAndSoundShot)
 					{
-						method_58(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection);
+						method_62(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection);
 						LightAndSoundShot(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection, ammo.AmmoTemplate);
 					}
 				}
@@ -460,7 +461,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
 						throw;
 					}
-					ItemAddress gridItemAddress = null;
+                    ItemAddress gridItemAddress = null;
 					if (packet.ReloadMagPacket.LocationDescription != null)
 					{
 						using MemoryStream memoryStream = new(packet.ReloadMagPacket.LocationDescription);
@@ -469,8 +470,8 @@ namespace Fika.Core.Coop.ObservedClasses
 						{
 							if (packet.ReloadMagPacket.LocationDescription.Length != 0)
 							{
-								GridItemAddressDescriptorClass descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
-								gridItemAddress = inventoryController.ToGridItemAddress(descriptor);
+								GClass1634 descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
+								gridItemAddress = inventoryController.ToItemAddress(descriptor);
 							}
 						}
 						catch (GException4 exception2)
@@ -565,7 +566,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 
             }*/
 
-			if (packet.HasRollCylinder && Weapon is GClass2754 rollWeapon)
+			if (packet.HasRollCylinder && Weapon is GClass2941 rollWeapon)
 			{
 				RollCylinder(packet.RollToZeroCamora);
 			}
@@ -588,7 +589,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					AmmoPackReloadingClass ammoPack = new(ammo);
 
-					ItemAddressClass gridItemAddress = null;
+                    ItemAddress gridItemAddress = null;
 
 					using MemoryStream memoryStream = new(packet.ReloadBarrels.LocationDescription);
 					using BinaryReader binaryReader = new(memoryStream);
@@ -597,7 +598,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						if (packet.ReloadBarrels.LocationDescription.Length > 0)
 						{
 							GridItemAddressDescriptorClass descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
-							gridItemAddress = inventoryController.ToGridItemAddress(descriptor);
+							gridItemAddress = inventoryController.ToItemAddress(descriptor);
 						}
 					}
 					catch (GException4 exception2)
@@ -626,7 +627,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (packet.HasFlareShot)
 			{
-				BulletClass bulletClass = (BulletClass)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.FlareShotPacket.AmmoTemplateId, null);
+				BulletClass bulletClass = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.FlareShotPacket.AmmoTemplateId, null);
 				InitiateFlare(bulletClass, packet.FlareShotPacket.ShotPosition, packet.FlareShotPacket.ShotForward);
 			}
 
@@ -646,7 +647,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		private IEnumerator ObservedBoltAction(FirearmsAnimator animator, FirearmController controller, InventoryControllerClass inventoryController)
+		private IEnumerator ObservedBoltAction(FirearmsAnimator animator, FirearmController controller, InventoryController inventoryController)
 		{
 			animator.SetBoltActionReload(true);
 			animator.SetFire(true);
@@ -663,7 +664,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (magazine != null && magazine is not CylinderMagazineClass && weapon.HasChambers)
 			{
-				magazine.Cartridges.PopTo(inventoryController, new GClass2826(controller.Item.Chambers[0]));
+				magazine.Cartridges.PopTo(inventoryController, new Class2243(controller.Item.Chambers[0]));
 			}
 
 			animator.SetBoltActionReload(false);
@@ -688,7 +689,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				weaponEffectsManager.SetRoundIntoWeapon(ammo, 0);
 			}
 
-			if (Weapon is GClass2754 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || Weapon.BoltAction)
+			if (Weapon is GClass2941 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || Weapon.BoltAction)
 			{
 				return;
 			}

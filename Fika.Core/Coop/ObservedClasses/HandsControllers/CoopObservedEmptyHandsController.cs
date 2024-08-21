@@ -15,7 +15,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public static CoopObservedEmptyHandsController Create(CoopPlayer player)
 		{
-			return smethod_5<CoopObservedEmptyHandsController>(player);
+			return smethod_6<CoopObservedEmptyHandsController>(player);
 		}
 
 		public override bool CanChangeCompassState(bool newState)
