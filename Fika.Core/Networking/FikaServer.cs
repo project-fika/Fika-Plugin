@@ -425,7 +425,7 @@ namespace Fika.Core.Networking
 					{
 						InteractableInitPacket response = new(false)
 						{
-							Interactables = world.Interactables
+							Interactables = (Dictionary<string, int>)world.Interactables
 						};
 
 						SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
