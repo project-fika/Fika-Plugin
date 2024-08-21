@@ -35,6 +35,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static Fika.Core.Networking.Packets.GameWorld.ReconnectPacket;
 using static Fika.Core.Utils.ColorUtils;
 
@@ -1200,7 +1201,7 @@ namespace Fika.Core.Networking
 
 		private class InventoryOperationHandler
 		{
-			public GStruct417 opResult;
+			public GStruct416 opResult;
 			public uint operationId;
 			public int netId;
 			public NetPeer peer;
@@ -1226,12 +1227,12 @@ namespace Fika.Core.Networking
 
 				using MemoryStream memoryStream = new();
 				using BinaryWriter binaryWriter = new(memoryStream);
-				binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(opResult.Value, false));
-				byte[] opBytes = memoryStream.ToArray();
+				GClass1162 writer = new();
+				writer.WritePolymorph(result);
 				packet.ItemControllerExecutePacket = new()
 				{
 					CallbackId = operationId,
-					OperationBytes = opBytes
+					OperationBytes = writer.ToArray()
 				};
 
 				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);

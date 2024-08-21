@@ -122,21 +122,21 @@ namespace Fika.Core.Coop.Players
 		}
 		#endregion
 
-		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(int playerId, Vector3 position, Quaternion rotation,
+		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
 			Func<float> getAimingSensitivity, IViewFilter filter)
 		{
-			ObservedCoopPlayer player = Create<ObservedCoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
+			ObservedCoopPlayer player = Create<ObservedCoopPlayer>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
 				armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
 				aiControl);
 
 			player.IsYourPlayer = false;
 
-			InventoryControllerClass inventoryController = new ObservedInventoryController(player, profile, true);
+			ObservedInventoryController inventoryController = new ObservedInventoryController(player, profile, true);
 
-			PlayerHealthController tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
+			GControl4 tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
 			byte[] healthBytes = tempController.SerializeState();
 
 			ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
@@ -146,10 +146,10 @@ namespace Fika.Core.Coop.Players
 			await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
 				statisticsManager, null, null, filter, EVoipState.NotAvailable, aiControl, false);
 
-			player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
+			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new AIData(null, player);
+			player.AIData = new GClass533(null, player);
 
 			player.AggressorFound = false;
 
@@ -179,14 +179,14 @@ namespace Fika.Core.Coop.Players
 			base.PlayGroundedSound(fallHeight, jumpHeight);
 		}
 
-		public override void OnSkillLevelChanged(GClass1801 skill)
+		public override void OnSkillLevelChanged(GClass1874 skill)
 		{
-			//base.OnSkillLevelChanged(skill);
+			// Do nothing
 		}
 
 		public override void OnWeaponMastered(MasterSkillClass masterSkill)
 		{
-			//base.OnWeaponMastered(masterSkill);
+			// Do nothing
 		}
 
 		public override void StartInflictSelfDamageCoroutine()
@@ -250,7 +250,7 @@ namespace Fika.Core.Coop.Players
 
 			if (player.IsYourPlayer)
 			{
-				bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface245>(bodyPart) != null;
+				bool flag = damageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface290>(bodyPart) != null;
 				player.StatisticsManager.OnEnemyDamage(damageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
 					GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
 					Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,

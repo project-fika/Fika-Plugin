@@ -11,6 +11,7 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.InventoryLogic;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
@@ -1053,11 +1054,11 @@ namespace Fika.Core.Coop.Players
 							{
 								Traverse operationTraverse = Traverse.Create(internalSplitOperation);
 								Item fromItem = operationTraverse.Field<Item>("item_0").Value;
-								Item toItem = operationTraverse.Field<ItemAddress>("itemAddress_1").Value.chi
+								Item toItem = operationTraverse.Field<FikaItemAddress>("itemAddress_1").Value.Item;
 								string cloneId = operationTraverse.Field<string>("string_0").Value;
 								if (fromItem != null)
 								{
-									if (fromItem.Id != cloneId && fromItem.TemplateId == internalSplitOperation.)
+									if (fromItem.Id != cloneId && fromItem.TemplateId == toItem.TemplateId)
 									{
 										fromItem.Id = internalSplitOperation.CloneId;
 									}

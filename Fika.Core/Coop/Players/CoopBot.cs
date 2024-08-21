@@ -128,7 +128,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct395 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
 		{
 			if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
 			{
@@ -169,11 +169,6 @@ namespace Fika.Core.Coop.Players
 			}
 
 			return hitInfo;
-		}
-
-		public override void BtrInteraction()
-		{
-			// Do nothing
 		}
 
 		public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)

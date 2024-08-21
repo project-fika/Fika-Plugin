@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using JetBrains.Annotations;
@@ -10,30 +11,51 @@ using static EFT.Player;
 
 namespace Fika.Core.Coop.BotClasses
 {
-	public class CoopBotInventoryController(Player player, Profile profile, bool examined) : PlayerInventoryController(player, profile, examined)
+	public class CoopBotInventoryController : PlayerInventoryController
 	{
-		private readonly CoopBot CoopBot = (CoopBot)player;
+		private readonly CoopBot CoopBot;
+		private readonly IPlayerSearchController searchController;
 
-		public override void Execute(GClass2897 operation, [CanBeNull] Callback callback)
+		public CoopBotInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
 		{
-			base.Execute(operation, callback);
+			CoopBot = (CoopBot)player;
+			if (!player.IsAI && !examined)
+			{
+				IPlayerSearchController playerSearchController = new GClass1865(profile, this);
+				searchController = playerSearchController;
+			}
+			else
+			{
+				IPlayerSearchController playerSearchController = new GClass1871(profile);
+				searchController = playerSearchController;
+			}
+		}
+
+		public override IPlayerSearchController PlayerSearchController => throw new System.NotImplementedException();
+
+		public override void vmethod_1(GClass3086 operation, [CanBeNull] Callback callback)
+		{
+			base.vmethod_1(operation, callback);
 
 			InventoryPacket packet = new()
 			{
 				HasItemControllerExecutePacket = true
 			};
 
-			using MemoryStream memoryStream = new();
-			using BinaryWriter binaryWriter = new(memoryStream);
-			binaryWriter.WritePolymorph(FromObjectAbstractClass.FromInventoryOperation(operation, false));
-			byte[] opBytes = memoryStream.ToArray();
+			GClass1162 writer = new();
+			writer.WritePolymorph(operation.ToDescriptor());
 			packet.ItemControllerExecutePacket = new()
 			{
 				CallbackId = operation.Id,
-				OperationBytes = opBytes
+				OperationBytes = writer.ToArray()
 			};
 
 			CoopBot.PacketSender.InventoryPackets.Enqueue(packet);
+		}
+
+		public override SearchContentOperation vmethod_2(SearchableItemClass item)
+		{
+			return new GClass3124(method_12(), this, PlayerSearchController, Profile, item);
 		}
 	}
 }
