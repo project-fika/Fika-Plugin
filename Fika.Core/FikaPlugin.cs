@@ -231,7 +231,7 @@ namespace Fika.Core
 			new ChangeGameModeButton_Patch().Enable();
 			new MenuTaskBar_Patch().Enable();
 			new GameWorld_Create_Patch().Enable();
-			new World_AddSpawnQuestLootPacket_Patch().Enable();
+			//new World_AddSpawnQuestLootPacket_Patch().Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();
 
