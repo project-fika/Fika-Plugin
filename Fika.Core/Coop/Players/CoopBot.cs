@@ -50,18 +50,18 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public static async Task<LocalPlayer> CreateBot(int playerId, Vector3 position, Quaternion rotation,
+		public static async Task<LocalPlayer> CreateBot(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
 			Func<float> getAimingSensitivity, IViewFilter filter)
 		{
-			CoopBot player = Create<CoopBot>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
+			CoopBot player = Create<CoopBot>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
 				bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
 
 			player.IsYourPlayer = false;
 
-			InventoryControllerClass inventoryController = new CoopBotInventoryController(player, profile, true);
+			CoopBotInventoryController inventoryController = new CoopBotInventoryController(player, profile, true);
 
 			player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
 			player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
@@ -71,10 +71,10 @@ namespace Fika.Core.Coop.Players
 				new CoopObservedStatisticsManager(), null, null, filter,
 				EVoipState.NotAvailable, aiControl, false);
 
-			player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
+			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new AIData(null, player)
+			player.AIData = new GClass533(null, player)
 			{
 				IsAI = true
 			};
@@ -92,7 +92,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void OnSkillLevelChanged(GClass1801 skill)
+		public override void OnSkillLevelChanged(GClass1874 skill)
 		{
 			// Do nothing
 		}
