@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static Class281;
 using static EFT.InventoryLogic.Slot;
 using static EFT.Player;
 
@@ -464,13 +465,12 @@ namespace Fika.Core.Coop.ObservedClasses
                     ItemAddress gridItemAddress = null;
 					if (packet.ReloadMagPacket.LocationDescription != null)
 					{
-						using MemoryStream memoryStream = new(packet.ReloadMagPacket.LocationDescription);
-						using BinaryReader binaryReader = new(memoryStream);
 						try
 						{
+							GClass1157 reader = new(packet.ReloadMagPacket.LocationDescription);
 							if (packet.ReloadMagPacket.LocationDescription.Length != 0)
 							{
-								GClass1634 descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
+								GClass1638 descriptor = reader.ReadEFTGridItemAddressDescriptor();
 								gridItemAddress = inventoryController.ToItemAddress(descriptor);
 							}
 						}
@@ -591,13 +591,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
                     ItemAddress gridItemAddress = null;
 
-					using MemoryStream memoryStream = new(packet.ReloadBarrels.LocationDescription);
-					using BinaryReader binaryReader = new(memoryStream);
+					GClass1157 reader = new(packet.ReloadBarrels.LocationDescription);
 					try
 					{
 						if (packet.ReloadBarrels.LocationDescription.Length > 0)
 						{
-							GridItemAddressDescriptorClass descriptor = binaryReader.ReadEFTGridItemAddressDescriptor();
+							GClass1638 descriptor = reader.ReadEFTGridItemAddressDescriptor();
 							gridItemAddress = inventoryController.ToItemAddress(descriptor);
 						}
 					}
@@ -645,6 +644,20 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				UnderbarrelSightingRangeDown();
 			}
+		}
+
+		private List<BulletClass> FindAmmoByIds(string[] ammoIds)
+		{
+			_preallocatedAmmoList.Clear();
+			foreach (string text in ammoIds)
+			{
+				GStruct421<Item> gstruct = _player.FindItemById(text, true, true);
+				if (gstruct.Succeeded && gstruct.Value is BulletClass bulletClass)
+				{
+					_preallocatedAmmoList.Add(bulletClass);
+				}
+			}
+			return _preallocatedAmmoList;
 		}
 
 		private IEnumerator ObservedBoltAction(FirearmsAnimator animator, FirearmController controller, InventoryController inventoryController)
