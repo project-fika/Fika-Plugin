@@ -1546,7 +1546,7 @@ namespace Fika.Core.Coop.Players
 			foreach (TraderServicesClass service in services)
 			{
 				BackendConfigSettingsClass.ServiceData serviceData = new(service, null);
-				if (servicesData.TryGetValue(serviceData.ServiceType, out BackendConfigSettingsClass.ServiceData _serviceData2))
+				if (servicesData.ContainsKey(serviceData.ServiceType))
 				{
 					servicesData[serviceData.ServiceType] = serviceData;
 				}
