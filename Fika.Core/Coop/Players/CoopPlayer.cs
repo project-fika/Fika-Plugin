@@ -1110,52 +1110,6 @@ namespace Fika.Core.Coop.Players
 						InventoryOperationHandler opHandler = new(result);
 
 						opHandler.opResult.Value.vmethod_0(new Callback(opHandler.HandleResult), false);
-
-						// TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
-						// Unknown what problems this might cause so far.
-						if (result.Value is UnloadOperationClass unloadOperation)
-						{
-							if (unloadOperation.InternalOperation is SplitOperationClass internalSplitOperation)
-							{
-								Item item = internalSplitOperation.To.Item;
-								if (item != null)
-								{
-									if (item.Id != internalSplitOperation.CloneId && item.TemplateId == internalSplitOperation.Item.TemplateId)
-									{
-										item.Id = internalSplitOperation.CloneId;
-									}
-									else
-									{
-										FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {item.Id}, SplitOperationItemID: {internalSplitOperation.To.Item.Id}");
-									}
-								}
-								else
-								{
-									FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
-								}
-							}
-						}
-
-						// TODO: Same as above.
-						if (result.Value is SplitOperationClass splitOperation)
-						{
-							Item item = splitOperation.To.Item;
-							if (item != null)
-							{
-								if (item.Id != splitOperation.CloneId && item.TemplateId == splitOperation.Item.TemplateId)
-								{
-									item.Id = splitOperation.CloneId;
-								}
-								else
-								{
-									FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {item.Id}, SplitOperationItemID: {splitOperation.To.Item.Id}");
-								}
-							}
-							else
-							{
-								FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
-							}
-						}
 					}
 					catch (Exception exception)
 					{
