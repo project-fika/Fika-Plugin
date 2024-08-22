@@ -135,6 +135,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
+			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket, NetPeer>(OnSpawnSyncObjectPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -246,16 +247,21 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
 		}
 
+		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet, NetPeer peer)
+		{
+			// Do nothing
+		}
+
 		private void OnSyncObjectPacketReceived(SyncObjectPacket packet, NetPeer peer)
 		{
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			switch (packet.ObjectType)
 			{
-				case SyncObjectPacket.SyncObjectType.Tripwire:
+				case SynchronizableObjectType.Tripwire:
 					{
 						if (packet.Disarmed)
 						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
 							if (tripwire != null)
 							{
 								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
@@ -266,7 +272,7 @@ namespace Fika.Core.Networking
 						}
 						if (packet.Triggered)
 						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
 							if (tripwire != null)
 							{
 								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
@@ -870,8 +876,17 @@ namespace Fika.Core.Networking
 				GClass1157 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
 				try
 				{
-					GClass1640 asd = reader.ReadPolymorph<GClass1640>();
-					GStruct417<GClass3086> result = asd.ToInventoryOperation(playerToApply);
+					OperationCallbackPacket operationCallbackPacket;
+					GClass1640 descriptor = reader.ReadPolymorph<GClass1640>();
+					GStruct417<GClass3086> result = descriptor.ToInventoryOperation(playerToApply);
+
+					// Handle this on the server and use GameWorld to replicate
+					if (result.Value is GClass3104 tripwireOperation)
+					{
+						SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+						result.Value.method_1(null);
+						return;
+					}
 
 					InventoryOperationHandler opHandler = new()
 					{
@@ -882,7 +897,7 @@ namespace Fika.Core.Networking
 						server = this
 					};
 #if DEBUG
-					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
+					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
 						simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
 #else
 					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);

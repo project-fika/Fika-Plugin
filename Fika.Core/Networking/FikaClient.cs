@@ -6,6 +6,7 @@ using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.MovingPlatforms;
 using EFT.SynchronizableObjects;
 using EFT.UI;
@@ -117,6 +118,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LightkeeperGuardDeathPacket>(OnLightkeeperGuardDeathPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
+			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -165,16 +167,49 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
 		}
 
+		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet)
+		{
+			switch (packet.ObjectType)
+			{
+				case SynchronizableObjectType.AirDrop:
+					break;
+				case SynchronizableObjectType.AirPlane:
+					break;
+				case SynchronizableObjectType.Tripwire:
+					{
+						if (Singleton<ItemFactoryClass>.Instance.CreateItem(packet.GrenadeId, packet.GrenadeTemplate, null) is not GrenadeClass grenadeClass)
+						{
+							logger.LogError("Item with id " + packet.GrenadeId + " is not a grenade!");
+							return;
+						}
+
+						GClass2298 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+						TripwireSynchronizableObject syncObject = (TripwireSynchronizableObject)processor.TakeFromPool(packet.ObjectType);
+						syncObject.ObjectId = packet.ObjectId;
+						syncObject.IsStatic = packet.IsStatic;
+						syncObject.transform.position = packet.Position;
+						syncObject.transform.rotation = packet.Rotation;
+						processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
+
+						syncObject.SetupGrenade(grenadeClass, packet.ProfileId, packet.Position, packet.ToPosition);
+						processor.TripwireManager.AddTripwire(syncObject);
+					}
+					break;
+				default:
+					break;
+			}
+		}
+
 		private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
 		{
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			switch (packet.ObjectType)
 			{
-				case SyncObjectPacket.SyncObjectType.Tripwire:
+				case SynchronizableObjectType.Tripwire:
 					{
 						if (packet.Disarmed)
 						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
 							if (tripwire != null)
 							{
 								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
@@ -184,7 +219,7 @@ namespace Fika.Core.Networking
 						}
 						if (packet.Triggered)
 						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
 							if (tripwire != null)
 							{
 								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);

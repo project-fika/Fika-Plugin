@@ -638,7 +638,7 @@ namespace Fika.Core.Coop.Players
 			base.vmethod_4(tripwire);
 			SyncObjectPacket packet = new(tripwire.ObjectId)
 			{
-				ObjectType = SyncObjectPacket.SyncObjectType.Tripwire,
+				ObjectType = SynchronizableObjectType.Tripwire,
 				Disarmed = true
 			};
 			PacketSender.SendPacket(ref packet);

@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
 using HarmonyLib;
@@ -25,13 +26,18 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override GClass711 CreateGrenadeFactory()
 		{
-			return new GClass711();
+			return new GClass712();
 		}
 
 		public override void Start()
 		{
 			base.Start();
 			RegisterBorderZones();
+		}
+
+		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
+		{
+			// Do nothing
 		}
 
 		public override void TriggerTripwire(TripwireSynchronizableObject tripwire)

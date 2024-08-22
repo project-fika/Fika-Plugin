@@ -122,10 +122,27 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 			else if (FikaBackendUtils.IsClient)
 			{
+				GClass1162 writer;
+
 				InventoryPacket packet = new()
 				{
 					HasItemControllerExecutePacket = true
 				};
+
+				// Do not use callback for Tripwires
+				if (operation is GClass3104 tripwireOperation)
+				{
+					writer = new();
+					writer.WritePolymorph(operation.ToDescriptor());
+					packet.ItemControllerExecutePacket = new()
+					{
+						CallbackId = 1,
+						OperationBytes = writer.ToArray()
+					};
+					CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
+					base.vmethod_1(operation, callback);
+					return;
+				}
 
 				ClientInventoryOperationManager clientOperationManager = new()
 				{
@@ -137,7 +154,7 @@ namespace Fika.Core.Coop.ClientClasses
 				clientOperationManager.callback ??= new Callback(ClientPlayer.Control0.Class1488.class1488_0.method_0);
 				uint operationNum = AddOperationCallback(operation, new Callback<EOperationStatus>(clientOperationManager.HandleResult));
 
-				GClass1162 writer = new();
+				writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());
 				packet.ItemControllerExecutePacket = new()
 				{

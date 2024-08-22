@@ -1,21 +1,22 @@
-﻿using LiteNetLib.Utils;
+﻿using EFT.SynchronizableObjects;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
 	public struct SyncObjectPacket(int id) : INetSerializable
 	{
-		public SyncObjectType ObjectType;
-		public int Id = id;
+		public SynchronizableObjectType ObjectType;
+		public int ObjectId = id;
 		public bool Disarmed;
 		public bool Triggered;
 
 		public void Deserialize(NetDataReader reader)
 		{
-			ObjectType = (SyncObjectType)reader.GetByte();
-			Id = reader.GetInt();
+			ObjectType = (SynchronizableObjectType)reader.GetByte();
+			ObjectId = reader.GetInt();
 			switch (ObjectType)
 			{
-				case SyncObjectType.Tripwire:
+				case SynchronizableObjectType.Tripwire:
 					{
 						Disarmed = reader.GetBool();
 						Triggered = reader.GetBool();
@@ -29,10 +30,10 @@ namespace Fika.Core.Networking
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put((byte)ObjectType);
-			writer.Put(Id);
+			writer.Put(ObjectId);
 			switch (ObjectType)
 			{
-				case SyncObjectType.Tripwire:
+				case SynchronizableObjectType.Tripwire:
 					{
 						writer.Put(Disarmed);
 						writer.Put(Triggered);
@@ -41,11 +42,6 @@ namespace Fika.Core.Networking
 				default:
 					break;
 			}
-		}
-
-		public enum SyncObjectType
-		{
-			Tripwire = 0
 		}
 	}
 }

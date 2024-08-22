@@ -653,6 +653,7 @@ namespace Fika.Core.Networking
 		{
 			public uint CallbackId;
 			public byte[] OperationBytes;
+
 			public static ItemControllerExecutePacket Deserialize(NetDataReader reader)
 			{
 				ItemControllerExecutePacket packet = new()
