@@ -5,6 +5,7 @@ using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
+using EFT.SynchronizableObjects;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -133,6 +134,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
+			packetProcessor.SubscribeNetSerializable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -242,6 +244,42 @@ namespace Fika.Core.Networking
 			FikaRequestHandler.UpdateSetHost(body);
 
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnSyncObjectPacketReceived(SyncObjectPacket packet, NetPeer peer)
+		{
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			switch (packet.ObjectType)
+			{
+				case SyncObjectPacket.SyncObjectType.Tripwire:
+					{
+						if (packet.Disarmed)
+						{
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							if (tripwire != null)
+							{
+								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
+								tripwire.DisableTripwire();
+								SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+							}
+							return;
+						}
+						if (packet.Triggered)
+						{
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							if (tripwire != null)
+							{
+								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
+								tripwire.TriggerTripwire();
+								SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+							}
+							return;
+						}
+					}
+					break;
+				default:
+					break;
+			}
 		}
 
 		private void OnReconnectPacketReceived(ReconnectPacket packet, NetPeer peer)

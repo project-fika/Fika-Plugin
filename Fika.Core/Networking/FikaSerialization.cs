@@ -609,6 +609,9 @@ namespace Fika.Core.Networking
 			public Vector3 GrenadePosition;
 			public Vector3 ThrowForce;
 			public bool LowThrow;
+			public bool PlantTripwire = false;
+			public bool ChangeToIdle = false;
+			public bool ChangeToPlant = false;
 
 			public static GrenadePacket Deserialize(NetDataReader reader)
 			{
@@ -624,6 +627,9 @@ namespace Fika.Core.Networking
 					packet.ThrowForce = reader.GetVector3();
 					packet.LowThrow = reader.GetBool();
 				}
+				packet.PlantTripwire = reader.GetBool();
+				packet.ChangeToIdle = reader.GetBool();
+				packet.ChangeToPlant = reader.GetBool();
 				return packet;
 			}
 			public static void Serialize(NetDataWriter writer, GrenadePacket packet)
@@ -637,6 +643,9 @@ namespace Fika.Core.Networking
 					writer.Put(packet.ThrowForce);
 					writer.Put(packet.LowThrow);
 				}
+				writer.Put(packet.PlantTripwire);
+				writer.Put(packet.ChangeToIdle);
+				writer.Put(packet.ChangeToPlant);
 			}
 		}
 

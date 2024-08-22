@@ -7,6 +7,7 @@ using EFT.Communications;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
@@ -17,6 +18,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Packets.GameWorld;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -629,6 +631,18 @@ namespace Fika.Core.Coop.Players
 				HasMountingPacket = true,
 				MountingPacket = packet
 			});
+		}
+
+		public override void vmethod_4(TripwireSynchronizableObject tripwire)
+		{
+			base.vmethod_4(tripwire);
+			SyncObjectPacket packet = new(tripwire.ObjectId)
+			{
+				ObjectType = SyncObjectPacket.SyncObjectType.Tripwire,
+				Disarmed = true
+			};
+			PacketSender.SendPacket(ref packet);
+			UpdateInteractionCast();
 		}
 
 		public override void ApplyCorpseImpulse()
@@ -1249,6 +1263,21 @@ namespace Fika.Core.Coop.Players
 					if (packet.GrenadePacket.HasGrenade)
 					{
 						grenadeController.SpawnGrenade(0f, packet.GrenadePacket.GrenadePosition, packet.GrenadePacket.GrenadeRotation, packet.GrenadePacket.ThrowForce, packet.GrenadePacket.LowThrow);
+					}
+
+					if (packet.GrenadePacket.PlantTripwire)
+					{
+						grenadeController.PlantTripwire();
+					}
+
+					if (packet.GrenadePacket.ChangeToIdle)
+					{
+						grenadeController.ChangeFireMode(Weapon.EFireMode.grenadeThrowing);
+					}
+
+					if (packet.GrenadePacket.ChangeToPlant)
+					{
+						grenadeController.ChangeFireMode(Weapon.EFireMode.greanadePlanting);
 					}
 				}
 				else if (HandsController is CoopObservedQuickGrenadeController quickGrenadeController)

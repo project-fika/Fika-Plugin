@@ -1,6 +1,9 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
+using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.HostClasses;
+using Fika.Core.Networking;
 using HarmonyLib;
 using UnityEngine;
 
@@ -32,6 +35,30 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			base.Start();
 			RegisterBorderZones();
+		}
+
+		public override void TriggerTripwire(TripwireSynchronizableObject tripwire)
+		{
+			base.TriggerTripwire(tripwire);
+			FikaServer server = Singleton<FikaServer>.Instance;
+			SyncObjectPacket packet = new(tripwire.ObjectId)
+			{
+				ObjectType = SyncObjectPacket.SyncObjectType.Tripwire,
+				Triggered = true
+			};
+			server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+		}
+
+		public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
+		{
+			base.DeActivateTripwire(tripwire);
+			FikaServer server = Singleton<FikaServer>.Instance;
+			SyncObjectPacket packet = new(tripwire.ObjectId)
+			{
+				ObjectType = SyncObjectPacket.SyncObjectType.Tripwire,
+				Disarmed = true
+			};
+			server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 		}
 	}
 }

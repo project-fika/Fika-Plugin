@@ -1,10 +1,14 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using System;
 using UnityEngine;
+using static UnityEngine.ParticleSystem.PlaybackState;
+using UnityEngine.UIElements;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -103,6 +107,58 @@ namespace Fika.Core.Coop.ClientClasses
 				}
 			});
 			base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
+		}
+
+		public override void PlantTripwire()
+		{
+			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			{
+				HasGrenadePacket = true,
+				GrenadePacket = new()
+				{
+					PlantTripwire = true
+				}
+			});
+			base.PlantTripwire();
+		}
+
+		public override void ChangeFireMode(Weapon.EFireMode fireMode)
+		{
+			if (!CurrentOperation.CanChangeFireMode(fireMode))
+			{
+				return;
+			}
+
+			Class1092 currentOperation = CurrentOperation;
+			if (currentOperation != null)
+			{
+				if (currentOperation is not Class1097)
+				{
+					if (currentOperation is Class1098)
+					{
+						coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+						{
+							HasGrenadePacket = true,
+							GrenadePacket = new()
+							{
+								ChangeToIdle = true
+							}
+						});
+					}
+				}
+				else
+				{
+					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+					{
+						HasGrenadePacket = true,
+						GrenadePacket = new()
+						{
+							ChangeToPlant = true
+						}
+					});
+				}
+			}
+			base.ChangeFireMode(fireMode);
 		}
 
 		public override void ActualDrop(Result<IHandsThrowController> controller, float animationSpeed, Action callback, bool fastDrop)

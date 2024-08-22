@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
 using HarmonyLib;
 using UnityEngine;
@@ -31,6 +32,16 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			base.Start();
 			RegisterBorderZones();
+		}
+
+		public override void TriggerTripwire(TripwireSynchronizableObject tripwire)
+		{
+			// Do nothing
+		}
+
+		public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
+		{
+			// Do nothing
 		}
 	}
 }

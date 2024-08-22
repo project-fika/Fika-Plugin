@@ -7,6 +7,7 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.MovingPlatforms;
+using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.UI.BattleTimer;
 using EFT.Weather;
@@ -115,6 +116,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LightkeeperGuardDeathPacket>(OnLightkeeperGuardDeathPacketReceived);
+			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -161,6 +163,40 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
+		{
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			switch (packet.ObjectType)
+			{
+				case SyncObjectPacket.SyncObjectType.Tripwire:
+					{
+						if (packet.Disarmed)
+						{
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							if (tripwire != null)
+							{
+								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
+								tripwire.DisableTripwire();
+							}
+							return;
+						}
+						if (packet.Triggered)
+						{
+							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.Id);
+							if (tripwire != null)
+							{
+								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
+								tripwire.TriggerTripwire();
+							}
+							return;
+						}
+					}
+					break;
+				default:
+					break;
+			}
 		}
 
 		private void OnReconnectPacketReceived(ReconnectPacket packet)
