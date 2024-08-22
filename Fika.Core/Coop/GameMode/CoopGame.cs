@@ -1444,6 +1444,11 @@ namespace Fika.Core.Coop.GameMode
 				halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
 			}
 
+			if (instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
+			{
+				gameWorld.BtrController = new BTRControllerClass(gameWorld);
+			}
+
 			ESeason season = iSession.Season;
 			Class416 seasonHandler = new();
 			gameWorld.GInterface27_0 = seasonHandler;
