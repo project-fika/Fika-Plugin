@@ -1027,12 +1027,6 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaServerDestroyedEvent(this));
 		}
 
-		[Obsolete("SendDataToAll with a NetDataWriter specified is deprecated and will be removed in newer versions of Fika, please use SendDataToALl without a writer.")]
-		public void SendDataToAll<T>(NetDataWriter writer, ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToExclude = null) where T : INetSerializable
-		{
-			SendDataToAll(ref packet, deliveryMethod, peerToExclude);
-		}
-
 		public void SendDataToAll<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToExclude = null) where T : INetSerializable
 		{
 			dataWriter.Reset();
@@ -1050,12 +1044,6 @@ namespace Fika.Core.Networking
 				packetProcessor.WriteNetSerializable(dataWriter, ref packet);
 				netServer.SendToAll(dataWriter, deliveryMethod);
 			}
-		}
-
-		[Obsolete("SendDataToPeer with a NetDataWriter specified is deprecated and will be removed in newer versions of Fika, please use SendDataToPeer without a writer.")]
-		public void SendDataToPeer<T>(NetPeer peer, NetDataWriter writer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
-		{
-			SendDataToPeer(peer, ref packet, deliveryMethod);
 		}
 
 		public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable

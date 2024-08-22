@@ -639,7 +639,6 @@ namespace Fika.Core
 			new MaxBotPatch_Override().Enable();
 			new BotTemplateLimitPatch_Override().Enable();
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
-			//new AddEnemyToAllGroupsInBotZonePatch_Override().Enable();
 			new LighthouseBridge_Patch().Enable();
 			new LighthouseMines_Patch().Enable();
 		}
