@@ -6,6 +6,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
+using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
@@ -230,6 +231,8 @@ namespace Fika.Core
 			new ChangeGameModeButton_Patch().Enable();
 			new MenuTaskBar_Patch().Enable();
 			new GameWorld_Create_Patch().Enable();
+			new BTRControllerClass_Init_Patch().Enable();
+			new BTRView_SyncViewFromServer_Patch().Enable();
 			//new World_AddSpawnQuestLootPacket_Patch().Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();

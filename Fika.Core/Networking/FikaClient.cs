@@ -119,6 +119,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<LightkeeperGuardDeathPacket>(OnLightkeeperGuardDeathPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
+			packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -1030,6 +1031,11 @@ namespace Fika.Core.Networking
 			{
 				logger.LogError("OnLightkeeperGuardDeathPacketReceived: Received packet but manager is not initialized");
 			}
+		}
+
+		private void OnBTRPacketReceived(BTRPacket packet)
+		{
+			Singleton<GameWorld>.Instance.BtrController.SyncBTRVehicleFromServer(packet.Data);
 		}
 
 		private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
