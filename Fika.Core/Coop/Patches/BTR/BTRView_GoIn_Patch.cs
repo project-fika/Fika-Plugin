@@ -1,6 +1,10 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.Vehicle;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
+using LiteNetLib;
 using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
@@ -25,6 +29,25 @@ namespace Fika.Core.Coop.Patches.BTR
 				__result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
 				return false;
 			}
+
+			if (player.IsYourPlayer && FikaBackendUtils.IsServer)
+			{
+				CoopPlayer myPlayer = (CoopPlayer)player;
+				BTRInteractionPacket packet = new(myPlayer.NetId)
+				{
+					Data = new()
+					{
+						HasInteraction = true,
+						InteractionType = EInteractionType.GoIn,
+						SideId = __instance.GetSideId(side),
+						SlotId = placeId,
+						Fast = fast
+					}
+				};
+
+				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+			}
+
 			return true;
 		}
 
@@ -59,7 +82,7 @@ namespace Fika.Core.Coop.Patches.BTR
 			}
 			catch (Exception ex)
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("BTRControllerClass_LocalBtrInteraction_Patch: " + ex.Message);
+				FikaPlugin.Instance.FikaLogger.LogError("BTRView_GoIn_Patch: " + ex.Message);
 			}
 		}
 	}

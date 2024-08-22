@@ -21,6 +21,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
+using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -2242,6 +2243,8 @@ namespace Fika.Core.Coop.GameMode
 					Destroy(CoopHandler.CoopHandlerParent);
 				}
 			}
+
+			BTRSide_Patches.Passengers.Clear();
 
 			base.Dispose();
 		}
