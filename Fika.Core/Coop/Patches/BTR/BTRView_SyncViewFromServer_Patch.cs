@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Patches.BTR
 				Data = packet
 			};
 
-			Singleton<FikaServer>.Instance.SendDataToAll(ref btrPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+			Singleton<FikaServer>.Instance.SendDataToAll(ref btrPacket, LiteNetLib.DeliveryMethod.Unreliable);
 		}
 	}
 }
