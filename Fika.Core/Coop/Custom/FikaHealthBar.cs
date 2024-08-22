@@ -38,8 +38,8 @@ namespace Fika.Core.Coop.Custom
 			mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
 			effects = [];
-            // Check for GClass increments, can be checked in EFT.UI.StaticIcons.EffectSprites method UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize
-            ignoredTypes = [typeof(GInterface310), typeof(GInterface312), typeof(GInterface313), typeof(GInterface325), typeof(GInterface326), typeof(GInterface327)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
+			// Check for GClass increments, can be checked in EFT.UI.StaticIcons.EffectSprites method UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize
+			ignoredTypes = [typeof(GInterface310), typeof(GInterface312), typeof(GInterface313), typeof(GInterface325), typeof(GInterface326), typeof(GInterface327)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
 			CreateHealthBar();
 		}
 

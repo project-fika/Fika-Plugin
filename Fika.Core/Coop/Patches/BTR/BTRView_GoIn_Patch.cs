@@ -30,22 +30,26 @@ namespace Fika.Core.Coop.Patches.BTR
 				return false;
 			}
 
-			if (player.IsYourPlayer && FikaBackendUtils.IsServer)
+			if (player.IsYourPlayer)
 			{
 				CoopPlayer myPlayer = (CoopPlayer)player;
-				BTRInteractionPacket packet = new(myPlayer.NetId)
+				myPlayer.PacketSender.Enabled = false;
+				if (FikaBackendUtils.IsServer)
 				{
-					Data = new()
+					BTRInteractionPacket packet = new(myPlayer.NetId)
 					{
-						HasInteraction = true,
-						InteractionType = EInteractionType.GoIn,
-						SideId = __instance.GetSideId(side),
-						SlotId = placeId,
-						Fast = fast
-					}
-				};
+						Data = new()
+						{
+							HasInteraction = true,
+							InteractionType = EInteractionType.GoOut,
+							SideId = __instance.GetSideId(side),
+							SlotId = placeId,
+							Fast = fast
+						}
+					};
 
-				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+					Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+				}
 			}
 
 			return true;
