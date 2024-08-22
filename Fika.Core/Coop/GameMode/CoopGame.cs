@@ -1350,6 +1350,7 @@ namespace Fika.Core.Coop.GameMode
 			Logger.LogWarning("vmethod_4");
 #endif
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			gameWorld.LocationId = Location_0.Id;
 
 			if (isServer)
 			{
