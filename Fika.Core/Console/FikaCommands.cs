@@ -6,7 +6,9 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using HarmonyLib;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Fika.Core.Console
 {
@@ -158,6 +160,34 @@ namespace Fika.Core.Console
 				if (game.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
 				{
 					ConsoleScreen.Log("GameTimer stopped at: " + game.GameTimer.PastTime.ToString());
+				}
+			}
+		}
+
+		[ConsoleCommand("goToBTR", "", null, "Teleports you to the BTR if active", [])]
+		public static void GoToBTR()
+		{
+			if (Singleton<IFikaGame>.Instance is CoopGame game)
+			{
+				GameWorld gameWorld = game.GameWorld_0;
+				if (gameWorld != null)
+				{
+					if (gameWorld.BtrController != null)
+					{
+						Transform btrTransform = Traverse.Create(gameWorld.BtrController.BtrView).Field<Transform>("_cachedTransform").Value;
+						if (btrTransform != null)
+						{
+							Player myPlayer = gameWorld.MainPlayer;
+							if (myPlayer != null)
+							{
+								myPlayer.Teleport(btrTransform.position + (Vector3.forward * 3));
+							}
+						}
+					}
+					else
+					{
+						ConsoleScreen.LogWarning("There is no BTRController active!");
+					}
 				}
 			}
 		}

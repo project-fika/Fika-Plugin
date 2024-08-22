@@ -1,17 +1,10 @@
 ﻿using Comfort.Common;
-using EFT;
 using EFT.Vehicle;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.GameWorld;
 using SPT.Reflection.Patching;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Patches.BTR
 {
@@ -25,12 +18,10 @@ namespace Fika.Core.Coop.Patches.BTR
 		[PatchPrefix]
 		public static void Prefix(ref BTRDataPacket packet)
 		{
-			if(FikaBackendUtils.IsClient)
+			if (FikaBackendUtils.IsClient)
 			{
 				return;
 			}
-
-			Logger.LogInfo("BTRView SyncViewFromServer");
 
 			BTRPacket btrPacket = new()
 			{

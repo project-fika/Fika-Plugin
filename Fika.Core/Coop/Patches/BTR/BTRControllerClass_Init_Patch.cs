@@ -1,17 +1,10 @@
-﻿using EFT.Interactive;
-using EFT.Weather;
+﻿using Comfort.Common;
+using EFT;
 using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Comfort.Common;
-using EFT;
-using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Coop.Patches.BTR
 {
@@ -25,8 +18,6 @@ namespace Fika.Core.Coop.Patches.BTR
 		[PatchPrefix]
 		public static bool Prefix(ref CancellationToken cancellationToken, ref Task __result, ref GameWorld ___gameWorld_0, ref BackendConfigSettingsClass.BTRGlobalSettings ___btrglobalSettings_0, ref bool ___bool_1)
 		{
-			Logger.LogInfo("BTRControllerClass method_0");
-
 			___btrglobalSettings_0 = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings;
 
 			if (FikaBackendUtils.IsServer)

@@ -233,7 +233,7 @@ namespace Fika.Core
 			new GameWorld_Create_Patch().Enable();
 			new BTRControllerClass_Init_Patch().Enable();
 			new BTRView_SyncViewFromServer_Patch().Enable();
-			//new World_AddSpawnQuestLootPacket_Patch().Enable();
+			new Player_Hide_Patch().Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();
 
