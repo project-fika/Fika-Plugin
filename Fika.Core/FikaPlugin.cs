@@ -234,6 +234,7 @@ namespace Fika.Core
 			new BTRControllerClass_Init_Patch().Enable();
 			new BTRView_SyncViewFromServer_Patch().Enable();
 			new Player_Hide_Patch().Enable();
+			new BTRView_GoIn_Patch().Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();
 

@@ -2,7 +2,7 @@
 using EFT.Vehicle;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.GameWorld;
+using LiteNetLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Patches.BTR
 				Data = packet
 			};
 
-			Singleton<FikaServer>.Instance.SendDataToAll(ref btrPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+			Singleton<FikaServer>.Instance.SendDataToAll(ref btrPacket, DeliveryMethod.Unreliable);
 		}
 	}
 }
