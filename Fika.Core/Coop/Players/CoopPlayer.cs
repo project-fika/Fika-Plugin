@@ -1534,6 +1534,37 @@ namespace Fika.Core.Coop.Players
 			});
 		}
 
+		public void ReceiveTraderServicesData(List<TraderServicesClass> services)
+		{
+			if (!IsYourPlayer)
+			{
+				return;
+			}
+
+			Dictionary<ETraderServiceType, BackendConfigSettingsClass.ServiceData> servicesData = Singleton<BackendConfigSettingsClass>.Instance.ServicesData;
+
+			foreach (TraderServicesClass service in services)
+			{
+				BackendConfigSettingsClass.ServiceData serviceData = new(service, null);
+				if (servicesData.TryGetValue(serviceData.ServiceType, out BackendConfigSettingsClass.ServiceData _serviceData2))
+				{
+					servicesData[serviceData.ServiceType] = serviceData;
+				}
+				else
+				{
+					servicesData.Add(serviceData.ServiceType, serviceData);
+				}
+				if (!Profile.TradersInfo.TryGetValue(serviceData.TraderId, out Profile.TraderInfo traderInfo))
+				{
+					FikaPlugin.Instance.FikaLogger.LogWarning($"Can't find trader with id: {serviceData.TraderId}!");
+				}
+				else
+				{
+					traderInfo.SetServiceAvailability(serviceData.ServiceType, service.CanAfford, service.WasPurchasedInThisRaid);
+				}
+			}
+		}
+
 		public Item FindItem(string itemId, bool questItem = false)
 		{
 			if (questItem)
