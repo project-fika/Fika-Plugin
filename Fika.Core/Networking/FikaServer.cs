@@ -7,6 +7,7 @@ using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.SynchronizableObjects;
 using EFT.UI;
+using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
@@ -136,6 +137,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket, NetPeer>(OnSpawnSyncObjectPacketReceived);
+			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -245,6 +247,26 @@ namespace Fika.Core.Networking
 			FikaRequestHandler.UpdateSetHost(body);
 
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				GameWorld gameWorld = Singleton<GameWorld>.Instance;
+				if (gameWorld.BtrController != null && gameWorld.BtrController.BtrVehicle != null)
+				{
+					EBtrInteractionStatus status = gameWorld.BtrController.BtrVehicle.method_39(playerToApply, packet.Data);
+					BTRInteractionPacket response = new(packet.NetId)
+					{
+						IsResponse = true,
+						Status = status,
+						Data = packet.Data
+					};
+
+					SendDataToAll(ref response, DeliveryMethod.ReliableOrdered);
+				}
+			}
 		}
 
 		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet, NetPeer peer)

@@ -11,6 +11,7 @@ namespace Fika.Core.Coop.Patches.BTR
 			return typeof(LocalPlayer).GetMethod(nameof(LocalPlayer.Hide));
 		}
 
+		[PatchPrefix]
 		public static bool Prefix(GClass856 ___gclass856_0)
 		{
 			___gclass856_0.Hide();

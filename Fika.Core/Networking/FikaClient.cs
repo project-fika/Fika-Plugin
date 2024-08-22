@@ -5,12 +5,13 @@ using Comfort.Common;
 using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
+using EFT.GlobalEvents;
 using EFT.Interactive;
-using EFT.InventoryLogic;
 using EFT.MovingPlatforms;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.UI.BattleTimer;
+using EFT.Vehicle;
 using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -120,6 +121,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
+			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -166,6 +168,27 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				GameWorld gameWorld = Singleton<GameWorld>.Instance;
+				if (gameWorld.BtrController != null && gameWorld.BtrController.BtrView != null)
+				{
+					if (packet.Status is not EBtrInteractionStatus.Confirmed && playerToApply.IsYourPlayer)
+					{
+						int playerId = playerToApply.PlayerId;
+						if (packet.Status - EBtrInteractionStatus.Blacklisted <= 2)
+						{
+							GlobalEventHandlerClass.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(playerId, packet.Status);
+						}
+						return;
+					}
+					gameWorld.BtrController.BtrView.Interaction(playerToApply, packet.Data);
+				}
+			}
 		}
 
 		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet)

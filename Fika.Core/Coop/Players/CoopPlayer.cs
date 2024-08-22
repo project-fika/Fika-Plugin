@@ -9,6 +9,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
+using EFT.Vehicle;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -805,6 +806,22 @@ namespace Fika.Core.Coop.Players
 				_openAction(new Action(handler.Handle));
 			}
 			_openAction = null;
+		}
+
+		public override void vmethod_2(BTRSide btr, byte placeId, EInteractionType interaction)
+		{
+			if (FikaBackendUtils.IsServer)
+			{
+				base.vmethod_2(btr, placeId, interaction);
+				return;
+			}
+
+			FikaClient client = Singleton<FikaClient>.Instance;
+			BTRInteractionPacket packet = new(NetId)
+			{
+				Data = btr.GetInteractWithBtrPacket(placeId, interaction)
+			};
+			client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 		}
 
 		public void SetupMainPlayer()
