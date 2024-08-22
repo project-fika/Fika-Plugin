@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Custom
 		private float screenScale = 1f;
 		private Dictionary<Type, Sprite> effectIcons;
 		private List<HealthBarEffect> effects;
-		private List<Type> ignoredTypes; // Check for GClass increments
+		private List<Type> ignoredTypes;
 		private float counter = 0;
 		private bool updatePos = true;
 
@@ -38,7 +38,8 @@ namespace Fika.Core.Coop.Custom
 			mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
 			effects = [];
-			ignoredTypes = [typeof(GInterface310), typeof(GInterface312), typeof(GInterface313), typeof(GInterface325), typeof(GInterface326), typeof(GInterface327)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
+            // Check for GClass increments, can be checked in EFT.UI.StaticIcons.EffectSprites method UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize
+            ignoredTypes = [typeof(GInterface310), typeof(GInterface312), typeof(GInterface313), typeof(GInterface325), typeof(GInterface326), typeof(GInterface327)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
 			CreateHealthBar();
 		}
 
