@@ -1167,6 +1167,82 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		public struct MountingPacket(GStruct173.EMountingCommand command)
+		{
+			public GStruct173.EMountingCommand Command = command;
+			public bool IsMounted;
+			public Vector3 MountDirection;
+			public Vector3 MountingPoint;
+			public Vector3 TargetPos;
+			public float TargetPoseLevel;
+			public float TargetHandsRotation;
+			public Vector2 PoseLimit;
+			public Vector2 PitchLimit;
+			public Vector2 YawLimit;
+			public Quaternion TargetBodyRotation;
+			public float CurrentMountingPointVerticalOffset;
+			public short MountingDirection;
+			public float TransitionTime;
+
+			public static MountingPacket Deserialize(NetDataReader reader)
+			{
+				MountingPacket packet = new()
+				{
+					Command = (GStruct173.EMountingCommand)reader.GetByte()
+				};
+				if (packet.Command == GStruct173.EMountingCommand.Update)
+				{
+					packet.CurrentMountingPointVerticalOffset = reader.GetFloat();
+				}
+				if (packet.Command is GStruct173.EMountingCommand.Enter or GStruct173.EMountingCommand.Exit)
+				{
+					packet.IsMounted = reader.GetBool();
+				};
+				if (packet.Command == GStruct173.EMountingCommand.Enter)
+				{
+					packet.MountDirection = reader.GetVector3();
+					packet.MountingPoint = reader.GetVector3();
+					packet.MountingDirection = reader.GetShort();
+					packet.TransitionTime = reader.GetFloat();
+					packet.TargetPos = reader.GetVector3();
+					packet.TargetPoseLevel = reader.GetFloat();
+					packet.TargetHandsRotation = reader.GetFloat();
+					packet.TargetBodyRotation = reader.GetQuaternion();
+					packet.PoseLimit = reader.GetVector2();
+					packet.PitchLimit = reader.GetVector2();
+					packet.YawLimit = reader.GetVector2();
+				}
+				return packet;
+			}
+
+			public static void Serialize(NetDataWriter writer, MountingPacket packet)
+			{
+				writer.Put((byte)packet.Command);
+				if (packet.Command == GStruct173.EMountingCommand.Update)
+				{
+					writer.Put(packet.CurrentMountingPointVerticalOffset);
+				}
+				if (packet.Command is GStruct173.EMountingCommand.Enter or GStruct173.EMountingCommand.Exit)
+				{
+					writer.Put(packet.IsMounted);
+				}
+				if (packet.Command == GStruct173.EMountingCommand.Enter)
+				{
+					writer.Put(packet.MountDirection);
+					writer.Put(packet.MountingPoint);
+					writer.Put(packet.MountingDirection);
+					writer.Put(packet.TransitionTime);
+					writer.Put(packet.TargetPos);
+					writer.Put(packet.TargetPoseLevel);
+					writer.Put(packet.TargetHandsRotation);
+					writer.Put(packet.TargetBodyRotation);
+					writer.Put(packet.PoseLimit);
+					writer.Put(packet.PitchLimit);
+					writer.Put(packet.YawLimit);
+				}
+			}
+		}
+
 		public enum EProceedType
 		{
 			EmptyHands,

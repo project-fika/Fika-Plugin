@@ -8,6 +8,7 @@ using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
+using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.ObservedClasses;
@@ -597,8 +598,37 @@ namespace Fika.Core.Coop.Players
 				PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
 					Interaction = interaction
-				}); 
+				});
 			}
+		}
+
+		public override void OnMounting(GStruct173.EMountingCommand command)
+		{
+			MountingPacket packet = new(command)
+			{
+				IsMounted = MovementContext.IsInMountedState,
+				MountDirection = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
+				MountingPoint = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
+				CurrentMountingPointVerticalOffset = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
+				MountingDirection = MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0
+			};
+			if (command == GStruct173.EMountingCommand.Enter)
+			{
+				packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
+				packet.TargetPos = MovementContext.PlayerMountingPointData.PlayerTargetPos;
+				packet.TargetPoseLevel = MovementContext.PlayerMountingPointData.TargetPoseLevel;
+				packet.TargetHandsRotation = MovementContext.PlayerMountingPointData.TargetHandsRotation;
+				packet.TargetBodyRotation = MovementContext.PlayerMountingPointData.TargetBodyRotation;
+				packet.PoseLimit = MovementContext.PlayerMountingPointData.PoseLimit;
+				packet.PitchLimit = MovementContext.PlayerMountingPointData.PitchLimit;
+				packet.YawLimit = MovementContext.PlayerMountingPointData.YawLimit;
+			}
+
+			PacketSender.CommonPlayerPackets.Enqueue(new()
+			{
+				HasMountingPacket = true,
+				MountingPacket = packet
+			});
 		}
 
 		public override void ApplyCorpseImpulse()
@@ -987,6 +1017,42 @@ namespace Fika.Core.Coop.Players
 			if (packet.HasVaultPacket)
 			{
 				DoObservedVault(packet.VaultPacket);
+			}
+
+			if (packet.HasMountingPacket)
+			{
+				MountingPacket mPacket = packet.MountingPacket;
+
+				switch (mPacket.Command)
+				{
+					case GStruct173.EMountingCommand.Enter:
+						{
+							MovementContext.PlayerMountingPointData.SetData(new MountPointData(mPacket.MountingPoint, mPacket.MountDirection,
+								(EMountSideDirection)mPacket.MountingDirection), mPacket.TargetPos, mPacket.TargetPoseLevel, mPacket.TargetHandsRotation,
+								mPacket.TransitionTime, mPacket.TargetBodyRotation, mPacket.PoseLimit, mPacket.PitchLimit, mPacket.YawLimit);
+							MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = mPacket.CurrentMountingPointVerticalOffset;
+							MovementContext.EnterMountedState();
+						}
+						break;
+					case GStruct173.EMountingCommand.Exit:
+						{
+							MovementContext.ExitMountedState();
+						}
+						break;
+					case GStruct173.EMountingCommand.Update:
+						{
+							MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = mPacket.CurrentMountingPointVerticalOffset;
+						}
+						break;
+					case GStruct173.EMountingCommand.StartLeaving:
+						{
+							MovementContext.StartExitingMountedState();
+						}
+						break;
+					default:
+						break;
+				}
+				
 			}
 		}
 

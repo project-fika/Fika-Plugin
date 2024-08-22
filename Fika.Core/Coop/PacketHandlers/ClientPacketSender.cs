@@ -66,14 +66,13 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation,
-				player.HeadRotation, player.LastDirection, player.CurrentManagedState.Name,
-				player.MovementContext.SmoothedTilt, player.MovementContext.Step, player.CurrentAnimatorStateIndex,
-				player.MovementContext.SmoothedCharacterMovementSpeed, player.IsInPronePose, player.PoseLevel,
-				player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
+			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
+				player.CurrentManagedState.Name,
+				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
+				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
+				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
-				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface,
-				player.MovementContext.SurfaceNormal);
+				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
 
 			Client.SendData(ref playerStatePacket, DeliveryMethod.Unreliable);
 

@@ -71,53 +71,7 @@ namespace Fika.Core.Coop.Players
 
 		public override float ProtagonistHearing => Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
 
-		private FollowerCullingObject followerCullingObject;
 		private GClass855 cullingHandler;
-		private List<DisablerCullingObject> cullingObjects = new();
-		private bool CollidingWithReporter
-		{
-			get
-			{
-				if (cullingObjects.Count > 0)
-				{
-					for (int i = 0; i < cullingObjects.Count; i++)
-					{
-						if (cullingObjects[i].HasEntered)
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-				return true;
-			}
-		}
-		public override bool IsVisible
-		{
-			get
-			{
-				if (followerCullingObject != null)
-				{
-					return followerCullingObject.IsVisible && CollidingWithReporter;
-				}
-				return OnScreen;
-			}
-			set
-			{
-
-			}
-		}
-		public override float SqrCameraDistance
-		{
-			get
-			{
-				if (followerCullingObject != null)
-				{
-					return followerCullingObject.SqrCameraDistance;
-				}
-				return base.SqrCameraDistance;
-			}
-		}
 		#endregion
 
 		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
@@ -423,6 +377,11 @@ namespace Fika.Core.Coop.Players
 			_removeFromHandsCallback = callback;
 			Proceed(false, new Callback<GInterface149>(handler.Handle), false);
 		}*/
+
+		public override void OnMounting(GStruct173.EMountingCommand command)
+		{
+			// Do nothing
+		}
 
 		public override void ApplyCorpseImpulse()
 		{
@@ -991,52 +950,6 @@ namespace Fika.Core.Coop.Players
 		public override void OnAnimatedInteraction(EInteraction interaction)
 		{
 			// Do nothing
-		}
-
-		private void UnregisterCulling()
-		{
-			if (followerCullingObject != null)
-			{
-				followerCullingObject.enabled = false;
-			}
-
-			if (_triggerColliderSearcher != null)
-			{
-				_triggerColliderSearcher.OnEnter -= AddColliderReporters;
-				_triggerColliderSearcher.OnExit -= RemoveColliderReporters;
-			}
-		}
-
-		private void AddColliderReporters(IPhysicsTrigger trigger)
-		{
-			ColliderReporter colliderReporter = trigger as ColliderReporter;
-			if (colliderReporter != null)
-			{
-				for (int i = 0; i < colliderReporter.Owners.Count; i++)
-				{
-					DisablerCullingObject disablerCullingObject = colliderReporter.Owners[i] as DisablerCullingObject;
-					if (disablerCullingObject != null)
-					{
-						cullingObjects.Add(disablerCullingObject);
-					}
-				}
-			}
-		}
-
-		private void RemoveColliderReporters(IPhysicsTrigger trigger)
-		{
-			ColliderReporter colliderReporter = trigger as ColliderReporter;
-			if (colliderReporter != null)
-			{
-				for (int i = 0; i < colliderReporter.Owners.Count; i++)
-				{
-					DisablerCullingObject disablerCullingObject = colliderReporter.Owners[i] as DisablerCullingObject;
-					if (disablerCullingObject != null)
-					{
-						cullingObjects.Remove(disablerCullingObject);
-					}
-				}
-			}
 		}
 
 		private Transform GetPlayerBones()
