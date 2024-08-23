@@ -8,6 +8,7 @@ using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Airdrops;
 using Fika.Core.Coop.Patches.BTR;
+using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Patches.Weather;
@@ -242,6 +243,7 @@ namespace Fika.Core
 			new GClass2304_UpdateOfflineClientLogic_Patch().Enable();
 			new GClass2305_UpdateOfflineClientLogic_Patch().Enable();
 			new GClass2298_GetSyncObjectStrategyByType_Patch().Enable();
+			LighthouseTraderZone_Patches.Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();
 
