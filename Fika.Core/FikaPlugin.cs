@@ -11,6 +11,7 @@ using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
+using Fika.Core.Coop.Patches.Tripwire;
 using Fika.Core.Coop.Patches.Weather;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
@@ -245,6 +246,11 @@ namespace Fika.Core
 			new GClass2298_GetSyncObjectStrategyByType_Patch().Enable();
 			LighthouseTraderZone_Patches.Enable();
 			new BufferZoneControllerClass_method_1_Patch().Enable();
+			new BufferZoneControllerClass_SetPlayerInZoneStatus_Patch().Enable();
+			new BufferInnerZone_ChangeZoneInteractionAvailability_Patch().Enable();
+			new BufferInnerZone_ChangePlayerAccessStatus_Patch().Enable();
+			new TripwireSynchronizableObject_method_6_Patch().Enable();
+			new TripwireSynchronizableObject_method_11_Patch().Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();
 

@@ -28,7 +28,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 			}
 
 			[PatchPrefix]
-			public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone, ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
+			public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
+				ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
 			{
 				CoopHandler coopHandler = CoopHandler.GetCoopHandler();
 
@@ -88,7 +89,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 			}
 
 			[PatchPrefix]
-			public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone, ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
+			public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
+				ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
 			{
 				CoopHandler coopHandler = CoopHandler.GetCoopHandler();
 

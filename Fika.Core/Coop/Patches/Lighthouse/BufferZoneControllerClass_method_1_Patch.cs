@@ -3,11 +3,7 @@ using EFT.Interactive;
 using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Patches.Lighthouse
 {
@@ -37,7 +33,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 			}
 
 			// Fire OnInitialized
-			___action_0();
+			___action_0?.Invoke();
 
 			// Skip the original method
 			return false;

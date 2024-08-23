@@ -8,7 +8,6 @@ using EFT.AssetsManager;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
-using EFT.InventoryLogic;
 using EFT.MovingPlatforms;
 using EFT.SynchronizableObjects;
 using EFT.UI;
@@ -125,6 +124,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket>(OnTraderServicesPacketReceived);
 			packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
+			packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -173,6 +173,32 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
 		}
 
+		private void OnBufferZonePacketReceived(BufferZonePacket packet)
+		{
+			switch (packet.Status)
+			{
+				case EFT.BufferZone.EBufferZoneData.Availability:
+				case EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead:
+				case EFT.BufferZone.EBufferZoneData.DisableByPlayerDead:
+					{
+						BufferZoneControllerClass.Instance.SetInnerZoneAvailabilityStatus(packet.Available, packet.Status);
+					}
+					break;
+				case EFT.BufferZone.EBufferZoneData.PlayerAccessStatus:
+					{
+						BufferZoneControllerClass.Instance.SetPlayerAccessStatus(packet.ProfileId, packet.Available);
+					}
+					break;
+				case EFT.BufferZone.EBufferZoneData.PlayerInZoneStatusChange:
+					{
+						BufferZoneControllerClass.Instance.SetPlayerInZoneStatus(packet.ProfileId, packet.Available);
+					}
+					break;
+				default:
+					break;
+			}
+		}
+
 		private void OnFlareSuccessPacketReceived(FlareSuccessPacket packet)
 		{
 			if (Singleton<GameWorld>.Instance.MainPlayer.ProfileId == packet.ProfileId)
@@ -180,7 +206,7 @@ namespace Fika.Core.Networking
 				if (!packet.Success)
 				{
 					NotificationManagerClass.DisplayNotification(new GClass2169("AirplaneDelayMessage".Localized(null),
-								ENotificationDurationType.Default, ENotificationIconType.Default, null)); 
+								ENotificationDurationType.Default, ENotificationIconType.Default, null));
 				}
 			}
 		}
@@ -269,7 +295,7 @@ namespace Fika.Core.Networking
 						processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
 
 						syncObject.SetupGrenade(grenadeClass, packet.ProfileId, packet.Position, packet.ToPosition);
-						processor.TripwireManager.AddTripwire(syncObject);
+						//processor.TripwireManager.AddTripwire(syncObject);
 					}
 					break;
 				default:
@@ -280,42 +306,8 @@ namespace Fika.Core.Networking
 		private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
 		{
 			CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
-			switch (packet.ObjectType)
-			{
-				case SynchronizableObjectType.Tripwire:
-					{
-						if (packet.Disarmed)
-						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
-							if (tripwire != null)
-							{
-								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
-								tripwire.DisableTripwire();
-							}
-							return;
-						}
-						if (packet.Triggered)
-						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
-							if (tripwire != null)
-							{
-								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
-								tripwire.TriggerTripwire();
-							}
-							return;
-						}
-					}
-					break;
-				case SynchronizableObjectType.AirDrop:
-				case SynchronizableObjectType.AirPlane:
-					{
-						List<AirplaneDataPacketStruct> structs = [packet.Data];
-						gameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(structs);
-					}
-					break;
-				default:
-					break;
-			}
+			List<AirplaneDataPacketStruct> structs = [packet.Data];
+			gameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(structs);			
 		}
 
 		private void OnReconnectPacketReceived(ReconnectPacket packet)
