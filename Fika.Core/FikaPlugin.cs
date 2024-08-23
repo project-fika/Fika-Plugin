@@ -6,6 +6,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
+using Fika.Core.Coop.Patches.Airdrops;
 using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
@@ -238,6 +239,9 @@ namespace Fika.Core
 			new Player_Hide_Patch().Enable();
 			new Player_UpdateBtrTraderServiceData_Patch().Enable();
 			BTRSide_Patches.Enable();
+			new GClass2304_UpdateOfflineClientLogic_Patch().Enable();
+			new GClass2305_UpdateOfflineClientLogic_Patch().Enable();
+			new GClass2298_GetSyncObjectStrategyByType_Patch().Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();
 

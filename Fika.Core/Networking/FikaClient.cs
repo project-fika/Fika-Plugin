@@ -214,11 +214,15 @@ namespace Fika.Core.Networking
 						AirdropSynchronizableObject syncObject = (AirdropSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirDrop);
 						syncObject.ObjectId = packet.ObjectId;
 						syncObject.AirdropType = packet.AirdropType;
-						LootableContainer componentInChildren = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
-						componentInChildren.enabled = true;
-						componentInChildren.Id = packet.ContainerId;
-						Singleton<GameWorld>.Instance.RegisterWorldInteractionObject(componentInChildren);
-						LootItem.CreateLootContainer(componentInChildren, packet.AirdropItem, packet.AirdropItem.ShortName.Localized(null),
+						LootableContainer container = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
+						container.enabled = true;
+						container.Id = packet.ContainerId;
+						if (packet.NetId > 0)
+						{
+							container.NetId = packet.NetId;
+						}
+						Singleton<GameWorld>.Instance.RegisterWorldInteractionObject(container);
+						LootItem.CreateLootContainer(container, packet.AirdropItem, packet.AirdropItem.ShortName.Localized(null),
 								Singleton<GameWorld>.Instance, null);
 						if (!syncObject.IsStatic)
 						{
@@ -232,7 +236,6 @@ namespace Fika.Core.Networking
 					{
 						AirplaneSynchronizableObject syncObject = (AirplaneSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirPlane);
 						syncObject.ObjectId = packet.ObjectId;
-						syncObject.UniqueId = packet.UniqueId;
 						syncObject.transform.SetPositionAndRotation(packet.Position, packet.Rotation);
 						processor.InitSyncObject(syncObject, packet.Position, packet.Rotation.eulerAngles, packet.ObjectId);
 					}
@@ -247,7 +250,6 @@ namespace Fika.Core.Networking
 
 						TripwireSynchronizableObject syncObject = (TripwireSynchronizableObject)processor.TakeFromPool(packet.ObjectType);
 						syncObject.ObjectId = packet.ObjectId;
-						syncObject.UniqueId = packet.UniqueId;
 						syncObject.IsStatic = packet.IsStatic;
 						syncObject.transform.SetPositionAndRotation(packet.Position, packet.Rotation);
 						processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
@@ -263,7 +265,7 @@ namespace Fika.Core.Networking
 
 		private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
 		{
-			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
 			switch (packet.ObjectType)
 			{
 				case SynchronizableObjectType.Tripwire:
@@ -288,6 +290,13 @@ namespace Fika.Core.Networking
 							}
 							return;
 						}
+					}
+					break;
+				case SynchronizableObjectType.AirDrop:
+				case SynchronizableObjectType.AirPlane:
+					{
+						List<AirplaneDataPacketStruct> structs = [packet.Data];
+						gameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(structs);
 					}
 					break;
 				default:

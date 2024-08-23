@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
@@ -33,7 +34,7 @@ namespace Fika.Core.Coop.ClientClasses
 		public override void PlayerTick(float dt)
 		{
 			method_10(new Action<Player>(Class951.class951_0.method_5));
-		}
+		}		
 
 		public override void vmethod_1(float dt)
 		{
@@ -47,7 +48,11 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override GClass2298 SyncObjectProcessorFactory()
 		{
-			return new GClass2298();
+			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
+			{
+				TripwireManager = new(Singleton<GameWorld>.Instance)
+			};
+			return ClientSynchronizableObjectLogicProcessor;
 		}
 
 		public override void Start()

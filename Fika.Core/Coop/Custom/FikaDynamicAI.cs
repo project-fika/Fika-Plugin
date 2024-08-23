@@ -85,6 +85,11 @@ namespace Fika.Core.Coop.Custom
 				}
 			}
 
+			if (botOwner.IsRole(WildSpawnType.shooterBTR))
+			{
+				return;
+			}
+
 			bots.Add((CoopBot)botOwner.GetPlayer);
 		}
 

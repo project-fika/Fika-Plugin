@@ -10,7 +10,6 @@ namespace Fika.Core.Networking
 	{
 		public SynchronizableObjectType ObjectType;
 		public int ObjectId = id;
-		public int UniqueId;
 		public bool IsStatic;
 
 		public string GrenadeTemplate;
@@ -21,6 +20,7 @@ namespace Fika.Core.Networking
 		public EAirdropType AirdropType;
 		public Item AirdropItem;
 		public string ContainerId;
+		public int NetId;
 
 		public Vector3 Position;
 		public Quaternion Rotation;
@@ -34,7 +34,6 @@ namespace Fika.Core.Networking
 			{
 				case SynchronizableObjectType.Tripwire:
 					{
-						UniqueId = reader.GetInt();
 						GrenadeTemplate = reader.GetString();
 						GrenadeId = reader.GetString();
 						ProfileId = reader.GetString();
@@ -45,7 +44,6 @@ namespace Fika.Core.Networking
 					break;
 				case SynchronizableObjectType.AirPlane:
 					{
-						UniqueId = reader.GetInt();
 						Position = reader.GetVector3();
 						Rotation = reader.GetQuaternion();
 					}
@@ -55,6 +53,7 @@ namespace Fika.Core.Networking
 						AirdropType = (EAirdropType)reader.GetByte();
 						AirdropItem = reader.GetItem();
 						ContainerId = reader.GetString();
+						NetId = reader.GetInt();
 					}
 					break;
 				default:
@@ -72,7 +71,6 @@ namespace Fika.Core.Networking
 				case SynchronizableObjectType.Tripwire:
 					{
 
-						writer.Put(UniqueId);
 						writer.Put(GrenadeTemplate);
 						writer.Put(GrenadeId);
 						writer.Put(ProfileId);
@@ -84,7 +82,6 @@ namespace Fika.Core.Networking
 				case SynchronizableObjectType.AirPlane:
 					{
 
-						writer.Put(UniqueId);
 						writer.Put(Position);
 						writer.Put(Rotation);
 					}
@@ -93,7 +90,8 @@ namespace Fika.Core.Networking
 					{
 						writer.Put((byte)AirdropType);
 						writer.PutItem(AirdropItem);
-						writer.Put(ContainerId);
+						writer.Put(ContainerId);		
+						writer.Put(NetId);
 					}
 					break;
 				default:

@@ -1077,7 +1077,7 @@ namespace Fika.Core.Coop.GameMode
 				{
 					AirdropParameters = Location_0.airdropParameters
 				};
-				gclass.Init(Singleton<AbstractGame>.Instance.GameType == EGameType.Offline);
+				gclass.Init(true);
 				(Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
 				Traverse.Create(GameWorld_0.SynchronizableObjectLogicProcessor).Field<GInterface228>("ginterface228_0").Value = Singleton<FikaServer>.Instance;
 			}

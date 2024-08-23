@@ -720,80 +720,73 @@ namespace Fika.Core.Coop.Players
 
 		private void HandleInteractPacket(WorldInteractionPacket packet)
 		{
-			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+			WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
+			if (worldInteractiveObject != null)
 			{
-				WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
-				if (worldInteractiveObject != null)
+				if (worldInteractiveObject.isActiveAndEnabled && !worldInteractiveObject.ForceLocalInteraction)
 				{
-					if (worldInteractiveObject.isActiveAndEnabled && !worldInteractiveObject.ForceLocalInteraction)
+					InteractionResult interactionResult;
+					Action action;
+					if (packet.InteractionType == EInteractionType.Unlock)
 					{
-						InteractionResult interactionResult;
-						Action action;
-						if (packet.InteractionType == EInteractionType.Unlock)
+						KeyHandler keyHandler = new(this);
+
+						if (string.IsNullOrEmpty(packet.ItemId))
 						{
-							KeyHandler keyHandler = new(this);
-
-							if (string.IsNullOrEmpty(packet.ItemId))
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: ItemID was null!");
-								return;
-							}
-
-							Item keyItem = FindItem(packet.ItemId);
-							if (keyItem == null)
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Could not find item: " + packet.ItemId);
-								return;
-							}
-
-							KeyComponent keyComponent = keyItem.GetItemComponent<KeyComponent>();
-							if (keyComponent == null)
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: keyComponent was null!");
-								return;
-							}
-
-							keyHandler.unlockResult = worldInteractiveObject.UnlockOperation(keyComponent, this);
-							if (keyHandler.unlockResult.Error != null)
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Error when processing unlockResult: " + keyHandler.unlockResult.Error);
-								return;
-							}
-
-							interactionResult = keyHandler.unlockResult.Value;
-							keyHandler.unlockResult.Value.RaiseEvents(_inventoryController, CommandStatus.Begin);
-							action = new(keyHandler.HandleKeyEvent);
-						}
-						else
-						{
-							interactionResult = new InteractionResult(packet.InteractionType);
-							action = null;
-						}
-
-						if (packet.InteractionStage == EInteractionStage.Start)
-						{
-							vmethod_0(worldInteractiveObject, interactionResult, action);
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: ItemID was null!");
 							return;
 						}
 
-						if (packet.InteractionStage != EInteractionStage.Execute)
+						Item keyItem = FindItem(packet.ItemId);
+						if (keyItem == null)
 						{
-							worldInteractiveObject.Interact(interactionResult);
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Could not find item: " + packet.ItemId);
 							return;
 						}
 
-						vmethod_1(worldInteractiveObject, interactionResult);
+						KeyComponent keyComponent = keyItem.GetItemComponent<KeyComponent>();
+						if (keyComponent == null)
+						{
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: keyComponent was null!");
+							return;
+						}
+
+						keyHandler.unlockResult = worldInteractiveObject.UnlockOperation(keyComponent, this);
+						if (keyHandler.unlockResult.Error != null)
+						{
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Error when processing unlockResult: " + keyHandler.unlockResult.Error);
+							return;
+						}
+
+						interactionResult = keyHandler.unlockResult.Value;
+						keyHandler.unlockResult.Value.RaiseEvents(_inventoryController, CommandStatus.Begin);
+						action = new(keyHandler.HandleKeyEvent);
+					}
+					else
+					{
+						interactionResult = new InteractionResult(packet.InteractionType);
+						action = null;
 					}
 
+					if (packet.InteractionStage == EInteractionStage.Start)
+					{
+						vmethod_0(worldInteractiveObject, interactionResult, action);
+						return;
+					}
+
+					if (packet.InteractionStage != EInteractionStage.Execute)
+					{
+						worldInteractiveObject.Interact(interactionResult);
+						return;
+					}
+
+					vmethod_1(worldInteractiveObject, interactionResult);
 				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError("HandleInteractPacket: WorldInteractiveObject was null or disabled!");
-				}
+
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("HandleInteractPacket: CoopHandler was null!");
+				FikaPlugin.Instance.FikaLogger.LogError("HandleInteractPacket: WorldInteractiveObject was null or disabled!");
 			}
 		}
 

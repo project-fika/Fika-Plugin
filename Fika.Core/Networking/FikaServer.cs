@@ -254,11 +254,36 @@ namespace Fika.Core.Networking
 
 		public void SendAirdropContainerData(EAirdropType containerType, Item item, int ObjectId)
 		{
+			logger.LogInfo($"Sending airdrop details, type: {containerType}, id: {ObjectId}");
+			int netId = 0;
+			string containerId = "AIRDROPCRATE";
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			IEnumerable<SynchronizableObject> syncObjects = gameWorld.SynchronizableObjectLogicProcessor.GetSynchronizableObjects();
+			foreach (SynchronizableObject obj in syncObjects)
+			{
+				if (obj.ObjectId == ObjectId)
+				{
+					LootableContainer container = obj.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
+					if (container != null)
+					{
+						netId = container.NetId;
+						containerId = container.Id;
+						break;
+					}
+				}				
+			}
+
+			if (netId == 0)
+			{
+				logger.LogError("SendAirdropContainerData: Could not find NetId!");
+			}
+
 			SpawnSyncObjectPacket packet = new(ObjectId)
 			{
 				AirdropType = containerType,
 				AirdropItem = item,
-				ContainerId = item.Id,
+				ContainerId = containerId,
+				NetId = netId,
 				IsStatic = false
 			};
 

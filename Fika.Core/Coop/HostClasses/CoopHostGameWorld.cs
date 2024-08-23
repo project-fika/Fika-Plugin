@@ -58,7 +58,7 @@ namespace Fika.Core.Coop.ClientClasses
 			SynchronizableObject synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
 			ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
 
-			SpawnSyncObjectPacket packet = new(synchronizableObject.ObjectId)
+			/*SpawnSyncObjectPacket packet = new(synchronizableObject.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.AirPlane,
 				UniqueId = synchronizableObject.UniqueId,
@@ -67,7 +67,7 @@ namespace Fika.Core.Coop.ClientClasses
 				Rotation = synchronizableObject.transform.rotation
 			};
 
-			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);*/
 		}
 
 		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
@@ -88,7 +88,6 @@ namespace Fika.Core.Coop.ClientClasses
 			SpawnSyncObjectPacket packet = new(tripwireSynchronizableObject.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
-				UniqueId = tripwireSynchronizableObject.UniqueId,
 				IsStatic = tripwireSynchronizableObject.IsStatic,
 				GrenadeTemplate = grenadeClass.TemplateId,
 				GrenadeId = grenadeClass.Id,

@@ -1,4 +1,5 @@
-﻿using EFT.SynchronizableObjects;
+﻿using EFT.Airdrop;
+using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
@@ -7,10 +8,11 @@ namespace Fika.Core.Networking
 	{
 		public SynchronizableObjectType ObjectType;
 		public int ObjectId = id;
-		public bool Disarmed;
-		public bool Triggered;
 
-		public AirplaneDataPacketStruct Data;
+		public bool Disarmed = false;
+		public bool Triggered = false;
+
+		public AirplaneDataPacketStruct Data = default;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -31,7 +33,7 @@ namespace Fika.Core.Networking
 							ObjectId = ObjectId,
 							ObjectType = ObjectType,
 							Position = reader.GetVector3(),
-							Rotation = reader.GetQuaternion().eulerAngles,
+							Rotation = reader.GetVector3(),
 							PacketData = new()
 							{
 								AirplaneDataPacket = new()
@@ -40,7 +42,31 @@ namespace Fika.Core.Networking
 								}
 							},
 							Outdated = reader.GetBool(),
-							IsStatic = reader.GetBool()
+							IsStatic = reader.GetBool(),
+							Develop = false
+						};
+					}
+					break;
+				case SynchronizableObjectType.AirDrop:
+					{
+						Data = new()
+						{
+							ObjectId = ObjectId,
+							ObjectType = ObjectType,
+							Position = reader.GetVector3(),
+							Rotation = reader.GetVector3(),
+							Outdated = reader.GetBool(),
+							IsStatic = reader.GetBool(),
+							PacketData = new()
+							{
+								AirdropDataPacket = new()
+								{
+									AirdropType = (EAirdropType)reader.GetByte(),
+									FallingStage = (EAirdropFallingStage)reader.GetByte(),
+									SignalFire = reader.GetBool(),
+									UniqueId = reader.GetInt()
+								}
+							}
 						};
 					}
 					break;
@@ -61,9 +87,25 @@ namespace Fika.Core.Networking
 						writer.Put(Triggered);
 					}
 					break;
-					case SynchronizableObjectType.AirPlane:
+				case SynchronizableObjectType.AirPlane:
 					{
-						writer.Put(Data.Position)
+						writer.Put(Data.Position);
+						writer.Put(Data.Rotation);
+						writer.Put(Data.PacketData.AirplaneDataPacket.AirplanePercent);
+						writer.Put(Data.Outdated);
+						writer.Put(Data.IsStatic);
+					}
+					break;
+				case SynchronizableObjectType.AirDrop:
+					{
+						writer.Put(Data.Position);
+						writer.Put(Data.Rotation);
+						writer.Put(Data.Outdated);
+						writer.Put(Data.IsStatic);
+						writer.Put((byte)Data.PacketData.AirdropDataPacket.AirdropType);
+						writer.Put((byte)Data.PacketData.AirdropDataPacket.FallingStage);
+						writer.Put(Data.PacketData.AirdropDataPacket.SignalFire);
+						writer.Put(Data.PacketData.AirdropDataPacket.UniqueId);
 					}
 					break;
 				default:
