@@ -284,7 +284,7 @@ namespace Fika.Core.Networking
 					{
 						if (Singleton<ItemFactoryClass>.Instance.CreateItem(packet.GrenadeId, packet.GrenadeTemplate, null) is not GrenadeClass grenadeClass)
 						{
-							logger.LogError("Item with id " + packet.GrenadeId + " is not a grenade!");
+							logger.LogError("OnSpawnSyncObjectPacketReceived: Item with id " + packet.GrenadeId + " is not a grenade!");
 							return;
 						}
 
@@ -305,6 +305,10 @@ namespace Fika.Core.Networking
 
 		private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
 		{
+			if (packet.ObjectType == SynchronizableObjectType.Tripwire)
+			{
+				logger.LogWarning(packet.Data.IsActive + " " + packet.Data.PacketData.TripwireDataPacket.State);
+			}
 			CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
 			List<AirplaneDataPacketStruct> structs = [packet.Data];
 			gameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(structs);			

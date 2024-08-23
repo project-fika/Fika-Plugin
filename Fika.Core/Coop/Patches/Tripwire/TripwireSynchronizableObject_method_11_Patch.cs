@@ -29,14 +29,10 @@ namespace Fika.Core.Coop.Patches.Tripwire
 						{
 							TripwireDataPacket = new()
 							{
-								State = ETripwireState.Exploded,
-								GrenadeTemplateId = __instance.GrenadeTemplateId,
-								GrenadeItemId = __instance.GrenadeItemId,
-								PlayerId = __instance.PlacerPlayerId,
-								FromPosition = __instance.FromPosition,
-								ToPosition = __instance.ToPosition,
+								State = ETripwireState.Exploded
 							}
 						},
+						Position = __instance.transform.position,
 						Rotation = __instance.transform.rotation.eulerAngles,
 						IsActive = true
 					}

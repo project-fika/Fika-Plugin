@@ -85,8 +85,6 @@ namespace Fika.Core.Coop.ClientClasses
 			Vector3 vector = (fromPosition + toPosition) * 0.5f;
 			Singleton<BotEventHandler>.Instance.PlantTripwire(tripwireSynchronizableObject, vector);
 
-			//tripwireSynchronizableObject.OnDestroyed += TripwireSynchronizableObject_OnDestroyed;
-
 			SpawnSyncObjectPacket packet = new(tripwireSynchronizableObject.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
@@ -102,36 +100,8 @@ namespace Fika.Core.Coop.ClientClasses
 			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
-		private void TripwireSynchronizableObject_OnDestroyed(TripwireSynchronizableObject tripwire)
-		{
-			tripwire.OnDestroyed -= TripwireSynchronizableObject_OnDestroyed;
-			SyncObjectPacket packet = new(tripwire.ObjectId)
-			{
-				ObjectType = SynchronizableObjectType.Tripwire,
-				Data = new()
-				{
-					PacketData = new()
-					{
-						TripwireDataPacket = new()
-						{
-							State = ETripwireState.Exploded,
-							GrenadeTemplateId = tripwire.GrenadeTemplateId,
-							GrenadeItemId = tripwire.GrenadeItemId,
-							PlayerId = tripwire.PlacerPlayerId,
-							FromPosition = tripwire.FromPosition,
-							ToPosition = tripwire.ToPosition,
-						}
-					},
-					Rotation = tripwire.transform.rotation.eulerAngles,
-					IsActive = false
-				}
-			};
-			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-		}
-
 		public override void TriggerTripwire(TripwireSynchronizableObject tripwire)
 		{
-			base.TriggerTripwire(tripwire);
 			SyncObjectPacket packet = new(tripwire.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
@@ -141,24 +111,21 @@ namespace Fika.Core.Coop.ClientClasses
 					{
 						TripwireDataPacket = new()
 						{
-							State = ETripwireState.Active,
-							GrenadeTemplateId = tripwire.GrenadeTemplateId,
-							GrenadeItemId = tripwire.GrenadeItemId,
-							PlayerId = tripwire.PlacerPlayerId,
-							FromPosition = tripwire.FromPosition,
-							ToPosition = tripwire.ToPosition,
+							State = ETripwireState.Active
 						}
 					},
+					Position = tripwire.transform.position,
 					Rotation = tripwire.transform.rotation.eulerAngles,
 					IsActive = true
 				}
 			};
+
 			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+			base.TriggerTripwire(tripwire);			
 		}
 
 		public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
 		{
-			base.DeActivateTripwire(tripwire);
 			SyncObjectPacket packet = new(tripwire.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
@@ -168,19 +135,18 @@ namespace Fika.Core.Coop.ClientClasses
 					{
 						TripwireDataPacket = new()
 						{
-							State = ETripwireState.Inert,
-							GrenadeTemplateId = tripwire.GrenadeTemplateId,
-							GrenadeItemId = tripwire.GrenadeItemId,
-							PlayerId = tripwire.PlacerPlayerId,
-							FromPosition = tripwire.FromPosition,
-							ToPosition = tripwire.ToPosition,
+							State = ETripwireState.Inert
 						}
 					},
+					Position = tripwire.transform.position,
 					Rotation = tripwire.transform.rotation.eulerAngles,
 					IsActive = true
 				}
 			};
+
 			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+			base.DeActivateTripwire(tripwire);
+			
 		}
 	}
 }

@@ -8,10 +8,6 @@ namespace Fika.Core.Networking
 	{
 		public SynchronizableObjectType ObjectType;
 		public int ObjectId = id;
-
-		public bool Disarmed = false;
-		public bool Triggered = false;
-
 		public AirplaneDataPacketStruct Data;
 
 		public void Deserialize(NetDataReader reader)
@@ -30,15 +26,10 @@ namespace Fika.Core.Networking
 							{
 								TripwireDataPacket = new()
 								{
-									State = (ETripwireState)reader.GetByte(),
-									GrenadeTemplateId = reader.GetString(),
-									GrenadeItemId = reader.GetString(),
-									PlayerId = reader.GetString(),
-									FromPosition = reader.GetVector3(),
-									ToPosition = reader.GetVector3()
+									State = (ETripwireState)reader.GetByte()
 								}
 							},
-							Position = Data.PacketData.TripwireDataPacket.FromPosition,
+							Position = reader.GetVector3(),
 							Rotation = reader.GetVector3(),
 							IsActive = reader.GetBool()
 						};
@@ -102,11 +93,7 @@ namespace Fika.Core.Networking
 				case SynchronizableObjectType.Tripwire:
 					{
 						writer.Put((byte)Data.PacketData.TripwireDataPacket.State);
-						writer.Put(Data.PacketData.TripwireDataPacket.GrenadeTemplateId);
-						writer.Put(Data.PacketData.TripwireDataPacket.GrenadeItemId);
-						writer.Put(Data.PacketData.TripwireDataPacket.PlayerId);
-						writer.Put(Data.PacketData.TripwireDataPacket.FromPosition);
-						writer.Put(Data.PacketData.TripwireDataPacket.ToPosition);
+						writer.Put(Data.Position);
 						writer.Put(Data.Rotation);
 						writer.Put(Data.IsActive);
 					}
