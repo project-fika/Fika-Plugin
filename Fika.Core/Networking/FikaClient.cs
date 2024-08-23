@@ -18,7 +18,6 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Lighthouse;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -1053,6 +1052,7 @@ namespace Fika.Core.Networking
 
 		private void OnLightkeeperGuardDeathPacketReceived(LightkeeperGuardDeathPacket packet)
 		{
+			/*
 			FikaLighthouseProgressionClass Component = Singleton<GameWorld>.Instance.gameObject.GetComponent<FikaLighthouseProgressionClass>();
 
 			if (Component != null)
@@ -1063,6 +1063,7 @@ namespace Fika.Core.Networking
 			{
 				logger.LogError("OnLightkeeperGuardDeathPacketReceived: Received packet but manager is not initialized");
 			}
+			*/
 		}
 
 		private void OnBTRPacketReceived(BTRPacket packet)
