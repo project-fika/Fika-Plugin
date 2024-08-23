@@ -7,7 +7,6 @@ using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.BTR;
-using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Patches.Weather;
@@ -641,8 +640,6 @@ namespace Fika.Core
 			new MaxBotPatch_Override().Enable();
 			new BotTemplateLimitPatch_Override().Enable();
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
-			new LighthouseBridge_Patch().Enable();
-			new LighthouseMines_Patch().Enable();
 		}
 
 		public enum EDynamicAIRates
