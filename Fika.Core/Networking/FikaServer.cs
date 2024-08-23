@@ -256,7 +256,6 @@ namespace Fika.Core.Networking
 		{
 			logger.LogInfo($"Sending airdrop details, type: {containerType}, id: {ObjectId}");
 			int netId = 0;
-			string containerId = "AIRDROPCRATE";
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			IEnumerable<SynchronizableObject> syncObjects = gameWorld.SynchronizableObjectLogicProcessor.GetSynchronizableObjects();
 			foreach (SynchronizableObject obj in syncObjects)
@@ -267,11 +266,11 @@ namespace Fika.Core.Networking
 					if (container != null)
 					{
 						netId = container.NetId;
-						containerId = container.Id;
+						gameWorld.RegisterWorldInteractionObject(container);
 						break;
 					}
 				}				
-			}
+			}			
 
 			if (netId == 0)
 			{
@@ -282,7 +281,7 @@ namespace Fika.Core.Networking
 			{
 				AirdropType = containerType,
 				AirdropItem = item,
-				ContainerId = containerId,
+				ContainerId = item.Id,
 				NetId = netId,
 				IsStatic = false
 			};
@@ -292,7 +291,8 @@ namespace Fika.Core.Networking
 
 		public void SendFlareSuccessEvent(string profileId, bool canSendAirdrop)
 		{
-			logger.LogWarning("SendFlareSuccessEvent: Not implemented");
+			FlareSuccessPacket packet = new(profileId, canSendAirdrop);
+			SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 		}
 
 		private void OnTraderServicesPacketReceived(TraderServicesPacket packet, NetPeer peer)

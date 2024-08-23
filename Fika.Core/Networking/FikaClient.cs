@@ -5,6 +5,7 @@ using Comfort.Common;
 using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
+using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.InventoryLogic;
@@ -123,6 +124,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket>(OnTraderServicesPacketReceived);
+			packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -169,6 +171,18 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnFlareSuccessPacketReceived(FlareSuccessPacket packet)
+		{
+			if (Singleton<GameWorld>.Instance.MainPlayer.ProfileId == packet.ProfileId)
+			{
+				if (!packet.Success)
+				{
+					NotificationManagerClass.DisplayNotification(new GClass2169("AirplaneDelayMessage".Localized(null),
+								ENotificationDurationType.Default, ENotificationIconType.Default, null)); 
+				}
+			}
 		}
 
 		private void OnTraderServicesPacketReceived(TraderServicesPacket packet)
