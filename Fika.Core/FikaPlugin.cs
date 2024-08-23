@@ -7,7 +7,6 @@ using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.BTR;
-using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Patches.Weather;
