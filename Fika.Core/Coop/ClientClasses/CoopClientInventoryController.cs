@@ -7,6 +7,7 @@ using EFT.UI;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using LiteNetLib;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -46,6 +47,22 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				return searchController;
 			}
+		}
+
+		public override void GetTraderServicesDataFromServer(string traderId)
+		{
+			if (FikaBackendUtils.IsClient)
+			{
+				TraderServicesPacket packet = new(CoopPlayer.NetId)
+				{
+					IsRequest = true,
+					TraderId = traderId
+				};
+				Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+				return;
+			}
+
+			CoopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
 		}
 
 		public override void CallMalfunctionRepaired(Weapon weapon)

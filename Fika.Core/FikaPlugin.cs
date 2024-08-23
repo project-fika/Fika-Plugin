@@ -233,9 +233,11 @@ namespace Fika.Core
 			new GameWorld_Create_Patch().Enable();
 			new BTRControllerClass_Init_Patch().Enable();
 			new BTRView_SyncViewFromServer_Patch().Enable();
-			new Player_Hide_Patch().Enable();
 			new BTRView_GoIn_Patch().Enable();
 			new BTRView_GoOut_Patch().Enable();
+			new BTRVehicle_method_38_Patch().Enable();
+			new Player_Hide_Patch().Enable();
+			new Player_UpdateBtrTraderServiceData_Patch().Enable();
 			BTRSide_Patches.Enable();
 
 			gameObject.AddComponent<MainThreadDispatcher>();

@@ -65,6 +65,7 @@ namespace Fika.Core.Coop.Patches.BTR
 				ValueTuple<Vector3, Vector3> valueTuple = side.GoOutPoints();
 				side.ApplyPlayerRotation(observedPlayer.MovementContext, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.9f);
 				observedPlayer.BtrState = EPlayerBtrState.Outside;
+				observedPlayer.CharacterController.isEnabled = true;
 				side.RemovePassenger(observedPlayer);
 				observedPlayer.MovementContext.IsAxesIgnored = false;
 				view.method_18(observedPlayer);

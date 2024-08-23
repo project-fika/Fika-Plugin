@@ -138,6 +138,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket, NetPeer>(OnSpawnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
+			packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -247,6 +248,20 @@ namespace Fika.Core.Networking
 			FikaRequestHandler.UpdateSetHost(body);
 
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnTraderServicesPacketReceived(TraderServicesPacket packet, NetPeer peer)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				List<TraderServicesClass> services = playerToApply.GetAvailableTraderServices(packet.TraderId).ToList();
+				TraderServicesPacket response = new(playerToApply.NetId)
+				{
+					Services = services
+				};
+
+				SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+			}
 		}
 
 		private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)

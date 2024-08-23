@@ -59,5 +59,10 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			return null;
 		}
+
+		public override void GetTraderServicesDataFromServer(string traderId)
+		{
+			// Do nothing
+		}
 	}
 }

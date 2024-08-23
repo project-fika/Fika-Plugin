@@ -6,19 +6,26 @@ namespace Fika.Core.Networking
 	public struct TraderServicesPacket(int NetId) : INetSerializable
 	{
 		public int NetId = NetId;
-		public List<TraderServicesClass> Services;
+		public bool IsRequest = false;
+		public string TraderId;
+		public List<TraderServicesClass> Services = [];
 
 		public void Deserialize(NetDataReader reader)
 		{
+			NetId = reader.GetInt();
+			IsRequest = reader.GetBool();
+			if (IsRequest)
+			{
+				TraderId = reader.GetString();
+				return;
+			}
 			int num = reader.GetInt();
 			if (num > 0)
 			{
 				Services = new(num);
-				byte[] data = reader.GetByteArray();
-				GClass1158 eftReader = new(data);
 				for (int i = 0; i < num; i++)
 				{
-					TraderServicesClass traderServicesClass = eftReader.ReadPolymorph<TraderServicesClass>();
+					TraderServicesClass traderServicesClass = reader.GetTraderService();
 					Services.Add(traderServicesClass);
 				}
 			}
@@ -27,11 +34,21 @@ namespace Fika.Core.Networking
 
 		public void Serialize(NetDataWriter writer)
 		{
-			writer.Put(Services.Count);
-			GClass1162 eftWriter = new();
-			for (int i = 0; i < Services.Count; i++)
+			writer.Put(NetId);
+			writer.Put(IsRequest);
+			if (IsRequest)
 			{
-				eftWriter.WritePolymorph(Services[i]);
+				writer.Put(TraderId);
+				return;
+			}
+			int amount = Services.Count;
+			writer.Put(amount);
+			if (amount > 0)
+			{
+				for (int i = 0; i < Services.Count; i++)
+				{
+					writer.PutTraderService(Services[i]);
+				}
 			}
 		}
 	}

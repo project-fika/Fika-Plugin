@@ -331,5 +331,61 @@ namespace Fika.Core.Networking
 			}
 			return new(reader.GetString());
 		}
+
+		public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
+		{
+			writer.PutMongoID(traderService.TraderId);
+			writer.Put((byte)traderService.ServiceType);
+			writer.Put(traderService.CanAfford);
+			writer.Put(traderService.WasPurchasedInThisRaid);
+			writer.Put(traderService.ItemsToPay.Count);
+			foreach (KeyValuePair<MongoID, int> pair in traderService.ItemsToPay)
+			{
+				writer.PutMongoID(pair.Key);
+				writer.Put(pair.Value);
+			}
+			int uniqueAmount = traderService.UniqueItems.Length;
+			writer.Put(uniqueAmount);
+			for (int i = 0; i < uniqueAmount; i++)
+			{
+				writer.PutMongoID(traderService.UniqueItems[i]);
+			}
+			writer.Put(traderService.SubServices.Count);
+			foreach (KeyValuePair<string, int> pair in traderService.SubServices)
+			{
+				writer.Put(pair.Key);
+				writer.Put(pair.Value);
+			}
+		}
+
+		public static TraderServicesClass GetTraderService(this NetDataReader reader)
+		{
+			TraderServicesClass traderService = new()
+			{
+				TraderId = reader.GetMongoID().Value,
+				ServiceType = (ETraderServiceType)reader.GetByte(),
+				CanAfford = reader.GetBool(),
+				WasPurchasedInThisRaid = reader.GetBool()
+			};
+			int toPayAmount = reader.GetInt();
+			traderService.ItemsToPay = new(toPayAmount);
+			for (int i = 0; i < toPayAmount; i++)
+			{
+				traderService.ItemsToPay[reader.GetMongoID().Value] = reader.GetInt();
+			}
+			int uniqueAmount = reader.GetInt();
+			traderService.UniqueItems = new MongoID[uniqueAmount];
+			for (int i = 0; i < uniqueAmount; i++)
+			{
+				traderService.UniqueItems[i] = reader.GetMongoID().Value;
+			}
+			int subAmount = reader.GetInt();
+			traderService.SubServices = new(subAmount);
+			for (int i = 0; i < subAmount; i++)
+			{
+				traderService.SubServices[reader.GetString()] = reader.GetInt();
+			}
+			return traderService;
+		}
 	}
 }

@@ -7,6 +7,8 @@ using Fika.Core.Networking;
 using LiteNetLib;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +26,7 @@ namespace Fika.Core.Coop.Patches.BTR
 		[PatchPrefix]
 		public static bool Prefix(BTRView __instance, Player player, BTRSide side, byte placeId, bool fast, ref Task __result)
 		{
+			bool isServer = FikaBackendUtils.IsServer;
 			if (player is ObservedCoopPlayer observedPlayer)
 			{
 				__result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
@@ -34,14 +37,14 @@ namespace Fika.Core.Coop.Patches.BTR
 			{
 				CoopPlayer myPlayer = (CoopPlayer)player;
 				myPlayer.PacketSender.Enabled = false;
-				if (FikaBackendUtils.IsServer)
+				if (isServer)
 				{
 					BTRInteractionPacket packet = new(myPlayer.NetId)
 					{
 						Data = new()
 						{
 							HasInteraction = true,
-							InteractionType = EInteractionType.GoOut,
+							InteractionType = EInteractionType.GoIn,
 							SideId = __instance.GetSideId(side),
 							SlotId = placeId,
 							Fast = fast
@@ -72,6 +75,7 @@ namespace Fika.Core.Coop.Patches.BTR
 					}
 				}
 				view.method_17(observedPlayer);
+				observedPlayer.CharacterController.isEnabled = false;
 				observedPlayer.BtrState = EPlayerBtrState.GoIn;
 				side.AddPassenger(observedPlayer, placeId);
 				await view.method_14(observedPlayer.MovementContext.PlayerAnimator, fast, false, cancellationToken);

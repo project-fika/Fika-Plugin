@@ -175,7 +175,7 @@ namespace Fika.Core.Networking
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.ReceiveTraderServicesData(packet.Services);
+				playerToApply.method_133(packet.Services);
 			}
 		}
 
@@ -186,14 +186,13 @@ namespace Fika.Core.Networking
 				GameWorld gameWorld = Singleton<GameWorld>.Instance;
 				if (gameWorld.BtrController != null && gameWorld.BtrController.BtrView != null)
 				{
-					if (packet.Status is not EBtrInteractionStatus.Confirmed && playerToApply.IsYourPlayer)
+					if (packet.IsResponse && packet.Status != EBtrInteractionStatus.Confirmed)
 					{
-						int playerId = playerToApply.PlayerId;
-						if (packet.Status - EBtrInteractionStatus.Blacklisted <= 2)
+						if (packet.Status - EBtrInteractionStatus.Blacklisted <= 2 && playerToApply.IsYourPlayer)
 						{
-							GlobalEventHandlerClass.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(playerId, packet.Status);
+							GlobalEventHandlerClass.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(playerToApply.PlayerId, packet.Status);
+							return;
 						}
-						return;
 					}
 					gameWorld.BtrController.BtrView.Interaction(playerToApply, packet.Data);
 				}
