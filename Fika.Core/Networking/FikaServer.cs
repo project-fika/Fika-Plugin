@@ -3,8 +3,10 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
+using EFT.Airdrop;
 using EFT.AssetsManager;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
@@ -41,7 +43,7 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
 {
-	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener
+	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface228
 	{
 		public NetPacketProcessor packetProcessor = new();
 		public CoopPlayer MyPlayer;
@@ -248,6 +250,24 @@ namespace Fika.Core.Networking
 			FikaRequestHandler.UpdateSetHost(body);
 
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		public void SendAirdropContainerData(EAirdropType containerType, Item item, int ObjectId)
+		{
+			SpawnSyncObjectPacket packet = new(ObjectId)
+			{
+				AirdropType = containerType,
+				AirdropItem = item,
+				ContainerId = item.Id,
+				IsStatic = false
+			};
+
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
+
+		public void SendFlareSuccessEvent(string profileId, bool canSendAirdrop)
+		{
+			logger.LogWarning("SendFlareSuccessEvent: Not implemented");
 		}
 
 		private void OnTraderServicesPacketReceived(TraderServicesPacket packet, NetPeer peer)

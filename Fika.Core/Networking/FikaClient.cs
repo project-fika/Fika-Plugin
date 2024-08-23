@@ -7,6 +7,7 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.GlobalEvents;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.MovingPlatforms;
 using EFT.SynchronizableObjects;
 using EFT.UI;
@@ -200,11 +201,41 @@ namespace Fika.Core.Networking
 
 		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet)
 		{
+			GClass2298 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+			if (processor == null)
+			{
+				return;
+			}
+
 			switch (packet.ObjectType)
 			{
 				case SynchronizableObjectType.AirDrop:
+					{
+						AirdropSynchronizableObject syncObject = (AirdropSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirDrop);
+						syncObject.ObjectId = packet.ObjectId;
+						syncObject.AirdropType = packet.AirdropType;
+						LootableContainer componentInChildren = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
+						componentInChildren.enabled = true;
+						componentInChildren.Id = packet.ContainerId;
+						Singleton<GameWorld>.Instance.RegisterWorldInteractionObject(componentInChildren);
+						LootItem.CreateLootContainer(componentInChildren, packet.AirdropItem, packet.AirdropItem.ShortName.Localized(null),
+								Singleton<GameWorld>.Instance, null);
+						if (!syncObject.IsStatic)
+						{
+							processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
+							return;
+						}
+						processor.InitStaticObject(syncObject);
+					}
 					break;
 				case SynchronizableObjectType.AirPlane:
+					{
+						AirplaneSynchronizableObject syncObject = (AirplaneSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirPlane);
+						syncObject.ObjectId = packet.ObjectId;
+						syncObject.UniqueId = packet.UniqueId;
+						syncObject.transform.SetPositionAndRotation(packet.Position, packet.Rotation);
+						processor.InitSyncObject(syncObject, packet.Position, packet.Rotation.eulerAngles, packet.ObjectId);
+					}
 					break;
 				case SynchronizableObjectType.Tripwire:
 					{
@@ -214,12 +245,11 @@ namespace Fika.Core.Networking
 							return;
 						}
 
-						GClass2298 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
 						TripwireSynchronizableObject syncObject = (TripwireSynchronizableObject)processor.TakeFromPool(packet.ObjectType);
 						syncObject.ObjectId = packet.ObjectId;
+						syncObject.UniqueId = packet.UniqueId;
 						syncObject.IsStatic = packet.IsStatic;
-						syncObject.transform.position = packet.Position;
-						syncObject.transform.rotation = packet.Rotation;
+						syncObject.transform.SetPositionAndRotation(packet.Position, packet.Rotation);
 						processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
 
 						syncObject.SetupGrenade(grenadeClass, packet.ProfileId, packet.Position, packet.ToPosition);

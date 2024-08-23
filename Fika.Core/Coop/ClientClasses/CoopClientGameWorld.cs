@@ -3,6 +3,7 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
 using HarmonyLib;
+using System;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -27,6 +28,26 @@ namespace Fika.Core.Coop.ClientClasses
 		public override GClass711 CreateGrenadeFactory()
 		{
 			return new GClass712();
+		}
+
+		public override void PlayerTick(float dt)
+		{
+			method_10(new Action<Player>(Class951.class951_0.method_5));
+		}
+
+		public override void vmethod_1(float dt)
+		{
+			// Do nothing
+		}
+
+		public override void InitAirdrop(bool takeNearbyPoint = false, Vector3 position = default)
+		{
+			// Do nothing
+		}
+
+		public override GClass2298 SyncObjectProcessorFactory()
+		{
+			return new GClass2298();
 		}
 
 		public override void Start()

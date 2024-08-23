@@ -45,6 +45,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -1070,12 +1071,16 @@ namespace Fika.Core.Coop.GameMode
 				Singleton<IBotGame>.Instance.BotsController.CoversData.Patrols.RestoreLoot(Location_0.Loot, LocationScene.GetAllObjects<LootableContainer>(false));
 			}
 
-			GClass2302 gclass = new()
+			if (isServer)
 			{
-				AirdropParameters = Location_0.airdropParameters
-			};
-			gclass.Init(Singleton<AbstractGame>.Instance.GameType == EGameType.Offline);
-			(Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
+				GClass2302 gclass = new()
+				{
+					AirdropParameters = Location_0.airdropParameters
+				};
+				gclass.Init(Singleton<AbstractGame>.Instance.GameType == EGameType.Offline);
+				(Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
+				Traverse.Create(GameWorld_0.SynchronizableObjectLogicProcessor).Field<GInterface228>("ginterface228_0").Value = Singleton<FikaServer>.Instance;
+			}
 
 			await method_6();
 			FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));

@@ -6,12 +6,21 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Networking;
 using HarmonyLib;
+using LiteNetLib;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
 	public class CoopHostGameWorld : ClientLocalGameWorld
 	{
+		private FikaServer Server
+		{
+			get
+			{
+				return Singleton<FikaServer>.Instance;
+			}
+		}
+
 		public static CoopHostGameWorld Create(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
 		{
 			CoopHostGameWorld gameWorld = gameObject.AddComponent<CoopHostGameWorld>();
@@ -38,6 +47,29 @@ namespace Fika.Core.Coop.ClientClasses
 			RegisterBorderZones();
 		}
 
+		public override void InitAirdrop(bool takeNearbyPoint = false, Vector3 position = default)
+		{
+			GameObject gameObject = method_18(takeNearbyPoint, position);
+			if (gameObject == null)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError("There is no airdrop points here!");
+				return;
+			}
+			SynchronizableObject synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
+			ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
+
+			SpawnSyncObjectPacket packet = new(synchronizableObject.ObjectId)
+			{
+				ObjectType = SynchronizableObjectType.AirPlane,
+				UniqueId = synchronizableObject.UniqueId,
+				IsStatic = synchronizableObject.IsStatic,
+				Position = gameObject.transform.position,
+				Rotation = synchronizableObject.transform.rotation
+			};
+
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
+
 		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
 		{
 			if (item is not GrenadeClass grenadeClass)
@@ -53,10 +85,10 @@ namespace Fika.Core.Coop.ClientClasses
 			Vector3 vector = (fromPosition + toPosition) * 0.5f;
 			Singleton<BotEventHandler>.Instance.PlantTripwire(tripwireSynchronizableObject, vector);
 
-			FikaServer server = Singleton<FikaServer>.Instance;
 			SpawnSyncObjectPacket packet = new(tripwireSynchronizableObject.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
+				UniqueId = tripwireSynchronizableObject.UniqueId,
 				IsStatic = tripwireSynchronizableObject.IsStatic,
 				GrenadeTemplate = grenadeClass.TemplateId,
 				GrenadeId = grenadeClass.Id,
@@ -66,31 +98,29 @@ namespace Fika.Core.Coop.ClientClasses
 				Rotation = tripwireSynchronizableObject.transform.rotation
 			};
 
-			server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		public override void TriggerTripwire(TripwireSynchronizableObject tripwire)
 		{
 			base.TriggerTripwire(tripwire);
-			FikaServer server = Singleton<FikaServer>.Instance;
 			SyncObjectPacket packet = new(tripwire.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
 				Triggered = true
 			};
-			server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
 		{
 			base.DeActivateTripwire(tripwire);
-			FikaServer server = Singleton<FikaServer>.Instance;
 			SyncObjectPacket packet = new(tripwire.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
 				Disarmed = true
 			};
-			server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 	}
 }

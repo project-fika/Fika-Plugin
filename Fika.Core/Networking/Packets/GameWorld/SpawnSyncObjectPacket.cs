@@ -1,4 +1,6 @@
-﻿using EFT.SynchronizableObjects;
+﻿using EFT.Airdrop;
+using EFT.InventoryLogic;
+using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
 using UnityEngine;
 
@@ -8,29 +10,51 @@ namespace Fika.Core.Networking
 	{
 		public SynchronizableObjectType ObjectType;
 		public int ObjectId = id;
+		public int UniqueId;
 		public bool IsStatic;
+
 		public string GrenadeTemplate;
 		public string GrenadeId;
 		public string ProfileId;
-		public Vector3 Position;
 		public Vector3 ToPosition;
+
+		public EAirdropType AirdropType;
+		public Item AirdropItem;
+		public string ContainerId;
+
+		public Vector3 Position;
 		public Quaternion Rotation;
 
 		public void Deserialize(NetDataReader reader)
 		{
 			ObjectType = (SynchronizableObjectType)reader.GetByte();
-			ObjectId = reader.GetInt();
+			ObjectId = reader.GetInt();			
+			IsStatic = reader.GetBool();
 			switch (ObjectType)
 			{
 				case SynchronizableObjectType.Tripwire:
 					{
-						IsStatic = reader.GetBool();
+						UniqueId = reader.GetInt();
 						GrenadeTemplate = reader.GetString();
 						GrenadeId = reader.GetString();
 						ProfileId = reader.GetString();
 						Position = reader.GetVector3();
 						ToPosition = reader.GetVector3();
 						Rotation = reader.GetQuaternion();
+					}
+					break;
+				case SynchronizableObjectType.AirPlane:
+					{
+						UniqueId = reader.GetInt();
+						Position = reader.GetVector3();
+						Rotation = reader.GetQuaternion();
+					}
+					break;
+				case SynchronizableObjectType.AirDrop:
+					{
+						AirdropType = (EAirdropType)reader.GetByte();
+						AirdropItem = reader.GetItem();
+						ContainerId = reader.GetString();
 					}
 					break;
 				default:
@@ -42,17 +66,34 @@ namespace Fika.Core.Networking
 		{
 			writer.Put((byte)ObjectType);
 			writer.Put(ObjectId);
+			writer.Put(IsStatic);
 			switch (ObjectType)
 			{
 				case SynchronizableObjectType.Tripwire:
 					{
-						writer.Put(IsStatic);
+
+						writer.Put(UniqueId);
 						writer.Put(GrenadeTemplate);
 						writer.Put(GrenadeId);
 						writer.Put(ProfileId);
 						writer.Put(Position);
 						writer.Put(ToPosition);
 						writer.Put(Rotation);
+					}
+					break;
+				case SynchronizableObjectType.AirPlane:
+					{
+
+						writer.Put(UniqueId);
+						writer.Put(Position);
+						writer.Put(Rotation);
+					}
+					break;
+				case SynchronizableObjectType.AirDrop:
+					{
+						writer.Put((byte)AirdropType);
+						writer.PutItem(AirdropItem);
+						writer.Put(ContainerId);
 					}
 					break;
 				default:
