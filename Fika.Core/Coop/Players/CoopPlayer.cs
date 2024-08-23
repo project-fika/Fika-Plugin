@@ -124,19 +124,6 @@ namespace Fika.Core.Coop.Players
 
 			player._animators[0].enabled = true;
 
-			RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
-
-			if (radioTransmitterRecodableComponent != null)
-			{
-				//Todo: (Archangel) method_131 refers to 'singlePlayerInventoryController_0' which is null in our case
-				//radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += player.method_131;
-
-				if (player.Profile.GetTraderStanding("638f541a29ffd1183d187f57").IsZero())
-				{
-					radioTransmitterRecodableComponent.SetEncoded(false);
-				}
-			}
-
 			player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
 
 			return player;

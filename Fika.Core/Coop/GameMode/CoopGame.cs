@@ -869,8 +869,6 @@ namespace Fika.Core.Coop.GameMode
 			Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, ISession session,
 			ELocalMode localMode)
 		{
-			gameWorld.LocationId = Location_0.Id;
-
 			profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
 
 			LocalPlayer myPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
@@ -1353,7 +1351,7 @@ namespace Fika.Core.Coop.GameMode
 			Logger.LogWarning("vmethod_4");
 #endif
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
-			gameWorld.RegisterRestrictableZones();
+			gameWorld.LocationId = Location_0.Id;
 
 			if (isServer)
 			{
