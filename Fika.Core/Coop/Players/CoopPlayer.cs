@@ -1112,6 +1112,16 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
+		public override void PauseAllEffectsOnPlayer()
+		{
+			ActiveHealthController.PauseAllEffects();
+		}
+
+		public override void UnpauseAllEffectsOnPlayer()
+		{
+			ActiveHealthController.UnpauseAllEffects();
+		}
+
 		public void HandleCallbackFromServer(in OperationCallbackPacket operationCallbackPacket)
 		{
 			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Callback<EOperationStatus> callback))
