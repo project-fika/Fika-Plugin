@@ -1,0 +1,46 @@
+﻿using EFT;
+using EFT.Interactive;
+using Fika.Core.Coop.Utils;
+using SPT.Reflection.Patching;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Fika.Core.Coop.Patches.Lighthouse
+{
+	internal class BufferZoneControllerClass_method_1_Patch : ModulePatch
+	{
+		protected override MethodBase GetTargetMethod()
+		{
+			return typeof(BufferZoneControllerClass).GetMethod(nameof(BufferZoneControllerClass.method_1));
+		}
+
+		[PatchPrefix]
+		public static bool Prefix(EGameType gameType, BufferZoneControllerClass __instance, ref bool ___bool_1, ref Action ___action_0)
+		{
+			AbstractGame.OnGameTypeSetted -= __instance.method_1;
+
+			___bool_1 = gameType == EGameType.Offline;
+
+			if (FikaBackendUtils.IsClient)
+			{
+				___bool_1 = false;
+			}
+
+			if (___bool_1)
+			{
+				Player.OnPlayerDeadStatic += __instance.method_2;
+				LighthouseTraderZone.OnPlayerAllowStatusChanged += __instance.method_4;
+			}
+
+			// Fire OnInitialized
+			___action_0();
+
+			// Skip the original method
+			return false;
+		}
+	}
+}
