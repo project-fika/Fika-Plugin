@@ -278,6 +278,11 @@ namespace Fika.Core.Coop.Players
 
 			if (damageInfo.DamageType == EDamageType.Sniper && isServer)
 			{
+				if (HealthController.DamageCoeff == 0)
+				{
+					return null;
+				}
+
 				PacketSender.DamagePackets.Enqueue(new()
 				{
 					Damage = damageInfo.Damage,
