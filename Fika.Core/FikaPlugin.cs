@@ -101,8 +101,6 @@ namespace Fika.Core
 		public static ConfigEntry<bool> ShowNotifications { get; set; }
 		public static ConfigEntry<bool> AutoExtract { get; set; }
 		public static ConfigEntry<bool> ShowExtractMessage { get; set; }
-		//public static ConfigEntry<bool> FasterInventoryScroll { get; set; }
-		//public static ConfigEntry<int> FasterInventoryScrollSpeed { get; set; }
 		public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
 		public static ConfigEntry<bool> EnableChat { get; set; }
 		public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
@@ -151,8 +149,6 @@ namespace Fika.Core
 		public static ConfigEntry<float> DynamicAIRange { get; set; }
 		public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
 		public static ConfigEntry<bool> DynamicAIIgnoreSnipers { get; set; }
-		//public static ConfigEntry<bool> CullPlayers { get; set; }
-		//public static ConfigEntry<float> CullingRange { get; set; }
 
 		// Performance | Bot Limits            
 		public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
@@ -475,6 +471,7 @@ namespace Fika.Core
 
 			PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f,
 				new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 0, IsAdvanced = true }));
+
 			PingSound = Config.Bind("Coop | Custom", "Ping Sound", EPingSound.SubQuestComplete,
 				new ConfigDescription("The audio that plays on ping"));
 
@@ -502,10 +499,6 @@ namespace Fika.Core
 
 			DynamicAIIgnoreSnipers = Config.Bind("Performance", "Dynamic AI - Ignore Snipers", true,
 				new ConfigDescription("Whether Dynamic AI should ignore sniper scavs.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
-
-			//CullPlayers = Config.Bind("Performance", "Culling System", true, new ConfigDescription("Whether to use the culling system or not. When players are outside of the culling range, their animations will be simplified. This can dramatically improve performance in certain scenarios.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
-
-			//CullingRange = Config.Bind("Performance", "Culling Range", 30f, new ConfigDescription("The range at which players should be culled.", new AcceptableValueRange<float>(30f, 150f), new ConfigurationManagerAttributes() { Order = 1 }));
 
 			// Performance | Max Bots
 
@@ -550,7 +543,7 @@ namespace Fika.Core
 
 			// Network
 
-			NativeSockets = Config.Bind(section: "Network", "Native Sockets", false,
+			NativeSockets = Config.Bind(section: "Network", "Native Sockets", true,
 				new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
 			ForceIP = Config.Bind("Network", "Force IP", "",
