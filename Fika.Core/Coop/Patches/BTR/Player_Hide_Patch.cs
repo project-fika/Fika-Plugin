@@ -11,10 +11,11 @@ namespace Fika.Core.Coop.Patches.BTR
 			return typeof(LocalPlayer).GetMethod(nameof(LocalPlayer.Hide));
 		}
 
+		// Check for GClass increments
 		[PatchPrefix]
-		public static bool Prefix(GClass856 ___gclass856_0)
+		public static bool Prefix(GClass857 ___gclass857_0)
 		{
-			___gclass856_0.Hide();
+			___gclass857_0.Hide();
 			return false;
 		}
 	}
