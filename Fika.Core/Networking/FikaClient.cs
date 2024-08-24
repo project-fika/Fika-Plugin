@@ -305,10 +305,6 @@ namespace Fika.Core.Networking
 
 		private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
 		{
-			if (packet.ObjectType == SynchronizableObjectType.Tripwire)
-			{
-				logger.LogWarning(packet.Data.IsActive + " " + packet.Data.PacketData.TripwireDataPacket.State);
-			}
 			CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
 			List<AirplaneDataPacketStruct> structs = [packet.Data];
 			gameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(structs);			

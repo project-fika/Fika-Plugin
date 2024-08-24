@@ -336,37 +336,18 @@ namespace Fika.Core.Networking
 
 		private void OnSyncObjectPacketReceived(SyncObjectPacket packet, NetPeer peer)
 		{
-			GameWorld gameWorld = Singleton<GameWorld>.Instance;
-			switch (packet.ObjectType)
+			if (packet.ObjectType == SynchronizableObjectType.Tripwire)
 			{
-				case SynchronizableObjectType.Tripwire:
-					{
-						if (packet.Disarmed)
-						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
-							if (tripwire != null)
-							{
-								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
-								tripwire.DisableTripwire();
-								SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-							}
-							return;
-						}
-						if (packet.Triggered)
-						{
-							TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
-							if (tripwire != null)
-							{
-								gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.RemoveTripwire(tripwire);
-								tripwire.TriggerTripwire();
-								SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-							}
-							return;
-						}
-					}
-					break;
-				default:
-					break;
+				CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
+				TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
+				if (tripwire != null)
+				{
+					gameWorld.DeActivateTripwire(tripwire);
+				}
+				else
+				{
+					logger.LogError($"OnSyncObjectPacketReceived: Tripwire with id {packet.ObjectId} could not be found!");
+				}
 			}
 		}
 

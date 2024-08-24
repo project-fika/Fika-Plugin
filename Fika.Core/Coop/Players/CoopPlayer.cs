@@ -12,7 +12,6 @@ using EFT.UI;
 using EFT.Vehicle;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
-using Fika.Core.Coop.Components;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
@@ -652,7 +651,19 @@ namespace Fika.Core.Coop.Players
 			SyncObjectPacket packet = new(tripwire.ObjectId)
 			{
 				ObjectType = SynchronizableObjectType.Tripwire,
-				Disarmed = true
+				Data = new()
+				{
+					PacketData = new()
+					{
+						TripwireDataPacket = new()
+						{
+							State = ETripwireState.Inert
+						}
+					},
+					Position = tripwire.transform.position,
+					Rotation = tripwire.transform.rotation.eulerAngles,
+					IsActive = true
+				}
 			};
 			PacketSender.SendPacket(ref packet);
 			UpdateInteractionCast();
