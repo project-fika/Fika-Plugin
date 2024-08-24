@@ -1,8 +1,14 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using Comfort.Common;
+using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static EFT.Player.FirearmController;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
@@ -20,41 +26,18 @@ namespace Fika.Core.Coop.ObservedClasses
 			return smethod_9<CoopObservedGrenadeController>(player, item);
 		}
 
-		/*public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
-        {
-            return new Dictionary<Type, OperationFactoryDelegate>
-                {
-                    {
-                        typeof(Class1029),
-                        new OperationFactoryDelegate(method_10)
-                    },
-                    {
-                        typeof(Class1027),
-                        new OperationFactoryDelegate(method_11)
-                    },
-                    {
-                        typeof(Class1028),
-                        new OperationFactoryDelegate(CreateGrenadeClass1)
-                    },
-                    {
-                        typeof(Class1025),
-                        new OperationFactoryDelegate(method_13)
-                    },
-                    {
-                        typeof(Class1026),
-                        new OperationFactoryDelegate(method_14)
-                    },
-                    {
-                        typeof(Class1023),
-                        new OperationFactoryDelegate(method_15)
-                    }
-                };
-        }*/
+		public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
+		{
+			// Check for GClass increments..
+			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
+			operationFactoryDelegates[typeof(GClass1098)] = new OperationFactoryDelegate(Grenade1);
+			return operationFactoryDelegates;
+		}
 
-		/*private void CreateGrenadeClass1()
-        {
-
-        }*/
+		private Player.GClass1694 Grenade1()
+		{
+			return new ObservedTripwireState(this, coopPlayer);
+		}
 
 		public override bool CanChangeCompassState(bool newState)
 		{
@@ -101,13 +84,54 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
 		}
+	}
 
-		/*private class GrenadeClass1 : Class1028
-        {
-            public GrenadeClass1(Player.GrenadeController controller) : base(controller)
-            {
+	public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1098(controller)
+	{
+		private CoopPlayer coopPlayer = player;
 
-            }
-        }*/
+		public new void Start()
+		{
+			gparam_0.FirearmsAnimator.SetFireMode(Weapon.EFireMode.greanadePlanting, false);
+			EPlantOperationState_0 = EPlantOperationState.StateIn;
+			State = Player.EOperationState.Executing;
+			SetLeftStanceAnimOnStartOperation();
+		}
+
+		public override void OnIdleStartAction()
+		{
+			EPlantOperationState_0 = EPlantOperationState.Idling;
+		}
+
+		public override void OnEnd()
+		{
+			// Do nothing
+		}
+
+		public override void HandleFireInput()
+		{
+			// Do nothing
+		}
+
+		public override void HandleAltFireInput()
+		{
+			// Do nothing
+		}
+
+		public override void Execute(GInterface386 operation, Callback callback)
+		{
+			callback.Succeed();
+		}
+
+		public override void PlantTripwire()
+		{
+			EPlantOperationState_0 = EPlantOperationState.Planting;
+			gparam_0.FirearmsAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
+		}
+
+		public override void HideGrenade(Action onHidden, bool fastHide)
+		{
+			base.HideGrenade(onHidden, fastHide);
+		}
 	}
 }
