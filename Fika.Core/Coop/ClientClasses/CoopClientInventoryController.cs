@@ -7,6 +7,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using JetBrains.Annotations;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -122,6 +123,21 @@ namespace Fika.Core.Coop.ClientClasses
 
 				CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
 			}
+		}
+
+		public override bool HasCultistAmulet(out CultistAmuletClass amulet)
+		{
+			amulet = null;
+			using IEnumerator<Item> enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets]).GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current is CultistAmuletClass cultistAmuletClass)
+				{
+					amulet = cultistAmuletClass;
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private uint AddOperationCallback(GClass2854 operation, Callback<EOperationStatus> callback)
