@@ -29,6 +29,10 @@ namespace Fika.Core.Coop.Patches.BTR
 			bool isServer = FikaBackendUtils.IsServer;
 			if (player is ObservedCoopPlayer observedPlayer)
 			{
+				if (!isServer)
+				{
+					Singleton<GameWorld>.Instance.BtrController.TransferItemsController.InitPlayerStash(player);
+				}
 				__result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
 				return false;
 			}
@@ -52,10 +56,6 @@ namespace Fika.Core.Coop.Patches.BTR
 					};
 
 					Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-				}
-				else
-				{
-					Singleton<GameWorld>.Instance.BtrController.TransferItemsController.InitPlayerStash(player);
 				}
 			}
 
