@@ -108,6 +108,15 @@ namespace Fika.Core.Coop.Players
 			player.cullingHandler = botTraverse.Field<GClass857>("gclass857_0").Value;
 			botTraverse.Field<GClass857>("gclass857_0").Value.Initialize(player, player.PlayerBones);
 
+			if (!aiControl)
+			{
+				HashSet<ETraderServiceType> services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
+				foreach (ETraderServiceType etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
+				{
+					services.Add(etraderServiceType);
+				}
+			}
+
 			player.AggressorFound = false;
 
 			player._animators[0].enabled = true;

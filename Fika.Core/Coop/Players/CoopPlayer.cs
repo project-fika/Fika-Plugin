@@ -18,6 +18,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -112,6 +113,12 @@ namespace Fika.Core.Coop.Players
 			foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
 			{
 				player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+			}
+
+			HashSet<ETraderServiceType> services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
+			foreach (ETraderServiceType etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
+			{
+				services.Add(etraderServiceType);
 			}
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
