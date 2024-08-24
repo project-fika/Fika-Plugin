@@ -252,6 +252,10 @@ namespace Fika.Core
 			new TripwireSynchronizableObject_method_6_Patch().Enable();
 			new TripwireSynchronizableObject_method_11_Patch().Enable();
 
+#if DEBUG
+			TasksExtensions_HandleFinishedTask_Patches.Enable();
+#endif
+
 			gameObject.AddComponent<MainThreadDispatcher>();
 
 #if GOLDMASTER
