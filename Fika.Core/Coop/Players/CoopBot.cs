@@ -217,39 +217,6 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
-			/*if (Side == EPlayerSide.Savage)
-            {
-                if (LastAggressor != null)
-                {
-                    if (LastAggressor is CoopPlayer coopPlayer)
-                    {
-                        coopPlayer.hasKilledScav = true;
-                    }
-                }
-            }
-
-            if (hasKilledScav)
-            {
-                if (LastAggressor != null)
-                {
-                    if (LastAggressor.IsYourPlayer && LastAggressor.Side == EPlayerSide.Savage)
-                    {
-                        if (Side is EPlayerSide.Usec or EPlayerSide.Bear)
-                        {
-                            // This one is already handled by SPT, so we do not add directly to profile until they move it to client side
-                            // They also do a flat value of 0.02 rather than 0.01 for 1 scav kill or 0.03 for >1
-                            LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.02, [CounterTag.FenceStanding, EFenceStandingSource.ScavHelp]);
-                            LastAggressor.Profile.FenceInfo.AddStanding(0.01, EFenceStandingSource.ScavHelp);
-                        }
-                        else if (Side == EPlayerSide.Savage)
-                        {
-                            LastAggressor.Profile.EftStats.SessionCounters.AddDouble(0.03, [CounterTag.FenceStanding, EFenceStandingSource.TraitorKill]);
-                            LastAggressor.Profile.FenceInfo.AddStanding(0.03, EFenceStandingSource.TraitorKill);
-                        }
-                    }
-                }
-            }*/
-
 			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 			if (coopGame.Bots.ContainsKey(ProfileId))
 			{

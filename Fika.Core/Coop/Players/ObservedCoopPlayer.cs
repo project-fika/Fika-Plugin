@@ -1214,17 +1214,6 @@ namespace Fika.Core.Coop.Players
 			if (killer != null)
 			{
 				LastAggressor = killer;
-				/*if (killer.IsYourPlayer)
-                {
-                    Item weapon = FindItem(weaponId);
-                    if (weapon != null)
-                    {
-                        LastDamageInfo = new()
-                        {
-                            Weapon = weapon
-                        };
-                    }
-                }*/
 			}
 		}
 
