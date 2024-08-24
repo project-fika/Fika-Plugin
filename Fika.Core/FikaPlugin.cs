@@ -635,6 +635,8 @@ namespace Fika.Core
 			new AmmoUsedCounterPatch().Disable();
 			new ArmorDamageCounterPatch().Disable();
 			new ScavRepAdjustmentPatch().Disable();
+			new GetProfileAtEndOfRaidPatch().Disable();
+			new FixSavageInventoryScreenPatch().Disable();
 
 			if (DisableSPTAIPatches.Value)
 			{
@@ -649,6 +651,8 @@ namespace Fika.Core
 			new MaxBotPatch_Override().Enable();
 			new BotTemplateLimitPatch_Override().Enable();
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
+			new GetProfileAtEndOfRaidPatch_Override().Enable();
+			new FixSavageInventoryScreenPatch_Override().Enable();
 		}
 
 		public enum EDynamicAIRates
