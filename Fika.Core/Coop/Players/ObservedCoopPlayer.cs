@@ -71,7 +71,7 @@ namespace Fika.Core.Coop.Players
 
 		public override float ProtagonistHearing => Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
 
-		private GClass855 cullingHandler;
+		private GClass857 cullingHandler;
 		#endregion
 
 		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
@@ -101,12 +101,12 @@ namespace Fika.Core.Coop.Players
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new GClass533(null, player);
+			player.AIData = new GClass534(null, player);
 
 			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass856>("gclass856_0").Value = new();
-			player.cullingHandler = botTraverse.Field<GClass856>("gclass856_0").Value;
-			botTraverse.Field<GClass856>("gclass856_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass857>("gclass857_0").Value = new();
+			player.cullingHandler = botTraverse.Field<GClass857>("gclass857_0").Value;
+			botTraverse.Field<GClass857>("gclass857_0").Value.Initialize(player, player.PlayerBones);
 
 			player.AggressorFound = false;
 
@@ -136,7 +136,7 @@ namespace Fika.Core.Coop.Players
 			base.PlayGroundedSound(fallHeight, jumpHeight);
 		}
 
-		public override void OnSkillLevelChanged(GClass1874 skill)
+		public override void OnSkillLevelChanged(GClass1875 skill)
 		{
 			// Do nothing
 		}
@@ -401,7 +401,7 @@ namespace Fika.Core.Coop.Players
 		public override void OnHealthEffectAdded(IEffect effect)
 		{
 			// Remember to check if classes increment
-			if (effect is GInterface261 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
+			if (effect is GInterface291 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
 			{
 				Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraClass.Instance.Distance(Position),
 					BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);
@@ -701,9 +701,9 @@ namespace Fika.Core.Coop.Players
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-				PlayerBody.GClass1977 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
+				PlayerBody.GClass1978 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass1977 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+				PlayerBody.GClass1978 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
 				if (gclass2 != null)
 				{
 					gclass2.Dispose();

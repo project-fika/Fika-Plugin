@@ -389,7 +389,7 @@ namespace Fika.Core.Networking
 				GameWorld gameWorld = Singleton<GameWorld>.Instance;
 				Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
-				GClass759<int, Throwable>.GStruct44 grenades = gameWorld.Grenades.GetValuesEnumerator();
+				GClass760<int, Throwable>.GStruct44 grenades = gameWorld.Grenades.GetValuesEnumerator();
 				List<GStruct35> smokeData = [];
 				foreach (Throwable item in grenades)
 				{
@@ -452,7 +452,7 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
 				}
 
-				GClass759<int, WindowBreaker>.GStruct44 windows = gameWorld.Windows.GetValuesEnumerator();
+				GClass760<int, WindowBreaker>.GStruct44 windows = gameWorld.Windows.GetValuesEnumerator();
 				Dictionary<int, Vector3> windowData = [];
 				foreach (WindowBreaker window in windows)
 				{
@@ -692,7 +692,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<GameWorld>.Instance.MineManager != null)
 			{
-				NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
+				NetworkGame<EftGamePlayerOwner>.Class1470 mineSeeker = new()
 				{
 					minePosition = packet.MinePositon
 				};
@@ -936,12 +936,12 @@ namespace Fika.Core.Networking
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				GClass1157 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+				GClass1158 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
 				try
 				{
 					OperationCallbackPacket operationCallbackPacket;
-					GClass1640 descriptor = reader.ReadPolymorph<GClass1640>();
-					GStruct417<GClass3086> result = descriptor.ToInventoryOperation(playerToApply);
+					GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
+					GStruct417<GClass3087> result = descriptor.ToInventoryOperation(playerToApply);
 
 					// Handle this on the server and use GameWorld to replicate
 					if (result.Value is GClass3104 tripwireOperation)
@@ -1187,7 +1187,7 @@ namespace Fika.Core.Networking
 
 						if (profile.ProfileId == RequestHandler.SessionId)
 						{
-							foreach (Profile.ProfileHealthClass.GClass1859 bodyPartHealth in profile.Health.BodyParts.Values)
+							foreach (Profile.ProfileHealthClass.GClass1860 bodyPartHealth in profile.Health.BodyParts.Values)
 							{
 								bodyPartHealth.Effects.Clear();
 								bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
@@ -1269,7 +1269,7 @@ namespace Fika.Core.Networking
 
 				using MemoryStream memoryStream = new();
 				using BinaryWriter binaryWriter = new(memoryStream);
-				GClass1162 writer = new();
+				GClass1163 writer = new();
 				writer.WritePolymorph(result);
 				packet.ItemControllerExecutePacket = new()
 				{

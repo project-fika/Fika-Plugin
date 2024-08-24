@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.Players
 			questController.Init();
 			questController.Run();
 
-			GClass3484 achievementsController = new(profile, inventoryController, session, true);
+			GClass3485 achievementsController = new(profile, inventoryController, session, true);
 			achievementsController.Init();
 			achievementsController.Run();
 
@@ -115,9 +115,9 @@ namespace Fika.Core.Coop.Players
 			}
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-			player._handsController.Spawn(1f, new Action(Class1590.class1590_0.method_0));
+			player._handsController.Spawn(1f, new Action(Class1591.class1591_0.method_0));
 
-			player.AIData = new GClass533(null, player);
+			player.AIData = new GClass534(null, player);
 
 			player.AggressorFound = false;
 
@@ -156,9 +156,9 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void OnSkillLevelChanged(GClass1874 skill)
+		public override void OnSkillLevelChanged(GClass1875 skill)
 		{
-			NotificationManagerClass.DisplayNotification(new GClass2167(skill));
+			NotificationManagerClass.DisplayNotification(new GClass2168(skill));
 		}
 
 		public override bool CheckSurface()
@@ -494,7 +494,7 @@ namespace Fika.Core.Coop.Players
 		public override void SendHeadlightsPacket(bool isSilent)
 		{
 			FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController,
-				FirearmLightStateStruct>(ClientPlayer.Class1517.class1517_0.method_0)).ToArray();
+				FirearmLightStateStruct>(ClientPlayer.Class1518.class1518_0.method_0)).ToArray();
 
 			if (PacketSender != null)
 			{
@@ -571,7 +571,7 @@ namespace Fika.Core.Coop.Players
 					InteractiveId = interactiveObject.Id,
 					InteractionType = interactionResult.InteractionType,
 					InteractionStage = EInteractionStage.Start,
-					ItemId = (interactionResult is GClass3228 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+					ItemId = (interactionResult is GClass3229 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
 				}
 			};
 			PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -596,7 +596,7 @@ namespace Fika.Core.Coop.Players
 					InteractiveId = door.Id,
 					InteractionType = interactionResult.InteractionType,
 					InteractionStage = EInteractionStage.Execute,
-					ItemId = (interactionResult is GClass3228 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+					ItemId = (interactionResult is GClass3229 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
 				}
 			};
 			PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -854,7 +854,7 @@ namespace Fika.Core.Coop.Players
 				FikaPlugin.Instance.FikaLogger.LogInfo("Setting up DogTag");
 				if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
 				{
-					GStruct419<GClass3025> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false);
+					GStruct419<GClass3026> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false);
 					if (result.Error != null)
 					{
 						FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::SetupMainPlayer: Error removing dog tag!");
@@ -868,7 +868,7 @@ namespace Fika.Core.Coop.Players
 					Item item = Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), templateId, null);
 
 					Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
-					GStruct419<GClass3029> addResult = dogtagSlot.AddWithoutRestrictions(item);
+					GStruct419<GClass3030> addResult = dogtagSlot.AddWithoutRestrictions(item);
 
 					if (addResult.Error != null)
 					{
@@ -1160,61 +1160,13 @@ namespace Fika.Core.Coop.Players
 				{
 					try
 					{
-						GClass1157 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
-						GClass1640 descriptor = reader.ReadPolymorph<GClass1640>();
-						GStruct417<GClass3086> result = descriptor.ToInventoryOperation(this);
+						GClass1158 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+						GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
+						GStruct417<GClass3087> result = descriptor.ToInventoryOperation(this);
 
 						InventoryOperationHandler opHandler = new(result);
 
 						opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
-
-						// TODO: Hacky workaround to fix errors due to each client generating new IDs. Might need to find a more 'elegant' solution later.
-						/*if (result.Value is GClass3122 unloadOperation)
-						{
-							if (unloadOperation.InternalOperation is GClass3109 internalSplitOperation)
-							{
-								Traverse operationTraverse = Traverse.Create(internalSplitOperation);
-								Item fromItem = operationTraverse.Field<Item>("item_0").Value;
-								Item toItem = operationTraverse.Field<FikaItemAddress>("itemAddress_1").Value.Item;
-								string cloneId = operationTraverse.Field<string>("string_0").Value;
-								if (fromItem != null)
-								{
-									if (fromItem.Id != cloneId && fromItem.TemplateId == toItem.TemplateId)
-									{
-										fromItem.Id = internalSplitOperation.CloneId;
-									}
-									else
-									{
-										FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {fromItem.Id}, SplitOperationItemID: {internalSplitOperation.To.Item.Id}");
-									}
-								}
-								else
-								{
-									FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
-								}
-							}
-						}
-
-						// TODO: Same as above.
-						if (result.Value is GClass3109 splitOperation)
-						{
-							Item item = splitOperation.To.Item;
-							if (item != null)
-							{
-								if (item.Id != splitOperation.CloneId && item.TemplateId == splitOperation.Item.TemplateId)
-								{
-									item.Id = splitOperation.CloneId;
-								}
-								else
-								{
-									FikaPlugin.Instance.FikaLogger.LogWarning($"Matching failed: ItemID: {item.Id}, SplitOperationItemID: {splitOperation.To.Item.Id}");
-								}
-							}
-							else
-							{
-								FikaPlugin.Instance.FikaLogger.LogError("Split: Item was null");
-							}
-						}*/
 					}
 					catch (Exception exception)
 					{
@@ -1630,7 +1582,7 @@ namespace Fika.Core.Coop.Players
 		private class KeyHandler(CoopPlayer player)
 		{
 			private readonly CoopPlayer player = player;
-			public GStruct421<GClass3228> unlockResult;
+			public GStruct421<GClass3229> unlockResult;
 
 			internal void HandleKeyEvent()
 			{

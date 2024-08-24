@@ -26,14 +26,14 @@ namespace Fika.Core.Coop.ClientClasses
 			return gameWorld;
 		}
 
-		public override GClass711 CreateGrenadeFactory()
+		public override GClass712 CreateGrenadeFactory()
 		{
-			return new GClass712();
+			return new GClass713();
 		}
 
 		public override void PlayerTick(float dt)
 		{
-			method_10(new Action<Player>(Class951.class951_0.method_5));
+			method_10(new Action<Player>(Class952.class952_0.method_5));
 		}		
 
 		public override void vmethod_1(float dt)
@@ -46,7 +46,7 @@ namespace Fika.Core.Coop.ClientClasses
 			// Do nothing
 		}
 
-		public override GClass2298 SyncObjectProcessorFactory()
+		public override GClass2299 SyncObjectProcessorFactory()
 		{
 			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
 			{

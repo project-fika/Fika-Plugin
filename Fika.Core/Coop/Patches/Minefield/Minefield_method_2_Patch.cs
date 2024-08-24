@@ -65,7 +65,7 @@ namespace Fika.Core.Coop.Patches
 				IEnumerable<BodyPartCollider> enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_4))
 					: player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_5));
 
-				enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2390.class2390_0.method_0)).ToArray();
+				enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2391.class2391_0.method_0)).ToArray();
 				enumerable = enumerable.Randomize();
 
 				int num3 = (isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue;

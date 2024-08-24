@@ -10,7 +10,7 @@ namespace Fika.Core.Coop.Patches.Overrides
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass565).GetMethod(nameof(GClass565.LoadDifficultyStringInternal));
+			return typeof(GClass566).GetMethod(nameof(GClass566.LoadDifficultyStringInternal));
 		}
 
 		[PatchPrefix]

@@ -32,7 +32,7 @@ namespace Fika.Core.Coop.Patches.BTR
 				BTRControllerClass.Instance.method_5();
 			}
 
-			BTRControllerClass.Instance.TransferItemsController = new GClass1583(___gameWorld_0, ___btrglobalSettings_0, true);
+			BTRControllerClass.Instance.TransferItemsController = new GClass1584(___gameWorld_0, ___btrglobalSettings_0, true);
 
 			__result = Task.CompletedTask;
 			return false;

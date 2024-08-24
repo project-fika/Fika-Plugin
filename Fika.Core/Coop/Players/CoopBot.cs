@@ -73,14 +73,14 @@ namespace Fika.Core.Coop.Players
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new GClass533(null, player)
+			player.AIData = new GClass534(null, player)
 			{
 				IsAI = true
 			};
 
 			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass856>("gclass856_0").Value = new();
-			botTraverse.Field<GClass856>("gclass856_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass857>("gclass857_0").Value = new();
+			botTraverse.Field<GClass857>("gclass857_0").Value.Initialize(player, player.PlayerBones);
 
 			player.AggressorFound = false;
 
@@ -95,7 +95,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void OnSkillLevelChanged(GClass1874 skill)
+		public override void OnSkillLevelChanged(GClass1875 skill)
 		{
 			// Do nothing
 		}

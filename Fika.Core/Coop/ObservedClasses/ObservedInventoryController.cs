@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID currentId) : base(player, profile, examined)
 		{
 			mongoID_0 = currentId;
-			searchController = new GClass1867();
+			searchController = new GClass1868();
 		}
 
 		public override void StrictCheckMagazine(MagazineClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
@@ -50,7 +50,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return false;
 		}
 
-		public override bool vmethod_0(GClass3086 operation)
+		public override bool vmethod_0(GClass3087 operation)
 		{
 			return true;
 		}

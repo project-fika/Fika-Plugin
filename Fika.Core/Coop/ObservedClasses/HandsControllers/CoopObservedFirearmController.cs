@@ -10,7 +10,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static EFT.InventoryLogic.Slot;
 using static EFT.Player;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -26,7 +25,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		private float aimMovementSpeed = 1f;
 		private bool hasFired = false;
 		private WeaponPrefab weaponPrefab;
-		private GClass1693 underBarrelManager;
+		private GClass1694 underBarrelManager;
 		public override bool IsAiming
 		{
 			get => base.IsAiming;
@@ -63,7 +62,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
 			if (UnderbarrelWeapon != null)
 			{
-				underBarrelManager = Traverse.Create(this).Field<GClass1693>("gclass1693_0").Value;
+				underBarrelManager = Traverse.Create(this).Field<GClass1694>("gclass1694_0").Value;
 			}
 		}
 
@@ -332,8 +331,8 @@ namespace Fika.Core.Coop.ObservedClasses
 						}
 					}
 
-					// Remember to check if classes increment
-					if (Weapon is GClass2941)
+					// Check for GClass increments
+					if (Weapon is GClass2942)
 					{
 						Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
 
@@ -366,7 +365,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					{
 						if (Item.HasChambers)
 						{
-							magazine.Cartridges.PopTo(inventoryController, new Class2243(Item.Chambers[0]));
+							magazine.Cartridges.PopTo(inventoryController, Item.Chambers[0].CreateItemAddress());
 						}
 						else
 						{
@@ -465,10 +464,10 @@ namespace Fika.Core.Coop.ObservedClasses
 					{
 						try
 						{
-							GClass1157 reader = new(packet.ReloadMagPacket.LocationDescription);
+							GClass1158 reader = new(packet.ReloadMagPacket.LocationDescription);
 							if (packet.ReloadMagPacket.LocationDescription.Length != 0)
 							{
-								GClass1634 descriptor = reader.ReadPolymorph<GClass1634>();
+								GClass1635 descriptor = reader.ReadPolymorph<GClass1635>();
 								gridItemAddress = inventoryController.ToItemAddress(descriptor);
 							}
 						}
@@ -589,12 +588,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					ItemAddress gridItemAddress = null;
 
-					GClass1157 reader = new(packet.ReloadBarrels.LocationDescription);
+					GClass1158 reader = new(packet.ReloadBarrels.LocationDescription);
 					try
 					{
 						if (packet.ReloadBarrels.LocationDescription.Length > 0)
 						{
-							GClass1634 descriptor = reader.ReadPolymorph<GClass1634>();
+							GClass1635 descriptor = reader.ReadPolymorph<GClass1635>();
 							gridItemAddress = inventoryController.ToItemAddress(descriptor);
 						}
 					}
@@ -675,7 +674,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (magazine != null && magazine is not CylinderMagazineClass && weapon.HasChambers)
 			{
-				magazine.Cartridges.PopTo(inventoryController, new Class2243(controller.Item.Chambers[0]));
+				magazine.Cartridges.PopTo(inventoryController, controller.Item.Chambers[0].CreateItemAddress());
 			}
 
 			animator.SetBoltActionReload(false);

@@ -8,7 +8,6 @@ using Fika.Core.Networking;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static EFT.Player.FirearmController;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
@@ -30,11 +29,11 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(GClass1098)] = new OperationFactoryDelegate(Grenade1);
+			operationFactoryDelegates[typeof(GClass1099)] = new OperationFactoryDelegate(Grenade1);
 			return operationFactoryDelegates;
 		}
 
-		private Player.GClass1694 Grenade1()
+		private Player.GClass1695 Grenade1()
 		{
 			return new ObservedTripwireState(this, coopPlayer);
 		}
@@ -86,7 +85,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		}
 	}
 
-	public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1098(controller)
+	public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1099(controller)
 	{
 		private CoopPlayer coopPlayer = player;
 

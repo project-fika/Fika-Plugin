@@ -410,13 +410,14 @@ namespace Fika.Core.Coop.Components
 		{
 			bool isDedicatedProfile = !isAI && profile.Info.MainProfileNickname.Contains("dedicated_");
 
+			// CHeck for GClass increments on filter
 			ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(LocalGameInstance.GameWorld_0, netId, position,
 				Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
 				EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
 				Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
-				GClass1547.Default, currentId).Result;
+				GClass1548.Default, currentId).Result;
 
 			if (otherPlayer == null)
 			{

@@ -22,12 +22,12 @@ namespace Fika.Core.Coop.BotClasses
 
 			if (!player.IsAI && !examined)
 			{
-				IPlayerSearchController playerSearchController = new GClass1865(profile, this);
+				IPlayerSearchController playerSearchController = new GClass1866(profile, this);
 				searchController = playerSearchController;
 			}
 			else
 			{
-				IPlayerSearchController playerSearchController = new GClass1871(profile);
+				IPlayerSearchController playerSearchController = new GClass1872(profile);
 				searchController = playerSearchController;
 			}
 		}
@@ -40,7 +40,7 @@ namespace Fika.Core.Coop.BotClasses
 			}
 		}
 
-		public override void vmethod_1(GClass3086 operation, [CanBeNull] Callback callback)
+		public override void vmethod_1(GClass3087 operation, [CanBeNull] Callback callback)
 		{
 			base.vmethod_1(operation, callback);
 
@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.BotClasses
 				HasItemControllerExecutePacket = true
 			};
 
-			GClass1162 writer = new();
+			GClass1163 writer = new();
 			writer.WritePolymorph(operation.ToDescriptor());
 			packet.ItemControllerExecutePacket = new()
 			{
@@ -62,7 +62,7 @@ namespace Fika.Core.Coop.BotClasses
 
 		public override SearchContentOperation vmethod_2(SearchableItemClass item)
 		{
-			return new GClass3124(method_12(), this, PlayerSearchController, Profile, item);
+			return new GClass3125(method_12(), this, PlayerSearchController, Profile, item);
 		}
 	}
 }
