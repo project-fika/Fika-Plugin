@@ -112,6 +112,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 			if (FikaBackendUtils.IsServer)
 			{
+				if (operation is GClass3106)
+				{
+					base.vmethod_1(operation, callback);
+					return;
+				}
+
 				HostInventoryOperationManager operationManager = new(this, operation, callback);
 				if (vmethod_0(operationManager.operation))
 				{
