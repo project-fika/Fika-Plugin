@@ -635,7 +635,6 @@ namespace Fika.Core
 			new EmptyInfilFixPatch().Disable();
 			new BotTemplateLimitPatch().Disable();
 			new MaxBotPatch().Disable();
-			new LabsKeycardRemovalPatch().Disable(); // We handle this locally instead
 			new AmmoUsedCounterPatch().Disable();
 			new ArmorDamageCounterPatch().Disable();
 			new ScavRepAdjustmentPatch().Disable();
