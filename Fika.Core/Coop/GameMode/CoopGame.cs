@@ -151,16 +151,20 @@ namespace Fika.Core.Coop.GameMode
 				new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
 			coopGame.isServer = FikaBackendUtils.IsServer;
 
-			// Non Waves Scenario setup
-			coopGame.nonWavesSpawnScenario_0 = NonWavesSpawnScenario.smethod_0(coopGame, location, coopGame.botsController_0);
-			coopGame.nonWavesSpawnScenario_0.ImplementWaveSettings(wavesSettings);
+			if (coopGame.isServer)
+			{
+				// Non Waves Scenario setup
+				coopGame.nonWavesSpawnScenario_0 = NonWavesSpawnScenario.smethod_0(coopGame, location, coopGame.botsController_0);
+				coopGame.nonWavesSpawnScenario_0.ImplementWaveSettings(wavesSettings);
 
-			// Waves Scenario setup
-			WildSpawnWave[] waves = LocalGame.smethod_7(wavesSettings, location.waves);
-			coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, new Func<BotWaveDataClass, Task>(coopGame.botsController_0.ActivateBotsByWave), location);
+				// Waves Scenario setup
+				WildSpawnWave[] waves = LocalGame.smethod_7(wavesSettings, location.waves);
+				coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, new Func<BotWaveDataClass, Task>(coopGame.botsController_0.ActivateBotsByWave), location);
 
-			BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
-			coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
+				// Boss Scenario setup
+				BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
+				coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave)); 
+			}
 
 			if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
 			{
@@ -1375,8 +1379,6 @@ namespace Fika.Core.Coop.GameMode
 					controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
 					bossSpawnScenario.HaveSectants, gameWorld, Location_0.OpenZones);
 
-				Logger.LogInfo($"Location: {Location_0.Name}");
-
 				int numberOfBots = controllerSettings.BotAmount switch
 				{
 					EBotAmount.AsOnline => 20,
@@ -1422,7 +1424,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 			else
 			{
-				controllerSettings.BotAmount = EBotAmount.NoBots;
+				/*controllerSettings.BotAmount = EBotAmount.NoBots;
 
 				BotsPresets profileCreator = new(iSession, [], [], [], false);
 
@@ -1435,11 +1437,10 @@ namespace Fika.Core.Coop.GameMode
 				botsController_0.Init(this, botCreator, botZones, spawnSystem, wavesSpawnScenario_0.BotLocationModifier,
 					false, false, true, false, false, gameWorld, Location_0.OpenZones);
 
-				botsController_0.SetSettings(0, [], []);
-
-				Logger.LogInfo($"Location: {Location_0.Name}");
+				botsController_0.SetSettings(0, [], []);*/
 			}
 
+			Logger.LogInfo($"Location: {Location_0.Name}");
 			BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
 
 			if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
@@ -1497,7 +1498,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 			else
 			{
-				if (wavesSpawnScenario_0 != null)
+				/*if (wavesSpawnScenario_0 != null)
 				{
 					wavesSpawnScenario_0.Stop();
 				}
@@ -1505,7 +1506,7 @@ namespace Fika.Core.Coop.GameMode
 				{
 					nonWavesSpawnScenario_0.Stop();
 				}
-				bossSpawnScenario?.Stop();
+				bossSpawnScenario?.Stop();*/
 			}
 
 			// Add FreeCamController to GameWorld GameObject
@@ -1934,17 +1935,16 @@ namespace Fika.Core.Coop.GameMode
 			if (isServer)
 			{
 				botsController_0.Stop();
-			}
-
-			bossSpawnScenario?.Stop();
-			if (nonWavesSpawnScenario_0 != null)
-			{
-				nonWavesSpawnScenario_0.Stop();
-			}
-			if (wavesSpawnScenario_0 != null)
-			{
-				wavesSpawnScenario_0.Stop();
-			}
+				bossSpawnScenario?.Stop();
+				if (nonWavesSpawnScenario_0 != null)
+				{
+					nonWavesSpawnScenario_0.Stop();
+				}
+				if (wavesSpawnScenario_0 != null)
+				{
+					wavesSpawnScenario_0.Stop();
+				}
+			}			
 
 			try
 			{
@@ -2115,14 +2115,17 @@ namespace Fika.Core.Coop.GameMode
 				Destroy(CoopHandler.CoopHandlerParent);
 			}
 
-			bossSpawnScenario?.Stop();
-			if (nonWavesSpawnScenario_0 != null)
+			if (isServer)
 			{
-				nonWavesSpawnScenario_0.Stop();
-			}
-			if (wavesSpawnScenario_0 != null)
-			{
-				wavesSpawnScenario_0.Stop();
+				bossSpawnScenario?.Stop();
+				if (nonWavesSpawnScenario_0 != null)
+				{
+					nonWavesSpawnScenario_0.Stop();
+				}
+				if (wavesSpawnScenario_0 != null)
+				{
+					wavesSpawnScenario_0.Stop();
+				} 
 			}
 
 			CancelExitManager stopManager = new()
