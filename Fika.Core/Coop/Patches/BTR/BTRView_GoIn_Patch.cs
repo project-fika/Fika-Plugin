@@ -57,6 +57,10 @@ namespace Fika.Core.Coop.Patches.BTR
 
 					Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 				}
+				else
+				{
+					Singleton<GameWorld>.Instance.BtrController.TransferItemsController.InitPlayerStash(player);
+				}
 			}
 
 			return true;

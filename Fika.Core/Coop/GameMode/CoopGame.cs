@@ -2049,13 +2049,33 @@ namespace Fika.Core.Coop.GameMode
 
 			try
 			{
-				await iSession.LocalRaidEnded(localRaidSettings_0, parameters, method_12(), method_13());
+				await iSession.LocalRaidEnded(localRaidSettings_0, parameters, method_12(), GetOwnBTRTransfers(player.ProfileId));
 			}
 			catch (Exception ex)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("Exception caught when saving: " + ex.Message);
 			}
 			hasSaved = true;
+		}
+
+		private Dictionary<string, GClass1266[]> GetOwnBTRTransfers(string profileId)
+		{
+			GameWorld instance = Singleton<GameWorld>.Instance;
+			Dictionary<string, GClass1266[]> dictionary = [];
+			BTRControllerClass btrController = instance.BtrController;
+			if ((btrController?.TransferItemsController.Stash) != null)
+			{
+				StashClass stash = btrController.TransferItemsController.Stash;
+				foreach (EFT.InventoryLogic.IContainer item in stash.Containers)
+				{
+					if (item.ID == profileId)
+					{
+						dictionary.Add(stash.Id, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
+					}
+				}
+				
+			}
+			return dictionary;
 		}
 
 		/// <summary>
