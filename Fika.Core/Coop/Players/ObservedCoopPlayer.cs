@@ -35,7 +35,6 @@ namespace Fika.Core.Coop.Players
 	{
 		#region Fields and Properties
 		public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-		private float observedFixedTime = 0f;
 		public FikaHealthBar HealthBar
 		{
 			get => healthBar;
@@ -214,11 +213,6 @@ namespace Fika.Core.Coop.Players
 		}
 
 		public override void FaceshieldMarkOperation(FaceShieldComponent armor, bool hasServerOrigin)
-		{
-			// Do nothing
-		}
-
-		public override void SetAudioProtagonist()
 		{
 			// Do nothing
 		}
@@ -956,13 +950,6 @@ namespace Fika.Core.Coop.Players
 			{
 				_nFixedFrames = 0;
 				_fixedTime = 0f;
-			}
-			float fixedTime = Time.fixedTime;
-			if (fixedTime - observedFixedTime > 1f)
-			{
-				observedFixedTime = fixedTime;
-				OcclusionDirty = true;
-				UpdateOcclusion();
 			}
 		}
 

@@ -1061,14 +1061,6 @@ namespace Fika.Core.Coop.Players
 
 		}
 
-		public override void SetAudioProtagonist()
-		{
-			if (IsYourPlayer)
-			{
-				Singleton<BetterAudio>.Instance.SetProtagonist(this);
-			}
-		}
-
 		public void HandleCallbackFromServer(in OperationCallbackPacket operationCallbackPacket)
 		{
 			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Callback<EOperationStatus> callback))
