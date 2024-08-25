@@ -20,6 +20,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
 using static Fika.Core.Networking.FikaSerialization;
 using static Fika.Core.Utils.ColorUtils;
 
@@ -34,7 +35,6 @@ namespace Fika.Core.Coop.Players
 	{
 		#region Fields and Properties
 		public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-		private float observedFixedTime = 0f;
 		public FikaHealthBar HealthBar
 		{
 			get => healthBar;
@@ -181,11 +181,6 @@ namespace Fika.Core.Coop.Players
 		}
 
 		public override void FaceshieldMarkOperation(FaceShieldComponent armor, bool hasServerOrigin)
-		{
-			// Do nothing
-		}
-
-		public override void SetAudioProtagonist()
 		{
 			// Do nothing
 		}
@@ -895,12 +890,20 @@ namespace Fika.Core.Coop.Players
 				_nFixedFrames = 0;
 				_fixedTime = 0f;
 			}
-			float fixedTime = Time.fixedTime;
-			if (fixedTime - observedFixedTime > 1f)
+		}
+
+		public override void UpdateOcclusion()
+		{
+			if (OcclusionDirty && MonoBehaviourSingleton<BetterAudio>.Instantiated)
 			{
-				observedFixedTime = fixedTime;
-				OcclusionDirty = true;
-				UpdateOcclusion();
+				OcclusionDirty = false;
+				BetterAudio instance = MonoBehaviourSingleton<BetterAudio>.Instance;
+				AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.ObservedPlayerSpeechMixer;
+				if (SpeechSource != null)
+				{
+					SpeechSource.SetMixerGroup(audioMixerGroup); 
+				}
+				return;
 			}
 		}
 

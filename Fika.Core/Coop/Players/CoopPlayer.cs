@@ -1115,14 +1115,6 @@ namespace Fika.Core.Coop.Players
 
 		}
 
-		public override void SetAudioProtagonist()
-		{
-			if (IsYourPlayer)
-			{
-				Singleton<BetterAudio>.Instance.SetProtagonist(this);
-			}
-		}
-
 		public override void PauseAllEffectsOnPlayer()
 		{
 			ActiveHealthController.PauseAllEffects();
