@@ -988,8 +988,14 @@ namespace Fika.Core.Networking
 				catch (Exception exception)
 				{
 					FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
+					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+					{
+						Error = exception.Message
+					};
 					SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
+
+					ResyncInventoryPacket resyncPacket = new(playerToApply.NetId);
+					SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
