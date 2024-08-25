@@ -21,6 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
 using static Fika.Core.Networking.FikaSerialization;
 using static Fika.Core.Utils.ColorUtils;
 
@@ -950,6 +951,21 @@ namespace Fika.Core.Coop.Players
 			{
 				_nFixedFrames = 0;
 				_fixedTime = 0f;
+			}
+		}
+
+		public override void UpdateOcclusion()
+		{
+			if (OcclusionDirty && MonoBehaviourSingleton<BetterAudio>.Instantiated)
+			{
+				OcclusionDirty = false;
+				BetterAudio instance = MonoBehaviourSingleton<BetterAudio>.Instance;
+				AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.VeryStandartMixerGroup;
+				if (SpeechSource != null)
+				{
+					SpeechSource.SetMixerGroup(audioMixerGroup);
+				}
+				return;
 			}
 		}
 
