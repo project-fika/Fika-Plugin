@@ -15,6 +15,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -347,6 +348,21 @@ namespace Fika.Core.Networking
 				else
 				{
 					logger.LogError($"OnSyncObjectPacketReceived: Tripwire with id {packet.ObjectId} could not be found!");
+				}
+			}
+		}
+
+		private void OnResyncInventoryPacketReceived(ResyncInventoryPacket packet, NetPeer peer)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				if (playerToApply is ObservedCoopPlayer observedPlayer)
+				{
+					SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+					if (observedPlayer.InventoryControllerClass is ObservedInventoryController observedController)
+					{
+						observedController.SetNewID(new(packet.MongoId));
+					}
 				}
 			}
 		}
@@ -1258,6 +1274,9 @@ namespace Fika.Core.Networking
 					FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
 					operationCallbackPacket = new(netId, operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
 					server.SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+
+					ResyncInventoryPacket resyncPacket = new(netId);
+					server.SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 
 					return;
 				}

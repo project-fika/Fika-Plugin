@@ -64,5 +64,9 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			// Do nothing
 		}
+		public void SetNewID(MongoID newId)
+		{
+			mongoID_0 = newId;
+		}
 	}
 }
