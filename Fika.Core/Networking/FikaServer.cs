@@ -359,7 +359,7 @@ namespace Fika.Core.Networking
 				if (playerToApply is ObservedCoopPlayer observedPlayer)
 				{
 					SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-					if (observedPlayer.InventoryControllerClass is ObservedInventoryController observedController)
+					if (observedPlayer.InventoryController is ObservedInventoryController observedController)
 					{
 						observedController.SetNewID(new(packet.MongoId));
 					}

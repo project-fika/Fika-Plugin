@@ -19,6 +19,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -125,6 +126,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket>(OnTraderServicesPacketReceived);
 			packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
+			packetProcessor.SubscribeNetSerializable<ResyncInventoryPacket>(OnResyncInventoryPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -171,6 +173,29 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnResyncInventoryPacketReceived(ResyncInventoryPacket packet)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				if (playerToApply is ObservedCoopPlayer observedPlayer)
+				{
+					if (observedPlayer.InventoryController is ObservedInventoryController observedController)
+					{
+						observedController.SetNewID(new(packet.MongoId));
+					}
+					return;
+				}
+				if (playerToApply.IsYourPlayer)
+				{
+					ResyncInventoryPacket response = new(playerToApply.NetId)
+					{
+						MongoId = playerToApply.InventoryController.CurrentId.ToString()
+					};
+					SendData(ref response, DeliveryMethod.ReliableOrdered);
+				}
+			}
 		}
 
 		private void OnBufferZonePacketReceived(BufferZonePacket packet)
