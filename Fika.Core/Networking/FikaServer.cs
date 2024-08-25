@@ -142,6 +142,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket, NetPeer>(OnSpawnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
+			packetProcessor.SubscribeNetSerializable<ResyncInventoryPacket, NetPeer>(OnResyncInventoryPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -270,8 +271,8 @@ namespace Fika.Core.Networking
 						gameWorld.RegisterWorldInteractionObject(container);
 						break;
 					}
-				}				
-			}			
+				}
+			}
 
 			if (netId == 0)
 			{
@@ -361,7 +362,7 @@ namespace Fika.Core.Networking
 					SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 					if (observedPlayer.InventoryController is ObservedInventoryController observedController)
 					{
-						observedController.SetNewID(new(packet.MongoId));
+						observedController.SetNewID(new(packet.MongoId), packet.NextId);
 					}
 				}
 			}
@@ -492,7 +493,9 @@ namespace Fika.Core.Networking
 
 				foreach (CoopPlayer player in coopHandler.Players.Values)
 				{
-					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile, player.InventoryController.CurrentId),
+					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile,
+						player.InventoryController.CurrentId,
+						player.InventoryController.NextOperationId),
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
 
 					dataWriter.Reset();
@@ -686,7 +689,8 @@ namespace Fika.Core.Networking
 			packet.netId = netId;
 			if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
+				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI,
+					packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
@@ -910,7 +914,7 @@ namespace Fika.Core.Networking
 					AllCharacterRequestPacket requestPacket = new(player.ProfileId)
 					{
 						IsRequest = false,
-						PlayerInfo = new(player.Profile, player.InventoryController.CurrentId),
+						PlayerInfo = new(player.Profile, player.InventoryController.CurrentId, player.InventoryController.NextOperationId),
 						IsAlive = player.HealthController.IsAlive,
 						IsAI = player is CoopBot,
 						Position = player.Transform.position,
@@ -932,7 +936,7 @@ namespace Fika.Core.Networking
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
 					coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y),
-						packet.NetId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
+						packet.NetId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
 					PlayersMissing.Remove(packet.ProfileId);
 				}
 			}
@@ -958,6 +962,20 @@ namespace Fika.Core.Networking
 					OperationCallbackPacket operationCallbackPacket;
 					GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
 					GStruct417<GClass3087> result = descriptor.ToInventoryOperation(playerToApply);
+
+					if (result.Failed)
+					{
+						FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Operation conversion failed: {result.Error.ToString()}");
+						OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+						{
+							Error = result.Error.ToString()
+						};
+						SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
+
+						ResyncInventoryPacket resyncPacket = new(playerToApply.NetId);
+						SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+						return;
+					}
 
 					// Handle this on the server and use GameWorld to replicate
 					if (result.Value is GClass3104 tripwireOperation)

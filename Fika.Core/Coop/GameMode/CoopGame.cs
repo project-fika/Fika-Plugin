@@ -452,7 +452,8 @@ namespace Fika.Core.Coop.GameMode
 				netId = server.PopNetId();
 
 				MongoID mongoId = MongoID.Generate(true);
-				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile, mongoId), true, true, position, netId);
+				ushort nextOperationId = 1;
+				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile, mongoId, nextOperationId), true, true, position, netId);
 				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 
 				if (server.NetServer.ConnectedPeersCount > 0)
@@ -464,7 +465,7 @@ namespace Fika.Core.Coop.GameMode
 				localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
 				   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
 				   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(LocalGame.Class1458.class1458_0.method_4),
-					new Func<float>(LocalGame.Class1458.class1458_0.method_5), GClass1548.Default, mongoId);
+					new Func<float>(LocalGame.Class1458.class1458_0.method_5), GClass1548.Default, mongoId, nextOperationId);
 
 				localPlayer.Location = Location_0.Id;
 
@@ -915,7 +916,8 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!isServer && !FikaBackendUtils.IsReconnect)
 			{
-				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(coopPlayer.Profile, coopPlayer.InventoryController.CurrentId), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
+				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(coopPlayer.Profile, coopPlayer.InventoryController.CurrentId,
+					coopPlayer.InventoryController.NextOperationId), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
 				FikaClient client = Singleton<FikaClient>.Instance;
 
 				do

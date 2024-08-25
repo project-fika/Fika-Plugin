@@ -19,9 +19,10 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID currentId) : base(player, profile, examined)
+		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId) : base(player, profile, examined)
 		{
-			mongoID_0 = currentId;
+			mongoID_0 = firstId;
+			ushort_0 = firstOperationId;
 			searchController = new GClass1868();
 		}
 
@@ -64,9 +65,10 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			// Do nothing
 		}
-		public void SetNewID(MongoID newId)
+		public void SetNewID(MongoID newId, ushort nextId)
 		{
 			mongoID_0 = newId;
+			ushort_0 = nextId;
 		}
 	}
 }

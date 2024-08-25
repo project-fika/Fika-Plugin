@@ -183,7 +183,7 @@ namespace Fika.Core.Networking
 				{
 					if (observedPlayer.InventoryController is ObservedInventoryController observedController)
 					{
-						observedController.SetNewID(new(packet.MongoId));
+						observedController.SetNewID(new(packet.MongoId), packet.NextId);
 					}
 					return;
 				}
@@ -191,7 +191,8 @@ namespace Fika.Core.Networking
 				{
 					ResyncInventoryPacket response = new(playerToApply.NetId)
 					{
-						MongoId = playerToApply.InventoryController.CurrentId.ToString()
+						MongoId = playerToApply.InventoryController.CurrentId.ToString(),
+						NextId = playerToApply.InventoryController.NextOperationId
 					};
 					SendData(ref response, DeliveryMethod.ReliableOrdered);
 				}
@@ -653,7 +654,8 @@ namespace Fika.Core.Networking
 
 			if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
+				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI,
+							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
 			}
 		}
 
@@ -997,7 +999,8 @@ namespace Fika.Core.Networking
 				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
-					coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
+					coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
+						packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
 				}
 			}
 			else if (packet.IsRequest)
