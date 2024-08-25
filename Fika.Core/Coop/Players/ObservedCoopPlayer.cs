@@ -898,10 +898,10 @@ namespace Fika.Core.Coop.Players
 			{
 				OcclusionDirty = false;
 				BetterAudio instance = MonoBehaviourSingleton<BetterAudio>.Instance;
-				AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.ObservedPlayerSpeechMixer;
+				AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.VeryStandartMixerGroup;
 				if (SpeechSource != null)
 				{
-					SpeechSource.SetMixerGroup(audioMixerGroup); 
+					SpeechSource.SetMixerGroup(audioMixerGroup);
 				}
 				return;
 			}
