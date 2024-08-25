@@ -372,7 +372,7 @@ namespace Fika.Core.Networking
 
 				foreach (CoopPlayer player in coopHandler.Players.Values)
 				{
-					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile),
+					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile, player.InventoryControllerClass.CurrentId),
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
 
 					dataWriter.Reset();
@@ -566,7 +566,7 @@ namespace Fika.Core.Networking
 			packet.netId = netId;
 			if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI);
+				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
@@ -823,10 +823,7 @@ namespace Fika.Core.Networking
 					AllCharacterRequestPacket requestPacket = new(player.ProfileId)
 					{
 						IsRequest = false,
-						PlayerInfo = new()
-						{
-							Profile = player.Profile
-						},
+						PlayerInfo = new(player.Profile, player.InventoryControllerClass.CurrentId),
 						IsAlive = player.HealthController.IsAlive,
 						IsAI = player is CoopBot,
 						Position = player.Transform.position,
@@ -847,7 +844,8 @@ namespace Fika.Core.Networking
 				logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
-					coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y), packet.NetId, packet.IsAlive);
+					coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y),
+						packet.NetId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value);
 					PlayersMissing.Remove(packet.ProfileId);
 				}
 			}

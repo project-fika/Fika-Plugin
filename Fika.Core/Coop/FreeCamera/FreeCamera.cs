@@ -460,9 +460,8 @@ namespace Fika.Core.Coop.FreeCamera
 		{
 			FikaPlugin.Instance.FikaLogger.LogInfo("Attaching camera to: " + player.Profile.Info.MainProfileNickname);
 			transform.SetParent(player.Transform.Original);
-			transform.localPosition = new(0, 25, 0);
+			transform.localPosition = new(0, 125, 0);
 			transform.LookAt(player.PlayerBones.Head.position);
-			isFollowing = true;
 
 			pitch = -transform.eulerAngles.x;
 			yaw = transform.eulerAngles.y;

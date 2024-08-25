@@ -48,7 +48,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
 			gameWorld.BufferZoneController = new BufferZoneControllerClass();
 			gameWorld.CurrentProfileId = currentProfileId;
 			gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
-			gameObject.AddComponent<FikaWorld>();
 			return gameWorld;
 		}
 	}
