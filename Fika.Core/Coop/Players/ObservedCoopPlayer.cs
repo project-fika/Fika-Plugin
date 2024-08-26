@@ -629,7 +629,6 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 
-			InteractableObject interactableObject = null;
 			InteractableObjectIsProxy = false;
 			Ray interactionRay = InteractionRay;
 			GameObject gameObject = GameWorld.FindInteractable(interactionRay, out _);
