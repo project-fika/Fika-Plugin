@@ -2,13 +2,14 @@
 
 using EFT;
 using EFT.InventoryLogic.Operations;
+using Fika.Core.Coop.Players;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public class ObservedInventoryController : Player.PlayerInventoryController
+	public class ObservedInventoryController : Player.PlayerInventoryController, Interface15
 	{
-		private IPlayerSearchController searchController;
-
+		private readonly IPlayerSearchController searchController;
+		private readonly CoopPlayer coopPlayer;
 		public override bool HasDiscardLimits => false;
 
 		public override IPlayerSearchController PlayerSearchController
@@ -24,6 +25,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			mongoID_0 = firstId;
 			ushort_0 = firstOperationId;
 			searchController = new GClass1868();
+			coopPlayer = (CoopPlayer)player;
 		}
 
 		public override void StrictCheckMagazine(MagazineClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
@@ -65,10 +67,17 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			// Do nothing
 		}
+
 		public void SetNewID(MongoID newId, ushort nextId)
 		{
 			mongoID_0 = newId;
 			ushort_0 = nextId;
+		}
+
+		public GStruct416 CreateOperationFromDescriptor(GClass1641 descriptor)
+		{
+			method_13(descriptor);
+			return descriptor.ToInventoryOperation(coopPlayer);
 		}
 	}
 }

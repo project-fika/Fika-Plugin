@@ -77,10 +77,6 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void vmethod_1(GClass3087 operation, Callback callback)
 		{
-#if DEBUG
-			ConsoleScreen.Log("InvOperation: " + operation.GetType().Name);
-#endif
-
 			// Do not replicate picking up quest items, throws an error on the other clients            
 			if (operation is GClass3090 moveOperation)
 			{
@@ -113,6 +109,9 @@ namespace Fika.Core.Coop.ClientClasses
 
 			if (FikaBackendUtils.IsServer)
 			{
+#if DEBUG
+				ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
+#endif
 				if (operation is GClass3106)
 				{
 					base.vmethod_1(operation, callback);
@@ -186,6 +185,10 @@ namespace Fika.Core.Coop.ClientClasses
 					CallbackId = operationNum,
 					OperationBytes = writer.ToArray()
 				};
+
+#if DEBUG
+				ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
+#endif
 
 				CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
 			}

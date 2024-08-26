@@ -1159,13 +1159,16 @@ namespace Fika.Core.Coop.Players
 				{
 					try
 					{
-						GClass1158 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
-						GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
-						GStruct417<GClass3087> result = descriptor.ToInventoryOperation(this);
+						if (InventoryController is Interface15 networkController)
+						{
+							GClass1158 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+							GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
+							GStruct416 result = networkController.CreateOperationFromDescriptor(descriptor);
 
-						InventoryOperationHandler opHandler = new(result);
+							InventoryOperationHandler opHandler = new(result);
 
-						opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
+							opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult)); 
+						}
 					}
 					catch (Exception exception)
 					{

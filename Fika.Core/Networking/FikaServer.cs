@@ -960,48 +960,61 @@ namespace Fika.Core.Networking
 				try
 				{
 					OperationCallbackPacket operationCallbackPacket;
-					GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
-					GStruct417<GClass3087> result = descriptor.ToInventoryOperation(playerToApply);
-
-					if (result.Failed)
+					if (playerToApply.InventoryController is Interface15 inventoryController)
 					{
-						FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Operation conversion failed: {result.Error.ToString()}");
-						OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
-						{
-							Error = result.Error.ToString()
-						};
-						SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
+						GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
+						GStruct416 result = inventoryController.CreateOperationFromDescriptor(descriptor);
+						//GStruct417<GClass3087> result = descriptor.ToInventoryOperation(playerToApply);
 
-						ResyncInventoryPacket resyncPacket = new(playerToApply.NetId);
-						SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
-						return;
-					}
-
-					// Handle this on the server and use GameWorld to replicate
-					if (result.Value is GClass3104 tripwireOperation)
-					{
-						SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-						result.Value.method_1(null);
-						return;
-					}
-
-					InventoryOperationHandler opHandler = new()
-					{
-						opResult = result,
-						operationId = packet.ItemControllerExecutePacket.CallbackId,
-						netId = playerToApply.NetId,
-						peer = peer,
-						server = this
-					};
 #if DEBUG
-					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
-						simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
-#else
-					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
-#endif
-					SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+						ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
 
-					opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
+#endif
+
+						if (result.Failed)
+						{
+							FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Operation conversion failed: {result.Error}");
+							OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+							{
+								Error = result.Error.ToString()
+							};
+							SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
+
+							ResyncInventoryPacket resyncPacket = new(playerToApply.NetId);
+							SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+							return;
+						}
+
+						// Handle this on the server and use GameWorld to replicate
+						if (result.Value is GClass3105 tripwireOperation)
+						{
+							SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+							result.Value.method_1(null);
+							return;
+						}
+
+						InventoryOperationHandler opHandler = new()
+						{
+							opResult = result,
+							operationId = packet.ItemControllerExecutePacket.CallbackId,
+							netId = playerToApply.NetId,
+							peer = peer,
+							server = this
+						};
+#if DEBUG
+						operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
+							simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
+#else
+						operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
+#endif
+						SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+
+						opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
+					}
+					else
+					{
+						throw new NullReferenceException($"Inventory controller was not of type {nameof(Interface15)}!");
+					}
 				}
 				catch (Exception exception)
 				{
