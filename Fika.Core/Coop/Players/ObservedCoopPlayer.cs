@@ -37,21 +37,31 @@ namespace Fika.Core.Coop.Players
 		public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 		public FikaHealthBar HealthBar
 		{
-			get => healthBar;
+			get
+			{
+				return healthBar;
+			}
 		}
 		private FikaHealthBar healthBar = null;
 		private Coroutine waitForStartRoutine;
 		private bool isServer;
 		public ObservedHealthController NetworkHealthController
 		{
-			get => HealthController as ObservedHealthController;
+			get
+			{
+				return HealthController as ObservedHealthController;
+			}
 		}
 		private readonly ObservedVaultingParametersClass ObservedVaultingParameters = new();
 		public override bool CanBeSnapped => false;
 		public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
 		public override AbstractHandsController HandsController
 		{
-			get => base.HandsController;
+			get
+			{
+				return base.HandsController;
+			}
+
 			set
 			{
 				base.HandsController = value;
@@ -69,7 +79,13 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override float ProtagonistHearing => Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
+		public override float ProtagonistHearing
+		{
+			get
+			{
+				return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
+			}
+		}
 
 		private GClass857 cullingHandler;
 		#endregion
@@ -608,7 +624,25 @@ namespace Fika.Core.Coop.Players
 
 		public override void InteractionRaycast()
 		{
-			// Do nothing
+			if (_playerLookRaycastTransform == null || !HealthController.IsAlive)
+			{
+				return;
+			}
+
+			InteractableObject interactableObject = null;
+			InteractableObjectIsProxy = false;
+			Ray interactionRay = InteractionRay;
+			GameObject gameObject = GameWorld.FindInteractable(interactionRay, out _);
+			if (gameObject != null)
+			{
+				Player player = gameObject.GetComponent<Player>();
+				if (player != null && player != InteractablePlayer)
+				{
+					InteractablePlayer = (player != this) ? player : null;
+				}
+			}
+
+			Boolean_0 = false;
 		}
 
 		public override void OnDead(EDamageType damageType)
