@@ -380,13 +380,6 @@ namespace Fika.Core.Coop.Players
 			return null;
 		}
 
-		/*public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
-		{
-			RemoveHandsControllerHandler handler = new(this, callback);
-			_removeFromHandsCallback = callback;
-			Proceed(false, new Callback<GInterface149>(handler.Handle), false);
-		}*/
-
 		public override void OnMounting(GStruct173.EMountingCommand command)
 		{
 			// Do nothing
@@ -812,11 +805,6 @@ namespace Fika.Core.Coop.Players
 				playerTraverse.Field("_vaultAudioController").SetValue(null);
 				playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
 				playerTraverse.Field("_climbAudioController").SetValue(null);
-
-				/*if (FikaPlugin.CullPlayers.Value)
-                {
-                    SetupCulling();
-                }*/
 			}
 
 			PacketReceiver = gameObject.AddComponent<PacketReceiver>();
