@@ -885,7 +885,21 @@ namespace Fika.Core.Networking
 				using BinaryReader binaryReader = new(memoryStream);
 				try
 				{
+					OperationCallbackPacket operationCallbackPacket;
 					GStruct411 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
+					if (!result.Succeeded)
+					{
+						logger.LogError($"Inventory operation {packet.ItemControllerExecutePacket.CallbackId} was rejected from {playerToApply.Profile.Info.MainProfileNickname}. Reason: {result.Error}");
+						operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+						{
+							Error = result.Error.ToString()
+						};
+						SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+
+						ResyncInventoryPacket resyncPacket = new(packet.NetId);
+						SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+						return;
+					}
 
 					InventoryOperationHandler opHandler = new()
 					{
@@ -896,7 +910,7 @@ namespace Fika.Core.Networking
 						server = this
 					};
 #if DEBUG
-					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
+					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
 						simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
 #else
 					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
