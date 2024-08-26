@@ -613,6 +613,11 @@ namespace Fika.Core.Coop.Players
 			return newState;
 		}
 
+		public override void InteractionRaycast()
+		{
+			// Do nothing
+		}
+
 		public override void OnDead(EDamageType damageType)
 		{
 			StartCoroutine(DestroyNetworkedComponents());
