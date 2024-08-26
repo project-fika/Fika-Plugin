@@ -140,8 +140,8 @@ namespace Fika.Core.Coop.Players
 
 		public override void PlayGroundedSound(float fallHeight, float jumpHeight)
 		{
-			(bool hit, BaseBallistic.ESurfaceSound surfaceSound) values = method_57();
-			method_58(values.hit, values.surfaceSound);
+			(bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_57();
+			method_58(hit, surfaceSound);
 			base.PlayGroundedSound(fallHeight, jumpHeight);
 		}
 
