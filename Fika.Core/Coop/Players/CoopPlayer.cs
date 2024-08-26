@@ -1105,7 +1105,7 @@ namespace Fika.Core.Coop.Players
 					}
 					catch (Exception exception)
 					{
-						FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
+						FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown on netId {NetId}, {Profile.Info.MainProfileNickname}: {exception}");
 						if (FikaBackendUtils.IsServer)
 						{
 							OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);

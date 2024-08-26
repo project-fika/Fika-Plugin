@@ -921,7 +921,7 @@ namespace Fika.Core.Networking
 				}
 				catch (Exception exception)
 				{
-					FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
+					logger.LogError($"ItemControllerExecutePacket::Exception thrown on netId {playerToApply.NetId}, {playerToApply.Profile.Info.MainProfileNickname}: {exception}");
 					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
 					{
 						Error = exception.Message
