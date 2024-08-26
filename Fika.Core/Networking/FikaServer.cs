@@ -913,7 +913,7 @@ namespace Fika.Core.Networking
 					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
 						simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
 #else
-					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
+					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
 #endif
 					SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
