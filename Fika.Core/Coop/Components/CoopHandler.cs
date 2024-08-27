@@ -10,7 +10,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -505,9 +504,13 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
 			Logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 #endif
-
-			SetWeaponInHandsOfNewPlayer(otherPlayer);
-
+			otherPlayer.SetFirstAvailableItem((result) =>
+			{
+				if (result.Failed)
+				{
+					Logger.LogError($"SetFirstAvailableItem: Failed to set the first available item for {otherPlayer.Profile.Info.MainProfileNickname}");
+				}
+			});
 			return otherPlayer;
 		}
 
@@ -553,48 +556,6 @@ namespace Fika.Core.Coop.Components
 			{
 				Logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
 			}
-		}
-
-		/// <summary>
-		/// Attempts to set up the New Player with the current weapon after spawning
-		/// </summary>
-		/// <param name="player">The player to set the item on</param>
-		public void SetWeaponInHandsOfNewPlayer(Player player)
-		{
-			EquipmentClass equipment = player.Profile.Inventory.Equipment;
-			if (equipment == null)
-			{
-				Logger.LogError($"SetWeaponInHandsOfNewPlayer: {player.Profile.Nickname}, {player.Profile.ProfileId} has no Equipment!");
-			}
-			Item item = null;
-
-			if (equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon).ContainedItem != null)
-			{
-				item = equipment.GetSlot(EquipmentSlot.FirstPrimaryWeapon).ContainedItem;
-			}
-
-			if (item == null && equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon).ContainedItem != null)
-			{
-				item = equipment.GetSlot(EquipmentSlot.SecondPrimaryWeapon).ContainedItem;
-			}
-
-			if (item == null && equipment.GetSlot(EquipmentSlot.Holster).ContainedItem != null)
-			{
-				item = equipment.GetSlot(EquipmentSlot.Holster).ContainedItem;
-			}
-
-			if (item == null && equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem != null)
-			{
-				item = equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem;
-			}
-
-			player.SetItemInHands(item, (IResult) =>
-			{
-				if (IResult.Failed == true)
-				{
-					Logger.LogError($"SetWeaponInHandsOfNewPlayer: Unable to set item {item} in hands for {player.Profile.Nickname}, {player.Profile.ProfileId}");
-				}
-			});
 		}
 	}
 }
