@@ -808,11 +808,10 @@ namespace Fika.Core.Networking
 			{
 				respondPackage.GameTime = gameStartTime.Value;
 				GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
-				//TimeSpan? passedTime = gameTimer.SessionTime - gameTimer.PastTime;
 				respondPackage.SessionTime = gameTimer.SessionTime.Value;
 			}
 
-			SendDataToPeer(peer, ref respondPackage, DeliveryMethod.ReliableUnordered);
+			SendDataToAll(ref respondPackage, DeliveryMethod.ReliableUnordered);
 		}
 
 		private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
