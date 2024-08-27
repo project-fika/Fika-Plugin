@@ -1161,8 +1161,12 @@ namespace Fika.Core.Coop.Players
 						if (InventoryController is Interface15 networkController)
 						{
 							GClass1158 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
-							GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
-							GStruct416 result = networkController.CreateOperationFromDescriptor(descriptor);
+							GStruct416 result = networkController.CreateOperationFromDescriptor(reader.ReadPolymorph<GClass1641>());
+							if (!result.Succeeded)
+							{
+								FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Unable to handle packet from netId {NetId}, error: {result.Error}");
+								return;
+							}
 
 							InventoryOperationHandler opHandler = new(result);
 
@@ -1171,7 +1175,7 @@ namespace Fika.Core.Coop.Players
 					}
 					catch (Exception exception)
 					{
-						FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
+						FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Exception thrown: {exception}");
 						if (FikaBackendUtils.IsServer)
 						{
 							OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
@@ -1181,7 +1185,7 @@ namespace Fika.Core.Coop.Players
 				}
 				else
 				{
-					FikaPlugin.Instance.FikaLogger.LogError("ItemControllerExecutePacket: inventory was null!");
+					FikaPlugin.Instance.FikaLogger.LogError("HandleInventoryPacket: inventory was null!");
 					if (FikaBackendUtils.IsServer)
 					{
 						OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
