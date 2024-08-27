@@ -1098,6 +1098,11 @@ namespace Fika.Core.Coop.Players
 					try
 					{
 						GStruct411 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
+						if (!result.Succeeded)
+						{
+							FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Unable to process descriptor from netid {NetId}, error: {result.Error}");
+							return;
+						}
 
 						InventoryOperationHandler opHandler = new(result);
 
@@ -1105,7 +1110,7 @@ namespace Fika.Core.Coop.Players
 					}
 					catch (Exception exception)
 					{
-						FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown on netId {NetId}, {Profile.Info.MainProfileNickname}: {exception}");
+						FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Exception thrown on netId {NetId}, {Profile.Info.MainProfileNickname}: {exception}");
 						if (FikaBackendUtils.IsServer)
 						{
 							OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
@@ -1115,7 +1120,7 @@ namespace Fika.Core.Coop.Players
 				}
 				else
 				{
-					FikaPlugin.Instance.FikaLogger.LogError("ItemControllerExecutePacket: inventory was null!");
+					FikaPlugin.Instance.FikaLogger.LogError("HandleInventoryPacket: inventory was null!");
 					if (FikaBackendUtils.IsServer)
 					{
 						OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
