@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Ballistics;
 using EFT.Interactive;
 using EFT.InventoryLogic;
@@ -490,19 +491,6 @@ namespace Fika.Core.Coop.Players
 		}
 		#endregion
 
-		public override void vmethod_6(EInteraction gesture)
-		{
-			if (gesture == EInteraction.FriendlyGesture)
-			{
-				InteractionRaycast();
-				if (InteractablePlayer != null)
-				{
-					InteractablePlayer.ShowHelloNotification(Profile.Nickname);
-				}
-			}
-			base.vmethod_6(gesture);
-		}
-
 		public override void OnFovUpdatedEvent(int fov)
 		{
 			// Do nothing
@@ -959,7 +947,14 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnAnimatedInteraction(EInteraction interaction)
 		{
-			// Do nothing
+			if (interaction == EInteraction.FriendlyGesture)
+			{
+				InteractionRaycast();
+				if (InteractablePlayer != null)
+				{
+					InteractablePlayer.ShowHelloNotification(Profile.Nickname);
+				}
+			}
 		}
 
 		public override void PauseAllEffectsOnPlayer()
