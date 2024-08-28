@@ -260,7 +260,7 @@ namespace Fika.Core.Coop.ClientClasses
 					{
 						localOperationStatus = EOperationStatus.Started;
 						serverOperationStatus = EOperationStatus.Started;
-						operation.method_1(new Callback(callbackManager.HandleResult));
+						operation.method_0(new Callback(callbackManager.HandleResult));
 						return;
 					}
 					if (value == EOperationStatus.Finished)
@@ -272,6 +272,12 @@ namespace Fika.Core.Coop.ClientClasses
 							callback.Succeed();
 							return;
 						}
+
+						// Check for GClass increments
+						if (operation is GInterface388 gInterface)
+						{
+							gInterface.Terminate();
+						}
 					}
 				}
 				else
@@ -281,6 +287,12 @@ namespace Fika.Core.Coop.ClientClasses
 					localOperationStatus = EOperationStatus.Failed;
 					operation.Dispose();
 					callback.Invoke(callbackManager.result);
+
+					// Check for GClass increments
+					if (operation is GInterface388 gInterface)
+					{
+						gInterface.Terminate();
+					}
 				}
 			}
 		}

@@ -1635,7 +1635,8 @@ namespace Fika.Core.Coop.GameMode
 			{
 				coopClientHealthController.Start();
 			}
-			base.Spawn();
+			gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
+			gparam_0.vmethod_0();
 		}
 
 		/// <summary>
@@ -1644,9 +1645,7 @@ namespace Fika.Core.Coop.GameMode
 		public override void vmethod_6()
 		{
 			GameTimer.Start(gameTime, sessionTime);
-			Spawn();
-			gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
-			gparam_0.vmethod_0();
+			Spawn();			
 
 			SkillClass[] skills = Profile_0.Skills.Skills;
 			for (int i = 0; i < skills.Length; i++)
