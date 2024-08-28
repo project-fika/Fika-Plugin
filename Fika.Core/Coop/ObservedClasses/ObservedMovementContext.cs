@@ -154,12 +154,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public override BaseMovementState GetNewState(EPlayerState name, bool isAI = false)
 		{
-			if (name == EPlayerState.Run)
-				return new ObservedRunState(this);
-			if (name == EPlayerState.Sprint)
-				return new ObservedSprintState(this);
-			else
-				return base.GetNewState(name, isAI);
+			return name switch
+			{
+				EPlayerState.Run => new ObservedRunState(this),
+				EPlayerState.Sprint => new ObservedSprintState(this),
+				_ => base.GetNewState(name, isAI)
+			};
 		}
 
 		public new static ObservedMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
