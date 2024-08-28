@@ -738,6 +738,14 @@ namespace Fika.Core.Coop.GameMode
 					{
 						DynamicAI.AddHumans();
 					}
+
+					InformationPacket finalPacket = new(false)
+					{
+						NumberOfPlayers = server.NetServer.ConnectedPeersCount,
+						ReadyPlayers = server.ReadyClients
+					};
+
+					server.SendDataToAll(ref finalPacket, DeliveryMethod.ReliableOrdered);
 				}
 				else
 				{
