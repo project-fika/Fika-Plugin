@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.PacketHandlers
 	{
 		private CoopPlayer player;
 
-		public bool Enabled { get; set; } = true;
+		public bool Enabled { get; set; } = false;
 		public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
 		public FikaClient Client { get; set; }
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
@@ -48,6 +48,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		public void Init()
 		{
 			enabled = true;
+			Enabled = true;
 			if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
 			{
 				sharedQuestController.LateInit();

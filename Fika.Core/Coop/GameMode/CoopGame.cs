@@ -37,7 +37,6 @@ using HarmonyLib;
 using JsonType;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,7 +44,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -71,7 +69,7 @@ namespace Fika.Core.Coop.GameMode
 		private WavesSpawnScenario wavesSpawnScenario_0;
 		private NonWavesSpawnScenario nonWavesSpawnScenario_0;
 		private BossSpawnScenario bossSpawnScenario;
-		private Func<Player, EftGamePlayerOwner> func_1;
+		private Func<LocalPlayer, EftGamePlayerOwner> func_1;
 		private bool hasSaved = false;
 		private CoopExfilManager exfilManager;
 		private CoopTimeManager timeManager;
@@ -163,7 +161,7 @@ namespace Fika.Core.Coop.GameMode
 
 				// Boss Scenario setup
 				BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
-				coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave)); 
+				coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
 			}
 
 			if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
@@ -175,7 +173,7 @@ namespace Fika.Core.Coop.GameMode
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
 			SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
-			coopGame.func_1 = new Func<Player, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);
+			coopGame.func_1 = new Func<LocalPlayer, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);
 
 			Singleton<IFikaGame>.Create(coopGame);
 			FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
@@ -216,8 +214,9 @@ namespace Fika.Core.Coop.GameMode
 			private readonly CoopGame game = game;
 			private readonly LocationSettingsClass.Location location = location;
 
-			public EftGamePlayerOwner HandleSetup(Player player)
+			public EftGamePlayerOwner HandleSetup(LocalPlayer player)
 			{
+				game.LocalPlayer_0 = player;
 				EftGamePlayerOwner gamePlayerOwner = EftGamePlayerOwner.Create(player, inputTree, insurance, backEndSession, gameUI, game.GameDateTime, location);
 				gamePlayerOwner.OnLeave += game.vmethod_4;
 				return gamePlayerOwner;
@@ -1031,7 +1030,7 @@ namespace Fika.Core.Coop.GameMode
 
 			using (CounterCreatorAbstractClass.StartWithToken("player create"))
 			{
-				Player player = await CreateLocalPlayer();
+				LocalPlayer player = await CreateLocalPlayer();
 				dictionary_0.Add(player.ProfileId, player);
 				gparam_0 = func_1(player);
 				PlayerCameraController.Create(gparam_0.Player);
@@ -1169,7 +1168,7 @@ namespace Fika.Core.Coop.GameMode
 		/// Creates the local player
 		/// </summary>
 		/// <returns>A <see cref="Player"/></returns>
-		private async Task<Player> CreateLocalPlayer()
+		private async Task<LocalPlayer> CreateLocalPlayer()
 		{
 			int num = 0;
 
@@ -1630,12 +1629,22 @@ namespace Fika.Core.Coop.GameMode
 			}
 		}
 
+		public override void Spawn()
+		{
+			if (LocalPlayer_0.ActiveHealthController is CoopClientHealthController coopClientHealthController)
+			{
+				coopClientHealthController.Start();
+			}
+			base.Spawn();
+		}
+
 		/// <summary>
 		/// Sets up <see cref="HealthControllerClass"/> events and all <see cref="ExfiltrationPoint"/>s
 		/// </summary>
 		public override void vmethod_6()
 		{
 			GameTimer.Start(gameTime, sessionTime);
+			Spawn();
 			gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
 			gparam_0.vmethod_0();
 
@@ -1946,7 +1955,7 @@ namespace Fika.Core.Coop.GameMode
 				{
 					wavesSpawnScenario_0.Stop();
 				}
-			}			
+			}
 
 			try
 			{
@@ -2075,7 +2084,7 @@ namespace Fika.Core.Coop.GameMode
 						dictionary.Add(stash.Id, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
 					}
 				}
-				
+
 			}
 			return dictionary;
 		}
@@ -2147,7 +2156,7 @@ namespace Fika.Core.Coop.GameMode
 				if (wavesSpawnScenario_0 != null)
 				{
 					wavesSpawnScenario_0.Stop();
-				} 
+				}
 			}
 
 			CancelExitManager stopManager = new()

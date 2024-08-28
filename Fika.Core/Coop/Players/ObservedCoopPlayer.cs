@@ -20,6 +20,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Android;
 using UnityEngine.Audio;
 using static Fika.Core.Networking.FikaSerialization;
 using static Fika.Core.Utils.ColorUtils;
@@ -961,9 +962,16 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		private Transform GetPlayerBones()
+		public override void PauseAllEffectsOnPlayer()
 		{
-			return PlayerBones.BodyTransform.Original;
+			// Do nothing
+			// TODO: Implement
+		}
+
+		public override void UnpauseAllEffectsOnPlayer()
+		{
+			// Do nothing
+			// TODO: Implement
 		}
 
 		public override void OnVaulting()
