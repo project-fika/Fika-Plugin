@@ -2,7 +2,6 @@
 
 using Comfort.Common;
 using EFT;
-using EFT.AnimatedInteractionsSubsystem.Models;
 using EFT.Ballistics;
 using EFT.Interactive;
 using EFT.InventoryLogic;
@@ -21,7 +20,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Android;
 using UnityEngine.Audio;
 using static Fika.Core.Networking.FikaSerialization;
 using static Fika.Core.Utils.ColorUtils;
@@ -916,7 +914,7 @@ namespace Fika.Core.Coop.Players
 				AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.ObservedPlayerSpeechMixer;
 				if (SpeechSource != null)
 				{
-					SpeechSource.SetMixerGroup(audioMixerGroup); 
+					SpeechSource.SetMixerGroup(audioMixerGroup);
 				}
 				return;
 			}
