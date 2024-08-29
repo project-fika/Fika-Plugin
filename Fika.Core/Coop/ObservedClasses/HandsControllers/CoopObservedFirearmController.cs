@@ -194,6 +194,11 @@ namespace Fika.Core.Coop.ObservedClasses
 			// Do nothing
 		}
 
+		public override bool ToggleBipod()
+		{
+			return HasBipod && CurrentOperation.ToggleBipod();
+		}
+
 		public void HandleFirearmPacket(in WeaponPacket packet, InventoryController inventoryController)
 		{
 			if (packet.HasShotInfo)
