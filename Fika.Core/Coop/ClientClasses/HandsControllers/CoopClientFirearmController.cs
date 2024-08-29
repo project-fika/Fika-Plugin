@@ -90,6 +90,19 @@ namespace Fika.Core.Coop.ClientClasses
 			return new FirearmClass4(this);
 		}
 
+		public override bool ToggleBipod()
+		{
+			bool success = base.ToggleBipod();
+			if (success)
+			{
+				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+				{
+					ToggleBipod = true
+				});
+			}
+			return success;
+		}
+
 		public override bool CheckChamber()
 		{
 			bool flag = base.CheckChamber();

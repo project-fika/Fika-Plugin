@@ -246,143 +246,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				}
 				else if (packet.ShotInfoPacket.ShotType == EShotType.RegularShot)
 				{
-					if (string.IsNullOrEmpty(packet.ShotInfoPacket.AmmoTemplate))
-					{
-						FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::HandleFirearmPacket: AmmoTemplate was null or empty!");
-						return;
-					}
-
-					BulletClass ammo = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
-					InitiateShot(Item, ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
-						CurrentFireport.position, packet.ShotInfoPacket.ChamberIndex, packet.ShotInfoPacket.Overheat);
-
-					if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
-					{
-						triggerPressed = true;
-					}
-
-					float pitchMult = method_60();
-					WeaponSoundPlayer.FireBullet(ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
-						pitchMult, Malfunction, false, IsBirstOf2Start);
-
-					Weapon.MalfState.LastShotOverheat = packet.ShotInfoPacket.LastShotOverheat;
-					Weapon.MalfState.LastShotTime = packet.ShotInfoPacket.LastShotTime;
-					Weapon.MalfState.SlideOnOverheatReached = packet.ShotInfoPacket.SlideOnOverheatReached;
-
-					triggerPressed = false;
-					hasFired = true;
-					lastFireTime = Time.time;
-					if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
-					{
-						needsReset = true;
-					}
-
-					MagazineClass magazine = Weapon.GetCurrentMagazine();
-
-					FirearmsAnimator.SetFire(true);
-
-					if (packet.ShotInfoPacket.UnderbarrelShot)
-					{
-						if (UnderbarrelWeapon.Chamber.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
-						{
-							grenadeBullet.IsUsed = true;
-							UnderbarrelWeapon.Chamber.RemoveItem();
-							underBarrelManager?.DestroyPatronInWeapon();
-						}
-						FirearmsAnimator.SetFire(false);
-						return;
-					}
-
-					if (Weapon.HasChambers)
-					{
-						if (Weapon.ReloadMode is Weapon.EReloadMode.OnlyBarrel)
-						{
-							for (int i = 0; i < Weapon.Chambers.Length; i++)
-							{
-								if (Weapon.Chambers[i].ContainedItem is BulletClass bClass && !bClass.IsUsed)
-								{
-									bClass.IsUsed = true;
-									if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
-									{
-										if (!bClass.AmmoTemplate.RemoveShellAfterFire)
-										{
-											weaponEffectsManager.MoveAmmoFromChamberToShellPort(bClass.IsUsed, i);
-										}
-										else
-										{
-											weaponEffectsManager.DestroyPatronInWeapon();
-										}
-									}
-									if (!bClass.AmmoTemplate.RemoveShellAfterFire)
-									{
-										Weapon.ShellsInChambers[i] = bClass.AmmoTemplate;
-									}
-									break;
-								}
-							}
-						}
-						else
-						{
-							Weapon.Chambers[0].RemoveItem(false);
-							if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
-							{
-								HandleShellEvent(weaponEffectsManager, packet, ammo, magazine);
-							}
-						}
-					}
-
-					// Check for GClass increments
-					if (Weapon is GClass2943)
-					{
-						Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
-
-						if (magazine is CylinderMagazineClass cylinderMagazine)
-						{
-							BulletClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
-							if (cylinderAmmo != null)
-							{
-								cylinderAmmo.IsUsed = true;
-								cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
-								FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
-								if (!cylinderAmmo.AmmoTemplate.RemoveShellAfterFire)
-								{
-									Weapon.ShellsInChambers[cylinderMagazine.CurrentCamoraIndex] = cylinderAmmo.AmmoTemplate;
-								}
-							}
-							if (Weapon.CylinderHammerClosed)
-							{
-								cylinderMagazine.IncrementCamoraIndex(false);
-							}
-							FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
-							FirearmsAnimator.SetDoubleAction(Convert.ToSingle(Weapon.CylinderHammerClosed));
-							FirearmsAnimator.SetHammerArmed(!Weapon.CylinderHammerClosed);
-						}
-					}
-
-					ammo.IsUsed = true;
-
-					if (magazine != null && magazine is not CylinderMagazineClass && !Weapon.BoltAction)
-					{
-						if (Item.HasChambers)
-						{
-							magazine.Cartridges.PopTo(inventoryController, Item.Chambers[0].CreateItemAddress());
-						}
-						else
-						{
-							magazine.Cartridges.PopToNowhere(inventoryController);
-						}
-					}
-
-					if (Weapon.IsBoltCatch && Weapon.ChamberAmmoCount == 1 && !Weapon.ManualBoltCatch && !Weapon.MustBoltBeOpennedForExternalReload && !Weapon.MustBoltBeOpennedForInternalReload)
-					{
-						FirearmsAnimator.SetBoltCatch(false);
-					}
-
-					if (ammo.AmmoTemplate.IsLightAndSoundShot)
-					{
-						method_61(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection);
-						LightAndSoundShot(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection, ammo.AmmoTemplate);
-					}
+					HandleObservedShot(packet, inventoryController);
 				}
 			}
 
@@ -640,6 +504,152 @@ namespace Fika.Core.Coop.ObservedClasses
 			if (packet.UnderbarrelSightingRangeDown)
 			{
 				UnderbarrelSightingRangeDown();
+			}
+
+			if (packet.ToggleBipod)
+			{
+				ToggleBipod();
+			}
+		}
+
+		private void HandleObservedShot(in WeaponPacket packet, InventoryController inventoryController)
+		{
+			if (string.IsNullOrEmpty(packet.ShotInfoPacket.AmmoTemplate))
+			{
+				FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::HandleFirearmPacket: AmmoTemplate was null or empty!");
+				return;
+			}
+
+			BulletClass ammo = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.ShotInfoPacket.AmmoTemplate, null);
+			InitiateShot(Item, ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
+				CurrentFireport.position, packet.ShotInfoPacket.ChamberIndex, packet.ShotInfoPacket.Overheat);
+
+			if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+			{
+				triggerPressed = true;
+			}
+
+			float pitchMult = method_60();
+			WeaponSoundPlayer.FireBullet(ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
+				pitchMult, Malfunction, false, IsBirstOf2Start);
+
+			Weapon.MalfState.LastShotOverheat = packet.ShotInfoPacket.LastShotOverheat;
+			Weapon.MalfState.LastShotTime = packet.ShotInfoPacket.LastShotTime;
+			Weapon.MalfState.SlideOnOverheatReached = packet.ShotInfoPacket.SlideOnOverheatReached;
+
+			triggerPressed = false;
+			hasFired = true;
+			lastFireTime = Time.time;
+			if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+			{
+				needsReset = true;
+			}
+
+			MagazineClass magazine = Weapon.GetCurrentMagazine();
+
+			FirearmsAnimator.SetFire(true);
+
+			if (packet.ShotInfoPacket.UnderbarrelShot)
+			{
+				if (UnderbarrelWeapon.Chamber.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
+				{
+					grenadeBullet.IsUsed = true;
+					UnderbarrelWeapon.Chamber.RemoveItem();
+					underBarrelManager?.DestroyPatronInWeapon();
+				}
+				FirearmsAnimator.SetFire(false);
+				return;
+			}
+
+			if (Weapon.HasChambers)
+			{
+				if (Weapon.ReloadMode is Weapon.EReloadMode.OnlyBarrel)
+				{
+					for (int i = 0; i < Weapon.Chambers.Length; i++)
+					{
+						if (Weapon.Chambers[i].ContainedItem is BulletClass bClass && !bClass.IsUsed)
+						{
+							bClass.IsUsed = true;
+							if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+							{
+								if (!bClass.AmmoTemplate.RemoveShellAfterFire)
+								{
+									weaponEffectsManager.MoveAmmoFromChamberToShellPort(bClass.IsUsed, i);
+								}
+								else
+								{
+									weaponEffectsManager.DestroyPatronInWeapon();
+								}
+							}
+							if (!bClass.AmmoTemplate.RemoveShellAfterFire)
+							{
+								Weapon.ShellsInChambers[i] = bClass.AmmoTemplate;
+							}
+							break;
+						}
+					}
+				}
+				else
+				{
+					Weapon.Chambers[0].RemoveItem(false);
+					if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+					{
+						HandleShellEvent(weaponEffectsManager, packet, ammo, magazine);
+					}
+				}
+			}
+
+			// Check for GClass increments
+			if (Weapon is GClass2943)
+			{
+				Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
+
+				if (magazine is CylinderMagazineClass cylinderMagazine)
+				{
+					BulletClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
+					if (cylinderAmmo != null)
+					{
+						cylinderAmmo.IsUsed = true;
+						cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
+						FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
+						if (!cylinderAmmo.AmmoTemplate.RemoveShellAfterFire)
+						{
+							Weapon.ShellsInChambers[cylinderMagazine.CurrentCamoraIndex] = cylinderAmmo.AmmoTemplate;
+						}
+					}
+					if (Weapon.CylinderHammerClosed)
+					{
+						cylinderMagazine.IncrementCamoraIndex(false);
+					}
+					FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
+					FirearmsAnimator.SetDoubleAction(Convert.ToSingle(Weapon.CylinderHammerClosed));
+					FirearmsAnimator.SetHammerArmed(!Weapon.CylinderHammerClosed);
+				}
+			}
+
+			ammo.IsUsed = true;
+
+			if (magazine != null && magazine is not CylinderMagazineClass && !Weapon.BoltAction)
+			{
+				if (Item.HasChambers)
+				{
+					magazine.Cartridges.PopTo(inventoryController, Item.Chambers[0].CreateItemAddress());
+				}
+				else
+				{
+					magazine.Cartridges.PopToNowhere(inventoryController);
+				}
+			}
+
+			if (Weapon.IsBoltCatch && Weapon.ChamberAmmoCount == 1 && !Weapon.ManualBoltCatch && !Weapon.MustBoltBeOpennedForExternalReload && !Weapon.MustBoltBeOpennedForInternalReload)
+			{
+				FirearmsAnimator.SetBoltCatch(false);
+			}
+
+			if (ammo.AmmoTemplate.IsLightAndSoundShot)
+			{
+				method_61(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection);
+				LightAndSoundShot(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection, ammo.AmmoTemplate);
 			}
 		}
 
