@@ -76,7 +76,7 @@ namespace Fika.Core.Coop.GameMode
 		private CoopHalloweenEventManager halloweenEventManager;
 		private FikaDebug fikaDebug;
 		private bool isServer;
-		private List<string> localTriggerZones;
+		private List<string> localTriggerZones = [];
 		private DateTime? gameTime;
 		private TimeSpan? sessionTime;
 
