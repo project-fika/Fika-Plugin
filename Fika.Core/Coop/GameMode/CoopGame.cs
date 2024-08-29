@@ -714,8 +714,6 @@ namespace Fika.Core.Coop.GameMode
 					return;
 				}
 
-				NetDataWriter writer = new();
-
 				float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
 				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)(1 / expectedPlayers));
 
