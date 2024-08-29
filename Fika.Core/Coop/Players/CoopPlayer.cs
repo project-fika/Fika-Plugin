@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
+using static UnityEngine.UIElements.StyleVariableResolver;
 
 namespace Fika.Core.Coop.Players
 {
@@ -1154,6 +1155,12 @@ namespace Fika.Core.Coop.Players
 		{
 			if (packet.HasItemControllerExecutePacket)
 			{
+				if (packet.ItemControllerExecutePacket.OperationBytes.Length == 0)
+				{
+					FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Bytes were null!");
+					return;
+				}
+
 				if (_inventoryController != null)
 				{
 					try

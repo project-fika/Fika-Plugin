@@ -423,7 +423,7 @@ namespace Fika.Core.Networking
 				ItemControllerExecutePacket packet = new()
 				{
 					CallbackId = reader.GetUInt(),
-					OperationBytes = reader.GetByteArray(),
+					OperationBytes = reader.GetByteArray()
 				};
 				return packet;
 			}
