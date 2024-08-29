@@ -923,9 +923,7 @@ namespace Fika.Core.Coop.GameMode
 				} while (client.NetClient.FirstPeer == null);
 
 				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
-			}
-
-			await WaitForPlayersToConnect();
+			}			
 
 			fikaDebug = gameObject.AddComponent<FikaDebug>();
 
@@ -1035,6 +1033,8 @@ namespace Fika.Core.Coop.GameMode
 				CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
 				CameraClass.Instance.IsActive = false;
 			}
+
+			await WaitForPlayersToConnect();
 
 			LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
 			if (isServer)
