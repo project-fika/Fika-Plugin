@@ -67,6 +67,11 @@ namespace Fika.Core.Coop.ClientClasses
 
 		private void Profile_OnItemZoneDropped(string itemId, string zoneId)
 		{
+			if (!canSendAndReceive)
+			{
+				return;
+			}
+
 			if (isItemBeingDropped)
 			{
 				return;
