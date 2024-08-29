@@ -2226,14 +2226,6 @@ namespace Fika.Core.Coop.GameMode
 			dictionary_0.Clear();
 			// Reset MatchingType to Single when the game ends.
 			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
-		}
-
-		/// <summary>
-		/// Disposes of the <see cref="CoopGame"/>
-		/// </summary>
-		public override void Dispose()
-		{
-			Logger.LogDebug("Dispose()");
 
 			if (Singleton<GameWorld>.Instance.MineManager != null)
 			{
@@ -2261,11 +2253,6 @@ namespace Fika.Core.Coop.GameMode
 				FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
 				FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
 			}
-			else
-			{
-				// Resetting this array to null forces the game to re-allocate it if the client hosts the next session
-				typeof(BotsController).GetField("_allTypes", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance).SetValue(botsController_0, null);
-			}
 
 			NetManagerUtils.DestroyNetManager(isServer);
 
@@ -2275,19 +2262,7 @@ namespace Fika.Core.Coop.GameMode
 			FikaBackendUtils.IsReconnect = false;
 			FikaBackendUtils.ReconnectPosition = Vector3.zero;
 
-			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-			{
-				Destroy(coopHandler);
-
-				if (CoopHandler.CoopHandlerParent != null)
-				{
-					Destroy(CoopHandler.CoopHandlerParent);
-				}
-			}
-
 			BTRSide_Patches.Passengers.Clear();
-
-			base.Dispose();
 		}
 
 		private class ExitManager : Class1446
@@ -2315,6 +2290,7 @@ namespace Fika.Core.Coop.GameMode
 				//Most of this is from method_15, minus the saving player part.
 				baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
 				baseLocalGame_0.CleanUp();
+				baseLocalGame_0.Dispose();
 
 				Class1447 exitCallback = new()
 				{
