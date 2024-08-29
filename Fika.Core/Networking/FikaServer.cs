@@ -1322,8 +1322,6 @@ namespace Fika.Core.Networking
 					HasItemControllerExecutePacket = true
 				};
 
-				using MemoryStream memoryStream = new();
-				using BinaryWriter binaryWriter = new(memoryStream);
 				GClass1164 writer = new();
 				writer.WritePolymorph(result);
 				packet.ItemControllerExecutePacket = new()
