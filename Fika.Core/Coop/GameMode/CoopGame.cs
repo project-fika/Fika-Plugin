@@ -2208,6 +2208,12 @@ namespace Fika.Core.Coop.GameMode
 		/// </summary>
 		public override void CleanUp()
 		{
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			if (gameWorld.BtrController != null)
+			{
+				gameWorld.BtrController.Dispose();
+			}
+
 			foreach (Player player in dictionary_0.Values)
 			{
 				try
