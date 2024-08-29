@@ -712,7 +712,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<GameWorld>.Instance.MineManager != null)
 			{
-				NetworkGame<EftGamePlayerOwner>.Class1470 mineSeeker = new()
+				NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
 				{
 					minePosition = packet.MinePositon
 				};
@@ -955,15 +955,15 @@ namespace Fika.Core.Networking
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				GClass1158 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+				GClass1159 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
 				try
 				{
 					OperationCallbackPacket operationCallbackPacket;
 					if (playerToApply.InventoryController is Interface15 inventoryController)
 					{
-						GClass1641 descriptor = reader.ReadPolymorph<GClass1641>();
+						GClass1642 descriptor = reader.ReadPolymorph<GClass1642>();
 						GStruct416 result = inventoryController.CreateOperationFromDescriptor(descriptor);
-						//GStruct417<GClass3087> result = descriptor.ToInventoryOperation(playerToApply);
+						//GStruct417<GClass3088> result = descriptor.ToInventoryOperation(playerToApply);
 
 #if DEBUG
 						ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
@@ -1239,7 +1239,7 @@ namespace Fika.Core.Networking
 
 						if (profile.ProfileId == RequestHandler.SessionId)
 						{
-							foreach (Profile.ProfileHealthClass.GClass1860 bodyPartHealth in profile.Health.BodyParts.Values)
+							foreach (Profile.ProfileHealthClass.GClass1861 bodyPartHealth in profile.Health.BodyParts.Values)
 							{
 								bodyPartHealth.Effects.Clear();
 								bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
@@ -1324,7 +1324,7 @@ namespace Fika.Core.Networking
 
 				using MemoryStream memoryStream = new();
 				using BinaryWriter binaryWriter = new(memoryStream);
-				GClass1163 writer = new();
+				GClass1164 writer = new();
 				writer.WritePolymorph(result);
 				packet.ItemControllerExecutePacket = new()
 				{

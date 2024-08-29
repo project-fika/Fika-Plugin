@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			mongoID_0 = firstId;
 			ushort_0 = firstOperationId;
-			searchController = new GClass1868();
+			searchController = new GClass1869();
 			coopPlayer = (CoopPlayer)player;
 		}
 
@@ -53,7 +53,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return false;
 		}
 
-		public override bool vmethod_0(GClass3087 operation)
+		public override bool vmethod_0(GClass3088 operation)
 		{
 			return true;
 		}
@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			ushort_0 = nextId;
 		}
 
-		public GStruct416 CreateOperationFromDescriptor(GClass1641 descriptor)
+		public GStruct416 CreateOperationFromDescriptor(GClass1642 descriptor)
 		{
 			method_13(descriptor);
 			return descriptor.ToInventoryOperation(coopPlayer);

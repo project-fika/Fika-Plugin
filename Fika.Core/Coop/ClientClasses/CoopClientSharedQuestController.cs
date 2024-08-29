@@ -252,7 +252,7 @@ namespace Fika.Core.Coop.ClientClasses
 			Item item = player.Inventory.QuestRaidItems.GetAllItems().FirstOrDefault(x => x.TemplateId == itemId);
 			if (item != null)
 			{
-				GStruct419<GClass3026> removeResult = InteractionsHandlerClass.Remove(item, player.InventoryController, false);
+				GStruct419<GClass3027> removeResult = InteractionsHandlerClass.Remove(item, player.InventoryController, false);
 				player.InventoryController.TryRunNetworkTransaction(removeResult);
 			}
 			player.Profile.ItemDroppedAtPlace(itemId, zoneId);

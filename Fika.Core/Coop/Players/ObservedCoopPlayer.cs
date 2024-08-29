@@ -120,9 +120,9 @@ namespace Fika.Core.Coop.Players
 			player.AIData = new GClass534(null, player);
 
 			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass857>("gclass857_0").Value = new();
-			player.cullingHandler = botTraverse.Field<GClass857>("gclass857_0").Value;
-			botTraverse.Field<GClass857>("gclass857_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass858>("gclass858_0").Value = new();
+			player.cullingHandler = botTraverse.Field<GClass857>("gclass858_0").Value;
+			botTraverse.Field<GClass858>("gclass858_0").Value.Initialize(player, player.PlayerBones);
 
 			if (!aiControl)
 			{
@@ -156,12 +156,12 @@ namespace Fika.Core.Coop.Players
 
 		public override void PlayGroundedSound(float fallHeight, float jumpHeight)
 		{
-			(bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_57();
-			method_58(hit, surfaceSound);
+			(bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_61();
+			method_62(hit, surfaceSound);
 			base.PlayGroundedSound(fallHeight, jumpHeight);
 		}
 
-		public override void OnSkillLevelChanged(GClass1875 skill)
+		public override void OnSkillLevelChanged(GClass1876 skill)
 		{
 			// Do nothing
 		}
@@ -513,7 +513,7 @@ namespace Fika.Core.Coop.Players
 		{
 			float interpolate = 0.3f;
 
-			method_58(newState.HasGround, newState.SurfaceSound);
+			method_62(newState.HasGround, newState.SurfaceSound);
 
 			Rotation = new Vector2(Mathf.LerpAngle(MovementContext.Rotation.x, newState.Rotation.x, interpolate),
 				Mathf.Lerp(MovementContext.Rotation.y, newState.Rotation.y, interpolate));
@@ -728,9 +728,9 @@ namespace Fika.Core.Coop.Players
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-				PlayerBody.GClass1978 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
+				PlayerBody.GClass1979 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass1978 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
+				PlayerBody.GClass1979 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
 				if (gclass2 != null)
 				{
 					gclass2.Dispose();
@@ -1097,7 +1097,7 @@ namespace Fika.Core.Coop.Players
 		#region handControllers
 		private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
 		{
-			CreateHandsControllerHandler handler = new((item != null) ? method_72(item) : null);
+			CreateHandsControllerHandler handler = new((item != null) ? method_78(item) : null);
 
 			handler.setInHandsOperation?.Confirm(true);
 

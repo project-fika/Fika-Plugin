@@ -79,8 +79,8 @@ namespace Fika.Core.Coop.Players
 			};
 
 			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass857>("gclass857_0").Value = new();
-			botTraverse.Field<GClass857>("gclass857_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass858>("gclass858_0").Value = new();
+			botTraverse.Field<GClass858>("gclass858_0").Value.Initialize(player, player.PlayerBones);
 
 			player.AggressorFound = false;
 
@@ -95,7 +95,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void OnSkillLevelChanged(GClass1875 skill)
+		public override void OnSkillLevelChanged(GClass1876 skill)
 		{
 			// Do nothing
 		}

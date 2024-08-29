@@ -126,7 +126,7 @@ namespace Fika.Core.Coop.ClientClasses
 				return;
 			}
 
-			Class1093 currentOperation = CurrentOperation;
+			Class1092 currentOperation = CurrentOperation;
 			if (currentOperation != null)
 			{
 				if (currentOperation is not Class1097)

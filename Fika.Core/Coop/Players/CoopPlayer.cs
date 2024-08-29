@@ -83,7 +83,7 @@ namespace Fika.Core.Coop.Players
 			questController.Init();
 			questController.Run();
 
-			GClass3485 achievementsController = new(profile, inventoryController, session, true);
+			GClass3486 achievementsController = new(profile, inventoryController, session, true);
 			achievementsController.Init();
 			achievementsController.Run();
 
@@ -122,7 +122,7 @@ namespace Fika.Core.Coop.Players
 			}
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-			player._handsController.Spawn(1f, new Action(Class1591.class1591_0.method_0));
+			player._handsController.Spawn(1f, new Action(Class1590.class1590_0.method_0));
 
 			player.AIData = new GClass534(null, player);
 
@@ -163,9 +163,9 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void OnSkillLevelChanged(GClass1875 skill)
+		public override void OnSkillLevelChanged(GClass1876 skill)
 		{
-			NotificationManagerClass.DisplayNotification(new GClass2168(skill));
+			NotificationManagerClass.DisplayNotification(new GClass2169(skill));
 		}
 
 		public override bool CheckSurface()
@@ -501,7 +501,7 @@ namespace Fika.Core.Coop.Players
 		public override void SendHeadlightsPacket(bool isSilent)
 		{
 			FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController,
-				FirearmLightStateStruct>(ClientPlayer.Class1518.class1518_0.method_0)).ToArray();
+				FirearmLightStateStruct>(ClientPlayer.Class1517.class1517_0.method_0)).ToArray();
 
 			if (PacketSender != null)
 			{
@@ -578,7 +578,7 @@ namespace Fika.Core.Coop.Players
 					InteractiveId = interactiveObject.Id,
 					InteractionType = interactionResult.InteractionType,
 					InteractionStage = EInteractionStage.Start,
-					ItemId = (interactionResult is GClass3229 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+					ItemId = (interactionResult is GClass3230 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
 				}
 			};
 			PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -603,7 +603,7 @@ namespace Fika.Core.Coop.Players
 					InteractiveId = door.Id,
 					InteractionType = interactionResult.InteractionType,
 					InteractionStage = EInteractionStage.Execute,
-					ItemId = (interactionResult is GClass3229 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+					ItemId = (interactionResult is GClass3230 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
 				}
 			};
 			PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -860,7 +860,7 @@ namespace Fika.Core.Coop.Players
 				FikaPlugin.Instance.FikaLogger.LogInfo("Setting up DogTag");
 				if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
 				{
-					GStruct419<GClass3026> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false);
+					GStruct419<GClass3027> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false);
 					if (result.Error != null)
 					{
 						FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::SetupMainPlayer: Error removing dog tag!");
@@ -874,7 +874,7 @@ namespace Fika.Core.Coop.Players
 					Item item = Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), templateId, null);
 
 					Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
-					GStruct419<GClass3030> addResult = dogtagSlot.AddWithoutRestrictions(item);
+					GStruct419<GClass3031> addResult = dogtagSlot.AddWithoutRestrictions(item);
 
 					if (addResult.Error != null)
 					{
@@ -1160,8 +1160,8 @@ namespace Fika.Core.Coop.Players
 					{
 						if (InventoryController is Interface15 networkController)
 						{
-							GClass1158 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
-							GStruct416 result = networkController.CreateOperationFromDescriptor(reader.ReadPolymorph<GClass1641>());
+							GClass1159 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+							GStruct416 result = networkController.CreateOperationFromDescriptor(reader.ReadPolymorph<GClass1642>());
 							if (!result.Succeeded)
 							{
 								FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Unable to process descriptor from netId {NetId}, error: {result.Error}");
@@ -1587,7 +1587,7 @@ namespace Fika.Core.Coop.Players
 		private class KeyHandler(CoopPlayer player)
 		{
 			private readonly CoopPlayer player = player;
-			public GStruct421<GClass3229> unlockResult;
+			public GStruct421<GClass3230> unlockResult;
 
 			internal void HandleKeyEvent()
 			{

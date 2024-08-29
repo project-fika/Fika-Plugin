@@ -4,7 +4,7 @@ using EFT;
 
 namespace Fika.Core.Coop.ObservedClasses.MovementStates
 {
-	internal class ObservedRunState : GClass1805
+	internal class ObservedRunState : GClass1806
 	{
 		public ObservedRunState(MovementContext movementContext) : base(movementContext)
 		{

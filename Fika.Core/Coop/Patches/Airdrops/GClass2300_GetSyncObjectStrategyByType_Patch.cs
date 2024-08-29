@@ -5,11 +5,11 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches.Airdrops
 {
-	internal class GClass2299_GetSyncObjectStrategyByType_Patch : ModulePatch
+	public class GClass2300_GetSyncObjectStrategyByType_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass2299).GetMethod(nameof(GClass2299.GetSyncObjectStrategyByType), BindingFlags.Static | BindingFlags.Public);
+			return typeof(GClass2300).GetMethod(nameof(GClass2300.GetSyncObjectStrategyByType), BindingFlags.Static | BindingFlags.Public);
 		}
 
 		[PatchPrefix]
@@ -18,7 +18,7 @@ namespace Fika.Core.Coop.Patches.Airdrops
 			switch (type)
 			{
 				case SynchronizableObjectType.Tripwire:
-					__result = new GClass2298();
+					__result = new GClass2299();
 					break;
 				case SynchronizableObjectType.AirPlane:
 					__result = new AirplaneLogicClass(FikaBackendUtils.IsServer);

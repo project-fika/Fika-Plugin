@@ -6,11 +6,11 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches.Airdrops
 {
-	public class GClass2306_UpdateOfflineClientLogic_Patch : ModulePatch
+	public class GClass2307_UpdateOfflineClientLogic_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass2306).GetMethod(nameof(GClass2306.UpdateOfflineClientLogic));
+			return typeof(GClass2307).GetMethod(nameof(GClass2307.UpdateOfflineClientLogic));
 		}
 
 		[PatchPostfix]

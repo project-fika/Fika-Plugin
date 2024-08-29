@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		private float aimMovementSpeed = 1f;
 		private bool hasFired = false;
 		private WeaponPrefab weaponPrefab;
-		private GClass1694 underBarrelManager;
+		private GClass1695 underBarrelManager;
 		public override bool IsAiming
 		{
 			get => base.IsAiming;
@@ -62,7 +62,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
 			if (UnderbarrelWeapon != null)
 			{
-				underBarrelManager = Traverse.Create(this).Field<GClass1694>("gclass1694_0").Value;
+				underBarrelManager = Traverse.Create(this).Field<GClass1695>("gclass1695_0").Value;
 			}
 		}
 
@@ -261,7 +261,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						triggerPressed = true;
 					}
 
-					float pitchMult = method_61();
+					float pitchMult = method_60();
 					WeaponSoundPlayer.FireBullet(ammo, packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection,
 						pitchMult, Malfunction, false, IsBirstOf2Start);
 
@@ -332,7 +332,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					}
 
 					// Check for GClass increments
-					if (Weapon is GClass2942)
+					if (Weapon is GClass2943)
 					{
 						Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
 
@@ -380,7 +380,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					if (ammo.AmmoTemplate.IsLightAndSoundShot)
 					{
-						method_62(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection);
+						method_61(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection);
 						LightAndSoundShot(packet.ShotInfoPacket.ShotPosition, packet.ShotInfoPacket.ShotDirection, ammo.AmmoTemplate);
 					}
 				}
@@ -464,10 +464,10 @@ namespace Fika.Core.Coop.ObservedClasses
 					{
 						try
 						{
-							GClass1158 reader = new(packet.ReloadMagPacket.LocationDescription);
+							GClass1159 reader = new(packet.ReloadMagPacket.LocationDescription);
 							if (packet.ReloadMagPacket.LocationDescription.Length != 0)
 							{
-								GClass1635 descriptor = reader.ReadPolymorph<GClass1635>();
+								GClass1636 descriptor = reader.ReadPolymorph<GClass1636>();
 								gridItemAddress = inventoryController.ToItemAddress(descriptor);
 							}
 						}
@@ -588,12 +588,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					ItemAddress gridItemAddress = null;
 
-					GClass1158 reader = new(packet.ReloadBarrels.LocationDescription);
+					GClass1159 reader = new(packet.ReloadBarrels.LocationDescription);
 					try
 					{
 						if (packet.ReloadBarrels.LocationDescription.Length > 0)
 						{
-							GClass1635 descriptor = reader.ReadPolymorph<GClass1635>();
+							GClass1636 descriptor = reader.ReadPolymorph<GClass1636>();
 							gridItemAddress = inventoryController.ToItemAddress(descriptor);
 						}
 					}
