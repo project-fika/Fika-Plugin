@@ -1323,7 +1323,7 @@ namespace Fika.Core.Networking
 				};
 
 				GClass1164 writer = new();
-				writer.WritePolymorph(result);
+				writer.WritePolymorph(opResult.Value.ToDescriptor());
 				packet.ItemControllerExecutePacket = new()
 				{
 					CallbackId = operationId,
