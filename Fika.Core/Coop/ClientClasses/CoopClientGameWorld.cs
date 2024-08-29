@@ -3,6 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using System;
 using UnityEngine;
@@ -59,6 +60,12 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			base.Start();
 			RegisterBorderZones();
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			NetManagerUtils.DestroyNetManager(false);
 		}
 
 		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)

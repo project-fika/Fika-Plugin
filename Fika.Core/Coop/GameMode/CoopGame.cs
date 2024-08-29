@@ -2208,12 +2208,6 @@ namespace Fika.Core.Coop.GameMode
 		/// </summary>
 		public override void CleanUp()
 		{
-			GameWorld gameWorld = Singleton<GameWorld>.Instance;
-			if (gameWorld.BtrController != null)
-			{
-				gameWorld.BtrController.Dispose();
-			}
-
 			foreach (Player player in dictionary_0.Values)
 			{
 				try
@@ -2258,9 +2252,7 @@ namespace Fika.Core.Coop.GameMode
 
 				FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
 				FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
-			}
-
-			NetManagerUtils.DestroyNetManager(isServer);
+			}			
 
 			FikaBackendUtils.Nodes = null;
 			FikaBackendUtils.HostExpectedNumberOfPlayers = 1;

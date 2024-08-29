@@ -4,9 +4,11 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.HostClasses;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib;
+using System;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -47,6 +49,12 @@ namespace Fika.Core.Coop.ClientClasses
 			RegisterBorderZones();
 		}
 
+		public override void Dispose()
+		{
+			base.Dispose();
+			NetManagerUtils.DestroyNetManager(true);
+		}
+
 		public override void InitAirdrop(bool takeNearbyPoint = false, Vector3 position = default)
 		{
 			GameObject gameObject = method_18(takeNearbyPoint, position);
@@ -57,17 +65,6 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 			SynchronizableObject synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
 			ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
-
-			/*SpawnSyncObjectPacket packet = new(synchronizableObject.ObjectId)
-			{
-				ObjectType = SynchronizableObjectType.AirPlane,
-				UniqueId = synchronizableObject.UniqueId,
-				IsStatic = synchronizableObject.IsStatic,
-				Position = gameObject.transform.position,
-				Rotation = synchronizableObject.transform.rotation
-			};
-
-			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);*/
 		}
 
 		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
