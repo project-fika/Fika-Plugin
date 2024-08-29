@@ -629,7 +629,6 @@ namespace Fika.Core
 			// Disable these as they interfere with Fika
 			new BotDifficultyPatch().Disable();
 			new VersionLabelPatch().Disable();
-			new EmptyInfilFixPatch().Disable();
 			new BotTemplateLimitPatch().Disable();
 			new MaxBotPatch().Disable();
 			new AmmoUsedCounterPatch().Disable();
