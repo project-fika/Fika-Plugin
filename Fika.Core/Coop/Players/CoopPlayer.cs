@@ -164,7 +164,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void OnSkillLevelChanged(GClass1876 skill)
+		public override void OnSkillLevelChanged(AbstractSkillClass skill)
 		{
 			NotificationManagerClass.DisplayNotification(new GClass2169(skill));
 		}

@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return operationFactoryDelegates;
 		}
 
-		public Player.GClass1696 Weapon1()
+		public Player.BaseAnimationOperation Weapon1()
 		{
 			if (Item.ReloadMode == Weapon.EReloadMode.InternalMagazine && Item.Chambers.Length == 0)
 			{
@@ -60,12 +60,12 @@ namespace Fika.Core.Coop.ClientClasses
 			return new FirearmClass2(this);
 		}
 
-		public Player.GClass1696 Weapon2()
+		public Player.BaseAnimationOperation Weapon2()
 		{
 			return new FirearmClass1(this);
 		}
 
-		public Player.GClass1696 Weapon3()
+		public Player.BaseAnimationOperation Weapon3()
 		{
 			if (Item.IsFlareGun)
 			{

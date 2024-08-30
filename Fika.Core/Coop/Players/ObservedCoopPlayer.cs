@@ -161,7 +161,7 @@ namespace Fika.Core.Coop.Players
 			base.PlayGroundedSound(fallHeight, jumpHeight);
 		}
 
-		public override void OnSkillLevelChanged(GClass1876 skill)
+		public override void OnSkillLevelChanged(AbstractSkillClass skill)
 		{
 			// Do nothing
 		}
