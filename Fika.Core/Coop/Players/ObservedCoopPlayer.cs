@@ -110,9 +110,16 @@ namespace Fika.Core.Coop.Players
 			ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
 
 			CoopObservedStatisticsManager statisticsManager = new();
+			ObservedQuestController observedQuestController = null;
+			if (!aiControl)
+			{
+				observedQuestController = new(profile, inventoryController, null, false);
+				observedQuestController.Init();
+				observedQuestController.Run();
+			}
 
 			await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-				statisticsManager, null, null, filter, EVoipState.NotAvailable, aiControl, false);
+				statisticsManager, observedQuestController, null, filter, EVoipState.NotAvailable, aiControl, false);
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
@@ -121,7 +128,7 @@ namespace Fika.Core.Coop.Players
 
 			Traverse botTraverse = Traverse.Create(player);
 			botTraverse.Field<GClass858>("gclass858_0").Value = new();
-			player.cullingHandler = botTraverse.Field<GClass857>("gclass858_0").Value;
+			player.cullingHandler = botTraverse.Field<GClass858>("gclass858_0").Value;
 			botTraverse.Field<GClass858>("gclass858_0").Value.Initialize(player, player.PlayerBones);
 
 			if (!aiControl)

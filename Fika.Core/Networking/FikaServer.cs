@@ -985,7 +985,7 @@ namespace Fika.Core.Networking
 						}
 
 						// Handle this on the server and use GameWorld to replicate
-						if (result.Value is GClass3105 tripwireOperation)
+						if (result.Value is GClass3106 tripwireOperation)
 						{
 							SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 							result.Value.method_1(null);
