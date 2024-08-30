@@ -1358,9 +1358,6 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		public override async Task vmethod_1(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem)
 		{
-#if DEBUG
-			Logger.LogWarning("vmethod_4");
-#endif
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			gameWorld.RegisterRestrictableZones();
 
