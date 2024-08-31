@@ -2133,6 +2133,24 @@ namespace Fika.Core.Coop.GameMode
 		}
 
 		/// <summary>
+		/// Tells the server that we have left the raid and 
+		/// </summary>
+		/// <returns></returns>
+		public override MetricsClass vmethod_7()
+		{
+			try
+			{
+				PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
+				FikaRequestHandler.RaidLeave(body);
+			}
+			catch (Exception ex)
+			{
+				Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
+			}
+			return base.vmethod_7();
+		}
+
+		/// <summary>
 		/// Cleans up after the <see cref="CoopGame"/> stops
 		/// </summary>
 		public override void CleanUp()
@@ -2210,20 +2228,11 @@ namespace Fika.Core.Coop.GameMode
 				//If we haven't saved, run the original method and stop running here.
 				if (!baseLocalGame_0.hasSaved)
 				{					
-					baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
-					try
-					{
-						PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
-						FikaRequestHandler.RaidLeave(body);
-					}
-					catch (Exception ex)
-					{
-						Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
-					}
+					baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();					
 					return;
 				}
 
-				//Most of this is from method_15, minus the saving player part.
+				//Most of this is from method_14, minus the saving player part.
 				baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
 				baseLocalGame_0.CleanUp();
 				baseLocalGame_0.Dispose();
