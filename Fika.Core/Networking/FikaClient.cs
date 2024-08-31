@@ -480,7 +480,7 @@ namespace Fika.Core.Networking
 				GClass1281 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1281>();
 				if (lootItems.Count < 1)
 				{
-					logger.LogWarning("LootItems length was less than 1! Something probably went very wrong");
+					throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
 				}
 				coopGame.LootItems = lootItems;
 				coopGame.HasReceivedLoot = true;
