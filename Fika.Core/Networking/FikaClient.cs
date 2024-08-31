@@ -115,7 +115,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
 			packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
 			packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
-			packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnStatisticsPacketReceived);
+			packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnThrowablePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LightkeeperGuardDeathPacket>(OnLightkeeperGuardDeathPacketReceived);
@@ -483,7 +483,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		private void OnStatisticsPacketReceived(ThrowablePacket packet)
+		private void OnThrowablePacketReceived(ThrowablePacket packet)
 		{
 			GClass760<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
 			if (grenades.TryGetByKey(packet.Data.Id, out Throwable throwable))
