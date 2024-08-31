@@ -2007,7 +2007,7 @@ namespace Fika.Core.Coop.GameMode
 				StashClass stash = btrController.TransferItemsController.Stash;
 				foreach (EFT.InventoryLogic.IContainer item in stash.Containers)
 				{
-					if (item.ID == profileId)
+					if (item.ID == profileId && !dictionary.ContainsKey(stash.Id))
 					{
 						dictionary.Add(stash.Id, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
 					}
@@ -2171,8 +2171,6 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 			dictionary_0.Clear();
-			// Reset MatchingType to Single when the game ends.
-			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
 
 			if (Singleton<GameWorld>.Instance.MineManager != null)
 			{
