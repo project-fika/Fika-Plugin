@@ -2,6 +2,7 @@
 using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
+using HarmonyLib;
 using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -43,6 +44,12 @@ namespace Fika.Core.Coop.ObservedClasses
 		public override void Run()
 		{
 			Quests.LoadAll();
+		}
+
+		public override void Dispose()
+		{
+			CompositeDisposableClass compositeDisposableClass = Traverse.Create(this).Field<CompositeDisposableClass>("compositeDisposableClass").Value;
+			compositeDisposableClass?.Dispose();
 		}
 	}
 }
