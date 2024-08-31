@@ -690,7 +690,7 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 
-			if (FikaPlugin.EasyKillConditions.Value)
+			if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
 			{
 				if (aggressor.Profile.Info.GroupId == "Fika" && !aggressor.IsYourPlayer)
 				{

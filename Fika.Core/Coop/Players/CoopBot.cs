@@ -115,7 +115,7 @@ namespace Fika.Core.Coop.Players
 		{
 			base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
-			if (FikaPlugin.EasyKillConditions.Value)
+			if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
 			{
 				if (aggressor.Profile.Info.GroupId == "Fika" && !aggressor.IsYourPlayer)
 				{
