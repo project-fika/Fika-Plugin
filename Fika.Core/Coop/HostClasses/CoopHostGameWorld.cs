@@ -53,6 +53,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			base.Dispose();
 			NetManagerUtils.DestroyNetManager(true);
+			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
 		}
 
 		public override void InitAirdrop(bool takeNearbyPoint = false, Vector3 position = default)

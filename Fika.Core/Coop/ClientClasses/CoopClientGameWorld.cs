@@ -66,6 +66,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			base.Dispose();
 			NetManagerUtils.DestroyNetManager(false);
+			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
 		}
 
 		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
