@@ -1039,8 +1039,8 @@ namespace Fika.Core.Coop.GameMode
 			LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
 			if (isServer)
 			{
-				await method_11(location);
 				HostLootItems = SimpleZlib.CompressToBytes(location.Loot.ToJson([]), 6);
+				await method_11(location);
 			}
 			else
 			{
