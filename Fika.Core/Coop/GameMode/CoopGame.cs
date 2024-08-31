@@ -1893,17 +1893,7 @@ namespace Fika.Core.Coop.GameMode
 				{
 					wavesSpawnScenario_0.Stop();
 				}
-			}
-
-			try
-			{
-				PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
-				FikaRequestHandler.RaidLeave(body);
-			}
-			catch (Exception)
-			{
-				Logger.LogError("Unable to send RaidLeave request to server.");
-			}
+			}			
 
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
@@ -2219,8 +2209,17 @@ namespace Fika.Core.Coop.GameMode
 
 				//If we haven't saved, run the original method and stop running here.
 				if (!baseLocalGame_0.hasSaved)
-				{
+				{					
 					baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
+					try
+					{
+						PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
+						FikaRequestHandler.RaidLeave(body);
+					}
+					catch (Exception ex)
+					{
+						Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
+					}
 					return;
 				}
 
