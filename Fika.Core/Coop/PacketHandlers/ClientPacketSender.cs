@@ -55,9 +55,9 @@ namespace Fika.Core.Coop.PacketHandlers
 			StartCoroutine(SyncWeather());
 		}
 
-		public void SendPacket<T>(ref T packet) where T : INetSerializable
+		public void SendPacket<T>(ref T packet, bool forced = false) where T : INetSerializable
 		{
-			if (!Enabled)
+			if (!Enabled && !forced)
 			{
 				return;
 			}
@@ -277,7 +277,7 @@ namespace Fika.Core.Coop.PacketHandlers
 						LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
 					};
 
-					SendPacket(ref genericPacket);
+					SendPacket(ref genericPacket, true);
 
 					if (FikaPlugin.PlayPingAnimation.Value)
 					{
