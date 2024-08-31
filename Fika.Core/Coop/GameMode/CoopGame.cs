@@ -1418,23 +1418,6 @@ namespace Fika.Core.Coop.GameMode
 
 				DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
 			}
-			else
-			{
-				/*controllerSettings.BotAmount = EBotAmount.NoBots;
-
-				BotsPresets profileCreator = new(iSession, [], [], [], false);
-
-				GClass860 botCreator = new(this, profileCreator, CreateBot);
-				BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
-
-				// Setting this to an empty array stops the client from downloading bots
-				typeof(BotsController).GetField("_allTypes", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance).SetValue(botsController_0, new WildSpawnType[0]);
-
-				botsController_0.Init(this, botCreator, botZones, spawnSystem, wavesSpawnScenario_0.BotLocationModifier,
-					false, false, true, false, false, gameWorld, Location_0.OpenZones);
-
-				botsController_0.SetSettings(0, [], []);*/
-			}
 
 			Logger.LogInfo($"Location: {Location_0.Name}");
 			BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
@@ -1491,18 +1474,6 @@ namespace Fika.Core.Coop.GameMode
 				SetStatusModel status = new(FikaBackendUtils.GetGroupId(), LobbyEntry.ELobbyStatus.IN_GAME);
 
 				await FikaRequestHandler.UpdateSetStatus(status);
-			}
-			else
-			{
-				/*if (wavesSpawnScenario_0 != null)
-				{
-					wavesSpawnScenario_0.Stop();
-				}
-				if (nonWavesSpawnScenario_0 != null)
-				{
-					nonWavesSpawnScenario_0.Stop();
-				}
-				bossSpawnScenario?.Stop();*/
 			}
 
 			// Add FreeCamController to GameWorld GameObject
@@ -1668,36 +1639,6 @@ namespace Fika.Core.Coop.GameMode
 			exfilManager = gameObject.AddComponent<CoopExfilManager>();
 			exfilManager.Run(exfilPoints);
 
-			/*if (FikaPlugin.Instance.UseBTR)
-            {
-                try
-                {
-                    BackendConfigSettingsClass.BTRGlobalSettings btrSettings = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings;
-                    GameWorld gameWorld = Singleton<GameWorld>.Instance;
-
-                    // Only run on maps that have the BTR enabled
-                    string location = gameWorld.MainPlayer.Location;
-                    if (btrSettings.LocationsWithBTR.Contains(location))
-                    {
-                        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-                        {
-                            if (isServer)
-                            {
-                                coopHandler.serverBTR = gameWorld.gameObject.AddComponent<FikaBTRManager_Host>();
-                            }
-                            else
-                            {
-                                coopHandler.clientBTR = gameWorld.gameObject.AddComponent<FikaBTRManager_Client>();
-                            }
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    Logger.LogError("vmethod_5: Exception thrown during BTR init, check logs.");
-                }
-            }*/
-
 			dateTime_0 = EFTDateTimeClass.Now;
 			Status = GameStatus.Started;
 			ConsoleScreen.ApplyStartCommands();
@@ -1786,6 +1727,11 @@ namespace Fika.Core.Coop.GameMode
 			catch
 			{
 
+			}
+
+			if (fikaDebug != null)
+			{
+				Destroy(fikaDebug);
 			}
 
 			CoopHandler coopHandler = CoopHandler.GetCoopHandler();
