@@ -36,12 +36,10 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -923,7 +921,7 @@ namespace Fika.Core.Coop.GameMode
 				} while (client.NetClient.FirstPeer == null);
 
 				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
-			}			
+			}
 
 			fikaDebug = gameObject.AddComponent<FikaDebug>();
 
@@ -1611,7 +1609,7 @@ namespace Fika.Core.Coop.GameMode
 		public override void vmethod_6()
 		{
 			GameTimer.Start(gameTime, sessionTime);
-			Spawn();			
+			Spawn();
 
 			SkillClass[] skills = Profile_0.Skills.Skills;
 			for (int i = 0; i < skills.Length; i++)
@@ -2009,7 +2007,7 @@ namespace Fika.Core.Coop.GameMode
 			hasSaved = true;
 		}
 
-		private Dictionary<string, GClass1267[]> GetOwnBTRTransfers(string profileId)
+		public Dictionary<string, GClass1267[]> GetOwnBTRTransfers(string profileId)
 		{
 			GameWorld instance = Singleton<GameWorld>.Instance;
 			Dictionary<string, GClass1267[]> dictionary = [];
@@ -2193,7 +2191,7 @@ namespace Fika.Core.Coop.GameMode
 
 				FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
 				FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
-			}			
+			}
 
 			FikaBackendUtils.Nodes = null;
 			FikaBackendUtils.HostExpectedNumberOfPlayers = 1;

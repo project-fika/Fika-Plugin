@@ -247,6 +247,7 @@ namespace Fika.Core
 			new BufferInnerZone_ChangePlayerAccessStatus_Patch().Enable();
 			new TripwireSynchronizableObject_method_6_Patch().Enable();
 			new TripwireSynchronizableObject_method_11_Patch().Enable();
+			new BaseLocalGame_method_13_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
