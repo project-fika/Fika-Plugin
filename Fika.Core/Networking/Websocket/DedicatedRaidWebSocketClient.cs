@@ -115,7 +115,7 @@ namespace Fika.Core.Networking.Websocket
 							matchmakerObject.SetActive(false);
 
 							// Matchmaker next screen (accept)
-							matchMakerAcceptScreen.method_22();
+							matchMakerAcceptScreen.method_19().HandleExceptions();
 						}, false));
 					}
 					else
