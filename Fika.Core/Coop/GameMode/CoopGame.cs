@@ -699,6 +699,9 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		private async Task WaitForOtherPlayers()
 		{
+#if DEBUG
+			Logger.LogWarning("Starting " + nameof(WaitForOtherPlayers));
+#endif
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
 				if (isServer && FikaBackendUtils.HostExpectedNumberOfPlayers <= 1)
@@ -717,6 +720,9 @@ namespace Fika.Core.Coop.GameMode
 
 				if (isServer)
 				{
+#if DEBUG
+					Logger.LogWarning("Server: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
+#endif
 					do
 					{
 						await Task.Yield();
@@ -732,6 +738,9 @@ namespace Fika.Core.Coop.GameMode
 
 					server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
+#if DEBUG
+					Logger.LogWarning("Server: Waiting for server.ReadyClients < expected players, expected: " + expectedPlayers);
+#endif
 					do
 					{
 						await Task.Yield();
@@ -752,6 +761,9 @@ namespace Fika.Core.Coop.GameMode
 				}
 				else
 				{
+#if DEBUG
+					Logger.LogWarning("Client: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
+#endif
 					do
 					{
 						await Task.Yield();
@@ -764,7 +776,9 @@ namespace Fika.Core.Coop.GameMode
 					};
 
 					client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-
+#if DEBUG
+					Logger.LogWarning("Client: Waiting for client.ReadyClients < expected players, expected: " + expectedPlayers);
+#endif
 					do
 					{
 						await Task.Yield();
@@ -1422,6 +1436,9 @@ namespace Fika.Core.Coop.GameMode
 
 			if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
 			{
+#if DEBUG
+				Logger.LogWarning("Spawning halloween prefabs");
+#endif
 				gameWorld.HalloweenEventController = new HalloweenEventControllerClass();
 				GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
 				if (gameObject != null)
@@ -1434,6 +1451,9 @@ namespace Fika.Core.Coop.GameMode
 
 			if (instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
 			{
+#if DEBUG
+				Logger.LogWarning("Spawning BTR controller");
+#endif
 				gameWorld.BtrController = new BTRControllerClass(gameWorld);
 			}
 
@@ -1441,11 +1461,17 @@ namespace Fika.Core.Coop.GameMode
 			Class417 seasonHandler = new();
 			gameWorld.GInterface27_0 = seasonHandler;
 
+#if DEBUG
+			Logger.LogWarning("Running season handler");
+#endif
 			await seasonHandler.Run(season);
 			await WaitForOtherPlayers();
 
 			if (isServer)
 			{
+#if DEBUG
+				Logger.LogWarning("Server: Starting scenarios of bots");
+#endif
 				if (Location_0.OldSpawn && wavesSpawnScenario_0.SpawnWaves != null && wavesSpawnScenario_0.SpawnWaves.Length != 0)
 				{
 					Logger.LogInfo("Running old spawn system. Waves: " + wavesSpawnScenario_0.SpawnWaves.Length);
@@ -1893,7 +1919,7 @@ namespace Fika.Core.Coop.GameMode
 				{
 					wavesSpawnScenario_0.Stop();
 				}
-			}			
+			}
 
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
@@ -2225,8 +2251,8 @@ namespace Fika.Core.Coop.GameMode
 
 				//If we haven't saved, run the original method and stop running here.
 				if (!baseLocalGame_0.hasSaved)
-				{					
-					baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();					
+				{
+					baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
 					return;
 				}
 
