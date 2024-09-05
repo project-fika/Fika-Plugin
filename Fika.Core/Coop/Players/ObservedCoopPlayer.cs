@@ -97,8 +97,7 @@ namespace Fika.Core.Coop.Players
 			Func<float> getAimingSensitivity, IViewFilter filter, MongoID firstId, ushort firstOperationId)
 		{
 			ObservedCoopPlayer player = Create<ObservedCoopPlayer>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
-				armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix,
-				aiControl);
+				armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
 
 			player.IsYourPlayer = false;
 
@@ -141,11 +140,13 @@ namespace Fika.Core.Coop.Players
 			}
 
 			player.AggressorFound = false;
-
 			player._animators[0].enabled = true;
-			player._armsUpdateQueue = EUpdateQueue.Update;
-
 			player.isServer = FikaBackendUtils.IsServer;
+
+			if (FikaBackendUtils.IsDedicated)
+			{
+				player.cullingHandler.Disable();
+			}
 
 			return player;
 		}
@@ -987,7 +988,10 @@ namespace Fika.Core.Coop.Players
 			method_13(deltaTime);
 
 			UpdateTriggerColliderSearcher(deltaTime, SqrCameraDistance < 1600);
-			cullingHandler.ManualUpdate(deltaTime);
+			if (cullingHandler != null)
+			{
+				cullingHandler.ManualUpdate(deltaTime); 
+			}
 		}
 
 		public override void InitAudioController()
