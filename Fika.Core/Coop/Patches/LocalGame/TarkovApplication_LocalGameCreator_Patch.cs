@@ -13,8 +13,10 @@ using HarmonyLib;
 using JsonType;
 using SPT.Reflection.Patching;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.LocalGame
 {
@@ -139,6 +141,13 @@ namespace Fika.Core.Coop.Patches.LocalGame
 			}
 
 			await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
+			using (CounterCreatorAbstractClass.StartWithToken("LoadingScreen.LoadComplete"))
+			{
+				GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
+				MainMenuController mmc = Traverse.Create(instance).Field<MainMenuController>("mainMenuController").Value;
+				mmc?.Unsubscribe();
+				gameWorld.OnGameStarted();
+			}
 		}
 
 		private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile,
@@ -154,18 +163,6 @@ namespace Fika.Core.Coop.Patches.LocalGame
 			{
 				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
 			}
-
-			/*public void HandleLoadComplete(IResult error)
-			{
-				using (CounterCreatorAbstractClass.StartWithToken("LoadingScreen.LoadComplete"))
-				{
-					GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
-					MainMenuController mmc = (MainMenuController)typeof(TarkovApplication).GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(x => x.FieldType == typeof(MainMenuController)).FirstOrDefault().GetValue(tarkovApplication);
-					mmc?.Unsubscribe();
-					GameWorld gameWorld = Singleton<GameWorld>.Instance;
-					gameWorld.OnGameStarted();					
-				}
-			}*/
 		}
 	}
 }
