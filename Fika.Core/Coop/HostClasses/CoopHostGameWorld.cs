@@ -8,7 +8,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib;
-using System;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -119,7 +118,7 @@ namespace Fika.Core.Coop.ClientClasses
 			};
 
 			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-			base.TriggerTripwire(tripwire);			
+			base.TriggerTripwire(tripwire);
 		}
 
 		public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
@@ -144,7 +143,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 			base.DeActivateTripwire(tripwire);
-			
+
 		}
 	}
 }

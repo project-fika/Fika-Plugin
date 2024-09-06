@@ -7,8 +7,6 @@ using Fika.Core.Networking;
 using LiteNetLib;
 using SPT.Reflection.Patching;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;

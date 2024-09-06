@@ -1,5 +1,4 @@
 ﻿using EFT;
-using EFT.UI;
 using Fika.Core.Coop.GameMode;
 using SPT.Reflection.Patching;
 using System.Collections.Generic;

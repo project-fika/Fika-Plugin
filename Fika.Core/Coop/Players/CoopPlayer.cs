@@ -26,7 +26,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
-using static UnityEngine.UIElements.StyleVariableResolver;
 
 namespace Fika.Core.Coop.Players
 {
@@ -1178,7 +1177,7 @@ namespace Fika.Core.Coop.Players
 
 							InventoryOperationHandler opHandler = new(result);
 
-							opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult)); 
+							opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
 						}
 					}
 					catch (Exception exception)

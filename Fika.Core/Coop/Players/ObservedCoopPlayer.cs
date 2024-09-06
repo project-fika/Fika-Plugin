@@ -990,7 +990,7 @@ namespace Fika.Core.Coop.Players
 			UpdateTriggerColliderSearcher(deltaTime, SqrCameraDistance < 1600);
 			if (cullingHandler != null)
 			{
-				cullingHandler.ManualUpdate(deltaTime); 
+				cullingHandler.ManualUpdate(deltaTime);
 			}
 		}
 

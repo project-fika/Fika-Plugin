@@ -1,6 +1,5 @@
 ﻿using EFT;
 using Fika.Core.Coop.ClientClasses;
-using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;

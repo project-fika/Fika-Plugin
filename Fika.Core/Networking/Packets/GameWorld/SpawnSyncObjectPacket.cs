@@ -28,7 +28,7 @@ namespace Fika.Core.Networking
 		public void Deserialize(NetDataReader reader)
 		{
 			ObjectType = (SynchronizableObjectType)reader.GetByte();
-			ObjectId = reader.GetInt();			
+			ObjectId = reader.GetInt();
 			IsStatic = reader.GetBool();
 			switch (ObjectType)
 			{
@@ -90,7 +90,7 @@ namespace Fika.Core.Networking
 					{
 						writer.Put((byte)AirdropType);
 						writer.PutItem(AirdropItem);
-						writer.Put(ContainerId);		
+						writer.Put(ContainerId);
 						writer.Put(NetId);
 					}
 					break;

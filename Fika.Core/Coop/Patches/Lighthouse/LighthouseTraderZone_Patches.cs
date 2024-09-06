@@ -1,18 +1,15 @@
 ﻿using EFT;
-using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Patches.Lighthouse
 {
-	class LighthouseTraderZone_Patches 
+	class LighthouseTraderZone_Patches
 	{
 		public static void Enable()
 		{
