@@ -735,7 +735,7 @@ namespace Fika.Core.Coop.Players
 				base.Move(direction);
 				LastDirection = direction;
 			}
-		}				
+		}
 
 		private void HandleInteractPacket(WorldInteractionPacket packet)
 		{

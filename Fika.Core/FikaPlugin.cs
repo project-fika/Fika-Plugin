@@ -241,7 +241,7 @@ namespace Fika.Core
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;			
+			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
 
 			DisableSPTPatches();
 			EnableOverridePatches();
@@ -291,7 +291,7 @@ namespace Fika.Core
 			else
 			{
 				FikaLogger.LogInfo($"Server version check passed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
-			}			
+			}
 		}
 
 		/// <summary>

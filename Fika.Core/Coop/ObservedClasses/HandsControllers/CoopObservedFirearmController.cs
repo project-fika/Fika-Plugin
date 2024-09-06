@@ -149,7 +149,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			catch (Exception ex)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController: Exception was caught: " + ex.Message);
-			}	
+			}
 		}
 
 		private IEnumerator BreakFiringLoop()

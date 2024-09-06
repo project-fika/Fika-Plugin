@@ -36,7 +36,6 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
 using SPT.SinglePlayer.Models.Progression;
@@ -2312,7 +2311,7 @@ namespace Fika.Core.Coop.GameMode
 				if (screenManager.CheckCurrentScreen(EEftScreenType.Reconnect))
 				{
 					screenManager.CloseAllScreensForced();
-				}				
+				}
 				localGame.gparam_0.Player.OnGameSessionEnd(exitStatus, localGame.PastTime, localGame.Location_0.Id, exitName);
 				localGame.CleanUp();
 				localGame.Status = GameStatus.Stopped;
@@ -2332,7 +2331,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 				localGame.iSession.OfflineRaidEnded(exitStatus, exitName, timeSpan.TotalSeconds).HandleExceptions();
 				MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
-				StaticManager staticManager = StaticManager.Instance;				
+				StaticManager staticManager = StaticManager.Instance;
 				float num = delay;
 				EndAction = new Action(FireCallback);
 				staticManager.WaitSeconds(num, EndAction);

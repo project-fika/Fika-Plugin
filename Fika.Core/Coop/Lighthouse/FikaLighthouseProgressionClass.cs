@@ -6,7 +6,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;

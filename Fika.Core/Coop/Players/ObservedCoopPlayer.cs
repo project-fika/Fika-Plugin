@@ -899,7 +899,7 @@ namespace Fika.Core.Coop.Players
 
 				if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
 				{
-					NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(), 
+					NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
 						ColorizeText(Colors.GREEN, Profile.Info.MainProfileNickname)),
 					EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
 				}
