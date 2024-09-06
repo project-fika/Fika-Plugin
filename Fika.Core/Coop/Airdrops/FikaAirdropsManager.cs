@@ -9,7 +9,6 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using SPT.Custom.Airdrops;
 using System;
 using System.Collections;

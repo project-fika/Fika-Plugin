@@ -4,7 +4,6 @@ using EFT.GlobalEvents;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System;
 using UnityEngine;
 

@@ -7,7 +7,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using UnityEngine;
 

@@ -5,13 +5,13 @@ using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
-using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -136,6 +136,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
+			packetProcessor.SubscribeNetSerializable<ResyncInventoryPacket, NetPeer>(OnResyncInventoryPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -245,6 +246,21 @@ namespace Fika.Core.Networking
 			FikaRequestHandler.UpdateSetHost(body);
 
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnResyncInventoryPacketReceived(ResyncInventoryPacket packet, NetPeer peer)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				if (playerToApply is ObservedCoopPlayer observedPlayer)
+				{
+					SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+					if (observedPlayer.InventoryControllerClass is ObservedInventoryController observedController)
+					{
+						observedController.SetNewID(new(packet.MongoId));
+					}
+				}
+			}
 		}
 
 		private void OnReconnectPacketReceived(ReconnectPacket packet, NetPeer peer)
@@ -792,11 +808,10 @@ namespace Fika.Core.Networking
 			{
 				respondPackage.GameTime = gameStartTime.Value;
 				GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
-				//TimeSpan? passedTime = gameTimer.SessionTime - gameTimer.PastTime;
 				respondPackage.SessionTime = gameTimer.SessionTime.Value;
 			}
 
-			SendDataToPeer(peer, ref respondPackage, DeliveryMethod.ReliableUnordered);
+			SendDataToAll(ref respondPackage, DeliveryMethod.ReliableUnordered);
 		}
 
 		private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
@@ -869,7 +884,21 @@ namespace Fika.Core.Networking
 				using BinaryReader binaryReader = new(memoryStream);
 				try
 				{
+					OperationCallbackPacket operationCallbackPacket;
 					GStruct411 result = playerToApply.ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
+					if (!result.Succeeded)
+					{
+						logger.LogError($"Inventory operation {packet.ItemControllerExecutePacket.CallbackId} was rejected from {playerToApply.Profile.Info.MainProfileNickname}. Reason: {result.Error}");
+						operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+						{
+							Error = result.Error.ToString()
+						};
+						SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+
+						ResyncInventoryPacket resyncPacket = new(packet.NetId);
+						SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+						return;
+					}
 
 					InventoryOperationHandler opHandler = new()
 					{
@@ -880,10 +909,10 @@ namespace Fika.Core.Networking
 						server = this
 					};
 #if DEBUG
-					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
+					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
 						simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
 #else
-					OperationCallbackPacket operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
+					operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
 #endif
 					SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
@@ -891,9 +920,15 @@ namespace Fika.Core.Networking
 				}
 				catch (Exception exception)
 				{
-					FikaPlugin.Instance.FikaLogger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-					SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+					logger.LogError($"ItemControllerExecutePacket::Exception thrown on netId {playerToApply.NetId}, {playerToApply.Profile.Info.MainProfileNickname}: {exception}");
+					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+					{
+						Error = exception.Message
+					};
+					SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
+
+					ResyncInventoryPacket resyncPacket = new(packet.NetId);
+					SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 		}
@@ -1190,6 +1225,9 @@ namespace Fika.Core.Networking
 					FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
 					operationCallbackPacket = new(netId, operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
 					server.SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+
+					ResyncInventoryPacket resyncPacket = new(netId);
+					server.SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 
 					return;
 				}
