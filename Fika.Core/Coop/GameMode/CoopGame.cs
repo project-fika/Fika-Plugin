@@ -1134,6 +1134,9 @@ namespace Fika.Core.Coop.GameMode
 			{
 				await Task.Delay(250);
 			} while (Profile_0 == null);
+
+			await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Local,
+				Profile_0.GetAllPrefabPaths(true).ToArray(), JobPriority.General);
 		}
 
 		private async Task Reconnect()
