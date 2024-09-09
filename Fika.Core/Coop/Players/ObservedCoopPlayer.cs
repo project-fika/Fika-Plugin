@@ -717,22 +717,19 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
+		// TODO: This code needs refactoring and hopefully removing
+		// The reason it was added was due to a lot of bots inventories desyncing because of their unnatural inventory operations
 		public override void SetInventory(InventoryEquipment equipmentClass)
 		{
 			Inventory.Equipment = equipmentClass;
 
 			BindableState<Item> itemInHands = Traverse.Create(this).Field<BindableState<Item>>("_itemInHands").Value;
-			if (HandsController != null && HandsController.Item != null)
+			if (HandsController != null && HandsController.Item != null && !MovementContext.IsStationaryWeaponInHands)
 			{
-				Item item = FindItem(HandsController.Item.Id);
-				if (item != null)
-				{
-					itemInHands.Value = item;
-				}
+				itemInHands.Value = HandsController.Item;
 			}
-
-			EquipmentSlot[] equipmentSlots = Traverse.Create<PlayerBody>().Field<EquipmentSlot[]>("SlotNames").Value;
-			foreach (EquipmentSlot equipmentSlot in equipmentSlots)
+			
+			foreach (EquipmentSlot equipmentSlot in PlayerBody.SlotNames)
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
