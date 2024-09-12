@@ -157,12 +157,12 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				if (FikaBackendUtils.IsServer)
 				{
-					players = [.. Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList().Where(x => !x.IsYourPlayer && x.IsAI)];
+					players = [.. coopHandler.Players.Values.Where(x => x.IsAI && x.HealthController.IsAlive)];
 					FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam SERVER: There are {players.Count} players");
 				}
 				else
 				{
-					players = [.. coopHandler.Players.Values.Where(x => x.IsObservedAI)];
+					players = [.. coopHandler.Players.Values.Where(x => x.IsObservedAI && x.HealthController.IsAlive)];
 					FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam CLIENT: There are {players.Count} players");
 				}
 			}
@@ -484,13 +484,18 @@ namespace Fika.Core.Coop.FreeCamera
 		public void Attach3rdPerson()
 		{
 			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}"); 
-			if (freeCameraController != null && freeCameraController.hasEnabledCulling)
+			if (!CurrentPlayer.IsAI)
 			{
-				freeCameraController.DisableAllCullingObjects();
+				transform.SetParent(CurrentPlayer.RaycastCameraTransform);
+				transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
+				transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
 			}
-			transform.SetParent(CurrentPlayer.RaycastCameraTransform);
-			transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
-			transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
+			else
+			{
+				transform.SetParent(CurrentPlayer.PlayerBones.Head.Original);
+				transform.localPosition = new Vector3(0f, -0.32f, -0.53f);
+				transform.localEulerAngles = new Vector3(-115f, 99f, 5f);
+			}
 			isFollowing = true;
 		}
 
