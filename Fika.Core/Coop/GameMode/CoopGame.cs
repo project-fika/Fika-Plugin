@@ -647,6 +647,9 @@ namespace Fika.Core.Coop.GameMode
 		public override IEnumerator vmethod_2()
 		{
 			int timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
+#if DEBUG
+			timeBeforeDeployLocal = 3;
+#endif
 
 			if (!isServer)
 			{
@@ -758,6 +761,14 @@ namespace Fika.Core.Coop.GameMode
 					{
 						DynamicAI.AddHumans();
 					}
+
+					InformationPacket finalPacket = new(false)
+					{
+						NumberOfPlayers = server.NetServer.ConnectedPeersCount,
+						ReadyPlayers = server.ReadyClients
+					};
+
+					server.SendDataToAll(ref finalPacket, DeliveryMethod.ReliableOrdered);
 				}
 				else
 				{
