@@ -28,6 +28,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private CoopPlayer CurrentPlayer;
 		private Vector3 LastKnownPlayerPosition;
 		private bool isFollowing = false;
+		private bool isSpectatingBots = false;
 		private bool leftMode = false;
 		private bool disableInput = false;
 		private bool showOverlay;
@@ -44,6 +45,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private KeyCode rightKey = KeyCode.D;
 		private KeyCode relUpKey = KeyCode.E;
 		private KeyCode relDownKey = KeyCode.Q;
+		private KeyCode detachKey = KeyCode.G;
 		private readonly KeyCode upKey = KeyCode.R;
 		private readonly KeyCode downKey = KeyCode.F;
 
@@ -101,9 +103,20 @@ namespace Fika.Core.Coop.FreeCamera
 				GUILayout.BeginArea(new Rect(5, 5, 800, 800));
 				GUILayout.BeginVertical();
 
-				GUILayout.Label($"Left/Right Mouse Button: Jump between players");
-				GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
+				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				{
+					GUILayout.Label($"Left/Right Mouse Button: Jump between players");
+					GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
+				}
+				else
+				{
+					GUILayout.Label($"Left/Right Mouse Button: Jump and spectate in 3rd person");
+				}
 				GUILayout.Label($"Spacebar + Left/Right Mouse Button: Jump and spectate in head cam");
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectatingBots)
+				{
+					GUILayout.Label($"G: Detach Camera");
+				}
 				GUILayout.Label($"T: Teleport to cam position");
 				GUILayout.Label($"N: {visionText}");
 				GUILayout.Label($"M: Disable culling");
@@ -113,6 +126,17 @@ namespace Fika.Core.Coop.FreeCamera
 				GUILayout.EndVertical();
 				GUILayout.EndArea();
 			}
+		}
+
+		public void DetachCamera()
+		{
+			CurrentPlayer = null;
+			if (isFollowing)
+			{
+				isFollowing = false;
+				transform.parent = null;
+			}
+			return;
 		}
 
 		public void SwitchSpectateMode()
@@ -157,32 +181,24 @@ namespace Fika.Core.Coop.FreeCamera
 			// If no alive players, add bots to spectate pool if enabled
 			if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
 			{
+				isSpectatingBots = true;
 				if (FikaBackendUtils.IsServer)
 				{
 					players = [.. coopHandler.Players.Values.Where(x => x.IsAI && x.HealthController.IsAlive)];
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam SERVER: There are {players.Count} players");
-#endif
 				}
 				else
 				{
 					players = [.. coopHandler.Players.Values.Where(x => x.IsObservedAI && x.HealthController.IsAlive)];
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam CLIENT: There are {players.Count} players");
-#endif
 				}
 			}
+#if DEBUG
+			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {players.Count} players");
+#endif
 
 			if (players.Count() <= 0)
 			{
 				// Clear out all spectate positions
-				CurrentPlayer = null;
-				if (isFollowing)
-				{
-					isFollowing = false;
-					transform.parent = null;
-				}
-				return;
+				DetachCamera();
 			}
 
 			// Start spectating a player if we haven't before
@@ -293,6 +309,11 @@ namespace Fika.Core.Coop.FreeCamera
 					freeCameraController.DisableAllCullingObjects();
 					return;
 				}
+			}
+
+			if (Input.GetKeyDown(detachKey) && (isSpectatingBots || FikaPlugin.Instance.AllowSpectateFreeCam))
+			{
+				DetachCamera();
 			}
 
 			if (isFollowing)
