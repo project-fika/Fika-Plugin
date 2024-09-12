@@ -4,6 +4,7 @@ using EFT;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
@@ -154,10 +155,18 @@ namespace Fika.Core.Coop.FreeCamera
 			// If no alive players, add bots to spectate pool if enabled
 			if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
 			{
-				players = [.. Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList().Where(x => !x.IsYourPlayer)];
+				if (FikaBackendUtils.IsServer)
+				{
+					players = [.. Singleton<GameWorld>.Instance.AllAlivePlayersList.Cast<CoopPlayer>().ToList().Where(x => !x.IsYourPlayer && x.IsAI)];
+					FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam SERVER: There are {players.Count} players");
+				}
+				else
+				{
+					players = [.. coopHandler.Players.Values.Where(x => x.IsObservedAI)];
+					FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam CLIENT: There are {players.Count} players");
+				}
 			}
 
-			FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: There are {players.Count} players");
 			if (players.Count() <= 0)
 			{
 				// Clear out all spectate positions
@@ -479,18 +488,9 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				freeCameraController.DisableAllCullingObjects();
 			}
-			if (!CurrentPlayer.IsAI)
-			{
-				transform.SetParent(CurrentPlayer.RaycastCameraTransform);
-				transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
-				transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
-			}
-			else
-			{
-				transform.SetParent(CurrentPlayer.PlayerBones.Head.Original);
-				transform.localPosition = new Vector3(0f, -0.32f, -0.53f);
-				transform.localEulerAngles = new Vector3(-115f, 99f, 5f);
-			}
+			transform.SetParent(CurrentPlayer.RaycastCameraTransform);
+			transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
+			transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
 			isFollowing = true;
 		}
 
