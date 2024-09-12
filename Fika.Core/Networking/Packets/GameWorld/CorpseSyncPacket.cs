@@ -1,6 +1,5 @@
 ﻿using EFT.InventoryLogic;
 using LiteNetLib.Utils;
-using System.Security.Policy;
 
 namespace Fika.Core.Networking.Packets.GameWorld
 {

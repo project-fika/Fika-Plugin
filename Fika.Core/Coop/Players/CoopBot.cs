@@ -16,7 +16,6 @@ using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;

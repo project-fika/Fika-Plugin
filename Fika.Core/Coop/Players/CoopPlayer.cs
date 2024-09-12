@@ -714,7 +714,7 @@ namespace Fika.Core.Coop.Players
 		/// <returns></returns>
 		private IEnumerator SendDogtagRoutine()
 		{
-			yield return new WaitForSeconds(1);			
+			yield return new WaitForSeconds(1);
 
 			Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
 			if (item != null)
