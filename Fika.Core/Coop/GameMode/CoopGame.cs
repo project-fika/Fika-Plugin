@@ -1887,12 +1887,7 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Logger.LogDebug("Stop");
 
-			CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-			myPlayer.TriggerZones.Clear();
-			foreach (string triggerZone in localTriggerZones)
-			{
-				myPlayer.TriggerZones.Add(triggerZone);
-			}
+			CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;			
 			myPlayer.PacketSender.DestroyThis();
 
 			if (myPlayer.Side != EPlayerSide.Savage)
@@ -2266,6 +2261,11 @@ namespace Fika.Core.Coop.GameMode
 				//If we haven't saved, run the original method and stop running here.
 				if (!baseLocalGame_0.hasSaved)
 				{
+					baseLocalGame_0.gparam_0.Player.TriggerZones.Clear();
+					foreach (string triggerZone in baseLocalGame_0.localTriggerZones)
+					{
+						baseLocalGame_0.gparam_0.Player.TriggerZones.Add(triggerZone);
+					}
 					baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
 					return;
 				}
