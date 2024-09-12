@@ -23,6 +23,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -141,7 +142,8 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket, NetPeer>(OnSpawnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
-			packetProcessor.SubscribeNetSerializable<ResyncInventoryPacket, NetPeer>(OnResyncInventoryPacketReceived);
+			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
+			packetProcessor.SubscribeNetSerializable<InventoryHashPacket, NetPeer>(OnInventoryHashPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -253,6 +255,40 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
 		}
 
+		private void OnInventoryHashPacketReceived(InventoryHashPacket packet, NetPeer peer)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				int hash = playerToApply.Inventory.CreateInventoryHashSum([EquipmentSlot.SecuredContainer]);
+				if (hash != packet.Hash)
+				{
+
+					string responseString = $"Mismatch on inventory hash! Received: {packet.Hash}, Sent: {hash}\nPlayer: {playerToApply.Profile.Nickname} with id {playerToApply.NetId}";
+					logger.LogError(responseString);
+
+					InventoryHashPacket response = new(playerToApply.NetId)
+					{
+						Hash = hash,
+						Response = responseString
+					};
+					SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+
+					CorpseSyncPacket syncPacket = new(playerToApply.NetId)
+					{
+						Equipment = playerToApply.Inventory.Equipment
+					};
+
+					Corpse corpse = playerToApply.GetComponent<Corpse>();
+					if (corpse != null && corpse.ItemInHands.Value != null)
+					{
+						syncPacket.ItemInHandsId = corpse.ItemInHands.Value.Id;
+					}
+
+					SendDataToPeer(peer, ref syncPacket, DeliveryMethod.ReliableOrdered);
+				}
+			}
+		}
+
 		public void SendAirdropContainerData(EAirdropType containerType, Item item, int ObjectId)
 		{
 			logger.LogInfo($"Sending airdrop details, type: {containerType}, id: {ObjectId}");
@@ -352,7 +388,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		private void OnResyncInventoryPacketReceived(ResyncInventoryPacket packet, NetPeer peer)
+		private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet, NetPeer peer)
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
@@ -978,7 +1014,7 @@ namespace Fika.Core.Networking
 							};
 							SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
 
-							ResyncInventoryPacket resyncPacket = new(playerToApply.NetId);
+							ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
 							SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 							return;
 						}
@@ -1023,7 +1059,7 @@ namespace Fika.Core.Networking
 					};
 					SendDataToAll(ref callbackPacket, DeliveryMethod.ReliableOrdered);
 
-					ResyncInventoryPacket resyncPacket = new(playerToApply.NetId);
+					ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
 					SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
@@ -1033,7 +1069,8 @@ namespace Fika.Core.Networking
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.DamagePackets?.Enqueue(packet);
+				logger.LogWarning($"{playerToApply.Profile.Nickname} took damage from: {packet.ProfileId}");
+				playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1043,7 +1080,7 @@ namespace Fika.Core.Networking
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.ArmorDamagePackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.ArmorDamagePackets.Enqueue(packet);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1053,7 +1090,7 @@ namespace Fika.Core.Networking
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.FirearmPackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.FirearmPackets.Enqueue(packet);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1310,7 +1347,7 @@ namespace Fika.Core.Networking
 					operationCallbackPacket = new(netId, operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
 					server.SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
-					ResyncInventoryPacket resyncPacket = new(netId);
+					ResyncInventoryIdPacket resyncPacket = new(netId);
 					server.SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 
 					return;

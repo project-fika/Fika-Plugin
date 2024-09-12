@@ -88,7 +88,6 @@ namespace Fika.Core.Coop.Players
 			}
 
 			player.AggressorFound = false;
-
 			player._animators[0].enabled = true;
 
 			return player;
@@ -202,11 +201,6 @@ namespace Fika.Core.Coop.Players
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
 			_corpseAppliedForce = num;
 
-			if (Side is EPlayerSide.Usec or EPlayerSide.Bear)
-			{
-				SetupDogTag();
-			}
-
 			if (FikaPlugin.ShowNotifications.Value)
 			{
 				if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out string name) && LastAggressor != null)
@@ -230,16 +224,6 @@ namespace Fika.Core.Coop.Players
 			base.OnDead(damageType);
 		}
 
-		private IEnumerator DestroyNetworkedComponents()
-		{
-			yield return new WaitForSeconds(2);
-
-			if (PacketSender != null)
-			{
-				PacketSender.DestroyThis();
-			}
-		}
-
 		public override void ShowHelloNotification(string sender)
 		{
 			// Do nothing
@@ -258,37 +242,29 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 
-			if (Singleton<FikaServer>.Instantiated)
+			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+			if (coopGame != null && coopGame.Status == GameStatus.Started)
 			{
-				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-				if (coopGame != null && coopGame.Status == GameStatus.Started)
+				GenericPacket packet = new(EPackageType.EnableBot)
 				{
-					FikaServer server = Singleton<FikaServer>.Instance;
-					GenericPacket packet = new(EPackageType.EnableBot)
-					{
-						NetId = MainPlayer.NetId,
-						BotNetId = NetId
-					};
-					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-				}
+					NetId = MainPlayer.NetId,
+					BotNetId = NetId
+				};
+				PacketSender.SendPacket(ref packet, true);
 			}
 		}
 
 		protected void OnDisable()
 		{
-			if (Singleton<FikaServer>.Instantiated)
+			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+			if (coopGame != null && coopGame.Status == GameStatus.Started)
 			{
-				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-				if (coopGame != null && coopGame.Status == GameStatus.Started)
+				GenericPacket packet = new(EPackageType.DisableBot)
 				{
-					FikaServer server = Singleton<FikaServer>.Instance;
-					GenericPacket packet = new(EPackageType.DisableBot)
-					{
-						NetId = MainPlayer.NetId,
-						BotNetId = NetId
-					};
-					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-				}
+					NetId = MainPlayer.NetId,
+					BotNetId = NetId
+				};
+				PacketSender.SendPacket(ref packet, true);
 			}
 		}
 

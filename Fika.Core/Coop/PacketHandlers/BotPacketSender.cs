@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
 		{
-
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		protected void FixedUpdate()

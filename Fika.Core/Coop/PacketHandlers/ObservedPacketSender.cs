@@ -46,7 +46,18 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
 		{
+			if (!enabled)
+			{
+				return;
+			}
 
+			if (isServer)
+			{
+				Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+				return;
+			}
+
+			Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		protected void Update()

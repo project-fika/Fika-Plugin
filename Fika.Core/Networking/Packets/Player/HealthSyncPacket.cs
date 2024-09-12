@@ -1,5 +1,4 @@
 ﻿using EFT;
-using EFT.InventoryLogic;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.FikaSerialization;
 
@@ -11,7 +10,6 @@ namespace Fika.Core.Networking
 		public GStruct352 Packet;
 		public string KillerId;
 		public RagdollPacket RagdollPacket;
-		public InventoryEquipment Equipment;
 		public string[] TriggerZones;
 
 		public void Deserialize(NetDataReader reader)
@@ -137,7 +135,6 @@ namespace Fika.Core.Networking
 							packet.Data.IsAlive.DamageType = (EDamageType)reader.GetInt();
 							KillerId = reader.GetString();
 							RagdollPacket = RagdollPacket.Deserialize(reader);
-							Equipment = (InventoryEquipment)reader.GetItem();
 							TriggerZones = reader.GetStringArray();
 							break;
 						}
@@ -348,7 +345,6 @@ namespace Fika.Core.Networking
 							writer.Put((int)packet.IsAlive.DamageType);
 							writer.Put(KillerId);
 							RagdollPacket.Serialize(writer, RagdollPacket);
-							writer.PutItem(Equipment);
 							writer.PutArray(TriggerZones);
 							break;
 						}

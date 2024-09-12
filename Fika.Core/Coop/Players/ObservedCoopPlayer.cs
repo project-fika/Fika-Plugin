@@ -13,6 +13,7 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using System;
@@ -384,7 +385,7 @@ namespace Fika.Core.Coop.Players
 						DeflectedBy = damageInfo.DeflectedBy,
 						SourceId = damageInfo.SourceId,
 						ArmorDamage = damageInfo.ArmorDamage,
-						ProfileId = damageInfo.Player.iPlayer.ProfileId,
+						ProfileId = player.ProfileId,
 						Material = materialType
 					});
 
@@ -680,6 +681,20 @@ namespace Fika.Core.Coop.Players
 			}
 			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateStepSoundRolloff;
 			base.OnDead(damageType);
+
+			if (!isServer)
+			{
+				InventoryHashPacket hashPacket = new(NetId)
+				{
+					Hash = Inventory.CreateInventoryHashSum([EquipmentSlot.SecuredContainer])
+				};
+				PacketSender.SendPacket(ref hashPacket, true);
+			}
+
+			if (cullingHandler != null)
+			{
+				cullingHandler.DisableCullingOnDead();
+			}
 		}
 
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
@@ -707,11 +722,6 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void SetupDogTag()
-		{
-			// Do nothing
-		}
-
 		public override void ExternalInteraction()
 		{
 			// Do nothing
@@ -719,16 +729,8 @@ namespace Fika.Core.Coop.Players
 
 		// TODO: This code needs refactoring and hopefully removing
 		// The reason it was added was due to a lot of bots inventories desyncing because of their unnatural inventory operations
-		public override void SetInventory(InventoryEquipment equipmentClass)
+		public override void SetInventory(InventoryEquipment equipmentClass, string itemInHandsId)
 		{
-			Inventory.Equipment = equipmentClass;
-
-			BindableState<Item> itemInHands = Traverse.Create(this).Field<BindableState<Item>>("_itemInHands").Value;
-			if (HandsController != null && HandsController.Item != null && !MovementContext.IsStationaryWeaponInHands)
-			{
-				itemInHands.Value = HandsController.Item;
-			}
-			
 			foreach (EquipmentSlot equipmentSlot in PlayerBody.SlotNames)
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
@@ -742,7 +744,20 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
-			//PlayerBody.Init(PlayerBody.BodyCustomization, Inventory.Equipment, shouldSet ? itemInHands : null, LayerMask.NameToLayer("Player"), Side);
+			if (!string.IsNullOrEmpty(itemInHandsId) && Corpse != null)
+			{
+				Item item = FindItem(itemInHandsId);
+				if (item != null)
+				{
+					Corpse.ItemInHands.Value = item;
+				}
+			}
+
+			Inventory inventory = new()
+			{
+				Equipment = equipmentClass
+			};
+			InventoryController.ReplaceInventory(inventory);
 		}
 
 		public override void DoObservedVault(VaultPacket packet)
@@ -1044,11 +1059,6 @@ namespace Fika.Core.Coop.Players
 			{
 				MovementContext.SetBlindFire(0);
 			}
-		}
-
-		public override void HandleDamagePacket(ref DamagePacket packet)
-		{
-			// Do nothing
 		}
 
 		public void HandleProceedPacket(ProceedPacket packet)

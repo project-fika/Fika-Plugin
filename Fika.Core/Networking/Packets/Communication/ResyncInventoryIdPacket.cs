@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Networking
 {
-	public struct ResyncInventoryPacket(int netId) : INetSerializable
+	public struct ResyncInventoryIdPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
 		public string MongoId = string.Empty;

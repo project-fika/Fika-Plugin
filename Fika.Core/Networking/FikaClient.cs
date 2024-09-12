@@ -25,6 +25,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets.GameWorld;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -126,7 +127,10 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket>(OnTraderServicesPacketReceived);
 			packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
-			packetProcessor.SubscribeNetSerializable<ResyncInventoryPacket>(OnResyncInventoryPacketReceived);
+			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
+			packetProcessor.SubscribeNetSerializable<InventoryHashPacket>(OnInventoryHashPacketReceived);
+			packetProcessor.SubscribeNetSerializable<CorpseSyncPacket>(OnCorpseSyncPacketReceived);
+			packetProcessor.SubscribeNetSerializable<DogTagPacket>(OnDogTagPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -175,7 +179,34 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
 		}
 
-		private void OnResyncInventoryPacketReceived(ResyncInventoryPacket packet)
+		private void OnDogTagPacketReceived(DogTagPacket packet)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				playerToApply.SetupDogTag(in packet);
+			}
+		}
+
+		private void OnInventoryHashPacketReceived(InventoryHashPacket packet)
+		{
+			if (!string.IsNullOrEmpty(packet.Response))
+			{
+				logger.LogError(packet.Response);
+				return;
+			}
+
+			logger.LogError("OnInventoryHashPacketReceived: Response was empty!");
+		}
+
+		private void OnCorpseSyncPacketReceived(CorpseSyncPacket packet)
+		{
+			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				playerToApply.SetInventory(packet.Equipment, packet.ItemInHandsId);
+			}
+		}
+
+		private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet)
 		{
 			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
@@ -189,7 +220,7 @@ namespace Fika.Core.Networking
 				}
 				if (playerToApply.IsYourPlayer)
 				{
-					ResyncInventoryPacket response = new(playerToApply.NetId)
+					ResyncInventoryIdPacket response = new(playerToApply.NetId)
 					{
 						MongoId = playerToApply.InventoryController.CurrentId.ToString(),
 						NextId = playerToApply.InventoryController.NextOperationId
