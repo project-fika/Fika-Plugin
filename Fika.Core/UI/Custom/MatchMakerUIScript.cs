@@ -16,6 +16,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Security.Authentication.ExtendedProtection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,22 +25,27 @@ namespace Fika.Core.UI.Custom
 {
 	public class MatchMakerUIScript : MonoBehaviour
 	{
-		public MatchMakerUI fikaMatchMakerUi;
-		public RaidSettings RaidSettings { get; set; }
-		private LobbyEntry[] Matches { get; set; }
-		private List<GameObject> MatchesListObjects { get; set; } = [];
+		private MatchMakerUI fikaMatchMakerUi;
+		internal RaidSettings raidSettings;
+		private LobbyEntry[] matches;
+		private List<GameObject> matchesListObjects = [];
 		private bool stopQuery = false;
 
-		public DefaultUIButton BackButton { get; internal set; }
-		public DefaultUIButton AcceptButton { get; internal set; }
-		public GameObject NewBackButton { get; internal set; }
+		internal DefaultUIButton backButton;
+		internal DefaultUIButton acceptButton;
+		private GameObject NewBackButton;
 
-		private string ProfileId => FikaBackendUtils.Profile.ProfileId;
+		private string profileId;
 		private float lastRefreshed;
 
 		private bool _started;
 		private Coroutine serverQueryRoutine;
 		private float loadingTextTick = 0f;
+
+		protected void Awake()
+		{
+			profileId = FikaBackendUtils.Profile.ProfileId;
+		}
 
 		protected void OnEnable()
 		{
@@ -260,8 +266,8 @@ namespace Fika.Core.UI.Custom
 					}
 
 					FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-					await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
-					AcceptButton.OnClick.Invoke();
+					await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, raidSettings);
+					acceptButton.OnClick.Invoke();
 					DestroyThis();
 				}
 				else
@@ -317,16 +323,16 @@ namespace Fika.Core.UI.Custom
 			tooltipArea.enabled = true;
 			tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
 
-			AcceptButton.gameObject.SetActive(false);
-			AcceptButton.enabled = false;
-			AcceptButton.Interactable = false;
+			acceptButton.gameObject.SetActive(false);
+			acceptButton.enabled = false;
+			acceptButton.Interactable = false;
 
-			NewBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
+			NewBackButton = Instantiate(backButton.gameObject, backButton.transform.parent);
 			UnityEngine.Events.UnityEvent newEvent = new();
 			newEvent.AddListener(() =>
 			{
 				DestroyThis();
-				BackButton.OnClick.Invoke();
+				backButton.OnClick.Invoke();
 			});
 			DefaultUIButton newButtonComponent = NewBackButton.GetComponent<DefaultUIButton>();
 			Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
@@ -336,7 +342,7 @@ namespace Fika.Core.UI.Custom
 				NewBackButton.SetActive(true);
 			}
 
-			BackButton.gameObject.SetActive(false);
+			backButton.gameObject.SetActive(false);
 		}
 
 		private void ToggleLoading(bool enabled)
@@ -363,7 +369,7 @@ namespace Fika.Core.UI.Custom
 
 		private void AutoRefresh()
 		{
-			Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+			matches = FikaRequestHandler.LocationRaids(raidSettings);
 
 			lastRefreshed = Time.time;
 
@@ -373,7 +379,7 @@ namespace Fika.Core.UI.Custom
 		private void ManualRefresh()
 		{
 			Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-			Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+			matches = FikaRequestHandler.LocationRaids(raidSettings);
 
 			lastRefreshed = Time.time;
 
@@ -473,27 +479,27 @@ namespace Fika.Core.UI.Custom
 
 		private void RefreshUI()
 		{
-			if (Matches == null)
+			if (matches == null)
 			{
 				// not initialized
 				return;
 			}
 
-			if (MatchesListObjects != null)
+			if (matchesListObjects != null)
 			{
 				// cleanup old objects
-				foreach (GameObject match in MatchesListObjects)
+				foreach (GameObject match in matchesListObjects)
 				{
 					Destroy(match);
 				}
 			}
 
 			// create lobby listings
-			for (int i = 0; i < Matches.Length; ++i)
+			for (int i = 0; i < matches.Length; ++i)
 			{
-				LobbyEntry entry = Matches[i];
+				LobbyEntry entry = matches[i];
 
-				if (entry.ServerId == ProfileId)
+				if (entry.ServerId == profileId)
 				{
 					continue;
 				}
@@ -501,7 +507,7 @@ namespace Fika.Core.UI.Custom
 				// server object
 				GameObject server = Instantiate(fikaMatchMakerUi.RaidGroupDefaultToClone, fikaMatchMakerUi.RaidGroupDefaultToClone.transform.parent);
 				server.SetActive(true);
-				MatchesListObjects.Add(server);
+				matchesListObjects.Add(server);
 
 				server.name = entry.ServerId;
 
@@ -509,7 +515,7 @@ namespace Fika.Core.UI.Custom
 				bool localPlayerDead = false;
 				foreach (KeyValuePair<string, bool> player in entry.Players)
 				{
-					if (player.Key == ProfileId)
+					if (player.Key == profileId)
 					{
 						localPlayerInRaid = true;
 						localPlayerDead = player.Value;
@@ -539,10 +545,10 @@ namespace Fika.Core.UI.Custom
 
 					Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
 					FikaBackendUtils.HostLocationId = entry.Location;
-					StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
+					StartCoroutine(JoinMatch(profileId, server.name, button, () =>
 					{
 						DestroyThis();
-						AcceptButton.OnClick.Invoke();
+						acceptButton.OnClick.Invoke();
 					}, localPlayerInRaid));
 				});
 
@@ -550,7 +556,7 @@ namespace Fika.Core.UI.Custom
 				HoverTooltipArea tooltipArea;
 				Image image = server.GetComponent<Image>();
 
-				if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
+				if (raidSettings.LocationId != entry.Location && !(raidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
 				{
 					tooltipTextGetter = new()
 					{
@@ -571,7 +577,7 @@ namespace Fika.Core.UI.Custom
 					continue;
 				}
 
-				if (RaidSettings.SelectedDateTime != entry.Time)
+				if (raidSettings.SelectedDateTime != entry.Time)
 				{
 					tooltipTextGetter = new()
 					{
@@ -591,14 +597,14 @@ namespace Fika.Core.UI.Custom
 					continue;
 				}
 
-				if (RaidSettings.Side != entry.Side)
+				if (raidSettings.Side != entry.Side)
 				{
 					string errorText = "ERROR";
-					if (RaidSettings.Side == ESideType.Pmc)
+					if (raidSettings.Side == ESideType.Pmc)
 					{
 						errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_SCAV_AS_PMC.Localized();
 					}
-					else if (RaidSettings.Side == ESideType.Savage)
+					else if (raidSettings.Side == ESideType.Savage)
 					{
 						errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_PMC_AS_SCAV.Localized();
 					}

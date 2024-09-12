@@ -34,9 +34,9 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 			}
 
 			MatchMakerUIScript newMatchMaker = MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
-			newMatchMaker.RaidSettings = raidSettings;
-			newMatchMaker.AcceptButton = ____acceptButton;
-			newMatchMaker.BackButton = ____backButton;
+			newMatchMaker.raidSettings = raidSettings;
+			newMatchMaker.acceptButton = ____acceptButton;
+			newMatchMaker.backButton = ____backButton;
 		}
 
 		[PatchPostfix]
