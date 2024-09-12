@@ -191,7 +191,7 @@ namespace Fika.Core.Networking
 		{
 			if (!string.IsNullOrEmpty(packet.Response))
 			{
-				logger.LogError(packet.Response);
+				logger.LogWarning(packet.Response);
 				return;
 			}
 

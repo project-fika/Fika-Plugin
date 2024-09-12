@@ -264,7 +264,7 @@ namespace Fika.Core.Networking
 				{
 
 					string responseString = $"Mismatch on inventory hash! Received: {packet.Hash}, Sent: {hash}\nPlayer: {playerToApply.Profile.Nickname} with id {playerToApply.NetId}";
-					logger.LogError(responseString);
+					logger.LogWarning(responseString);
 
 					InventoryHashPacket response = new(playerToApply.NetId)
 					{
