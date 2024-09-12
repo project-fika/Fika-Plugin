@@ -473,9 +473,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void AttachDedicated(CoopPlayer player)
 		{
-#if DEBUG
 			FikaPlugin.Instance.FikaLogger.LogInfo("Attaching camera to: " + player.Profile.Info.MainProfileNickname);
-#endif
 			transform.SetParent(player.Transform.Original);
 			transform.localPosition = new(0, 125, 0);
 			transform.LookAt(player.PlayerBones.Head.position);
