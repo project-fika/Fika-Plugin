@@ -845,6 +845,7 @@ namespace Fika.Core.Coop.Players
 				playerTraverse.Field("_vaultAudioController").SetValue(null);
 				playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
 				playerTraverse.Field("_climbAudioController").SetValue(null);
+				RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
 			}
 
 			PacketReceiver = gameObject.AddComponent<PacketReceiver>();
