@@ -174,13 +174,14 @@ namespace Fika.Core.Networking
 				}
 				catch (Exception ex)
 				{
-					logger.LogError($"Error when attempting to map UPnP. Make sure the selected port is not already open! Error message: {ex.Message}");
+					logger.LogError($"Error when attempting to map UPnP. Make sure the selected port is not already open! Exception: {ex.Message}");
 					upnpFailed = true;
 				}
 
 				if (upnpFailed)
 				{
 					Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "UPnP mapping failed. Make sure the selected port is not already open!");
+					throw new MappingException("Error during mapping. Check log file for more information.");
 				}
 			}
 			else if (FikaPlugin.ForceIP.Value != "")
@@ -196,9 +197,11 @@ namespace Fika.Core.Networking
 					MyExternalIP = ipAdress.Replace("\n", "");
 					client.Dispose();
 				}
-				catch (Exception)
+				catch (Exception ex)
 				{
+					logger.LogError($"Error when trying to receive IP automatically. Exception: {ex.Message}");
 					Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Error when trying to receive IP automatically.");
+					throw new NullReferenceException("IP address was null when fetching");
 				}
 			}
 
@@ -233,7 +236,6 @@ namespace Fika.Core.Networking
 				EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
 			string[] Ips = [];
-
 			foreach (string ip in FikaPlugin.Instance.LocalIPs)
 			{
 				if (ValidateLocalIP(ip))
@@ -251,7 +253,6 @@ namespace Fika.Core.Networking
 
 			SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
-
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
 		}
 
