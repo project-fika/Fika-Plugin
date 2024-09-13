@@ -17,6 +17,9 @@ using Logger = BepInEx.Logging.Logger;
 
 namespace Fika.Core.Utils
 {
+	/// <summary>
+	/// Class used to verify and handle other SPT mods
+	/// </summary>
 	public class FikaModHandler
 	{
 		private readonly ManualLogSource logger = Logger.CreateLogSource("FikaModHandler");

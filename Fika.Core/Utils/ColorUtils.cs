@@ -2,6 +2,9 @@
 
 namespace Fika.Core.Utils
 {
+	/// <summary>
+	/// Enum used for <see cref="ColorUtils"/>
+	/// </summary>
 	public enum Colors
 	{
 		WHITE,
@@ -12,6 +15,9 @@ namespace Fika.Core.Utils
 		RED
 	}
 
+	/// <summary>
+	/// Utility used to color text within a <see cref="CustomTextMeshProUGUI"/>
+	/// </summary>
 	public class ColorUtils
 	{
 		private static readonly Dictionary<Colors, string> keyValuePairs = new()

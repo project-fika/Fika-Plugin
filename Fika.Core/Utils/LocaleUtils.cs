@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Utils
 {
+	/// <summary>
+	/// Utilities for locales/language
+	/// </summary>
 	public static class LocaleUtils
 	{
 		private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];

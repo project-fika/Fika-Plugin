@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace Fika.Core.Utils
 {
+	/// <summary>
+	/// Class to convert screen space to world space
+	/// </summary>
 	public static class WorldToScreen
 	{
 		public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true, bool skip = false)
