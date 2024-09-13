@@ -10,7 +10,9 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
 	private TextMeshProUGUI handleText;
 
 	[SerializeField]
+#pragma warning disable CS0169 // Remove unused private members
 	Sprite buttonSprite;
+#pragma warning restore CS0169 // Remove unused private members
 
 	void Start()
 	{

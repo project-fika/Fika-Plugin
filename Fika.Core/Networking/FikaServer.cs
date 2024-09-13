@@ -46,20 +46,8 @@ namespace Fika.Core.Networking
 {
 	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface228
 	{
-		public NetPacketProcessor packetProcessor = new();
-		public CoopPlayer MyPlayer;
-		public Dictionary<int, CoopPlayer> Players => coopHandler.Players;
-		public List<string> PlayersMissing = [];
-		public string MyExternalIP { get; private set; } = NetUtils.GetLocalIp(LocalAddrType.IPv4);
 		public int ReadyClients = 0;
-		public NetManager NetServer
-		{
-			get
-			{
-				return netServer;
-			}
-		}
-		public DateTime timeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
+		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
 		public bool HasHadPeer = false;
 		public bool RaidInitialized = false;
 		public bool Started
@@ -88,13 +76,22 @@ namespace Fika.Core.Networking
 				gameStartTime = value;
 			}
 		}
+		public NetManager NetServer
+		{
+			get
+			{
+				return netServer;
+			}
+		}
 
+		private readonly NetPacketProcessor packetProcessor = new();
+		private CoopPlayer MyPlayer;
+		private readonly List<string> playersMissing = [];
+		private string externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
 		private NetManager netServer;
-		public NetDataWriter Writer => dataWriter;
 		private DateTime? gameStartTime;
 		private readonly NetDataWriter dataWriter = new();
-		private int Port => FikaPlugin.UDPPort.Value;
-
+		private int port;
 		private CoopHandler coopHandler;
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
 		private int currentNetId;
@@ -108,6 +105,8 @@ namespace Fika.Core.Networking
 
 		public async Task Init()
 		{
+			port = FikaPlugin.UDPPort.Value;
+
 			NetworkGameSession.Rtt = 0;
 			NetworkGameSession.LossPercent = 0;
 
@@ -168,9 +167,9 @@ namespace Fika.Core.Networking
 					CancellationTokenSource cts = new(10000);
 					NatDevice device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
 					IPAddress extIp = await device.GetExternalIPAsync();
-					MyExternalIP = extIp.MapToIPv4().ToString();
+					externalIp = extIp.MapToIPv4().ToString();
 
-					await device.CreatePortMapAsync(new Mapping(Protocol.Udp, Port, Port, 300, "Fika UDP"));
+					await device.CreatePortMapAsync(new Mapping(Protocol.Udp, port, port, 300, "Fika UDP"));
 				}
 				catch (Exception ex)
 				{
@@ -186,7 +185,7 @@ namespace Fika.Core.Networking
 			}
 			else if (FikaPlugin.ForceIP.Value != "")
 			{
-				MyExternalIP = FikaPlugin.ForceIP.Value;
+				externalIp = FikaPlugin.ForceIP.Value;
 			}
 			else
 			{
@@ -194,7 +193,7 @@ namespace Fika.Core.Networking
 				{
 					HttpClient client = new();
 					string ipAdress = await client.GetStringAsync("https://ipv4.icanhazip.com/");
-					MyExternalIP = ipAdress.Replace("\n", "");
+					externalIp = ipAdress.Replace("\n", "");
 					client.Dispose();
 				}
 				catch (Exception ex)
@@ -222,11 +221,11 @@ namespace Fika.Core.Networking
 			{
 				if (FikaPlugin.ForceBindIP.Value != "Disabled")
 				{
-					netServer.Start(FikaPlugin.ForceBindIP.Value, "", Port);
+					netServer.Start(FikaPlugin.ForceBindIP.Value, "", port);
 				}
 				else
 				{
-					netServer.Start(Port);
+					netServer.Start(port);
 				}
 			}
 
@@ -240,25 +239,25 @@ namespace Fika.Core.Networking
 			{
 				if (ValidateLocalIP(ip))
 				{
-					Ips = [MyExternalIP, ip];
+					Ips = [externalIp, ip];
 				}
 			}
 
 			if (Ips.Length < 1)
 			{
-				Ips = [MyExternalIP, ""];
+				Ips = [externalIp, ""];
 				NotificationManagerClass.DisplayMessageNotification(LocaleUtils.NO_VALID_IP.Localized(),
 					iconType: EFT.Communications.ENotificationIconType.Alert);
 			}
 
-			SetHostRequest body = new(Ips, Port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
+			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
 		}
 
 		private void OnInventoryHashPacketReceived(InventoryHashPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				int hash = playerToApply.Inventory.CreateInventoryHashSum([EquipmentSlot.SecuredContainer]);
 				if (hash != packet.Hash)
@@ -335,7 +334,7 @@ namespace Fika.Core.Networking
 
 		private void OnTraderServicesPacketReceived(TraderServicesPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				List<TraderServicesClass> services = playerToApply.GetAvailableTraderServices(packet.TraderId).ToList();
 				TraderServicesPacket response = new(playerToApply.NetId)
@@ -349,7 +348,7 @@ namespace Fika.Core.Networking
 
 		private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				GameWorld gameWorld = Singleton<GameWorld>.Instance;
 				if (gameWorld.BtrController != null && gameWorld.BtrController.BtrVehicle != null)
@@ -391,7 +390,7 @@ namespace Fika.Core.Networking
 
 		private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				if (playerToApply is ObservedCoopPlayer observedPlayer)
 				{
@@ -893,7 +892,7 @@ namespace Fika.Core.Networking
 
 		private void OnHealthSyncPacketReceived(HealthSyncPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				playerToApply.PacketReceiver.HealthSyncPackets?.Enqueue(packet);
 			}
@@ -958,28 +957,28 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
-			if (!Players.ContainsKey(packet.NetId) && !PlayersMissing.Contains(packet.ProfileId) && !coopHandler.ExtractedPlayers.Contains(packet.NetId))
+			if (!coopHandler.Players.ContainsKey(packet.NetId) && !playersMissing.Contains(packet.ProfileId) && !coopHandler.ExtractedPlayers.Contains(packet.NetId))
 			{
-				PlayersMissing.Add(packet.ProfileId);
+				playersMissing.Add(packet.ProfileId);
 				logger.LogInfo($"Requesting missing player from server.");
 				AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
 				SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
 			}
-			if (!packet.IsRequest && PlayersMissing.Contains(packet.ProfileId))
+			if (!packet.IsRequest && playersMissing.Contains(packet.ProfileId))
 			{
 				logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
 					coopHandler.QueueProfile(packet.PlayerInfo.Profile, new Vector3(packet.Position.x, packet.Position.y + 0.5f, packet.Position.y),
 						packet.NetId, packet.IsAlive, packet.IsAI, packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
-					PlayersMissing.Remove(packet.ProfileId);
+					playersMissing.Remove(packet.ProfileId);
 				}
 			}
 		}
 
 		private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				playerToApply.PacketReceiver.CommonPlayerPackets?.Enqueue(packet);
 			}
@@ -989,7 +988,7 @@ namespace Fika.Core.Networking
 
 		private void OnInventoryPacketReceived(InventoryPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				GClass1159 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
 				try
@@ -1068,7 +1067,7 @@ namespace Fika.Core.Networking
 
 		private void OnDamagePacketReceived(DamagePacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				logger.LogWarning($"{playerToApply.Profile.Nickname} took damage from: {packet.ProfileId}");
 				playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
@@ -1079,7 +1078,7 @@ namespace Fika.Core.Networking
 
 		private void OnArmorDamagePacketReceived(ArmorDamagePacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				playerToApply.PacketReceiver.ArmorDamagePackets.Enqueue(packet);
 			}
@@ -1089,7 +1088,7 @@ namespace Fika.Core.Networking
 
 		private void OnFirearmPacketReceived(WeaponPacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				playerToApply.PacketReceiver.FirearmPackets.Enqueue(packet);
 			}
@@ -1116,7 +1115,7 @@ namespace Fika.Core.Networking
 
 		private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)
 		{
-			if (Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				playerToApply.PacketReceiver.NewState = packet;
 			}
@@ -1260,7 +1259,7 @@ namespace Fika.Core.Networking
 				iconType: EFT.Communications.ENotificationIconType.Alert);
 			if (netServer.ConnectedPeersCount == 0)
 			{
-				timeSinceLastPeerDisconnected = DateTime.Now;
+				TimeSinceLastPeerDisconnected = DateTime.Now;
 			}
 
 			if (FikaBackendUtils.IsDedicatedGame)

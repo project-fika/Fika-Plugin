@@ -203,7 +203,7 @@ namespace Fika.Core.Coop.Components
 						return;
 					}
 					else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0
-						&& Singleton<FikaServer>.Instance.timeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
+						&& Singleton<FikaServer>.Instance.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
 						&& Singleton<FikaServer>.Instance.HasHadPeer)
 					{
 						NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_WAIT_5_SECONDS.Localized());
