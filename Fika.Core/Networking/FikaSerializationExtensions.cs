@@ -194,7 +194,7 @@ namespace Fika.Core.Networking
 		/// Gets a serialized <see cref="Item"/>
 		/// </summary>
 		/// <param name="reader"></param>
-		/// <returns>An <see cref="Item"/></returns>
+		/// <returns>An <see cref="Item"/> (cast to type inside packet)</returns>
 		public static Item GetItem(this NetDataReader reader)
 		{
 			GClass1159 eftReader = new(reader.GetByteArray());
