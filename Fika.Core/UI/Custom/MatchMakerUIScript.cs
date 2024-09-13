@@ -39,11 +39,6 @@ namespace Fika.Core.UI.Custom
 		internal DefaultUIButton backButton;
 		internal DefaultUIButton acceptButton;
 
-		protected void Awake()
-		{
-			profileId = FikaBackendUtils.Profile.ProfileId;
-		}
-
 		protected void OnEnable()
 		{
 			if (_started)
@@ -68,6 +63,7 @@ namespace Fika.Core.UI.Custom
 
 		protected void Start()
 		{
+			profileId = FikaBackendUtils.Profile.ProfileId;
 			CreateMatchMakerUI();
 			serverQueryRoutine = StartCoroutine(ServerQuery());
 			_started = true;
