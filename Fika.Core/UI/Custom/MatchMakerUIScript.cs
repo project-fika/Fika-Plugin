@@ -16,7 +16,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Security.Authentication.ExtendedProtection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,21 +25,19 @@ namespace Fika.Core.UI.Custom
 	public class MatchMakerUIScript : MonoBehaviour
 	{
 		private MatchMakerUI fikaMatchMakerUi;
-		internal RaidSettings raidSettings;
 		private LobbyEntry[] matches;
-		private List<GameObject> matchesListObjects = [];
+		private readonly List<GameObject> matchesListObjects = [];
 		private bool stopQuery = false;
-
-		internal DefaultUIButton backButton;
-		internal DefaultUIButton acceptButton;
 		private GameObject NewBackButton;
-
 		private string profileId;
 		private float lastRefreshed;
-
 		private bool _started;
 		private Coroutine serverQueryRoutine;
 		private float loadingTextTick = 0f;
+
+		internal RaidSettings raidSettings; 
+		internal DefaultUIButton backButton;
+		internal DefaultUIButton acceptButton;
 
 		protected void Awake()
 		{

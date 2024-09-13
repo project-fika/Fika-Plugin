@@ -450,7 +450,9 @@ namespace Fika.Core.Networking
 					InteractionStage = (EInteractionStage)reader.GetByte(),
 				};
 				if (packet.InteractionType == EInteractionType.Unlock)
+				{
 					packet.ItemId = reader.GetString();
+				}
 
 				return packet;
 			}
@@ -461,7 +463,9 @@ namespace Fika.Core.Networking
 				writer.Put((byte)packet.InteractionType);
 				writer.Put((byte)packet.InteractionStage);
 				if (packet.InteractionType == EInteractionType.Unlock)
+				{
 					writer.Put(packet.ItemId);
+				}
 			}
 		}
 
@@ -536,7 +540,9 @@ namespace Fika.Core.Networking
 					HasItemId = reader.GetBool()
 				};
 				if (packet.HasItemId)
+				{
 					packet.ItemId = reader.GetString();
+				}
 
 				return packet;
 			}
@@ -545,7 +551,9 @@ namespace Fika.Core.Networking
 				writer.Put(packet.FastDrop);
 				writer.Put(packet.HasItemId);
 				if (packet.HasItemId)
+				{
 					writer.Put(packet.ItemId);
+				}
 			}
 		}
 
@@ -568,7 +576,9 @@ namespace Fika.Core.Networking
 				};
 
 				if (packet.Command == EStationaryCommand.Occupy)
+				{
 					packet.Id = reader.GetString();
+				}
 
 				return packet;
 			}
@@ -576,7 +586,9 @@ namespace Fika.Core.Networking
 			{
 				writer.Put((byte)packet.Command);
 				if (packet.Command == EStationaryCommand.Occupy && !string.IsNullOrEmpty(packet.Id))
+				{
 					writer.Put(packet.Id);
+				}
 			}
 		}
 
@@ -612,7 +624,6 @@ namespace Fika.Core.Networking
 			public int AmmoAfterShot = 0;
 			public Vector3 ShotPosition = Vector3.zero;
 			public Vector3 ShotDirection = Vector3.zero;
-			//public Vector3 FireportPosition = Vector3.zero;
 			public int ChamberIndex = 0;
 			public float Overheat = 0f;
 			public bool UnderbarrelShot = false;
@@ -629,7 +640,6 @@ namespace Fika.Core.Networking
 					AmmoAfterShot = reader.GetInt(),
 					ShotPosition = reader.GetVector3(),
 					ShotDirection = reader.GetVector3(),
-					//FireportPosition = reader.GetVector3(),
 					ChamberIndex = reader.GetInt(),
 					Overheat = reader.GetFloat(),
 					UnderbarrelShot = reader.GetBool(),
@@ -647,7 +657,6 @@ namespace Fika.Core.Networking
 				writer.Put(packet.AmmoAfterShot);
 				writer.Put(packet.ShotPosition);
 				writer.Put(packet.ShotDirection);
-				//writer.Put(packet.FireportPosition);
 				writer.Put(packet.ChamberIndex);
 				writer.Put(packet.Overheat);
 				writer.Put(packet.UnderbarrelShot);

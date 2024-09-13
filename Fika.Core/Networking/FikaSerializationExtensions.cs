@@ -201,6 +201,11 @@ namespace Fika.Core.Networking
 			return GClass1634.DeserializeItem(Singleton<ItemFactoryClass>.Instance, [], eftReader.ReadEFTItemDescriptor());
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="List{T}"/> of <see cref="GStruct35"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="throwables"></param>
 		public static void PutThrowableData(this NetDataWriter writer, List<GStruct35> throwables)
 		{
 			writer.Put(throwables.Count);
@@ -215,6 +220,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="List{T}"/> of <see cref="GStruct35"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="List{T}"/> of <see cref="GStruct35"/></returns>
 		public static List<GStruct35> GetThrowableData(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
@@ -236,6 +246,11 @@ namespace Fika.Core.Networking
 			return throwables;
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="List{WorldInteractiveObject.GStruct388}"/> of <see cref="WorldInteractiveObject"/> data
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="interactiveObjectsData"></param>
 		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct388> interactiveObjectsData)
 		{
 			writer.Put(interactiveObjectsData.Count);
@@ -247,6 +262,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="List{WorldInteractiveObject.GStruct388}"/> of <see cref="WorldInteractiveObject"/> data
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.GStruct388"/></returns>
 		public static List<WorldInteractiveObject.GStruct388> GetInteractivesStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
@@ -265,6 +285,11 @@ namespace Fika.Core.Networking
 			return interactivesStates;
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="lampStates"></param>
 		public static void PutLampStates(this NetDataWriter writer, Dictionary<int, byte> lampStates)
 		{
 			int amount = lampStates.Count;
@@ -276,6 +301,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="LampController"/>s</returns>
 		public static Dictionary<int, byte> GetLampStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
@@ -288,6 +318,11 @@ namespace Fika.Core.Networking
 			return states;
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="windowBreakerStates"></param>
 		public static void PutWindowBreakerStates(this NetDataWriter writer, Dictionary<int, Vector3> windowBreakerStates)
 		{
 			int amount = windowBreakerStates.Count;
@@ -299,6 +334,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="WindowBreaker"/>s</returns>
 		public static Dictionary<int, Vector3> GetWindowBreakerStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
@@ -311,6 +351,11 @@ namespace Fika.Core.Networking
 			return states;
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="MongoID"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="mongoId"></param>
 		public static void PutMongoID(this NetDataWriter writer, MongoID? mongoId)
 		{
 			if (!mongoId.HasValue)
@@ -322,6 +367,11 @@ namespace Fika.Core.Networking
 			writer.Put(mongoId.Value.ToString());
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="MongoID"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A new <see cref="MongoID"/>? (nullable)</returns>
 		public static MongoID? GetMongoID(this NetDataReader reader)
 		{
 			int value = reader.GetInt();
@@ -332,6 +382,11 @@ namespace Fika.Core.Networking
 			return new(reader.GetString());
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="TraderServicesClass"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="traderService"></param>
 		public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
 		{
 			writer.PutMongoID(traderService.TraderId);
@@ -358,6 +413,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="TraderServicesClass"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="TraderServicesClass"/></returns>
 		public static TraderServicesClass GetTraderService(this NetDataReader reader)
 		{
 			TraderServicesClass traderService = new()
