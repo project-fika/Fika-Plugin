@@ -821,6 +821,7 @@ namespace Fika.Core.Coop.Players
 
 			PacketSender = gameObject.AddComponent<ObservedPacketSender>();
 			Traverse playerTraverse = Traverse.Create(this);
+			RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
 
 			if (IsObservedAI)
 			{
@@ -845,7 +846,6 @@ namespace Fika.Core.Coop.Players
 				playerTraverse.Field("_vaultAudioController").SetValue(null);
 				playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
 				playerTraverse.Field("_climbAudioController").SetValue(null);
-				RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
 			}
 
 			PacketReceiver = gameObject.AddComponent<PacketReceiver>();
@@ -878,8 +878,6 @@ namespace Fika.Core.Coop.Players
 				}
 
 				Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
-
-				RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
 			}
 		}
 
