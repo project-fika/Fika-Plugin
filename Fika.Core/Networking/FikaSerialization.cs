@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
+	/// <summary>
+	/// Class containing several static methods to serialize/deserialize sub-packages
+	/// </summary>
 	public class FikaSerialization
 	{
 		public struct PlayerInfoPacket(Profile profile, MongoID? controllerId, ushort firstOperationId)

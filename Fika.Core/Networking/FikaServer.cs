@@ -44,6 +44,9 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
 {
+	/// <summary>
+	/// Server used in P2P connections
+	/// </summary>
 	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface228
 	{
 		public int ReadyClients = 0;
