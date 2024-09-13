@@ -4,7 +4,7 @@ using EFT.Interactive;
 namespace Fika.Core.Coop.GameMode
 {
 	/// <summary>
-	/// Currently used to keep track of interactable objects, in the future this will be used to sync reconnects
+	/// <see cref="World"/> used for the client to synchronize game logic
 	/// </summary>
 	public class FikaWorld : World
 	{

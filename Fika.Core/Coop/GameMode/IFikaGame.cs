@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Coop.GameMode
 {
+	/// <summary>
+	/// Interface for the <see cref="CoopGame"/>
+	/// </summary>
 	public interface IFikaGame
 	{
 		public List<int> ExtractedPlayers { get; }
