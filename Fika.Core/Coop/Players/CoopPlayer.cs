@@ -939,7 +939,7 @@ namespace Fika.Core.Coop.Players
 					}
 				}
 
-				string templateId = GetDogTagTemplateId();
+				string templateId = GetDogtagTemplateId();
 
 				if (!string.IsNullOrEmpty(templateId))
 				{
