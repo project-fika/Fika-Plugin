@@ -185,7 +185,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.SetupDogTag(in packet);
+				playerToApply.SetupDogtag(in packet);
 			}
 		}
 
