@@ -738,6 +738,7 @@ namespace Fika.Core.Coop.Players
 					dogtagComponent.Nickname = nickname;
 					dogtagComponent.KillerAccountId = killerAccountId;
 					dogtagComponent.KillerProfileId = killerProfileId;
+					dogtagComponent.KillerName = killerNickname;
 					dogtagComponent.Side = side;
 					dogtagComponent.Level = level;
 					dogtagComponent.Time = time;
@@ -770,6 +771,34 @@ namespace Fika.Core.Coop.Players
 
 			FikaPlugin.Instance.FikaLogger.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
 
+		}
+
+		public void SetupDogtag(in DogTagPacket packet)
+		{
+#if DEBUG
+			FikaPlugin.Instance.FikaLogger.LogWarning($"Setting Dogtag on {Profile.Nickname}. Killer: {packet.KillerName}");
+#endif
+			Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+			if (item != null)
+			{
+				DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
+				if (dogtagComponent != null)
+				{
+					dogtagComponent.Item.SpawnedInSession = true;
+					dogtagComponent.AccountId = packet.AccountId;
+					dogtagComponent.ProfileId = packet.ProfileId;
+					dogtagComponent.Nickname = packet.Nickname;
+					dogtagComponent.KillerAccountId = packet.KillerAccountId;
+					dogtagComponent.KillerProfileId = packet.KillerProfileId;
+					dogtagComponent.KillerName = packet.KillerName;
+					dogtagComponent.Side = Side;
+					dogtagComponent.Level = packet.Level;
+					dogtagComponent.Time = packet.Time.ToLocalTime();
+					dogtagComponent.Status = !string.IsNullOrEmpty(packet.KillerProfileId) ? "Killed by" : "Died";
+					dogtagComponent.WeaponName = (!string.IsNullOrEmpty(packet.KillerProfileId) && !string.IsNullOrEmpty(packet.WeaponName)) ? packet.WeaponName : "-";
+					dogtagComponent.GroupId = GroupId;
+				}
+			}
 		}
 
 		private IEnumerator LocalPlayerDied()
@@ -1495,34 +1524,6 @@ namespace Fika.Core.Coop.Players
 					itemComponent.Repairable.Durability = packet.Durabilities[i];
 					itemComponent.Buff.TryDisableComponent(itemComponent.Repairable.Durability);
 					itemComponent.Item.RaiseRefreshEvent(false, false);
-				}
-			}
-		}
-
-		public void SetupDogTag(in DogTagPacket packet)
-		{
-#if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogWarning($"Setting Dogtag on {Profile.Nickname}. Killer: {packet.KillerName}");
-#endif
-			Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-			if (item != null)
-			{
-				DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
-				if (dogtagComponent != null)
-				{
-					dogtagComponent.Item.SpawnedInSession = true;
-					dogtagComponent.AccountId = packet.AccountId;
-					dogtagComponent.ProfileId = packet.ProfileId;
-					dogtagComponent.Nickname = packet.Nickname;
-					dogtagComponent.KillerAccountId = packet.KillerAccountId;
-					dogtagComponent.KillerProfileId = packet.KillerProfileId;
-					dogtagComponent.KillerName = packet.KillerName;
-					dogtagComponent.Side = Side;
-					dogtagComponent.Level = packet.Level;
-					dogtagComponent.Time = packet.Time.ToLocalTime();
-					dogtagComponent.Status = !string.IsNullOrEmpty(KillerAccountId) ? "Killed by" : "Died";
-					dogtagComponent.WeaponName = !string.IsNullOrEmpty(packet.WeaponName) ? packet.WeaponName : "-";
-					dogtagComponent.GroupId = GroupId;
 				}
 			}
 		}
