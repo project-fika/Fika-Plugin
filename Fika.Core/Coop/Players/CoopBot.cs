@@ -249,7 +249,10 @@ namespace Fika.Core.Coop.Players
 					NetId = MainPlayer.NetId,
 					BotNetId = NetId
 				};
-				PacketSender.SendPacket(ref packet, true);
+				if (PacketSender != null)
+				{
+					PacketSender.SendPacket(ref packet, true); 
+				}
 			}
 		}
 
@@ -263,7 +266,10 @@ namespace Fika.Core.Coop.Players
 					NetId = MainPlayer.NetId,
 					BotNetId = NetId
 				};
-				PacketSender.SendPacket(ref packet, true);
+				if (PacketSender != null)
+				{
+					PacketSender.SendPacket(ref packet, true); 
+				}
 			}
 		}
 
