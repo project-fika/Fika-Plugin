@@ -704,7 +704,7 @@ namespace Fika.Core.Coop.Players
 			}
 			if (FikaBackendUtils.IsServer && Side is not EPlayerSide.Savage)
 			{
-				StartCoroutine(SendDogtagRoutine());
+				SetupAndSendDogtag();
 			}
 		}
 
@@ -712,9 +712,19 @@ namespace Fika.Core.Coop.Players
 		/// TODO: Refactor... BSG code makes this difficult
 		/// </summary>
 		/// <returns></returns>
-		private IEnumerator SendDogtagRoutine()
+		private void SetupAndSendDogtag()
 		{
-			yield return new WaitForSeconds(1);
+			string accountId = AccountId;
+			string profileId = ProfileId;
+			string nickname = Profile.Nickname;
+			string killerAccountId = LastAggressor != null ? LastAggressor.AccountId : string.Empty;
+			string killerProfileId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty;
+			string killerNickname = LastAggressor != null ? LastAggressor.Profile.Nickname : string.Empty;
+			EPlayerSide side = Side;
+			int level = Profile.Info.Level;
+			DateTime time = EFTDateTimeClass.UtcNow;
+			string weaponName = LastAggressor != null ? (LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.ShortName : string.Empty) : "-";
+			string groupId = GroupId;
 
 			Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
 			if (item != null)
@@ -722,36 +732,44 @@ namespace Fika.Core.Coop.Players
 				DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
 				if (dogtagComponent != null)
 				{
+					dogtagComponent.Item.SpawnedInSession = true;
+					dogtagComponent.AccountId = accountId;
+					dogtagComponent.ProfileId = profileId;
+					dogtagComponent.Nickname = nickname;
+					dogtagComponent.KillerAccountId = killerAccountId;
+					dogtagComponent.KillerProfileId = killerProfileId;
+					dogtagComponent.Side = side;
+					dogtagComponent.Level = level;
+					dogtagComponent.Time = time;
+					dogtagComponent.Status = LastAggressor != null ? "Killed by" : "Died";
+					dogtagComponent.WeaponName = weaponName;
+					dogtagComponent.GroupId = groupId;
+
 					DogTagPacket packet = new(NetId)
 					{
-						AccountId = dogtagComponent.AccountId,
-						ProfileId = dogtagComponent.ProfileId,
-						Nickname = dogtagComponent.Nickname,
-						KillerAccountId = dogtagComponent.KillerAccountId,
-						KillerProfileId = dogtagComponent.KillerProfileId,
-						KillerName = dogtagComponent.KillerName,
-						Side = dogtagComponent.Side,
-						Level = dogtagComponent.Level,
-						Time = dogtagComponent.Time,
-						WeaponName = dogtagComponent.WeaponName,
-						GroupId = dogtagComponent.GroupId
+						AccountId = accountId,
+						ProfileId = profileId,
+						Nickname = nickname,
+						KillerAccountId = killerAccountId,
+						KillerProfileId = killerProfileId,
+						KillerName = killerNickname,
+						Side = side,
+						Level = level,
+						Time = time,
+						WeaponName = weaponName,
+						GroupId = groupId
 					};
 
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogWarning($"Sending dogtag packet from {dogtagComponent.Nickname}. Killer: {dogtagComponent.KillerName}");
 #endif
 					PacketSender.SendPacket(ref packet, true);
-					yield break;
+					return;
 				}
 			}
 
 			FikaPlugin.Instance.FikaLogger.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
 
-		}
-
-		public override void ManageAggressor(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
-		{
-			base.ManageAggressor(damageInfo, bodyPart, colliderType);
 		}
 
 		private IEnumerator LocalPlayerDied()
@@ -792,14 +810,14 @@ namespace Fika.Core.Coop.Players
 							return;
 						}
 
-						Item keyItem = FindItem(packet.ItemId);
-						if (keyItem == null)
+						GStruct421<Item> result = FindItemById(packet.ItemId, false, false);
+						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Could not find item: " + packet.ItemId);
 							return;
 						}
 
-						KeyComponent keyComponent = keyItem.GetItemComponent<KeyComponent>();
+						KeyComponent keyComponent = result.Value.GetItemComponent<KeyComponent>();
 						if (keyComponent == null)
 						{
 							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: keyComponent was null!");
@@ -1072,8 +1090,13 @@ namespace Fika.Core.Coop.Players
 			{
 				if (packet.DropPacket.HasItemId)
 				{
-					Item item = FindItem(packet.ProceedPacket.ItemId);
-					base.DropCurrentController(null, packet.DropPacket.FastDrop, item ?? null);
+					GStruct421<Item> result = FindItemById(packet.ProceedPacket.ItemId, false, false);
+					if (!result.Succeeded)
+					{
+						FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+						return;
+					}
+					base.DropCurrentController(null, packet.DropPacket.FastDrop, result.Value ?? null);
 				}
 				else
 				{
@@ -1440,7 +1463,6 @@ namespace Fika.Core.Coop.Players
 
 			ShotReactions(damageInfo, packet.BodyPartType);
 			ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
-			ManageAggressor(damageInfo, packet.BodyPartType, packet.ColliderType);
 			base.ApplyDamageInfo(damageInfo, packet.BodyPartType, packet.ColliderType, packet.Absorbed);
 			//ClientApplyShot(damageInfo, packet.BodyPartType, packet.ColliderType, packet.ArmorPlateCollider);
 		}
@@ -1582,38 +1604,21 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public Item FindItem(string itemId, bool questItem = false)
+		public Item FindQuestItem(string itemId)
 		{
-			if (questItem)
+			//List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
+			foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
 			{
-				//List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
-				foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
+				if (lootItem is LootItem observedLootItem)
 				{
-					if (lootItem is LootItem observedLootItem)
+					if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
 					{
-						if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
-						{
-							return observedLootItem.Item;
-						}
+						return observedLootItem.Item;
 					}
 				}
-				FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
-				return null;
 			}
-			if (Inventory.Equipment.TryFindItem(itemId, out Item _))
-			{
-				GStruct421<Item> itemResult = FindItemById(itemId);
-				if (itemResult.Error != null)
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
-				}
-				return itemResult.Value;
-			}
-			else
-			{
-				FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem::Else Could not find item with id '{itemId}' in the world at all.");
-				return null;
-			}
+			FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
+			return null;
 		}
 
 		#region handlers

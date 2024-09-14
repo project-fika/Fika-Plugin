@@ -312,14 +312,19 @@ namespace Fika.Core.Coop.ObservedClasses
 					MagazineClass magazine = null;
 					try
 					{
-						Item item = coopPlayer.FindItem(packet.ReloadMagPacket.MagId);
-						if (item is MagazineClass magazineClass)
+						GStruct421<Item> result = coopPlayer.FindItemById(packet.ReloadMagPacket.MagId);
+						if (!result.Succeeded)
+						{
+							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+							return;
+						}
+						if (result.Value is MagazineClass magazineClass)
 						{
 							magazine = magazineClass;
 						}
 						else
 						{
-							FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::HandleFirearmPacket::ReloadMagPacket: Item was not MagazineClass, it was {item.GetType()}");
+							FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
 						}
 					}
 					catch (Exception ex)
@@ -361,14 +366,21 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				if (packet.QuickReloadMagPacket.Reload)
 				{
-					MagazineClass magazine;
 					try
 					{
-						Item item = coopPlayer.FindItem(packet.QuickReloadMagPacket.MagId);
-						magazine = item as MagazineClass;
-						if (magazine == null)
+						GStruct421<Item> result = coopPlayer.FindItemById(packet.QuickReloadMagPacket.MagId, false, false);
+						if (!result.Succeeded)
 						{
-							FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::QuickReloadMag could not cast {packet.ReloadMagPacket.MagId} as a magazine, got {item.ShortName}");
+							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+							return;
+						}
+						if (result.Value is MagazineClass magazine)
+						{
+							QuickReloadMag(magazine, null);
+						}
+						else
+						{
+							FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::QuickReloadMag item was not of type MagazineClass, was {result.Value.GetType()}");
 						}
 					}
 					catch (Exception ex)
@@ -377,7 +389,6 @@ namespace Fika.Core.Coop.ObservedClasses
 						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
 						throw;
 					}
-					QuickReloadMag(magazine, null);
 				}
 			}
 
@@ -661,9 +672,9 @@ namespace Fika.Core.Coop.ObservedClasses
 		private List<BulletClass> FindAmmoByIds(string[] ammoIds)
 		{
 			_preallocatedAmmoList.Clear();
-			foreach (string text in ammoIds)
+			foreach (string id in ammoIds)
 			{
-				GStruct421<Item> gstruct = _player.FindItemById(text, true, true);
+				GStruct421<Item> gstruct = _player.FindItemById(id, false, false);
 				if (gstruct.Succeeded && gstruct.Value is BulletClass bulletClass)
 				{
 					_preallocatedAmmoList.Add(bulletClass);

@@ -11,6 +11,7 @@ using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
 using Fika.Core.Coop.Patches.Overrides;
+using Fika.Core.Coop.Patches.PlayerPatches;
 using Fika.Core.Coop.Patches.Tripwire;
 using Fika.Core.Coop.Patches.Weather;
 using Fika.Core.EssentialPatches;
@@ -249,6 +250,8 @@ namespace Fika.Core
 			new TripwireSynchronizableObject_method_6_Patch().Enable();
 			new TripwireSynchronizableObject_method_11_Patch().Enable();
 			new BaseLocalGame_method_13_Patch().Enable();
+			new Player_method_138_Patch().Enable();
+			new Player_SetDogtagInfo_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();

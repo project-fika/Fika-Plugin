@@ -746,10 +746,14 @@ namespace Fika.Core.Coop.Players
 
 			if (!string.IsNullOrEmpty(itemInHandsId) && Corpse != null)
 			{
-				Item item = FindItem(itemInHandsId);
-				if (item != null)
+				GStruct421<Item> result = FindItemById(itemInHandsId, false, false);
+				if (!result.Succeeded)
 				{
-					Corpse.ItemInHands.Value = item;
+					FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				}
+				if (result.Value != null)
+				{
+					Corpse.ItemInHands.Value = result.Value;
 				}
 			}
 
@@ -1153,106 +1157,121 @@ namespace Fika.Core.Coop.Players
 			}
 			else
 			{
-				handler.item = FindItem(itemId);
+				GStruct421<Item> result = FindItemById(itemId, false, false);
+				if (!result.Succeeded)
+				{
+					FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+					return;
+				}
+				handler.item = result.Value;
 			}
 
-			if (handler.item != null)
-			{
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
-			}
-			else
-			{
-				FikaPlugin.Instance.FikaLogger.LogError("CreateFirearmController: item was null!");
-			}
+			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 		}
 
 		private void CreateGrenadeController(string itemId)
 		{
 			CreateGrenadeControllerHandler handler = new(this);
 
-			Item item = FindItem(itemId);
-			handler.item = item;
-			if ((handler.item = item as GrenadeClass) != null)
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
+			}
+			handler.item = result.Value;
+			if (handler.item is GrenadeClass)
 			{
 				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("CreateGrenadeController: item was null!");
+				FikaPlugin.Instance.FikaLogger.LogError($"CreateGrenadeController: Item was not of type GrenadeClass, was {handler.item.GetType()}!");
 			}
 		}
 
 		private void CreateMedsController(string itemId, EBodyPart bodyPart, float amount, int animationVariant)
 		{
-			CreateMedsControllerHandler handler = new(this, FindItem(itemId), bodyPart, amount, animationVariant);
-			if (handler.item != null)
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
 			{
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
 			}
-			else
-			{
-				FikaPlugin.Instance.FikaLogger.LogError("CreateMedsController: item was null!");
-			}
+			CreateMedsControllerHandler handler = new(this, result.Value, bodyPart, amount, animationVariant);
+			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 		}
 
 		private void CreateKnifeController(string itemId)
 		{
 			CreateKnifeControllerHandler handler = new(this);
-
-			Item item = FindItem(itemId);
-			handler.knife = item.GetItemComponent<KnifeComponent>();
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
+			}
+			handler.knife = result.Value.GetItemComponent<KnifeComponent>();
 			if (handler.knife != null)
 			{
 				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.knife.Item);
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("CreateKnifeController: item was null!");
+				FikaPlugin.Instance.FikaLogger.LogError($"CreateKnifeController: Item did not contain a KnifeComponent, was of type {handler.knife.GetType()}!");
 			}
 		}
 
 		private void CreateQuickGrenadeController(string itemId)
 		{
 			CreateQuickGrenadeControllerHandler handler = new(this);
-
-			Item item = FindItem(itemId);
-			if ((handler.item = item as GrenadeClass) != null)
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
+			}
+			handler.item = result.Value;
+			if (handler.item is GrenadeClass)
 			{
 				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("CreateQuickGrenadeController: item was null!");
+				FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickGrenadeController: Item was not of type GrenadeClass, was {handler.item.GetType()}!");
 			}
 		}
 
 		private void CreateQuickKnifeController(string itemId)
 		{
 			CreateQuickKnifeControllerHandler handler = new(this);
-
-			Item item = FindItem(itemId);
-			handler.knife = item.GetItemComponent<KnifeComponent>();
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
+			}
+			handler.knife = result.Value.GetItemComponent<KnifeComponent>();
 			if (handler.knife != null)
 			{
 				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.knife.Item);
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("CreateQuickKnifeController: item was null!");
+				FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.knife.GetType()}!");
 			}
 		}
 
 		private void CreateQuickUseItemController(string itemId)
 		{
-			CreateQuickUseItemControllerHandler handler = new(this, FindItem(itemId));
-			if (handler.item != null)
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
 			{
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
 			}
-			else
-			{
-				FikaPlugin.Instance.FikaLogger.LogError("CreateMedsController: item was null!");
-			}
+			CreateQuickUseItemControllerHandler handler = new(this, result.Value);
+			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 		}
 
 		public void SetAggressor(string killerId)

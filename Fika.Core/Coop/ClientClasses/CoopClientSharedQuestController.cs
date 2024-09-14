@@ -198,7 +198,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			if (!string.IsNullOrEmpty(packet.ItemId))
 			{
-				Item item = player.FindItem(packet.ItemId, true);
+				Item item = player.FindQuestItem(packet.ItemId);
 				if (item != null)
 				{
 					InventoryController playerInventory = player.InventoryController;
