@@ -1072,7 +1072,6 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				logger.LogWarning($"{playerToApply.Profile.Nickname} took damage from: {packet.ProfileId}");
 				playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
 			}
 
