@@ -38,19 +38,18 @@ namespace Fika.Core.Coop.Components
 		private bool isClient;
 		private float charSyncCounter;
 
+		internal static GameObject CoopHandlerParent;
+
 		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId)
 		{
-			public Profile Profile { get; set; } = profile;
-			public Vector3 Position { get; set; } = position;
-			public bool IsAlive { get; set; } = isAlive;
-			public bool IsAI { get; set; } = isAI;
-			public int NetId { get; set; } = netId;
+			public Profile Profile = profile;
+			public Vector3 Position = position;
+			public bool IsAlive = isAlive;
+			public bool IsAI = isAI;
+			public int NetId = netId;
 			public MongoID CurrentId = currentId;
 			public ushort FirstOperationId = firstOperationId;
 		}
-
-		internal static GameObject CoopHandlerParent;
-
 		#endregion
 
 		#region Public Voids
