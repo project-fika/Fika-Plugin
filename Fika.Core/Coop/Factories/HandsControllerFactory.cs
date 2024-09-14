@@ -1,5 +1,6 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
+using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
@@ -7,7 +8,7 @@ using Fika.Core.Coop.Players;
 namespace Fika.Core.Coop.Factories
 {
 	/// <summary>
-	/// Used to create custom <see cref="EFT.Player.ItemHandsController"/>s for the client that are used for networking
+	/// Used to create custom <see cref="Player.ItemHandsController"/>s for the client that are used for networking
 	/// </summary>
 	/// <param name="player">The <see cref="CoopPlayer"/> to initiate the controller on.</param>
 	/// <param name="item">The <see cref="Item"/> to add to the controller.</param>
@@ -26,7 +27,7 @@ namespace Fika.Core.Coop.Factories
 		/// Creates a <see cref="CoopObservedFirearmController"/>
 		/// </summary>
 		/// <returns>A new <see cref="CoopObservedFirearmController"/> or null if the action failed.</returns>
-		public EFT.Player.FirearmController CreateObservedFirearmController()
+		public Player.FirearmController CreateObservedFirearmController()
 		{
 			if (item is Weapon weapon)
 			{
@@ -43,7 +44,7 @@ namespace Fika.Core.Coop.Factories
 		/// Creates a <see cref="CoopObservedGrenadeController"/>
 		/// </summary>
 		/// <returns>A new <see cref="CoopObservedGrenadeController"/> or null if the action failed.</returns>
-		public EFT.Player.GrenadeHandsController CreateObservedGrenadeController()
+		public Player.GrenadeHandsController CreateObservedGrenadeController()
 		{
 			if (item is GrenadeClass grenade)
 			{
@@ -60,7 +61,7 @@ namespace Fika.Core.Coop.Factories
 		/// Creates a <see cref="CoopObservedQuickGrenadeController"/>
 		/// </summary>
 		/// <returns>A new <see cref="CoopObservedQuickGrenadeController"/> or null if the action failed.</returns>
-		public EFT.Player.QuickGrenadeThrowHandsController CreateObservedQuickGrenadeController()
+		public Player.QuickGrenadeThrowHandsController CreateObservedQuickGrenadeController()
 		{
 			if (item is GrenadeClass grenade)
 			{
@@ -77,7 +78,7 @@ namespace Fika.Core.Coop.Factories
 		/// Creates a <see cref="CoopObservedKnifeController"/>
 		/// </summary>
 		/// <returns>A new <see cref="CoopObservedKnifeController"/> or null if the action failed.</returns>
-		public EFT.Player.KnifeController CreateObservedKnifeController()
+		public Player.KnifeController CreateObservedKnifeController()
 		{
 			if (knifeComponent != null)
 			{
@@ -94,7 +95,7 @@ namespace Fika.Core.Coop.Factories
 		/// Creates a <see cref="CoopObservedMedsController"/>
 		/// </summary>
 		/// <returns>A new <see cref="CoopObservedMedsController"/> or null if the action failed.</returns>
-		public EFT.Player.MedsController CreateObservedMedsController()
+		public Player.MedsController CreateObservedMedsController()
 		{
 			if (food != null)
 			{
