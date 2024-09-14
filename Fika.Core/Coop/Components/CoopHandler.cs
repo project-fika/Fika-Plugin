@@ -88,8 +88,6 @@ namespace Fika.Core.Coop.Components
 		}
 		#endregion
 
-		#region Unity Component Methods
-
 		protected void Awake()
 		{
 			Logger = BepInEx.Logging.Logger.CreateLogSource("CoopHandler");
@@ -125,22 +123,16 @@ namespace Fika.Core.Coop.Components
 		/// </summary>
 		public enum EQuitState
 		{
-			NONE = -1,
-			YouAreDead,
-			YouHaveExtracted
+			None = -1,
+			Dead,
+			Extracted
 		}
 
 		public EQuitState GetQuitState()
 		{
-			EQuitState quitState = EQuitState.NONE;
+			EQuitState quitState = EQuitState.None;
 
-			if (!Singleton<IFikaGame>.Instantiated)
-			{
-				return quitState;
-			}
-
-			IFikaGame coopGame = Singleton<IFikaGame>.Instance;
-			if (coopGame == null)
+			if (LocalGameInstance == null)
 			{
 				return quitState;
 			}
@@ -150,7 +142,7 @@ namespace Fika.Core.Coop.Components
 				return quitState;
 			}
 
-			if (coopGame.ExtractedPlayers == null)
+			if (LocalGameInstance.ExtractedPlayers == null)
 			{
 				return quitState;
 			}
@@ -163,13 +155,13 @@ namespace Fika.Core.Coop.Components
 			// Check alive status
 			if (!MyPlayer.HealthController.IsAlive)
 			{
-				quitState = EQuitState.YouAreDead;
+				quitState = EQuitState.Dead;
 			}
 
 			// Extractions
-			if (coopGame.ExtractedPlayers.Contains(MyPlayer.NetId))
+			if (LocalGameInstance.ExtractedPlayers.Contains(MyPlayer.NetId))
 			{
-				quitState = EQuitState.YouHaveExtracted;
+				quitState = EQuitState.Extracted;
 			}
 
 			return quitState;
@@ -182,7 +174,7 @@ namespace Fika.Core.Coop.Components
 		{
 			EQuitState quitState = GetQuitState();
 
-			if (FikaPlugin.ExtractKey.Value.IsDown() && quitState != EQuitState.NONE && !requestQuitGame)
+			if (FikaPlugin.ExtractKey.Value.IsDown() && quitState != EQuitState.None && !requestQuitGame)
 			{
 				//Log to both the in-game console as well as into the BepInEx logfile
 				ConsoleScreen.Log($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
@@ -195,7 +187,7 @@ namespace Fika.Core.Coop.Components
 				if (FikaBackendUtils.IsServer)
 				{
 					// A host needs to wait for the team to extract or die!
-					if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.NONE)
+					if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.None)
 					{
 						NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
 						requestQuitGame = false;
@@ -265,8 +257,6 @@ namespace Fika.Core.Coop.Components
 			}
 		}
 
-		#endregion
-
 		private void SyncPlayersWithServer()
 		{
 			AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
@@ -274,7 +264,12 @@ namespace Fika.Core.Coop.Components
 			if (Players.Count > 0)
 			{
 				requestPacket.HasCharacters = true;
-				requestPacket.Characters = [.. Players.Values.Select(p => p.ProfileId), .. queuedProfileIds];
+				List<string> characters = new(queuedProfileIds);
+				foreach (CoopPlayer player in Players.Values)
+				{
+					characters.Add(player.ProfileId);
+				}
+				requestPacket.Characters = [.. characters];
 			}
 
 			Singleton<FikaClient>.Instance.SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
@@ -289,15 +284,7 @@ namespace Fika.Core.Coop.Components
 				return;
 			}
 
-			foreach (IPlayer player in Singleton<GameWorld>.Instance.RegisteredPlayers)
-			{
-				if (player.ProfileId == spawnObject.Profile.ProfileId)
-				{
-					return;
-				}
-			}
-
-			foreach (IPlayer player in Singleton<GameWorld>.Instance.AllAlivePlayersList)
+			foreach (IPlayer player in Singleton<GameWorld>.Instance.AllPlayersEverExisted)
 			{
 				if (player.ProfileId == spawnObject.Profile.ProfileId)
 				{
@@ -379,15 +366,7 @@ namespace Fika.Core.Coop.Components
 				return;
 			}
 
-			foreach (IPlayer player in gameWorld.RegisteredPlayers)
-			{
-				if (player.ProfileId == profile.ProfileId)
-				{
-					return;
-				}
-			}
-
-			foreach (IPlayer player in gameWorld.AllAlivePlayersList)
+			foreach (IPlayer player in gameWorld.AllPlayersEverExisted)
 			{
 				if (player.ProfileId == profile.ProfileId)
 				{
@@ -404,14 +383,14 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
 			Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
 #endif
-			spawnQueue.Enqueue(new SpawnObject(profile, position, isAlive, isAI, netId, firstId, firstOperationId));
+			spawnQueue.Enqueue(new(profile, position, isAlive, isAI, netId, firstId, firstOperationId));
 		}
 
 		private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId, MongoID firstId, ushort firstOperationId)
 		{
 			bool isDedicatedProfile = !isAI && profile.Info.MainProfileNickname.Contains("dedicated_");
 
-			// CHeck for GClass increments on filter
+			// Check for GClass increments on filter
 			ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(LocalGameInstance.GameWorld_0, netId, position,
 				Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
 				EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
@@ -489,13 +468,6 @@ namespace Fika.Core.Coop.Components
 			else if (profile.Info.Side != EPlayerSide.Savage)// Make Player PMC items are all not 'FiR'
 			{
 				profile.SetSpawnedInSession(false);
-
-				// We still want DogTags to be 'FiR'
-				Item item = otherPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-				if (item != null)
-				{
-					item.SpawnedInSession = true;
-				}
 			}
 
 			otherPlayer.InitObservedPlayer(isDedicatedProfile);

@@ -133,7 +133,7 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 
 			CoopHandler.EQuitState quitState = coopHandler.GetQuitState();
-			if (quitState != CoopHandler.EQuitState.YouHaveExtracted)
+			if (quitState != CoopHandler.EQuitState.Extracted)
 			{
 				LastKnownPosition = player.PlayerBones.Neck.position;
 			}
@@ -158,7 +158,7 @@ namespace Fika.Core.Coop.FreeCamera
 					return;
 				}
 
-				if (quitState == CoopHandler.EQuitState.NONE)
+				if (quitState == CoopHandler.EQuitState.None)
 				{
 					ToggleCamera();
 					ToggleUi();
@@ -166,7 +166,7 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
-			if (quitState == CoopHandler.EQuitState.YouHaveExtracted && !extracted)
+			if (quitState == CoopHandler.EQuitState.Extracted && !extracted)
 			{
 				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: player has extracted");
 				CoopGame coopGame = coopHandler.LocalGameInstance;
