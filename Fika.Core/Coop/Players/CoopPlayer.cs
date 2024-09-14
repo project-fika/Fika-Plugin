@@ -991,7 +991,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private string GetDogTagTemplateId()
+		private string GetDogtagTemplateId()
 		{
 			if (Side is EPlayerSide.Usec)
 			{
