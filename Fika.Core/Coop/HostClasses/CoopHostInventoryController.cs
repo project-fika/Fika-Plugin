@@ -69,11 +69,6 @@ namespace Fika.Core.Coop.HostClasses
 			}
 		}
 
-		public override bool vmethod_0(GClass3088 operation)
-		{
-			return player.HandsController.CanExecute(operation);
-		}
-
 		public override void vmethod_1(GClass3088 operation, Callback callback)
 		{
 			HandleOperation(operation, callback).HandleExceptions();
@@ -130,10 +125,10 @@ namespace Fika.Core.Coop.HostClasses
 				return;
 			}
 
-			HostInventoryOperationManager operationManager = new(this, operation, callback);
-			if (vmethod_0(operationManager.operation))
+			HostInventoryOperationHandler handler = new(this, operation, callback);
+			if (vmethod_0(handler.operation))
 			{
-				operationManager.operation.method_1(operationManager.HandleResult);
+				handler.operation.method_1(handler.HandleResult);
 
 				InventoryPacket packet = new()
 				{
@@ -152,8 +147,8 @@ namespace Fika.Core.Coop.HostClasses
 
 				return;
 			}
-			operationManager.operation.Dispose();
-			operationManager.callback?.Fail($"Can't execute {operationManager.operation}", 1);
+			handler.operation.Dispose();
+			handler.callback?.Fail($"Can't execute {handler.operation}", 1);
 		}
 
 		public override bool HasCultistAmulet(out CultistAmuletClass amulet)
@@ -183,7 +178,7 @@ namespace Fika.Core.Coop.HostClasses
 			return new GClass3126(method_12(), this, PlayerSearchController, Profile, item);
 		}
 
-		private class HostInventoryOperationManager(CoopHostInventoryController inventoryController, GClass3088 operation, Callback callback)
+		private class HostInventoryOperationHandler(CoopHostInventoryController inventoryController, GClass3088 operation, Callback callback)
 		{
 			public readonly CoopHostInventoryController inventoryController = inventoryController;
 			public GClass3088 operation = operation;

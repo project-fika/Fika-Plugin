@@ -7,18 +7,20 @@ using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using JetBrains.Annotations;
+using System;
+using System.Threading.Tasks;
 using static EFT.Player;
 
 namespace Fika.Core.Coop.BotClasses
 {
 	public class CoopBotInventoryController : PlayerInventoryController
 	{
-		private readonly CoopBot CoopBot;
+		private readonly CoopBot coopBot;
 		private readonly IPlayerSearchController searchController;
 
 		public CoopBotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
 		{
-			CoopBot = (CoopBot)player;
+			coopBot = (CoopBot)player;
 			mongoID_0 = currentId;
 			ushort_0 = nextOperationId;
 			IPlayerSearchController playerSearchController = new GClass1873(profile);
@@ -40,27 +42,64 @@ namespace Fika.Core.Coop.BotClasses
 
 		public override void vmethod_1(GClass3088 operation, [CanBeNull] Callback callback)
 		{
-			base.vmethod_1(operation, callback);
+			HandleOperation(operation, callback).HandleExceptions();			
+		}
 
-			InventoryPacket packet = new()
+		private async Task HandleOperation(GClass3088 operation, Callback callback)
+		{
+			if (coopBot.HealthController.IsAlive)
 			{
-				HasItemControllerExecutePacket = true
-			};
+				await Task.Yield();
+			}
+			RunBotOperation(operation, callback);
+		}
 
-			GClass1164 writer = new();
-			writer.WritePolymorph(operation.ToDescriptor());
-			packet.ItemControllerExecutePacket = new()
+		private void RunBotOperation(GClass3088 operation, Callback callback)
+		{
+			BotInventoryOperationHandler handler = new(this, operation, callback);
+			if (vmethod_0(operation))
 			{
-				CallbackId = operation.Id,
-				OperationBytes = writer.ToArray()
-			};
-
-			CoopBot.PacketSender.InventoryPackets.Enqueue(packet);
+				handler.Operation.method_1(callback);
+				return;
+			}
+			handler.Operation.Dispose();
+			handler.Callback?.Fail($"Can't execute {handler.Operation}", 1);
 		}
 
 		public override SearchContentOperation vmethod_2(SearchableItemClass item)
 		{
 			return new GClass3126(method_12(), this, PlayerSearchController, Profile, item);
+		}
+
+		private class BotInventoryOperationHandler(CoopBotInventoryController controller, GClass3088 operation, Callback callback)
+		{
+			private readonly CoopBotInventoryController controller = controller;
+			public readonly GClass3088 Operation = operation;
+			public readonly Callback Callback = callback;
+
+			public void HandleResult(IResult result)
+			{
+				if (!result.Succeed)
+				{
+					FikaPlugin.Instance.FikaLogger.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {controller.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
+					Callback?.Invoke(result);
+					return;
+				}
+
+				Callback?.Invoke(result);
+				InventoryPacket packet = new()
+				{
+					HasItemControllerExecutePacket = true
+				};
+				GClass1164 writer = new();
+				writer.WritePolymorph(Operation.ToDescriptor());
+				packet.ItemControllerExecutePacket = new()
+				{
+					CallbackId = Operation.Id,
+					OperationBytes = writer.ToArray()
+				};
+				controller.coopBot.PacketSender.InventoryPackets.Enqueue(packet);
+			}
 		}
 	}
 }

@@ -67,11 +67,6 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		public override bool vmethod_0(GClass3088 operation)
-		{
-			return player.HandsController.CanExecute(operation);
-		}
-
 		public override void vmethod_1(GClass3088 operation, Callback callback)
 		{
 			HandleOperation(operation, callback).HandleExceptions();
@@ -125,15 +120,15 @@ namespace Fika.Core.Coop.ClientClasses
 				HasItemControllerExecutePacket = true
 			};
 
-			ClientInventoryOperationManager clientOperationManager = new()
+			ClientInventoryOperationHandler handler = new()
 			{
 				operation = operation,
 				callback = callback,
 				inventoryController = this
 			};
 
-			clientOperationManager.callback ??= new Callback(ClientPlayer.Control0.Class1488.class1488_0.method_0);
-			uint operationNum = AddOperationCallback(operation, new Callback<EOperationStatus>(clientOperationManager.HandleResult));
+			handler.callback ??= new Callback(ClientPlayer.Control0.Class1488.class1488_0.method_0);
+			uint operationNum = AddOperationCallback(operation, new Callback<EOperationStatus>(handler.HandleResult));
 			writer.WritePolymorph(operation.ToDescriptor());
 			packet.ItemControllerExecutePacket = new()
 			{
@@ -175,7 +170,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return new GClass3126(method_12(), this, PlayerSearchController, Profile, item);
 		}
 
-		private class ClientInventoryOperationManager
+		private class ClientInventoryOperationHandler
 		{
 			public EOperationStatus? serverOperationStatus;
 			public EOperationStatus? localOperationStatus;
@@ -238,7 +233,7 @@ namespace Fika.Core.Coop.ClientClasses
 		private class ClientInventoryCallbackManager
 		{
 			public Result<EOperationStatus> result;
-			public ClientInventoryOperationManager clientOperationManager;
+			public ClientInventoryOperationHandler clientOperationManager;
 
 			public void HandleResult(IResult executeResult)
 			{
