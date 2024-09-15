@@ -7,7 +7,6 @@ using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using JetBrains.Annotations;
-using System;
 using System.Threading.Tasks;
 using static EFT.Player;
 
@@ -17,6 +16,13 @@ namespace Fika.Core.Coop.BotClasses
 	{
 		private readonly CoopBot coopBot;
 		private readonly IPlayerSearchController searchController;
+		public override bool HasDiscardLimits
+		{
+			get
+			{
+				return false;
+			}
+		}
 
 		public CoopBotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
 		{
@@ -42,7 +48,7 @@ namespace Fika.Core.Coop.BotClasses
 
 		public override void vmethod_1(GClass3088 operation, [CanBeNull] Callback callback)
 		{
-			HandleOperation(operation, callback).HandleExceptions();			
+			HandleOperation(operation, callback).HandleExceptions();
 		}
 
 		private async Task HandleOperation(GClass3088 operation, Callback callback)

@@ -13,7 +13,13 @@ namespace Fika.Core.Coop.ObservedClasses
 	{
 		private readonly IPlayerSearchController searchController;
 		private readonly CoopPlayer coopPlayer;
-		public override bool HasDiscardLimits => false;
+		public override bool HasDiscardLimits
+		{
+			get
+			{
+				return false;
+			}
+		}
 
 		public override IPlayerSearchController PlayerSearchController
 		{
