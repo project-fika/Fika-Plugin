@@ -9,7 +9,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {

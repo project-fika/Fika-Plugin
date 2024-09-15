@@ -251,7 +251,7 @@ namespace Fika.Core.Coop.Players
 				};
 				if (PacketSender != null)
 				{
-					PacketSender.SendPacket(ref packet, true); 
+					PacketSender.SendPacket(ref packet, true);
 				}
 			}
 		}
@@ -268,7 +268,7 @@ namespace Fika.Core.Coop.Players
 				};
 				if (PacketSender != null)
 				{
-					PacketSender.SendPacket(ref packet, true); 
+					PacketSender.SendPacket(ref packet, true);
 				}
 			}
 		}

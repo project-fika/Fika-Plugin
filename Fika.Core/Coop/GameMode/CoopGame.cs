@@ -1887,7 +1887,7 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Logger.LogDebug("Stop");
 
-			CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;			
+			CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			myPlayer.PacketSender.DestroyThis();
 
 			if (myPlayer.Side != EPlayerSide.Savage)

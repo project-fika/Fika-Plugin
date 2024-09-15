@@ -35,7 +35,7 @@ namespace Fika.Core.UI.Custom
 		private Coroutine serverQueryRoutine;
 		private float loadingTextTick = 0f;
 
-		internal RaidSettings raidSettings; 
+		internal RaidSettings raidSettings;
 		internal DefaultUIButton backButton;
 		internal DefaultUIButton acceptButton;
 
