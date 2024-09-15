@@ -14,8 +14,6 @@ namespace Fika.Core.Coop.BotClasses
 {
 	public class CoopBotInventoryController : PlayerInventoryController
 	{
-		private readonly CoopBot coopBot;
-		private readonly IPlayerSearchController searchController;
 		public override bool HasDiscardLimits
 		{
 			get
@@ -23,6 +21,8 @@ namespace Fika.Core.Coop.BotClasses
 				return false;
 			}
 		}
+		private readonly CoopBot coopBot;
+		private readonly IPlayerSearchController searchController;
 
 		public CoopBotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
 		{

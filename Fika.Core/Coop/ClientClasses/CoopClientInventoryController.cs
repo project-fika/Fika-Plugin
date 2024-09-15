@@ -16,8 +16,14 @@ namespace Fika.Core.Coop.ClientClasses
 {
 	public sealed class CoopClientInventoryController : Player.PlayerOwnerInventoryController
 	{
-		public override bool HasDiscardLimits => false;
-		ManualLogSource BepInLogger { get; set; } = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
+		public override bool HasDiscardLimits
+		{
+			get
+			{
+				return false;
+			}
+		}
+		private readonly ManualLogSource logger;
 		private readonly Player player;
 		private CoopPlayer CoopPlayer
 		{
@@ -33,6 +39,7 @@ namespace Fika.Core.Coop.ClientClasses
 			this.player = player;
 			IPlayerSearchController playerSearchController = new GClass1867(profile, this);
 			searchController = playerSearchController;
+			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 		}
 
 		public override IPlayerSearchController PlayerSearchController
