@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.PacketHandlers
 						if (packet.Packet.SyncType == GStruct352.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
 						{
 							observedPlayer.SetAggressor(packet.KillerId);
-							observedPlayer.RagdollPacket = packet.RagdollPacket;
+							observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
 							if (packet.TriggerZones.Length > 0)
 							{
 								observedPlayer.TriggerZones.Clear();
@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.PacketHandlers
 									observedPlayer.TriggerZones.Add(triggerZone);
 								}
 							}
-						}
+						}						
 						observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
 					}
 				}

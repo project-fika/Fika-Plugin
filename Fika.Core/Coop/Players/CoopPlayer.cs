@@ -43,7 +43,7 @@ namespace Fika.Core.Coop.Players
 		public float observedOverlap = 0f;
 		public bool leftStanceDisabled = false;
 		public Vector2 LastDirection = Vector2.zero;
-		public RagdollPacket RagdollPacket = default;
+		public CorpseSyncPacket CorpseSyncPacket = default;
 		public bool hasGround = false;
 		public Transform RaycastCameraTransform;
 		public int NetId;
@@ -673,7 +673,7 @@ namespace Fika.Core.Coop.Players
 			Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
 		}
 
-		public HealthSyncPacket SetupDeathPacket(GStruct352 packet)
+		public HealthSyncPacket SetupCorpseSyncPacket(GStruct352 packet)
 		{
 			float num = EFTHardSettings.Instance.HIT_FORCE;
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
@@ -683,13 +683,14 @@ namespace Fika.Core.Coop.Players
 			{
 				Packet = packet,
 				KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
-				RagdollPacket = new()
+				CorpseSyncPacket = new()
 				{
 					BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
 					Direction = LastDamageInfo.Direction,
 					Point = LastDamageInfo.HitPoint,
 					Force = _corpseAppliedForce,
-					OverallVelocity = Velocity
+					OverallVelocity = Velocity,
+					Equipment = Inventory.Equipment
 				},
 				TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
 			};
@@ -698,15 +699,17 @@ namespace Fika.Core.Coop.Players
 		public override void OnDead(EDamageType damageType)
 		{
 			base.OnDead(damageType);
-
 			PacketSender.Enabled = false;
 			if (IsYourPlayer)
 			{
 				StartCoroutine(LocalPlayerDied());
 			}
-			if (FikaBackendUtils.IsServer && Side is not EPlayerSide.Savage)
+			if (FikaBackendUtils.IsServer)
 			{
-				SetupAndSendDogtag();
+				if (Side is not EPlayerSide.Savage)
+				{
+					GenerateDogtagDetails(); 
+				}
 			}
 		}
 
@@ -714,7 +717,7 @@ namespace Fika.Core.Coop.Players
 		/// TODO: Refactor... BSG code makes this difficult
 		/// </summary>
 		/// <returns></returns>
-		private void SetupAndSendDogtag()
+		private void GenerateDogtagDetails()
 		{
 			string accountId = AccountId;
 			string profileId = ProfileId;
@@ -747,60 +750,11 @@ namespace Fika.Core.Coop.Players
 					dogtagComponent.Status = LastAggressor != null ? "Killed by" : "Died";
 					dogtagComponent.WeaponName = weaponName;
 					dogtagComponent.GroupId = groupId;
-
-					DogTagPacket packet = new(NetId)
-					{
-						AccountId = accountId,
-						ProfileId = profileId,
-						Nickname = nickname,
-						KillerAccountId = killerAccountId,
-						KillerProfileId = killerProfileId,
-						KillerName = killerNickname,
-						Side = side,
-						Level = level,
-						Time = time,
-						WeaponName = weaponName,
-						GroupId = groupId
-					};
-
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogWarning($"Sending dogtag packet from {dogtagComponent.Nickname}. Killer: {dogtagComponent.KillerName}");
-#endif
-					PacketSender.SendPacket(ref packet, true);
 					return;
 				}
 			}
 
 			FikaPlugin.Instance.FikaLogger.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
-
-		}
-
-		public void SetupDogtag(in DogTagPacket packet)
-		{
-#if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogWarning($"Setting Dogtag on {Profile.Nickname}. Killer: {packet.KillerName}");
-#endif
-			Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-			if (item != null)
-			{
-				DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
-				if (dogtagComponent != null)
-				{
-					dogtagComponent.Item.SpawnedInSession = true;
-					dogtagComponent.AccountId = packet.AccountId;
-					dogtagComponent.ProfileId = packet.ProfileId;
-					dogtagComponent.Nickname = packet.Nickname;
-					dogtagComponent.KillerAccountId = packet.KillerAccountId;
-					dogtagComponent.KillerProfileId = packet.KillerProfileId;
-					dogtagComponent.KillerName = packet.KillerName;
-					dogtagComponent.Side = Side;
-					dogtagComponent.Level = packet.Level;
-					dogtagComponent.Time = packet.Time.ToLocalTime();
-					dogtagComponent.Status = !string.IsNullOrEmpty(packet.KillerProfileId) ? "Killed by" : "Died";
-					dogtagComponent.WeaponName = (!string.IsNullOrEmpty(packet.KillerProfileId) && !string.IsNullOrEmpty(packet.WeaponName)) ? packet.WeaponName : "-";
-					dogtagComponent.GroupId = GroupId;
-				}
-			}
 		}
 
 		private IEnumerator LocalPlayerDied()
@@ -1537,16 +1491,6 @@ namespace Fika.Core.Coop.Players
 
 			_achievementsController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
 			_achievementsController?.ResetCurrentNullableCounters();
-		}
-
-		public virtual void SetInventory(InventoryEquipment equipmentClass, string itemInHandsId)
-		{
-			// Do nothing
-		}
-
-		public override void OnDestroy()
-		{
-			base.OnDestroy();
 		}
 
 		public override void Dispose()

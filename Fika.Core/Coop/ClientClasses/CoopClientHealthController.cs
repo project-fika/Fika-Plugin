@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			if (packet.SyncType == GStruct352.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
 			{
-				coopPlayer.PacketSender.HealthSyncPackets.Enqueue(coopPlayer.SetupDeathPacket(packet));
+				coopPlayer.PacketSender.HealthSyncPackets.Enqueue(coopPlayer.SetupCorpseSyncPacket(packet));
 				return;
 			}
 

@@ -23,7 +23,6 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
-using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -145,7 +144,6 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
-			packetProcessor.SubscribeNetSerializable<InventoryHashPacket, NetPeer>(OnInventoryHashPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -256,40 +254,6 @@ namespace Fika.Core.Networking
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
-		}
-
-		private void OnInventoryHashPacketReceived(InventoryHashPacket packet, NetPeer peer)
-		{
-			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-			{
-				int hash = playerToApply.Inventory.CreateInventoryHashSum([EquipmentSlot.SecuredContainer]);
-				if (hash != packet.Hash)
-				{
-
-					string responseString = $"Mismatch on inventory hash! Received: {packet.Hash}, Sent: {hash}\nPlayer: {playerToApply.Profile.Nickname} with id {playerToApply.NetId}";
-					logger.LogWarning(responseString);
-
-					InventoryHashPacket response = new(playerToApply.NetId)
-					{
-						Hash = hash,
-						Response = responseString
-					};
-					SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
-
-					CorpseSyncPacket syncPacket = new(playerToApply.NetId)
-					{
-						Equipment = playerToApply.Inventory.Equipment
-					};
-
-					Corpse corpse = playerToApply.GetComponent<Corpse>();
-					if (corpse != null && corpse.ItemInHands.Value != null)
-					{
-						syncPacket.ItemInHandsId = corpse.ItemInHands.Value.Id;
-					}
-
-					SendDataToPeer(peer, ref syncPacket, DeliveryMethod.ReliableOrdered);
-				}
-			}
 		}
 
 		public void SendAirdropContainerData(EAirdropType containerType, Item item, int ObjectId)

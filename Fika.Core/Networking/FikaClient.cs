@@ -25,7 +25,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets.GameWorld;
-using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -130,9 +129,6 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
-			packetProcessor.SubscribeNetSerializable<InventoryHashPacket>(OnInventoryHashPacketReceived);
-			packetProcessor.SubscribeNetSerializable<CorpseSyncPacket>(OnCorpseSyncPacketReceived);
-			packetProcessor.SubscribeNetSerializable<DogTagPacket>(OnDogTagPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -179,33 +175,6 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
-		}
-
-		private void OnDogTagPacketReceived(DogTagPacket packet)
-		{
-			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-			{
-				playerToApply.SetupDogtag(in packet);
-			}
-		}
-
-		private void OnInventoryHashPacketReceived(InventoryHashPacket packet)
-		{
-			if (!string.IsNullOrEmpty(packet.Response))
-			{
-				logger.LogWarning(packet.Response);
-				return;
-			}
-
-			logger.LogError("OnInventoryHashPacketReceived: Response was empty!");
-		}
-
-		private void OnCorpseSyncPacketReceived(CorpseSyncPacket packet)
-		{
-			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-			{
-				playerToApply.SetInventory(packet.Equipment, packet.ItemInHandsId);
-			}
 		}
 
 		private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet)

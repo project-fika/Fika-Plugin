@@ -13,7 +13,6 @@ using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using System;
@@ -35,7 +34,13 @@ namespace Fika.Core.Coop.Players
 	public class ObservedCoopPlayer : CoopPlayer
 	{
 		#region Fields and Properties
-		public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+		public CoopPlayer MainPlayer
+		{
+			get
+			{
+				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+			}
+		}
 		public FikaHealthBar HealthBar
 		{
 			get
@@ -54,8 +59,20 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 		private readonly ObservedVaultingParametersClass ObservedVaultingParameters = new();
-		public override bool CanBeSnapped => false;
-		public override EPointOfView PointOfView { get => EPointOfView.ThirdPerson; }
+		public override bool CanBeSnapped
+		{
+			get
+			{
+				return false;
+			}
+		}
+		public override EPointOfView PointOfView
+		{
+			get
+			{
+				return EPointOfView.ThirdPerson;
+			}
+		}
 		public override AbstractHandsController HandsController
 		{
 			get
@@ -70,7 +87,6 @@ namespace Fika.Core.Coop.Players
 				MovementContext.PlayerAnimatorSetWeaponId(weaponAnimationType);
 			}
 		}
-
 		public override Ray InteractionRay
 		{
 			get
@@ -79,7 +95,6 @@ namespace Fika.Core.Coop.Players
 				return new(_playerLookRaycastTransform.position, vector);
 			}
 		}
-
 		public override float ProtagonistHearing
 		{
 			get
@@ -87,7 +102,6 @@ namespace Fika.Core.Coop.Players
 				return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
 			}
 		}
-
 		private GClass857 cullingHandler;
 		#endregion
 
@@ -412,10 +426,10 @@ namespace Fika.Core.Coop.Players
 
 		public override void ApplyCorpseImpulse()
 		{
-			if (RagdollPacket.BodyPartColliderType != EBodyPartColliderType.None)
+			if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None)
 			{
-				Collider collider = PlayerBones.BodyPartCollidersDictionary[RagdollPacket.BodyPartColliderType].Collider;
-				Corpse.Ragdoll.ApplyImpulse(collider, RagdollPacket.Direction, RagdollPacket.Point, RagdollPacket.Force);
+				Collider collider = PlayerBones.BodyPartCollidersDictionary[CorpseSyncPacket.BodyPartColliderType].Collider;
+				Corpse.Ragdoll.ApplyImpulse(collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
 			}
 		}
 
@@ -640,6 +654,15 @@ namespace Fika.Core.Coop.Players
 			Boolean_0 = false;
 		}
 
+		public override Corpse CreateCorpse()
+		{
+			if (CorpseSyncPacket.Equipment != null)
+			{
+				SetInventory(CorpseSyncPacket.Equipment); 
+			}
+			return base.CreateCorpse();
+		}
+
 		public override void OnDead(EDamageType damageType)
 		{
 			StartCoroutine(DestroyNetworkedComponents());
@@ -681,20 +704,11 @@ namespace Fika.Core.Coop.Players
 			}
 			Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateStepSoundRolloff;
 			base.OnDead(damageType);
-
-			if (!isServer)
-			{
-				InventoryHashPacket hashPacket = new(NetId)
-				{
-					Hash = Inventory.CreateInventoryHashSum([EquipmentSlot.SecuredContainer])
-				};
-				PacketSender.SendPacket(ref hashPacket, true);
-			}
-
 			if (cullingHandler != null)
 			{
 				cullingHandler.DisableCullingOnDead();
-			}
+			}			
+			CorpseSyncPacket = default;
 		}
 
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
@@ -729,8 +743,14 @@ namespace Fika.Core.Coop.Players
 
 		// TODO: This code needs refactoring and hopefully removing
 		// The reason it was added was due to a lot of bots inventories desyncing because of their unnatural inventory operations
-		public override void SetInventory(InventoryEquipment equipmentClass, string itemInHandsId)
+		public void SetInventory(InventoryEquipment equipmentClass)
 		{
+			Inventory inventory = new()
+			{
+				Equipment = equipmentClass
+			};
+			InventoryController.ReplaceInventory(inventory);
+
 			foreach (EquipmentSlot equipmentSlot in PlayerBody.SlotNames)
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
@@ -743,25 +763,6 @@ namespace Fika.Core.Coop.Players
 					gclass2.Dispose();
 				}
 			}
-
-			if (!string.IsNullOrEmpty(itemInHandsId) && Corpse != null)
-			{
-				GStruct421<Item> result = FindItemById(itemInHandsId, false, false);
-				if (!result.Succeeded)
-				{
-					FikaPlugin.Instance.FikaLogger.LogError(result.Error);
-				}
-				if (result.Value != null)
-				{
-					Corpse.ItemInHands.Value = result.Value;
-				}
-			}
-
-			Inventory inventory = new()
-			{
-				Equipment = equipmentClass
-			};
-			InventoryController.ReplaceInventory(inventory);
 		}
 
 		public override void DoObservedVault(VaultPacket packet)

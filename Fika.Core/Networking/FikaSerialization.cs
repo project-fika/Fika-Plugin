@@ -2,6 +2,7 @@
 
 using ComponentAce.Compression.Libs.zlib;
 using EFT;
+using EFT.InventoryLogic;
 using EFT.Vaulting;
 using LiteNetLib.Utils;
 using System;
@@ -872,33 +873,36 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct RagdollPacket
+		public struct CorpseSyncPacket
 		{
 			public EBodyPartColliderType BodyPartColliderType;
 			public Vector3 Direction;
 			public Vector3 Point;
 			public float Force;
 			public Vector3 OverallVelocity;
+			public InventoryEquipment Equipment;
 
-			public static RagdollPacket Deserialize(NetDataReader reader)
+			public static CorpseSyncPacket Deserialize(NetDataReader reader)
 			{
-				return new RagdollPacket()
+				return new CorpseSyncPacket()
 				{
 					BodyPartColliderType = (EBodyPartColliderType)reader.GetInt(),
 					Direction = reader.GetVector3(),
 					Point = reader.GetVector3(),
 					Force = reader.GetFloat(),
-					OverallVelocity = reader.GetVector3()
+					OverallVelocity = reader.GetVector3(),
+					Equipment = (InventoryEquipment)reader.GetItem()
 				};
 			}
 
-			public static void Serialize(NetDataWriter writer, RagdollPacket packet)
+			public static void Serialize(NetDataWriter writer, CorpseSyncPacket packet)
 			{
 				writer.Put((int)packet.BodyPartColliderType);
 				writer.Put(packet.Direction);
 				writer.Put(packet.Point);
 				writer.Put(packet.Force);
 				writer.Put(packet.OverallVelocity);
+				writer.PutItem(packet.Equipment);
 			}
 		}
 
