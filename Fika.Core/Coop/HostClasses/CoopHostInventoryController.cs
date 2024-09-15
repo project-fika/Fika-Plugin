@@ -18,19 +18,19 @@ namespace Fika.Core.Coop.HostClasses
 	{
 		public override bool HasDiscardLimits => false;
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopHostInventoryController));
-		private readonly Player Player;
+		private readonly Player player;
 		private CoopPlayer CoopPlayer
 		{
 			get
 			{
-				return (CoopPlayer)Player;
+				return (CoopPlayer)player;
 			}
 		}
 		private readonly IPlayerSearchController searchController;
 
 		public CoopHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
 		{
-			Player = player;
+			this.player = player;
 			IPlayerSearchController playerSearchController = new GClass1867(profile, this);
 			searchController = playerSearchController;
 		}
@@ -65,6 +65,11 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.EGlowType.Repaired, true, method_41());
 			}
+		}
+
+		public override bool vmethod_0(GClass3088 operation)
+		{
+			return player.HandsController.CanExecute(operation);
 		}
 
 		public override void vmethod_1(GClass3088 operation, Callback callback)
