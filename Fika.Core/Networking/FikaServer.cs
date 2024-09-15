@@ -1022,14 +1022,6 @@ namespace Fika.Core.Networking
 							return;
 						}
 
-						// Handle this on the server and use GameWorld to replicate
-						if (result.Value is GClass3106 tripwireOperation)
-						{
-							SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-							result.Value.method_1(null);
-							return;
-						}
-
 						InventoryOperationHandler opHandler = new()
 						{
 							opResult = result,

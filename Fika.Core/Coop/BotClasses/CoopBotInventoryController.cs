@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
@@ -20,17 +21,8 @@ namespace Fika.Core.Coop.BotClasses
 			CoopBot = (CoopBot)player;
 			mongoID_0 = currentId;
 			ushort_0 = nextOperationId;
-
-			if (!player.IsAI && !examined)
-			{
-				IPlayerSearchController playerSearchController = new GClass1867(profile, this);
-				searchController = playerSearchController;
-			}
-			else
-			{
-				IPlayerSearchController playerSearchController = new GClass1873(profile);
-				searchController = playerSearchController;
-			}
+			IPlayerSearchController playerSearchController = new GClass1873(profile);
+			searchController = playerSearchController;
 		}
 
 		public override IPlayerSearchController PlayerSearchController
@@ -39,6 +31,11 @@ namespace Fika.Core.Coop.BotClasses
 			{
 				return searchController;
 			}
+		}
+
+		public override void CallMalfunctionRepaired(Weapon weapon)
+		{
+			// Do nothing
 		}
 
 		public override void vmethod_1(GClass3088 operation, [CanBeNull] Callback callback)

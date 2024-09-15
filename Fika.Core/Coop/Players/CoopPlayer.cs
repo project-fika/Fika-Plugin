@@ -12,6 +12,7 @@ using EFT.UI;
 using EFT.Vehicle;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
@@ -70,7 +71,8 @@ namespace Fika.Core.Coop.Players
 			player.IsYourPlayer = true;
 			player.NetId = netId;
 
-			CoopClientInventoryController inventoryController = new(player, profile, false);
+			PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new CoopHostInventoryController(player, profile, false)
+				: new CoopClientInventoryController(player, profile, false);
 
 			LocalQuestControllerClass questController;
 			if (FikaPlugin.Instance.SharedQuestProgression)
