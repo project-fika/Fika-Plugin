@@ -8,7 +8,9 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -71,6 +73,20 @@ namespace Fika.Core.Coop.ClientClasses
 		}
 
 		public override void vmethod_1(GClass3088 operation, Callback callback)
+		{
+			HandleOperation(operation, callback).HandleExceptions();
+		}
+
+		private async Task HandleOperation(GClass3088 operation, Callback callback)
+		{
+			if (player.HealthController.IsAlive)
+			{
+				await Task.Yield();
+			}
+			RunClientOperation(operation, callback);
+		}
+
+		private void RunClientOperation(GClass3088 operation, Callback callback)
 		{
 			// Do not replicate picking up quest items, throws an error on the other clients            
 			if (operation is GClass3091 moveOperation)
