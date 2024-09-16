@@ -1,6 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using Diz.Binding;
 using EFT;
 using EFT.Ballistics;
 using EFT.Interactive;
@@ -71,6 +72,22 @@ namespace Fika.Core.Coop.Players
 			get
 			{
 				return EPointOfView.ThirdPerson;
+			}
+			set
+			{
+				if (_playerBody.PointOfView.Value == value)
+				{
+					return;
+				}
+				_playerBody.PointOfView.Value = value;
+				CalculateScaleValueByFov((float)Singleton<SharedGameSettingsClass>.Instance.Game.Settings.FieldOfView);
+				SetCompensationScale(false);
+				PlayerBones.Ribcage.Original.localScale = new Vector3(1f, 1f, 1f);
+				MovementContext.PlayerAnimatorPointOfView(value);
+				BindableEvent pointOfViewChanged = PointOfViewChanged;
+				pointOfViewChanged?.Invoke();
+				_playerBody.UpdatePlayerRenders(_playerBody.PointOfView.Value, Side);
+				ProceduralWeaponAnimation.PointOfView = value;
 			}
 		}
 		public override AbstractHandsController HandsController
@@ -658,7 +675,7 @@ namespace Fika.Core.Coop.Players
 		{
 			if (CorpseSyncPacket.Equipment != null)
 			{
-				SetInventory(CorpseSyncPacket.Equipment); 
+				SetInventory(CorpseSyncPacket.Equipment);
 			}
 			return base.CreateCorpse();
 		}
@@ -707,7 +724,7 @@ namespace Fika.Core.Coop.Players
 			if (cullingHandler != null)
 			{
 				cullingHandler.DisableCullingOnDead();
-			}			
+			}
 			CorpseSyncPacket = default;
 		}
 
