@@ -35,13 +35,6 @@ namespace Fika.Core.Coop.Players
 	public class ObservedCoopPlayer : CoopPlayer
 	{
 		#region Fields and Properties
-		public CoopPlayer MainPlayer
-		{
-			get
-			{
-				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-			}
-		}
 		public FikaHealthBar HealthBar
 		{
 			get
@@ -658,6 +651,7 @@ namespace Fika.Core.Coop.Players
 
 			InteractableObjectIsProxy = false;
 			Ray interactionRay = InteractionRay;
+			Boolean_0 = false;
 			GameObject gameObject = GameWorld.FindInteractable(interactionRay, out _);
 			if (gameObject != null)
 			{
@@ -666,9 +660,10 @@ namespace Fika.Core.Coop.Players
 				{
 					InteractablePlayer = (player != this) ? player : null;
 				}
+				return;
 			}
 
-			Boolean_0 = false;
+			InteractablePlayer = null;
 		}
 
 		public override Corpse CreateCorpse()
