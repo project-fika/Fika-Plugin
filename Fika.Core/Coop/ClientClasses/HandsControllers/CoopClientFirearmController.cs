@@ -168,6 +168,19 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
+		public override void AimingChanged(bool newValue)
+		{
+			base.AimingChanged(newValue);
+			if (!IsAiming)
+			{
+				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+				{
+					ToggleAim = true,
+					AimingIndex = -1
+				});
+			}
+		}
+
 		public override bool CheckFireMode()
 		{
 			bool flag = base.CheckFireMode();
