@@ -1,5 +1,4 @@
-﻿using Fika.Core.Coop.Players;
-using SPT.Reflection.Patching;
+﻿using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
@@ -14,7 +13,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static bool Prefix(WeaponManagerClass __instance)
 		{
-			if (__instance.Player is ObservedCoopPlayer)
+			if (!__instance.Player.IsYourPlayer)
 			{
 				return false;
 			}
