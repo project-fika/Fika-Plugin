@@ -733,6 +733,11 @@ namespace Fika.Core.Coop.ObservedClasses
 				weaponEffectsManager.SetRoundIntoWeapon(ammo, 0);
 			}
 
+			if (Weapon.IsBoltCatch && Weapon.ChamberAmmoCount == 0 && Weapon.GetCurrentMagazine() != null && Weapon.GetCurrentMagazineCount() == 0 && !Weapon.ManualBoltCatch)
+			{
+				FirearmsAnimator.SetBoltCatch(true);
+			}
+
 			if (Weapon is GClass2941 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || Weapon.BoltAction)
 			{
 				return;
