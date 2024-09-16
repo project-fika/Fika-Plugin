@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static bool Prefix(WeaponManagerClass __instance)
 		{
-			if (!__instance.Player.IsYourPlayer)
+			if (__instance.Player != null && !__instance.Player.IsYourPlayer)
 			{
 				return false;
 			}
