@@ -1216,21 +1216,11 @@ namespace Fika.Core.Coop.Players
 					catch (Exception exception)
 					{
 						FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Exception thrown: {exception}");
-						if (FikaBackendUtils.IsServer)
-						{
-							OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-							Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
-						}
 					}
 				}
 				else
 				{
 					FikaPlugin.Instance.FikaLogger.LogError("HandleInventoryPacket: inventory was null!");
-					if (FikaBackendUtils.IsServer)
-					{
-						OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-						Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
-					}
 				}
 			}
 
