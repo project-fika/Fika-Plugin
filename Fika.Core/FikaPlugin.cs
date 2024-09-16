@@ -376,9 +376,6 @@ namespace Fika.Core
 			OfficialVersion = Config.Bind("Advanced", "Official Version", false,
 				new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
 
-			DisableSPTAIPatches = Config.Bind("Advanced", "Disable SPT AI Patches", false,
-				new ConfigDescription("Disable SPT AI patches that are most likely redundant in Fika.", tags: new ConfigurationManagerAttributes { IsAdvanced = true }));
-
 			// Coop
 
 			ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true,
@@ -650,11 +647,6 @@ namespace Fika.Core
 			new ScavRepAdjustmentPatch().Disable();
 			new GetProfileAtEndOfRaidPatch().Disable();
 			new FixSavageInventoryScreenPatch().Disable();
-
-			if (DisableSPTAIPatches.Value)
-			{
-				new IsEnemyPatch().Disable();
-			}
 		}
 
 		private void EnableOverridePatches()
