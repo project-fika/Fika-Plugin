@@ -480,7 +480,7 @@ namespace Fika.Core.Coop.GameMode
 					Bots.Add(localPlayer.ProfileId, localPlayer);
 				}
 
-				if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
+				if (profile.Info.Side is not EPlayerSide.Savage)
 				{
 					Slot backpackSlot = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
 					Item backpack = backpackSlot.ContainedItem;
@@ -503,16 +503,28 @@ namespace Fika.Core.Coop.GameMode
 					}
 				}
 
-				if (Singleton<GameWorld>.Instance != null)
+				if (gameWorld != null)
 				{
-					if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.ProfileId == localPlayer.ProfileId))
+					bool found = false;
+					foreach (IPlayer player in gameWorld.RegisteredPlayers)
 					{
-						Singleton<GameWorld>.Instance.RegisterPlayer(localPlayer);
+						if (player.ProfileId == localPlayer.ProfileId)
+						{
+							found = true;
+						}
+					}
+					if (!found)
+					{
+						gameWorld.RegisterPlayer(localPlayer);
+					}
+					else
+					{
+						Logger.LogError("CreateBot: Cannot add bot because it was already registered!");
 					}
 				}
 				else
 				{
-					Logger.LogError("Cannot add player because GameWorld is NULL");
+					Logger.LogError("CreateBot: Cannot add bot because GameWorld is NULL");
 				}
 			}
 
