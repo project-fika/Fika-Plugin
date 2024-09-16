@@ -252,6 +252,7 @@ namespace Fika.Core
 			new BaseLocalGame_method_13_Patch().Enable();
 			new Player_method_138_Patch().Enable();
 			new Player_SetDogtagInfo_Patch().Enable();
+			new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
@@ -635,10 +636,10 @@ namespace Fika.Core
 		private void DisableSPTPatches()
 		{
 			// Disable these as they interfere with Fika
-			new BotDifficultyPatch().Disable();
+			//new BotDifficultyPatch().Disable();
 			new VersionLabelPatch().Disable();
-			new BotTemplateLimitPatch().Disable();
-			new MaxBotPatch().Disable();
+			//new BotTemplateLimitPatch().Disable();
+			//new MaxBotPatch().Disable();
 			new AmmoUsedCounterPatch().Disable();
 			new ArmorDamageCounterPatch().Disable();
 			new ScavRepAdjustmentPatch().Disable();
@@ -653,10 +654,10 @@ namespace Fika.Core
 
 		private void EnableOverridePatches()
 		{
-			new BotDifficultyPatch_Override().Enable();
+			//new BotDifficultyPatch_Override().Enable();
 			new ScavProfileLoad_Override().Enable();
-			new MaxBotPatch_Override().Enable();
-			new BotTemplateLimitPatch_Override().Enable();
+			//new MaxBotPatch_Override().Enable();
+			//new BotTemplateLimitPatch_Override().Enable();
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
 			new GetProfileAtEndOfRaidPatch_Override().Enable();
 			new FixSavageInventoryScreenPatch_Override().Enable();
