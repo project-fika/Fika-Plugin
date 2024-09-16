@@ -636,10 +636,7 @@ namespace Fika.Core
 		private void DisableSPTPatches()
 		{
 			// Disable these as they interfere with Fika
-			//new BotDifficultyPatch().Disable();
 			new VersionLabelPatch().Disable();
-			//new BotTemplateLimitPatch().Disable();
-			//new MaxBotPatch().Disable();
 			new AmmoUsedCounterPatch().Disable();
 			new ArmorDamageCounterPatch().Disable();
 			new ScavRepAdjustmentPatch().Disable();
@@ -654,10 +651,7 @@ namespace Fika.Core
 
 		private void EnableOverridePatches()
 		{
-			//new BotDifficultyPatch_Override().Enable();
 			new ScavProfileLoad_Override().Enable();
-			//new MaxBotPatch_Override().Enable();
-			//new BotTemplateLimitPatch_Override().Enable();
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
 			new GetProfileAtEndOfRaidPatch_Override().Enable();
 			new FixSavageInventoryScreenPatch_Override().Enable();
