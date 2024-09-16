@@ -157,12 +157,10 @@ namespace Fika.Core.Coop.Players
 			{
 				MovementContext = ClientMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
 					new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+				return;
 			}
-			else
-			{
-				MovementContext = NoInertiaMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
+			MovementContext = NoInertiaMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
 					new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
-			}
 		}
 
 		public override void OnSkillLevelChanged(AbstractSkillClass skill)
