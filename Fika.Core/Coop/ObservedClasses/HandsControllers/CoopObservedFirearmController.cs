@@ -20,7 +20,13 @@ namespace Fika.Core.Coop.ObservedClasses
 		bool triggerPressed = false;
 		bool needsReset = false;
 		float lastFireTime = 0f;
-		public override bool IsTriggerPressed => triggerPressed;
+		public override bool IsTriggerPressed
+		{
+			get
+			{
+				return triggerPressed;
+			}
+		}
 		private float overlapCounter = 0f;
 		private float aimMovementSpeed = 1f;
 		private bool hasFired = false;
@@ -28,7 +34,10 @@ namespace Fika.Core.Coop.ObservedClasses
 		private GClass1695 underBarrelManager;
 		public override bool IsAiming
 		{
-			get => base.IsAiming;
+			get
+			{
+				return base.IsAiming;
+			}
 			set
 			{
 				if (!value)
@@ -39,7 +48,6 @@ namespace Fika.Core.Coop.ObservedClasses
 				{
 					return;
 				}
-
 				_isAiming = value;
 				_player.Skills.FastAimTimer.Target = value ? 0f : 2f;
 				_player.MovementContext.SetAimingSlowdown(IsAiming, 0.33f + aimMovementSpeed);

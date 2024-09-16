@@ -92,6 +92,10 @@ namespace Fika.Core.Coop.BotClasses
 					return;
 				}
 
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}"); 
+#endif
+
 				Callback?.Invoke(result);
 				InventoryPacket packet = new()
 				{
