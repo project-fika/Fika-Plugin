@@ -1,10 +1,12 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using Diz.LanguageExtensions;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
+using HarmonyLib;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -92,6 +94,54 @@ namespace Fika.Core.Coop.ObservedClasses
 		public override SearchContentOperation vmethod_2(SearchableItemClass item)
 		{
 			return null;
+		}
+
+		public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface386 operation, Callback callback)
+		{
+			if (!succeed)
+			{
+				callback.Succeed();
+				return;
+			}
+			if (!executor.CheckTransferOwners(item, to, out Error error))
+			{
+				callback.Fail(error.ToString());
+				return;
+			}
+			HandlePickup(operation, callback);
+			coopPlayer.StatisticsManager.OnGrabLoot(item);
+		}
+
+		private void HandlePickup(GInterface386 operation, Callback callback)
+		{
+			Class1039 class1 = new()
+			{
+				callback = callback
+			};
+			Player.Class1165 handler = new()
+			{
+				player_0 = coopPlayer,
+				callback = callback
+			};
+			if (!coopPlayer.HealthController.IsAlive)
+			{
+				handler.callback.Succeed();
+				return;
+			}
+			// Check for GClass increments, fold operation
+			if (operation is GClass3104 && handler.player_0.HandsController.CanExecute(operation))
+			{
+				Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
+				RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
+				handler.player_0.HandsController.Execute(operation, new Callback(handler.method_1));
+				return;
+			}
+			if (operation is GClass3104 && !handler.player_0.HandsController.CanExecute(operation))
+			{
+				handler.callback.Fail("Can't perform operation");
+				return;
+			}
+			handler.callback.Succeed();
 		}
 
 		public override void GetTraderServicesDataFromServer(string traderId)
