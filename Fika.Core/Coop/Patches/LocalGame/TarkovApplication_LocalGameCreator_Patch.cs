@@ -25,7 +25,10 @@ namespace Fika.Core.Coop.Patches.LocalGame
 	/// </summary>
 	internal class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_46));
+		protected override MethodBase GetTargetMethod()
+		{
+			return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_46));
+		}
 
 		[PatchPrefix]
 		public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,

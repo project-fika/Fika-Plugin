@@ -15,7 +15,10 @@ namespace Fika.Core.Coop.Patches.LocalGame
 	/// </summary>
 	internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_39));
+		protected override MethodBase GetTargetMethod()
+		{
+			return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_39));
+		}
 
 		[PatchPrefix]
 		public static async void Prefix(TarkovApplication __instance, RaidSettings ____raidSettings)

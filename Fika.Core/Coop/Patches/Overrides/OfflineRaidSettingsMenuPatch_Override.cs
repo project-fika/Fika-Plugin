@@ -22,8 +22,14 @@ namespace Fika.Core.Coop.Patches.Overrides
 		private static bool randomWeather;
 		public static bool UseCustomWeather
 		{
-			get => randomWeather;
-			set => randomWeather = value;
+			get
+			{
+				return randomWeather;
+			}
+			set
+			{
+				randomWeather = value;
+			}
 		}
 
 		[PatchPostfix]
