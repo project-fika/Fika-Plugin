@@ -587,18 +587,21 @@ namespace Fika.Core.Coop.Players
 
 			base.vmethod_1(door, interactionResult);
 
-			CommonPlayerPacket packet = new()
+			if (!door.ForceLocalInteraction)
 			{
-				HasWorldInteractionPacket = true,
-				WorldInteractionPacket = new()
+				CommonPlayerPacket packet = new()
 				{
-					InteractiveId = door.Id,
-					InteractionType = interactionResult.InteractionType,
-					InteractionStage = EInteractionStage.Execute,
-					ItemId = (interactionResult is GClass3230 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
-				}
-			};
-			PacketSender.CommonPlayerPackets.Enqueue(packet);
+					HasWorldInteractionPacket = true,
+					WorldInteractionPacket = new()
+					{
+						InteractiveId = door.Id,
+						InteractionType = interactionResult.InteractionType,
+						InteractionStage = EInteractionStage.Execute,
+						ItemId = (interactionResult is GClass3230 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+					}
+				};
+				PacketSender.CommonPlayerPackets.Enqueue(packet); 
+			}
 
 			UpdateInteractionCast();
 		}
