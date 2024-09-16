@@ -89,6 +89,13 @@ namespace Fika.Core.Coop.ClientClasses
 
 		private void RunClientOperation(GClass3088 operation, Callback callback)
 		{
+			if (!vmethod_0(operation))
+			{
+				operation.Dispose();
+				callback.Fail("LOCAL: hands controller can't perform this operation");
+				return;
+			}
+
 			// Do not replicate picking up quest items, throws an error on the other clients            
 			if (operation is GClass3091 moveOperation)
 			{
