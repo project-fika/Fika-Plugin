@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.BotClasses
 				}
 
 #if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}"); 
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}");
 #endif
 
 				Callback?.Invoke(result);

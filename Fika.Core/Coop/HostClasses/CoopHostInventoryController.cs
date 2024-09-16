@@ -9,7 +9,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;

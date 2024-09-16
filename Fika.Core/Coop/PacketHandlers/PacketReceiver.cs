@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.PacketHandlers
 									observedPlayer.TriggerZones.Add(triggerZone);
 								}
 							}
-						}						
+						}
 						observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
 					}
 				}

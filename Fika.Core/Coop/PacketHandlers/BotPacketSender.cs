@@ -38,7 +38,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		{
 			if (Server != null)
 			{
-				Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered); 
+				Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 			}
 		}
 

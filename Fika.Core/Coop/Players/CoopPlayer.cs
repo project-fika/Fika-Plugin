@@ -19,7 +19,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Packets.GameWorld;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -708,7 +707,7 @@ namespace Fika.Core.Coop.Players
 			{
 				if (Side is not EPlayerSide.Savage)
 				{
-					GenerateDogtagDetails(); 
+					GenerateDogtagDetails();
 				}
 			}
 		}

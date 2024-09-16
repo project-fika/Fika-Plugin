@@ -27,7 +27,6 @@ using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
 using SPT.SinglePlayer.Patches.MainMenu;
-using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
