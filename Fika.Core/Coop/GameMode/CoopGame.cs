@@ -502,30 +502,6 @@ namespace Fika.Core.Coop.GameMode
 						}
 					}
 				}
-
-				if (gameWorld != null)
-				{
-					bool found = false;
-					foreach (IPlayer player in gameWorld.RegisteredPlayers)
-					{
-						if (player.ProfileId == localPlayer.ProfileId)
-						{
-							found = true;
-						}
-					}
-					if (!found)
-					{
-						gameWorld.RegisterPlayer(localPlayer);
-					}
-					else
-					{
-						Logger.LogError("CreateBot: Cannot add bot because it was already registered!");
-					}
-				}
-				else
-				{
-					Logger.LogError("CreateBot: Cannot add bot because GameWorld is NULL");
-				}
 			}
 
 			CoopBot coopBot = (CoopBot)localPlayer;
