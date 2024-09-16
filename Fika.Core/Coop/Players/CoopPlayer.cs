@@ -704,7 +704,7 @@ namespace Fika.Core.Coop.Players
 			{
 				StartCoroutine(LocalPlayerDied());
 			}
-			if (FikaBackendUtils.IsServer)
+			if (FikaBackendUtils.IsServer || IsYourPlayer)
 			{
 				if (Side is not EPlayerSide.Savage)
 				{
