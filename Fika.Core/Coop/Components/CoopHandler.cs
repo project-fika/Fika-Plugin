@@ -476,13 +476,13 @@ namespace Fika.Core.Coop.Components
 			Logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 #endif
 
-			otherPlayer.SetFirstAvailableItem((result) =>
+			/*otherPlayer.SetFirstAvailableItem((result) =>
 			{
 				if (result.Failed)
 				{
 					Logger.LogError($"SetFirstAvailableItem: Failed to set the first available item for {otherPlayer.Profile.Info.MainProfileNickname}");
 				}
-			});
+			});*/
 			return otherPlayer;
 		}
 

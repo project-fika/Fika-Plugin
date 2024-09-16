@@ -533,31 +533,17 @@ namespace Fika.Core.Networking
 		public struct DropPacket
 		{
 			public bool FastDrop;
-			public bool HasItemId;
-			public string ItemId;
 
 			public static DropPacket Deserialize(NetDataReader reader)
 			{
-				DropPacket packet = new()
+				return new DropPacket
 				{
-					FastDrop = reader.GetBool(),
-					HasItemId = reader.GetBool()
+					FastDrop = reader.GetBool()
 				};
-				if (packet.HasItemId)
-				{
-					packet.ItemId = reader.GetString();
-				}
-
-				return packet;
 			}
 			public static void Serialize(NetDataWriter writer, DropPacket packet)
 			{
 				writer.Put(packet.FastDrop);
-				writer.Put(packet.HasItemId);
-				if (packet.HasItemId)
-				{
-					writer.Put(packet.ItemId);
-				}
 			}
 		}
 

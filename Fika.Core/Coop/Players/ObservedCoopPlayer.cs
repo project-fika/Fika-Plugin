@@ -1147,7 +1147,7 @@ namespace Fika.Core.Coop.Players
 				HandsController = null;
 			}
 
-			base.SpawnController(controllerFactory(), new Action(handler.DisposeHandler));
+			base.SpawnController(controllerFactory(), handler.DisposeHandler);
 		}
 
 		private void CreateEmptyHandsController()

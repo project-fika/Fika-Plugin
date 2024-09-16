@@ -363,17 +363,15 @@ namespace Fika.Core.Coop.Players
 
 		public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
 		{
-			base.DropCurrentController(callback, fastDrop, nextControllerItem);
-
-			/*PacketSender.CommonPlayerPackets.Enqueue(new()
-            {
-                HasDrop = true,
-                DropPacket = new()
-                {
-                    FastDrop = fastDrop,
-                    HasItemId = false
-                }
-            });*/
+			PacketSender.CommonPlayerPackets.Enqueue(new()
+			{
+				HasDrop = true,
+				DropPacket = new()
+				{
+					FastDrop = fastDrop
+				}
+			});
+			base.DropCurrentController(callback, fastDrop, nextControllerItem);			
 		}
 
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
@@ -1043,20 +1041,8 @@ namespace Fika.Core.Coop.Players
 
 			if (packet.HasDrop)
 			{
-				if (packet.DropPacket.HasItemId)
-				{
-					GStruct421<Item> result = FindItemById(packet.ProceedPacket.ItemId, false, false);
-					if (!result.Succeeded)
-					{
-						FikaPlugin.Instance.FikaLogger.LogError(result.Error);
-						return;
-					}
-					base.DropCurrentController(null, packet.DropPacket.FastDrop, result.Value ?? null);
-				}
-				else
-				{
-					base.DropCurrentController(null, packet.DropPacket.FastDrop, null);
-				}
+				DropHandler handler = new(this);
+				base.DropCurrentController(handler.HandleResult, packet.DropPacket.FastDrop, null);
 			}
 
 			if (packet.HasStationaryPacket)
@@ -1873,6 +1859,16 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
+		private class DropHandler(CoopPlayer coopPlayer)
+		{
+			private readonly CoopPlayer coopPlayer = coopPlayer;
+
+			internal void HandleResult()
+			{
+				coopPlayer.DestroyController();
+				coopPlayer.SetEmptyHands(null);
+			}
+		}
 	}
 	#endregion
 }
