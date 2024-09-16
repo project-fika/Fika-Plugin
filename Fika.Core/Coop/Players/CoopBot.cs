@@ -29,7 +29,13 @@ namespace Fika.Core.Coop.Players
 	/// </summary>
 	public class CoopBot : CoopPlayer
 	{
-		public CoopPlayer MainPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+		public CoopPlayer MainPlayer
+		{
+			get
+			{
+				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+			}
+		}
 		/// <summary>
 		/// The amount of players that have loaded this bot
 		/// </summary>

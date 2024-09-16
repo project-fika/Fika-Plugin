@@ -216,7 +216,10 @@ namespace Fika.Core.Networking
 				int natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
 				string token = $"server:{RequestHandler.SessionId}";
 
-				Task natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, natIntroduceRoutineCts.Token));
+				Task natIntroduceTask = Task.Run(() =>
+				{
+					NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, natIntroduceRoutineCts.Token);
+				});
 			}
 			else
 			{

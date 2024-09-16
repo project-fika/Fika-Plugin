@@ -1791,7 +1791,10 @@ namespace Fika.Core.Coop.GameMode
 			coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
 			coopHandler.Players.Remove(coopPlayer.NetId);
 
-			preloaderUI.StartBlackScreenShow(2f, 2f, () => { preloaderUI.FadeBlackScreen(2f, -2f); });
+			preloaderUI.StartBlackScreenShow(2f, 2f, () =>
+			{
+				preloaderUI.FadeBlackScreen(2f, -2f);
+			});
 
 			player.ActiveHealthController.SetDamageCoeff(0);
 			player.ActiveHealthController.DamageMultiplier = 0;

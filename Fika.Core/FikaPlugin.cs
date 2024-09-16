@@ -56,11 +56,19 @@ namespace Fika.Core
 		public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
 		public static string EFTVersionMajor { get; internal set; }
 		public static string ServerModVersion { get; private set; }
-		private static Version RequiredServerVersion = new("2.2.8");
-		public ManualLogSource FikaLogger { get => Logger; }
+		public ManualLogSource FikaLogger
+		{
+			get
+			{
+				return Logger;
+			}
+		}
 		public BotDifficulties BotDifficulties;
 		public FikaModHandler ModHandler = new();
 		public string[] LocalIPs;
+
+		private static Version RequiredServerVersion = new("2.2.8");
+
 		public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
 		public static Dictionary<string, string> RespectedPlayersList = new()
