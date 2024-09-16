@@ -68,7 +68,8 @@ namespace Fika.Core.Coop.Patches.BTR
 				observedPlayer.CharacterController.isEnabled = true;
 				side.RemovePassenger(observedPlayer);
 				observedPlayer.MovementContext.IsAxesIgnored = false;
-				view.method_18(observedPlayer);
+				//view.method_18(observedPlayer);
+				observedPlayer.IsInBufferZone = false;
 			}
 			catch (Exception ex)
 			{
