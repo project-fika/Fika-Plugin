@@ -998,38 +998,8 @@ namespace Fika.Core.Coop.Players
 				{
 					if (lootableContainer.isActiveAndEnabled)
 					{
-						string methodName = string.Empty;
-						switch (packet.ContainerInteractionPacket.InteractionType)
-						{
-							case EInteractionType.Open:
-								methodName = "Open";
-								break;
-							case EInteractionType.Close:
-								methodName = "Close";
-								break;
-							case EInteractionType.Unlock:
-								methodName = "Unlock";
-								break;
-							case EInteractionType.Breach:
-								break;
-							case EInteractionType.Lock:
-								methodName = "Lock";
-								break;
-						}
-
-						if (!string.IsNullOrEmpty(methodName))
-						{
-							void Interact() => lootableContainer.Invoke(methodName, 0);
-
-							if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
-							{
-								Interact();
-							}
-							else
-							{
-								lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
-							}
-						}
+						InteractionResult result = new (packet.ContainerInteractionPacket.InteractionType);
+						lootableContainer.Interact(result);						
 					}
 				}
 				else
@@ -1545,7 +1515,6 @@ namespace Fika.Core.Coop.Players
 
 		public Item FindQuestItem(string itemId)
 		{
-			//List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
 			foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
 			{
 				if (lootItem is LootItem observedLootItem)
