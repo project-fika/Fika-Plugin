@@ -234,11 +234,6 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void UpdateTick()
-		{
-			base.UpdateTick();
-		}
-
 		protected void OnEnable()
 		{
 			if (!firstEnabled)
