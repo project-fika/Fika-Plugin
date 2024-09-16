@@ -260,6 +260,7 @@ namespace Fika.Core
 			new Player_method_138_Patch().Enable();
 			new Player_SetDogtagInfo_Patch().Enable();
 			new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
+			new MatchmakerOfflineRaidScreen_Close_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
