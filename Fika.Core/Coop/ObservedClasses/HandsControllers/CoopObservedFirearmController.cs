@@ -740,7 +740,8 @@ namespace Fika.Core.Coop.ObservedClasses
 				FirearmsAnimator.SetBoltCatch(true);
 			}
 
-			if (Weapon is GClass2941 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
+			//Check for GClass increments
+			if (Weapon is GClass2943 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
 			{
 				return;
 			}
