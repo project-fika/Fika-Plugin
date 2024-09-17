@@ -8,6 +8,10 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -45,15 +49,34 @@ namespace Fika.Core.Coop.ClientClasses
 			return new HostGrenadeFactory();
 		}
 
-		public override void Start()
+		public override async Task InitLevel(ItemFactoryClass itemFactory, GClass1914 config, bool loadBundlesAndCreatePools = true, List<ResourceKey> resources = null, IProgress<GStruct121> progress = null, CancellationToken ct = default)
 		{
-			base.Start();
-			RegisterBorderZones();
+			await base.InitLevel(itemFactory, config, loadBundlesAndCreatePools, resources, progress, ct);
+			MineManager.OnExplosion += OnMineExplode;
+		}
+
+		/// <summary>
+		/// Triggers when a <see cref="MineDirectional"/> explodes
+		/// </summary>
+		/// <param name="directional"></param>
+		private void OnMineExplode(MineDirectional directional)
+		{
+			if (!directional.gameObject.active)
+			{
+				return;
+			}
+
+			MinePacket packet = new()
+			{
+				MinePositon = directional.transform.position
+			};
+			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		public override void Dispose()
 		{
 			base.Dispose();
+			MineManager.OnExplosion -= OnMineExplode;
 			NetManagerUtils.DestroyNetManager(true);
 			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
 		}
@@ -63,7 +86,7 @@ namespace Fika.Core.Coop.ClientClasses
 			GameObject gameObject = method_18(takeNearbyPoint, position);
 			if (gameObject == null)
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("There is no airdrop points here!");
+				FikaPlugin.Instance.FikaLogger.LogError("There are no airdrop points here!");
 				return;
 			}
 			SynchronizableObject synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);

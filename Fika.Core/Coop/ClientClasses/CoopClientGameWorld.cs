@@ -59,12 +59,6 @@ namespace Fika.Core.Coop.ClientClasses
 			return ClientSynchronizableObjectLogicProcessor;
 		}
 
-		public override void Start()
-		{
-			base.Start();
-			RegisterBorderZones();
-		}
-
 		public override void Dispose()
 		{
 			base.Dispose();

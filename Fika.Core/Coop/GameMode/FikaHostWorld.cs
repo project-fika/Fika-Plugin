@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.GameMode
 				ZoneId = zone.Id
 			};
 
-			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 	}
 }

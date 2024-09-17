@@ -1515,12 +1515,6 @@ namespace Fika.Core.Coop.GameMode
 
 			await SetupRaidCode();
 
-			// Need to move to separate classes later
-			if (gameWorld.MineManager != null)
-			{
-				gameWorld.MineManager.OnExplosion += OnMineExplode;
-			}
-
 			// This will be implemented later, suspect it's used for reconnects?
 			/*if (isServer && gameWorld.PlatformAdapters.Length > 0)
 			{
@@ -1531,6 +1525,8 @@ namespace Fika.Core.Coop.GameMode
 			Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
 
 			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+
+			GameWorld_0.RegisterBorderZones();
 		}
 
 		/// <summary>
@@ -1601,32 +1597,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				DynamicAI.EnabledChange(FikaPlugin.DynamicAI.Value);
 			}
-		}
-
-		/// <summary>
-		/// Triggers when a <see cref="MineDirectional"/> explodes
-		/// </summary>
-		/// <param name="directional"></param>
-		private void OnMineExplode(MineDirectional directional)
-		{
-			if (!directional.gameObject.active)
-			{
-				return;
-			}
-
-			MinePacket packet = new()
-			{
-				MinePositon = directional.transform.position
-			};
-			if (!isServer)
-			{
-				Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-			}
-			else
-			{
-				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-			}
-		}
+		}		
 
 		public override void Spawn()
 		{
@@ -2204,11 +2175,6 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 			dictionary_0.Clear();
-
-			if (Singleton<GameWorld>.Instance.MineManager != null)
-			{
-				Singleton<GameWorld>.Instance.MineManager.OnExplosion -= OnMineExplode;
-			}
 
 			if (extractRoutine != null)
 			{

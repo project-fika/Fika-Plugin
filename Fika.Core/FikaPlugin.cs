@@ -10,6 +10,7 @@ using Fika.Core.Coop.Patches.Airdrops;
 using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.LocalGame;
+using Fika.Core.Coop.Patches.Mines;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Patches.PlayerPatches;
 using Fika.Core.Coop.Patches.Tripwire;
@@ -232,6 +233,7 @@ namespace Fika.Core
 			new MatchmakerAcceptScreen_Awake_Patch().Enable();
 			new MatchmakerAcceptScreen_Show_Patch().Enable();
 			new Minefield_method_2_Patch().Enable();
+			new MineDirectional_OnTriggerEnter_Patch().Enable();
 			new BotCacher_Patch().Enable();
 			new AbstractGame_InRaid_Patch().Enable();
 			new DisconnectButton_Patch().Enable();

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches
+namespace Fika.Core.Coop.Patches.Mines
 {
 	/// <summary>
 	/// This patch prevents a null exception when an <see cref="ObservedCoopPlayer"/> is hit by a mine explosion
@@ -62,10 +62,10 @@ namespace Fika.Core.Coop.Patches
 			if (coopPlayer != null)
 			{
 				float num2 = 1f - distance / collateralDamageRange;
-				IEnumerable<BodyPartCollider> enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_4))
-					: player.PlayerBones.BodyPartColliders.Where(new Func<BodyPartCollider, bool>(minefield.method_5));
+				IEnumerable<BodyPartCollider> enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(minefield.method_4)
+					: player.PlayerBones.BodyPartColliders.Where(minefield.method_5);
 
-				enumerable = enumerable.DistinctBy(new Func<BodyPartCollider, EBodyPart>(Minefield.Class2390.class2390_0.method_0)).ToArray();
+				enumerable = enumerable.DistinctBy(Minefield.Class2390.class2390_0.method_0).ToArray();
 				enumerable = enumerable.Randomize();
 
 				int num3 = (isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue;
