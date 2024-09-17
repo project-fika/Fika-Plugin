@@ -728,17 +728,19 @@ namespace Fika.Core.Coop.ObservedClasses
 				FirearmsAnimator.SetShellsInWeapon(0);
 			}
 
-			if (magazine != null && !Weapon.BoltAction)
+			bool boltAction = Weapon.BoltAction;
+
+			if (magazine != null && !boltAction)
 			{
 				weaponEffectsManager.SetRoundIntoWeapon(ammo, 0);
 			}
 
-			if (Weapon.IsBoltCatch && Weapon.ChamberAmmoCount == 0 && Weapon.GetCurrentMagazine() != null && Weapon.GetCurrentMagazineCount() == 0 && !Weapon.ManualBoltCatch)
+			if (Weapon.IsBoltCatch && Weapon.ChamberAmmoCount == 0 && Weapon.GetCurrentMagazine() != null && Weapon.GetCurrentMagazineCount() == 0 && !Weapon.ManualBoltCatch && !boltAction)
 			{
 				FirearmsAnimator.SetBoltCatch(true);
 			}
 
-			if (Weapon is GClass2941 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || Weapon.BoltAction)
+			if (Weapon is GClass2941 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
 			{
 				return;
 			}
