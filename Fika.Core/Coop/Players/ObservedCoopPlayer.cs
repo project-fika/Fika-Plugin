@@ -838,7 +838,6 @@ namespace Fika.Core.Coop.Players
 
 			PacketSender = gameObject.AddComponent<ObservedPacketSender>();
 			Traverse playerTraverse = Traverse.Create(this);
-			RaycastCameraTransform = playerTraverse.Field<Transform>("_playerLookRaycastTransform").Value;
 
 			if (IsObservedAI)
 			{

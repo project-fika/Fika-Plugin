@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private FreeCameraController freeCameraController;
 		private float yaw = 0f;
 		private float pitch = 0f;
-		private float lookSensitivity = 3f;
+		private const float lookSensitivity = 3f;
 
 		private KeyCode forwardKey = KeyCode.W;
 		private KeyCode backKey = KeyCode.S;
@@ -533,7 +533,7 @@ namespace Fika.Core.Coop.FreeCamera
 #endif
 			if (!CurrentPlayer.IsAI)
 			{
-				transform.SetParent(CurrentPlayer.RaycastCameraTransform);
+				transform.SetParent(CurrentPlayer.SpectateTransform);
 				transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
 				transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
 			}

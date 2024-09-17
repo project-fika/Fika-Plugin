@@ -24,7 +24,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
@@ -45,7 +44,6 @@ namespace Fika.Core.Coop.Players
 		public Vector2 LastDirection = Vector2.zero;
 		public CorpseSyncPacket CorpseSyncPacket = default;
 		public bool hasGround = false;
-		public Transform RaycastCameraTransform;
 		public int NetId;
 		public bool IsObservedAI = false;
 		public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
@@ -54,6 +52,13 @@ namespace Fika.Core.Coop.Players
 			get
 			{
 				return MovementContext as ClientMovementContext;
+			}
+		}
+		public Transform SpectateTransform
+		{
+			get
+			{
+				return PlayerBones.LootRaycastOrigin;
 			}
 		}
 		#endregion
@@ -382,7 +387,7 @@ namespace Fika.Core.Coop.Players
 					FastDrop = fastDrop
 				}
 			});
-			base.DropCurrentController(callback, fastDrop, nextControllerItem);			
+			base.DropCurrentController(callback, fastDrop, nextControllerItem);
 		}
 
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
@@ -607,7 +612,7 @@ namespace Fika.Core.Coop.Players
 						ItemId = (interactionResult is GClass3230 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
 					}
 				};
-				PacketSender.CommonPlayerPackets.Enqueue(packet); 
+				PacketSender.CommonPlayerPackets.Enqueue(packet);
 			}
 
 			UpdateInteractionCast();
@@ -1005,8 +1010,8 @@ namespace Fika.Core.Coop.Players
 				{
 					if (lootableContainer.isActiveAndEnabled)
 					{
-						InteractionResult result = new (packet.ContainerInteractionPacket.InteractionType);
-						lootableContainer.Interact(result);						
+						InteractionResult result = new(packet.ContainerInteractionPacket.InteractionType);
+						lootableContainer.Interact(result);
 					}
 				}
 				else

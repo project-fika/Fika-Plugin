@@ -180,7 +180,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				Quaternion handsRotation = Quaternion.Euler(Pitch, Yaw, 0);
 				player.HandsController.ControllerGameObject.transform.SetPositionAndRotation(player.PlayerBones.Ribcage.Original.position, handsRotation);
-				//player.CameraContainer.transform.rotation = handsRotation;
+				player.CameraContainer.transform.rotation = handsRotation;
 			}
 		}
 	}
