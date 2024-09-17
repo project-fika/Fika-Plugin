@@ -1114,10 +1114,7 @@ namespace Fika.Core.Coop.Players
 					}
 				case EProceedType.Weapon:
 					{
-						if (HandsController == null || HandsController.Item.Id != packet.ItemId)
-						{
-							CreateFirearmController(packet.ItemId);
-						}
+						CreateFirearmController(packet.ItemId);
 						break;
 					}
 				case EProceedType.Knife:
@@ -1134,8 +1131,8 @@ namespace Fika.Core.Coop.Players
 				case EProceedType.Stationary:
 					{
 						CreateFirearmController(packet.ItemId, true);
+						break;
 					}
-					break;
 			}
 		}
 
@@ -1214,25 +1211,24 @@ namespace Fika.Core.Coop.Players
 
 			if (isStationary)
 			{
-				handler.item = Singleton<GameWorld>.Instance.FindStationaryWeaponByItemId(itemId).Item;
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
-				FastForwardToStationaryWeapon(handler.item, MovementContext.Rotation, Transform.rotation, Transform.rotation);
-				return;
-			}
-			if (MovementContext.StationaryWeapon != null && MovementContext.StationaryWeapon.Id == itemId)
-			{
-				handler.item = MovementContext.StationaryWeapon.Item;
-			}
-			else
-			{
-				GStruct421<Item> result = FindItemById(itemId, false, false);
-				if (!result.Succeeded)
+				if (initial)
 				{
-					FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+					handler.item = Singleton<GameWorld>.Instance.FindStationaryWeaponByItemId(itemId).Item;
+					CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+					FastForwardToStationaryWeapon(handler.item, MovementContext.Rotation, Transform.rotation, Transform.rotation);
 					return;
 				}
-				handler.item = result.Value;
+				handler.item = Singleton<GameWorld>.Instance.FindStationaryWeaponByItemId(itemId).Item;
+				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+				return;
 			}
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
+			}
+			handler.item = result.Value;
 			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 		}
 

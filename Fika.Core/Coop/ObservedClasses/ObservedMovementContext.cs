@@ -148,6 +148,26 @@ namespace Fika.Core.Coop.ObservedClasses
 			return movementContext;
 		}
 
+		public override void SetStationaryWeapon(Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
+		{
+			Class1215 handler = new()
+			{
+				movementContext_0 = this,
+				callback = callback
+			};
+			if (_player.HandsController.Item == StationaryWeapon.Item)
+			{
+				handler.callback(_player.HandsController, _player.HandsController);
+				return;
+			}
+			OnHandsControllerChanged += handler.method_0;
+		}
+
+		public override void DropStationary(GStruct171.EStationaryCommand command)
+		{
+			// Do nothing
+		}
+
 		public override void Init()
 		{
 			base.Init();
