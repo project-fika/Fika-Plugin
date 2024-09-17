@@ -1125,6 +1125,17 @@ namespace Fika.Core.Coop.Players
 						CreateKnifeController(packet.ItemId);
 						break;
 					}
+				case EProceedType.UsableItem:
+					{
+						CreateUsableItemController(packet.ItemId);
+						break;
+					}
+
+				case EProceedType.Stationary:
+					{
+						CreateFirearmController(packet.ItemId, true);
+					}
+					break;
 			}
 		}
 
@@ -1150,6 +1161,43 @@ namespace Fika.Core.Coop.Players
 			base.SpawnController(controllerFactory(), handler.DisposeHandler);
 		}
 
+		public void SpawnHandsController(EHandsControllerType controllerType, string itemId, bool isStationary)
+		{
+			switch (controllerType)
+			{
+				case EHandsControllerType.Empty:
+					CreateEmptyHandsController();
+					break;
+				case EHandsControllerType.Firearm:
+					CreateFirearmController(itemId, isStationary, true);
+					break;
+				case EHandsControllerType.Meds:
+					CreateMedsController(itemId, EBodyPart.Head, 1f, 1);
+					break;
+				case EHandsControllerType.Grenade:
+					CreateGrenadeController(itemId);
+					break;
+				case EHandsControllerType.Knife:
+					CreateKnifeController(itemId);
+					break;
+				case EHandsControllerType.QuickGrenade:
+					CreateQuickGrenadeController(itemId);
+					break;
+				case EHandsControllerType.QuickKnife:
+					CreateQuickKnifeController(itemId);
+					break;
+				case EHandsControllerType.QuickUseItem:
+					CreateQuickUseItemController(itemId);
+					break;
+				case EHandsControllerType.UsableItem:
+					CreateUsableItemController(itemId);
+					break;
+				default:
+					FikaPlugin.Instance.FikaLogger.LogWarning($"ObservedCoopPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
+					break;
+			}
+		}
+
 		private void CreateEmptyHandsController()
 		{
 			CreateHandsController(new Func<AbstractHandsController>(ReturnEmptyHandsController), null);
@@ -1160,10 +1208,17 @@ namespace Fika.Core.Coop.Players
 			return CoopObservedEmptyHandsController.Create(this);
 		}
 
-		private void CreateFirearmController(string itemId)
+		private void CreateFirearmController(string itemId, bool isStationary = false, bool initial = false)
 		{
 			CreateFirearmControllerHandler handler = new(this);
 
+			if (isStationary)
+			{
+				handler.item = Singleton<GameWorld>.Instance.FindStationaryWeaponByItemId(itemId).Item;
+				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+				FastForwardToStationaryWeapon(handler.item, MovementContext.Rotation, Transform.rotation, Transform.rotation);
+				return;
+			}
 			if (MovementContext.StationaryWeapon != null && MovementContext.StationaryWeapon.Id == itemId)
 			{
 				handler.item = MovementContext.StationaryWeapon.Item;
@@ -1178,7 +1233,6 @@ namespace Fika.Core.Coop.Players
 				}
 				handler.item = result.Value;
 			}
-
 			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 		}
 
@@ -1273,6 +1327,18 @@ namespace Fika.Core.Coop.Players
 			{
 				FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.knife.GetType()}!");
 			}
+		}
+
+		private void CreateUsableItemController(string itemId)
+		{
+			GStruct421<Item> result = FindItemById(itemId, false, false);
+			if (!result.Succeeded)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+				return;
+			}
+			CreateUsableItemControllerHandler handler = new(this, result.Value);
+			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
 		}
 
 		private void CreateQuickUseItemController(string itemId)
@@ -1392,6 +1458,17 @@ namespace Fika.Core.Coop.Players
 			internal AbstractHandsController ReturnController()
 			{
 				return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(coopPlayer, knife);
+			}
+		}
+
+		private class CreateUsableItemControllerHandler(ObservedCoopPlayer coopPlayer, Item item)
+		{
+			private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+			public readonly Item item = item;
+
+			internal AbstractHandsController ReturnController()
+			{
+				return UsableItemController.smethod_6<UsableItemController>(coopPlayer, item);
 			}
 		}
 

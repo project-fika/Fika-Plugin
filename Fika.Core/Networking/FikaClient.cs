@@ -660,7 +660,7 @@ namespace Fika.Core.Networking
 
 			if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI,
+				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
 							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
 			}
 		}
@@ -1015,15 +1015,19 @@ namespace Fika.Core.Networking
 				AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
 				{
 					IsRequest = false,
-					PlayerInfo = new()
-					{
-						Profile = MyPlayer.Profile
-					},
+					PlayerInfo = new(MyPlayer.Profile, MyPlayer.InventoryController.CurrentId, MyPlayer.InventoryController.NextOperationId),
 					IsAlive = MyPlayer.ActiveHealthController.IsAlive,
 					IsAI = MyPlayer.IsAI,
 					Position = MyPlayer.Transform.position,
 					NetId = MyPlayer.NetId
 				};
+
+				if (MyPlayer.HandsController != null)
+				{
+					requestPacket.PlayerInfo.ControllerType = GClass1755.FromController(MyPlayer.HandsController);
+					requestPacket.PlayerInfo.ItemId = MyPlayer.HandsController.Item.Id;
+					requestPacket.PlayerInfo.IsStationary = MyPlayer.MovementContext.IsStationaryWeaponInHands;
+				}
 
 				SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
 			}

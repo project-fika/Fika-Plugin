@@ -503,6 +503,13 @@ namespace Fika.Core.Networking
 						player.InventoryController.NextOperationId),
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
 
+					if (player.HandsController != null)
+					{
+						characterPacket.PlayerInfo.ControllerType = GClass1755.FromController(player.HandsController);
+						characterPacket.PlayerInfo.ItemId = player.HandsController.Item.Id;
+						characterPacket.PlayerInfo.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
+					}
+
 					dataWriter.Reset();
 					SendDataToPeer(peer, ref characterPacket, DeliveryMethod.ReliableOrdered);
 				}
@@ -691,10 +698,10 @@ namespace Fika.Core.Networking
 			}
 
 			int netId = PopNetId();
-			packet.netId = netId;
+			packet.NetId = netId;
 			if (packet.PlayerInfo.Profile.ProfileId != MyPlayer.ProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.netId, packet.IsAlive, packet.IsAI,
+				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
 					packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
 			}
 
@@ -924,6 +931,14 @@ namespace Fika.Core.Networking
 						Position = player.Transform.position,
 						NetId = player.NetId
 					};
+
+					if (player.HandsController != null)
+					{
+						requestPacket.PlayerInfo.ControllerType = GClass1755.FromController(player.HandsController);
+						requestPacket.PlayerInfo.ItemId = player.HandsController.Item.Id;
+						requestPacket.PlayerInfo.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
+					}
+
 					SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}

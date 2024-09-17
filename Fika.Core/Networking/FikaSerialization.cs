@@ -20,6 +20,9 @@ namespace Fika.Core.Networking
 			public Profile Profile = profile;
 			public MongoID? ControllerId = controllerId;
 			public ushort FirstOperationId = firstOperationId;
+			public EHandsControllerType ControllerType;
+			public string ItemId;
+			public bool IsStationary;
 
 			public static void Serialize(NetDataWriter writer, PlayerInfoPacket packet)
 			{
@@ -27,12 +30,26 @@ namespace Fika.Core.Networking
 				writer.PutByteArray(profileBytes);
 				writer.PutMongoID(packet.ControllerId);
 				writer.Put(packet.FirstOperationId);
+				writer.Put((byte)packet.ControllerType);
+				if (packet.ControllerType != EHandsControllerType.None)
+				{					
+					writer.Put(packet.ItemId);
+					writer.Put(packet.IsStationary);
+				}
 			}
 
 			public static PlayerInfoPacket Deserialize(NetDataReader reader)
 			{
 				byte[] profileBytes = reader.GetByteArray();
-				PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>(), reader.GetMongoID(), reader.GetUShort());
+				PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>(), reader.GetMongoID(), reader.GetUShort())
+				{
+					ControllerType = (EHandsControllerType)reader.GetByte()
+				};
+				if (packet.ControllerType != EHandsControllerType.None)
+				{
+					packet.ItemId = reader.GetString();
+					packet.IsStationary = reader.GetBool();
+				}
 				return packet;
 			}
 		}
@@ -497,8 +514,7 @@ namespace Fika.Core.Networking
 		public struct ProceedPacket()
 		{
 			public EProceedType ProceedType;
-			public string ItemId = "";
-			public string ItemTemplateId = "";
+			public string ItemId = string.Empty;
 			public float Amount = 0f;
 			public int AnimationVariant = 0;
 			public bool Scheduled = false;
@@ -510,7 +526,6 @@ namespace Fika.Core.Networking
 				{
 					ProceedType = (EProceedType)reader.GetInt(),
 					ItemId = reader.GetString(),
-					ItemTemplateId = reader.GetString(),
 					Amount = reader.GetFloat(),
 					AnimationVariant = reader.GetInt(),
 					Scheduled = reader.GetBool(),
@@ -521,7 +536,6 @@ namespace Fika.Core.Networking
 			{
 				writer.Put((int)packet.ProceedType);
 				writer.Put(packet.ItemId);
-				writer.Put(packet.ItemTemplateId);
 				writer.Put(packet.Amount);
 				writer.Put(packet.AnimationVariant);
 				writer.Put(packet.Scheduled);
@@ -1028,7 +1042,9 @@ namespace Fika.Core.Networking
 			QuickGrenadeThrow,
 			QuickKnifeKick,
 			QuickUse,
+			UsableItem,
 			Weapon,
+			Stationary,
 			Knife,
 			TryProceed
 		}

@@ -10,7 +10,7 @@ namespace Fika.Core.Networking
 		public bool IsAlive = isAlive;
 		public bool IsAI = isAi;
 		public Vector3 Position = position;
-		public int netId = netId;
+		public int NetId = netId;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -18,7 +18,7 @@ namespace Fika.Core.Networking
 			IsAlive = reader.GetBool();
 			IsAI = reader.GetBool();
 			Position = reader.GetVector3();
-			netId = reader.GetInt();
+			NetId = reader.GetInt();
 		}
 
 		public void Serialize(NetDataWriter writer)
@@ -27,7 +27,7 @@ namespace Fika.Core.Networking
 			writer.Put(IsAlive);
 			writer.Put(IsAI);
 			writer.Put(Position);
-			writer.Put(netId);
+			writer.Put(NetId);
 		}
 	}
 }

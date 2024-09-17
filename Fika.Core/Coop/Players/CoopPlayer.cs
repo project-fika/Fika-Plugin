@@ -24,6 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.FikaSerialization;
@@ -281,6 +282,16 @@ namespace Fika.Core.Coop.Players
 
 			Func<MedsController> func = new(handler.ReturnController);
 			handler.process = new(this, func, foodDrink, false);
+			handler.confirmCallback = new(handler.SendPacket);
+			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+		}
+
+		public override void Proceed<T>(Item item, Callback<GInterface153> callback, bool scheduled = true)
+		{
+			UsableItemControllerHandler handler = new(this, item);
+
+			Func<UsableItemController> func = new(handler.ReturnController);
+			handler.process = new(this, func, item, false);
 			handler.confirmCallback = new(handler.SendPacket);
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
@@ -1048,7 +1059,7 @@ namespace Fika.Core.Coop.Players
 			if (packet.HasStationaryPacket)
 			{
 				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy) ? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
-				base.OperateStationaryWeapon(stationaryWeapon, (GStruct171.EStationaryCommand)packet.StationaryPacket.Command);
+				ObservedStationaryInteract(stationaryWeapon, (GStruct171.EStationaryCommand)packet.StationaryPacket.Command);
 			}
 
 			if (packet.Interaction != EInteraction.None)
@@ -1063,16 +1074,16 @@ namespace Fika.Core.Coop.Players
 
 			if (packet.HasMountingPacket)
 			{
-				MountingPacket mPacket = packet.MountingPacket;
+				MountingPacket mountPacket = packet.MountingPacket;
 
-				switch (mPacket.Command)
+				switch (mountPacket.Command)
 				{
 					case GStruct173.EMountingCommand.Enter:
 						{
-							MovementContext.PlayerMountingPointData.SetData(new MountPointData(mPacket.MountingPoint, mPacket.MountDirection,
-								(EMountSideDirection)mPacket.MountingDirection), mPacket.TargetPos, mPacket.TargetPoseLevel, mPacket.TargetHandsRotation,
-								mPacket.TransitionTime, mPacket.TargetBodyRotation, mPacket.PoseLimit, mPacket.PitchLimit, mPacket.YawLimit);
-							MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = mPacket.CurrentMountingPointVerticalOffset;
+							MovementContext.PlayerMountingPointData.SetData(new MountPointData(mountPacket.MountingPoint, mountPacket.MountDirection,
+								(EMountSideDirection)mountPacket.MountingDirection), mountPacket.TargetPos, mountPacket.TargetPoseLevel, mountPacket.TargetHandsRotation,
+								mountPacket.TransitionTime, mountPacket.TargetBodyRotation, mountPacket.PoseLimit, mountPacket.PitchLimit, mountPacket.YawLimit);
+							MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = mountPacket.CurrentMountingPointVerticalOffset;
 							MovementContext.EnterMountedState();
 						}
 						break;
@@ -1083,7 +1094,7 @@ namespace Fika.Core.Coop.Players
 						break;
 					case GStruct173.EMountingCommand.Update:
 						{
-							MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = mPacket.CurrentMountingPointVerticalOffset;
+							MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = mountPacket.CurrentMountingPointVerticalOffset;
 						}
 						break;
 					case GStruct173.EMountingCommand.StartLeaving:
@@ -1095,6 +1106,32 @@ namespace Fika.Core.Coop.Players
 						break;
 				}
 
+			}
+		}
+
+		private void ObservedStationaryInteract(StationaryWeapon stationaryWeapon, GStruct171.EStationaryCommand command)
+		{
+			if (command == GStruct171.EStationaryCommand.Occupy)
+			{
+				if (stationaryWeapon.IsAvailable(ProfileId))
+				{
+					stationaryWeapon.SetOperator(ProfileId, false);
+					MovementContext.StationaryWeapon = stationaryWeapon;
+					MovementContext.InteractionParameters = stationaryWeapon.GetInteractionParameters();
+					MovementContext.PlayerAnimatorSetApproached(false);
+					MovementContext.PlayerAnimatorSetStationary(true);
+					MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
+				}
+				return;
+			}
+			if (command == GStruct171.EStationaryCommand.Leave)
+			{
+				return;
+			}
+			MovementContext.PlayerAnimatorSetStationary(false);
+			if (MovementContext.StationaryWeapon != null)
+			{
+				MovementContext.StationaryWeapon.Unlock(ProfileId);
 			}
 		}
 
@@ -1578,19 +1615,47 @@ namespace Fika.Core.Coop.Players
 
 			internal void SendPacket()
 			{
-				if (weapon.IsStationaryWeapon)
-				{
-					return;
-				}
-
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
 					HasProceedPacket = true,
 					ProceedPacket = new()
 					{
-						ProceedType = EProceedType.Weapon,
-						ItemId = weapon.Id,
-						ItemTemplateId = weapon.TemplateId
+						ProceedType = weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon,
+						ItemId = weapon.Id
+					}
+				});
+			}
+
+			internal void HandleResult(IResult result)
+			{
+				if (result.Succeed)
+				{
+					confirmCallback();
+				}
+			}
+		}
+
+		private class UsableItemControllerHandler(CoopPlayer coopPlayer, Item item)
+		{
+			private readonly CoopPlayer coopPlayer = coopPlayer;
+			private readonly Item item = item;
+			public Process<UsableItemController, GInterface153> process;
+			public Action confirmCallback;
+
+			internal UsableItemController ReturnController()
+			{
+				return UsableItemController.smethod_6<UsableItemController>(coopPlayer, item);
+			}
+
+			internal void SendPacket()
+			{
+				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+				{
+					HasProceedPacket = true,
+					ProceedPacket = new()
+					{
+						ProceedType = EProceedType.UsableItem,
+						ItemId = item.Id
 					}
 				});
 			}
@@ -1624,8 +1689,7 @@ namespace Fika.Core.Coop.Players
 					ProceedPacket = new()
 					{
 						ProceedType = EProceedType.QuickUse,
-						ItemId = item.Id,
-						ItemTemplateId = item.TemplateId
+						ItemId = item.Id
 					}
 				});
 			}
@@ -1662,7 +1726,6 @@ namespace Fika.Core.Coop.Players
 					{
 						ProceedType = EProceedType.MedsClass,
 						ItemId = meds.Id,
-						ItemTemplateId = meds.TemplateId,
 						AnimationVariant = animationVariant,
 						BodyPart = bodyPart
 					}
@@ -1703,7 +1766,6 @@ namespace Fika.Core.Coop.Players
 						ProceedType = EProceedType.MedsClass,
 						ItemId = foodDrink.Id,
 						Amount = amount,
-						ItemTemplateId = foodDrink.TemplateId,
 						AnimationVariant = animationVariant,
 						BodyPart = bodyPart
 					}
@@ -1739,8 +1801,7 @@ namespace Fika.Core.Coop.Players
 					ProceedPacket = new()
 					{
 						ProceedType = EProceedType.Knife,
-						ItemId = knife.Item.Id,
-						ItemTemplateId = knife.Item.TemplateId
+						ItemId = knife.Item.Id
 					}
 				});
 			}
@@ -1774,8 +1835,7 @@ namespace Fika.Core.Coop.Players
 					ProceedPacket = new()
 					{
 						ProceedType = EProceedType.QuickKnifeKick,
-						ItemId = knife.Item.Id,
-						ItemTemplateId = knife.Item.TemplateId
+						ItemId = knife.Item.Id
 					}
 				});
 			}
@@ -1809,8 +1869,7 @@ namespace Fika.Core.Coop.Players
 					ProceedPacket = new()
 					{
 						ProceedType = EProceedType.GrenadeClass,
-						ItemId = throwWeap.Id,
-						ItemTemplateId = throwWeap.TemplateId
+						ItemId = throwWeap.Id
 					}
 				});
 			}
@@ -1844,8 +1903,7 @@ namespace Fika.Core.Coop.Players
 					ProceedPacket = new()
 					{
 						ProceedType = EProceedType.QuickGrenadeThrow,
-						ItemId = throwWeap.Id,
-						ItemTemplateId = throwWeap.TemplateId
+						ItemId = throwWeap.Id
 					}
 				});
 			}

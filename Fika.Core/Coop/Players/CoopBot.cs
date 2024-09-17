@@ -342,8 +342,7 @@ namespace Fika.Core.Coop.Players
 					ProceedPacket = new()
 					{
 						ProceedType = EProceedType.Weapon,
-						ItemId = weapon.Id,
-						ItemTemplateId = weapon.TemplateId
+						ItemId = weapon.Id
 					}
 				});
 			}

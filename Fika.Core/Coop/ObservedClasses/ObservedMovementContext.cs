@@ -91,26 +91,6 @@ namespace Fika.Core.Coop.ObservedClasses
 			UpdateCovertEfficiency(characterMovementSpeed, false);
 		}
 
-		/*public override void ManualUpdate(float deltaTime)
-        {
-            if (!_player.HealthController.IsAlive)
-            {
-                return;
-            }
-            LastDeltaTime = deltaTime;
-            UpdateGroundCollision(deltaTime);
-            SmoothPoseLevel(deltaTime);
-            if (_player.Physical.Sprinting)
-            {
-                PreSprintAcceleration(deltaTime);
-            }
-            method_13(deltaTime);
-            if (Math.Abs(Tilt) > 0)
-            {
-                _player.ProceduralWeaponAnimation.UpdatePossibleTilt(SmoothedCharacterMovementSpeed, SmoothedPoseLevel);
-            }
-        }*/
-
 		public override void SmoothPitchLimitations(float deltaTime)
 		{
 			// Do nothing
@@ -166,6 +146,22 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			ObservedMovementContext movementContext = Create<ObservedMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
 			return movementContext;
+		}
+
+		public override void Init()
+		{
+			base.Init();
+			RotationAction = Rotate;
+		}
+
+		private void Rotate(Player player)
+		{
+			if (player.HandsController != null)
+			{
+				Quaternion handsRotation = Quaternion.Euler(Pitch, Yaw, 0);
+				player.HandsController.ControllerGameObject.transform.SetPositionAndRotation(player.PlayerBones.Ribcage.Original.position, handsRotation);
+				//player.CameraContainer.transform.rotation = handsRotation;
+			}
 		}
 	}
 }

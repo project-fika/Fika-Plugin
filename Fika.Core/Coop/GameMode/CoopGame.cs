@@ -924,9 +924,16 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!isServer && !FikaBackendUtils.IsReconnect)
 			{
-				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(coopPlayer.Profile, coopPlayer.InventoryController.CurrentId,
+				SendCharacterPacket packet = new(new(coopPlayer.Profile, coopPlayer.InventoryController.CurrentId,
 					coopPlayer.InventoryController.NextOperationId), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
 				FikaClient client = Singleton<FikaClient>.Instance;
+
+				if (coopPlayer.HandsController != null)
+				{
+					packet.PlayerInfo.ControllerType = GClass1755.FromController(coopPlayer.HandsController);
+					packet.PlayerInfo.ItemId = coopPlayer.HandsController.Item.Id;
+					packet.PlayerInfo.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
+				}
 
 				do
 				{

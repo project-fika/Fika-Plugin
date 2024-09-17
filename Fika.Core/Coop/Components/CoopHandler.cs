@@ -49,6 +49,9 @@ namespace Fika.Core.Coop.Components
 			public int NetId = netId;
 			public MongoID CurrentId = currentId;
 			public ushort FirstOperationId = firstOperationId;
+			public EHandsControllerType ControllerType;
+			public string ItemId;
+			public bool IsStationary;
 		}
 		#endregion
 
@@ -320,13 +323,10 @@ namespace Fika.Core.Coop.Components
 					}
 				});
 
-			ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject.Profile, spawnObject.Position, playerId, spawnObject.IsAI, spawnObject.NetId,
-				spawnObject.CurrentId, spawnObject.FirstOperationId);
+			ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject);
 
 			if (!spawnObject.IsAlive)
 			{
-				// TODO: Spawn them as corpses?
-				// Run 'OnDead'
 				otherPlayer.OnDead(EDamageType.Undefined);
 				otherPlayer.NetworkHealthController.IsAlive = false;
 			}
@@ -358,7 +358,8 @@ namespace Fika.Core.Coop.Components
 			queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
 		}
 
-		public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId)
+		public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId,
+			EHandsControllerType controllerType = EHandsControllerType.None, string itemId = null)
 		{
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			if (gameWorld == null)
@@ -383,17 +384,32 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
 			Logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
 #endif
-			spawnQueue.Enqueue(new(profile, position, isAlive, isAI, netId, firstId, firstOperationId));
+			SpawnObject spawnObject = new(profile, position, isAlive, isAI, netId, firstId, firstOperationId);
+			if (controllerType != EHandsControllerType.None)
+			{
+				spawnObject.ControllerType = controllerType;
+				if (!string.IsNullOrEmpty(itemId))
+				{
+					spawnObject.ItemId = itemId;
+				}
+			}
+			spawnQueue.Enqueue(spawnObject);
 		}
 
-		private ObservedCoopPlayer SpawnObservedPlayer(Profile profile, Vector3 position, int playerId, bool isAI, int netId, MongoID firstId, ushort firstOperationId)
+		private ObservedCoopPlayer SpawnObservedPlayer(SpawnObject spawnObject)
 		{
-			bool isDedicatedProfile = !isAI && profile.Info.MainProfileNickname.Contains("dedicated_");
+			bool isAi = spawnObject.IsAI;
+			Profile profile = spawnObject.Profile;
+			Vector3 position = spawnObject.Position;
+			int netId = spawnObject.NetId;
+			MongoID firstId = spawnObject.CurrentId;
+			ushort firstOperationId = spawnObject.FirstOperationId;
+			bool isDedicatedProfile = !isAi && profile.Info.MainProfileNickname.Contains("dedicated_");
 
 			// Check for GClass increments on filter
 			ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(LocalGameInstance.GameWorld_0, netId, position,
-				Quaternion.identity, "Player", isAI == true ? "Bot_" : $"Player_{profile.Nickname}_",
-				EPointOfView.ThirdPerson, profile, isAI, EUpdateQueue.Update, Player.EUpdateMode.Manual,
+				Quaternion.identity, "Player", isAi == true ? "Bot_" : $"Player_{profile.Nickname}_",
+				EPointOfView.ThirdPerson, profile, isAi, EUpdateQueue.Update, Player.EUpdateMode.Manual,
 				Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
@@ -408,7 +424,7 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
 			Logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
 #endif
-			if (!isAI)
+			if (!isAi)
 			{
 				AmountOfHumans++;
 			}
@@ -422,7 +438,7 @@ namespace Fika.Core.Coop.Components
 				Logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
 			}
 
-			if (!isAI && !isDedicatedProfile && !HumanPlayers.Contains(otherPlayer))
+			if (!isAi && !isDedicatedProfile && !HumanPlayers.Contains(otherPlayer))
 			{
 				HumanPlayers.Add(otherPlayer);
 			}
@@ -448,7 +464,7 @@ namespace Fika.Core.Coop.Components
 				}
 			}
 
-			if (isAI)
+			if (isAi)
 			{
 				if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
 				{
@@ -476,13 +492,21 @@ namespace Fika.Core.Coop.Components
 			Logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 #endif
 
-			/*otherPlayer.SetFirstAvailableItem((result) =>
+
+			EHandsControllerType controllerType = spawnObject.ControllerType;
+			string itemId = spawnObject.ItemId;
+			bool isStationary = spawnObject.IsStationary;
+			if (controllerType != EHandsControllerType.None)
 			{
-				if (result.Failed)
+				if (controllerType != EHandsControllerType.Empty && string.IsNullOrEmpty(itemId))
 				{
-					Logger.LogError($"SetFirstAvailableItem: Failed to set the first available item for {otherPlayer.Profile.Info.MainProfileNickname}");
+					Logger.LogError($"CreateLocalPlayer: ControllerType was not Empty but itemId was null! ControllerType: {controllerType}");
 				}
-			});*/
+				else
+				{
+					otherPlayer.SpawnHandsController(controllerType, itemId, isStationary);
+				}
+			}
 			return otherPlayer;
 		}
 
