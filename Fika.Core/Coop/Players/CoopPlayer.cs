@@ -139,7 +139,6 @@ namespace Fika.Core.Coop.Players
 			player._animators[0].enabled = true;
 
 			RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
-
 			if (radioTransmitterRecodableComponent != null)
 			{
 				//Todo: (Archangel) method_131 refers to 'singlePlayerInventoryController_0' which is null in our case
