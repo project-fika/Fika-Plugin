@@ -2,10 +2,12 @@
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.Lighthouse
 {
@@ -15,6 +17,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 		{
 			new LighthouseTraderZone_AddPlayer_Patch().Enable();
 			new LighthouseTraderZone_RemovePlayer_Patch().Enable();
+			new LighthouseTraderZone_Awake_Patch().Enable();
 		}
 
 		internal class LighthouseTraderZone_AddPlayer_Patch : ModulePatch
@@ -116,6 +119,25 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 				___allPlayersInZone.Remove(player);
 
 				return false;
+			}
+		}
+
+		internal class LighthouseTraderZone_Awake_Patch : ModulePatch
+		{
+			protected override MethodBase GetTargetMethod()
+			{
+				return typeof(LighthouseTraderZone).GetMethod(nameof(LighthouseTraderZone.Awake));
+			}
+
+			[PatchPrefix]
+			public static bool Prefix(LighthouseTraderZone __instance)
+			{
+				if (FikaBackendUtils.IsClient)
+				{
+					GameObject.Destroy(__instance);
+					return false;
+				}
+				return true;
 			}
 		}
 	}
