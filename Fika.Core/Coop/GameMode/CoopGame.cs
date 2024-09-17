@@ -155,11 +155,11 @@ namespace Fika.Core.Coop.GameMode
 
 				// Waves Scenario setup
 				WildSpawnWave[] waves = LocalGame.smethod_7(wavesSettings, location.waves);
-				coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, new Func<BotWaveDataClass, Task>(coopGame.botsController_0.ActivateBotsByWave), location);
+				coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, coopGame.botsController_0.ActivateBotsByWave, location);
 
 				// Boss Scenario setup
 				BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
-				coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, new Action<BossLocationSpawn>(coopGame.botsController_0.ActivateBotsByWave));
+				coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, coopGame.botsController_0.ActivateBotsByWave);
 			}
 
 			if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
@@ -171,7 +171,7 @@ namespace Fika.Core.Coop.GameMode
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
 			SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
-			coopGame.func_1 = new Func<LocalPlayer, EftGamePlayerOwner>(setupGamePlayerOwnerHandler.HandleSetup);
+			coopGame.func_1 = setupGamePlayerOwnerHandler.HandleSetup;
 
 			Singleton<IFikaGame>.Create(coopGame);
 			FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
@@ -461,8 +461,8 @@ namespace Fika.Core.Coop.GameMode
 				// Check for GClass increments on filter
 				localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
 				   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
-				   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, new Func<float>(LocalGame.Class1457.class1457_0.method_4),
-					new Func<float>(LocalGame.Class1457.class1457_0.method_5), GClass1549.Default, mongoId, nextOperationId);
+				   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, LocalGame.Class1457.class1457_0.method_4,
+					LocalGame.Class1457.class1457_0.method_5, GClass1549.Default, mongoId, nextOperationId);
 
 				localPlayer.Location = Location_0.Id;
 
@@ -1201,7 +1201,7 @@ namespace Fika.Core.Coop.GameMode
 				Location_0.SpawnPointParams);
 			int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
 			GStruct383 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-			SpawnSystem = GClass3195.CreateSpawnSystem(settings, new Func<float>(Class1443.class1443_0.method_0), Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
+			SpawnSystem = GClass3195.CreateSpawnSystem(settings, Class1443.class1443_0.method_0, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
 
 			if (isServer)
 			{
@@ -1227,7 +1227,7 @@ namespace Fika.Core.Coop.GameMode
 			LocalPlayer myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
 				Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
-				new Func<float>(Class1443.class1443_0.method_1), new Func<float>(Class1443.class1443_0.method_2), statisticsManager,
+				Class1443.class1443_0.method_1, Class1443.class1443_0.method_2, statisticsManager,
 				iSession, (localRaidSettings_0 != null) ? localRaidSettings_0.mode : ELocalMode.TRAINING);
 
 			myPlayer.OnEpInteraction += OnEpInteraction;
@@ -1949,7 +1949,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				EnvironmentManager.Instance.Stop();
 			}
-			MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
+			MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, stopManager.ExitOverride);
 			BackendConfigAbstractClass.Config.UseSpiritPlayer = false;
 		}
 
@@ -2120,7 +2120,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				EnvironmentManager.Instance.Stop();
 			}
-			MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new Action(stopManager.ExitOverride));
+			MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, stopManager.ExitOverride);
 			BackendConfigAbstractClass.Config.UseSpiritPlayer = false;
 		}
 
@@ -2246,7 +2246,7 @@ namespace Fika.Core.Coop.GameMode
 					exitStatus = exitStatus
 				};
 
-				StaticManager.Instance.WaitSeconds(delay, new Action(exitCallback.method_0));
+				StaticManager.Instance.WaitSeconds(delay, exitCallback.method_0);
 			}
 		}
 

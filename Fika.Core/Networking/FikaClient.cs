@@ -401,8 +401,8 @@ namespace Fika.Core.Networking
 #endif
 								string localizedString = LocaleUtils.UI_SYNC_LAMP_STATES.Localized();
 								Dictionary<int, LampController> lampControllerDictionary = LocationScene.GetAllObjects<LampController>(true)
-														.Where(new Func<LampController, bool>(ClientWorld.Class1282.class1282_0.method_0))
-														.ToDictionary(new Func<LampController, int>(ClientWorld.Class1282.class1282_0.method_1));
+														.Where(ClientWorld.Class1282.class1282_0.method_0)
+														.ToDictionary(ClientWorld.Class1282.class1282_0.method_1);
 
 								float total = packet.LampStates.Count;
 								float progress = 0f;
@@ -434,7 +434,7 @@ namespace Fika.Core.Networking
 								float total = packet.WindowBreakerStates.Count;
 								float progress = 0f;
 								foreach (WindowBreaker windowBreaker in LocationScene.GetAllObjects<WindowBreaker>(true)
-									.Where(new Func<WindowBreaker, bool>(ClientWorld.Class1282.class1282_0.method_2)))
+									.Where(ClientWorld.Class1282.class1282_0.method_2))
 								{
 									if (windowBreakerStates.TryGetValue(windowBreaker.NetId, out Vector3 hitPosition))
 									{

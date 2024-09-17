@@ -62,7 +62,7 @@ namespace Fika.Core.UI
 
 			messageHandler.errorScreen = UnityEngine.Object.Instantiate(errorScreenTemplate, errorScreenContainer.transform, false);
 			errorScreenContainer.AddChildNode(messageHandler.errorScreen);
-			return messageHandler.errorScreen.ShowFikaMessage(header, message, new Action(messageHandler.method_1), waitingTime, new Action(messageHandler.method_2), buttonType, true);
+			return messageHandler.errorScreen.ShowFikaMessage(header, message, messageHandler.method_1, waitingTime, messageHandler.method_2, buttonType, true);
 		}
 
 		public static GClass3355 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
@@ -96,7 +96,7 @@ namespace Fika.Core.UI
 
 			CompositeDisposableClass ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
 
-			ui.AddDisposable(new Action(errorScreenHandler.method_0));
+			ui.AddDisposable(errorScreenHandler.method_0);
 			string text = buttonType switch
 			{
 				ErrorScreen.EButtonType.OkButton => "I UNDERSTAND",

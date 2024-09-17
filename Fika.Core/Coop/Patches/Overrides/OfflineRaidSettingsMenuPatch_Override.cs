@@ -78,7 +78,7 @@ namespace Fika.Core.Coop.Patches.Overrides
 			// If enforced from server, this will be true by default
 			if (!raidSettings.TimeAndWeatherSettings.IsRandomWeather)
 			{
-				____randomWeatherToggle.Bind(new Action<bool>(ToggleWeather));
+				____randomWeatherToggle.Bind(ToggleWeather);
 				____randomTimeToggle.gameObject.GetComponent<CanvasGroup>().SetUnlockStatus(false, false);
 
 				GameObject weatherToggle = GameObject.Find("RandomWeatherCheckmark");

@@ -446,7 +446,7 @@ namespace Fika.Core.Coop.Players
 		public override void CreateMovementContext()
 		{
 			LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
-			MovementContext = ObservedMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon), new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+			MovementContext = ObservedMovementContext.Create(this, GetBodyAnimatorCommon, GetCharacterControllerCommon, movement_MASK);
 		}
 
 		public override void OnHealthEffectAdded(IEffect effect)
@@ -1196,7 +1196,7 @@ namespace Fika.Core.Coop.Players
 
 		private void CreateEmptyHandsController()
 		{
-			CreateHandsController(new Func<AbstractHandsController>(ReturnEmptyHandsController), null);
+			CreateHandsController(ReturnEmptyHandsController, null);
 		}
 
 		private AbstractHandsController ReturnEmptyHandsController()
@@ -1213,12 +1213,12 @@ namespace Fika.Core.Coop.Players
 				if (initial)
 				{
 					handler.item = Singleton<GameWorld>.Instance.FindStationaryWeaponByItemId(itemId).Item;
-					CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+					CreateHandsController(handler.ReturnController, handler.item);
 					FastForwardToStationaryWeapon(handler.item, MovementContext.Rotation, Transform.rotation, Transform.rotation);
 					return;
 				}
 				handler.item = Singleton<GameWorld>.Instance.FindStationaryWeaponByItemId(itemId).Item;
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+				CreateHandsController(handler.ReturnController, handler.item);
 				return;
 			}
 			GStruct421<Item> result = FindItemById(itemId, false, false);
@@ -1228,7 +1228,7 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 			handler.item = result.Value;
-			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+			CreateHandsController(handler.ReturnController, handler.item);
 		}
 
 		private void CreateGrenadeController(string itemId)
@@ -1244,7 +1244,7 @@ namespace Fika.Core.Coop.Players
 			handler.item = result.Value;
 			if (handler.item is GrenadeClass)
 			{
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+				CreateHandsController(handler.ReturnController, handler.item);
 			}
 			else
 			{
@@ -1261,7 +1261,7 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 			CreateMedsControllerHandler handler = new(this, result.Value, bodyPart, amount, animationVariant);
-			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+			CreateHandsController(handler.ReturnController, handler.item);
 		}
 
 		private void CreateKnifeController(string itemId)
@@ -1276,7 +1276,7 @@ namespace Fika.Core.Coop.Players
 			handler.knife = result.Value.GetItemComponent<KnifeComponent>();
 			if (handler.knife != null)
 			{
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.knife.Item);
+				CreateHandsController(handler.ReturnController, handler.knife.Item);
 			}
 			else
 			{
@@ -1296,7 +1296,7 @@ namespace Fika.Core.Coop.Players
 			handler.item = result.Value;
 			if (handler.item is GrenadeClass)
 			{
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+				CreateHandsController(handler.ReturnController, handler.item);
 			}
 			else
 			{
@@ -1316,7 +1316,7 @@ namespace Fika.Core.Coop.Players
 			handler.knife = result.Value.GetItemComponent<KnifeComponent>();
 			if (handler.knife != null)
 			{
-				CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.knife.Item);
+				CreateHandsController(handler.ReturnController, handler.knife.Item);
 			}
 			else
 			{
@@ -1333,7 +1333,7 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 			CreateUsableItemControllerHandler handler = new(this, result.Value);
-			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+			CreateHandsController(handler.ReturnController, handler.item);
 		}
 
 		private void CreateQuickUseItemController(string itemId)
@@ -1345,7 +1345,7 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 			CreateQuickUseItemControllerHandler handler = new(this, result.Value);
-			CreateHandsController(new Func<AbstractHandsController>(handler.ReturnController), handler.item);
+			CreateHandsController(handler.ReturnController, handler.item);
 		}
 
 		public void SetAggressor(string killerId)

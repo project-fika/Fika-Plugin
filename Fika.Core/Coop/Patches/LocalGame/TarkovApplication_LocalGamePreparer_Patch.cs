@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 					if (____raidSettings.LocationId.ToLower() == "sandbox" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox_high")
 					{
 						LocationSettingsClass.Location sandboxHigh = __instance.Session.LocationSettings.locations.Values.FirstOrDefault
-							(new Func<LocationSettingsClass.Location, bool>(IsSandboxHigh));
+							(IsSandboxHigh);
 						____raidSettings.SelectedLocation = sandboxHigh;
 
 						NotificationManagerClass.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 					if (____raidSettings.LocationId.ToLower() == "sandbox_high" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox")
 					{
 						LocationSettingsClass.Location sandbox = __instance.Session.LocationSettings.locations.Values.FirstOrDefault
-							(new Func<LocationSettingsClass.Location, bool>(IsSandbox));
+							(IsSandbox);
 						____raidSettings.SelectedLocation = sandbox;
 					}
 				}

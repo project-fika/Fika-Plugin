@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void PlayerTick(float dt)
 		{
-			method_10(new Action<Player>(Class951.class951_0.method_5));
+			method_10(Class951.class951_0.method_5);
 		}
 
 		public override void vmethod_1(float dt)

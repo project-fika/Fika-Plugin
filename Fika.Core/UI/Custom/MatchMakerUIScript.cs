@@ -174,7 +174,7 @@ namespace Fika.Core.UI.Custom
 
 				HoverTooltipArea dediTooltipArea = fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
 				dediTooltipArea.enabled = true;
-				dediTooltipArea.SetMessageText(new Func<string>(dediTooltipTextGetter.GetText));
+				dediTooltipArea.SetMessageText(dediTooltipTextGetter.GetText);
 			}
 
 			TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
@@ -314,7 +314,7 @@ namespace Fika.Core.UI.Custom
 
 			HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
 			tooltipArea.enabled = true;
-			tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+			tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 
 			acceptButton.gameObject.SetActive(false);
 			acceptButton.enabled = false;
@@ -565,7 +565,7 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+					tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 
 					continue;
 				}
@@ -585,7 +585,7 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+					tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 
 					continue;
 				}
@@ -615,7 +615,7 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+					tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 
 					continue;
 				}
@@ -637,7 +637,7 @@ namespace Fika.Core.UI.Custom
 
 							tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 							tooltipArea.enabled = true;
-							tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+							tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 						}
 						break;
 					case LobbyEntry.ELobbyStatus.IN_GAME:
@@ -656,7 +656,7 @@ namespace Fika.Core.UI.Custom
 
 							tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 							tooltipArea.enabled = true;
-							tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+							tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 						}
 						else
 						{
@@ -669,7 +669,7 @@ namespace Fika.Core.UI.Custom
 
 								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+								tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 							}
 							else
 							{
@@ -686,7 +686,7 @@ namespace Fika.Core.UI.Custom
 
 								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+								tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 							}
 						}
 						break;
@@ -698,7 +698,7 @@ namespace Fika.Core.UI.Custom
 
 						tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 						tooltipArea.enabled = true;
-						tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+						tooltipArea.SetMessageText(tooltipTextGetter.GetText);
 						break;
 					default:
 						break;

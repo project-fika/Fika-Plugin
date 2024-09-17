@@ -116,7 +116,7 @@ namespace Fika.Core.Coop.Players
 		public override void CreateMovementContext()
 		{
 			LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
-			MovementContext = BotMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon), new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+			MovementContext = BotMovementContext.Create(this, GetBodyAnimatorCommon, GetCharacterControllerCommon, movement_MASK);
 		}
 
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)

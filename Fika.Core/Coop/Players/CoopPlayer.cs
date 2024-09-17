@@ -130,7 +130,7 @@ namespace Fika.Core.Coop.Players
 			}
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-			player._handsController.Spawn(1f, new Action(Class1590.class1590_0.method_0));
+			player._handsController.Spawn(1f, Class1590.class1590_0.method_0);
 
 			player.AIData = new GClass534(null, player);
 
@@ -161,12 +161,12 @@ namespace Fika.Core.Coop.Players
 			LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
 			if (FikaPlugin.Instance.UseInertia)
 			{
-				MovementContext = ClientMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
-					new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+				MovementContext = ClientMovementContext.Create(this, GetBodyAnimatorCommon,
+					GetCharacterControllerCommon, movement_MASK);
 				return;
 			}
-			MovementContext = NoInertiaMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
-					new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+			MovementContext = NoInertiaMovementContext.Create(this, GetBodyAnimatorCommon,
+					GetCharacterControllerCommon, movement_MASK);
 		}
 
 		public override void OnSkillLevelChanged(AbstractSkillClass skill)
@@ -504,8 +504,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void SendHeadlightsPacket(bool isSilent)
 		{
-			FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController,
-				FirearmLightStateStruct>(ClientPlayer.Class1517.class1517_0.method_0)).ToArray();
+			FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(ClientPlayer.Class1517.class1517_0.method_0).ToArray();
 
 			if (PacketSender != null)
 			{
@@ -867,7 +866,7 @@ namespace Fika.Core.Coop.Players
 			LootableContainerInteractionHandler handler = new(this, container);
 			if (handler.container != null && _openAction != null)
 			{
-				_openAction(new Action(handler.Handle));
+				_openAction(handler.Handle);
 			}
 			_openAction = null;
 		}

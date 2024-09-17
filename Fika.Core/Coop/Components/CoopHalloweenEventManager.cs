@@ -40,9 +40,9 @@ namespace Fika.Core.Coop.Components
 
 			server = Singleton<FikaServer>.Instance;
 
-			summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSummonStartedEvent>(this.OnHalloweenSummonStarted));
-			syncStateEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncStateEvent>(this.OnHalloweenSyncStateEvent));
-			syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncExitsEvent>(this.OnHalloweenSyncExitsEvent));
+			summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSummonStartedEvent>(OnHalloweenSummonStarted);
+			syncStateEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSyncStateEvent>(OnHalloweenSyncStateEvent);
+			syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSyncExitsEvent>(OnHalloweenSyncExitsEvent);
 		}
 
 		private void OnHalloweenSummonStarted(HalloweenSummonStartedEvent summonStartedEvent)
