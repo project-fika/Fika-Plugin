@@ -108,11 +108,11 @@ namespace Fika.Core.Coop.ObservedClasses
 				callback.Fail(error.ToString());
 				return;
 			}
-			HandlePickup(operation, callback);
+			HandleInProcess(item, to, operation, callback);
 			coopPlayer.StatisticsManager.OnGrabLoot(item);
 		}
 
-		private void HandlePickup(GInterface386 operation, Callback callback)
+		private void HandleInProcess(Item item, ItemAddress to, GInterface386 operation, Callback callback)
 		{
 			Class1039 class1 = new()
 			{
@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				return;
 			}
 			// Check for GClass increments, fold operation
-			if (operation is GClass3104 && handler.player_0.HandsController.CanExecute(operation))
+			if ((item.Parent != to || operation is GClass3104) && handler.player_0.HandsController.CanExecute(operation))
 			{
 				Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
 				RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
