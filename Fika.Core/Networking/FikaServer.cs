@@ -728,7 +728,7 @@ namespace Fika.Core.Networking
 				{
 					minePosition = packet.MinePositon
 				};
-				MineDirectional mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(new Func<MineDirectional, bool>(mineSeeker.method_0));
+				MineDirectional mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(mineSeeker.method_0);
 				if (mineDirectional == null)
 				{
 					return;

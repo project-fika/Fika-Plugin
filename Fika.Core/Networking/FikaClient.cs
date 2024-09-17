@@ -693,19 +693,17 @@ namespace Fika.Core.Networking
 
 		private void OnMinePacketReceived(MinePacket packet)
 		{
-			if (Singleton<GameWorld>.Instance.MineManager != null)
+			NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
 			{
-				NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
-				{
-					minePosition = packet.MinePositon
-				};
-				MineDirectional mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(new Func<MineDirectional, bool>(mineSeeker.method_0));
-				if (mineDirectional == null)
-				{
-					return;
-				}
-				mineDirectional.Explosion();
+				minePosition = packet.MinePositon
+			};
+			MineDirectional mineDirectional = MineDirectional.Mines.FirstOrDefault(mineSeeker.method_0);
+			if (mineDirectional == null)
+			{
+				logger.LogError($"OnMinePacketReceived: Could not find mine at position {packet.MinePositon}");
+				return;
 			}
+			mineDirectional.Explosion();
 		}
 
 		private void OnWeatherPacketReceived(WeatherPacket packet)
