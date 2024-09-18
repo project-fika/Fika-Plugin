@@ -25,7 +25,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets.GameWorld;
-using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;

@@ -1,6 +1,6 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Player
+namespace Fika.Core.Networking
 {
 	public struct UsableItemPacket(int netId) : INetSerializable
 	{

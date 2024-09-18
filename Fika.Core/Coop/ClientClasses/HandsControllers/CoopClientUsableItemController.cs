@@ -1,6 +1,6 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking;
 using static EFT.Player;
 
 namespace Fika.Core.Coop.ClientClasses.HandsControllers
