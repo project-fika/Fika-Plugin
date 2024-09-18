@@ -93,11 +93,6 @@ namespace Fika.Core.Networking.Http
 			await PutJsonAsync("/fika/update/setstatus", data);
 		}
 
-		public static async Task UpdateSpawnPoint(UpdateSpawnPointRequest data)
-		{
-			await PutJsonAsync("/fika/update/spawnpoint", data);
-		}
-
 		public static async Task UpdatePlayerSpawn(PlayerSpawnRequest data)
 		{
 			await PutJsonAsync("/fika/update/playerspawn", data);
