@@ -241,6 +241,12 @@ namespace Fika.Core.Networking
 
 		private void OnTraderServicesPacketReceived(TraderServicesPacket packet)
 		{
+			if (packet.Services.Count < 1)
+			{
+				logger.LogWarning("OnTraderServicesPacketReceived: Services was 0, but might be intentional. Skipping...");
+				return;
+			}
+
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				playerToApply.method_139(packet.Services);
