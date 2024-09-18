@@ -431,11 +431,6 @@ namespace Fika.Core.Coop.GameMode
 
 			int netId = 1000;
 			LocalPlayer localPlayer;
-
-			if (!Status.IsRunned())
-			{
-				return null;
-			}
 			if (Bots.ContainsKey(profile.Id))
 			{
 				return null;
