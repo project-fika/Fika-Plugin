@@ -1011,7 +1011,7 @@ namespace Fika.Core.Coop.GameMode
 				throw new NullReferenceException("CoopHandler was missing!");
 			}
 
-			ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, !isServer, "");
+			ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, !isServer, Location_0.DisabledScavExits);
 
 			ApplicationConfigClass config = BackendConfigAbstractClass.Config;
 			if (config.FixedFrameRate > 0f)
