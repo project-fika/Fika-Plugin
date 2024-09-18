@@ -23,6 +23,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
 using Fika.Core.Networking.Packets.GameWorld;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -144,6 +145,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
+			packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
 
 			netServer = new NetManager(this)
 			{
@@ -257,6 +259,15 @@ namespace Fika.Core.Networking
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnUsableItemPacketReceived(UsableItemPacket packet, NetPeer peer)
+		{
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				playerToApply.HandleUsableItemPacket(in packet);
+			}
 		}
 
 		public void SendAirdropContainerData(EAirdropType containerType, Item item, int ObjectId)

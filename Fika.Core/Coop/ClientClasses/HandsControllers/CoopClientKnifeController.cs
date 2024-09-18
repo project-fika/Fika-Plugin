@@ -7,23 +7,20 @@ namespace Fika.Core.Coop.ClientClasses
 {
 	internal class CoopClientKnifeController : EFT.Player.KnifeController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
+		private CoopPlayer player;
 
 		public static CoopClientKnifeController Create(CoopPlayer player, KnifeComponent item)
 		{
-			return smethod_9<CoopClientKnifeController>(player, item);
+			CoopClientKnifeController controller = smethod_9<CoopClientKnifeController>(player, item);
+			controller.player = player;
+			return controller;
 		}
 
 		public override void ExamineWeapon()
 		{
 			base.ExamineWeapon();
 
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasKnifePacket = true,
 				KnifePacket = new()
@@ -39,7 +36,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			if (knifeKick)
 			{
-				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
 					HasKnifePacket = true,
 					KnifePacket = new()
@@ -58,7 +55,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			if (alternateKnifeKick)
 			{
-				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
 					HasKnifePacket = true,
 					KnifePacket = new()
@@ -75,7 +72,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			base.BrakeCombo();
 
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasKnifePacket = true,
 				KnifePacket = new()

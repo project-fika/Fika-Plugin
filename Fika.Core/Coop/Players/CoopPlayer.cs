@@ -12,6 +12,7 @@ using EFT.UI;
 using EFT.Vehicle;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
+using Fika.Core.Coop.ClientClasses.HandsControllers;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.PacketHandlers;
@@ -19,6 +20,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Packets.Player;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -1112,6 +1114,27 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
+		public void HandleUsableItemPacket(in UsableItemPacket packet)
+		{
+			if (HandsController is UsableItemController usableItemController)
+			{
+				if (packet.ExamineWeapon)
+				{
+					usableItemController.ExamineWeapon();
+				}
+
+				if (packet.HasCompassState)
+				{
+					usableItemController.CompassState.Value = packet.CompassState;
+				}
+
+				if (packet.HasAim)
+				{
+					usableItemController.IsAiming = packet.AimState;
+				}
+			}
+		}
+
 		private void ObservedStationaryInteract(StationaryWeapon stationaryWeapon, GStruct171.EStationaryCommand command)
 		{
 			if (command == GStruct171.EStationaryCommand.Occupy)
@@ -1551,7 +1574,7 @@ namespace Fika.Core.Coop.Players
 			}
 			FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
 			return null;
-		}
+		}		
 
 		#region handlers
 		private class KeyHandler(CoopPlayer player)
@@ -1645,9 +1668,9 @@ namespace Fika.Core.Coop.Players
 			public Process<UsableItemController, GInterface153> process;
 			public Action confirmCallback;
 
-			internal UsableItemController ReturnController()
+			internal CoopClientUsableItemController ReturnController()
 			{
-				return UsableItemController.smethod_6<UsableItemController>(coopPlayer, item);
+				return CoopClientUsableItemController.Create(coopPlayer, item);
 			}
 
 			internal void SendPacket()

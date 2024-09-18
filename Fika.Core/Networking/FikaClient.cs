@@ -25,6 +25,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets.GameWorld;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -129,6 +130,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
+			packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -175,6 +177,14 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnUsableItemPacketReceived(UsableItemPacket packet)
+		{
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				playerToApply.HandleUsableItemPacket(in packet);
+			}
 		}
 
 		private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet)

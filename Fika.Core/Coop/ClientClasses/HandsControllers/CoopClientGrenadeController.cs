@@ -11,21 +11,18 @@ namespace Fika.Core.Coop.ClientClasses
 {
 	internal class CoopClientGrenadeController : EFT.Player.GrenadeHandsController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
+		private CoopPlayer player;
 
 		public static CoopClientGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
-			return smethod_9<CoopClientGrenadeController>(player, item);
+			CoopClientGrenadeController controller = smethod_9<CoopClientGrenadeController>(player, item);
+			controller.player = player;
+			return controller;
 		}
 
 		public override void ExamineWeapon()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
@@ -38,7 +35,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void HighThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
@@ -51,7 +48,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void LowThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
@@ -64,7 +61,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void PullRingForHighThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
@@ -77,7 +74,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void PullRingForLowThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
@@ -90,7 +87,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
@@ -108,7 +105,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void PlantTripwire()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
@@ -133,7 +130,7 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					if (currentOperation is Class1098)
 					{
-						coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+						player.PacketSender.FirearmPackets.Enqueue(new()
 						{
 							HasGrenadePacket = true,
 							GrenadePacket = new()
@@ -145,7 +142,7 @@ namespace Fika.Core.Coop.ClientClasses
 				}
 				else
 				{
-					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+					player.PacketSender.FirearmPackets.Enqueue(new()
 					{
 						HasGrenadePacket = true,
 						GrenadePacket = new()
@@ -162,7 +159,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			// TODO: Override Class1025
 
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				CancelGrenade = true
 			});

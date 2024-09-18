@@ -1618,7 +1618,21 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
-			ExfiltrationPoint[] exfilPoints = ExfiltrationControllerClass.Instance.EligiblePoints(Profile_0);
+			ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+			Player player = gparam_0.Player;
+			bool isScav = player.Side is EPlayerSide.Savage;
+			ExfiltrationPoint[] exfilPoints;
+
+			if (isScav)
+			{
+				exfilController.ScavExfiltrationClaim(player.Position, player.ProfileId, player.Profile.FenceInfo.AvailableExitsCount);
+				int mask = exfilController.GetScavExfiltrationMask(player.ProfileId);
+				exfilPoints = exfilController.ScavExfiltrationClaim(mask, player.ProfileId);
+			}
+			else
+			{
+				exfilPoints = exfilController.EligiblePoints(Profile_0);
+			}
 
 			GameUi.TimerPanel.SetTime(EFTDateTimeClass.UtcNow, Profile_0.Info.Side, GameTimer.EscapeTimeSeconds(), exfilPoints);
 

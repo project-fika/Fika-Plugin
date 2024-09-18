@@ -11,21 +11,18 @@ namespace Fika.Core.Coop.ClientClasses
 	/// </summary>
 	internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
+		private CoopPlayer player;
 
 		public static CoopClientQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
-			return smethod_9<CoopClientQuickGrenadeController>(player, item);
+			CoopClientQuickGrenadeController controller = smethod_9<CoopClientQuickGrenadeController>(player, item);
+			controller.player = player;
+			return controller;
 		}
 
 		public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasGrenadePacket = true,
 				GrenadePacket = new()
