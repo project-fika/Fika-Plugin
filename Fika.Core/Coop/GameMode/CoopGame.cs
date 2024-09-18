@@ -434,71 +434,58 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!Status.IsRunned())
 			{
-				localPlayer = null;
+				return null;
 			}
-			else if (Bots.ContainsKey(profile.Id))
+			if (Bots.ContainsKey(profile.Id))
 			{
-				localPlayer = null;
+				return null;
 			}
-			else
+
+			profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
+
+			FikaServer server = Singleton<FikaServer>.Instance;
+			netId = server.PopNetId();
+
+			MongoID mongoId = MongoID.Generate(true);
+			ushort nextOperationId = 0;
+			SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile, mongoId, nextOperationId), true, true, position, netId);
+			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
+
+			if (server.NetServer.ConnectedPeersCount > 0)
 			{
-				//int num = method_12();
-				profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
+				await WaitForPlayersToLoadBotProfile(netId);
+			}
 
-				FikaServer server = Singleton<FikaServer>.Instance;
-				netId = server.PopNetId();
+			// Check for GClass increments on filter
+			localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
+			   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
+			   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, LocalGame.Class1457.class1457_0.method_4,
+				LocalGame.Class1457.class1457_0.method_5, GClass1549.Default, mongoId, nextOperationId);
 
-				MongoID mongoId = MongoID.Generate(true);
-				ushort nextOperationId = 0;
-				SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile, mongoId, nextOperationId), true, true, position, netId);
-				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
-
-				if (server.NetServer.ConnectedPeersCount > 0)
-				{
-					await WaitForPlayersToLoadBotProfile(netId);
-				}
-
-				// Check for GClass increments on filter
-				localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
-				   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
-				   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, LocalGame.Class1457.class1457_0.method_4,
-					LocalGame.Class1457.class1457_0.method_5, GClass1549.Default, mongoId, nextOperationId);
-
-				localPlayer.Location = Location_0.Id;
-
-				if (Bots.ContainsKey(localPlayer.ProfileId))
-				{
-					Logger.LogError($"{profile.ProfileId} already exists in the bots list, cancelling...");
-					Destroy(localPlayer);
-					return null;
-				}
-				else
-				{
+			localPlayer.Location = Location_0.Id;
 #if DEBUG
-					Logger.LogInfo($"Bot {profile.Info.Settings.Role} created at {position} SUCCESSFULLY!");
+			Logger.LogInfo($"Bot {profile.Info.Settings.Role} created at {position} SUCCESSFULLY!");
 #endif
-					Bots.Add(localPlayer.ProfileId, localPlayer);
-				}
+			Bots.Add(localPlayer.ProfileId, localPlayer);
 
-				if (profile.Info.Side is not EPlayerSide.Savage)
+			if (profile.Info.Side is not EPlayerSide.Savage)
+			{
+				Slot backpackSlot = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
+				Item backpack = backpackSlot.ContainedItem;
+				if (backpack != null)
 				{
-					Slot backpackSlot = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
-					Item backpack = backpackSlot.ContainedItem;
-					if (backpack != null)
+					Item[] items = backpack.GetAllItems()?.ToArray();
+					if (items != null)
 					{
-						Item[] items = backpack.GetAllItems()?.ToArray();
-						if (items != null)
+						for (int i = 0; i < items.Count(); i++)
 						{
-							for (int i = 0; i < items.Count(); i++)
+							Item item = items[i];
+							if (item == backpack)
 							{
-								Item item = items[i];
-								if (item == backpack)
-								{
-									continue;
-								}
-
-								item.SpawnedInSession = true;
+								continue;
 							}
+
+							item.SpawnedInSession = true;
 						}
 					}
 				}
