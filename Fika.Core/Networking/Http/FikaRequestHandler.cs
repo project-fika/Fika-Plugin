@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,17 +33,29 @@ namespace Fika.Core.Networking.Http
 			ipString = ipString.Replace("\n", "");
 			if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
 			{
-				return ipAddress;
+				if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+				{
+					return ipAddress;
+				}
+				throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
 			}
 			ipString = await client.GetStringAsync("https://checkip.amazonaws.com/");
 			if (IPAddress.TryParse(ipString, out ipAddress))
 			{
-				return ipAddress;
+				if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+				{
+					return ipAddress;
+				}
+				throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
 			}
 			ipString = await client.GetStringAsync("https://ipv4.icanhazip.com/");
 			if (IPAddress.TryParse(ipString, out ipAddress))
 			{
-				return ipAddress;
+				if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+				{
+					return ipAddress;
+				}
+				throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
 			}
 			throw new Exception("Could not retrieve or parse the external address!");
 		}
