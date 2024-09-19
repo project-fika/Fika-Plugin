@@ -13,7 +13,7 @@ namespace Fika.Core.Networking
 		public EBodyPart BodyPartType;
 		public EBodyPartColliderType ColliderType;
 		public EArmorPlateCollider ArmorPlateCollider;
-		public float Absorbed;
+		public float Absorbed = 0f;
 		public Vector3 Direction = Vector3.zero;
 		public Vector3 Point = Vector3.zero;
 		public Vector3 HitNormal = Vector3.zero;
@@ -35,7 +35,6 @@ namespace Fika.Core.Networking
 			BodyPartType = (EBodyPart)reader.GetInt();
 			ColliderType = (EBodyPartColliderType)reader.GetInt();
 			ArmorPlateCollider = (EArmorPlateCollider)reader.GetInt();
-			Absorbed = reader.GetFloat();
 			Direction = reader.GetVector3();
 			Point = reader.GetVector3();
 			HitNormal = reader.GetVector3();
@@ -58,7 +57,6 @@ namespace Fika.Core.Networking
 			writer.Put((int)BodyPartType);
 			writer.Put((int)ColliderType);
 			writer.Put((int)ArmorPlateCollider);
-			writer.Put(Absorbed);
 			writer.Put(Direction);
 			writer.Put(Point);
 			writer.Put(HitNormal);
