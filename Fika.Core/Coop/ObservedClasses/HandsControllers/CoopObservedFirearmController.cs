@@ -451,7 +451,8 @@ namespace Fika.Core.Coop.ObservedClasses
                 
             }*/
 
-			if (packet.HasRollCylinder && Weapon is GClass2941 rollWeapon)
+			// Check for GClass increment
+			if (packet.HasRollCylinder && Weapon is GClass2943)
 			{
 				RollCylinder(packet.RollToZeroCamora);
 			}
