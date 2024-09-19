@@ -34,6 +34,16 @@ namespace Fika.Core.Networking.Http
 			{
 				return ipAddress;
 			}
+			ipString = await client.GetStringAsync("https://checkip.amazonaws.com/");
+			if (IPAddress.TryParse(ipString, out ipAddress))
+			{
+				return ipAddress;
+			}
+			ipString = await client.GetStringAsync("https://ipv4.icanhazip.com/");
+			if (IPAddress.TryParse(ipString, out ipAddress))
+			{
+				return ipAddress;
+			}
 			throw new Exception("Could not retrieve or parse the external address!");
 		}
 
