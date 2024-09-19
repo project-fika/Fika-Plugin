@@ -141,15 +141,6 @@ namespace Fika.Core.Coop.Players
 
 		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
 		{
-			if (damageInfo.Player != null && damageInfo.Player.iPlayer is ObservedCoopPlayer)
-			{
-				LastDamageInfo.BodyPartColliderType = damageInfo.BodyPartColliderType;
-				LastDamageInfo.Direction = damageInfo.Direction;
-				LastDamageInfo.HitPoint = damageInfo.HitPoint;
-				LastDamageInfo.PenetrationPower = damageInfo.PenetrationPower;
-				return null;
-			}
-
 			ActiveHealthController activeHealthController = ActiveHealthController;
 			if (activeHealthController != null && !activeHealthController.IsAlive)
 			{

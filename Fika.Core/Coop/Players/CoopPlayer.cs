@@ -221,18 +221,18 @@ namespace Fika.Core.Coop.Players
 		{
 			if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
 			{
-				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider);
 			}
 
-			if (damageInfo.Player?.iPlayer is CoopBot)
+			if (damageInfo.Player != null && damageInfo.Player.IsAI)
 			{
-				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider);
 			}
 
 			return null;
 		}
 
-		private ShotInfoClass SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
+		private ShotInfoClass SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
 		{
 			ActiveHealthController activeHealthController = ActiveHealthController;
 			if (activeHealthController != null && !activeHealthController.IsAlive)
@@ -243,27 +243,27 @@ namespace Fika.Core.Coop.Players
 			float damage = damageInfo.Damage;
 			List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
 			MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
-			ShotInfoClass gclass = new()
+			ShotInfoClass hitInfo = new()
 			{
 				PoV = PointOfView,
 				Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
 				Material = materialType
 			};
-			ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
-			ShotReactions(damageInfo, bodyPartType);
 			float num = damage - damageInfo.Damage;
 			if (num > 0)
 			{
 				damageInfo.DidArmorDamage = num;
 			}
-			ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, gclass.Material);
+			ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
+			ShotReactions(damageInfo, bodyPartType);
+			ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
 			if (list != null)
 			{
 				QueueArmorDamagePackets([.. list]);
 			}
 
-			return gclass;
+			return hitInfo;
 		}
 
 		#region Proceed

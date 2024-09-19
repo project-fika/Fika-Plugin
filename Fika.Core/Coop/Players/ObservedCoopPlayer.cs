@@ -284,40 +284,33 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
+		public void HandleMineDamage(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
+		{
+			if (HealthController.DamageCoeff == 0)
+			{
+				return;
+			}
+
+			PacketSender.DamagePackets.Enqueue(new()
+			{
+				Damage = damageInfo.Damage,
+				DamageType = damageInfo.DamageType,
+				BodyPartType = bodyPartType,
+				ColliderType = colliderType,
+				Absorbed = 0f,
+				Direction = damageInfo.Direction,
+				Point = damageInfo.HitPoint,
+				HitNormal = damageInfo.HitNormal,
+				PenetrationPower = damageInfo.PenetrationPower,
+				BlockedBy = damageInfo.BlockedBy,
+				DeflectedBy = damageInfo.DeflectedBy,
+				SourceId = damageInfo.SourceId,
+				ArmorDamage = damageInfo.ArmorDamage
+			});
+		}
+
 		public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 		{
-			if (damageInfo.DamageType == EDamageType.Landmine && FikaBackendUtils.IsServer)
-			{
-				PacketSender.DamagePackets.Enqueue(new()
-				{
-					Damage = damageInfo.Damage,
-					DamageType = damageInfo.DamageType,
-					BodyPartType = bodyPartType,
-					ColliderType = colliderType,
-					Absorbed = 0f,
-					Direction = damageInfo.Direction,
-					Point = damageInfo.HitPoint,
-					HitNormal = damageInfo.HitNormal,
-					PenetrationPower = damageInfo.PenetrationPower,
-					BlockedBy = damageInfo.BlockedBy,
-					DeflectedBy = damageInfo.DeflectedBy,
-					SourceId = damageInfo.SourceId,
-					ArmorDamage = damageInfo.ArmorDamage
-				});
-
-				return;
-			}
-
-			if (damageInfo.Player == null)
-			{
-				return;
-			}
-
-			if (!damageInfo.Player.iPlayer.IsYourPlayer)
-			{
-				return;
-			}
-
 			LastAggressor = damageInfo.Player.iPlayer;
 			LastDamagedBodyPart = bodyPartType;
 			LastBodyPart = bodyPartType;
@@ -325,108 +318,157 @@ namespace Fika.Core.Coop.Players
 			LastDamageType = damageInfo.DamageType;
 		}
 
+		public ShotInfoClass HandleSniperShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
+		{
+			if (HealthController.DamageCoeff == 0)
+			{
+				return null;
+			}
+
+			PacketSender.DamagePackets.Enqueue(new()
+			{
+				Damage = damageInfo.Damage,
+				DamageType = damageInfo.DamageType,
+				BodyPartType = bodyPartType,
+				ColliderType = colliderType,
+				ArmorPlateCollider = armorPlateCollider,
+				Absorbed = 0f,
+				Direction = damageInfo.Direction,
+				Point = damageInfo.HitPoint,
+				HitNormal = damageInfo.HitNormal,
+				PenetrationPower = damageInfo.PenetrationPower,
+				BlockedBy = damageInfo.BlockedBy,
+				DeflectedBy = damageInfo.DeflectedBy,
+				SourceId = damageInfo.SourceId,
+				ArmorDamage = damageInfo.ArmorDamage
+			});
+
+			return new()
+			{
+				PoV = EPointOfView.ThirdPerson,
+				Penetrated = damageInfo.Penetrated,
+				Material = MaterialType.Body
+			};
+		}
+
 		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
+		{			
+			if (HealthController != null && !HealthController.IsAlive)
+			{
+				return null;
+			}
+
+			ShotReactions(damageInfo, bodyPartType);
+			bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+			float damage = damageInfo.Damage;
+			List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+			MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+			ShotInfoClass hitInfo = new()
+			{
+				PoV = PointOfView,
+				Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
+				Material = materialType
+			};
+			float num = damage - damageInfo.Damage;
+			if (num > 0)
+			{
+				damageInfo.DidArmorDamage = num;
+			}
+			damageInfo.DidBodyDamage = damageInfo.Damage;
+			ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
+
+			PacketSender.DamagePackets.Enqueue(new()
+			{
+				Damage = damageInfo.Damage,
+				DamageType = damageInfo.DamageType,
+				BodyPartType = bodyPartType,
+				ColliderType = colliderType,
+				ArmorPlateCollider = armorPlateCollider,
+				Absorbed = 0f,
+				Direction = damageInfo.Direction,
+				Point = damageInfo.HitPoint,
+				HitNormal = damageInfo.HitNormal,
+				PenetrationPower = damageInfo.PenetrationPower,
+				BlockedBy = damageInfo.BlockedBy,
+				DeflectedBy = damageInfo.DeflectedBy,
+				SourceId = damageInfo.SourceId,
+				ArmorDamage = damageInfo.ArmorDamage,
+				ProfileId = damageInfo.Player.iPlayer.ProfileId,
+				Material = materialType
+			});
+
+			if (list != null)
+			{
+				QueueArmorDamagePackets([.. list]);
+			}
+
+			// Run this to get weapon skill
+			ManageAggressor(damageInfo, bodyPartType, colliderType);
+
+			return hitInfo;
+		}
+
+		public ShotInfoClass ApplyClientShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
 		{
 			ShotReactions(damageInfo, bodyPartType);
+			LastAggressor = damageInfo.Player.iPlayer;
+			LastDamagedBodyPart = bodyPartType;
+			LastBodyPart = bodyPartType;
+			LastDamageInfo = damageInfo;
+			LastDamageType = damageInfo.DamageType;
 
-			if (damageInfo.DamageType == EDamageType.Sniper && isServer)
+			if (HealthController != null && !HealthController.IsAlive)
 			{
-				if (HealthController.DamageCoeff == 0)
-				{
-					return null;
-				}
-
-				PacketSender.DamagePackets.Enqueue(new()
-				{
-					Damage = damageInfo.Damage,
-					DamageType = damageInfo.DamageType,
-					BodyPartType = bodyPartType,
-					ColliderType = colliderType,
-					ArmorPlateCollider = armorPlateCollider,
-					Absorbed = 0f,
-					Direction = damageInfo.Direction,
-					Point = damageInfo.HitPoint,
-					HitNormal = damageInfo.HitNormal,
-					PenetrationPower = damageInfo.PenetrationPower,
-					BlockedBy = damageInfo.BlockedBy,
-					DeflectedBy = damageInfo.DeflectedBy,
-					SourceId = damageInfo.SourceId,
-					ArmorDamage = damageInfo.ArmorDamage
-				});
-
 				return null;
 			}
 
-			if (damageInfo.Player != null)
+			bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+			float damage = damageInfo.Damage;
+			List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+			MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+			ShotInfoClass hitInfo = new()
 			{
-				LastAggressor = damageInfo.Player.iPlayer;
-				LastDamagedBodyPart = bodyPartType;
-				LastBodyPart = bodyPartType;
-				LastDamageInfo = damageInfo;
-				LastDamageType = damageInfo.DamageType;
+				PoV = PointOfView,
+				Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
+				Material = materialType
+			};
+			float num = damage - damageInfo.Damage;
+			if (num > 0)
+			{
+				damageInfo.DidArmorDamage = num;
+			}
+			damageInfo.DidBodyDamage = damageInfo.Damage;
+			ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
-				// There should never be other instances than CoopPlayer or its derived types
-				CoopPlayer player = (CoopPlayer)damageInfo.Player.iPlayer;
+			PacketSender.DamagePackets.Enqueue(new()
+			{
+				Damage = damageInfo.Damage,
+				DamageType = damageInfo.DamageType,
+				BodyPartType = bodyPartType,
+				ColliderType = colliderType,
+				ArmorPlateCollider = armorPlateCollider,
+				Absorbed = 0f,
+				Direction = damageInfo.Direction,
+				Point = damageInfo.HitPoint,
+				HitNormal = damageInfo.HitNormal,
+				PenetrationPower = damageInfo.PenetrationPower,
+				BlockedBy = damageInfo.BlockedBy,
+				DeflectedBy = damageInfo.DeflectedBy,
+				SourceId = damageInfo.SourceId,
+				ArmorDamage = damageInfo.ArmorDamage,
+				ProfileId = damageInfo.Player.iPlayer.ProfileId,
+				Material = materialType
+			});
 
-				if (player.IsYourPlayer || player.IsAI)
-				{
-					if (HealthController != null && !HealthController.IsAlive)
-					{
-						return null;
-					}
-
-					bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
-					float damage = damageInfo.Damage;
-					List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-					MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
-					ShotInfoClass hitInfo = new()
-					{
-						PoV = PointOfView,
-						Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
-						Material = materialType
-					};
-					float num = damage - damageInfo.Damage;
-					if (num > 0)
-					{
-						damageInfo.DidArmorDamage = num;
-					}
-					damageInfo.DidBodyDamage = damageInfo.Damage;
-					ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
-
-					PacketSender.DamagePackets.Enqueue(new()
-					{
-						Damage = damageInfo.Damage,
-						DamageType = damageInfo.DamageType,
-						BodyPartType = bodyPartType,
-						ColliderType = colliderType,
-						ArmorPlateCollider = armorPlateCollider,
-						Absorbed = 0f,
-						Direction = damageInfo.Direction,
-						Point = damageInfo.HitPoint,
-						HitNormal = damageInfo.HitNormal,
-						PenetrationPower = damageInfo.PenetrationPower,
-						BlockedBy = damageInfo.BlockedBy,
-						DeflectedBy = damageInfo.DeflectedBy,
-						SourceId = damageInfo.SourceId,
-						ArmorDamage = damageInfo.ArmorDamage,
-						ProfileId = player.ProfileId,
-						Material = materialType
-					});
-
-					if (list != null)
-					{
-						QueueArmorDamagePackets([.. list]);
-					}
-
-					// Run this to get weapon skill
-					ManageAggressor(damageInfo, bodyPartType, colliderType);
-
-					return hitInfo;
-				}
-				return null;
+			if (list != null)
+			{
+				QueueArmorDamagePackets([.. list]);
 			}
 
-			return null;
+			// Run this to get weapon skill
+			ManageAggressor(damageInfo, bodyPartType, colliderType);
+
+			return hitInfo;
 		}
 
 		public override void OnMounting(GStruct173.EMountingCommand command)
