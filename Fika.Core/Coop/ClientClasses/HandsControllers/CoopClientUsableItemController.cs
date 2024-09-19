@@ -7,7 +7,7 @@ namespace Fika.Core.Coop.ClientClasses.HandsControllers
 {
 	public class CoopClientUsableItemController : UsableItemController
 	{
-		private CoopPlayer player;
+		protected CoopPlayer player;
 
 		public static CoopClientUsableItemController Create(CoopPlayer player, Item item)
 		{

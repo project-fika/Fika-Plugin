@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.ClientClasses
 {
 	public class CoopClientFirearmController : Player.FirearmController
 	{
-		private CoopPlayer player;
+		protected CoopPlayer player;
 
 		public static CoopClientFirearmController Create(CoopPlayer player, Weapon weapon)
 		{

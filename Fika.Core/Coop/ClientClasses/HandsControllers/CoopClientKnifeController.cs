@@ -7,7 +7,7 @@ namespace Fika.Core.Coop.ClientClasses
 {
 	internal class CoopClientKnifeController : EFT.Player.KnifeController
 	{
-		private CoopPlayer player;
+		protected CoopPlayer player;
 
 		public static CoopClientKnifeController Create(CoopPlayer player, KnifeComponent item)
 		{

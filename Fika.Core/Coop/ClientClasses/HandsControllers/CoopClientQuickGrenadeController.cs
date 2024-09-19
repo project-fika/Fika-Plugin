@@ -11,7 +11,7 @@ namespace Fika.Core.Coop.ClientClasses
 	/// </summary>
 	internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
-		private CoopPlayer player;
+		protected CoopPlayer player;
 
 		public static CoopClientQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
