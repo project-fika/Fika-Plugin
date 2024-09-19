@@ -1138,15 +1138,12 @@ namespace Fika.Core.Coop.Players
 		{
 			if (command == GStruct171.EStationaryCommand.Occupy)
 			{
-				if (stationaryWeapon.IsAvailable(ProfileId))
-				{
-					stationaryWeapon.SetOperator(ProfileId, false);
-					MovementContext.StationaryWeapon = stationaryWeapon;
-					MovementContext.InteractionParameters = stationaryWeapon.GetInteractionParameters();
-					MovementContext.PlayerAnimatorSetApproached(false);
-					MovementContext.PlayerAnimatorSetStationary(true);
-					MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
-				}
+				stationaryWeapon.SetOperator(ProfileId, false);
+				MovementContext.StationaryWeapon = stationaryWeapon;
+				MovementContext.InteractionParameters = stationaryWeapon.GetInteractionParameters();
+				MovementContext.PlayerAnimatorSetApproached(false);
+				MovementContext.PlayerAnimatorSetStationary(true);
+				MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
 				return;
 			}
 			if (command == GStruct171.EStationaryCommand.Leave)
