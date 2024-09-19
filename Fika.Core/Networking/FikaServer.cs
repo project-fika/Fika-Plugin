@@ -191,19 +191,7 @@ namespace Fika.Core.Networking
 			}
 			else
 			{
-				try
-				{
-					HttpClient client = new();
-					string ipAdress = await client.GetStringAsync("https://ipv4.icanhazip.com/");
-					externalIp = ipAdress.Replace("\n", "");
-					client.Dispose();
-				}
-				catch (Exception ex)
-				{
-					logger.LogError($"Error when trying to receive IP automatically. Exception: {ex.Message}");
-					Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Error when trying to receive IP automatically.");
-					throw new NullReferenceException("IP address was null when fetching");
-				}
+				externalIp = FikaPlugin.Instance.WanIP.ToString();
 			}
 
 			if (FikaPlugin.UseNatPunching.Value)

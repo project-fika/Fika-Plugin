@@ -33,9 +33,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core
@@ -67,6 +69,7 @@ namespace Fika.Core
 		public BotDifficulties BotDifficulties;
 		public FikaModHandler ModHandler = new();
 		public string[] LocalIPs;
+		public IPAddress WanIP;
 
 		private static Version RequiredServerVersion = new("2.2.8");
 
@@ -331,6 +334,13 @@ namespace Fika.Core
 		/// <returns></returns>
 		private IEnumerator RunChecks()
 		{
+			Task<IPAddress> addressTask = FikaRequestHandler.GetPublicIP();
+			while (!addressTask.IsCompleted)
+			{
+				yield return null;
+			}
+			WanIP = addressTask.Result;
+
 			yield return new WaitForSeconds(5);
 			VerifyServerVersion();
 			ModHandler.VerifyMods();

@@ -7,7 +7,10 @@ using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
+using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +23,18 @@ namespace Fika.Core.Networking.Http
 		static FikaRequestHandler()
 		{
 			_httpClient = new FuyuClient(RequestHandler.Host, RequestHandler.SessionId);
+		}
+
+		public static async Task<IPAddress> GetPublicIP()
+		{
+			HttpClient client = _httpClient.GetClient();
+			string ipString = await client.GetStringAsync("https://api.ipify.org/");
+			ipString = ipString.Replace("\n", "");
+			if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
+			{
+				return ipAddress;
+			}
+			throw new Exception("Could not retrieve or parse the external address!");
 		}
 
 		private static byte[] EncodeBody<T>(T o)

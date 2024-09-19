@@ -8,12 +8,12 @@ namespace Fika.Core.Models
 	public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
 	{
 		[JsonIgnore]
-		private CoreBotSettingsClass CoreSettings;
+		private CoreBotSettingsClass coreSettings;
 
 		public BotDifficulties()
 		{
 			string coreString = RequestHandler.GetJson("/singleplayer/settings/bot/difficulty/core/core");
-			CoreSettings = JsonConvert.DeserializeObject<CoreBotSettingsClass>(coreString);
+			coreSettings = JsonConvert.DeserializeObject<CoreBotSettingsClass>(coreString);
 		}
 
 		public BotSettingsComponents GetComponent(BotDifficulty botDifficulty, WildSpawnType role)
@@ -34,9 +34,9 @@ namespace Fika.Core.Models
 		public CoreBotSettingsClass GetCoreSettings()
 		{
 			FikaPlugin.Instance.FikaLogger.LogInfo("Retrieving Core settings");
-			if (CoreSettings != null)
+			if (coreSettings != null)
 			{
-				return CoreSettings;
+				return coreSettings;
 			}
 
 			return null;
