@@ -291,6 +291,11 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 
+			LastDamagedBodyPart = bodyPartType;
+			LastBodyPart = bodyPartType;
+			LastDamageInfo = damageInfo;
+			LastDamageType = damageInfo.DamageType;
+
 			PacketSender.DamagePackets.Enqueue(new()
 			{
 				Damage = damageInfo.Damage,
@@ -324,6 +329,11 @@ namespace Fika.Core.Coop.Players
 			{
 				return null;
 			}
+
+			LastDamagedBodyPart = bodyPartType;
+			LastBodyPart = bodyPartType;
+			LastDamageInfo = damageInfo;
+			LastDamageType = damageInfo.DamageType;
 
 			PacketSender.DamagePackets.Enqueue(new()
 			{
