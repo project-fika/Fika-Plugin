@@ -379,7 +379,7 @@ namespace Fika.Core.UI.Custom
 			RefreshUI();
 		}
 
-		public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action successCallback, bool reconnect)
+		public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action<bool> callback, bool reconnect)
 		{
 			if (button != null)
 			{
@@ -425,6 +425,7 @@ namespace Fika.Core.UI.Custom
 					{
 						button.enabled = true;
 					}
+					callback.Invoke(false);
 					yield break;
 				}
 			}
@@ -434,6 +435,7 @@ namespace Fika.Core.UI.Custom
 					LocaleUtils.UI_ERROR_CONNECTING.Localized(),
 					LocaleUtils.UI_PINGER_START_FAIL.Localized(),
 					ErrorScreen.EButtonType.OkButton, 10f, null, null);
+				callback.Invoke(false);
 				yield break;
 			}
 
@@ -459,7 +461,7 @@ namespace Fika.Core.UI.Custom
 
 				//AcceptButton.OnClick.Invoke();
 
-				successCallback?.Invoke();
+				callback?.Invoke(true);
 			}
 			else
 			{
@@ -467,6 +469,8 @@ namespace Fika.Core.UI.Custom
 
 				Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage,
 					ErrorScreen.EButtonType.OkButton, 15, null, null);
+
+				callback?.Invoke(false);
 			}
 		}
 
@@ -538,10 +542,16 @@ namespace Fika.Core.UI.Custom
 
 					Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
 					FikaBackendUtils.HostLocationId = entry.Location;
-					StartCoroutine(JoinMatch(profileId, server.name, button, () =>
+					ToggleLoading(true);
+					StartCoroutine(JoinMatch(profileId, server.name, button, (bool success) =>
 					{
-						DestroyThis();
-						acceptButton.OnClick.Invoke();
+						if (success)
+						{
+							DestroyThis();
+							acceptButton.OnClick.Invoke();
+							return;
+						}
+						ToggleLoading(false);
 					}, localPlayerInRaid));
 				});
 

@@ -109,13 +109,16 @@ namespace Fika.Core.Networking.Websocket
 					{
 						TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
 
-						tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, () =>
+						tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, (bool success) =>
 						{
-							// Hide matchmaker UI
-							matchmakerObject.SetActive(false);
+							if (success)
+							{
+								// Hide matchmaker UI
+								matchmakerObject.SetActive(false);
 
-							// Matchmaker next screen (accept)
-							matchMakerAcceptScreen.method_19().HandleExceptions();
+								// Matchmaker next screen (accept)
+								matchMakerAcceptScreen.method_19().HandleExceptions(); 
+							}
 						}, false));
 					}
 					else
