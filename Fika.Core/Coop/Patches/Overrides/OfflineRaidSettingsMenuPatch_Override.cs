@@ -96,6 +96,16 @@ namespace Fika.Core.Coop.Patches.Overrides
 					timeFlowCanvasGroup.SetUnlockStatus(true, true);
 				}
 				____timeFlowDropdown.Interactable = true;
+
+				GameObject timeFlowText = GameObject.Find("TimeFlowText");
+				if (timeFlowText != null)
+				{
+					CanvasGroup group = timeFlowText.GetComponent<CanvasGroup>();
+					if (group != null)
+					{
+						group.SetUnlockStatus(true, true);
+					}
+				}
 			}
 
 			// If enforced from server, this will be true by default
@@ -112,16 +122,7 @@ namespace Fika.Core.Coop.Patches.Overrides
 					{
 						customTmp.text = "Use custom weather";
 					}
-				}
-				GameObject timeFlowText = GameObject.Find("TimeFlowText");
-				if (timeFlowText != null)
-				{
-					CanvasGroup group = timeFlowText.GetComponent<CanvasGroup>();
-					if (group != null)
-					{
-						group.SetUnlockStatus(true, true);
-					}
-				}
+				}				
 			}
 		}
 
