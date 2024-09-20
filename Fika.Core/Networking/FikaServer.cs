@@ -91,10 +91,11 @@ namespace Fika.Core.Networking
 		{
 			get
 			{
-				return 60;
+				return sendRate;
 			}
 		}
 
+		private int sendRate;
 		private readonly NetPacketProcessor packetProcessor = new();
 		private CoopPlayer MyPlayer;
 		private readonly List<string> playersMissing = [];
@@ -116,6 +117,9 @@ namespace Fika.Core.Networking
 
 		public async Task Init()
 		{
+			int sendRateSetting = FikaPlugin.UpdateRate.Value;
+			logger.LogInfo($"Starting server with SendRate: {sendRateSetting}");
+			sendRate = sendRateSetting;
 			port = FikaPlugin.UDPPort.Value;
 
 			NetworkGameSession.Rtt = 0;
@@ -1168,6 +1172,9 @@ namespace Fika.Core.Networking
 			logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
 
 			HasHadPeer = true;
+
+			NetworkSettingsPacket packet = new(sendRate);
+			SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)

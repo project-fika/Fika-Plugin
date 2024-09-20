@@ -7,6 +7,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		private CoopPlayer player;
 
 		public bool Enabled { get; set; } = true;
-		public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
+		public FikaServer Server { get; set; }
 		public FikaClient Client { get; set; }
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
@@ -25,10 +26,15 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+		private int updateRate;
+		private float frameCounter;
 
 		protected void Awake()
 		{
 			player = GetComponent<CoopPlayer>();
+			Server = Singleton<FikaServer>.Instance;
+			updateRate = Server.SendRate;
+			frameCounter = 0;
 		}
 
 		public void Init()
@@ -62,17 +68,25 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			player.NetworkDeltaTime += Time.deltaTime;
+			float dur = 1f / updateRate;
+			frameCounter += Time.fixedDeltaTime;
+			while (frameCounter >= dur)
+			{
+				frameCounter -= dur;
+				SendPlayerState(mover);
+			}
+		}
 
+		private void SendPlayerState(BotMover mover)
+		{
 			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
-				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
-
-			playerStatePacket.RemoteTime = NetworkTimeSync.Time;
+				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal,
+				NetworkTimeSync.Time);
 
 			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
 

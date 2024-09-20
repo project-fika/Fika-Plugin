@@ -81,10 +81,11 @@ namespace Fika.Core.Networking
 		{
 			get
 			{
-				return 60;
+				return sendRate;
 			}
 		}
 
+		private int sendRate;
 		private NetManager netClient;
 		private CoopHandler coopHandler;
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
@@ -139,6 +140,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
+			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -185,6 +187,12 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)
+		{
+			logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}");
+			sendRate = packet.SendRate;
 		}
 
 		private void OnUsableItemPacketReceived(UsableItemPacket packet)

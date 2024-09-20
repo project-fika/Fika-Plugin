@@ -188,6 +188,7 @@ namespace Fika.Core
 		public static ConfigEntry<bool> UseUPnP { get; set; }
 		public static ConfigEntry<bool> UseNatPunching { get; set; }
 		public static ConfigEntry<int> ConnectionTimeout { get; set; }
+		public static ConfigEntry<int> UpdateRate { get; set; }
 
 		// Gameplay
 		public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
@@ -594,6 +595,9 @@ namespace Fika.Core
 
 			ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15,
 				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
+
+			UpdateRate = Config.Bind("Network", "Update Rate", 30,
+				new ConfigDescription("How often per second packets should be sent (lower = less bandwidth used, slightly more delayed for interpolation)\nThis only affects the host and will be synchronized to all clients", new AcceptableValueRange<int>(20, 60), new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Gameplay
 

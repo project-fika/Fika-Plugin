@@ -36,6 +36,8 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 		private DateTime lastPingTime;
+		private int updateRate;
+		private float frameCounter;
 
 		protected void Awake()
 		{
@@ -43,6 +45,8 @@ namespace Fika.Core.Coop.PacketHandlers
 			Client = Singleton<FikaClient>.Instance;
 			enabled = false;
 			lastPingTime = DateTime.Now;
+			updateRate = Client.SendRate;
+			frameCounter = 0f;
 		}
 
 		public void Init()
@@ -73,17 +77,25 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			player.NetworkDeltaTime += Time.deltaTime;
+			float dur = 1f / updateRate;
+			frameCounter += Time.fixedDeltaTime;
+			while (frameCounter >= dur)
+			{
+				frameCounter -= dur;
+				SendPlayerState();
+			}
+		}
 
+		private void SendPlayerState()
+		{
 			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
-				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
-
-			playerStatePacket.RemoteTime = NetworkTimeSync.Time;
+				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal,
+				NetworkTimeSync.Time);
 
 			Client.SendData(ref playerStatePacket, DeliveryMethod.Unreliable);
 

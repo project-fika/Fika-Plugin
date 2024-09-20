@@ -15,8 +15,6 @@ namespace Fika.Core.Coop.PacketHandlers
 		private ObservedCoopPlayer observedPlayer;
 		public FikaServer Server { get; private set; }
 		public FikaClient Client { get; private set; }
-		public PlayerStatePacket LastState { get; set; }
-		public PlayerStatePacket NewState { get; set; }
 		public Queue<WeaponPacket> FirearmPackets { get; private set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; private set; } = new(50);
 		public Queue<ArmorDamagePacket> ArmorDamagePackets { get; private set; } = new(50);
@@ -43,27 +41,12 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				Client = Singleton<FikaClient>.Instance;
 			}
-
-			LastState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
-				player.CurrentManagedState.Name, player.MovementContext.Tilt, player.MovementContext.Step,
-				player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled,
-				player.Physical.SerializationStruct, player.MovementContext.BlindFire, player.observedOverlap,
-				player.leftStanceDisabled, player.MovementContext.IsGrounded, false, 0, Vector3.zero);
-
-			NewState = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
-				player.CurrentManagedState.Name, player.MovementContext.Tilt, player.MovementContext.Step,
-				player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled,
-				player.Physical.SerializationStruct, player.MovementContext.BlindFire, player.observedOverlap,
-				player.leftStanceDisabled, player.MovementContext.IsGrounded, false, 0, Vector3.zero);
 		}
 
 		protected void Update()
 		{
 			if (observedPlayer != null)
 			{
-				//LastState = observedPlayer.Interpolate(NewState, LastState);
 				int healthSyncPackets = HealthSyncPackets.Count;
 				if (healthSyncPackets > 0)
 				{

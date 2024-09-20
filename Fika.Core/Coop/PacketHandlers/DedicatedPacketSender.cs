@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		private CoopPlayer player;
 
 		public bool Enabled { get; set; } = false;
-		public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
+		public FikaServer Server { get; set; }
 		public FikaClient Client { get; set; }
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
@@ -25,12 +25,10 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 
-		private ManualLogSource logger;
-
 		protected void Awake()
 		{
-			logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
 			player = GetComponent<CoopPlayer>();
+			Server = Singleton<FikaServer>.Instance;
 			enabled = false;
 		}
 

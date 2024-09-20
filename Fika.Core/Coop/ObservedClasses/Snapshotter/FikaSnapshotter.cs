@@ -65,7 +65,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 		public void Insert(PlayerStatePacket snapshot)
 		{
 			snapshot.LocalTime = NetworkTimeSync.Time;
-
 			SnapshotInterpolation.InsertAndAdjust(buffer, interpolationSettings.bufferLimit, snapshot, ref localTimeline, ref localTimeScale,
 				sendInterval, BufferTime, interpolationSettings.catchupSpeed, interpolationSettings.slowdownSpeed, ref driftEma,
 				interpolationSettings.catchupNegativeThreshold, interpolationSettings.catchupPositiveThreshold, ref deliveryTimeEma);

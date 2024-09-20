@@ -50,7 +50,6 @@ namespace Fika.Core.Coop.Players
 		public bool IsObservedAI = false;
 		public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
 		public FikaSnapshotter Snapshotter;
-		public float NetworkDeltaTime;
 		public ClientMovementContext ClientMovementContext
 		{
 			get

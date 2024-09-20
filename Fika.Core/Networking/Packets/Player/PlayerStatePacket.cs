@@ -6,9 +6,10 @@ using static BaseBallistic;
 namespace Fika.Core.Networking
 {
 	public struct PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
-		EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed,
-		bool isProne, float poseLevel, bool isSprinting, BasePhysicalClass.GStruct36 stamina, int blindfire,
-		float weaponOverlap, bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, Vector3 surfaceNormal) : INetSerializable, ISnapshot
+		EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed, bool isProne,
+		float poseLevel, bool isSprinting, BasePhysicalClass.GStruct36 stamina, int blindfire, float weaponOverlap,
+		bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, Vector3 surfaceNormal,
+		double remoteTime) : INetSerializable, ISnapshot
 	{
 		public int NetId = netId;
 		public Vector3 Position = position;
@@ -33,7 +34,7 @@ namespace Fika.Core.Networking
 		public Vector3 SurfaceNormal = surfaceNormal;
 
 		// Snapshot
-		public double RemoteTime { get; set ; }
+		public double RemoteTime { get; set; } = remoteTime;
 		public double LocalTime { get; set; }
 
 		public void Serialize(NetDataWriter writer)
