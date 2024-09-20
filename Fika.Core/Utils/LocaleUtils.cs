@@ -191,5 +191,9 @@ namespace Fika.Core.Utils
 		public const string UI_FINISH_RECONNECT = "F_UI_FinishReconnect";
 		public const string FREECAM_ENABLED = "F_Client_FreeCamInputEnabled";
 		public const string FREECAM_DISABLED = "F_Client_FreeCamInputDisabled";
+		public const string UI_RAID_SETTINGS_DESCRIPTION = "F_UI_RaidSettingsDescription";
+		public const string UI_COOP_GAME_MODE = "F_UI_CoopGameMode";
+		public const string UI_COOP_RAID_SETTINGS = "F_UI_CoopRaidSettings";
+		public const string UI_FIKA_ALWAYS_COOP = "F_UI_FikaAlwaysCoop";
 	}
 }

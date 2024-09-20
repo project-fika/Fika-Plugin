@@ -1,9 +1,9 @@
 ﻿using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
+using Fika.Core.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -33,15 +33,23 @@ namespace Fika.Core.Coop.Patches.Overrides
 		}
 
 		[PatchPostfix]
-		private static void PatchPostfix(RaidSettingsWindow __instance, UiElementBlocker ____coopModeBlocker,
+		private static void PatchPostfix(RaidSettingsWindow __instance, RaidSettings raidSettings, UiElementBlocker ____coopModeBlocker,
 			List<CanvasGroup> ____weatherCanvasGroups, UpdatableToggle ____randomTimeToggle,
 			UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups,
 			List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown,
-			List<CanvasGroup> ____timeCanvasGroups, DropDownBox ____timeFlowDropdown, RaidSettings raidSettings)
+			List<CanvasGroup> ____timeCanvasGroups, DropDownBox ____timeFlowDropdown, UpdatableToggle ____coopModeToggle)
 		{
 			randomWeather = false;
 			// Always disable the Coop Mode checkbox
-			____coopModeBlocker.SetBlock(true, "Co-op is always enabled in Fika");
+			____coopModeBlocker.SetBlock(true, LocaleUtils.UI_FIKA_ALWAYS_COOP.Localized());
+			____coopModeToggle.onValueChanged.RemoveAllListeners();
+			____coopModeToggle.isOn = true;
+
+			LocalizedText captionText = __instance.gameObject.transform.GetChild(0).GetChild(1).GetComponent<LocalizedText>();
+			if (captionText != null)
+			{
+				captionText.method_2(LocaleUtils.UI_COOP_RAID_SETTINGS.Localized());
+			}
 
 			// Reset this one as otherwise it sticks
 			raidSettings.TimeAndWeatherSettings.HourOfDay = -1;
@@ -122,7 +130,7 @@ namespace Fika.Core.Coop.Patches.Overrides
 					{
 						customTmp.text = "Use custom weather";
 					}
-				}				
+				}
 			}
 		}
 
