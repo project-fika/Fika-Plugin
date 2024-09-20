@@ -144,12 +144,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 			localTimeline += deltaTime * localTimescale;
 		}
 
-		public static void StepInterpolation<T>(
-			SortedList<double, T> buffer,
-			double localTimeline,
-			out T fromSnapshot,
-			out T toSnapshot,
-			out double t)
+		public static void StepInterpolation<T>(SortedList<double, T> buffer, double localTimeline, out T fromSnapshot, out T toSnapshot, out double t)
 			where T : ISnapshot
 		{
 			Sample(buffer, localTimeline, out int from, out int to, out t);
