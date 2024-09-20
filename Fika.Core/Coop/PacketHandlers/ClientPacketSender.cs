@@ -9,6 +9,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -81,6 +82,8 @@ namespace Fika.Core.Coop.PacketHandlers
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
 				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
+
+			playerStatePacket.RemoteTime = NetworkTimeSync.Time;
 
 			Client.SendData(ref playerStatePacket, DeliveryMethod.Unreliable);
 

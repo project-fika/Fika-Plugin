@@ -20,6 +20,7 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
@@ -54,7 +55,7 @@ namespace Fika.Core.Networking
 		public int ReadyClients = 0;
 		public bool HostReady = false;
 		public bool HostLoaded = false;
-		public bool ReconnectDone = false;
+		public bool ReconnectDone = false;		
 		public NetManager NetClient
 		{
 			get
@@ -80,7 +81,7 @@ namespace Fika.Core.Networking
 		{
 			get
 			{
-				return 30;
+				return 60;
 			}
 		}
 

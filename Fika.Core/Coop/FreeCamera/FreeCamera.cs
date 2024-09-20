@@ -17,10 +17,10 @@ namespace Fika.Core.Coop.FreeCamera
 	/// A simple free camera to be added to a Unity game object. <br/><br/>
 	/// 
 	/// Full credit to Ashley Davis on GitHub for the inital code:<br/>
-	/// https://gist.github.com/ashleydavis/f025c03a9221bc840a2b<br/><br/>
+	/// <see href="https://gist.github.com/ashleydavis/f025c03a9221bc840a2b"/><br/><br/>
 	/// 
 	/// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
-	/// https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs
+	/// <see href="https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs"/>
 	/// </summary>
 	public class FreeCamera : MonoBehaviour
 	{

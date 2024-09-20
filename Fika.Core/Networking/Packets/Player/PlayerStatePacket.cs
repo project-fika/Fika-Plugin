@@ -59,7 +59,7 @@ namespace Fika.Core.Networking
 			writer.Put(HasGround);
 			writer.Put((int)SurfaceSound);
 			writer.Put(SurfaceNormal);
-			writer.Put(Time.time);
+			writer.Put(RemoteTime);
 		}
 
 		public void Deserialize(NetDataReader reader)
@@ -85,7 +85,7 @@ namespace Fika.Core.Networking
 			HasGround = reader.GetBool();
 			SurfaceSound = (ESurfaceSound)reader.GetInt();
 			SurfaceNormal = reader.GetVector3();
-			RemoteTime = reader.GetFloat();
+			RemoteTime = reader.GetDouble();
 		}
 	}
 }

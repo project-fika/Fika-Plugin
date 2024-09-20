@@ -21,6 +21,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
+using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Players;
@@ -680,6 +681,7 @@ namespace Fika.Core.Coop.GameMode
 			GameUi.gameObject.SetActive(true);
 			GameUi.TimerPanel.ProfileId = ProfileId;
 			yield return new WaitForSeconds(timeBeforeDeployLocal);
+			NetworkTimeSync.Start();
 		}
 
 		/// <summary>
@@ -1866,6 +1868,7 @@ namespace Fika.Core.Coop.GameMode
 		/// <param name="delay"></param>
 		public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
 		{
+			NetworkTimeSync.Reset();
 			Logger.LogDebug("Stop");
 
 			CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;

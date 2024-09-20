@@ -1,9 +1,9 @@
 ﻿using Comfort.Common;
+using EFT;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using System.Collections.Generic;
-using System.Security.Policy;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotter
@@ -12,12 +12,13 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 	{
 		private readonly SortedList<double, PlayerStatePacket> buffer = [];
 		private double localTimeline;
-		private double localTimeScale = 1;
+		private double localTimeScale = Time.timeScale;
 		private readonly SnapshotInterpolationSettings interpolationSettings = new();
 		private ExponentialMovingAverage driftEma;
 		private ExponentialMovingAverage deliveryTimeEma;
 		private ObservedCoopPlayer player;
 		private int sendRate;
+		private float sendInterval;
 
 		public static FikaSnapshotter Create(ObservedCoopPlayer player)
 		{
@@ -30,14 +31,14 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 		{
 			get
 			{
-				return 30 * interpolationSettings.bufferTimeMultiplier;
+				return sendInterval * interpolationSettings.bufferTimeMultiplier;
 			}
 		}
 
 		private void Awake()
 		{
-			driftEma = new ExponentialMovingAverage(sendRate * interpolationSettings.driftEmaDuration);
-			deliveryTimeEma = new ExponentialMovingAverage(sendRate * interpolationSettings.deliveryTimeEmaDuration);
+			driftEma = new(sendRate * interpolationSettings.driftEmaDuration);
+			deliveryTimeEma = new(sendRate * interpolationSettings.deliveryTimeEmaDuration);
 
 			if (FikaBackendUtils.IsServer)
 			{
@@ -47,13 +48,14 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 			{
 				sendRate = Singleton<FikaClient>.Instance.SendRate;
 			}
+			sendInterval = 1f / sendRate;
 		}
 
 		private void Update()
 		{
 			if (buffer.Count > 0)
 			{
-				SnapshotInterpolation.Step(buffer, Time.deltaTime, ref localTimeline, localTimeScale, out PlayerStatePacket fromSnapshot,
+				SnapshotInterpolation.Step(buffer, Time.unscaledDeltaTime, ref localTimeline, localTimeScale, out PlayerStatePacket fromSnapshot,
 					out PlayerStatePacket toSnapshot, out double ratio);
 
 				player.Interpolate(fromSnapshot, toSnapshot, ratio);
@@ -62,10 +64,10 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 
 		public void Insert(PlayerStatePacket snapshot)
 		{
-			snapshot.LocalTime = Time.time;
+			snapshot.LocalTime = NetworkTimeSync.Time;
 
 			SnapshotInterpolation.InsertAndAdjust(buffer, interpolationSettings.bufferLimit, snapshot, ref localTimeline, ref localTimeScale,
-				sendRate, BufferTime, interpolationSettings.catchupSpeed, interpolationSettings.slowdownSpeed, ref driftEma,
+				sendInterval, BufferTime, interpolationSettings.catchupSpeed, interpolationSettings.slowdownSpeed, ref driftEma,
 				interpolationSettings.catchupNegativeThreshold, interpolationSettings.catchupPositiveThreshold, ref deliveryTimeEma);
 		}
 	}

@@ -1,6 +1,8 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using EFT;
+using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -69,6 +71,8 @@ namespace Fika.Core.Coop.PacketHandlers
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
 				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
+
+			playerStatePacket.RemoteTime = NetworkTimeSync.Time;
 
 			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
 
