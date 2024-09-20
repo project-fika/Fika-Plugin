@@ -49,6 +49,7 @@ namespace Fika.Core.Coop.Utils
 		public static string HostLocationId;
 		public static bool RequestFikaWorld = false;
 		public static Vector3 ReconnectPosition = Vector3.zero;
+
 		private static string groupId;
 		private static string raidCode;
 

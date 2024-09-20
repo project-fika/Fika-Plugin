@@ -142,10 +142,26 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
+			if (timeAndWeather.HourOfDay != -1)
+			{
+				Logger.LogInfo($"Using custom time, hour of day: {timeAndWeather.HourOfDay}");
+				DateTime currentTime = backendDateTime.DateTime_1;
+				backendDateTime.DateTime_1 = new(currentTime.Year, currentTime.Month, currentTime.Day, timeAndWeather.HourOfDay, currentTime.Minute,
+									 currentTime.Second, currentTime.Millisecond);
+			}
+
 			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, backendDateTime, insurance, menuUI, gameUI,
 				location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
 				new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
 			coopGame.isServer = FikaBackendUtils.IsServer;
+
+			if (timeAndWeather.TimeFlowType != ETimeFlowType.x1)
+			{
+				float multiplier = timeAndWeather.TimeFlowType.ToTimeFlow();
+				float newFlow = 7 * multiplier;
+				coopGame.GameWorld_0.GameDateTime.TimeFactor = newFlow;
+				Logger.LogInfo($"Using custom time flow: {newFlow}");
+			}
 
 			if (coopGame.isServer)
 			{

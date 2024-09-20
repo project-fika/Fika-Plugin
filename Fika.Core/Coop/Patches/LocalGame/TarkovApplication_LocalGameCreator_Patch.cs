@@ -112,7 +112,9 @@ namespace Fika.Core.Coop.Patches.LocalGame
 				RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
 
 				raidSettings.MetabolismDisabled = raidSettingsResponse.MetabolismDisabled;
-				raidSettings.PlayersSpawnPlace = (EPlayersSpawnPlace)Enum.Parse(typeof(EPlayersSpawnPlace), raidSettingsResponse.PlayersSpawnPlace);
+				raidSettings.PlayersSpawnPlace = raidSettingsResponse.PlayersSpawnPlace;
+				timeAndWeather.HourOfDay = raidSettingsResponse.HourOfDay;
+				timeAndWeather.TimeFlowType = raidSettingsResponse.TimeFlowType;
 			}
 			else
 			{

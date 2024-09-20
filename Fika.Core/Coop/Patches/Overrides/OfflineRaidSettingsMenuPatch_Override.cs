@@ -37,11 +37,15 @@ namespace Fika.Core.Coop.Patches.Overrides
 			List<CanvasGroup> ____weatherCanvasGroups, UpdatableToggle ____randomTimeToggle,
 			UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups,
 			List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown,
-			RaidSettings raidSettings)
+			List<CanvasGroup> ____timeCanvasGroups, DropDownBox ____timeFlowDropdown, RaidSettings raidSettings)
 		{
 			randomWeather = false;
 			// Always disable the Coop Mode checkbox
 			____coopModeBlocker.SetBlock(true, "Co-op is always enabled in Fika");
+
+			// Reset this one as otherwise it sticks
+			raidSettings.TimeAndWeatherSettings.HourOfDay = -1;
+			raidSettings.TimeAndWeatherSettings.TimeFlowType = ETimeFlowType.x1;
 
 			if (____weatherCanvasGroups != null)
 			{
@@ -54,6 +58,11 @@ namespace Fika.Core.Coop.Patches.Overrides
 			}
 
 			foreach (CanvasGroup canvasGroup in ____playersSpawnPlaceCanvasGroups)
+			{
+				canvasGroup.SetUnlockStatus(true, true);
+			}
+
+			foreach (CanvasGroup canvasGroup in ____timeCanvasGroups)
 			{
 				canvasGroup.SetUnlockStatus(true, true);
 			}
@@ -75,6 +84,20 @@ namespace Fika.Core.Coop.Patches.Overrides
 
 			instance = __instance;
 
+			GameObject timeFlowDropDown = GameObject.Find("TimeFlowDropdown");
+			if (timeFlowDropDown != null)
+			{
+				GameObject tooltip = timeFlowDropDown.transform.parent.GetChild(1).gameObject;
+				tooltip.SetActive(false);
+
+				CanvasGroup timeFlowCanvasGroup = timeFlowDropDown.GetComponent<CanvasGroup>();
+				if (timeFlowCanvasGroup != null)
+				{
+					timeFlowCanvasGroup.SetUnlockStatus(true, true);
+				}
+				____timeFlowDropdown.Interactable = true;
+			}
+
 			// If enforced from server, this will be true by default
 			if (!raidSettings.TimeAndWeatherSettings.IsRandomWeather)
 			{
@@ -88,6 +111,15 @@ namespace Fika.Core.Coop.Patches.Overrides
 					if (customTmp != null)
 					{
 						customTmp.text = "Use custom weather";
+					}
+				}
+				GameObject timeFlowText = GameObject.Find("TimeFlowText");
+				if (timeFlowText != null)
+				{
+					CanvasGroup group = timeFlowText.GetComponent<CanvasGroup>();
+					if (group != null)
+					{
+						group.SetUnlockStatus(true, true);
 					}
 				}
 			}
