@@ -1350,11 +1350,7 @@ namespace Fika.Core.Coop.Players
 			{
 				if (HandsController is ItemHandsController handsController)
 				{
-					handsController.ApplyCompassPacket(new()
-					{
-						Toggle = true,
-						Status = packet.CompassState
-					});
+					handsController.CompassState.Value = packet.CompassState;
 				}
 			}
 
