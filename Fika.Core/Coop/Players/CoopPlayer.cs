@@ -15,6 +15,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -48,6 +49,8 @@ namespace Fika.Core.Coop.Players
 		public int NetId;
 		public bool IsObservedAI = false;
 		public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+		public FikaSnapshotter Snapshotter;
+		public float NetworkDeltaTime;
 		public ClientMovementContext ClientMovementContext
 		{
 			get

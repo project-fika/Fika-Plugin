@@ -11,6 +11,7 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -167,6 +168,7 @@ namespace Fika.Core.Coop.Players
 			player.AggressorFound = false;
 			player._animators[0].enabled = true;
 			player.isServer = FikaBackendUtils.IsServer;
+			player.Snapshotter = FikaSnapshotter.Create(player);
 
 			if (FikaBackendUtils.IsDedicated)
 			{
@@ -590,14 +592,14 @@ namespace Fika.Core.Coop.Players
 			method_32(clip);
 		}
 
-		public PlayerStatePacket Interpolate(in PlayerStatePacket newState, in PlayerStatePacket lastState)
+		public PlayerStatePacket Interpolate(in PlayerStatePacket newState, in PlayerStatePacket lastState, double ratio)
 		{
-			float interpolate = 0.3f;
+			float interpolateRatio = (float)ratio;
 
 			method_62(newState.HasGround, newState.SurfaceSound);
 
-			Rotation = new Vector2(Mathf.LerpAngle(MovementContext.Rotation.x, newState.Rotation.x, interpolate),
-				Mathf.Lerp(MovementContext.Rotation.y, newState.Rotation.y, interpolate));
+			Rotation = new Vector2(Mathf.LerpAngle(MovementContext.Rotation.x, newState.Rotation.x, interpolateRatio),
+				Mathf.Lerp(MovementContext.Rotation.y, newState.Rotation.y, interpolateRatio));
 
 			HeadRotation = newState.HeadRotation;
 			ProceduralWeaponAnimation.SetHeadRotation(HeadRotation);
@@ -668,15 +670,15 @@ namespace Fika.Core.Coop.Players
 
 			if (!IsInventoryOpened)
 			{
-				Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolate));
+				Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolateRatio));
 				if (isServer)
 				{
 					MovementContext.method_1(newState.MovementDirection);
 				}
 			}
 
-			Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolate);
-			CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolate);
+			Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolateRatio);
+			CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolateRatio);
 
 			if (!Mathf.Approximately(MovementContext.Tilt, newState.Tilt))
 			{

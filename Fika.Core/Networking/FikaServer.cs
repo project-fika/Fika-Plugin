@@ -86,6 +86,14 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		public int SendRate
+		{
+			get
+			{
+				return 30;
+			}
+		}
+
 		private readonly NetPacketProcessor packetProcessor = new();
 		private CoopPlayer MyPlayer;
 		private readonly List<string> playersMissing = [];
@@ -1087,7 +1095,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.NewState = packet;
+				playerToApply.Snapshotter.Insert(packet);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);

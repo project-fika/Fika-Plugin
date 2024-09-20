@@ -60,6 +60,8 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
+			player.NetworkDeltaTime += Time.deltaTime;
+
 			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,

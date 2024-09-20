@@ -76,6 +76,14 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		public int SendRate
+		{
+			get
+			{
+				return 30;
+			}
+		}
+
 		private NetManager netClient;
 		private CoopHandler coopHandler;
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
@@ -1166,7 +1174,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.NewState = packet;
+				playerToApply.Snapshotter.Insert(packet);
 			}
 		}
 

@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		{
 			if (observedPlayer != null)
 			{
-				LastState = observedPlayer.Interpolate(NewState, LastState);
+				//LastState = observedPlayer.Interpolate(NewState, LastState);
 				int healthSyncPackets = HealthSyncPackets.Count;
 				if (healthSyncPackets > 0)
 				{
