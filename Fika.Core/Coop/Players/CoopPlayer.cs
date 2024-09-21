@@ -1096,7 +1096,10 @@ namespace Fika.Core.Coop.Players
 						break;
 					case GStruct173.EMountingCommand.StartLeaving:
 						{
-							MovementContext.StartExitingMountedState();
+							if (MovementContext is ObservedMovementContext observedMovementContext)
+							{
+								observedMovementContext.ObservedStartExitingMountedState();
+							}
 						}
 						break;
 					default:

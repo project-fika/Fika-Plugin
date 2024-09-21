@@ -175,6 +175,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				EPlayerState.Run => new ObservedRunState(this),
 				EPlayerState.Sprint => new ObservedSprintState(this),
 				EPlayerState.Stationary => new ObservedStationaryState(this),
+				EPlayerState.IdleWeaponMounting => new ObservedMountedState(this, _player),
 				_ => base.GetNewState(name, isAI)
 			};
 		}
@@ -219,6 +220,23 @@ namespace Fika.Core.Coop.ObservedClasses
 				player.HandsController.ControllerGameObject.transform.SetPositionAndRotation(player.PlayerBones.Ribcage.Original.position, handsRotation);
 				player.CameraContainer.transform.rotation = handsRotation;
 			}
+		}
+
+		public void ObservedStartExitingMountedState()
+		{
+			if (OverridenControlsState is not ObservedMountedState observedMountedState)
+			{
+				return;
+			}
+			_player.ProceduralWeaponAnimation.SetMountingData(false, false);
+			observedMountedState.StartExiting();
+			PlayerMountingPointData.OnStartExitMountedState -= StartExitingMountedState;
+			Player.AbstractHandsController handsController = _player.HandsController;
+			if (handsController == null)
+			{
+				return;
+			}
+			handsController.FirearmsAnimator.SetMounted(false);
 		}
 
 		private class StationaryHandler(MovementContext context, Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
