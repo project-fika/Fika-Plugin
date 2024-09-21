@@ -694,7 +694,7 @@ namespace Fika.Core.Networking
 			if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
 			{
 				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
+							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId, packet.PlayerInfo.ControllerType, packet.PlayerInfo.ControllerId);
 			}
 		}
 
