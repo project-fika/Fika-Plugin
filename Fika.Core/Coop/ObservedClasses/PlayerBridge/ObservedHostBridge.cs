@@ -28,6 +28,11 @@ namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
 
         public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
         {
+			if (damageInfo.DamageType.IsEnvironmental())
+			{
+				return;
+			}
+
 			if (damageInfo.DamageType is EDamageType.Landmine)
 			{
 				observedPlayer.HandleMineDamage(damageInfo, bodyPartType, bodyPartCollider);
@@ -80,5 +85,6 @@ namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
         {
             return observedPlayer.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
         }
-    }
+
+	}
 }

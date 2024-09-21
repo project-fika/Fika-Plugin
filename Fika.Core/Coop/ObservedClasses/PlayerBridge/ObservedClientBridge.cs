@@ -28,7 +28,12 @@ namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
 
         public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
         {
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer)
+			if (damageInfo.DamageType.IsEnvironmental())
+			{
+				return;
+			}
+
+			if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer)
             {
                 observedPlayer.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
             }
