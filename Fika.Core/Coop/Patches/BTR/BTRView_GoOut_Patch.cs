@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.BTR
+namespace Fika.Core.Coop.Patches
 {
 	public class BTRView_GoOut_Patch : ModulePatch
 	{

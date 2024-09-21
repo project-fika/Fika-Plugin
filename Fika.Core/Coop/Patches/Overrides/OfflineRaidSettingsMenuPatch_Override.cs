@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.Overrides
+namespace Fika.Core.Coop.Patches
 {
 	public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
 	{

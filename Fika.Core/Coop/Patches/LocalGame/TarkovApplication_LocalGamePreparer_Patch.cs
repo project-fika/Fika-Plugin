@@ -7,7 +7,7 @@ using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.LocalGame
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// Created by: Lacyway

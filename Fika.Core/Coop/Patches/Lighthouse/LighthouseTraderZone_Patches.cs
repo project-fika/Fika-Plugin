@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.Lighthouse
+namespace Fika.Core.Coop.Patches
 {
 	class LighthouseTraderZone_Patches
 	{

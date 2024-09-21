@@ -2,7 +2,7 @@
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Mines
+namespace Fika.Core.Coop.Patches
 {
 	public class MineDirectional_OnTriggerEnter_Patch : ModulePatch
 	{

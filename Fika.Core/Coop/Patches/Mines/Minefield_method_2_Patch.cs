@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.Mines
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// This patch prevents a null exception when an <see cref="ObservedCoopPlayer"/> is hit by a mine explosion

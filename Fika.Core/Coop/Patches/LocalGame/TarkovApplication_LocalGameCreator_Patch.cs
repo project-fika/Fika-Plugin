@@ -17,7 +17,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.LocalGame
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// Created by: Paulov

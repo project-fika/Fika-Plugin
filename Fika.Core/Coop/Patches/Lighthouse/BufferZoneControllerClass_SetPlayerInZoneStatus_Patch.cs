@@ -6,7 +6,7 @@ using LiteNetLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Lighthouse
+namespace Fika.Core.Coop.Patches
 {
 	public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : ModulePatch
 	{

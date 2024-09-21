@@ -5,7 +5,7 @@ using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.PlayerPatches
+namespace Fika.Core.Coop.Patches
 {
 	public class BodyPartCollider_SetUpPlayer_Patch : ModulePatch
 	{

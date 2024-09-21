@@ -2,7 +2,7 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Patches.Overrides;
+using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;

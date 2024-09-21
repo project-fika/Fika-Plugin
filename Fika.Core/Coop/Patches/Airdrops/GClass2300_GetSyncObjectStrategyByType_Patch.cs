@@ -3,7 +3,7 @@ using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Airdrops
+namespace Fika.Core.Coop.Patches
 {
 	public class GClass2300_GetSyncObjectStrategyByType_Patch : ModulePatch
 	{
