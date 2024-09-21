@@ -1,6 +1,5 @@
 ﻿using EFT;
 using Fika.Core.Coop.ObservedClasses;
-using Fika.Core.Coop.ObservedClasses.PlayerBridge;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;

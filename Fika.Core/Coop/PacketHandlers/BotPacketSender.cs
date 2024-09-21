@@ -2,7 +2,7 @@
 
 using Comfort.Common;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.ObservedClasses.Snapshotter;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;

@@ -5,7 +5,7 @@ using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses.Snapshotter
+namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
 	public class FikaSnapshotter : MonoBehaviour
 	{

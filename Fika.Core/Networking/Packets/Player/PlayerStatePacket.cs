@@ -1,4 +1,4 @@
-﻿using Fika.Core.Coop.ObservedClasses.Snapshotter;
+﻿using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using LiteNetLib.Utils;
 using UnityEngine;
 using static BaseBallistic;

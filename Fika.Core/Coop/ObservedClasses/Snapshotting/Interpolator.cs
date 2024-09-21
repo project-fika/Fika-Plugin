@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Fika.Core.Coop.ObservedClasses.Snapshotter
+namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
 	public static class SortedListExtensions
 	{

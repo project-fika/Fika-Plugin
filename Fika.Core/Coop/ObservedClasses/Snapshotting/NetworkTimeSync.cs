@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Fika.Core.Coop.ObservedClasses.Snapshotter
+namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
 	/// <summary>
 	/// Used to sync snapshots for replication

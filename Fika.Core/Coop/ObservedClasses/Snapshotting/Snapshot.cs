@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Coop.ObservedClasses.Snapshotter
+﻿namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
 	public interface ISnapshot
 	{

@@ -4,7 +4,7 @@ using EFT.Ballistics;
 using Fika.Core.Coop.Players;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
+namespace Fika.Core.Coop.ObservedClasses
 {
 	public class ObservedHostBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.GInterface18
 	{

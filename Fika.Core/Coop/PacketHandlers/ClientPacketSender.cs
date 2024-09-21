@@ -9,7 +9,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.ObservedClasses.Snapshotter;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
