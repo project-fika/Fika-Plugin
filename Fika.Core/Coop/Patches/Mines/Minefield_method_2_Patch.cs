@@ -4,7 +4,6 @@ using EFT.Interactive;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

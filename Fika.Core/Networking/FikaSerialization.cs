@@ -32,7 +32,7 @@ namespace Fika.Core.Networking
 				writer.Put(packet.FirstOperationId);
 				writer.Put((byte)packet.ControllerType);
 				if (packet.ControllerType != EHandsControllerType.None)
-				{					
+				{
 					writer.Put(packet.ItemId);
 					writer.Put(packet.IsStationary);
 				}

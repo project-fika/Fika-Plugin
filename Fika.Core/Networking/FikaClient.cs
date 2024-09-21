@@ -25,7 +25,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -55,7 +54,7 @@ namespace Fika.Core.Networking
 		public int ReadyClients = 0;
 		public bool HostReady = false;
 		public bool HostLoaded = false;
-		public bool ReconnectDone = false;		
+		public bool ReconnectDone = false;
 		public NetManager NetClient
 		{
 			get

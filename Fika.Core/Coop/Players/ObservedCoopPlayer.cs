@@ -362,7 +362,7 @@ namespace Fika.Core.Coop.Players
 		}
 
 		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
-		{			
+		{
 			if (HealthController != null && !HealthController.IsAlive)
 			{
 				return null;
@@ -670,7 +670,7 @@ namespace Fika.Core.Coop.Players
 
 			if (!IsInventoryOpened && MovementContext.IsGrounded)
 			{
-				Move(Vector2.LerpUnclamped(from.MovementDirection,to.MovementDirection, interpolateRatio));
+				Move(Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, interpolateRatio));
 				if (isServer)
 				{
 					MovementContext.method_1(to.MovementDirection);

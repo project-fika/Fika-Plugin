@@ -202,7 +202,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			if (command is GStruct171.EStationaryCommand.Leave)
 			{
 				PlayerAnimatorSetStationary(false);
-				RotationAction = DefaultRotationFunction; 
+				RotationAction = DefaultRotationFunction;
 			}
 		}
 

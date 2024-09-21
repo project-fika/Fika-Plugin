@@ -1,6 +1,5 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;

@@ -6,28 +6,28 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
 {
-    public class ObservedHostBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.GInterface18
-    {
-        private readonly ObservedCoopPlayer observedPlayer = observedPlayer;
+	public class ObservedHostBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.GInterface18
+	{
+		private readonly ObservedCoopPlayer observedPlayer = observedPlayer;
 
-        public IPlayer iPlayer
-        {
-            get
-            {
-                return observedPlayer;
-            }
-        }
+		public IPlayer iPlayer
+		{
+			get
+			{
+				return observedPlayer;
+			}
+		}
 
-        public float WorldTime
-        {
-            get
-            {
-                return Singleton<AbstractGame>.Instance.LastServerTimeStamp;
-            }
-        }
+		public float WorldTime
+		{
+			get
+			{
+				return Singleton<AbstractGame>.Instance.LastServerTimeStamp;
+			}
+		}
 
-        public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
-        {
+		public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
+		{
 			if (damageInfo.DamageType.IsEnvironmental())
 			{
 				return;
@@ -39,52 +39,52 @@ namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
 				return;
 			}
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI)
-            {
-                observedPlayer.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
-            }
-        }
+			if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI)
+			{
+				observedPlayer.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
+			}
+		}
 
-        public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
-        {
+		public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
+		{
 			if (damageInfo.DamageType is EDamageType.Sniper)
 			{
 				return observedPlayer.HandleSniperShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
 			}
 
-            if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI))
-            {
-                return observedPlayer.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
-            }
+			if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI))
+			{
+				return observedPlayer.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
+			}
 
-            observedPlayer.ShotReactions(damageInfo, bodyPart);
-            return new()
-            {
-                PoV = EPointOfView.ThirdPerson,
-                Penetrated = damageInfo.Penetrated,
-                Material = MaterialType.Body
-            };
-        }
+			observedPlayer.ShotReactions(damageInfo, bodyPart);
+			return new()
+			{
+				PoV = EPointOfView.ThirdPerson,
+				Penetrated = damageInfo.Penetrated,
+				Material = MaterialType.Body
+			};
+		}
 
-        public bool CheckArmorHitByDirection(BodyPartCollider bodypart, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
-        {
-            return observedPlayer.CheckArmorHitByDirection(bodypart);
-        }
+		public bool CheckArmorHitByDirection(BodyPartCollider bodypart, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+		{
+			return observedPlayer.CheckArmorHitByDirection(bodypart);
+		}
 
-        public bool IsShotDeflectedByHeavyArmor(EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, int shotSeed)
-        {
-            return observedPlayer.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
-        }
+		public bool IsShotDeflectedByHeavyArmor(EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, int shotSeed)
+		{
+			return observedPlayer.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
+		}
 
-        public bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
-        {
-            return observedPlayer.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
-        }
+		public bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+		{
+			return observedPlayer.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
+		}
 
-        public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out GStruct23 armorResistanceData)
-        {
-            return observedPlayer.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
-        }
+		public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out GStruct23 armorResistanceData)
+		{
+			return observedPlayer.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
+		}
 
 	}
 }

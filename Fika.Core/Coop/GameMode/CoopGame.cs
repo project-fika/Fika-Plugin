@@ -691,7 +691,7 @@ namespace Fika.Core.Coop.GameMode
 			yield return new WaitForSeconds(timeBeforeDeployLocal);
 			if (!FikaBackendUtils.IsReconnect)
 			{
-				NetworkTimeSync.Start(); 
+				NetworkTimeSync.Start();
 			}
 		}
 
@@ -1608,7 +1608,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				DynamicAI.EnabledChange(FikaPlugin.DynamicAI.Value);
 			}
-		}		
+		}
 
 		public override void Spawn()
 		{

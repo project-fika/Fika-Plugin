@@ -4,7 +4,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
 using SPT.Reflection.Patching;
-using System;
 using System.Linq;
 using System.Reflection;
 

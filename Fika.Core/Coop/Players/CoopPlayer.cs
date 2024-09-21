@@ -1562,7 +1562,7 @@ namespace Fika.Core.Coop.Players
 			}
 			FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
 			return null;
-		}		
+		}
 
 		#region handlers
 		private class KeyHandler(CoopPlayer player)

@@ -1,6 +1,5 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using BepInEx.Logging;
 using Comfort.Common;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;

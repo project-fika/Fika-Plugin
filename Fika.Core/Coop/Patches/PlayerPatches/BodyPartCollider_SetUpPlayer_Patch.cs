@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Patches.PlayerPatches
 		public static bool Prefix(BodyPartCollider __instance, IPlayer iPlayer)
 		{
 			if (iPlayer != null)
-			{				
+			{
 				if (iPlayer is CoopBot coopBot)
 				{
 					__instance.InitColliderSettings();

@@ -1,14 +1,12 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
-using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 

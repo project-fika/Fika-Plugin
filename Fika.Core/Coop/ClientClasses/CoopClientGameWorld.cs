@@ -5,7 +5,6 @@ using EFT.SynchronizableObjects;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
-using System;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
