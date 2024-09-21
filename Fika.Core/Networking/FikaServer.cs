@@ -463,7 +463,6 @@ namespace Fika.Core.Networking
 						InteractivesData = interactivesData
 					};
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref interactivePacket, DeliveryMethod.ReliableOrdered);
 				}
 
@@ -482,7 +481,6 @@ namespace Fika.Core.Networking
 						LampStates = lampStates
 					};
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
 				}
 
@@ -504,13 +502,12 @@ namespace Fika.Core.Networking
 						WindowBreakerStates = windowData
 					};
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref windowPacket, DeliveryMethod.ReliableOrdered);
 				}
 
 				foreach (CoopPlayer player in coopHandler.Players.Values)
 				{
-					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile,
+					SendCharacterPacket characterPacket = new(new(player.Profile,
 						player.InventoryController.CurrentId,
 						player.InventoryController.NextOperationId),
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
@@ -522,7 +519,6 @@ namespace Fika.Core.Networking
 						characterPacket.PlayerInfo.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
 					}
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref characterPacket, DeliveryMethod.ReliableOrdered);
 				}
 
@@ -535,7 +531,6 @@ namespace Fika.Core.Networking
 							NetId = player.NetId
 						};
 
-						dataWriter.Reset();
 						SendDataToPeer(peer, ref assignPacket, DeliveryMethod.ReliableOrdered);
 					}
 				}
