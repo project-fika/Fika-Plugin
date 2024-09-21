@@ -22,6 +22,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.ObservedClasses.Snapshotter;
+using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Patches.BTR;
 using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.Coop.Players;
@@ -78,6 +79,7 @@ namespace Fika.Core.Coop.GameMode
 		private List<string> localTriggerZones = [];
 		private DateTime? gameTime;
 		private TimeSpan? sessionTime;
+		private BotStateManager botStateManager;
 
 		public FikaDynamicAI DynamicAI { get; private set; }
 		public RaidSettings RaidSettings { get; private set; }
@@ -177,6 +179,8 @@ namespace Fika.Core.Coop.GameMode
 				// Boss Scenario setup
 				BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
 				coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, coopGame.botsController_0.ActivateBotsByWave);
+
+				coopGame.botStateManager = BotStateManager.Create(coopGame, Singleton<FikaServer>.Instance);
 			}
 
 			if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
@@ -511,6 +515,11 @@ namespace Fika.Core.Coop.GameMode
 			}
 			coopHandler.Players.Add(coopBot.NetId, coopBot);
 
+			if (coopBot.PacketSender is BotPacketSender botSender)
+			{
+				botSender.AssignManager(botStateManager);
+			}
+
 			return localPlayer;
 		}
 
@@ -681,7 +690,10 @@ namespace Fika.Core.Coop.GameMode
 			GameUi.gameObject.SetActive(true);
 			GameUi.TimerPanel.ProfileId = ProfileId;
 			yield return new WaitForSeconds(timeBeforeDeployLocal);
-			NetworkTimeSync.Start();
+			if (!FikaBackendUtils.IsReconnect)
+			{
+				NetworkTimeSync.Start(); 
+			}
 		}
 
 		/// <summary>
@@ -1939,6 +1951,11 @@ namespace Fika.Core.Coop.GameMode
 			if (CoopHandler.CoopHandlerParent != null)
 			{
 				Destroy(CoopHandler.CoopHandlerParent);
+			}
+
+			if (isServer)
+			{
+				Destroy(botStateManager);
 			}
 
 			ExitManager stopManager = new()

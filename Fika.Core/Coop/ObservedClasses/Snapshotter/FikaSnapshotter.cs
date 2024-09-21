@@ -39,7 +39,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 		{
 			driftEma = new(sendRate * interpolationSettings.driftEmaDuration);
 			deliveryTimeEma = new(sendRate * interpolationSettings.deliveryTimeEmaDuration);
-
 			if (FikaBackendUtils.IsServer)
 			{
 				sendRate = Singleton<FikaServer>.Instance.SendRate;
@@ -57,8 +56,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 			{
 				SnapshotInterpolation.Step(buffer, Time.unscaledDeltaTime, ref localTimeline, localTimeScale, out PlayerStatePacket fromSnapshot,
 					out PlayerStatePacket toSnapshot, out double ratio);
-
-				player.Interpolate(fromSnapshot, toSnapshot, ratio);
+				player.Interpolate(toSnapshot, fromSnapshot, ratio);
 			}
 		}
 

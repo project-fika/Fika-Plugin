@@ -2,6 +2,7 @@
 
 using Comfort.Common;
 using EFT;
+using Fika.Core.Coop.Components;
 using Fika.Core.Coop.ObservedClasses.Snapshotter;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
@@ -27,19 +28,24 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 		private int updateRate;
-		private float frameCounter;
+		private BotStateManager manager;
 
 		protected void Awake()
 		{
 			player = GetComponent<CoopPlayer>();
 			Server = Singleton<FikaServer>.Instance;
 			updateRate = Server.SendRate;
-			frameCounter = 0;
 		}
 
 		public void Init()
 		{
 
+		}
+
+		public void AssignManager(BotStateManager stateManager)
+		{
+			manager = stateManager;
+			manager.OnUpdate += SendPlayerState;
 		}
 
 		public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
@@ -50,15 +56,11 @@ namespace Fika.Core.Coop.PacketHandlers
 			}
 		}
 
-		protected void FixedUpdate()
+		private void SendPlayerState()
 		{
-			if (player == null)
+			if (!player.HealthController.IsAlive)
 			{
-				return;
-			}
-
-			if (player.AIData?.BotOwner == null)
-			{
+				manager.OnUpdate -= SendPlayerState;
 				return;
 			}
 
@@ -68,18 +70,8 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			float dur = 1f / updateRate;
-			frameCounter += Time.fixedDeltaTime;
-			while (frameCounter >= dur)
-			{
-				frameCounter -= dur;
-				SendPlayerState(mover);
-			}
-		}
-
-		private void SendPlayerState(BotMover mover)
-		{
-			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
+			Vector2 direction = (mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk) ? player.MovementContext.MovementDirection : Vector2.zero;
+			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, direction,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
@@ -89,11 +81,6 @@ namespace Fika.Core.Coop.PacketHandlers
 				NetworkTimeSync.Time);
 
 			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
-
-			if (!mover.IsMoving || mover.Pause || !player.MovementContext.CanWalk)
-			{
-				player.LastDirection = Vector2.zero;
-			}
 		}
 
 		protected void Update()
@@ -168,6 +155,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		public void DestroyThis()
 		{
+			manager.OnUpdate -= SendPlayerState;
 			FirearmPackets.Clear();
 			DamagePackets.Clear();
 			InventoryPackets.Clear();

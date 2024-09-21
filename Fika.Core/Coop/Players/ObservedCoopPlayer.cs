@@ -592,22 +592,22 @@ namespace Fika.Core.Coop.Players
 			method_32(clip);
 		}
 
-		public PlayerStatePacket Interpolate(in PlayerStatePacket newState, in PlayerStatePacket lastState, double ratio)
+		public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, double ratio)
 		{
 			float interpolateRatio = (float)ratio;
 
-			method_62(newState.HasGround, newState.SurfaceSound);
+			method_62(to.HasGround, to.SurfaceSound);
 
-			Rotation = new Vector2(Mathf.LerpAngle(MovementContext.Rotation.x, newState.Rotation.x, interpolateRatio),
-				Mathf.Lerp(MovementContext.Rotation.y, newState.Rotation.y, interpolateRatio));
+			Rotation = new Vector2(Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, interpolateRatio),
+				Mathf.LerpUnclamped(from.Rotation.y, to.Rotation.y, interpolateRatio));
 
-			HeadRotation = newState.HeadRotation;
+			HeadRotation = to.HeadRotation;
 			ProceduralWeaponAnimation.SetHeadRotation(HeadRotation);
 
-			MovementContext.IsGrounded = newState.IsGrounded;
+			MovementContext.IsGrounded = to.IsGrounded;
 
 			EPlayerState oldMovementState = MovementContext.CurrentState.Name;
-			EPlayerState newMovementState = newState.State;
+			EPlayerState newMovementState = to.State;
 
 			if (newMovementState == EPlayerState.Jump)
 			{
@@ -617,7 +617,7 @@ namespace Fika.Core.Coop.Players
 					MovementContext.method_2(1f);
 				}
 			}
-			if (MovementContext.PlayerAnimator.IsJumpSetted() && newState.IsGrounded)
+			if (MovementContext.PlayerAnimator.IsJumpSetted() && to.IsGrounded)
 			{
 				MovementContext.PlayerAnimatorEnableJump(false);
 				MovementContext.PlayerAnimatorEnableLanding(true);
@@ -638,58 +638,57 @@ namespace Fika.Core.Coop.Players
 				MovementContext.PlayerAnimatorEnableInert(false);
 			}
 
-			Physical.SerializationStruct = newState.Stamina;
+			Physical.SerializationStruct = to.Stamina;
 
-			if (!Mathf.Approximately(MovementContext.Step, newState.Step))
+			if (!Mathf.Approximately(MovementContext.Step, to.Step))
 			{
-				CurrentManagedState.SetStep(newState.Step);
+				CurrentManagedState.SetStep(to.Step);
 			}
 
-			if (IsSprintEnabled != newState.IsSprinting)
+			if (IsSprintEnabled != to.IsSprinting)
 			{
-				CurrentManagedState.EnableSprint(newState.IsSprinting);
+				CurrentManagedState.EnableSprint(to.IsSprinting);
 			}
 
-			if (MovementContext.IsInPronePose != newState.IsProne)
+			if (MovementContext.IsInPronePose != to.IsProne)
 			{
-				MovementContext.IsInPronePose = newState.IsProne;
+				MovementContext.IsInPronePose = to.IsProne;
 			}
 
-			if (!Mathf.Approximately(PoseLevel, newState.PoseLevel))
+			if (!Mathf.Approximately(PoseLevel, to.PoseLevel))
 			{
-				MovementContext.SetPoseLevel(PoseLevel + (newState.PoseLevel - PoseLevel));
+				MovementContext.SetPoseLevel(PoseLevel + (to.PoseLevel - PoseLevel));
 			}
 
-			MovementContext.SetCurrentClientAnimatorStateIndex(newState.AnimatorStateIndex);
-			MovementContext.SetCharacterMovementSpeed(newState.CharacterMovementSpeed, true);
+			MovementContext.SetCurrentClientAnimatorStateIndex(to.AnimatorStateIndex);
+			MovementContext.SetCharacterMovementSpeed(to.CharacterMovementSpeed, true);
 
-			if (MovementContext.BlindFire != newState.Blindfire)
+			if (MovementContext.BlindFire != to.Blindfire)
 			{
-				MovementContext.SetBlindFire(newState.Blindfire);
+				MovementContext.SetBlindFire(to.Blindfire);
 			}
 
-			if (!IsInventoryOpened)
+			if (!IsInventoryOpened && MovementContext.IsGrounded)
 			{
-				Move(Vector2.Lerp(newState.MovementDirection, lastState.MovementDirection, interpolateRatio));
+				Move(Vector2.LerpUnclamped(from.MovementDirection,to.MovementDirection, interpolateRatio));
 				if (isServer)
 				{
-					MovementContext.method_1(newState.MovementDirection);
+					MovementContext.method_1(to.MovementDirection);
 				}
 			}
 
-			Vector3 newPosition = Vector3.Lerp(MovementContext.TransformPosition, newState.Position, interpolateRatio);
-			CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolateRatio);
+			Vector3 newPosition = Vector3.LerpUnclamped(from.Position, to.Position, interpolateRatio);
+			//CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolateRatio);
+			Transform.position = newPosition;
 
-			if (!Mathf.Approximately(MovementContext.Tilt, newState.Tilt))
+			if (!Mathf.Approximately(MovementContext.Tilt, to.Tilt))
 			{
-				MovementContext.SetTilt(newState.Tilt, true);
+				MovementContext.SetTilt(to.Tilt, true);
 			}
 
-			observedOverlap = newState.WeaponOverlap;
-			leftStanceDisabled = newState.LeftStanceDisabled;
-			MovementContext.SurfaceNormal = newState.SurfaceNormal;
-
-			return newState;
+			observedOverlap = to.WeaponOverlap;
+			leftStanceDisabled = to.LeftStanceDisabled;
+			MovementContext.SurfaceNormal = to.SurfaceNormal;
 		}
 
 		public override void InteractionRaycast()

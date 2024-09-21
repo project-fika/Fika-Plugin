@@ -43,7 +43,6 @@ namespace Fika.Core.Coop.Players
 		public bool hasSkilledScav = false;
 		public float observedOverlap = 0f;
 		public bool leftStanceDisabled = false;
-		public Vector2 LastDirection = Vector2.zero;
 		public CorpseSyncPacket CorpseSyncPacket = default;
 		public bool hasGround = false;
 		public int NetId;
@@ -779,15 +778,6 @@ namespace Fika.Core.Coop.Players
 			while (!diedTask.IsCompleted)
 			{
 				yield return new WaitForEndOfFrame();
-			}
-		}
-
-		public override void Move(Vector2 direction)
-		{
-			if (direction.sqrMagnitude > 0)
-			{
-				base.Move(direction);
-				LastDirection = direction;
 			}
 		}
 

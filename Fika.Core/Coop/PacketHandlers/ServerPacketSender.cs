@@ -86,7 +86,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		private void SendPlayerState()
 		{
-			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
+			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.MovementContext.MovementDirection,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
@@ -96,11 +96,6 @@ namespace Fika.Core.Coop.PacketHandlers
 				NetworkTimeSync.Time);
 
 			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
-
-			if (player.MovementIdlingTime > 0.05f)
-			{
-				player.LastDirection = Vector2.zero;
-			}
 		}
 
 		protected void Update()

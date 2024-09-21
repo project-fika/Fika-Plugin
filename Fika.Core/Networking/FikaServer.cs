@@ -401,7 +401,8 @@ namespace Fika.Core.Networking
 								Type = EReconnectDataType.OwnCharacter,
 								Profile = observedCoopPlayer.Profile,
 								ProfileHealthClass = observedCoopPlayer.NetworkHealthController.Store(),
-								PlayerPosition = observedCoopPlayer.Position
+								PlayerPosition = observedCoopPlayer.Position,
+								TimeOffset = NetworkTimeSync.Time
 							};
 
 							SendDataToPeer(peer, ref ownCharacterPacket, DeliveryMethod.ReliableOrdered);
@@ -1203,7 +1204,6 @@ namespace Fika.Core.Networking
 							resp = new();
 							resp.Put(data);
 							netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-							logger.LogInfo("PingingRequest: Correct ping query, sending response");
 							break;
 
 						case "fika.keepalive":
@@ -1231,6 +1231,7 @@ namespace Fika.Core.Networking
 
 		public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
 		{
+
 		}
 
 		public void OnConnectionRequest(ConnectionRequest request)

@@ -8,6 +8,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 	public static class NetworkTimeSync
 	{
 		private static readonly Stopwatch stopwatch = new();
+		private static double Offset = 0;
 
 		/// <summary>
 		/// Gets the current time in the game since start
@@ -16,16 +17,19 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 		{
 			get
 			{
-				return stopwatch.Elapsed.TotalSeconds;
+				return stopwatch.Elapsed.TotalSeconds + Offset;
 			}
 		}
 
 		/// <summary>
-		/// Starts the time counter
+		/// Starts the time counter (with an optional offset from server)
 		/// </summary>
-		public static void Start()
+		/// <param name="serverOffset">The offset received from the server</param>
+		public static void Start(double serverOffset = 0)
 		{
+			Offset = serverOffset;
 			stopwatch.Restart();
+			
 		}
 
 		/// <summary>
@@ -34,6 +38,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 		public static void Reset()
 		{
 			stopwatch.Reset();
+			Offset = 0;
 		}
 	}
 }
