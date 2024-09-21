@@ -1054,7 +1054,8 @@ namespace Fika.Core.Coop.Players
 
 			if (packet.HasStationaryPacket)
 			{
-				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy) ? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
+				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy)
+					? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
 				ObservedStationaryInteract(stationaryWeapon, (GStruct171.EStationaryCommand)packet.StationaryPacket.Command);
 			}
 

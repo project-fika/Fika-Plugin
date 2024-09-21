@@ -2,7 +2,7 @@
 
 using EFT;
 
-namespace Fika.Core.Coop.ObservedClasses.MovementStates
+namespace Fika.Core.Coop.ObservedClasses
 {
 	internal class ObservedRunState : RunState
 	{

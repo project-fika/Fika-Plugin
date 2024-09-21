@@ -1108,15 +1108,6 @@ namespace Fika.Core.Coop.Players
 			base.OnDestroy();
 		}
 
-		public override void Dispose()
-		{
-			/*if (FikaPlugin.CullPlayers.Value)
-            {
-                UnregisterCulling();
-            }*/
-			base.Dispose();
-		}
-
 		public override void SendHandsInteractionStateChanged(bool value, int animationId)
 		{
 			if (value)
@@ -1175,7 +1166,6 @@ namespace Fika.Core.Coop.Players
 						CreateUsableItemController(packet.ItemId);
 						break;
 					}
-
 				case EProceedType.Stationary:
 					{
 						CreateFirearmController(packet.ItemId, true);
