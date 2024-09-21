@@ -88,7 +88,8 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		private void SendPlayerState()
 		{
-			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.MovementContext.MovementDirection,
+			Vector2 movementDirection = player.MovementContext.IsInMountedState ? Vector2.zero : player.MovementContext.MovementDirection;
+			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, movementDirection,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
