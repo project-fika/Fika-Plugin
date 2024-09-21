@@ -5,7 +5,7 @@ using LiteNetLib.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Fika.Core.Networking.Packets.GameWorld
+namespace Fika.Core.Networking
 {
 	public struct ReconnectPacket(bool isRequest) : INetSerializable
 	{

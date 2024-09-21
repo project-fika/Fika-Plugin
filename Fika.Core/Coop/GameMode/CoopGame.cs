@@ -32,7 +32,6 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using HarmonyLib;

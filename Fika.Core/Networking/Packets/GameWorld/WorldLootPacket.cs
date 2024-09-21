@@ -1,6 +1,6 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.GameWorld
+namespace Fika.Core.Networking
 {
 	public struct WorldLootPacket(bool isRequest) : INetSerializable
 	{

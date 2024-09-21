@@ -23,7 +23,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Packets.GameWorld;
+using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -39,7 +39,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.GameWorld.ReconnectPacket;
+using static Fika.Core.Networking.ReconnectPacket;
 using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
