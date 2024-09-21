@@ -29,7 +29,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotter
 		{
 			Offset = serverOffset;
 			stopwatch.Restart();
-
 		}
 
 		/// <summary>
