@@ -34,7 +34,7 @@ namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
 				return;
 			}
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI)
+            if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI)
             {
                 observedPlayer.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
             }
@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.ObservedClasses.PlayerBridge
 				return observedPlayer.HandleSniperShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
 			}
 
-            if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
+            if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI))
             {
                 return observedPlayer.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
             }
