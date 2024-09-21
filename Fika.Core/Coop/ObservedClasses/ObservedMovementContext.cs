@@ -9,12 +9,49 @@ namespace Fika.Core.Coop.ObservedClasses
 {
 	public class ObservedMovementContext : MovementContext
 	{
-		public override bool CanJump => true;
-		public override bool CanMoveInProne => true;
-		public override bool CanProne => true;
-		public override bool CanSprint => true;
-		public override bool CanWalk => true;
-		public override Error CanInteract => null;
+		public override bool CanJump
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanMoveInProne
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanProne
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanSprint
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanWalk
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override Error CanInteract
+		{
+			get
+			{
+				return null;
+			}
+		}
+
 		public override bool StateLocksInventory { set { } }
 
 		public override void ApplyApproachMotion(Vector3 motion, float deltaTime)
