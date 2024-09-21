@@ -3,7 +3,6 @@ using EFT;
 using EFT.UI.Matchmaker;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
 using Fika.Core.Utils;
 using System;
 using System.Reflection;

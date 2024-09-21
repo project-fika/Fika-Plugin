@@ -3,7 +3,7 @@ using EFT.Bots;
 using JsonType;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Models.Dedicated
+namespace Fika.Core.Networking.Http
 {
 	[DataContract]
 	public struct StartDedicatedRequest

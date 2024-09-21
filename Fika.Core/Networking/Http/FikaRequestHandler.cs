@@ -1,7 +1,5 @@
 using EFT;
 using Fika.Core.Models;
-using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Models.Dedicated;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;

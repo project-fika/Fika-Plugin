@@ -4,7 +4,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
-using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Http;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
