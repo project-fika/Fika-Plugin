@@ -104,6 +104,11 @@ namespace Fika.Core.Utils
 						name = "Kollontay";
 						break;
 					}
+				case WildSpawnType.bossPartisan:
+					{
+						name = "Partisan";
+						break;
+					}
 			}
 			return name != null;
 		}
