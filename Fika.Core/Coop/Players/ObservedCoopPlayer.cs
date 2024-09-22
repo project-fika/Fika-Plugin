@@ -813,6 +813,11 @@ namespace Fika.Core.Coop.Players
 		// The reason it was added was due to a lot of bots inventories desyncing because of their unnatural inventory operations
 		public void SetInventory(InventoryEquipment equipmentClass)
 		{
+			if (HandsController != null)
+			{
+				HandsController.FastForwardCurrentState();
+			}
+
 			Inventory inventory = new()
 			{
 				Equipment = equipmentClass
