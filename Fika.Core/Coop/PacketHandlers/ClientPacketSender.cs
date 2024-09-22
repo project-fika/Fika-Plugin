@@ -289,7 +289,7 @@ namespace Fika.Core.Coop.PacketHandlers
 						PingLocation = hitPoint,
 						PingType = pingType,
 						PingColor = pingColor,
-						Nickname = player.Profile.Nickname,
+						Nickname = player.Profile.Info.MainProfileNickname,
 						LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
 					};
 
