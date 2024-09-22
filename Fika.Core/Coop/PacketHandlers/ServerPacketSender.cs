@@ -39,7 +39,8 @@ namespace Fika.Core.Coop.PacketHandlers
 			get
 			{
 				return FikaPlugin.UsePingSystem.Value && player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
-					&& FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible;
+					&& FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
+					&& lastPingTime < DateTime.Now.AddSeconds(-3);
 			}
 		}
 
@@ -190,112 +191,109 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			if (lastPingTime < DateTime.Now.AddSeconds(-3))
+			Transform originTransform;
+			Ray sourceRaycast;
+			FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
+			if (freeCamController != null && freeCamController.IsScriptActive)
 			{
-				Transform originTransform;
-				Ray sourceRaycast;
-				FreeCameraController freeCamController = Singleton<FreeCameraController>.Instance;
-				if (freeCamController != null && freeCamController.IsScriptActive)
+				originTransform = freeCamController.CameraMain.gameObject.transform;
+				sourceRaycast = new(originTransform.position + originTransform.forward / 2f, originTransform.forward);
+			}
+			else if (player.HealthController.IsAlive)
+			{
+				if (player.HandsController is CoopClientFirearmController controller && controller.IsAiming)
 				{
-					originTransform = freeCamController.CameraMain.gameObject.transform;
-					sourceRaycast = new(originTransform.position + originTransform.forward / 2f, originTransform.forward);
-				}
-				else if (player.HealthController.IsAlive)
-				{
-					if (player.HandsController is CoopClientFirearmController controller && controller.IsAiming)
-					{
-						sourceRaycast = new(controller.FireportPosition, controller.WeaponDirection);
-					}
-					else
-					{
-						originTransform = player.CameraPosition;
-						sourceRaycast = new(originTransform.position + originTransform.forward / 2f, player.LookDirection);
-					}
+					sourceRaycast = new(controller.FireportPosition, controller.WeaponDirection);
 				}
 				else
 				{
-					return;
+					originTransform = player.CameraPosition;
+					sourceRaycast = new(originTransform.position + originTransform.forward / 2f, player.LookDirection);
 				}
-				int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
-				if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
-				{
-					lastPingTime = DateTime.Now;
-					//GameObject gameObject = new("Ping", typeof(FikaPing));
-					//gameObject.transform.localPosition = hit.point;
-					Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
-					GameObject hitGameObject = hit.collider.gameObject;
-					int hitLayer = hitGameObject.layer;
+			}
+			else
+			{
+				return;
+			}
+			int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
+			if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
+			{
+				lastPingTime = DateTime.Now;
+				//GameObject gameObject = new("Ping", typeof(FikaPing));
+				//gameObject.transform.localPosition = hit.point;
+				Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());
+				GameObject hitGameObject = hit.collider.gameObject;
+				int hitLayer = hitGameObject.layer;
 
-					PingFactory.EPingType pingType = PingFactory.EPingType.Point;
-					object userData = null;
-					string localeId = null;
+				PingFactory.EPingType pingType = PingFactory.EPingType.Point;
+				object userData = null;
+				string localeId = null;
 
 #if DEBUG
-					ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
+				ConsoleScreen.Log(statement: $"{hit.collider.GetFullPath()}: {LayerMask.LayerToName(hitLayer)}/{hitGameObject.name}");
 #endif
 
-					if (LayerMask.LayerToName(hitLayer) == "Player")
+				if (LayerMask.LayerToName(hitLayer) == "Player")
+				{
+					if (hitGameObject.TryGetComponent(out Player player))
 					{
-						if (hitGameObject.TryGetComponent(out Player player))
-						{
-							pingType = PingFactory.EPingType.Player;
-							userData = player;
-						}
+						pingType = PingFactory.EPingType.Player;
+						userData = player;
 					}
-					else if (LayerMask.LayerToName(hitLayer) == "Deadbody")
-					{
-						pingType = PingFactory.EPingType.DeadBody;
-						userData = hitGameObject;
-					}
-					else if (hitGameObject.TryGetComponent(out LootableContainer container))
-					{
-						pingType = PingFactory.EPingType.LootContainer;
-						userData = container;
-						localeId = container.ItemOwner.Name;
-					}
-					else if (hitGameObject.TryGetComponent(out LootItem lootItem))
-					{
-						pingType = PingFactory.EPingType.LootItem;
-						userData = lootItem;
-						localeId = lootItem.Item.ShortName;
-					}
-					else if (hitGameObject.TryGetComponent(out Door door))
-					{
-						pingType = PingFactory.EPingType.Door;
-						userData = door;
-					}
-					else if (hitGameObject.TryGetComponent(out InteractableObject interactable))
-					{
-						pingType = PingFactory.EPingType.Interactable;
-						userData = interactable;
-					}
+				}
+				else if (LayerMask.LayerToName(hitLayer) == "Deadbody")
+				{
+					pingType = PingFactory.EPingType.DeadBody;
+					userData = hitGameObject;
+				}
+				else if (hitGameObject.TryGetComponent(out LootableContainer container))
+				{
+					pingType = PingFactory.EPingType.LootContainer;
+					userData = container;
+					localeId = container.ItemOwner.Name;
+				}
+				else if (hitGameObject.TryGetComponent(out LootItem lootItem))
+				{
+					pingType = PingFactory.EPingType.LootItem;
+					userData = lootItem;
+					localeId = lootItem.Item.ShortName;
+				}
+				else if (hitGameObject.TryGetComponent(out Door door))
+				{
+					pingType = PingFactory.EPingType.Door;
+					userData = door;
+				}
+				else if (hitGameObject.TryGetComponent(out InteractableObject interactable))
+				{
+					pingType = PingFactory.EPingType.Interactable;
+					userData = interactable;
+				}
 
-					GameObject basePingPrefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
-					GameObject basePing = GameObject.Instantiate(basePingPrefab);
-					Vector3 hitPoint = hit.point;
-					PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);
-					Color pingColor = FikaPlugin.PingColor.Value;
-					pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
-					// ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
-					abstractPing.Initialize(ref hitPoint, userData, pingColor);
+				GameObject basePingPrefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
+				GameObject basePing = GameObject.Instantiate(basePingPrefab);
+				Vector3 hitPoint = hit.point;
+				PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);
+				Color pingColor = FikaPlugin.PingColor.Value;
+				pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
+				// ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
+				abstractPing.Initialize(ref hitPoint, userData, pingColor);
 
-					GenericPacket genericPacket = new()
-					{
-						NetId = player.NetId,
-						PacketType = EPackageType.Ping,
-						PingLocation = hitPoint,
-						PingType = pingType,
-						PingColor = pingColor,
-						Nickname = player.Profile.Info.MainProfileNickname,
-						LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
-					};
+				GenericPacket genericPacket = new()
+				{
+					NetId = player.NetId,
+					PacketType = EPackageType.Ping,
+					PingLocation = hitPoint,
+					PingType = pingType,
+					PingColor = pingColor,
+					Nickname = player.Profile.Info.MainProfileNickname,
+					LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
+				};
 
-					SendPacket(ref genericPacket, true);
+				SendPacket(ref genericPacket, true);
 
-					if (FikaPlugin.PlayPingAnimation.Value)
-					{
-						player.vmethod_6(EInteraction.ThereGesture);
-					}
+				if (FikaPlugin.PlayPingAnimation.Value)
+				{
+					player.vmethod_6(EInteraction.ThereGesture);
 				}
 			}
 		}
