@@ -873,7 +873,7 @@ namespace Fika.Core.Networking
 									string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
 										ColorizeText(Colors.GREEN, nickname)),
-										EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+										ENotificationDurationType.Default, ENotificationIconType.EntryPoint);
 								}
 							}
 
@@ -1219,7 +1219,7 @@ namespace Fika.Core.Networking
 		public void OnPeerConnected(NetPeer peer)
 		{
 			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
-				EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
+				ENotificationDurationType.Default, ENotificationIconType.Friend);
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
