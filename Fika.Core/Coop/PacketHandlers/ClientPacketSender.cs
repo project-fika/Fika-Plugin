@@ -42,7 +42,8 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				return FikaPlugin.UsePingSystem.Value && player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
 					&& FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
-					&& lastPingTime < DateTime.Now.AddSeconds(-3) && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started;
+					&& lastPingTime < DateTime.Now.AddSeconds(-3) && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started
+					&& !player.IsInventoryOpened;
 			}
 		}
 
