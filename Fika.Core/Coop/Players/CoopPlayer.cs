@@ -15,11 +15,11 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using static EFT.InventoryLogic.Slot;
 using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Coop.Players
@@ -42,12 +43,12 @@ namespace Fika.Core.Coop.Players
 		public bool hasSkilledScav = false;
 		public float observedOverlap = 0f;
 		public bool leftStanceDisabled = false;
-		public Vector2 LastDirection = Vector2.zero;
 		public CorpseSyncPacket CorpseSyncPacket = default;
 		public bool hasGround = false;
 		public int NetId;
 		public bool IsObservedAI = false;
 		public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+		public FikaSnapshotter Snapshotter;
 		public ClientMovementContext ClientMovementContext
 		{
 			get
@@ -692,7 +693,7 @@ namespace Fika.Core.Coop.Players
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
 			_corpseAppliedForce = num;
 
-			return new(NetId)
+			HealthSyncPacket syncPacket = new(NetId)
 			{
 				Packet = packet,
 				KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
@@ -703,10 +704,27 @@ namespace Fika.Core.Coop.Players
 					Point = LastDamageInfo.HitPoint,
 					Force = _corpseAppliedForce,
 					OverallVelocity = Velocity,
-					Equipment = Inventory.Equipment
+					Equipment = Inventory.Equipment,
+					ItemSlot = EquipmentSlot.ArmBand
 				},
 				TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
 			};
+
+			if (HandsController.Item != null)
+			{
+				Item heldItem = HandsController.Item;
+				EquipmentSlot[] weaponSlots = [EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster, EquipmentSlot.Scabbard];
+				foreach (EquipmentSlot weaponSlot in weaponSlots)
+				{
+					if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
+					{
+						syncPacket.CorpseSyncPacket.ItemSlot = weaponSlot;
+						break;
+					}
+				}
+			}
+
+			return syncPacket;
 		}
 
 		public override void OnDead(EDamageType damageType)
@@ -777,15 +795,6 @@ namespace Fika.Core.Coop.Players
 			while (!diedTask.IsCompleted)
 			{
 				yield return new WaitForEndOfFrame();
-			}
-		}
-
-		public override void Move(Vector2 direction)
-		{
-			if (direction.sqrMagnitude > 0)
-			{
-				base.Move(direction);
-				LastDirection = direction;
 			}
 		}
 
@@ -1062,7 +1071,8 @@ namespace Fika.Core.Coop.Players
 
 			if (packet.HasStationaryPacket)
 			{
-				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy) ? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
+				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy)
+					? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
 				ObservedStationaryInteract(stationaryWeapon, (GStruct171.EStationaryCommand)packet.StationaryPacket.Command);
 			}
 
@@ -1103,7 +1113,10 @@ namespace Fika.Core.Coop.Players
 						break;
 					case GStruct173.EMountingCommand.StartLeaving:
 						{
-							MovementContext.StartExitingMountedState();
+							if (MovementContext is ObservedMovementContext observedMovementContext)
+							{
+								observedMovementContext.ObservedStartExitingMountedState();
+							}
 						}
 						break;
 					default:
@@ -1566,7 +1579,7 @@ namespace Fika.Core.Coop.Players
 			}
 			FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
 			return null;
-		}		
+		}
 
 		#region handlers
 		private class KeyHandler(CoopPlayer player)

@@ -4,11 +4,10 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
 using SPT.Reflection.Patching;
-using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.LocalGame
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// Created by: Lacyway

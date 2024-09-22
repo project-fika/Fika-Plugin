@@ -1,6 +1,8 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using Fika.Core.Coop.Components;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -15,7 +17,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		private CoopPlayer player;
 
 		public bool Enabled { get; set; } = true;
-		public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
+		public FikaServer Server { get; set; }
 		public FikaClient Client { get; set; }
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
@@ -23,15 +25,25 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+		private int updateRate;
+		private BotStateManager manager;
 
 		protected void Awake()
 		{
 			player = GetComponent<CoopPlayer>();
+			Server = Singleton<FikaServer>.Instance;
+			updateRate = Server.SendRate;
 		}
 
 		public void Init()
 		{
 
+		}
+
+		public void AssignManager(BotStateManager stateManager)
+		{
+			manager = stateManager;
+			manager.OnUpdate += SendPlayerState;
 		}
 
 		public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
@@ -42,15 +54,11 @@ namespace Fika.Core.Coop.PacketHandlers
 			}
 		}
 
-		protected void FixedUpdate()
+		private void SendPlayerState()
 		{
-			if (player == null)
+			if (!player.HealthController.IsAlive)
 			{
-				return;
-			}
-
-			if (player.AIData?.BotOwner == null)
-			{
+				manager.OnUpdate -= SendPlayerState;
 				return;
 			}
 
@@ -60,20 +68,17 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
+			Vector2 direction = (mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk) ? player.MovementContext.MovementDirection : Vector2.zero;
+			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, direction,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
-				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
+				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal,
+				NetworkTimeSync.Time);
 
 			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
-
-			if (!mover.IsMoving || mover.Pause || !player.MovementContext.CanWalk)
-			{
-				player.LastDirection = Vector2.zero;
-			}
 		}
 
 		protected void Update()
@@ -148,6 +153,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		public void DestroyThis()
 		{
+			manager.OnUpdate -= SendPlayerState;
 			FirearmPackets.Clear();
 			DamagePackets.Clear();
 			InventoryPackets.Clear();

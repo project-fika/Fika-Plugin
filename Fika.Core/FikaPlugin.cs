@@ -6,15 +6,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
-using Fika.Core.Coop.Patches.Airdrops;
-using Fika.Core.Coop.Patches.BTR;
-using Fika.Core.Coop.Patches.Lighthouse;
-using Fika.Core.Coop.Patches.LocalGame;
-using Fika.Core.Coop.Patches.Mines;
-using Fika.Core.Coop.Patches.Overrides;
-using Fika.Core.Coop.Patches.PlayerPatches;
-using Fika.Core.Coop.Patches.Tripwire;
-using Fika.Core.Coop.Patches.Weather;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
@@ -188,6 +179,7 @@ namespace Fika.Core
 		public static ConfigEntry<bool> UseUPnP { get; set; }
 		public static ConfigEntry<bool> UseNatPunching { get; set; }
 		public static ConfigEntry<int> ConnectionTimeout { get; set; }
+		public static ConfigEntry<int> UpdateRate { get; set; }
 
 		// Gameplay
 		public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
@@ -594,6 +586,9 @@ namespace Fika.Core
 
 			ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15,
 				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
+
+			UpdateRate = Config.Bind("Network", "Update Rate", 30,
+				new ConfigDescription("How often per second packets should be sent (lower = less bandwidth used, slightly more delayed for interpolation)\nThis only affects the host and will be synchronized to all clients", new AcceptableValueRange<int>(20, 60), new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Gameplay
 

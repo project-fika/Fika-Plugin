@@ -4,7 +4,7 @@ using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.LocalGame
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// Used to prevent players from getting everyone elses BTR items

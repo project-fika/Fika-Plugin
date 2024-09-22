@@ -8,7 +8,7 @@ using LiteNetLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.BTR
+namespace Fika.Core.Coop.Patches
 {
 	internal class BTRVehicle_method_38_Patch : ModulePatch
 	{

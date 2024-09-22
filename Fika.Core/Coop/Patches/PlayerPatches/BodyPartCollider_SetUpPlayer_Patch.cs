@@ -1,12 +1,11 @@
 ﻿using EFT;
 using Fika.Core.Coop.ObservedClasses;
-using Fika.Core.Coop.ObservedClasses.PlayerBridge;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.PlayerPatches
+namespace Fika.Core.Coop.Patches
 {
 	public class BodyPartCollider_SetUpPlayer_Patch : ModulePatch
 	{
@@ -19,7 +18,7 @@ namespace Fika.Core.Coop.Patches.PlayerPatches
 		public static bool Prefix(BodyPartCollider __instance, IPlayer iPlayer)
 		{
 			if (iPlayer != null)
-			{				
+			{
 				if (iPlayer is CoopBot coopBot)
 				{
 					__instance.InitColliderSettings();

@@ -9,6 +9,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -35,6 +36,8 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 		private DateTime lastPingTime;
+		private int updateRate;
+		private float frameCounter;
 
 		protected void Awake()
 		{
@@ -42,6 +45,8 @@ namespace Fika.Core.Coop.PacketHandlers
 			Client = Singleton<FikaClient>.Instance;
 			enabled = false;
 			lastPingTime = DateTime.Now;
+			updateRate = Client.SendRate;
+			frameCounter = 0f;
 		}
 
 		public void Init()
@@ -72,20 +77,28 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, player.LastDirection,
+			float dur = 1f / updateRate;
+			frameCounter += Time.fixedDeltaTime;
+			while (frameCounter >= dur)
+			{
+				frameCounter -= dur;
+				SendPlayerState();
+			}
+		}
+
+		private void SendPlayerState()
+		{
+			Vector2 movementDirection = player.MovementContext.IsInMountedState ? Vector2.zero : player.MovementContext.MovementDirection;
+			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, movementDirection,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
-				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal);
+				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal,
+				NetworkTimeSync.Time);
 
 			Client.SendData(ref playerStatePacket, DeliveryMethod.Unreliable);
-
-			if (player.MovementIdlingTime > 0.05f)
-			{
-				player.LastDirection = Vector2.zero;
-			}
 		}
 
 		protected void Update()

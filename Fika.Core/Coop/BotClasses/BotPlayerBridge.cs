@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
 			{
-				return bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId); 
+				return bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
 			}
 
 			bot.ShotReactions(damageInfo, bodyPart);

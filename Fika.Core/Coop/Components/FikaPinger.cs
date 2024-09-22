@@ -1,5 +1,4 @@
 ﻿using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;

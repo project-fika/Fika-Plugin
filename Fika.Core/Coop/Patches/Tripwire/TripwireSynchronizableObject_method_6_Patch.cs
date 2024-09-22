@@ -4,7 +4,7 @@ using EFT.SynchronizableObjects;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Tripwire
+namespace Fika.Core.Coop.Patches
 {
 	internal class TripwireSynchronizableObject_method_6_Patch : ModulePatch
 	{

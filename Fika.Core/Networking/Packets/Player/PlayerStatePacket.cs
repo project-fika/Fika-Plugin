@@ -1,13 +1,15 @@
-﻿using LiteNetLib.Utils;
+﻿using Fika.Core.Coop.ObservedClasses.Snapshotting;
+using LiteNetLib.Utils;
 using UnityEngine;
 using static BaseBallistic;
 
 namespace Fika.Core.Networking
 {
 	public struct PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
-		EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed,
-		bool isProne, float poseLevel, bool isSprinting, BasePhysicalClass.GStruct36 stamina, int blindfire,
-		float weaponOverlap, bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, Vector3 surfaceNormal) : INetSerializable
+		EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed, bool isProne,
+		float poseLevel, bool isSprinting, BasePhysicalClass.GStruct36 stamina, int blindfire, float weaponOverlap,
+		bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, Vector3 surfaceNormal,
+		double remoteTime) : INetSerializable, ISnapshot
 	{
 		public int NetId = netId;
 		public Vector3 Position = position;
@@ -30,6 +32,10 @@ namespace Fika.Core.Networking
 		public bool HasGround = hasGround;
 		public ESurfaceSound SurfaceSound = surfaceSound;
 		public Vector3 SurfaceNormal = surfaceNormal;
+
+		// Snapshot
+		public double RemoteTime { get; set; } = remoteTime;
+		public double LocalTime { get; set; }
 
 		public void Serialize(NetDataWriter writer)
 		{
@@ -54,6 +60,7 @@ namespace Fika.Core.Networking
 			writer.Put(HasGround);
 			writer.Put((int)SurfaceSound);
 			writer.Put(SurfaceNormal);
+			writer.Put(RemoteTime);
 		}
 
 		public void Deserialize(NetDataReader reader)
@@ -79,6 +86,7 @@ namespace Fika.Core.Networking
 			HasGround = reader.GetBool();
 			SurfaceSound = (ESurfaceSound)reader.GetInt();
 			SurfaceNormal = reader.GetVector3();
+			RemoteTime = reader.GetDouble();
 		}
 	}
 }

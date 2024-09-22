@@ -20,11 +20,11 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -76,6 +76,15 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		public int SendRate
+		{
+			get
+			{
+				return sendRate;
+			}
+		}
+
+		private int sendRate;
 		private NetManager netClient;
 		private CoopHandler coopHandler;
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
@@ -130,6 +139,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
+			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -176,6 +186,12 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)
+		{
+			logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}");
+			sendRate = packet.SendRate;
 		}
 
 		private void OnUsableItemPacketReceived(UsableItemPacket packet)
@@ -479,6 +495,7 @@ namespace Fika.Core.Networking
 						coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
 						coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
 						FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
+						NetworkTimeSync.Start(packet.TimeOffset);
 						break;
 					case ReconnectPacket.EReconnectDataType.Finished:
 						coopGame.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
@@ -676,7 +693,7 @@ namespace Fika.Core.Networking
 			if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
 			{
 				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
+							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId, packet.PlayerInfo.ControllerType, packet.PlayerInfo.ItemId);
 			}
 		}
 
@@ -1166,7 +1183,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.NewState = packet;
+				playerToApply.Snapshotter.Insert(packet);
 			}
 		}
 

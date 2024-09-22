@@ -8,7 +8,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
 using HarmonyLib;
 using JsonType;
 using SPT.Reflection.Patching;
@@ -17,7 +16,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.LocalGame
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// Created by: Paulov

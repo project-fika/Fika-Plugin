@@ -4,7 +4,7 @@ using LiteNetLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Airdrops
+namespace Fika.Core.Coop.Patches
 {
 	public class GClass2306_UpdateOfflineClientLogic_Patch : ModulePatch
 	{

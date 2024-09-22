@@ -2,12 +2,11 @@
 using EFT.BufferZone;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Lighthouse
+namespace Fika.Core.Coop.Patches
 {
 	public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : ModulePatch
 	{

@@ -16,13 +16,12 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -33,12 +32,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.GameWorld.ReconnectPacket;
+using static Fika.Core.Networking.ReconnectPacket;
 using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
@@ -86,6 +84,15 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		public int SendRate
+		{
+			get
+			{
+				return sendRate;
+			}
+		}
+
+		private int sendRate;
 		private readonly NetPacketProcessor packetProcessor = new();
 		private CoopPlayer MyPlayer;
 		private readonly List<string> playersMissing = [];
@@ -107,6 +114,9 @@ namespace Fika.Core.Networking
 
 		public async Task Init()
 		{
+			int sendRateSetting = FikaPlugin.UpdateRate.Value;
+			logger.LogInfo($"Starting server with SendRate: {sendRateSetting}");
+			sendRate = sendRateSetting;
 			port = FikaPlugin.UDPPort.Value;
 
 			NetworkGameSession.Rtt = 0;
@@ -388,7 +398,8 @@ namespace Fika.Core.Networking
 								Type = EReconnectDataType.OwnCharacter,
 								Profile = observedCoopPlayer.Profile,
 								ProfileHealthClass = observedCoopPlayer.NetworkHealthController.Store(),
-								PlayerPosition = observedCoopPlayer.Position
+								PlayerPosition = observedCoopPlayer.Position,
+								TimeOffset = NetworkTimeSync.Time
 							};
 
 							SendDataToPeer(peer, ref ownCharacterPacket, DeliveryMethod.ReliableOrdered);
@@ -449,7 +460,6 @@ namespace Fika.Core.Networking
 						InteractivesData = interactivesData
 					};
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref interactivePacket, DeliveryMethod.ReliableOrdered);
 				}
 
@@ -468,7 +478,6 @@ namespace Fika.Core.Networking
 						LampStates = lampStates
 					};
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
 				}
 
@@ -490,13 +499,12 @@ namespace Fika.Core.Networking
 						WindowBreakerStates = windowData
 					};
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref windowPacket, DeliveryMethod.ReliableOrdered);
 				}
 
 				foreach (CoopPlayer player in coopHandler.Players.Values)
 				{
-					SendCharacterPacket characterPacket = new(new FikaSerialization.PlayerInfoPacket(player.Profile,
+					SendCharacterPacket characterPacket = new(new(player.Profile,
 						player.InventoryController.CurrentId,
 						player.InventoryController.NextOperationId),
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
@@ -508,7 +516,6 @@ namespace Fika.Core.Networking
 						characterPacket.PlayerInfo.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
 					}
 
-					dataWriter.Reset();
 					SendDataToPeer(peer, ref characterPacket, DeliveryMethod.ReliableOrdered);
 				}
 
@@ -521,7 +528,6 @@ namespace Fika.Core.Networking
 							NetId = player.NetId
 						};
 
-						dataWriter.Reset();
 						SendDataToPeer(peer, ref assignPacket, DeliveryMethod.ReliableOrdered);
 					}
 				}
@@ -1087,7 +1093,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.NewState = packet;
+				playerToApply.Snapshotter.Insert(packet);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1159,6 +1165,9 @@ namespace Fika.Core.Networking
 			logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
 
 			HasHadPeer = true;
+
+			NetworkSettingsPacket packet = new(sendRate);
+			SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -1187,7 +1196,6 @@ namespace Fika.Core.Networking
 							resp = new();
 							resp.Put(data);
 							netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-							logger.LogInfo("PingingRequest: Correct ping query, sending response");
 							break;
 
 						case "fika.keepalive":
@@ -1215,6 +1223,7 @@ namespace Fika.Core.Networking
 
 		public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
 		{
+
 		}
 
 		public void OnConnectionRequest(ConnectionRequest request)

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.BTR
+namespace Fika.Core.Coop.Patches
 {
 	class BTRSide_Patches
 	{

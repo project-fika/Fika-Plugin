@@ -6,7 +6,7 @@ using LiteNetLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.BTR
+namespace Fika.Core.Coop.Patches
 {
 	public class BTRView_SyncViewFromServer_Patch : ModulePatch
 	{

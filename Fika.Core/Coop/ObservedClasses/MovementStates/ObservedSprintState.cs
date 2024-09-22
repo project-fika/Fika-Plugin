@@ -3,7 +3,7 @@
 using EFT;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses.MovementStates
+namespace Fika.Core.Coop.ObservedClasses
 {
 	internal class ObservedSprintState : SprintState
 	{

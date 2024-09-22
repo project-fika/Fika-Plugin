@@ -6,7 +6,7 @@ using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Overrides
+namespace Fika.Core.Coop.Patches
 {
 	public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
 	{

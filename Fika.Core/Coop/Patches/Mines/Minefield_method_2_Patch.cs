@@ -4,13 +4,12 @@ using EFT.Interactive;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using SPT.Reflection.Patching;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.Mines
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// This patch prevents a null exception when an <see cref="ObservedCoopPlayer"/> is hit by a mine explosion

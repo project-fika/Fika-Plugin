@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Networking.Models.Dedicated;
+﻿namespace Fika.Core.Networking.Http;
 
 public enum DedicatedStatus
 {

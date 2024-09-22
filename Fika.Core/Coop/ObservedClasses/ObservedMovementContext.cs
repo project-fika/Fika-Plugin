@@ -2,7 +2,6 @@
 
 using Diz.LanguageExtensions;
 using EFT;
-using Fika.Core.Coop.ObservedClasses.MovementStates;
 using System;
 using UnityEngine;
 
@@ -10,12 +9,49 @@ namespace Fika.Core.Coop.ObservedClasses
 {
 	public class ObservedMovementContext : MovementContext
 	{
-		public override bool CanJump => true;
-		public override bool CanMoveInProne => true;
-		public override bool CanProne => true;
-		public override bool CanSprint => true;
-		public override bool CanWalk => true;
-		public override Error CanInteract => null;
+		public override bool CanJump
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanMoveInProne
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanProne
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanSprint
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override bool CanWalk
+		{
+			get
+			{
+				return true;
+			}
+		}
+		public override Error CanInteract
+		{
+			get
+			{
+				return null;
+			}
+		}
+
 		public override bool StateLocksInventory { set { } }
 
 		public override void ApplyApproachMotion(Vector3 motion, float deltaTime)
@@ -138,6 +174,8 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				EPlayerState.Run => new ObservedRunState(this),
 				EPlayerState.Sprint => new ObservedSprintState(this),
+				EPlayerState.Stationary => new ObservedStationaryState(this),
+				EPlayerState.IdleWeaponMounting => new ObservedMountedState(this, _player),
 				_ => base.GetNewState(name, isAI)
 			};
 		}
@@ -150,22 +188,22 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public override void SetStationaryWeapon(Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
 		{
-			Class1215 handler = new()
-			{
-				movementContext_0 = this,
-				callback = callback
-			};
+			StationaryHandler handler = new(this, callback);
 			if (_player.HandsController.Item == StationaryWeapon.Item)
 			{
-				handler.callback(_player.HandsController, _player.HandsController);
+				handler.callback(null, _player.HandsController);
 				return;
 			}
-			OnHandsControllerChanged += handler.method_0;
+			OnHandsControllerChanged += handler.HandleSwap;
 		}
 
 		public override void DropStationary(GStruct171.EStationaryCommand command)
 		{
-			// Do nothing
+			if (command is GStruct171.EStationaryCommand.Leave)
+			{
+				PlayerAnimatorSetStationary(false);
+				RotationAction = DefaultRotationFunction;
+			}
 		}
 
 		public override void Init()
@@ -181,6 +219,43 @@ namespace Fika.Core.Coop.ObservedClasses
 				Quaternion handsRotation = Quaternion.Euler(Pitch, Yaw, 0);
 				player.HandsController.ControllerGameObject.transform.SetPositionAndRotation(player.PlayerBones.Ribcage.Original.position, handsRotation);
 				player.CameraContainer.transform.rotation = handsRotation;
+			}
+		}
+
+		public void ObservedStartExitingMountedState()
+		{
+			if (OverridenControlsState is not ObservedMountedState observedMountedState)
+			{
+				return;
+			}
+			_player.ProceduralWeaponAnimation.SetMountingData(false, false);
+			observedMountedState.StartExiting();
+			PlayerMountingPointData.OnStartExitMountedState -= StartExitingMountedState;
+			Player.AbstractHandsController handsController = _player.HandsController;
+			if (handsController == null)
+			{
+				return;
+			}
+			handsController.FirearmsAnimator.SetMounted(false);
+		}
+
+		private class StationaryHandler(MovementContext context, Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
+		{
+			private readonly MovementContext context = context;
+			public readonly Action<Player.AbstractHandsController, Player.AbstractHandsController> callback = callback;
+
+			public void HandleSwap(Player.AbstractHandsController oldController, Player.AbstractHandsController newController)
+			{
+				if (newController is not CoopObservedFirearmController)
+				{
+					return;
+				}
+
+				if (newController != null && newController is CoopObservedFirearmController observedController && observedController.Item == context.StationaryWeapon.Item)
+				{
+					context.OnHandsControllerChanged -= HandleSwap;
+					callback(null, newController);
+				}
 			}
 		}
 	}

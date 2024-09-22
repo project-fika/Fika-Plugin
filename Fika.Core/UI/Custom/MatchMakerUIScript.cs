@@ -2,12 +2,10 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Patches.Overrides;
+using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Models.Dedicated;
 using Fika.Core.Networking.Websocket;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;

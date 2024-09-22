@@ -1,7 +1,7 @@
 ﻿using EFT.BufferZone;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.GameWorld
+namespace Fika.Core.Networking
 {
 	public struct BufferZonePacket(EBufferZoneData status) : INetSerializable
 	{

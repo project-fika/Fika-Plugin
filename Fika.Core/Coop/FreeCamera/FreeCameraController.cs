@@ -18,8 +18,8 @@ using UnityEngine;
 namespace Fika.Core.Coop.FreeCamera
 {
 	/// <summary>
-	/// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! 
-	/// https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs
+	/// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
+	/// <see href="https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs"/>
 	/// </summary>
 
 	public class FreeCameraController : MonoBehaviour
