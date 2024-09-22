@@ -25,7 +25,6 @@ using UnityEngine;
 using UnityEngine.Audio;
 using static Fika.Core.Networking.FikaSerialization;
 using static Fika.Core.Utils.ColorUtils;
-using static UnityEngine.UIElements.StyleVariableResolver;
 
 namespace Fika.Core.Coop.Players
 {
@@ -114,7 +113,7 @@ namespace Fika.Core.Coop.Players
 				return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
 			}
 		}
-		private GClass857 cullingHandler;
+		private GClass858 cullingHandler;
 		#endregion
 
 		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
