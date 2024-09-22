@@ -881,6 +881,8 @@ namespace Fika.Core.Networking
 			public float Force;
 			public Vector3 OverallVelocity;
 			public InventoryEquipment Equipment;
+			public EquipmentSlot ItemSlot;
+			public Item ItemInHands;
 
 			public static CorpseSyncPacket Deserialize(NetDataReader reader)
 			{
@@ -891,7 +893,8 @@ namespace Fika.Core.Networking
 					Point = reader.GetVector3(),
 					Force = reader.GetFloat(),
 					OverallVelocity = reader.GetVector3(),
-					Equipment = (InventoryEquipment)reader.GetItem()
+					Equipment = (InventoryEquipment)reader.GetItem(),
+					ItemSlot = (EquipmentSlot)reader.GetByte()
 				};
 			}
 
@@ -903,6 +906,7 @@ namespace Fika.Core.Networking
 				writer.Put(packet.Force);
 				writer.Put(packet.OverallVelocity);
 				writer.PutItem(packet.Equipment);
+				writer.Put((byte)packet.ItemSlot);
 			}
 		}
 

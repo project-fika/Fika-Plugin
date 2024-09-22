@@ -25,6 +25,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using static Fika.Core.Networking.FikaSerialization;
 using static Fika.Core.Utils.ColorUtils;
+using static UnityEngine.UIElements.StyleVariableResolver;
 
 namespace Fika.Core.Coop.Players
 {
@@ -769,6 +770,12 @@ namespace Fika.Core.Coop.Players
 			{
 				cullingHandler.DisableCullingOnDead();
 			}
+			if (CorpseSyncPacket.ItemInHands != null)
+			{
+				Corpse.SetItemInHandsLootedCallback(null);
+				Corpse.ItemInHands.Value = CorpseSyncPacket.ItemInHands;
+				Corpse.SetItemInHandsLootedCallback(ReleaseHand);
+			}
 			CorpseSyncPacket = default;
 		}
 
@@ -810,7 +817,16 @@ namespace Fika.Core.Coop.Players
 			{
 				Equipment = equipmentClass
 			};
+
 			InventoryController.ReplaceInventory(inventory);
+			if (CorpseSyncPacket.ItemSlot <= EquipmentSlot.Scabbard)
+			{
+				Item heldItem = Equipment.GetSlot(CorpseSyncPacket.ItemSlot).ContainedItem;
+				if (heldItem != null)
+				{
+					CorpseSyncPacket.ItemInHands = heldItem;
+				}
+			}
 
 			foreach (EquipmentSlot equipmentSlot in PlayerBody.SlotNames)
 			{

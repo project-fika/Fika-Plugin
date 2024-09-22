@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using static EFT.InventoryLogic.Slot;
 using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Coop.Players
@@ -692,7 +693,7 @@ namespace Fika.Core.Coop.Players
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
 			_corpseAppliedForce = num;
 
-			return new(NetId)
+			HealthSyncPacket syncPacket = new(NetId)
 			{
 				Packet = packet,
 				KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
@@ -703,10 +704,27 @@ namespace Fika.Core.Coop.Players
 					Point = LastDamageInfo.HitPoint,
 					Force = _corpseAppliedForce,
 					OverallVelocity = Velocity,
-					Equipment = Inventory.Equipment
+					Equipment = Inventory.Equipment,
+					ItemSlot = EquipmentSlot.ArmBand
 				},
 				TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
 			};
+
+			if (HandsController.Item != null)
+			{
+				Item heldItem = HandsController.Item;
+				EquipmentSlot[] weaponSlots = [EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster, EquipmentSlot.Scabbard];
+				foreach (EquipmentSlot weaponSlot in weaponSlots)
+				{
+					if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
+					{
+						syncPacket.CorpseSyncPacket.ItemSlot = weaponSlot;
+						break;
+					}
+				}
+			}
+
+			return syncPacket;
 		}
 
 		public override void OnDead(EDamageType damageType)
