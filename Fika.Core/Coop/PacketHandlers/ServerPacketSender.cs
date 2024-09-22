@@ -33,6 +33,16 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+
+		private bool CanPing
+		{
+			get
+			{
+				return FikaPlugin.UsePingSystem.Value && player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
+					&& FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible;
+			}
+		}
+
 		private DateTime lastPingTime;
 		private int updateRate;
 		private float frameCounter;
@@ -166,15 +176,8 @@ namespace Fika.Core.Coop.PacketHandlers
 					Server.SendDataToAll(ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
-			if (FikaPlugin.UsePingSystem.Value
-				&& player.IsYourPlayer
-				&& Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
-				&& FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey))
+			if (CanPing)
 			{
-				if (MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible)
-				{
-					return;
-				}
 				SendPing();
 			}
 		}
