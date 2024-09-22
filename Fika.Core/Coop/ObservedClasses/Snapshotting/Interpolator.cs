@@ -115,10 +115,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 			{
 				T first = buffer.Values[i];
 				T second = buffer.Values[i + 1];
-				if (localTimeline >= first.RemoteTime &&
-					localTimeline <= second.RemoteTime)
+				if (localTimeline >= first.RemoteTime && localTimeline <= second.RemoteTime)
 				{
-					// use these two snapshots
 					from = i;
 					to = i + 1;
 					t = Mathd.InverseLerp(first.RemoteTime, second.RemoteTime, localTimeline);

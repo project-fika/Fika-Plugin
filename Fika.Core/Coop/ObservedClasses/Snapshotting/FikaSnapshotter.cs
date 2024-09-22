@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		private readonly SortedList<double, PlayerStatePacket> buffer = [];
 		private double localTimeline;
 		private double localTimeScale = Time.timeScale;
-		private readonly SnapshotInterpolationSettings interpolationSettings = new();
+		private SnapshotInterpolationSettings interpolationSettings;
 		private ExponentialMovingAverage driftEma;
 		private ExponentialMovingAverage deliveryTimeEma;
 		private ObservedCoopPlayer player;
@@ -23,6 +23,14 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		{
 			FikaSnapshotter snapshotter = player.gameObject.AddComponent<FikaSnapshotter>();
 			snapshotter.player = player;
+			double smoothingRate = FikaPlugin.SmoothingRate.Value switch
+			{
+				FikaPlugin.ESmoothingRate.Low => 1.5,
+				FikaPlugin.ESmoothingRate.Medium => 2,
+				FikaPlugin.ESmoothingRate.High => 2.5,
+				_ => 2,
+			};
+			snapshotter.interpolationSettings = new(smoothingRate);
 			return snapshotter;
 		}
 

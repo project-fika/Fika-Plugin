@@ -180,6 +180,7 @@ namespace Fika.Core
 		public static ConfigEntry<bool> UseNatPunching { get; set; }
 		public static ConfigEntry<int> ConnectionTimeout { get; set; }
 		public static ConfigEntry<int> UpdateRate { get; set; }
+		public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
 
 		// Gameplay
 		public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
@@ -460,37 +461,37 @@ namespace Fika.Core
 			// Coop | Custom
 
 			UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false,
-				new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+				new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
 			PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U),
-				new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+				new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
 			PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white,
-				new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+				new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
 			PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f,
-				new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 6 }));
+				new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 7 }));
 
 			PingTime = Config.Bind("Coop | Custom", "Ping Time", 3,
-				new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 5 }));
+				new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 6 }));
 
 			PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false,
-				new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+				new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
 			ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false,
-				new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+				new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
 			PingUseOpticZoom = Config.Bind("Coop | Custom", "Ping Use Optic Zoom", true,
-				new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
+				new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 3, IsAdvanced = true }));
 
 			PingScaleWithDistance = Config.Bind("Coop | Custom", "Ping Scale With Distance", true,
-				new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 1, IsAdvanced = true }));
+				new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
 
 			PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f,
-				new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 0, IsAdvanced = true }));
+				new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 1, IsAdvanced = true }));
 
 			PingSound = Config.Bind("Coop | Custom", "Ping Sound", EPingSound.SubQuestComplete,
-				new ConfigDescription("The audio that plays on ping"));
+				new ConfigDescription("The audio that plays on ping", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Debug
 
@@ -564,31 +565,34 @@ namespace Fika.Core
 			// Network
 
 			NativeSockets = Config.Bind(section: "Network", "Native Sockets", true,
-				new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+				new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
 			ForceIP = Config.Bind("Network", "Force IP", "",
-				new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+				new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
 			ForceBindIP = Config.Bind("Network", "Force Bind IP", "",
-				new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 6 }));
+				new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 7 }));
 
 			AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f,
-				new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 5 }));
+				new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 6 }));
 
 			UDPPort = Config.Bind("Network", "UDP Port", 25565,
-				new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+				new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
 			UseUPnP = Config.Bind("Network", "Use UPnP", false,
-				new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+				new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
 			UseNatPunching = Config.Bind("Network", "Use NAT Punching", false,
-				new ConfigDescription("Use NAT punching when hosting a raid. Only works with fullcone NAT type routers and requires NatPunchServer to be running on the SPT server. UPnP, Force IP and Force Bind IP are disabled with this mode.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+				new ConfigDescription("Use NAT punching when hosting a raid. Only works with fullcone NAT type routers and requires NatPunchServer to be running on the SPT server. UPnP, Force IP and Force Bind IP are disabled with this mode.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
 			ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15,
-				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 1 }));
+				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 2 }));
 
 			UpdateRate = Config.Bind("Network", "Update Rate", 30,
-				new ConfigDescription("How often per second packets should be sent (lower = less bandwidth used, slightly more delayed for interpolation)\nThis only affects the host and will be synchronized to all clients", new AcceptableValueRange<int>(20, 60), new ConfigurationManagerAttributes() { Order = 0 }));
+				new ConfigDescription("How often per second packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.", new AcceptableValueRange<int>(20, 60), new ConfigurationManagerAttributes() { Order = 1 }));
+
+			SmoothingRate = Config.Bind("Network", "Smoothing Rate", ESmoothingRate.Medium,
+				new ConfigDescription("Local simulation is behind by Update Rate * Smoothing Rate. This guarantees that we always have enough snapshots in the buffer to mitigate lags & jitter during interpolation.\n\nLow = 1.5\nMedium = 2\nHigh = 2.5\n\nSet this to 'High' if movement isn't smooth. Cannot be changed during a raid.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Gameplay
 
@@ -686,6 +690,13 @@ namespace Fika.Core
 			InspectWindow,
 			InspectWindowClose,
 			MenuEscape,
+		}
+
+		public enum ESmoothingRate
+		{
+			Low,
+			Medium,
+			High
 		}
 
 		[Flags]
