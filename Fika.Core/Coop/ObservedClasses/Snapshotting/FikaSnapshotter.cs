@@ -22,15 +22,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		public static FikaSnapshotter Create(ObservedCoopPlayer player)
 		{
 			FikaSnapshotter snapshotter = player.gameObject.AddComponent<FikaSnapshotter>();
-			snapshotter.player = player;
-			double smoothingRate = FikaPlugin.SmoothingRate.Value switch
-			{
-				FikaPlugin.ESmoothingRate.Low => 1.5,
-				FikaPlugin.ESmoothingRate.Medium => 2,
-				FikaPlugin.ESmoothingRate.High => 2.5,
-				_ => 2,
-			};
-			snapshotter.interpolationSettings = new(smoothingRate);
+			snapshotter.player = player;			
 			return snapshotter;
 		}
 
@@ -44,6 +36,14 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 
 		private void Awake()
 		{
+			double smoothingRate = FikaPlugin.SmoothingRate.Value switch
+			{
+				FikaPlugin.ESmoothingRate.Low => 1.5,
+				FikaPlugin.ESmoothingRate.Medium => 2,
+				FikaPlugin.ESmoothingRate.High => 2.5,
+				_ => 2,
+			};
+			interpolationSettings = new(smoothingRate);
 			driftEma = new(sendRate * interpolationSettings.driftEmaDuration);
 			deliveryTimeEma = new(sendRate * interpolationSettings.deliveryTimeEmaDuration);
 			if (FikaBackendUtils.IsServer)
