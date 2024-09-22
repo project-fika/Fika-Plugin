@@ -845,6 +845,19 @@ namespace Fika.Core.Coop.Players
 					gclass2.Dispose();
 				}
 			}
+
+			if (PlayerBody.HaveHolster && PlayerBody.SlotViews.ContainsKey(EquipmentSlot.Holster))
+			{
+				Transform slotBone = PlayerBody.GetSlotBone(EquipmentSlot.Holster);
+				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(EquipmentSlot.Holster);
+				PlayerBody.GClass1979 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(EquipmentSlot.Holster), slotBone, EquipmentSlot.Holster,
+					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
+				PlayerBody.GClass1979 gclass2 = PlayerBody.SlotViews.AddOrReplace(EquipmentSlot.Holster, gclass);
+				if (gclass2 != null)
+				{
+					gclass2.Dispose();
+				}
+			}
 		}
 
 		public override void DoObservedVault(VaultPacket packet)
