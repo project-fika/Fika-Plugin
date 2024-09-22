@@ -195,5 +195,6 @@ namespace Fika.Core.Utils
 		public const string UI_COOP_GAME_MODE = "F_UI_CoopGameMode";
 		public const string UI_COOP_RAID_SETTINGS = "F_UI_CoopRaidSettings";
 		public const string UI_FIKA_ALWAYS_COOP = "F_UI_FikaAlwaysCoop";
+		public const string UI_UPNP_FAILED = "F_UI_UpnpFailed";
 	}
 }

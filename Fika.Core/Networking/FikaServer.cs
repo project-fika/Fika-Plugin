@@ -191,7 +191,7 @@ namespace Fika.Core.Networking
 
 				if (upnpFailed)
 				{
-					Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "UPnP mapping failed. Make sure the selected port is not already open!");
+					Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", LocaleUtils.UI_UPNP_FAILED.Localized());
 					throw new MappingException("Error during mapping. Check log file for more information.");
 				}
 			}
