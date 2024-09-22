@@ -78,7 +78,7 @@ namespace Fika.Core
 			{ "nimbul",       "Sat with Lacy many night and is loved by both Lacy & me. We miss you <3 ~ SSH"               },
 			{ "vox",          "My favourite american. ~ Lacyway"                                                            },
 			{ "rairai",       "Very nice and caring person, someone I've appreciated getting to know. ~ Lacyway"            },
-			{ "cwx",          "Active and dedicated tester who has contributed a lot of good ideas to Fika. ~ Lacyway"       }
+			{ "cwx",          "Active and dedicated tester who has contributed a lot of good ideas to Fika. ~ Lacyway"      }
 		};
 
 		public static Dictionary<string, string> DevelopersList = new()
@@ -88,7 +88,8 @@ namespace Fika.Core
 			{ "nexus4880",    "the one who taught me everything I know now. ~ SSH"                       },
 			{ "thesparta",    "I keep asking him to fix these darn bugs ~ GhostFenixx"                   },
 			{ "senko-san",    "creator of SPT, extremely talented dev, a blast to work with ~ TheSparta" },
-			{ "leaves",       "Super talented person who comes up with the coolest ideas ~ Lacyway" }
+			{ "leaves",       "Super talented person who comes up with the coolest ideas ~ Lacyway"		 },
+			{ "Archangel",    "The 'tbh' guy :pepeChad: ~ Lacyway"                                        }
 		};
 
 		#region config values
