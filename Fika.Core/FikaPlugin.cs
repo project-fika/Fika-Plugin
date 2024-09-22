@@ -645,8 +645,9 @@ namespace Fika.Core
 				LocalIPs = ips.Skip(1).ToArray();
 				return [.. ips];
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Instance.FikaLogger.LogError("GetLocalAddresses: " + ex.Message);
 				return [.. ips];
 			}
 		}
