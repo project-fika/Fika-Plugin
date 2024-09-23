@@ -449,6 +449,11 @@ namespace Fika.Core.Networking
 			return traderService;
 		}
 
+		/// <summary>
+		/// Writes a <see cref="Profile.ProfileHealthClass"/> into a raw <see cref="byte"/>[]
+		/// </summary>
+		/// <param name="health"></param>
+		/// <returns><see cref="byte"/>[]</returns>
 		public static byte[] SerializeHealthInfo(this Profile.ProfileHealthClass health)
 		{
 			using MemoryStream stream = new();
@@ -493,6 +498,11 @@ namespace Fika.Core.Networking
 			return stream.ToArray();
 		}
 
+		/// <summary>
+		/// Writes a <see cref="Profile.ProfileHealthClass.ValueInfo"/> into <see cref="byte"/>s
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="valueInfo"></param>
 		public static void WriteValueInfo(this BinaryWriter writer, Profile.ProfileHealthClass.ValueInfo valueInfo)
 		{
 			writer.Write(valueInfo.Current);
