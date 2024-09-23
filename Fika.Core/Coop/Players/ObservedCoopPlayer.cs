@@ -591,6 +591,7 @@ namespace Fika.Core.Coop.Players
 		public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, double ratio)
 		{
 			float interpolateRatio = (float)ratio;
+			bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
 
 			method_62(to.HasGround, to.SurfaceSound);
 
@@ -605,7 +606,7 @@ namespace Fika.Core.Coop.Players
 			EPlayerState oldMovementState = MovementContext.CurrentState.Name;
 			EPlayerState newMovementState = to.State;
 
-			if (newMovementState == EPlayerState.Jump)
+			if (newMovementState == EPlayerState.Jump || (!MovementContext.IsGrounded && !isJumpSet))
 			{
 				MovementContext.PlayerAnimatorEnableJump(true);
 				if (isServer)
@@ -613,7 +614,7 @@ namespace Fika.Core.Coop.Players
 					MovementContext.method_2(1f);
 				}
 			}
-			if (MovementContext.PlayerAnimator.IsJumpSetted() && to.IsGrounded)
+			if (isJumpSet && to.IsGrounded)
 			{
 				MovementContext.PlayerAnimatorEnableJump(false);
 				MovementContext.PlayerAnimatorEnableLanding(true);
