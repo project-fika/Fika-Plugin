@@ -16,7 +16,7 @@ namespace Fika.Core.Utils
 		/// </summary>
 		/// <param name="word"></param>
 		/// <returns></returns>
-		[Obsolete("No longer used")]
+		[Obsolete("No longer used", true)]
 		public static string GetPrefix(string word)
 		{
 			char firstLetter = char.ToUpper(word[0]);
@@ -36,7 +36,7 @@ namespace Fika.Core.Utils
 		/// <returns>true if it's a boss, false if not</returns>
 		public static bool IsBoss(WildSpawnType wildSpawnType, out string name)
 		{
-			name = null;
+			name = string.Empty;
 			switch (wildSpawnType)
 			{
 				case WildSpawnType.bossBoar:
@@ -110,7 +110,7 @@ namespace Fika.Core.Utils
 						break;
 					}
 			}
-			return name != null;
+			return !string.IsNullOrEmpty(name);
 		}
 
 		public const string RECEIVED_SHARED_QUEST_PROGRESS = "F_Client_ReceivedSharedQuestProgress";
