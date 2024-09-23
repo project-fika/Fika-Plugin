@@ -512,8 +512,26 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (packet.HasFlareShot)
 			{
+				FirearmsAnimator.SetFire(true);
+				// Check for GClass increments
+				if (Weapon is not GClass2943)
+				{
+					FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0f);
+					Weapon.Repairable.Durability = 0;
+				}
+				else
+				{
+					FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0f);
+				}
 				BulletClass bulletClass = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.FlareShotPacket.AmmoTemplateId, null);
 				InitiateFlare(bulletClass, packet.FlareShotPacket.ShotPosition, packet.FlareShotPacket.ShotForward);
+				bulletClass.IsUsed = true;
+				if (weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+				{
+					weaponEffectsManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);
+				}
+				bulletClass = null;
+				FirearmsAnimator.SetFire(false);
 			}
 
 			if (packet.ReloadBoltAction)
