@@ -603,10 +603,10 @@ namespace Fika.Core.Coop.Players
 
 			MovementContext.IsGrounded = to.IsGrounded;
 
-			EPlayerState oldMovementState = MovementContext.CurrentState.Name;
+			EPlayerState oldMovementState = from.State;
 			EPlayerState newMovementState = to.State;
 
-			if (newMovementState == EPlayerState.Jump || (!MovementContext.IsGrounded && !isJumpSet))
+			if (newMovementState == EPlayerState.Jump)
 			{
 				MovementContext.PlayerAnimatorEnableJump(true);
 				if (isServer)
@@ -637,30 +637,30 @@ namespace Fika.Core.Coop.Players
 
 			Physical.SerializationStruct = to.Stamina;
 
-			if (!Mathf.Approximately(MovementContext.Step, to.Step))
+			if (!Mathf.Approximately(from.Step, to.Step))
 			{
 				CurrentManagedState.SetStep(to.Step);
 			}
 
-			if (IsSprintEnabled != to.IsSprinting)
+			if (from.IsSprinting != to.IsSprinting)
 			{
 				CurrentManagedState.EnableSprint(to.IsSprinting);
 			}
 
-			if (MovementContext.IsInPronePose != to.IsProne)
+			if (from.IsProne != to.IsProne)
 			{
 				MovementContext.IsInPronePose = to.IsProne;
 			}
 
-			if (!Mathf.Approximately(PoseLevel, to.PoseLevel))
+			if (!Mathf.Approximately(from.PoseLevel, to.PoseLevel))
 			{
-				MovementContext.SetPoseLevel(PoseLevel + (to.PoseLevel - PoseLevel));
+				MovementContext.SetPoseLevel(from.PoseLevel + (to.PoseLevel - from.PoseLevel));
 			}
 
 			MovementContext.SetCurrentClientAnimatorStateIndex(to.AnimatorStateIndex);
 			MovementContext.SetCharacterMovementSpeed(to.CharacterMovementSpeed, true);
 
-			if (MovementContext.BlindFire != to.Blindfire)
+			if (from.Blindfire != to.Blindfire)
 			{
 				MovementContext.SetBlindFire(to.Blindfire);
 			}
@@ -674,11 +674,9 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
-			Vector3 newPosition = Vector3.LerpUnclamped(from.Position, to.Position, interpolateRatio);
-			//CharacterController.Move(newPosition - MovementContext.TransformPosition, interpolateRatio);
-			Transform.position = newPosition;
+			Transform.position = Vector3.LerpUnclamped(from.Position, to.Position, interpolateRatio);
 
-			if (!Mathf.Approximately(MovementContext.Tilt, to.Tilt))
+			if (!Mathf.Approximately(from.Tilt, to.Tilt))
 			{
 				MovementContext.SetTilt(to.Tilt, true);
 			}

@@ -176,6 +176,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				EPlayerState.Sprint => new ObservedSprintState(this),
 				EPlayerState.Stationary => new ObservedStationaryState(this),
 				EPlayerState.IdleWeaponMounting => new ObservedMountedState(this, _player),
+				EPlayerState.Jump => new ObservedJumpState(this),
 				_ => base.GetNewState(name, isAI)
 			};
 		}
