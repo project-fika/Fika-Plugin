@@ -157,8 +157,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (timeAndWeather.TimeFlowType != ETimeFlowType.x1)
 			{
-				float multiplier = timeAndWeather.TimeFlowType.ToTimeFlow();
-				float newFlow = 7 * multiplier;
+				float newFlow = timeAndWeather.TimeFlowType.ToTimeFlow();
 				coopGame.GameWorld_0.GameDateTime.TimeFactor = newFlow;
 				Logger.LogInfo($"Using custom time flow: {newFlow}");
 			}
