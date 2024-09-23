@@ -94,17 +94,14 @@ namespace Fika.Core.Coop.Components
 		{
 			if (FikaBackendUtils.IsClient)
 			{
-				//_ = Task.Run(ReadFromServerCharactersLoop);
 				isClient = true;
 				charSyncCounter = 0f;
+				return;
 			}
 
-			if (FikaBackendUtils.IsServer)
-			{
-				isClient = false;
-				ready = true;
-				Singleton<GameWorld>.Instance.World_0.method_0(null);
-			}
+			isClient = false;
+			ready = true;
+			Singleton<GameWorld>.Instance.World_0.method_0(null);
 		}
 
 		protected void OnDestroy()
