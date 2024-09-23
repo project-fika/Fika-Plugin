@@ -88,8 +88,9 @@ namespace Fika.Core
 			{ "nexus4880",    "the one who taught me everything I know now. ~ SSH"                       },
 			{ "thesparta",    "I keep asking him to fix these darn bugs ~ GhostFenixx"                   },
 			{ "senko-san",    "creator of SPT, extremely talented dev, a blast to work with ~ TheSparta" },
-			{ "leaves",       "Super talented person who comes up with the coolest ideas ~ Lacyway"		 },
-			{ "Archangel",    "The 'tbh' guy :pepeChad: ~ Lacyway"                                        }
+			{ "leaves",       "Super talented person who comes up with the coolest ideas ~ Lacyway"      },
+			{ "Archangel",    "The 'tbh' guy :pepeChad: ~ Lacyway"                                       },
+			{ "trippy",       "One of the chads that made the dedicated client a reality ~ Archangel"    }
 		};
 
 		#region config values
