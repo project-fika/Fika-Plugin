@@ -119,7 +119,6 @@ namespace Fika.Core.Utils
 				indicatorPosition.x = Mathf.Sign(indicatorPosition.x) * (canvasRect.rect.width * 0.5f - outOfSightOffset) * canvasRect.localScale.x;
 				indicatorPosition.y = Mathf.Tan(Mathf.Deg2Rad * angle) * indicatorPosition.x;
 			}
-
 			else
 			{
 				float angle = Vector3.SignedAngle(Vector3.up, indicatorPosition, Vector3.forward);
