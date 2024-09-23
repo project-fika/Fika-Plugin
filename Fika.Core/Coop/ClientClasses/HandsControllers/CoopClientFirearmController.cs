@@ -200,7 +200,6 @@ namespace Fika.Core.Coop.ClientClasses
 				ShotInfoPacket = new()
 				{
 					ShotType = EShotType.DryFire,
-					AmmoAfterShot = underbarrelShot ? 0 : Item.GetCurrentMagazineCount(),
 					ChamberIndex = chamberIndex,
 					UnderbarrelShot = underbarrelShot
 				}
@@ -252,7 +251,6 @@ namespace Fika.Core.Coop.ClientClasses
 				ShotInfoPacket = new()
 				{
 					ShotType = shotType,
-					AmmoAfterShot = weapon.GetCurrentMagazineCount(),
 					ShotPosition = shotPosition,
 					ShotDirection = shotDirection,
 					ChamberIndex = chamberIndex,
@@ -450,7 +448,6 @@ namespace Fika.Core.Coop.ClientClasses
 				ShotInfoPacket = new()
 				{
 					ShotType = shotType,
-					AmmoAfterShot = Item.GetCurrentMagazineCount(),
 					Overheat = overheat,
 					AmmoTemplate = ammo.TemplateId
 				}

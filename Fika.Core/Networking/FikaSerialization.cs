@@ -150,8 +150,10 @@ namespace Fika.Core.Networking
 			public FirearmScopeStateStruct[] FirearmScopeStateStruct;
 			public static ScopeStatesPacket Deserialize(NetDataReader reader)
 			{
-				ScopeStatesPacket packet = new();
-				packet.Amount = reader.GetInt();
+				ScopeStatesPacket packet = new()
+				{
+					Amount = reader.GetInt()
+				};
 				if (packet.Amount > 0)
 				{
 					packet.FirearmScopeStateStruct = new FirearmScopeStateStruct[packet.Amount];
@@ -305,8 +307,10 @@ namespace Fika.Core.Networking
 
 			public static CylinderMagPacket Deserialize(NetDataReader reader)
 			{
-				CylinderMagPacket packet = new();
-				packet.Changed = reader.GetBool();
+				CylinderMagPacket packet = new()
+				{
+					Changed = reader.GetBool()
+				};
 				if (packet.Changed)
 				{
 					packet.CamoraIndex = reader.GetInt();
@@ -570,7 +574,7 @@ namespace Fika.Core.Networking
 		{
 			public EStationaryCommand Command;
 			public string Id;
-			public enum EStationaryCommand : byte
+			public enum EStationaryCommand
 			{
 				Occupy,
 				Leave,
@@ -630,7 +634,6 @@ namespace Fika.Core.Networking
 		{
 
 			public EShotType ShotType = EShotType.Unknown;
-			public int AmmoAfterShot = 0;
 			public Vector3 ShotPosition = Vector3.zero;
 			public Vector3 ShotDirection = Vector3.zero;
 			public int ChamberIndex = 0;
@@ -646,7 +649,6 @@ namespace Fika.Core.Networking
 				ShotInfoPacket packet = new()
 				{
 					ShotType = (EShotType)reader.GetInt(),
-					AmmoAfterShot = reader.GetInt(),
 					ShotPosition = reader.GetVector3(),
 					ShotDirection = reader.GetVector3(),
 					ChamberIndex = reader.GetInt(),
@@ -663,7 +665,6 @@ namespace Fika.Core.Networking
 			public static void Serialize(NetDataWriter writer, ShotInfoPacket packet)
 			{
 				writer.Put((int)packet.ShotType);
-				writer.Put(packet.AmmoAfterShot);
 				writer.Put(packet.ShotPosition);
 				writer.Put(packet.ShotDirection);
 				writer.Put(packet.ChamberIndex);
@@ -808,7 +809,7 @@ namespace Fika.Core.Networking
 			{
 				return new VaultPacket()
 				{
-					VaultingStrategy = (EVaultingStrategy)reader.GetInt(),
+					VaultingStrategy = (EVaultingStrategy)reader.GetByte(),
 					VaultingPoint = reader.GetVector3(),
 					VaultingHeight = reader.GetFloat(),
 					VaultingLength = reader.GetFloat(),
@@ -820,7 +821,7 @@ namespace Fika.Core.Networking
 
 			public static void Serialize(NetDataWriter writer, VaultPacket packet)
 			{
-				writer.Put((int)packet.VaultingStrategy);
+				writer.Put((byte)packet.VaultingStrategy);
 				writer.Put(packet.VaultingPoint);
 				writer.Put(packet.VaultingHeight);
 				writer.Put(packet.VaultingLength);
@@ -940,7 +941,7 @@ namespace Fika.Core.Networking
 					KillerAccountId = reader.GetString(),
 					KillerProfileId = reader.GetString(),
 					KillerName = reader.GetString(),
-					Side = (EPlayerSide)reader.GetInt(),
+					Side = (EPlayerSide)reader.GetByte(),
 					Level = reader.GetInt(),
 					Time = reader.GetDateTime(),
 					Status = reader.GetString(),
@@ -957,7 +958,7 @@ namespace Fika.Core.Networking
 				writer.Put(packet.KillerAccountId);
 				writer.Put(packet.KillerProfileId);
 				writer.Put(packet.KillerName);
-				writer.Put((int)packet.Side);
+				writer.Put((byte)packet.Side);
 				writer.Put(packet.Level);
 				writer.Put(packet.Time);
 				writer.Put(packet.Status);
