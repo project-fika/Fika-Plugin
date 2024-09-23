@@ -499,7 +499,6 @@ namespace Fika.Core.Coop.Components
 			Logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
 #endif
 
-
 			EHandsControllerType controllerType = spawnObject.ControllerType;
 			string itemId = spawnObject.ItemId;
 			bool isStationary = spawnObject.IsStationary;
