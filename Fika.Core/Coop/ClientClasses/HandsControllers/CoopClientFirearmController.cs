@@ -326,18 +326,18 @@ namespace Fika.Core.Coop.ClientClasses
 				return;
 			}
 
-			CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
-
 			string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
-
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
+				HasReloadLauncherPacket = true,
 				ReloadLauncher = new()
 				{
 					Reload = true,
 					AmmoIds = reloadingAmmoIds
 				}
 			});
+
+			CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
 		}
 
 		public override void ReloadMag(MagazineClass magazine, ItemAddress gridItemAddress, Callback callback)

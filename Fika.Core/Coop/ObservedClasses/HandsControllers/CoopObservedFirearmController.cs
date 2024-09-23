@@ -460,7 +460,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			if (packet.HasReloadLauncherPacket)
 			{
 				if (packet.ReloadLauncher.Reload)
-				{
+				{					
 					List<BulletClass> ammo = FindAmmoByIds(packet.ReloadLauncher.AmmoIds);
 					AmmoPackReloadingClass ammoPack = new(ammo);
 					ReloadGrenadeLauncher(ammoPack, null);
@@ -701,7 +701,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			_preallocatedAmmoList.Clear();
 			foreach (string id in ammoIds)
 			{
-				GStruct421<Item> gstruct = _player.FindItemById(id, false, false);
+				GStruct421<Item> gstruct = _player.FindItemById(id, true, true);
 				if (gstruct.Succeeded && gstruct.Value is BulletClass bulletClass)
 				{
 					_preallocatedAmmoList.Add(bulletClass);

@@ -337,8 +337,10 @@ namespace Fika.Core.Networking
 
 			public static ReloadLauncherPacket Deserialize(NetDataReader reader)
 			{
-				ReloadLauncherPacket packet = new();
-				packet.Reload = reader.GetBool();
+				ReloadLauncherPacket packet = new()
+				{
+					Reload = reader.GetBool()
+				};
 				if (packet.Reload)
 				{
 					packet.AmmoIds = reader.GetStringArray();
