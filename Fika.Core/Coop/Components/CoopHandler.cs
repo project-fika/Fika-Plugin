@@ -455,11 +455,6 @@ namespace Fika.Core.Coop.Components
 				HumanPlayers.Add(otherPlayer);
 			}
 
-			if (!Singleton<GameWorld>.Instance.RegisteredPlayers.Any(x => x.Profile.ProfileId == profile.ProfileId))
-			{
-				Singleton<GameWorld>.Instance.RegisteredPlayers.Add(otherPlayer);
-			}
-
 			foreach (CoopPlayer player in Players.Values)
 			{
 				if (player is not ObservedCoopPlayer)
