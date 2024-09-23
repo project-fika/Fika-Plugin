@@ -2,10 +2,13 @@
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using UnityEngine;
 using static BasePhysicalClass; // Physical struct
 
@@ -200,6 +203,24 @@ namespace Fika.Core.Networking
 		{
 			GClass1159 eftReader = new(reader.GetByteArray());
 			return GClass1634.DeserializeItem(Singleton<ItemFactoryClass>.Instance, [], eftReader.ReadEFTItemDescriptor());
+		}
+
+		public static Item GetAirdropItem(this NetDataReader reader)
+		{
+			GClass1159 eftReader = new(reader.GetByteArray());
+			Item item = GClass1634.DeserializeItem(Singleton<ItemFactoryClass>.Instance, [], eftReader.ReadEFTItemDescriptor());
+
+			GClass1281 enumerable = [new LootItemPositionClass()];
+			enumerable[0].Item = item;
+			Item[] array = enumerable.Select(AirdropSynchronizableObject.Class1919.class1919_0.method_0).ToArray();
+			ResourceKey[] resourceKeys = array.OfType<GClass2876>().GetAllItemsFromCollections()
+				.Concat(array.Where(AirdropSynchronizableObject.Class1919.class1919_0.method_1))
+				.SelectMany(AirdropSynchronizableObject.Class1919.class1919_0.method_2)
+				.ToArray();
+			Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online,
+				resourceKeys, JobPriority.Immediate, null, default).HandleExceptions();
+
+			return item;
 		}
 
 		/// <summary>

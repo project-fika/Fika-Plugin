@@ -51,7 +51,7 @@ namespace Fika.Core.Networking
 				case SynchronizableObjectType.AirDrop:
 					{
 						AirdropType = (EAirdropType)reader.GetByte();
-						AirdropItem = reader.GetItem();
+						AirdropItem = reader.GetAirdropItem();
 						ContainerId = reader.GetString();
 						NetId = reader.GetInt();
 					}
