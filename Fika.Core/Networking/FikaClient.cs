@@ -692,8 +692,9 @@ namespace Fika.Core.Networking
 
 			if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId, packet.PlayerInfo.ControllerType, packet.PlayerInfo.ItemId);
+				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.PlayerInfo.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
+							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId, packet.PlayerInfo.ControllerType,
+							 packet.PlayerInfo.ItemId);
 			}
 		}
 
@@ -1035,8 +1036,9 @@ namespace Fika.Core.Networking
 				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
-					coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-						packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId);
+					coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.PlayerInfo.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
+						packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId, packet.PlayerInfo.ControllerType,
+						packet.PlayerInfo.ItemId);
 				}
 			}
 			else if (packet.IsRequest)
@@ -1051,6 +1053,11 @@ namespace Fika.Core.Networking
 					Position = MyPlayer.Transform.position,
 					NetId = MyPlayer.NetId
 				};
+
+				if (MyPlayer.ActiveHealthController != null)
+				{
+					requestPacket.PlayerInfo.HealthByteArray = MyPlayer.ActiveHealthController.SerializeState();
+				}
 
 				if (MyPlayer.HandsController != null)
 				{

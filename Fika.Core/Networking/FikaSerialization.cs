@@ -18,6 +18,7 @@ namespace Fika.Core.Networking
 		public struct PlayerInfoPacket(Profile profile, MongoID? controllerId, ushort firstOperationId)
 		{
 			public Profile Profile = profile;
+			public byte[] HealthByteArray = [];
 			public MongoID? ControllerId = controllerId;
 			public ushort FirstOperationId = firstOperationId;
 			public EHandsControllerType ControllerType;
@@ -28,6 +29,7 @@ namespace Fika.Core.Networking
 			{
 				byte[] profileBytes = SimpleZlib.CompressToBytes(packet.Profile.ToJson(), 4, null);
 				writer.PutByteArray(profileBytes);
+				writer.PutByteArray(packet.HealthByteArray);
 				writer.PutMongoID(packet.ControllerId);
 				writer.Put(packet.FirstOperationId);
 				writer.Put((byte)packet.ControllerType);
@@ -41,8 +43,10 @@ namespace Fika.Core.Networking
 			public static PlayerInfoPacket Deserialize(NetDataReader reader)
 			{
 				byte[] profileBytes = reader.GetByteArray();
+				byte[] healthBytes = reader.GetByteArray();
 				PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>(), reader.GetMongoID(), reader.GetUShort())
 				{
+					HealthByteArray = healthBytes,
 					ControllerType = (EHandsControllerType)reader.GetByte()
 				};
 				if (packet.ControllerType != EHandsControllerType.None)
@@ -58,6 +62,7 @@ namespace Fika.Core.Networking
 		{
 			public int Amount;
 			public FirearmLightStateStruct[] LightStates;
+
 			public static LightStatesPacket Deserialize(NetDataReader reader)
 			{
 				LightStatesPacket packet = new()

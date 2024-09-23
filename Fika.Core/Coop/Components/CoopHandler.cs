@@ -52,6 +52,7 @@ namespace Fika.Core.Coop.Components
 			public EHandsControllerType ControllerType;
 			public string ItemId;
 			public bool IsStationary;
+			public byte[] HealthBytes;
 		}
 		#endregion
 
@@ -358,7 +359,7 @@ namespace Fika.Core.Coop.Components
 			queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
 		}
 
-		public void QueueProfile(Profile profile, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId,
+		public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId,
 			EHandsControllerType controllerType = EHandsControllerType.None, string itemId = null)
 		{
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
@@ -393,6 +394,10 @@ namespace Fika.Core.Coop.Components
 					spawnObject.ItemId = itemId;
 				}
 			}
+			if (healthByteArray != null)
+			{
+				spawnObject.HealthBytes = healthByteArray;
+			}
 			spawnQueue.Enqueue(spawnObject);
 		}
 
@@ -405,15 +410,22 @@ namespace Fika.Core.Coop.Components
 			MongoID firstId = spawnObject.CurrentId;
 			ushort firstOperationId = spawnObject.FirstOperationId;
 			bool isDedicatedProfile = !isAi && profile.Info.MainProfileNickname.Contains("dedicated_");
+			byte[] healthBytes = spawnObject.HealthBytes;
+
+			// Handle null bytes on players
+			if (!isAi && (spawnObject.HealthBytes == null || spawnObject.HealthBytes.Length == 0))
+			{
+				healthBytes = profile.Health.SerializeHealthInfo();
+			}
 
 			// Check for GClass increments on filter
 			ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(LocalGameInstance.GameWorld_0, netId, position,
 				Quaternion.identity, "Player", isAi == true ? "Bot_" : $"Player_{profile.Nickname}_",
-				EPointOfView.ThirdPerson, profile, isAi, EUpdateQueue.Update, Player.EUpdateMode.Manual,
-				Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
+				EPointOfView.ThirdPerson, profile, healthBytes, isAi, EUpdateQueue.Update,
+				Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
+				BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
 				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity,
-				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity,
-				GClass1549.Default, firstId, firstOperationId).Result;
+				() => Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity, GClass1549.Default, firstId, firstOperationId).Result;
 
 			if (otherPlayer == null)
 			{

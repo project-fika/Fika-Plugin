@@ -461,7 +461,8 @@ namespace Fika.Core.Coop.GameMode
 
 			MongoID mongoId = MongoID.Generate(true);
 			ushort nextOperationId = 0;
-			SendCharacterPacket packet = new(new FikaSerialization.PlayerInfoPacket(profile, mongoId, nextOperationId), true, true, position, netId);
+			SendCharacterPacket packet = new(new (profile, mongoId, nextOperationId), true, true, position, netId);
+			packet.PlayerInfo.HealthByteArray = profile.Health.SerializeHealthInfo();
 			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 
 			if (server.NetServer.ConnectedPeersCount > 0)
@@ -936,6 +937,11 @@ namespace Fika.Core.Coop.GameMode
 				SendCharacterPacket packet = new(new(coopPlayer.Profile, coopPlayer.InventoryController.CurrentId,
 					coopPlayer.InventoryController.NextOperationId), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
 				FikaClient client = Singleton<FikaClient>.Instance;
+
+				if (coopPlayer.ActiveHealthController != null)
+				{
+					packet.PlayerInfo.HealthByteArray = coopPlayer.ActiveHealthController.SerializeState();
+				}
 
 				if (coopPlayer.HandsController != null)
 				{

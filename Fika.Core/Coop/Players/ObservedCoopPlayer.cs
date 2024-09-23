@@ -117,10 +117,10 @@ namespace Fika.Core.Coop.Players
 		#endregion
 
 		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
-			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
-			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
-			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-			Func<float> getAimingSensitivity, IViewFilter filter, MongoID firstId, ushort firstOperationId)
+			string layerName, string prefix, EPointOfView pointOfView, Profile profile, byte[] healthBytes,
+			bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode,
+			EUpdateMode bodyUpdateMode, CharacterControllerSpawner.Mode characterControllerMode,
+			Func<float> getSensitivity, Func<float> getAimingSensitivity, IViewFilter filter, MongoID firstId, ushort firstOperationId)
 		{
 			ObservedCoopPlayer player = Create<ObservedCoopPlayer>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue,
 				armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
@@ -128,10 +128,6 @@ namespace Fika.Core.Coop.Players
 			player.IsYourPlayer = false;
 
 			ObservedInventoryController inventoryController = new(player, profile, true, firstId, firstOperationId);
-
-			GControl4 tempController = new(profile.Health, player, inventoryController, profile.Skills, aiControl);
-			byte[] healthBytes = tempController.SerializeState();
-
 			ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
 
 			CoopObservedStatisticsManager statisticsManager = new();

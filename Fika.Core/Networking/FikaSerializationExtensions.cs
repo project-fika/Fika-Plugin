@@ -5,6 +5,7 @@ using EFT.InventoryLogic;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using static BasePhysicalClass; // Physical struct
 
@@ -154,7 +155,7 @@ namespace Fika.Core.Networking
 				reader.GetBytes(bytes, length);
 				return bytes;
 			}
-			return Array.Empty<byte>();
+			return [];
 		}
 
 		/// <summary>
@@ -446,6 +447,57 @@ namespace Fika.Core.Networking
 				traderService.SubServices[reader.GetString()] = reader.GetInt();
 			}
 			return traderService;
+		}
+
+		public static byte[] SerializeHealthInfo(this Profile.ProfileHealthClass health)
+		{
+			using MemoryStream stream = new();
+			using BinaryWriter writer = new(stream);
+
+			writer.WriteValueInfo(health.Energy);
+			writer.WriteValueInfo(health.Hydration);
+			writer.WriteValueInfo(health.Temperature);
+			writer.WriteValueInfo(health.Poison);
+			float standard = 1f;
+			// Heal Rate
+			writer.Write(standard);
+			// Damage Rate
+			writer.Write(standard);
+			// Damage Multiplier
+			writer.Write(standard);
+			// Energy Rate
+			writer.Write(standard);
+			// Hydration Rate
+			writer.Write(standard);
+			// Temperate Rate
+			writer.Write(standard);
+			// Damage Coeff
+			writer.Write(standard);
+			// Stamina Coeff
+			writer.Write(standard);
+
+			foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass1861> bodyPart in health.BodyParts)
+			{
+				Profile.ProfileHealthClass.ValueInfo bodyPartInfo = bodyPart.Value.Health;
+				writer.Write(bodyPartInfo.Current <= bodyPartInfo.Minimum);
+				writer.Write(bodyPartInfo.Current);
+				writer.Write(bodyPartInfo.Maximum);
+			}
+
+			// Effect Amount - Set to 0 as it's a fresh profile
+			short effectAmount = 0;
+			writer.Write(effectAmount);
+			byte end = 42;
+			writer.Write(end);
+
+			return stream.ToArray();
+		}
+
+		public static void WriteValueInfo(this BinaryWriter writer, Profile.ProfileHealthClass.ValueInfo valueInfo)
+		{
+			writer.Write(valueInfo.Current);
+			writer.Write(valueInfo.Minimum);
+			writer.Write(valueInfo.Maximum);
 		}
 	}
 }
