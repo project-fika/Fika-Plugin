@@ -1034,10 +1034,9 @@ namespace Fika.Core.Coop.GameMode
 				await WaitForHostToLoad();
 			}
 
-			CoopHandler handler = CoopHandler.GetCoopHandler();
-			if (handler != null)
+			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
-				handler.LocalGameInstance = this;
+				coopHandler.LocalGameInstance = this;
 			}
 			else
 			{
@@ -1102,7 +1101,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
-			handler.SetReady(true);
+			coopHandler.SetReady(true);
 			await vmethod_1(botsSettings, SpawnSystem);
 
 			if (isServer && Singleton<IBotGame>.Instantiated)
@@ -1767,48 +1766,54 @@ namespace Fika.Core.Coop.GameMode
 				Destroy(fikaDebug);
 			}
 
-			CoopHandler coopHandler = CoopHandler.GetCoopHandler();
 
-			CoopPlayer coopPlayer = player;
-			ExtractedPlayers.Add(coopPlayer.NetId);
-			coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
-			coopHandler.Players.Remove(coopPlayer.NetId);
-
-			preloaderUI.StartBlackScreenShow(2f, 2f, () =>
+			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
-				preloaderUI.FadeBlackScreen(2f, -2f);
-			});
+				CoopPlayer coopPlayer = player;
+				ExtractedPlayers.Add(coopPlayer.NetId);
+				coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
+				coopHandler.Players.Remove(coopPlayer.NetId);
 
-			player.ActiveHealthController.SetDamageCoeff(0);
-			player.ActiveHealthController.DamageMultiplier = 0;
-			player.ActiveHealthController.DisableMetabolism();
-			player.ActiveHealthController.PauseAllEffects();
-
-			extractRoutine = StartCoroutine(ExtractRoutine(player));
-
-			// Prevents players from looting after extracting
-			CurrentScreenSingleton.Instance.CloseAllScreensForced();
-
-			// Detroys session timer
-			if (timeManager != null)
-			{
-				Destroy(timeManager);
-			}
-			if (GameUi.TimerPanel.enabled)
-			{
-				GameUi.TimerPanel.Close();
-			}
-
-			if (FikaPlugin.AutoExtract.Value)
-			{
-				if (!isServer)
+				preloaderUI.StartBlackScreenShow(2f, 2f, () =>
 				{
-					Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
-				}
-				else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0)
+					preloaderUI.FadeBlackScreen(2f, -2f);
+				});
+
+				player.ActiveHealthController.SetDamageCoeff(0);
+				player.ActiveHealthController.DamageMultiplier = 0;
+				player.ActiveHealthController.DisableMetabolism();
+				player.ActiveHealthController.PauseAllEffects();
+
+				extractRoutine = StartCoroutine(ExtractRoutine(player));
+
+				// Prevents players from looting after extracting
+				CurrentScreenSingleton.Instance.CloseAllScreensForced();
+
+				// Detroys session timer
+				if (timeManager != null)
 				{
-					Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
+					Destroy(timeManager);
 				}
+				if (GameUi.TimerPanel.enabled)
+				{
+					GameUi.TimerPanel.Close();
+				}
+
+				if (FikaPlugin.AutoExtract.Value)
+				{
+					if (!isServer)
+					{
+						Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
+					}
+					else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0)
+					{
+						Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
+					}
+				} 
+			}
+			else
+			{
+				throw new NullReferenceException("Extract: CoopHandler was null!");
 			}
 		}
 
@@ -1929,6 +1934,8 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
+			
+
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
 				// Create a copy to prevent errors when the dictionary is being modified (which happens when using spawn mods)
@@ -1950,11 +1957,6 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			Destroy(coopHandler);
-
-			if (CoopHandler.CoopHandlerParent != null)
-			{
-				Destroy(CoopHandler.CoopHandlerParent);
-			}
 
 			if (isServer)
 			{
@@ -2107,11 +2109,6 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			Destroy(coopHandler);
-
-			if (CoopHandler.CoopHandlerParent != null)
-			{
-				Destroy(CoopHandler.CoopHandlerParent);
-			}
 
 			if (isServer)
 			{

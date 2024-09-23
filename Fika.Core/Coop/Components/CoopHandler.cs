@@ -28,17 +28,22 @@ namespace Fika.Core.Coop.Components
 		public Dictionary<int, CoopPlayer> Players = [];
 		public List<CoopPlayer> HumanPlayers = [];
 		public int AmountOfHumans = 1;
-		public List<int> ExtractedPlayers = [];
-		public CoopPlayer MyPlayer => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+		public List<int> ExtractedPlayers = [];		
 		public List<string> queuedProfileIds = [];
+		public CoopPlayer MyPlayer
+		{
+			get
+			{
+				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+			}
+		}
 
 		private ManualLogSource Logger;
-		private Queue<SpawnObject> spawnQueue = new(50);
+		private readonly Queue<SpawnObject> spawnQueue = new(50);
 		private bool ready;
 		private bool isClient;
 		private float charSyncCounter;
-
-		internal static GameObject CoopHandlerParent;
+		private bool requestQuitGame = false;
 
 		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId)
 		{
@@ -56,41 +61,29 @@ namespace Fika.Core.Coop.Components
 		}
 		#endregion
 
-		#region Public Voids
-
-		public static CoopHandler GetCoopHandler()
-		{
-			if (CoopHandlerParent == null)
-			{
-				return null;
-			}
-
-			CoopHandler coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
-			if (coopHandler != null)
-			{
-				return coopHandler;
-			}
-
-			return null;
-		}
-
 		public static bool TryGetCoopHandler(out CoopHandler coopHandler)
 		{
-			coopHandler = GetCoopHandler();
-			return coopHandler != null;
+			coopHandler = null;
+			IFikaNetworkManager networkManager = Singleton<IFikaNetworkManager>.Instance;
+			if (networkManager != null)
+			{
+				coopHandler = networkManager.CoopHandler;
+				return true;
+			}
+
+			return false;
 		}
 
 		public static string GetServerId()
 		{
-			CoopHandler coopGC = GetCoopHandler();
-			if (coopGC == null)
+			IFikaNetworkManager networkManager = Singleton<IFikaNetworkManager>.Instance;
+			if (networkManager != null && networkManager.CoopHandler != null)
 			{
-				return FikaBackendUtils.GetGroupId();
+				return networkManager.CoopHandler.ServerId;
 			}
 
-			return coopGC.ServerId;
+			return FikaBackendUtils.GetGroupId();
 		}
-		#endregion
 
 		protected void Awake()
 		{
@@ -118,35 +111,13 @@ namespace Fika.Core.Coop.Components
 		{
 			Players.Clear();
 			HumanPlayers.Clear();
-		}
-
-		private bool requestQuitGame = false;
-
-		/// <summary>
-		/// The state your character or game is in to Quit.
-		/// </summary>
-		public enum EQuitState
-		{
-			None = -1,
-			Dead,
-			Extracted
-		}
+		}	
 
 		public EQuitState GetQuitState()
 		{
 			EQuitState quitState = EQuitState.None;
 
 			if (LocalGameInstance == null)
-			{
-				return quitState;
-			}
-
-			if (Players == null)
-			{
-				return quitState;
-			}
-
-			if (LocalGameInstance.ExtractedPlayers == null)
 			{
 				return quitState;
 			}
@@ -558,6 +529,16 @@ namespace Fika.Core.Coop.Components
 			{
 				Logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
 			}
+		}
+
+		/// <summary>
+		/// The state your character or game is in to Quit.
+		/// </summary>
+		public enum EQuitState
+		{
+			None = -1,
+			Dead,
+			Extracted
 		}
 	}
 }

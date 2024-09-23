@@ -43,9 +43,8 @@ namespace Fika.Core.Networking
 	/// <summary>
 	/// Client used in P2P connections
 	/// </summary>
-	public class FikaClient : MonoBehaviour, INetEventListener
-	{
-		public NetDataWriter Writer => dataWriter;
+	public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
+	{		
 		public CoopPlayer MyPlayer;
 		public NetPacketProcessor packetProcessor = new();
 		public int Ping = 0;
@@ -54,7 +53,9 @@ namespace Fika.Core.Networking
 		public int ReadyClients = 0;
 		public bool HostReady = false;
 		public bool HostLoaded = false;
-		public bool ReconnectDone = false;
+		public bool ReconnectDone = false;		
+		public NetPeer ServerConnection { get; private set; }
+		public bool ExfilPointsReceived { get; private set; } = false;
 		public NetManager NetClient
 		{
 			get
@@ -62,8 +63,13 @@ namespace Fika.Core.Networking
 				return netClient;
 			}
 		}
-		public NetPeer ServerConnection { get; private set; }
-		public bool ExfilPointsReceived { get; private set; } = false;
+		public NetDataWriter Writer
+		{
+			get
+			{
+				return dataWriter;
+			}
+		}
 		public bool Started
 		{
 			get
@@ -75,7 +81,6 @@ namespace Fika.Core.Networking
 				return netClient.IsRunning;
 			}
 		}
-
 		public int SendRate
 		{
 			get
@@ -83,7 +88,17 @@ namespace Fika.Core.Networking
 				return sendRate;
 			}
 		}
-
+		public CoopHandler CoopHandler
+		{
+			get
+			{
+				return coopHandler;
+			}
+			set
+			{
+				coopHandler = value;
+			}
+		}
 		private int sendRate;
 		private NetManager netClient;
 		private CoopHandler coopHandler;
@@ -155,7 +170,6 @@ namespace Fika.Core.Networking
 			};
 
 			await NetManagerUtils.CreateCoopHandler();
-			coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
 
 			if (FikaBackendUtils.IsHostNatPunch)
 			{

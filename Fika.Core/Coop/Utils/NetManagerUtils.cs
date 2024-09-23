@@ -35,12 +35,14 @@ namespace Fika.Core.Coop.Utils
 				FikaServer server = FikaGameObject.AddComponent<FikaServer>();
 				Singleton<FikaServer>.Create(server);
 				logger.LogInfo("FikaServer has started!");
+				Singleton<IFikaNetworkManager>.Create(server);
 			}
 			else
 			{
 				FikaClient client = FikaGameObject.AddComponent<FikaClient>();
 				Singleton<FikaClient>.Create(client);
 				logger.LogInfo("FikaClient has started!");
+				Singleton<IFikaNetworkManager>.Create(client);
 			}
 		}
 
@@ -49,6 +51,7 @@ namespace Fika.Core.Coop.Utils
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="packet"></param>
+		[Obsolete("Do not use", true)]
 		public static void SendPacket<T>(ref T packet) where T : INetSerializable
 		{
 			if (FikaBackendUtils.IsServer)
@@ -87,6 +90,10 @@ namespace Fika.Core.Coop.Utils
 				if (isServer)
 				{
 					FikaServer server = Singleton<FikaServer>.Instance;
+					if (!Singleton<IFikaNetworkManager>.TryRelease(server))
+					{
+						logger.LogError("Unable to release Server from Singleton!");
+					}
 					try
 					{
 						server.NetServer.Stop();
@@ -102,6 +109,10 @@ namespace Fika.Core.Coop.Utils
 				else
 				{
 					FikaClient client = Singleton<FikaClient>.Instance;
+					if (!Singleton<IFikaNetworkManager>.TryRelease(client))
+					{
+						logger.LogError("Unable to release Client from Singleton!");
+					}
 					try
 					{
 						client.NetClient.Stop();
@@ -200,38 +211,27 @@ namespace Fika.Core.Coop.Utils
 		public static Task CreateCoopHandler()
 		{
 			logger.LogInfo("Creating CoopHandler...");
-			CoopHandler coopHandler = CoopHandler.GetCoopHandler();
-			if (coopHandler != null)
+			IFikaNetworkManager networkManager = Singleton<IFikaNetworkManager>.Instance;
+			if (networkManager != null)
 			{
-				GameObject.Destroy(coopHandler);
-			}
+				if (FikaGameObject != null)
+				{
+					CoopHandler coopHandler = FikaGameObject.AddComponent<CoopHandler>();
+					networkManager.CoopHandler = coopHandler;
 
-			if (CoopHandler.CoopHandlerParent != null)
-			{
-				GameObject.Destroy(CoopHandler.CoopHandlerParent);
-				CoopHandler.CoopHandlerParent = null;
-			}
+					if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
+					{
+						coopHandler.ServerId = FikaBackendUtils.GetGroupId();
+						return Task.CompletedTask;
+					}
 
-			if (CoopHandler.CoopHandlerParent == null)
-			{
-				CoopHandler.CoopHandlerParent = new GameObject("CoopHandlerParent");
-				GameObject.DontDestroyOnLoad(CoopHandler.CoopHandlerParent);
-			}
+					GameObject.Destroy(coopHandler);
+					logger.LogError("No ServerId found, deleting CoopHandler!");
+					throw new MissingReferenceException("No Server Id found");
+				}
+			}			
 
-			coopHandler = CoopHandler.CoopHandlerParent.AddComponent<CoopHandler>();
-
-			if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
-			{
-				coopHandler.ServerId = FikaBackendUtils.GetGroupId();
-			}
-			else
-			{
-				GameObject.Destroy(coopHandler);
-				logger.LogError("No Server Id found, Deleting Coop Handler");
-				throw new MissingReferenceException("No Server Id found");
-			}
-
-			return Task.CompletedTask;
+			return Task.FromException(new NullReferenceException("CreateCoopHandler: IFikaNetworkManager or FikaGameObject was null"));
 		}
 	}
 }

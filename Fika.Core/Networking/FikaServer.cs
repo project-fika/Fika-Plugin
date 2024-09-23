@@ -44,7 +44,7 @@ namespace Fika.Core.Networking
 	/// <summary>
 	/// Server used in P2P connections
 	/// </summary>
-	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface228
+	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface228, IFikaNetworkManager
 	{
 		public int ReadyClients = 0;
 		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
@@ -91,6 +91,17 @@ namespace Fika.Core.Networking
 				return sendRate;
 			}
 		}
+		public CoopHandler CoopHandler
+		{
+			get
+			{
+				return coopHandler;
+			}
+			set
+			{
+				coopHandler = value;
+			}
+		}
 
 		private int sendRate;
 		private readonly NetPacketProcessor packetProcessor = new();
@@ -107,10 +118,6 @@ namespace Fika.Core.Networking
 		private FikaChat fikaChat;
 		private CancellationTokenSource natIntroduceRoutineCts;
 		private int statisticsCounter = 0;
-
-#if DEBUG
-		private bool simulateFail = false;
-#endif
 
 		public async Task Init()
 		{
@@ -695,7 +702,6 @@ namespace Fika.Core.Networking
 
 		public void SetupGameVariables(CoopPlayer coopPlayer)
 		{
-			coopHandler = CoopHandler.CoopHandlerParent.GetComponent<CoopHandler>();
 			MyPlayer = coopPlayer;
 			if (FikaPlugin.EnableChat.Value)
 			{
@@ -1029,12 +1035,8 @@ namespace Fika.Core.Networking
 							Peer = peer,
 							Server = this
 						};
-#if DEBUG
-						operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId,
-							simulateFail ? EOperationStatus.Failed : EOperationStatus.Started);
-#else
+
 						operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
-#endif
 						SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 						handler.OperationResult.Value.method_1(new Callback(handler.HandleResult));
 					}

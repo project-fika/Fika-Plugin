@@ -31,7 +31,10 @@ namespace Fika.Core.Coop.Patches
 			public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
 				ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
 			{
-				CoopHandler coopHandler = CoopHandler.GetCoopHandler();
+				if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+				{
+					return false;
+				}
 
 				player.OnPlayerDead += __instance.method_7;
 				bool flag = player.RecodableItemsHandler.TryToGetRecodableComponent(out RadioTransmitterRecodableComponent radioTransmitterRecodableComponent);
@@ -92,7 +95,10 @@ namespace Fika.Core.Coop.Patches
 			public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
 				ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
 			{
-				CoopHandler coopHandler = CoopHandler.GetCoopHandler();
+				if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+				{
+					return false;
+				}
 
 				player.OnPlayerDead -= __instance.method_7;
 				player.RecodableItemsHandler.TryToGetRecodableComponent(out RadioTransmitterRecodableComponent radioTransmitterRecodableComponent);

@@ -172,11 +172,11 @@ namespace Fika.Core.Coop.FreeCamera
 		/// </param>
 		public void CycleSpectatePlayers(bool reverse = false)
 		{
-			CoopHandler coopHandler = CoopHandler.GetCoopHandler();
-			if (coopHandler == null)
+			if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
 				return;
 			}
+
 			List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 			// If no alive players, add bots to spectate pool if enabled
 			if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)

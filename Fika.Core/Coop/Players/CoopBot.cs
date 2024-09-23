@@ -292,10 +292,7 @@ namespace Fika.Core.Coop.Players
 			}
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
-				if (!coopHandler.Players.Remove(NetId))
-				{
-					FikaPlugin.Instance.FikaLogger.LogWarning("Unable to remove " + NetId + " from CoopHandler.Players when Destroying");
-				}
+				coopHandler.Players.Remove(NetId);
 			}
 			base.OnDestroy();
 		}
