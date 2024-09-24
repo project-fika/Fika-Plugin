@@ -195,7 +195,7 @@ namespace Fika.Core.Coop.FreeCamera
 			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {players.Count} players");
 #endif
 
-			if (players.Count() <= 0)
+			if (players.Count <= 0)
 			{
 				// Clear out all spectate positions
 				DetachCamera();
