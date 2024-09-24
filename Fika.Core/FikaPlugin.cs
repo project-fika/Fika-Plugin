@@ -263,6 +263,7 @@ namespace Fika.Core
 			new MatchmakerOfflineRaidScreen_Close_Patch().Enable();
 			new BodyPartCollider_SetUpPlayer_Patch().Enable();
 			new MatchmakerOfflineRaidScreen_Show_Patch().Enable();
+			new RaidSettingsWindow_method_8_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
