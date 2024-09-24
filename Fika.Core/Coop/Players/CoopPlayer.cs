@@ -1954,8 +1954,7 @@ namespace Fika.Core.Coop.Players
 
 			internal void HandleResult()
 			{
-				coopPlayer.DestroyController();
-				coopPlayer.SetEmptyHands(null);
+
 			}
 		}
 	}

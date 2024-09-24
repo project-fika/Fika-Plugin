@@ -588,6 +588,14 @@ namespace Fika.Core.Coop.Players
 			method_32(clip);
 		}
 
+		public override void MouseLook(bool forceApplyToOriginalRibcage = false)
+		{
+			if (HandsController != null)
+			{
+				MovementContext.RotationAction?.Invoke(this);
+			}
+		}
+
 		public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, double ratio)
 		{
 			float interpolateRatio = (float)ratio;
