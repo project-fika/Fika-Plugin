@@ -482,10 +482,10 @@ namespace Fika.Core.Coop.Players
 
 		public override void ApplyCorpseImpulse()
 		{
-			if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None)
+			if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
+				&& PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
 			{
-				Collider collider = PlayerBones.BodyPartCollidersDictionary[CorpseSyncPacket.BodyPartColliderType].Collider;
-				Corpse.Ragdoll.ApplyImpulse(collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
+				Corpse.Ragdoll.ApplyImpulse(bodyPartCollider.Collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
 			}
 		}
 
@@ -724,7 +724,7 @@ namespace Fika.Core.Coop.Players
 			{
 				SetInventory(CorpseSyncPacket.Equipment);
 			}
-			return base.CreateCorpse();
+			return CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
 		}
 
 		public override void OnDead(EDamageType damageType)
