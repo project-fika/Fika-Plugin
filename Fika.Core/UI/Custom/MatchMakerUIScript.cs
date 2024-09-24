@@ -22,11 +22,19 @@ namespace Fika.Core.UI.Custom
 {
 	public class MatchMakerUIScript : MonoBehaviour
 	{
+		public DefaultUIButton AcceptButton
+		{
+			get
+			{
+				return acceptButton;
+			}
+		}
+
 		private MatchMakerUI fikaMatchMakerUi;
 		private LobbyEntry[] matches;
 		private readonly List<GameObject> matchesListObjects = [];
 		private bool stopQuery = false;
-		private GameObject NewBackButton;
+		private GameObject newBackButton;
 		private string profileId;
 		private float lastRefreshed;
 		private bool _started;
@@ -122,9 +130,9 @@ namespace Fika.Core.UI.Custom
 		protected void OnDestroy()
 		{
 			stopQuery = true;
-			if (NewBackButton != null)
+			if (newBackButton != null)
 			{
-				Destroy(NewBackButton);
+				Destroy(newBackButton);
 			}
 		}
 
@@ -318,19 +326,19 @@ namespace Fika.Core.UI.Custom
 			acceptButton.enabled = false;
 			acceptButton.Interactable = false;
 
-			NewBackButton = Instantiate(backButton.gameObject, backButton.transform.parent);
+			newBackButton = Instantiate(backButton.gameObject, backButton.transform.parent);
 			UnityEngine.Events.UnityEvent newEvent = new();
 			newEvent.AddListener(() =>
 			{
 				DestroyThis();
 				backButton.OnClick.Invoke();
 			});
-			DefaultUIButton newButtonComponent = NewBackButton.GetComponent<DefaultUIButton>();
+			DefaultUIButton newButtonComponent = newBackButton.GetComponent<DefaultUIButton>();
 			Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
-			if (!NewBackButton.active)
+			if (!newBackButton.active)
 			{
-				NewBackButton.SetActive(true);
+				newBackButton.SetActive(true);
 			}
 
 			backButton.gameObject.SetActive(false);
