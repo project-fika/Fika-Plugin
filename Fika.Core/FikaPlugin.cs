@@ -264,6 +264,7 @@ namespace Fika.Core
 			new BodyPartCollider_SetUpPlayer_Patch().Enable();
 			new MatchmakerOfflineRaidScreen_Show_Patch().Enable();
 			new RaidSettingsWindow_method_8_Patch().Enable();
+			new AIPlaceLogicPartisan_Dispose_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
