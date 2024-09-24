@@ -8,7 +8,7 @@ namespace Fika.Core.Coop.ObservedClasses
 	{
 		public ObservedRunState(MovementContext movementContext) : base(movementContext)
 		{
-			MovementContext = (ObservedMovementContext)movementContext;
+			MovementContext = movementContext;
 		}
 
 		public override void UpdatePosition(float deltaTime)
