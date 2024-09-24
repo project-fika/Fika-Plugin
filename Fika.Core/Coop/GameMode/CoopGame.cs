@@ -147,7 +147,7 @@ namespace Fika.Core.Coop.GameMode
 				Logger.LogInfo($"Using custom time, hour of day: {timeAndWeather.HourOfDay}");
 				DateTime currentTime = backendDateTime.DateTime_1;
 				backendDateTime.DateTime_1 = new(currentTime.Year, currentTime.Month, currentTime.Day,
-					dateTime is EDateTime.CURR ? timeAndWeather.HourOfDay : timeAndWeather.HourOfDay + 12, currentTime.Minute,
+					dateTime is EDateTime.CURR ? timeAndWeather.HourOfDay : timeAndWeather.HourOfDay - 12, currentTime.Minute,
 					currentTime.Second, currentTime.Millisecond);
 			}
 
