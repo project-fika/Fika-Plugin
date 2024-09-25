@@ -118,6 +118,16 @@ namespace Fika.Core.Coop.ClientClasses
 				}
 			}
 
+			// Do not replicate stashing quest items
+			if (operation is GClass3109 discardOperation)
+			{
+				if (discardOperation.Item.Template.QuestItem)
+				{
+					base.vmethod_1(operation, callback);
+					return;
+				}
+			}
+
 			// Do not replicate quest operations / search operations
 			// Check for GClass increments, ReadPolymorph
 			if (operation is GClass3126 or GClass3131 or GClass3132 or GClass3133)
