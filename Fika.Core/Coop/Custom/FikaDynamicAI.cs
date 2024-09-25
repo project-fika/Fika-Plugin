@@ -178,6 +178,11 @@ namespace Fika.Core.Coop.Custom
 				return;
 			}
 
+			if (bot.AIData.BotOwner.Memory.IsUnderFire || bot.AIData.BotOwner.Memory.HaveEnemy)
+			{
+				return;
+			}
+
 			int notInRange = 0;
 			float range = FikaPlugin.DynamicAIRange.Value;
 
