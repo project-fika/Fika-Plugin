@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
@@ -249,11 +250,19 @@ namespace Fika.Core.Coop.ClientClasses
 									iconType: EFT.Communications.ENotificationIconType.Quest);
 			}
 
-			Item item = player.Inventory.QuestRaidItems.GetAllItems().FirstOrDefault(x => x.TemplateId == itemId);
-			if (item != null)
+			foreach (Item questItem in player.Inventory.QuestRaidItems.GetAllItems())
 			{
-				GStruct419<GClass3027> removeResult = InteractionsHandlerClass.Remove(item, player.InventoryController, false);
-				player.InventoryController.TryRunNetworkTransaction(removeResult);
+				if (questItem.TemplateId == itemId)
+				{
+					GStruct419<GClass3027> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
+					player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
+					{
+						if (!result.Succeed)
+						{
+							FikaPlugin.Instance.FikaLogger.LogError("ReceiveQuestDropItemPacket: Discard failed: " + result.Error);
+						}
+					});
+				}
 			}
 			player.Profile.ItemDroppedAtPlace(itemId, zoneId);
 			isItemBeingDropped = false;
