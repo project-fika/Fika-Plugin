@@ -27,7 +27,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static EFT.InventoryLogic.Slot;
 using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Coop.Players
