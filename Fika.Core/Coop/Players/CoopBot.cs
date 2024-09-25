@@ -185,9 +185,9 @@ namespace Fika.Core.Coop.Players
 				flag = firearmController.CheckForFastWeaponSwitch(handler.weapon);
 			}
 			Func<FirearmController> func = new(handler.ReturnController);
-			handler.process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.weapon, flag);
-			handler.confirmCallback = new(handler.SendPacket);
-			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+			handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.weapon, flag);
+			handler.ConfirmCallback = new(handler.SendPacket);
+			handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
 
 		public override void OnDead(EDamageType damageType)
@@ -213,10 +213,7 @@ namespace Fika.Core.Coop.Players
 			}
 
 			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-			if (coopGame.Bots.ContainsKey(ProfileId))
-			{
-				coopGame.Bots.Remove(ProfileId);
-			}
+			coopGame.Bots.Remove(ProfileId);
 
 			base.OnDead(damageType);
 		}
@@ -284,11 +281,7 @@ namespace Fika.Core.Coop.Players
 					};
 
 					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-
-					if (!coopGame.Bots.Remove(ProfileId))
-					{
-						FikaPlugin.Instance.FikaLogger.LogWarning("Unable to remove " + ProfileId + " from CoopGame.Bots when Destroying");
-					}
+					coopGame.Bots.Remove(ProfileId);
 				}
 			}
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
@@ -310,8 +303,8 @@ namespace Fika.Core.Coop.Players
 		{
 			private readonly CoopBot coopBot = coopBot;
 			public readonly Weapon weapon = weapon;
-			public Process<FirearmController, IFirearmHandsController> process;
-			public Action confirmCallback;
+			public Process<FirearmController, IFirearmHandsController> Process;
+			public Action ConfirmCallback;
 
 			internal BotFirearmController ReturnController()
 			{
@@ -340,7 +333,7 @@ namespace Fika.Core.Coop.Players
 			{
 				if (result.Succeed)
 				{
-					confirmCallback();
+					ConfirmCallback();
 				}
 			}
 		}
