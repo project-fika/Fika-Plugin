@@ -121,7 +121,7 @@ namespace Fika.Core.Networking
 
 		public async Task Init()
 		{
-			int sendRateSetting = FikaPlugin.UpdateRate.Value;
+			int sendRateSetting = FikaPlugin.SendRate.Value;
 			logger.LogInfo($"Starting server with SendRate: {sendRateSetting}");
 			sendRate = sendRateSetting;
 			port = FikaPlugin.UDPPort.Value;
