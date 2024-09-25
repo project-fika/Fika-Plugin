@@ -37,7 +37,8 @@ namespace Fika.Core.Coop.ObservedClasses
 				MovementContext.MovementDirection = Vector2.Lerp(MovementContext.MovementDirection, Direction, deltaTime * EFTHardSettings.Instance.DIRECTION_LERP_SPEED);
 				MovementContext.SetUpDiscreteDirection(GClass1757.ConvertToMovementDirection(Direction));
 				Direction = Vector2.zero;
-				MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
+				// TODO: Causes issues with animations not updating sometimes, need to fix
+				//MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
 				MovementContext.SprintAcceleration(deltaTime);
 				UpdateRotationAndPosition(deltaTime);
 			}
