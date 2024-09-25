@@ -265,6 +265,7 @@ namespace Fika.Core
 			new MatchmakerOfflineRaidScreen_Show_Patch().Enable();
 			new RaidSettingsWindow_method_8_Patch().Enable();
 			new AIPlaceLogicPartisan_Dispose_Patch().Enable();
+			new Player_SpawnInHands_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
