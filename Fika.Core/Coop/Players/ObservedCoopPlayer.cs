@@ -147,10 +147,11 @@ namespace Fika.Core.Coop.Players
 
 			player.AIData = new GClass534(null, player);
 
-			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass858>("gclass858_0").Value = new();
-			player.cullingHandler = botTraverse.Field<GClass858>("gclass858_0").Value;
-			botTraverse.Field<GClass858>("gclass858_0").Value.Initialize(player, player.PlayerBones);
+			Traverse observedTraverse = Traverse.Create(player);
+			observedTraverse.Field<GClass858>("gclass858_0").Value = new();
+			player.cullingHandler = observedTraverse.Field<GClass858>("gclass858_0").Value;
+			player.cullingHandler.Initialize(player, player.PlayerBones);
+			player.cullingHandler.Disable();
 
 			if (!aiControl)
 			{

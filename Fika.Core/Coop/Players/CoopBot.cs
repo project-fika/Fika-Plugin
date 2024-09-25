@@ -86,11 +86,12 @@ namespace Fika.Core.Coop.Players
 			Traverse botTraverse = Traverse.Create(player);
 			botTraverse.Field<GClass858>("gclass858_0").Value = new();
 			botTraverse.Field<GClass858>("gclass858_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass858>("gclass858_0").Value.Disable();
 
-			if (FikaBackendUtils.IsDedicated)
+			/*if (FikaBackendUtils.IsDedicated)
 			{
 				botTraverse.Field<GClass858>("gclass858_0").Value.SetMode(GClass857.EMode.Disabled);
-			}
+			}*/
 
 			player.AggressorFound = false;
 			player._animators[0].enabled = true;
