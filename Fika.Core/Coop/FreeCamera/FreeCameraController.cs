@@ -1,4 +1,5 @@
-﻿using Comfort.Common;
+﻿using Audio.SpatialSystem;
+using Comfort.Common;
 using EFT;
 using EFT.CameraControl;
 using EFT.UI;
@@ -32,7 +33,14 @@ namespace Fika.Core.Coop.FreeCamera
 		private bool effectsCleared = false;
 
 		private GamePlayerOwner gamePlayerOwner;
-		private CoopPlayer player => (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+		private CoopPlayer Player
+		{
+			get
+			{
+				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+			}
+		}
+
 		private Vector3 LastKnownPosition;
 		private CoopHandler coopHandler;
 
@@ -94,7 +102,7 @@ namespace Fika.Core.Coop.FreeCamera
 			allCullingObjects = FindObjectsOfType<DisablerCullingObjectBase>();
 			previouslyActiveBakeGroups = [];
 
-			player.ActiveHealthController.DiedEvent += MainPlayer_DiedEvent;
+			Player.ActiveHealthController.DiedEvent += MainPlayer_DiedEvent;
 
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler cHandler))
 			{
@@ -104,7 +112,17 @@ namespace Fika.Core.Coop.FreeCamera
 
 		private void MainPlayer_DiedEvent(EDamageType obj)
 		{
-			player.ActiveHealthController.DiedEvent -= MainPlayer_DiedEvent;
+			if (Singleton<SpatialAudioSystem>.Instantiated)
+			{
+				SpatialAudioSystem spatialAudioSystem = Singleton<SpatialAudioSystem>.Instance;
+				ISpatialAudioRoom currentRoom = spatialAudioSystem.ListenerCurrentRoom;
+				if (currentRoom != null && currentRoom is SpatialAudioRoom spatialRoom)
+				{
+					spatialAudioSystem.RemovePlayerCurrentRoom(spatialRoom, Player);
+				}
+			}
+
+			Player.ActiveHealthController.DiedEvent -= MainPlayer_DiedEvent;
 
 			if (!deathFadeEnabled)
 			{
@@ -122,12 +140,12 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-			if (player == null)
+			if (Player == null)
 			{
 				return;
 			}
 
-			if (player.ActiveHealthController == null)
+			if (Player.ActiveHealthController == null)
 			{
 				return;
 			}
@@ -135,7 +153,7 @@ namespace Fika.Core.Coop.FreeCamera
 			CoopHandler.EQuitState quitState = coopHandler.GetQuitState();
 			if (quitState != CoopHandler.EQuitState.Extracted)
 			{
-				LastKnownPosition = player.PlayerBones.Neck.position;
+				LastKnownPosition = Player.PlayerBones.Neck.position;
 			}
 
 			if (extracted && !freeCamScript.IsActive)
@@ -170,7 +188,7 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: player has extracted");
 				CoopGame coopGame = coopHandler.LocalGameInstance;
-				if (coopGame.ExtractedPlayers.Contains(player.NetId))
+				if (coopGame.ExtractedPlayers.Contains(Player.NetId))
 				{
 					extracted = true;
 					ShowExtractMessage();
@@ -192,10 +210,10 @@ namespace Fika.Core.Coop.FreeCamera
 
 				if (!effectsCleared)
 				{
-					if (player != null)
+					if (Player != null)
 					{
-						player.Muffled = false;
-						player.HeavyBreath = false;
+						Player.Muffled = false;
+						Player.HeavyBreath = false;
 					}
 
 					if (CameraClass.Exist)
@@ -245,10 +263,10 @@ namespace Fika.Core.Coop.FreeCamera
 
 			if (!effectsCleared)
 			{
-				if (player != null)
+				if (Player != null)
 				{
-					player.Muffled = false;
-					player.HeavyBreath = false;
+					Player.Muffled = false;
+					Player.HeavyBreath = false;
 				}
 
 				if (CameraClass.Exist)
@@ -336,24 +354,24 @@ namespace Fika.Core.Coop.FreeCamera
 		public void ToggleCamera()
 		{
 			// Get our own Player instance. Null means we're not in a raid
-			if (player == null)
+			if (Player == null)
 			{
 				return;
 			}
 
 			if (!freeCamScript.IsActive)
 			{
-				SetPlayerToFreecamMode(player);
+				SetPlayerToFreecamMode(Player);
 			}
 			else
 			{
-				SetPlayerToFirstPersonMode(player);
+				SetPlayerToFirstPersonMode(Player);
 			}
 		}
 
 		public void ToggleSpectateCamera()
 		{
-			if (player == null)
+			if (Player == null)
 			{
 				return;
 			}
@@ -373,11 +391,11 @@ namespace Fika.Core.Coop.FreeCamera
 					freeCamScript.SetCurrentPlayer(coopPlayer);
 					FikaPlugin.Instance.FikaLogger.LogDebug("FreecamController: Spectating new player: " + coopPlayer.Profile.Info.MainProfileNickname);
 
-					player.PointOfView = EPointOfView.ThirdPerson;
-					if (player.PlayerBody != null)
+					Player.PointOfView = EPointOfView.ThirdPerson;
+					if (Player.PlayerBody != null)
 					{
-						player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
-						player.GetComponent<PlayerCameraController>().UpdatePointOfView();
+						Player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
+						Player.GetComponent<PlayerCameraController>().UpdatePointOfView();
 					}
 					gamePlayerOwner.enabled = false;
 					freeCamScript.SetActive(true);
@@ -394,7 +412,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private void ToggleUi()
 		{
 			// Check if we're currently in a raid
-			if (player == null)
+			if (Player == null)
 			{
 				return;
 			}
@@ -554,9 +572,9 @@ namespace Fika.Core.Coop.FreeCamera
 		}
 
 		/// <summary>
-		/// Gets the current <see cref="Player"/> instance if it's available
+		/// Gets the current <see cref="EFT.Player"/> instance if it's available
 		/// </summary>
-		/// <returns>Local <see cref="Player"/> instance; returns null if the game is not in raid</returns>
+		/// <returns>Local <see cref="EFT.Player"/> instance; returns null if the game is not in raid</returns>
 		private Player GetLocalPlayerFromWorld()
 		{
 			// If the GameWorld instance is null or has no RegisteredPlayers, it most likely means we're not in a raid
