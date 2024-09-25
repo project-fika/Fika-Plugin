@@ -56,7 +56,13 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public override Vector3 WeaponDirection => -CurrentFireport.up;
+		public override Vector3 WeaponDirection
+		{
+			get
+			{
+				return -CurrentFireport.up;
+			}
+		}
 
 		protected void Awake()
 		{
