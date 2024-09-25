@@ -946,26 +946,6 @@ namespace Fika.Core.Coop.Players
 					FikaPlugin.Instance.FikaLogger.LogError("Could not get templateId for DogTag!");
 				}
 			}
-
-			if (!string.IsNullOrEmpty(Location))
-			{
-				// Delete labs card on labs
-				if (Location.ToLower() == "laboratory")
-				{
-					foreach (Item item in Inventory.AllRealPlayerItems)
-					{
-						if (item.TemplateId == "5c94bbff86f7747ee735c08f")
-						{
-							InteractionsHandlerClass.Remove(item, _inventoryController, false);
-							break;
-						}
-					}
-				}
-			}
-			else
-			{
-				FikaPlugin.Instance.FikaLogger.LogError("CoopPlayer::SetupMainPlayer: Location was null!");
-			}
 		}
 
 		private string GetDogtagTemplateId()
