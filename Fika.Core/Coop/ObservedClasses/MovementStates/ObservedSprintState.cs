@@ -38,7 +38,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				MovementContext.SetUpDiscreteDirection(GClass1757.ConvertToMovementDirection(Direction));
 				Direction = Vector2.zero;
 				// TODO: Causes issues with animations not updating sometimes, need to fix
-				//MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
+				MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
 				MovementContext.SprintAcceleration(deltaTime);
 				UpdateRotationAndPosition(deltaTime);
 			}

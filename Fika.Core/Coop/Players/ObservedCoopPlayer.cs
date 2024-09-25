@@ -609,12 +609,12 @@ namespace Fika.Core.Coop.Players
 			HeadRotation = to.HeadRotation;
 			ProceduralWeaponAnimation.SetHeadRotation(HeadRotation);
 
-			MovementContext.IsGrounded = to.IsGrounded;
+			bool isGronded = to.IsGrounded;
+			MovementContext.IsGrounded = isGronded;
 
-			EPlayerState oldMovementState = from.State;
-			EPlayerState newMovementState = to.State;
+			EPlayerState newState = to.State;
 
-			if (newMovementState == EPlayerState.Jump)
+			if (newState == EPlayerState.Jump)
 			{
 				MovementContext.PlayerAnimatorEnableJump(true);
 				if (isServer)
@@ -622,22 +622,13 @@ namespace Fika.Core.Coop.Players
 					MovementContext.method_2(1f);
 				}
 			}
-			if (isJumpSet && to.IsGrounded)
+
+			if (isJumpSet && isGronded)
 			{
 				MovementContext.PlayerAnimatorEnableJump(false);
 				MovementContext.PlayerAnimatorEnableLanding(true);
 			}
-			if ((oldMovementState == EPlayerState.ProneIdle || oldMovementState == EPlayerState.ProneMove) && newMovementState != EPlayerState.ProneMove
-				&& newMovementState != EPlayerState.Transit2Prone && newMovementState != EPlayerState.ProneIdle)
-			{
-				MovementContext.IsInPronePose = false;
-			}
-			if ((newMovementState == EPlayerState.ProneIdle || newMovementState == EPlayerState.ProneMove) && oldMovementState != EPlayerState.ProneMove
-				&& oldMovementState != EPlayerState.Prone2Stand && oldMovementState != EPlayerState.Transit2Prone && oldMovementState != EPlayerState.ProneIdle)
-			{
-				MovementContext.IsInPronePose = true;
-			}
-			if (oldMovementState == EPlayerState.Sprint && newMovementState == EPlayerState.Transition)
+			if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)
 			{
 				MovementContext.UpdateSprintInertia();
 				MovementContext.PlayerAnimatorEnableInert(false);
@@ -645,22 +636,22 @@ namespace Fika.Core.Coop.Players
 
 			Physical.SerializationStruct = to.Stamina;
 
-			if (!Mathf.Approximately(from.Step, to.Step))
+			if (!Mathf.Approximately(MovementContext.Step, to.Step))
 			{
 				CurrentManagedState.SetStep(to.Step);
 			}
 
-			if (from.IsSprinting != to.IsSprinting)
+			if (MovementContext.IsSprintEnabled != to.IsSprinting)
 			{
 				CurrentManagedState.EnableSprint(to.IsSprinting);
 			}
 
-			if (from.IsProne != to.IsProne)
+			if (MovementContext.IsInPronePose != to.IsProne)
 			{
 				MovementContext.IsInPronePose = to.IsProne;
 			}
 
-			if (!Mathf.Approximately(from.PoseLevel, to.PoseLevel))
+			if (!Mathf.Approximately(PoseLevel, to.PoseLevel))
 			{
 				MovementContext.SetPoseLevel(from.PoseLevel + (to.PoseLevel - from.PoseLevel));
 			}
@@ -668,12 +659,12 @@ namespace Fika.Core.Coop.Players
 			MovementContext.SetCurrentClientAnimatorStateIndex(to.AnimatorStateIndex);
 			MovementContext.SetCharacterMovementSpeed(to.CharacterMovementSpeed, true);
 
-			if (from.Blindfire != to.Blindfire)
+			if (MovementContext.BlindFire != to.Blindfire)
 			{
 				MovementContext.SetBlindFire(to.Blindfire);
 			}
 
-			if (!IsInventoryOpened && MovementContext.IsGrounded)
+			if (!IsInventoryOpened && isGronded)
 			{
 				Move(Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, interpolateRatio));
 				if (isServer)
@@ -684,7 +675,7 @@ namespace Fika.Core.Coop.Players
 
 			Transform.position = Vector3.LerpUnclamped(from.Position, to.Position, interpolateRatio);
 
-			if (!Mathf.Approximately(from.Tilt, to.Tilt))
+			if (!Mathf.Approximately(MovementContext.Tilt, to.Tilt))
 			{
 				MovementContext.SetTilt(to.Tilt, true);
 			}
