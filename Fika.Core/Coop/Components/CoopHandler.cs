@@ -104,6 +104,44 @@ namespace Fika.Core.Coop.Components
 			Singleton<GameWorld>.Instance.World_0.method_0(null);
 		}
 
+		protected private void Update()
+		{
+			if (LocalGameInstance == null)
+			{
+				return;
+			}
+
+			if (!ready)
+			{
+				return;
+			}
+
+			if (spawnQueue.Count > 0)
+			{
+				SpawnPlayer(spawnQueue.Dequeue());
+			}
+
+			ProcessQuitting();
+
+			if (isClient)
+			{
+				charSyncCounter += Time.deltaTime;
+				int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
+
+				if (charSyncCounter > waitTime)
+				{
+					charSyncCounter = 0f;
+
+					if (Players == null)
+					{
+						return;
+					}
+
+					SyncPlayersWithServer();
+				}
+			}
+		}
+
 		protected void OnDestroy()
 		{
 			Players.Clear();
@@ -189,45 +227,7 @@ namespace Fika.Core.Coop.Components
 		public void SetReady(bool state)
 		{
 			ready = state;
-		}
-
-		protected private void Update()
-		{
-			if (LocalGameInstance == null)
-			{
-				return;
-			}
-
-			if (!ready)
-			{
-				return;
-			}
-
-			if (spawnQueue.Count > 0)
-			{
-				SpawnPlayer(spawnQueue.Dequeue());
-			}
-
-			ProcessQuitting();
-
-			if (isClient)
-			{
-				charSyncCounter += Time.deltaTime;
-				int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
-
-				if (charSyncCounter > waitTime)
-				{
-					charSyncCounter = 0f;
-
-					if (Players == null)
-					{
-						return;
-					}
-
-					SyncPlayersWithServer();
-				}
-			}
-		}
+		}		
 
 		private void SyncPlayersWithServer()
 		{
