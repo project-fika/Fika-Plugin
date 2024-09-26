@@ -127,6 +127,10 @@ namespace Fika.Core.Coop.Custom
 
 		private void DeactivateBot(CoopBot bot)
 		{
+			if (bot.AIData.BotOwner.Memory.IsUnderFire || bot.AIData.BotOwner.Memory.HaveEnemy)
+			{
+				return;
+			}
 #if DEBUG
 			logger.LogWarning($"Disabling {bot.gameObject.name}");
 #endif
@@ -143,11 +147,7 @@ namespace Fika.Core.Coop.Custom
 			bot.ActiveHealthController.PauseAllEffects();
 			bot.gameObject.SetActive(false);
 
-			if (!disabledBots.Contains(bot))
-			{
-				disabledBots.Add(bot);
-			}
-			else
+			if (!disabledBots.Add(bot))
 			{
 				logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
 			}
@@ -176,12 +176,7 @@ namespace Fika.Core.Coop.Custom
 			if (!bot.HealthController.IsAlive)
 			{
 				return;
-			}
-
-			if (bot.AIData.BotOwner.Memory.IsUnderFire || bot.AIData.BotOwner.Memory.HaveEnemy)
-			{
-				return;
-			}
+			}			
 
 			int notInRange = 0;
 			float range = FikaPlugin.DynamicAIRange.Value;
