@@ -132,7 +132,7 @@ namespace Fika.Core.Coop.Custom
 				return;
 			}
 
-			if (bot.AIData.BotOwner.Memory.IsUnderFire || bot.AIData.BotOwner.Memory.HaveEnemy)
+			if (!bot.AIData.BotOwner.Memory.IsPeace)
 			{
 				return;
 			}
