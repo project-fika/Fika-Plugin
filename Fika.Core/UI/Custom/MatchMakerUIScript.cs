@@ -525,15 +525,19 @@ namespace Fika.Core.UI.Custom
 					}
 				}
 
+				bool isDedicated = entry.HostUsername.StartsWith("dedicated_");
+
 				// player label
 				GameObject playerLabel = GameObject.Find("PlayerLabel");
 				playerLabel.name = "PlayerLabel" + i;
-				playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = entry.HostUsername;
+				string sessionName = isDedicated ? "Dedicated" : entry.HostUsername;
+				playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
 
 				// players count label
 				GameObject playerCountLabel = GameObject.Find("PlayerCountLabel");
 				playerCountLabel.name = "PlayerCountLabel" + i;
-				playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = entry.PlayerCount.ToString();
+				int playerCount = isDedicated ? entry.PlayerCount - 1 : entry.PlayerCount;
+				playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
 
 				// player join button
 				GameObject joinButton = GameObject.Find("JoinButton");
