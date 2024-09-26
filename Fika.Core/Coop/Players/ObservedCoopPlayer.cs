@@ -773,6 +773,55 @@ namespace Fika.Core.Coop.Players
 			CorpseSyncPacket = default;
 		}
 
+		public override void HandleDamagePacket(ref DamagePacket packet)
+		{
+			DamageInfo damageInfo = new()
+			{
+				Damage = packet.Damage,
+				DamageType = packet.DamageType,
+				BodyPartColliderType = packet.ColliderType,
+				HitPoint = packet.Point,
+				HitNormal = packet.HitNormal,
+				Direction = packet.Direction,
+				PenetrationPower = packet.PenetrationPower,
+				BlockedBy = packet.BlockedBy,
+				DeflectedBy = packet.DeflectedBy,
+				SourceId = packet.SourceId,
+				ArmorDamage = packet.ArmorDamage
+			};
+
+			if (!string.IsNullOrEmpty(packet.ProfileId))
+			{
+				IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
+
+				if (player != null)
+				{
+					damageInfo.Player = player;
+					LastAggressor = player.iPlayer;
+					if (IsYourPlayer)
+					{
+						if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+						{
+							return;
+						}
+					}
+				}
+
+				// TODO: Fix this and consistently get the correct data...
+				if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
+				{
+					damageInfo.Weapon = weapon;
+				}
+			}
+
+			ShotReactions(damageInfo, packet.BodyPartType);
+			ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
+			
+			LastDamageInfo = damageInfo;
+			LastBodyPart = packet.BodyPartType;
+			LastDamagedBodyPart = packet.BodyPartType;
+		}
+
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
 		{
 			// Only handle if it was ourselves as otherwise it's irrelevant

@@ -1399,7 +1399,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void HandleDamagePacket(ref DamagePacket packet)
+		public virtual void HandleDamagePacket(ref DamagePacket packet)
 		{
 			DamageInfo damageInfo = new()
 			{
@@ -1442,7 +1442,6 @@ namespace Fika.Core.Coop.Players
 			ShotReactions(damageInfo, packet.BodyPartType);
 			ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
 			base.ApplyDamageInfo(damageInfo, packet.BodyPartType, packet.ColliderType, packet.Absorbed);
-			//ClientApplyShot(damageInfo, packet.BodyPartType, packet.ColliderType, packet.ArmorPlateCollider);
 		}
 
 		public void HandleArmorDamagePacket(ref ArmorDamagePacket packet)
