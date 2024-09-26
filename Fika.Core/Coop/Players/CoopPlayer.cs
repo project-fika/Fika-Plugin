@@ -623,7 +623,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnAnimatedInteraction(EInteraction interaction)
 		{
-			if (!Constants.BlockedInteractions.Contains(interaction))
+			if (!FikaGlobals.BlockedInteractions.Contains(interaction))
 			{
 				PacketSender.CommonPlayerPackets.Enqueue(new()
 				{

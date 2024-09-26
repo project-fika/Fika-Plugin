@@ -479,8 +479,8 @@ namespace Fika.Core.Coop.GameMode
 			// Check for GClass increments on filter
 			localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
 			   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
-			   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, LocalGame.Class1477.class1477_0.method_4,
-				LocalGame.Class1477.class1477_0.method_5, GClass1574.Default, mongoId, nextOperationId);
+			   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
+				FikaGlobals.GetOtherPlayerSensitivity, GClass1574.Default, mongoId, nextOperationId);
 
 			localPlayer.Location = Location_0.Id;
 #if DEBUG
@@ -1248,7 +1248,7 @@ namespace Fika.Core.Coop.GameMode
 			LocalPlayer myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
 				Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
-				Class1464.class1464_0.method_3, Class1464.class1464_0.method_4, statisticsManager,
+				FikaGlobals.GetLocalPlayerSensitivity, FikaGlobals.GetLocalPlayerAimingSensitivity, statisticsManager,
 				iSession, (localRaidSettings_0 != null) ? localRaidSettings_0.mode : ELocalMode.TRAINING);
 
 			myPlayer.OnEpInteraction += OnEpInteraction;

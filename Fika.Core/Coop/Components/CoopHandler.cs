@@ -373,11 +373,6 @@ namespace Fika.Core.Coop.Components
 			spawnQueue.Enqueue(spawnObject);
 		}
 
-		private float GetSensitivity()
-		{
-			return 1f;
-		}
-
 		private ObservedCoopPlayer SpawnObservedPlayer(SpawnObject spawnObject)
 		{
 			bool isAi = spawnObject.IsAI;
@@ -399,7 +394,7 @@ namespace Fika.Core.Coop.Components
 			ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(LocalGameInstance.GameWorld_0, netId, position, Quaternion.identity, "Player",
 				isAi == true ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
 				EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
-				BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode, GetSensitivity, GetSensitivity,
+				BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode, FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
 				GClass1574.Default, firstId, firstOperationId).Result;
 
 			if (otherPlayer == null)
