@@ -105,18 +105,18 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public override void WeaponOverlapping()
 		{
-			SetWeaponOverlapValue(coopPlayer.observedOverlap);
+			SetWeaponOverlapValue(coopPlayer.ObservedOverlap);
 			ObservedOverlapView();
 			if (overlapCounter <= 1f)
 			{
 				overlapCounter += Time.deltaTime / 1f;
 			}
-			if (coopPlayer.leftStanceDisabled && coopPlayer.MovementContext.LeftStanceEnabled && overlapCounter > 1f)
+			if (coopPlayer.LeftStanceDisabled && coopPlayer.MovementContext.LeftStanceEnabled && overlapCounter > 1f)
 			{
 				coopPlayer.MovementContext.LeftStanceController.DisableLeftStanceAnimFromHandsAction();
 				overlapCounter = 0f;
 			}
-			if (!coopPlayer.MovementContext.LeftStanceController.LastAnimValue && !coopPlayer.leftStanceDisabled && coopPlayer.MovementContext.LeftStanceEnabled && overlapCounter > 1f)
+			if (!coopPlayer.MovementContext.LeftStanceController.LastAnimValue && !coopPlayer.LeftStanceDisabled && coopPlayer.MovementContext.LeftStanceEnabled && overlapCounter > 1f)
 			{
 				coopPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
 				overlapCounter = 0f;
@@ -126,16 +126,16 @@ namespace Fika.Core.Coop.ObservedClasses
 		private void ObservedOverlapView()
 		{
 			Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
-			if (coopPlayer.observedOverlap < 0.02f)
+			if (coopPlayer.ObservedOverlap < 0.02f)
 			{
-				_player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.observedOverlap;
+				_player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
 				_player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = true;
 			}
 			else
 			{
 				_player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
 				_player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
-				_player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.observedOverlap;
+				_player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
 			}
 		}
 

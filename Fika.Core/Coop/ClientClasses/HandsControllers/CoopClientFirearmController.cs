@@ -25,13 +25,13 @@ namespace Fika.Core.Coop.ClientClasses
 		public override void SetWeaponOverlapValue(float overlap)
 		{
 			base.SetWeaponOverlapValue(overlap);
-			player.observedOverlap = overlap;
+			player.ObservedOverlap = overlap;
 		}
 
 		public override void WeaponOverlapping()
 		{
 			base.WeaponOverlapping();
-			player.leftStanceDisabled = DisableLeftStanceByOverlap;
+			player.LeftStanceDisabled = DisableLeftStanceByOverlap;
 		}
 
 		public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()

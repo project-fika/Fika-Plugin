@@ -25,8 +25,10 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+
 		private int updateRate;
 		private BotStateManager manager;
+		private bool sendPackets;
 
 		protected void Awake()
 		{
@@ -38,6 +40,16 @@ namespace Fika.Core.Coop.PacketHandlers
 		public void Init()
 		{
 
+		}
+
+		public void OnEnable()
+		{
+			sendPackets = true;
+		}
+
+		public void OnDisable()
+		{
+			sendPackets = false;
 		}
 
 		public void AssignManager(BotStateManager stateManager)
@@ -56,6 +68,11 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		private void SendPlayerState()
 		{
+			if (!sendPackets)
+			{
+				return;
+			}
+
 			if (!player.HealthController.IsAlive)
 			{
 				manager.OnUpdate -= SendPlayerState;
@@ -68,14 +85,15 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			Vector2 direction = (mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk) ? player.MovementContext.MovementDirection : Vector2.zero;
+			bool isMoving = mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk;
+			Vector2 direction = isMoving ? player.MovementContext.MovementDirection : Vector2.zero;
 			PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, direction,
 				player.CurrentManagedState.Name,
 				player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-				player.MovementContext.BlindFire, player.observedOverlap, player.leftStanceDisabled,
-				player.MovementContext.IsGrounded, player.hasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal,
+				player.MovementContext.BlindFire, player.ObservedOverlap, player.LeftStanceDisabled,
+				player.MovementContext.IsGrounded, player.HasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal,
 				NetworkTimeSync.Time);
 
 			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);

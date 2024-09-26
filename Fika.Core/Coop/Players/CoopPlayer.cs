@@ -39,11 +39,11 @@ namespace Fika.Core.Coop.Players
 		#region Fields and Properties
 		public PacketReceiver PacketReceiver;
 		public IPacketSender PacketSender;
-		public bool hasSkilledScav = false;
-		public float observedOverlap = 0f;
-		public bool leftStanceDisabled = false;
+		public bool HasSkilledScav = false;
+		public float ObservedOverlap = 0f;
+		public bool LeftStanceDisabled = false;
 		public CorpseSyncPacket CorpseSyncPacket = default;
-		public bool hasGround = false;
+		public bool HasGround = false;
 		public int NetId;
 		public bool IsObservedAI = false;
 		public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
@@ -176,8 +176,8 @@ namespace Fika.Core.Coop.Players
 
 		public override bool CheckSurface()
 		{
-			hasGround = base.CheckSurface();
-			return hasGround;
+			HasGround = base.CheckSurface();
+			return HasGround;
 		}
 
 		public override void OnWeaponMastered(MasterSkillClass masterSkill)
@@ -402,12 +402,12 @@ namespace Fika.Core.Coop.Players
 					coopPlayer.Loyalty.method_1(this);
 				}
 
-				if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.hasSkilledScav)
+				if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.HasSkilledScav)
 				{
-					coopPlayer.hasSkilledScav = true;
+					coopPlayer.HasSkilledScav = true;
 					return;
 				}
-				else if (Side != EPlayerSide.Savage && hasSkilledScav && aggressor.Side == EPlayerSide.Savage)
+				else if (Side != EPlayerSide.Savage && HasSkilledScav && aggressor.Side == EPlayerSide.Savage)
 				{
 					coopPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
 				}

@@ -683,8 +683,8 @@ namespace Fika.Core.Coop.Players
 				MovementContext.SetTilt(to.Tilt, true);
 			}
 
-			observedOverlap = to.WeaponOverlap;
-			leftStanceDisabled = to.LeftStanceDisabled;
+			ObservedOverlap = to.WeaponOverlap;
+			LeftStanceDisabled = to.LeftStanceDisabled;
 			MovementContext.SurfaceNormal = to.SurfaceNormal;
 		}
 
