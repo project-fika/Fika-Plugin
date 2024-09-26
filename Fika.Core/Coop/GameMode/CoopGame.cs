@@ -902,7 +902,8 @@ namespace Fika.Core.Coop.GameMode
 		{
 			gameWorld.LocationId = Location_0.Id;
 
-			profile.SetSpawnedInSession(profile.Side == EPlayerSide.Savage);
+			bool spawnedInSession = profile.Side == EPlayerSide.Savage || GClass1615.IsTransit(profile.Id, out int _);
+			profile.SetSpawnedInSession(spawnedInSession);
 
 			LocalPlayer myPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
 				profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
@@ -1738,6 +1739,11 @@ namespace Fika.Core.Coop.GameMode
 				exfilPoints = exfilController.EligiblePoints(Profile_0);
 			}
 
+			if (GClass1615.Exist(out GClass1617 gclass))
+			{
+				gclass.Init();
+			}
+
 			GameUi.TimerPanel.SetTime(EFTDateTimeClass.UtcNow, Profile_0.Info.Side, GameTimer.EscapeTimeSeconds(), exfilPoints);
 
 			exfilManager = gameObject.AddComponent<CoopExfilManager>();
@@ -1745,6 +1751,12 @@ namespace Fika.Core.Coop.GameMode
 
 			dateTime_0 = EFTDateTimeClass.Now;
 			Status = GameStatus.Started;
+
+			if (isServer)
+			{
+				BotsController.Bots.CheckActivation();
+			}
+
 			ConsoleScreen.ApplyStartCommands();
 		}
 
