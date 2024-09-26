@@ -41,6 +41,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using static LocationSettingsClass;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -1456,6 +1457,13 @@ namespace Fika.Core.Coop.GameMode
 
 			Logger.LogInfo($"Location: {Location_0.Name}");
 			BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+
+			if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
+				instance.ArtilleryShelling.ArtilleryMapsConfigs.Keys.Contains(Location_0.Id))
+			{
+				Singleton<GameWorld>.Instance.ServerShellingController = new GClass596();
+				Singleton<GameWorld>.Instance.ClientShellingController = new GClass1356(isServer);
+			}
 
 			if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
 			{
