@@ -1488,6 +1488,27 @@ namespace Fika.Core.Coop.GameMode
 				gameWorld.BtrController = new BTRControllerClass(gameWorld);
 			}
 
+			bool transitActive;
+			if (instance == null)
+			{
+				transitActive = false;
+			}
+			else
+			{
+				BackendConfigSettingsClass.GClass1505 transitSettings = instance.transitSettings;
+				transitActive = (transitSettings != null) && transitSettings.active;
+			}
+			if (transitActive)
+			{
+				Singleton<GameWorld>.Instance.TransitController = new GClass1617(instance.transitSettings, Location_0.transitParameters,
+					Profile_0, localRaidSettings_0);
+			}
+			else
+			{
+				GClass1615.DisableTransitPoints();
+			}
+			
+
 			ESeason season = iSession.Season;
 			Class428 seasonHandler = new();
 			gameWorld.GInterface29_0 = seasonHandler;
