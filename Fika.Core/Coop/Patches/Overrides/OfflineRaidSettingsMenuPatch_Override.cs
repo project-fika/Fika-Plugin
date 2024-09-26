@@ -76,7 +76,7 @@ namespace Fika.Core.Coop.Patches
 			}
 
 			// Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
-			List<BaseDropDownBox.Struct1056> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1056>>("list_0").Value;
+			List<BaseDropDownBox.Struct1064> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1064>>("list_0").Value;
 			labelList.Clear();
 			labelList.Add(new()
 			{

@@ -247,9 +247,9 @@ namespace Fika.Core
 			new Player_Hide_Patch().Enable();
 			new Player_UpdateBtrTraderServiceData_Patch().Enable();
 			BTRSide_Patches.Enable();
-			new GClass2306_UpdateOfflineClientLogic_Patch().Enable();
-			new GClass2307_UpdateOfflineClientLogic_Patch().Enable();
-			new GClass2300_GetSyncObjectStrategyByType_Patch().Enable();
+			new GClass2335_UpdateOfflineClientLogic_Patch().Enable();
+			new GClass2336_UpdateOfflineClientLogic_Patch().Enable();
+			new GClass2329_GetSyncObjectStrategyByType_Patch().Enable();
 			LighthouseTraderZone_Patches.Enable();
 			new BufferZoneControllerClass_method_1_Patch().Enable();
 			new BufferZoneControllerClass_SetPlayerInZoneStatus_Patch().Enable();

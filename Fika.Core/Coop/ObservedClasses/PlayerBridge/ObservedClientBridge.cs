@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public class ObservedClientBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.GInterface18
+	public class ObservedClientBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.GInterface20
 	{
 		private readonly ObservedCoopPlayer observedPlayer = observedPlayer;
 
@@ -39,7 +39,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
+		public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct400 shotId)
 		{
 			if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer)
 			{

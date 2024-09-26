@@ -203,7 +203,7 @@ namespace Fika.Core.Coop.ClientClasses
 				if (item != null)
 				{
 					InventoryController playerInventory = player.InventoryController;
-					GStruct419<GInterface371> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
+					GStruct426<GInterface373> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
 						playerInventory.Inventory.Equipment.ToEnumerable(),
 						InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
 
@@ -254,7 +254,7 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				if (questItem.TemplateId == itemId)
 				{
-					GStruct419<GClass3027> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
+					GStruct426<GClass3058> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
 					player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
 					{
 						if (!result.Succeed)

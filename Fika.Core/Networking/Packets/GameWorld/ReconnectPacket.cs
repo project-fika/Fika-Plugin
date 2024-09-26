@@ -20,7 +20,7 @@ namespace Fika.Core.Networking
 		public double TimeOffset;
 
 		public List<GStruct35> ThrowableData;
-		public List<WorldInteractiveObject.GStruct388> InteractivesData;
+		public List<WorldInteractiveObject.GStruct395> InteractivesData;
 		public Dictionary<int, byte> LampStates;
 		public Dictionary<int, Vector3> WindowBreakerStates;
 

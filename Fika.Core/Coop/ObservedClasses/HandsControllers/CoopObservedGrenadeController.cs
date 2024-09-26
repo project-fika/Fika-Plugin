@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	internal class CoopObservedGrenadeController : EFT.Player.GrenadeHandsController
+	internal class CoopObservedGrenadeController : Player.GrenadeHandsController
 	{
 		public CoopPlayer coopPlayer;
 
@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(Class1098)] = new OperationFactoryDelegate(Grenade1);
+			operationFactoryDelegates[typeof(Class1117)] = new OperationFactoryDelegate(Grenade1);
 			return operationFactoryDelegates;
 		}
 
@@ -85,7 +85,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		}
 	}
 
-	public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1098(controller)
+	public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1117(controller)
 	{
 		private readonly CoopPlayer coopPlayer = player;
 
@@ -117,7 +117,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			// Do nothing
 		}
 
-		public override void Execute(GInterface386 operation, Callback callback)
+		public override void Execute(GInterface388 operation, Callback callback)
 		{
 			callback.Succeed();
 		}

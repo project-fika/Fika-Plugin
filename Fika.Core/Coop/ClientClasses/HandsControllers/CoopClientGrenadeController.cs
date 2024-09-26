@@ -1,6 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
@@ -9,7 +10,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	internal class CoopClientGrenadeController : EFT.Player.GrenadeHandsController
+	internal class CoopClientGrenadeController : Player.GrenadeHandsController
 	{
 		protected CoopPlayer player;
 
@@ -123,12 +124,12 @@ namespace Fika.Core.Coop.ClientClasses
 				return;
 			}
 
-			Class1092 currentOperation = CurrentOperation;
+			Class1111 currentOperation = CurrentOperation;
 			if (currentOperation != null)
 			{
-				if (currentOperation is not Class1097)
+				if (currentOperation is not Class1116)
 				{
-					if (currentOperation is Class1098)
+					if (currentOperation is Class1117)
 					{
 						player.PacketSender.FirearmPackets.Enqueue(new()
 						{

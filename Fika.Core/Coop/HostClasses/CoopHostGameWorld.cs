@@ -44,12 +44,12 @@ namespace Fika.Core.Coop.ClientClasses
 			return gameWorld;
 		}
 
-		public override GClass712 CreateGrenadeFactory()
+		public override GClass722 CreateGrenadeFactory()
 		{
 			return new HostGrenadeFactory();
 		}
 
-		public override async Task InitLevel(ItemFactoryClass itemFactory, GClass1914 config, bool loadBundlesAndCreatePools = true, List<ResourceKey> resources = null, IProgress<GStruct121> progress = null, CancellationToken ct = default)
+		public override async Task InitLevel(ItemFactoryClass itemFactory, GClass1943 config, bool loadBundlesAndCreatePools = true, List<ResourceKey> resources = null, IProgress<GStruct122> progress = null, CancellationToken ct = default)
 		{
 			await base.InitLevel(itemFactory, config, loadBundlesAndCreatePools, resources, progress, ct);
 			MineManager.OnExplosion += OnMineExplode;
@@ -81,15 +81,19 @@ namespace Fika.Core.Coop.ClientClasses
 			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
 		}
 
-		public override void InitAirdrop(bool takeNearbyPoint = false, Vector3 position = default)
+		public override void InitAirdrop(string lootTemplateId = null, bool takeNearbyPoint = false, Vector3 position = default)
 		{
-			GameObject gameObject = method_18(takeNearbyPoint, position);
+			GameObject gameObject = method_19(takeNearbyPoint, position);
 			if (gameObject == null)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("There are no airdrop points here!");
 				return;
 			}
 			SynchronizableObject synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
+			if (synchronizableObject.Logic is AirplaneLogicClass airplaneLogicClass && airplaneLogicClass.offlineMode)
+			{
+				airplaneLogicClass.OfflineServerLogic.ContainerTemplateId = lootTemplateId;
+			}
 			ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
 		}
 

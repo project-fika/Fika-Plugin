@@ -44,7 +44,7 @@ namespace Fika.Core.Networking
 	/// <summary>
 	/// Server used in P2P connections
 	/// </summary>
-	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface228, IFikaNetworkManager
+	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface231, IFikaNetworkManager
 	{
 		public int ReadyClients = 0;
 		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
@@ -427,7 +427,7 @@ namespace Fika.Core.Networking
 				GameWorld gameWorld = Singleton<GameWorld>.Instance;
 				Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
-				GClass760<int, Throwable>.GStruct44 grenades = gameWorld.Grenades.GetValuesEnumerator();
+				GClass770<int, Throwable>.GStruct44 grenades = gameWorld.Grenades.GetValuesEnumerator();
 				List<GStruct35> smokeData = [];
 				foreach (Throwable item in grenades)
 				{
@@ -448,7 +448,7 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref throwablePacket, DeliveryMethod.ReliableOrdered);
 				}
 
-				List<WorldInteractiveObject.GStruct388> interactivesData = [];
+				List<WorldInteractiveObject.GStruct395> interactivesData = [];
 				WorldInteractiveObject[] worldInteractiveObjects = worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
 				foreach (WorldInteractiveObject interactiveObject in worldInteractiveObjects)
 				{
@@ -488,7 +488,7 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
 				}
 
-				GClass760<int, WindowBreaker>.GStruct44 windows = gameWorld.Windows.GetValuesEnumerator();
+				GClass770<int, WindowBreaker>.GStruct44 windows = gameWorld.Windows.GetValuesEnumerator();
 				Dictionary<int, Vector3> windowData = [];
 				foreach (WindowBreaker window in windows)
 				{
@@ -527,7 +527,7 @@ namespace Fika.Core.Networking
 
 					if (player.HandsController != null)
 					{
-						characterPacket.PlayerInfo.ControllerType = GClass1755.FromController(player.HandsController);
+						characterPacket.PlayerInfo.ControllerType = GClass1783.FromController(player.HandsController);
 						characterPacket.PlayerInfo.ItemId = player.HandsController.Item.Id;
 						characterPacket.PlayerInfo.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
 					}
@@ -744,7 +744,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<GameWorld>.Instance.MineManager != null)
 			{
-				NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
+				NetworkGame<EftGamePlayerOwner>.Class1489 mineSeeker = new()
 				{
 					minePosition = packet.MinePositon
 				};
@@ -959,7 +959,7 @@ namespace Fika.Core.Networking
 
 					if (player.HandsController != null)
 					{
-						requestPacket.PlayerInfo.ControllerType = GClass1755.FromController(player.HandsController);
+						requestPacket.PlayerInfo.ControllerType = GClass1783.FromController(player.HandsController);
 						requestPacket.PlayerInfo.ItemId = player.HandsController.Item.Id;
 						requestPacket.PlayerInfo.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
 					}
@@ -1001,14 +1001,14 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				GClass1159 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+				GClass1170 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
 				try
 				{
 					OperationCallbackPacket operationCallbackPacket;
 					if (playerToApply.InventoryController is Interface15 inventoryController)
 					{
-						GClass1642 descriptor = reader.ReadPolymorph<GClass1642>();
-						GStruct416 result = inventoryController.CreateOperationFromDescriptor(descriptor);
+						GClass1670 descriptor = reader.ReadPolymorph<GClass1670>();
+						GStruct423 result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
 						ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
 #endif
@@ -1266,7 +1266,7 @@ namespace Fika.Core.Networking
 
 						if (profile.ProfileId == RequestHandler.SessionId)
 						{
-							foreach (Profile.ProfileHealthClass.GClass1861 bodyPartHealth in profile.Health.BodyParts.Values)
+							foreach (Profile.ProfileHealthClass.GClass1890 bodyPartHealth in profile.Health.BodyParts.Values)
 							{
 								bodyPartHealth.Effects.Clear();
 								bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
@@ -1320,9 +1320,9 @@ namespace Fika.Core.Networking
 			});
 		}
 
-		private class InventoryOperationHandler(GStruct416 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
+		private class InventoryOperationHandler(GStruct423 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
 		{
-			public GStruct416 OperationResult = operationResult;
+			public GStruct423 OperationResult = operationResult;
 			private readonly uint operationId = operationId;
 			private readonly int netId = netId;
 			private readonly NetPeer peer = peer;
@@ -1349,7 +1349,7 @@ namespace Fika.Core.Networking
 					HasItemControllerExecutePacket = true
 				};
 
-				GClass1164 writer = new();
+				GClass1175 writer = new();
 				writer.WritePolymorph(OperationResult.Value.ToDescriptor());
 				packet.ItemControllerExecutePacket = new()
 				{
@@ -1359,7 +1359,7 @@ namespace Fika.Core.Networking
 
 				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);*/
 
-				operationCallbackPacket = new(netId, operationId, EOperationStatus.Finished);
+				operationCallbackPacket = new(netId, operationId, EOperationStatus.Succeeded);
 				server.SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 			}
 		}

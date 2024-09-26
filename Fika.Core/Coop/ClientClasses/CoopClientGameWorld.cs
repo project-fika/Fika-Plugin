@@ -29,14 +29,14 @@ namespace Fika.Core.Coop.ClientClasses
 			return gameWorld;
 		}
 
-		public override GClass712 CreateGrenadeFactory()
+		public override GClass722 CreateGrenadeFactory()
 		{
-			return new GClass713();
+			return new GClass723();
 		}
 
 		public override void PlayerTick(float dt)
 		{
-			method_10(Class951.class951_0.method_5);
+			method_10(Class968.class968_0.method_5);
 		}
 
 		public override void vmethod_1(float dt)
@@ -44,12 +44,12 @@ namespace Fika.Core.Coop.ClientClasses
 			// Do nothing
 		}
 
-		public override void InitAirdrop(bool takeNearbyPoint = false, Vector3 position = default)
+		public override void InitAirdrop(string lootTemplateId = null, bool takeNearbyPoint = false, Vector3 position = default)
 		{
 			// Do nothing
 		}
 
-		public override GClass2300 SyncObjectProcessorFactory()
+		public override GClass2329 SyncObjectProcessorFactory()
 		{
 			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
 			{

@@ -38,9 +38,9 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(GClass1701)] = new OperationFactoryDelegate(Weapon1);
-			operationFactoryDelegates[typeof(GClass1702)] = new OperationFactoryDelegate(Weapon2);
-			operationFactoryDelegates[typeof(GClass1714)] = new OperationFactoryDelegate(Weapon3);
+			operationFactoryDelegates[typeof(GClass1729)] = new OperationFactoryDelegate(Weapon1);
+			operationFactoryDelegates[typeof(GClass1730)] = new OperationFactoryDelegate(Weapon2);
+			operationFactoryDelegates[typeof(GClass1742)] = new OperationFactoryDelegate(Weapon3);
 			return operationFactoryDelegates;
 		}
 
@@ -66,23 +66,23 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			if (Item.IsFlareGun)
 			{
-				return new GClass1717(this);
+				return new GClass1745(this);
 			}
 			if (Item.IsOneOff)
 			{
-				return new GClass1719(this);
+				return new GClass1747(this);
 			}
 			if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
 			{
 				return new FireOnlyBarrelFireOperation(this);
 			}
-			if (Item is GClass2943) // This is a revolver
+			if (Item is GClass2973) // This is a revolver
 			{
-				return new GClass1716(this);
+				return new GClass1744(this);
 			}
 			if (!Item.BoltAction)
 			{
-				return new GClass1714(this);
+				return new GClass1742(this);
 			}
 			return new FirearmClass4(this);
 		}
@@ -570,7 +570,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		private class FirearmClass1(Player.FirearmController controller) : GClass1702(controller)
+		private class FirearmClass1(Player.FirearmController controller) : GClass1730(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -592,7 +592,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass2(Player.FirearmController controller) : GClass1703(controller)
+		private class FirearmClass2(Player.FirearmController controller) : GClass1731(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -613,7 +613,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass3(Player.FirearmController controller) : GClass1704(controller)
+		private class FirearmClass3(Player.FirearmController controller) : GClass1732(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -635,7 +635,7 @@ namespace Fika.Core.Coop.ClientClasses
 		}
 
 		// Check for GClass increments
-		private class FirearmClass4(Player.FirearmController controller) : GClass1715(controller)
+		private class FirearmClass4(Player.FirearmController controller) : GClass1743(controller)
 		{
 			public override void Start()
 			{
@@ -701,8 +701,8 @@ namespace Fika.Core.Coop.ClientClasses
 			public void Process(IResult error)
 			{
 				ItemAddress itemAddress = gridItemAddress;
-				GClass1636 descriptor = itemAddress?.ToDescriptor();
-				GClass1164 writer = new();
+				GClass1664 descriptor = itemAddress?.ToDescriptor();
+				GClass1175 writer = new();
 
 				byte[] locationDescription;
 				if (descriptor != null)
@@ -771,8 +771,8 @@ namespace Fika.Core.Coop.ClientClasses
 			public void Process(IResult error)
 			{
 				ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
-				GClass1636 descriptor = itemAddress?.ToDescriptor();
-				GClass1164 writer = new();
+				GClass1664 descriptor = itemAddress?.ToDescriptor();
+				GClass1175 writer = new();
 				string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
 				byte[] locationDescription;

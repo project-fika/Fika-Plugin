@@ -89,7 +89,7 @@ namespace Fika.Core.Coop.Patches
 				{
 					if (view.method_19() == 1)
 					{
-						GlobalEventHandlerClass.CreateEvent<GClass3154>().Invoke(observedPlayer.Side);
+						GlobalEventHandlerClass.CreateEvent<GClass3185>().Invoke(observedPlayer.Side);
 					}
 					observedPlayer.BtrState = EPlayerBtrState.Inside;
 				}

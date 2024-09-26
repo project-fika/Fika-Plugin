@@ -81,7 +81,7 @@ namespace Fika.Core.Coop.GameMode
 		public FikaDynamicAI DynamicAI { get; private set; }
 		public RaidSettings RaidSettings { get; private set; }
 		public byte[] HostLootItems { get; private set; }
-		public GClass1281 LootItems { get; internal set; } = [];
+		public GClass1292 LootItems { get; internal set; } = [];
 		BossSpawnScenario IBotGame.BossSpawnScenario
 		{
 			get
@@ -138,7 +138,7 @@ namespace Fika.Core.Coop.GameMode
 			TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
 			Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
 			ISession backEndSession, TimeSpan sessionTime, MetricsEventsClass metricsEvents,
-			GClass2285 metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
+			GClass2314 metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
 		{
 			Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
@@ -241,7 +241,7 @@ namespace Fika.Core.Coop.GameMode
 
 		public override void vmethod_0()
 		{
-			gclass664_0 = new(LoggerMode.None, dictionary_0, Bots);
+			gclass674_0 = new(LoggerMode.None, dictionary_0, Bots);
 		}
 
 		/// <summary>
@@ -473,8 +473,8 @@ namespace Fika.Core.Coop.GameMode
 			// Check for GClass increments on filter
 			localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
 			   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
-			   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, LocalGame.Class1457.class1457_0.method_4,
-				LocalGame.Class1457.class1457_0.method_5, GClass1549.Default, mongoId, nextOperationId);
+			   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, LocalGame.Class1477.class1477_0.method_4,
+				LocalGame.Class1477.class1477_0.method_5, GClass1574.Default, mongoId, nextOperationId);
 
 			localPlayer.Location = Location_0.Id;
 #if DEBUG
@@ -901,7 +901,7 @@ namespace Fika.Core.Coop.GameMode
 			LocalPlayer myPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
 				profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-				new GClass1902(), new GClass1548(), session, localMode, isServer ? 0 : 1000);
+				new GClass1931(), new GClass1573(), session, localMode, isServer ? 0 : 1000);
 
 			myPlayer.Location = Location_0.Id;
 
@@ -945,7 +945,7 @@ namespace Fika.Core.Coop.GameMode
 
 				if (coopPlayer.HandsController != null)
 				{
-					packet.PlayerInfo.ControllerType = GClass1755.FromController(coopPlayer.HandsController);
+					packet.PlayerInfo.ControllerType = GClass1783.FromController(coopPlayer.HandsController);
 					packet.PlayerInfo.ItemId = coopPlayer.HandsController.Item.Id;
 					packet.PlayerInfo.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
 				}
@@ -1092,7 +1092,7 @@ namespace Fika.Core.Coop.GameMode
 			if (FikaBackendUtils.IsReconnect)
 			{
 				await Reconnect();
-				foreach (KeyValuePair<EBodyPart, GClass2644<ActiveHealthController.GClass2643>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
+				foreach (KeyValuePair<EBodyPart, GClass2674<ActiveHealthController.GClass2673>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
 				{
 					if (item.Value.Health.AtMinimum)
 					{
@@ -1111,13 +1111,13 @@ namespace Fika.Core.Coop.GameMode
 
 			if (isServer)
 			{
-				GClass2304 gclass = new()
+				GClass2333 gclass = new()
 				{
 					AirdropParameters = Location_0.airdropParameters
 				};
 				gclass.Init(true);
 				(Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
-				Traverse.Create(GameWorld_0.SynchronizableObjectLogicProcessor).Field<GInterface228>("ginterface228_0").Value = Singleton<FikaServer>.Instance;
+				Traverse.Create(GameWorld_0.SynchronizableObjectLogicProcessor).Field<GInterface231>("ginterface231_0").Value = Singleton<FikaServer>.Instance;
 			}
 
 			await method_6();
@@ -1214,8 +1214,8 @@ namespace Fika.Core.Coop.GameMode
 			spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
 				Location_0.SpawnPointParams);
 			int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-			GStruct383 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-			SpawnSystem = GClass3195.CreateSpawnSystem(settings, Class1443.class1443_0.method_0, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
+			GStruct390 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+			SpawnSystem = GClass3228.CreateSpawnSystem(settings, Class1464.class1464_0.method_0, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
 
 			if (isServer)
 			{
@@ -1241,7 +1241,7 @@ namespace Fika.Core.Coop.GameMode
 			LocalPlayer myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
 				Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
-				Class1443.class1443_0.method_1, Class1443.class1443_0.method_2, statisticsManager,
+				Class1464.class1464_0.method_3, Class1464.class1464_0.method_4, statisticsManager,
 				iSession, (localRaidSettings_0 != null) ? localRaidSettings_0.mode : ELocalMode.TRAINING);
 
 			myPlayer.OnEpInteraction += OnEpInteraction;
@@ -1399,9 +1399,9 @@ namespace Fika.Core.Coop.GameMode
 			if (isServer)
 			{
 				BotsPresets botsPresets = new(iSession, wavesSpawnScenario_0.SpawnWaves,
-					bossSpawnScenario.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1570_0, false);
+					bossSpawnScenario.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1597_0, false);
 				await botsPresets.TryLoadBotsProfilesOnStart();
-				GClass860 botCreator = new(this, botsPresets, CreateBot);
+				GClass871 botCreator = new(this, botsPresets, CreateBot);
 				BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 
 				bool useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
@@ -1481,8 +1481,8 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			ESeason season = iSession.Season;
-			Class417 seasonHandler = new();
-			gameWorld.GInterface27_0 = seasonHandler;
+			Class428 seasonHandler = new();
+			gameWorld.GInterface29_0 = seasonHandler;
 
 #if DEBUG
 			Logger.LogWarning("Running season handler");
@@ -1550,7 +1550,7 @@ namespace Fika.Core.Coop.GameMode
 		[Obsolete("Not implemented yet", true)]
 		private void HandleHostTrain(Locomotive.ETravelState state)
 		{
-			MovingPlatform.GClass3197 platformAdapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
+			MovingPlatform.GClass3230 platformAdapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
 			if (!platformAdapter.HasNetPacket)
 			{
 				return;
@@ -1712,7 +1712,7 @@ namespace Fika.Core.Coop.GameMode
 				sharedQuestController.ToggleQuestSharing(false);
 			}
 
-			BackendConfigSettingsClass.GClass1454.GClass1460 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
+			BackendConfigSettingsClass.GClass1479.GClass1485 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
 			if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && PastTime < matchEndConfig.SurvivedTimeRequirement)
 			{
 				MyExitStatus = ExitStatus.Runner;
@@ -1898,7 +1898,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
 				{
-					GStruct419<GClass3027> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+					GStruct426<GClass3058> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
 						myPlayer.InventoryController, false);
 					if (result.Error != null)
 					{
@@ -2015,7 +2015,7 @@ namespace Fika.Core.Coop.GameMode
 
 			TimeSpan playTimeDuration = EFTDateTimeClass.Now - dateTime_0;
 
-			GClass1852 parameters = new()
+			GClass1881 parameters = new()
 			{
 				profile = Profile_0.ToUnparsedData([]),
 				result = exitStatus,
@@ -2038,22 +2038,48 @@ namespace Fika.Core.Coop.GameMode
 			hasSaved = true;
 		}
 
-		public Dictionary<string, GClass1267[]> GetOwnBTRTransfers(string profileId)
+		public Dictionary<string, GClass1278[]> GetOwnBTRTransfers(string profileId)
 		{
 			GameWorld instance = Singleton<GameWorld>.Instance;
-			Dictionary<string, GClass1267[]> dictionary = [];
+			Dictionary<string, GClass1278[]> dictionary = [];
 			BTRControllerClass btrController = instance.BtrController;
 			if ((btrController?.TransferItemsController.Stash) != null)
 			{
 				StashClass stash = btrController.TransferItemsController.Stash;
+				string stashName = stash.Id + "_btr";
 				foreach (EFT.InventoryLogic.IContainer item in stash.Containers)
 				{
-					if (item.ID == profileId && !dictionary.ContainsKey(stash.Id))
+					if (item.ID == profileId && !dictionary.ContainsKey(stashName))
 					{
-						dictionary.Add(stash.Id, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
+						dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
 					}
 				}
 
+			}
+			if (GClass1615.Exist(out GClass1617 gclass))
+			{
+				bool flag;
+				if (gclass == null)
+				{
+					flag = null != null;
+				}
+				else
+				{
+					GClass1611 transferItemsController = gclass.TransferItemsController;
+					flag = (transferItemsController?.Stash) != null;
+				}
+				if (flag)
+				{
+					StashClass stash2 = gclass.TransferItemsController.Stash;
+					string stashName = stash2.Id + "_transit";
+					foreach (EFT.InventoryLogic.IContainer item in stash2.Containers)
+					{
+						if (item.ID == profileId && !dictionary.ContainsKey(stashName))
+						{
+							dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems([stash2])); 
+						}
+					}
+				}
 			}
 			return dictionary;
 		}
@@ -2074,7 +2100,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
 				{
-					GStruct419<GClass3027> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+					GStruct426<GClass3058> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
 						myPlayer.InventoryController, false);
 					if (result.Error != null)
 					{
@@ -2239,7 +2265,7 @@ namespace Fika.Core.Coop.GameMode
 			BTRSide_Patches.Passengers.Clear();
 		}
 
-		private class ExitManager : Class1446
+		private class ExitManager : Class1467
 		{
 			public new CoopGame baseLocalGame_0;
 
@@ -2271,7 +2297,7 @@ namespace Fika.Core.Coop.GameMode
 				baseLocalGame_0.CleanUp();
 				baseLocalGame_0.Dispose();
 
-				Class1447 exitCallback = new()
+				Class1468 exitCallback = new()
 				{
 					baseLocalGame_0 = baseLocalGame_0,
 					duration = EFTDateTimeClass.Now - baseLocalGame_0.dateTime_0,
@@ -2285,7 +2311,7 @@ namespace Fika.Core.Coop.GameMode
 		/// <summary>
 		/// Used to manage the stopping of the <see cref="CoopGame"/> gracefully when cancelling
 		/// </summary>
-		private class CancelExitManager : Class1446
+		private class CancelExitManager : Class1467
 		{
 			public void ExitOverride()
 			{

@@ -18,9 +18,9 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		public override void SendNetworkSyncPacket(GStruct352 packet)
+		public override void SendNetworkSyncPacket(GStruct358 packet)
 		{
-			if (packet.SyncType == GStruct352.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
+			if (packet.SyncType == GStruct358.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
 			{
 				coopPlayer.PacketSender.HealthSyncPackets.Enqueue(coopPlayer.SetupCorpseSyncPacket(packet));
 				return;

@@ -969,9 +969,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct MountingPacket(GStruct173.EMountingCommand command)
+		public struct MountingPacket(GStruct179.EMountingCommand command)
 		{
-			public GStruct173.EMountingCommand Command = command;
+			public GStruct179.EMountingCommand Command = command;
 			public bool IsMounted;
 			public Vector3 MountDirection;
 			public Vector3 MountingPoint;
@@ -990,17 +990,17 @@ namespace Fika.Core.Networking
 			{
 				MountingPacket packet = new()
 				{
-					Command = (GStruct173.EMountingCommand)reader.GetByte()
+					Command = (GStruct179.EMountingCommand)reader.GetByte()
 				};
-				if (packet.Command == GStruct173.EMountingCommand.Update)
+				if (packet.Command == GStruct179.EMountingCommand.Update)
 				{
 					packet.CurrentMountingPointVerticalOffset = reader.GetFloat();
 				}
-				if (packet.Command is GStruct173.EMountingCommand.Enter or GStruct173.EMountingCommand.Exit)
+				if (packet.Command is GStruct179.EMountingCommand.Enter or GStruct179.EMountingCommand.Exit)
 				{
 					packet.IsMounted = reader.GetBool();
 				};
-				if (packet.Command == GStruct173.EMountingCommand.Enter)
+				if (packet.Command == GStruct179.EMountingCommand.Enter)
 				{
 					packet.MountDirection = reader.GetVector3();
 					packet.MountingPoint = reader.GetVector3();
@@ -1020,15 +1020,15 @@ namespace Fika.Core.Networking
 			public static void Serialize(NetDataWriter writer, MountingPacket packet)
 			{
 				writer.Put((byte)packet.Command);
-				if (packet.Command == GStruct173.EMountingCommand.Update)
+				if (packet.Command == GStruct179.EMountingCommand.Update)
 				{
 					writer.Put(packet.CurrentMountingPointVerticalOffset);
 				}
-				if (packet.Command is GStruct173.EMountingCommand.Enter or GStruct173.EMountingCommand.Exit)
+				if (packet.Command is GStruct179.EMountingCommand.Enter or GStruct179.EMountingCommand.Exit)
 				{
 					writer.Put(packet.IsMounted);
 				}
-				if (packet.Command == GStruct173.EMountingCommand.Enter)
+				if (packet.Command == GStruct179.EMountingCommand.Enter)
 				{
 					writer.Put(packet.MountDirection);
 					writer.Put(packet.MountingPoint);

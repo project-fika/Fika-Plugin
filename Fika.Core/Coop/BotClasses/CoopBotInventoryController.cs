@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.BotClasses
 			coopBot = (CoopBot)player;
 			mongoID_0 = currentId;
 			ushort_0 = nextOperationId;
-			IPlayerSearchController playerSearchController = new GClass1873(profile);
+			IPlayerSearchController playerSearchController = new GClass1902(profile);
 			searchController = playerSearchController;
 		}
 
@@ -46,12 +46,12 @@ namespace Fika.Core.Coop.BotClasses
 			// Do nothing
 		}
 
-		public override void vmethod_1(GClass3088 operation, [CanBeNull] Callback callback)
+		public override void vmethod_1(GClass3119 operation, [CanBeNull] Callback callback)
 		{
 			HandleOperation(operation, callback).HandleExceptions();
 		}
 
-		private async Task HandleOperation(GClass3088 operation, Callback callback)
+		private async Task HandleOperation(GClass3119 operation, Callback callback)
 		{
 			if (coopBot.HealthController.IsAlive)
 			{
@@ -60,7 +60,7 @@ namespace Fika.Core.Coop.BotClasses
 			RunBotOperation(operation, callback);
 		}
 
-		private void RunBotOperation(GClass3088 operation, Callback callback)
+		private void RunBotOperation(GClass3119 operation, Callback callback)
 		{
 			BotInventoryOperationHandler handler = new(this, operation, callback);
 			if (vmethod_0(operation))
@@ -74,13 +74,13 @@ namespace Fika.Core.Coop.BotClasses
 
 		public override SearchContentOperation vmethod_2(SearchableItemClass item)
 		{
-			return new GClass3126(method_12(), this, PlayerSearchController, Profile, item);
+			return new GClass3158(method_12(), this, PlayerSearchController, Profile, item);
 		}
 
-		private class BotInventoryOperationHandler(CoopBotInventoryController controller, GClass3088 operation, Callback callback)
+		private class BotInventoryOperationHandler(CoopBotInventoryController controller, GClass3119 operation, Callback callback)
 		{
 			private readonly CoopBotInventoryController controller = controller;
-			public readonly GClass3088 Operation = operation;
+			public readonly GClass3119 Operation = operation;
 			public readonly Callback Callback = callback;
 
 			public void HandleResult(IResult result)
@@ -94,7 +94,7 @@ namespace Fika.Core.Coop.BotClasses
 
 				// Check for GClass increments
 				// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-				if (Operation is GClass3106)
+				if (Operation is GClass3137)
 				{
 					return;
 				}
@@ -108,7 +108,7 @@ namespace Fika.Core.Coop.BotClasses
 				{
 					HasItemControllerExecutePacket = true
 				};
-				GClass1164 writer = new();
+				GClass1175 writer = new();
 				writer.WritePolymorph(Operation.ToDescriptor());
 				packet.ItemControllerExecutePacket = new()
 				{

@@ -78,19 +78,19 @@ namespace Fika.Core.Coop.Players
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new GClass534(null, player)
+			player.AIData = new GClass540(null, player)
 			{
 				IsAI = true
 			};
 
 			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass858>("gclass858_0").Value = new();
-			botTraverse.Field<GClass858>("gclass858_0").Value.Initialize(player, player.PlayerBones);
-			botTraverse.Field<GClass858>("gclass858_0").Value.Disable();
+			botTraverse.Field<GClass869>("gclass869_0").Value = new();
+			botTraverse.Field<GClass869>("gclass869_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass869>("gclass869_0").Value.Disable();
 
 			/*if (FikaBackendUtils.IsDedicated)
 			{
-				botTraverse.Field<GClass858>("gclass858_0").Value.SetMode(GClass857.EMode.Disabled);
+				botTraverse.Field<GClass869>("gclass869_0").Value.SetMode(GClass857.EMode.Disabled);
 			}*/
 
 			player.AggressorFound = false;
@@ -140,7 +140,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct400 shotId)
 		{
 			ActiveHealthController activeHealthController = ActiveHealthController;
 			if (activeHealthController != null && !activeHealthController.IsAlive)

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public class BotPlayerBridge(CoopBot bot) : BodyPartCollider.GInterface18
+	public class BotPlayerBridge(CoopBot bot) : BodyPartCollider.GInterface20
 	{
 		private readonly CoopBot bot = bot;
 
@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			bot.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
 		}
 
-		public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct393 shotId)
+		public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct400 shotId)
 		{
 			if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
 			{

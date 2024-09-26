@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPostfix]
 		public static void Prefix(Grenade ____grenadeInWorld)
 		{
-			Singleton<GInterface121>.Instance.RegisterGrenade(____grenadeInWorld);
+			Singleton<GInterface124>.Instance.RegisterGrenade(____grenadeInWorld);
 		}
 	}
 }

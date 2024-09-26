@@ -272,7 +272,7 @@ namespace Fika.Core.Networking
 			{
 				if (!packet.Success)
 				{
-					NotificationManagerClass.DisplayNotification(new GClass2171("AirplaneDelayMessage".Localized(null),
+					NotificationManagerClass.DisplayNotification(new GClass2200("AirplaneDelayMessage".Localized(null),
 								ENotificationDurationType.Default, ENotificationIconType.Default, null));
 				}
 			}
@@ -288,7 +288,7 @@ namespace Fika.Core.Networking
 
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.method_139(packet.Services);
+				playerToApply.method_141(packet.Services);
 			}
 		}
 
@@ -314,7 +314,7 @@ namespace Fika.Core.Networking
 
 		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet)
 		{
-			GClass2300 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+			GClass2329 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
 			if (processor == null)
 			{
 				return;
@@ -415,9 +415,9 @@ namespace Fika.Core.Networking
 #endif
 								string localizedString = LocaleUtils.UI_SYNC_INTERACTABLES.Localized();
 								WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
-								Dictionary<int, WorldInteractiveObject.GStruct388> netIdDictionary = [];
+								Dictionary<int, WorldInteractiveObject.GStruct395> netIdDictionary = [];
 								{
-									foreach (WorldInteractiveObject.GStruct388 data in packet.InteractivesData)
+									foreach (WorldInteractiveObject.GStruct395 data in packet.InteractivesData)
 									{
 										netIdDictionary.Add(data.NetId, data);
 									}
@@ -427,7 +427,7 @@ namespace Fika.Core.Networking
 								float progress = 0f;
 								foreach (WorldInteractiveObject item in worldInteractiveObjects)
 								{
-									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct388 value))
+									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct395 value))
 									{
 										progress++;
 										coopGame.SetMatchmakerStatus(localizedString, progress / total);
@@ -446,8 +446,8 @@ namespace Fika.Core.Networking
 #endif
 								string localizedString = LocaleUtils.UI_SYNC_LAMP_STATES.Localized();
 								Dictionary<int, LampController> lampControllerDictionary = LocationScene.GetAllObjects<LampController>(true)
-														.Where(ClientWorld.Class1282.class1282_0.method_0)
-														.ToDictionary(ClientWorld.Class1282.class1282_0.method_1);
+														.Where(ClientWorld.Class1301.class1301_0.method_0)
+														.ToDictionary(ClientWorld.Class1301.class1301_0.method_1);
 
 								float total = packet.LampStates.Count;
 								float progress = 0f;
@@ -479,7 +479,7 @@ namespace Fika.Core.Networking
 								float total = packet.WindowBreakerStates.Count;
 								float progress = 0f;
 								foreach (WindowBreaker windowBreaker in LocationScene.GetAllObjects<WindowBreaker>(true)
-									.Where(ClientWorld.Class1282.class1282_0.method_2))
+									.Where(ClientWorld.Class1301.class1301_0.method_2))
 								{
 									if (windowBreakerStates.TryGetValue(windowBreaker.NetId, out Vector3 hitPosition))
 									{
@@ -525,7 +525,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
-				GClass1281 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1281>();
+				GClass1292 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1292>();
 				if (lootItems.Count < 1)
 				{
 					throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
@@ -537,7 +537,7 @@ namespace Fika.Core.Networking
 
 		private void OnThrowablePacketReceived(ThrowablePacket packet)
 		{
-			GClass760<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
+			GClass770<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
 			if (grenades.TryGetByKey(packet.Data.Id, out Throwable throwable))
 			{
 				throwable.ApplyNetPacket(packet.Data);
@@ -740,7 +740,7 @@ namespace Fika.Core.Networking
 
 		private void OnMinePacketReceived(MinePacket packet)
 		{
-			NetworkGame<EftGamePlayerOwner>.Class1469 mineSeeker = new()
+			NetworkGame<EftGamePlayerOwner>.Class1489 mineSeeker = new()
 			{
 				minePosition = packet.MinePositon
 			};
@@ -904,10 +904,10 @@ namespace Fika.Core.Networking
 					break;
 				case EPackageType.TrainSync:
 					{
-						MovingPlatform.GClass3197 adapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
+						MovingPlatform.GClass3230 adapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
 						if (adapter != null)
 						{
-							GStruct130 data = new()
+							GStruct132 data = new()
 							{
 								Id = packet.PlatformId,
 								Position = packet.PlatformPosition
@@ -1075,7 +1075,7 @@ namespace Fika.Core.Networking
 
 				if (MyPlayer.HandsController != null)
 				{
-					requestPacket.PlayerInfo.ControllerType = GClass1755.FromController(MyPlayer.HandsController);
+					requestPacket.PlayerInfo.ControllerType = GClass1783.FromController(MyPlayer.HandsController);
 					requestPacket.PlayerInfo.ItemId = MyPlayer.HandsController.Item.Id;
 					requestPacket.PlayerInfo.IsStationary = MyPlayer.MovementContext.IsStationaryWeaponInHands;
 				}

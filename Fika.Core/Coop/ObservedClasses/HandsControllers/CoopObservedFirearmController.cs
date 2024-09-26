@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		private float aimMovementSpeed = 1f;
 		private bool hasFired = false;
 		private WeaponPrefab weaponPrefab;
-		private GClass1695 underBarrelManager;
+		private GClass1723 underBarrelManager;
 		public override bool IsAiming
 		{
 			get
@@ -76,7 +76,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
 			if (UnderbarrelWeapon != null)
 			{
-				underBarrelManager = Traverse.Create(this).Field<GClass1695>("gclass1695_0").Value;
+				underBarrelManager = Traverse.Create(this).Field<GClass1723>("GClass1723_0").Value;
 			}
 		}
 
@@ -326,7 +326,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					MagazineClass magazine = null;
 					try
 					{
-						GStruct421<Item> result = coopPlayer.FindItemById(packet.ReloadMagPacket.MagId);
+						GStruct428<Item> result = coopPlayer.FindItemById(packet.ReloadMagPacket.MagId);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -352,10 +352,10 @@ namespace Fika.Core.Coop.ObservedClasses
 					{
 						try
 						{
-							GClass1159 reader = new(packet.ReloadMagPacket.LocationDescription);
+							GClass1170 reader = new(packet.ReloadMagPacket.LocationDescription);
 							if (packet.ReloadMagPacket.LocationDescription.Length != 0)
 							{
-								GClass1636 descriptor = reader.ReadPolymorph<GClass1636>();
+								GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
 								gridItemAddress = inventoryController.ToItemAddress(descriptor);
 							}
 						}
@@ -382,7 +382,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				{
 					try
 					{
-						GStruct421<Item> result = coopPlayer.FindItemById(packet.QuickReloadMagPacket.MagId, false, false);
+						GStruct428<Item> result = coopPlayer.FindItemById(packet.QuickReloadMagPacket.MagId, false, false);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -458,7 +458,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }*/
 
 			// Check for GClass increment
-			if (packet.HasRollCylinder && Weapon is GClass2943)
+			if (packet.HasRollCylinder && Weapon is GClass2973)
 			{
 				RollCylinder(packet.RollToZeroCamora);
 			}
@@ -483,12 +483,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
 					ItemAddress gridItemAddress = null;
 
-					GClass1159 reader = new(packet.ReloadBarrels.LocationDescription);
+					GClass1170 reader = new(packet.ReloadBarrels.LocationDescription);
 					try
 					{
 						if (packet.ReloadBarrels.LocationDescription.Length > 0)
 						{
-							GClass1636 descriptor = reader.ReadPolymorph<GClass1636>();
+							GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
 							gridItemAddress = inventoryController.ToItemAddress(descriptor);
 						}
 					}
@@ -520,7 +520,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				FirearmsAnimator.SetFire(true);
 				// Check for GClass increments
-				if (Weapon is not GClass2943)
+				if (Weapon is not GClass2973)
 				{
 					FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0f);
 					Weapon.Repairable.Durability = 0;
@@ -649,7 +649,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 
 			// Check for GClass increments
-			if (Weapon is GClass2943)
+			if (Weapon is GClass2973)
 			{
 				Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
 
@@ -707,7 +707,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			_preallocatedAmmoList.Clear();
 			foreach (string id in ammoIds)
 			{
-				GStruct421<Item> gstruct = _player.FindItemById(id, true, true);
+				GStruct428<Item> gstruct = _player.FindItemById(id, true, true);
 				if (gstruct.Succeeded && gstruct.Value is BulletClass bulletClass)
 				{
 					_preallocatedAmmoList.Add(bulletClass);
@@ -766,7 +766,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 
 			//Check for GClass increments
-			if (Weapon is GClass2943 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
+			if (Weapon is GClass2973 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
 			{
 				return;
 			}

@@ -198,9 +198,9 @@ namespace Fika.Core.Coop.ObservedClasses
 			OnHandsControllerChanged += handler.HandleSwap;
 		}
 
-		public override void DropStationary(GStruct171.EStationaryCommand command)
+		public override void DropStationary(GStruct177.EStationaryCommand command)
 		{
-			if (command is GStruct171.EStationaryCommand.Leave)
+			if (command is GStruct177.EStationaryCommand.Leave)
 			{
 				PlayerAnimatorSetStationary(false);
 				RotationAction = DefaultRotationFunction;

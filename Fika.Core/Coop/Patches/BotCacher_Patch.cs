@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Patches
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass566).GetMethod(nameof(GClass566.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+			return typeof(GClass572).GetMethod(nameof(GClass572.LoadInternal), BindingFlags.Static | BindingFlags.Public);
 		}
 
 		[PatchPrefix]
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
 			}
 			else
 			{
-				string text = GClass566.LoadCoreByString();
+				string text = GClass572.LoadCoreByString();
 				if (text == null)
 				{
 					core = null;
@@ -39,19 +39,19 @@ namespace Fika.Core.Coop.Patches
 					botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
 					if (botSettingsComponents != null)
 					{
-						if (!GClass566.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+						if (!GClass572.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 						{
-							GClass566.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+							GClass572.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 						}
 					}
 					else
 					{
-						botSettingsComponents = GClass566.smethod_1(GClass566.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
+						botSettingsComponents = GClass572.smethod_1(GClass572.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
 						if (botSettingsComponents != null)
 						{
-							if (!GClass566.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+							if (!GClass572.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 							{
-								GClass566.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+								GClass572.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 							}
 						}
 						else
@@ -74,19 +74,19 @@ namespace Fika.Core.Coop.Patches
 						botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
 						if (botSettingsComponents != null)
 						{
-							if (!GClass566.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+							if (!GClass572.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 							{
-                                GClass566.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                GClass572.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 							}
 						}
 						else
 						{
-							botSettingsComponents = GClass566.smethod_1(GClass566.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
+							botSettingsComponents = GClass572.smethod_1(GClass572.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
 							if (botSettingsComponents != null)
 							{
-								if (!GClass566.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+								if (!GClass572.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 								{
-                                    GClass566.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                    GClass572.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 								}
 							}
 							else

@@ -13,9 +13,9 @@ namespace Fika.Core.Coop.Patches
 
 		// Check for GClass increments
 		[PatchPrefix]
-		public static bool Prefix(GClass858 ___gclass858_0)
+		public static bool Prefix(GClass869 ___gclass869_0)
 		{
-			//___gclass858_0.Hide();
+			//___gclass869_0.Hide();
 			return false;
 		}
 	}
