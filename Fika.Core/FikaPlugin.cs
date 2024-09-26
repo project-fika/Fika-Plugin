@@ -130,6 +130,7 @@ namespace Fika.Core
 		public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
 		public static ConfigEntry<bool> QuestSharingNotifications { get; set; }
 		public static ConfigEntry<bool> EasyKillConditions { get; set; }
+		public static ConfigEntry<bool> SharedBossExperience { get; set; }
 
 		// Coop | Custom
 		public static ConfigEntry<bool> UsePingSystem { get; set; }
@@ -455,13 +456,16 @@ namespace Fika.Core
 			// Coop | Quest Sharing
 
 			QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All,
-				new ConfigDescription("Which quest types to receive and send. PlaceBeacon is both markers and items.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+				new ConfigDescription("Which quest types to receive and send. PlaceBeacon is both markers and items.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
 			QuestSharingNotifications = Config.Bind("Coop | Quest Sharing", "Show Notifications", true,
-				new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+				new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
 			EasyKillConditions = Config.Bind("Coop | Quest Sharing", "Easy Kill Conditions", false,
-				new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for your quests as long as all conditions are met.\nThis can be inconsistent and does not always work.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+				new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for your quests as long as all conditions are met.\nThis can be inconsistent and does not always work.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+			SharedBossExperience = Config.Bind("Coop | Quest Sharing", "Shared Boss Experience", false,
+				new ConfigDescription("If enabled you will receive ½ of the experience when a friendly player kills a boss", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Custom
 

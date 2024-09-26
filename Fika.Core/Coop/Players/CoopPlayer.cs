@@ -417,7 +417,7 @@ namespace Fika.Core.Coop.Players
 		public void HandleTeammateKill(DamageInfo damage, EBodyPart bodyPart,
 			EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
 			float distance, int hour, List<string> targetEquipment,
-			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer)
+			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer, int experience)
 		{
 			if (role != WildSpawnType.pmcBEAR)
 			{
@@ -462,7 +462,11 @@ namespace Fika.Core.Coop.Players
                     killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
 			}
 
-
+			if (FikaPlugin.SharedBossExperience.Value && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR) && role.IsBoss())
+			{
+				int toReceive = experience / 2;
+				Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
+			}
 		}
 
 #if DEBUG
