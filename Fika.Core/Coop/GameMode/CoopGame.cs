@@ -905,12 +905,12 @@ namespace Fika.Core.Coop.GameMode
 			bool spawnedInSession = profile.Side == EPlayerSide.Savage || GClass1615.IsTransit(profile.Id, out int _);
 			profile.SetSpawnedInSession(spawnedInSession);
 
-			LocalPlayer myPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
+			CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
 				profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
 				new GClass1931(), new GClass1573(), session, localMode, isServer ? 0 : 1000);
 
-			myPlayer.Location = Location_0.Id;
+			coopPlayer.Location = Location_0.Id;
 
 			if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
@@ -920,24 +920,23 @@ namespace Fika.Core.Coop.GameMode
 
 			if (RaidSettings.MetabolismDisabled)
 			{
-				myPlayer.HealthController.DisableMetabolism();
+				coopPlayer.HealthController.DisableMetabolism();
 				NotificationManagerClass.DisplayMessageNotification(LocaleUtils.METABOLISM_DISABLED.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
 			}
 
-			CoopPlayer coopPlayer = (CoopPlayer)myPlayer;
 			coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
 			coopHandler.HumanPlayers.Add(coopPlayer);
 			coopPlayer.SetupMainPlayer();
 
-			PlayerSpawnRequest body = new(myPlayer.ProfileId, FikaBackendUtils.GetGroupId());
+			PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GetGroupId());
 			await FikaRequestHandler.UpdatePlayerSpawn(body);
 
-			myPlayer.SpawnPoint = spawnPoint;
+			coopPlayer.SpawnPoint = spawnPoint;
 
 			GameObject customButton = null;
 
 			await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
-			customButton = CreateCancelButton(myPlayer, customButton);
+			customButton = CreateCancelButton(coopPlayer, customButton);
 
 			if (!isServer && !FikaBackendUtils.IsReconnect)
 			{
@@ -971,10 +970,10 @@ namespace Fika.Core.Coop.GameMode
 
 			if (FikaBackendUtils.IsReconnect && !FikaBackendUtils.ReconnectPosition.Equals(Vector3.zero))
 			{
-				myPlayer.Teleport(FikaBackendUtils.ReconnectPosition);
+				coopPlayer.Teleport(FikaBackendUtils.ReconnectPosition);
 			}
 
-			return myPlayer;
+			return coopPlayer;
 		}
 
 		/// <summary>

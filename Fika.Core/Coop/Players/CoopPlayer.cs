@@ -8,7 +8,6 @@ using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using EFT.UI;
 using EFT.Vehicle;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
@@ -64,7 +63,7 @@ namespace Fika.Core.Coop.Players
 		}
 		#endregion
 
-		public static async Task<LocalPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
+		public static async Task<CoopPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
@@ -1178,11 +1177,11 @@ namespace Fika.Core.Coop.Players
 				}
 				if (operationCallbackPacket.OperationStatus != EOperationStatus.Failed)
 				{
-					callback(new Result<EOperationStatus>(operationCallbackPacket.OperationStatus));
+					callback(new(operationCallbackPacket.OperationStatus));
 				}
 				else
 				{
-					callback(new Result<EOperationStatus>(EOperationStatus.Failed)
+					callback(new()
 					{
 						Error = operationCallbackPacket.Error
 					});
@@ -1190,7 +1189,7 @@ namespace Fika.Core.Coop.Players
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId {operationCallbackPacket.CallbackId}!");
+				FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId: {operationCallbackPacket.CallbackId}!");
 			}
 		}
 
