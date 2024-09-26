@@ -761,17 +761,18 @@ namespace Fika.Core.Networking
 		{
 			if (packet.IsRequest)
 			{
-				if (FikaBackendUtils.Nodes != null)
+				CoopGame coopGame = CoopHandler.LocalGameInstance;
+				if (coopGame != null && coopGame.WeatherClasses != null)
 				{
 					WeatherPacket weatherPacket2 = new()
 					{
 						IsRequest = false,
 						HasData = true,
-						Amount = FikaBackendUtils.Nodes.Length,
-						WeatherClasses = FikaBackendUtils.Nodes
+						Amount = coopGame.WeatherClasses.Length,
+						WeatherClasses = coopGame.WeatherClasses
 					};
 
-					SendDataToPeer(peer, ref weatherPacket2, DeliveryMethod.ReliableOrdered);
+					SendDataToPeer(peer, ref weatherPacket2, DeliveryMethod.ReliableUnordered);
 				};
 			}
 		}

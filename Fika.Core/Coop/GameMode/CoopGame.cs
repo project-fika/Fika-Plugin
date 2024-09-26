@@ -41,7 +41,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static LocationSettingsClass;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -104,7 +103,9 @@ namespace Fika.Core.Coop.GameMode
 				return botsController_0;
 			}
 		}
-		public IWeatherCurve WeatherCurve
+		public WeatherClass[] WeatherClasses { get; set; }
+
+		IWeatherCurve IBotGame.WeatherCurve
 		{
 			get
 			{
@@ -147,9 +148,13 @@ namespace Fika.Core.Coop.GameMode
 			{
 				Logger.LogInfo($"Using custom time, hour of day: {timeAndWeather.HourOfDay}");
 				DateTime currentTime = backendDateTime.DateTime_1;
-				backendDateTime.DateTime_1 = new(currentTime.Year, currentTime.Month, currentTime.Day,
-					dateTime is EDateTime.CURR ? timeAndWeather.HourOfDay : timeAndWeather.HourOfDay - 12, currentTime.Minute,
+				DateTime newTime = new(currentTime.Year, currentTime.Month, currentTime.Day, timeAndWeather.HourOfDay, currentTime.Minute,
 					currentTime.Second, currentTime.Millisecond);
+				if (dateTime is EDateTime.PAST)
+				{
+					newTime.AddHours(-12);
+				}
+				backendDateTime.DateTime_1 = newTime;
 			}
 
 			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, backendDateTime, insurance, menuUI, gameUI,
@@ -462,7 +467,7 @@ namespace Fika.Core.Coop.GameMode
 
 			MongoID mongoId = MongoID.Generate(true);
 			ushort nextOperationId = 0;
-			SendCharacterPacket packet = new(new (profile, mongoId, nextOperationId), true, true, position, netId);
+			SendCharacterPacket packet = new(new(profile, mongoId, nextOperationId), true, true, position, netId);
 			packet.PlayerInfo.HealthByteArray = profile.Health.SerializeHealthInfo();
 			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 
@@ -1507,7 +1512,26 @@ namespace Fika.Core.Coop.GameMode
 			{
 				GClass1615.DisableTransitPoints();
 			}
-			
+
+			if (isServer)
+			{
+				LocalGame.Class1474 weatherHandler = new()
+				{
+					weather = iSession.WeatherRequest()
+				};
+				while (!weatherHandler.weather.IsCompleted)
+				{
+					await Task.Yield();
+				}
+				WeatherClasses = weatherHandler.weather.Result.Weathers;
+				WeatherController.Instance.method_0(WeatherClasses);
+				weatherHandler = null;
+			}
+			else
+			{
+				await GetWeather();
+				WeatherController.Instance.method_0(WeatherClasses);
+			}
 
 			ESeason season = iSession.Season;
 			Class428 seasonHandler = new();
@@ -1529,7 +1553,8 @@ namespace Fika.Core.Coop.GameMode
 					Logger.LogInfo("Running old spawn system. Waves: " + wavesSpawnScenario_0.SpawnWaves.Length);
 					if (wavesSpawnScenario_0 != null)
 					{
-						await wavesSpawnScenario_0.Run(EBotsSpawnMode.Anyway);
+						await wavesSpawnScenario_0.Run(EBotsSpawnMode.BeforeGameStarted);
+						await wavesSpawnScenario_0.Run(EBotsSpawnMode.AfterGameStarted);
 					}
 				}
 
@@ -1570,6 +1595,24 @@ namespace Fika.Core.Coop.GameMode
 			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
 			GameWorld_0.RegisterBorderZones();
+		}
+
+		private async Task GetWeather()
+		{
+			WeatherPacket packet = new()
+			{
+				IsRequest = true,
+				HasData = false
+			};
+
+			FikaClient client = Singleton<FikaClient>.Instance;
+			client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+
+			while (WeatherClasses == null)
+			{
+				await Task.Delay(1000);
+				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+			}
 		}
 
 		/// <summary>
@@ -1838,7 +1881,7 @@ namespace Fika.Core.Coop.GameMode
 					{
 						Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
 					}
-				} 
+				}
 			}
 			else
 			{
@@ -1963,7 +2006,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
-			
+
 
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
@@ -2105,7 +2148,7 @@ namespace Fika.Core.Coop.GameMode
 					{
 						if (item.ID == profileId && !dictionary.ContainsKey(stashName))
 						{
-							dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems([stash2])); 
+							dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems([stash2]));
 						}
 					}
 				}
@@ -2285,7 +2328,6 @@ namespace Fika.Core.Coop.GameMode
 				FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
 			}
 
-			FikaBackendUtils.Nodes = null;
 			FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
 			FikaBackendUtils.RequestFikaWorld = false;
 			FikaBackendUtils.IsReconnect = false;

@@ -40,7 +40,6 @@ namespace Fika.Core.Coop.Utils
 		public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
 		public static MatchMakerGroupPreview MatchMakerGroupPreview;
 		public static int HostExpectedNumberOfPlayers = 1;
-		public static WeatherClass[] Nodes = null;
 		public static string RemoteIp;
 		public static int RemotePort;
 		public static int LocalPort = 0;

@@ -757,14 +757,13 @@ namespace Fika.Core.Networking
 		{
 			if (!packet.IsRequest)
 			{
-				if (WeatherController.Instance != null)
+				if (CoopHandler.LocalGameInstance != null)
 				{
-					WeatherController.Instance.method_0(packet.WeatherClasses);
+					CoopHandler.LocalGameInstance.WeatherClasses = packet.WeatherClasses;
+					return;
 				}
-				else
-				{
-					logger.LogWarning("WeatherPacket2Received: WeatherControll was null!");
-				}
+
+				logger.LogWarning("WeatherPacketReceived: WeatherControl was null!");
 			}
 		}
 

@@ -69,7 +69,6 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				sharedQuestController.LateInit();
 			}
-			StartCoroutine(SyncWeather());
 		}
 
 		public void SendPacket<T>(ref T packet, bool forced = false) where T : INetSerializable
@@ -294,34 +293,6 @@ namespace Fika.Core.Coop.PacketHandlers
 					player.vmethod_6(EInteraction.ThereGesture);
 				}
 			}
-		}
-
-		private IEnumerator SyncWeather()
-		{
-			if (WeatherController.Instance == null)
-			{
-				yield break;
-			}
-
-			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-			if (coopGame == null)
-			{
-				yield break;
-			}
-
-			while (coopGame.Status != GameStatus.Started)
-			{
-				yield return null;
-			}
-
-			WeatherPacket packet = new()
-			{
-				IsRequest = true,
-				HasData = false
-			};
-
-			Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void DestroyThis()

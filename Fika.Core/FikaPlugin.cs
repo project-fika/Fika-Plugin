@@ -228,7 +228,6 @@ namespace Fika.Core
 			new DeathFade_Patch().Enable();
 			new NonWaveSpawnScenario_Patch().Enable();
 			new WaveSpawnScenario_Patch().Enable();
-			new WeatherNode_Patch().Enable();
 			new MatchmakerAcceptScreen_Awake_Patch().Enable();
 			new MatchmakerAcceptScreen_Show_Patch().Enable();
 			new Minefield_method_2_Patch().Enable();
