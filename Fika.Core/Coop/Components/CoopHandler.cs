@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Components
 		public Dictionary<int, CoopPlayer> Players = [];
 		public List<CoopPlayer> HumanPlayers = [];
 		public int AmountOfHumans = 1;
-		public List<int> ExtractedPlayers = [];		
+		public List<int> ExtractedPlayers = [];
 		public List<string> queuedProfileIds = [];
 		public CoopPlayer MyPlayer
 		{
@@ -146,7 +146,7 @@ namespace Fika.Core.Coop.Components
 		{
 			Players.Clear();
 			HumanPlayers.Clear();
-		}	
+		}
 
 		public EQuitState GetQuitState()
 		{
@@ -227,7 +227,7 @@ namespace Fika.Core.Coop.Components
 		public void SetReady(bool state)
 		{
 			ready = state;
-		}		
+		}
 
 		private void SyncPlayersWithServer()
 		{
@@ -244,7 +244,11 @@ namespace Fika.Core.Coop.Components
 				requestPacket.Characters = [.. characters];
 			}
 
-			Singleton<FikaClient>.Instance.SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
+			FikaClient client = Singleton<FikaClient>.Instance;
+			if (client.NetClient.FirstPeer != null)
+			{
+				client.SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
+			}
 		}
 
 		private async void SpawnPlayer(SpawnObject spawnObject)
