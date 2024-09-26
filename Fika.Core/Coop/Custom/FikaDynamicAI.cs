@@ -127,6 +127,11 @@ namespace Fika.Core.Coop.Custom
 
 		private void DeactivateBot(CoopBot bot)
 		{
+			if (!bot.HealthController.IsAlive)
+			{
+				return;
+			}
+
 			if (bot.AIData.BotOwner.Memory.IsUnderFire || bot.AIData.BotOwner.Memory.HaveEnemy)
 			{
 				return;
@@ -168,15 +173,14 @@ namespace Fika.Core.Coop.Custom
 		private void CheckForPlayers(CoopBot bot)
 		{
 			// Do not run on bots that have no initialized yet
-			if (bot.AIData.BotOwner.BotState is EBotState.NonActive or EBotState.PreActive)
+			if (bot.AIData.BotOwner.BotState != EBotState.Active)
 			{
+				if (disabledBots.Contains(bot))
+				{
+					ActivateBot(bot);
+				}
 				return;
-			}
-
-			if (!bot.HealthController.IsAlive)
-			{
-				return;
-			}			
+			}					
 
 			int notInRange = 0;
 			float range = FikaPlugin.DynamicAIRange.Value;
