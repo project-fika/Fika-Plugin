@@ -313,17 +313,12 @@ namespace Fika.Core.Coop.Players
 
 			internal void SendPacket()
 			{
-				if (weapon.IsStationaryWeapon)
-				{
-					return;
-				}
-
 				coopBot.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
 					HasProceedPacket = true,
 					ProceedPacket = new()
 					{
-						ProceedType = EProceedType.Weapon,
+						ProceedType = weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon,
 						ItemId = weapon.Id
 					}
 				});
