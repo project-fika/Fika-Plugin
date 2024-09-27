@@ -51,5 +51,4 @@ namespace Fika.Core.Coop.Patches
 			}
 		}
 	}
-
 }
