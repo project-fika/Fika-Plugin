@@ -9,9 +9,11 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
 
 namespace Fika.Core.Coop.HostClasses
 {
@@ -38,8 +40,7 @@ namespace Fika.Core.Coop.HostClasses
 		public CoopHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
 		{
 			this.player = player;
-			IPlayerSearchController playerSearchController = new GClass1896(profile, this);
-			searchController = playerSearchController;
+			searchController = new GClass1896(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopHostInventoryController));
 		}
 
@@ -125,7 +126,7 @@ namespace Fika.Core.Coop.HostClasses
 			ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
 			// Check for GClass increments, TraderServices
-			if (operation is GClass3119)
+			if (operation is GClass3138)
 			{
 				base.vmethod_1(operation, callback);
 				return;
@@ -150,7 +151,6 @@ namespace Fika.Core.Coop.HostClasses
 				};
 
 				CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
-
 				return;
 			}
 			handler.operation.Dispose();
@@ -172,7 +172,7 @@ namespace Fika.Core.Coop.HostClasses
 			return false;
 		}
 
-		private uint AddOperationCallback(GClass3119 operation, Callback<EOperationStatus> callback)
+		private uint AddOperationCallback(GClass3119 operation, Action<ServerOperationStatus> callback)
 		{
 			ushort id = operation.Id;
 			CoopPlayer.OperationCallbacks.Add(id, callback);

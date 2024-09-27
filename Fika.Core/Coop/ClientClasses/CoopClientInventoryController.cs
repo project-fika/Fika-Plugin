@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Comfort.Net;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
@@ -8,6 +9,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,8 +38,7 @@ namespace Fika.Core.Coop.ClientClasses
 		public CoopClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
 		{
 			this.player = player;
-			IPlayerSearchController playerSearchController = new GClass1896(profile, this);
-			searchController = playerSearchController;
+			searchController = new GClass1896(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 		}
 
@@ -145,12 +146,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 			ClientInventoryOperationHandler handler = new()
 			{
-				operation = operation,
-				callback = callback,
-				inventoryController = this
+				Operation = operation,
+				Callback = callback,
+				InventoryController = this
 			};
 
-			uint operationNum = AddOperationCallback(operation, new Callback<EOperationStatus>(handler.HandleResult));
+			uint operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
 			writer.WritePolymorph(operation.ToDescriptor());
 			packet.ItemControllerExecutePacket = new()
 			{
@@ -180,7 +181,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return false;
 		}
 
-		private uint AddOperationCallback(GClass3119 operation, Callback<EOperationStatus> callback)
+		private uint AddOperationCallback(GClass3119 operation, Action<ServerOperationStatus> callback)
 		{
 			ushort id = operation.Id;
 			CoopPlayer.OperationCallbacks.Add(id, callback);
@@ -194,65 +195,82 @@ namespace Fika.Core.Coop.ClientClasses
 
 		private class ClientInventoryOperationHandler
 		{
-			public EOperationStatus? serverOperationStatus;
-			public EOperationStatus? localOperationStatus;
-			public GClass3119 operation;
-			public Callback callback;
-			public CoopClientInventoryController inventoryController;
+			public GClass3119 Operation;
+			public Callback Callback;
+			public CoopClientInventoryController InventoryController;
+			public IResult OperationResult = null;
+			public ServerOperationStatus ServerStatus = default;
 
-			public void HandleResult(Result<EOperationStatus> result)
+			public void ReceiveStatusFromServer(ServerOperationStatus serverStatus)
 			{
-				ClientInventoryCallbackManager callbackManager = new()
+				ServerStatus = serverStatus;
+				switch (serverStatus.Status)
 				{
-					clientOperationManager = this,
-					result = result
-				};
-
-				if (callbackManager.result.Succeed)
-				{
-					EOperationStatus value = callbackManager.result.Value;
-					if (value == EOperationStatus.Started)
-					{
-						localOperationStatus = EOperationStatus.Started;
-						serverOperationStatus = EOperationStatus.Started;
-						operation.method_0(new Callback(callbackManager.HandleResult));
+					case EOperationStatus.Started:
+						Operation.method_0(ExecuteResult);
 						return;
-					}
-					if (value == EOperationStatus.Succeeded)
-					{
-						serverOperationStatus = EOperationStatus.Succeeded;
-						if (localOperationStatus == serverOperationStatus)
-						{
-							operation.Dispose();
-							callback.Succeed();
-							return;
-						}
-
-						// Check for GClass increments
-						if (operation is GInterface391 gInterface)
-						{
-							gInterface.Terminate();
-						}
-					}
+					case EOperationStatus.Succeeded:
+						HandleFinalResult(SuccessfulResult.New);
+						return;
+					case EOperationStatus.Failed:
+						InventoryController.logger.LogError($"{InventoryController.ID} - Client operation rejected by server: {Operation.Id} - {Operation}\r\nReason: {serverStatus.Error}");
+						HandleFinalResult(new FailedResult(serverStatus.Error));
+						break;
+					default:
+						InventoryController.logger.LogError("ReceiveStatusFromServer: Status was missing?");
+						break;
 				}
-				else
+			}
+
+			private void ExecuteResult(IResult executeResult)
+			{
+				if (!executeResult.Succeed)
 				{
-					FikaPlugin.Instance.FikaLogger.LogError($"{inventoryController.ID} - Client operation rejected by server: {operation.Id} - {operation}\r\nReason: {callbackManager.result.Error}");
-					serverOperationStatus = EOperationStatus.Failed;
-					localOperationStatus = EOperationStatus.Failed;
-					operation.Dispose();
-					callback.Invoke(callbackManager.result);
+					InventoryController.logger.LogError($"{InventoryController.ID} - Client operation critical failure: {Operation.Id} server status: {"SERVERRESULT"} - {Operation}\r\nError: {executeResult.Error}");
+				}
+				HandleFinalResult(executeResult);
+			}
 
-					// Check for GClass increments
-					if (operation is GInterface391 gInterface)
+			private void HandleFinalResult(IResult result)
+			{
+				IResult result2 = OperationResult;
+				if (result2 == null || !result2.Failed)
+				{
+					OperationResult = result;
+				}
+				EOperationStatus serverStatus = ServerStatus.Status;
+				if (!serverStatus.Finished())
+				{
+					return;
+				}
+				EOperationStatus localStatus = Operation.Status;
+				if (localStatus.InProgress())
+				{
+					if (Operation is GInterface391 ginterface)
 					{
-						gInterface.Terminate();
+						ginterface.Terminate();
+					}
+					return;
+				}
+				Operation.Dispose();
+				if (serverStatus != localStatus)
+				{
+					if (localStatus.Finished())
+					{
+						InventoryController.logger.LogError($"{InventoryController.ID} - Operation critical failure - status mismatch: {Operation.Id} server status: {serverStatus} client status: {localStatus} - {Operation}");
 					}
 				}
+				Callback?.Invoke(OperationResult);
 			}
 		}
 
-		private class ClientInventoryCallbackManager
+		public readonly struct ServerOperationStatus(EOperationStatus status, string error)
+		{
+			public readonly EOperationStatus Status = status;
+			public readonly string Error = error;
+		}
+
+		/*private class ClientInventoryCallbackManager
 		{
 			public Result<EOperationStatus> result;
 			public ClientInventoryOperationHandler clientOperationManager;
@@ -282,6 +300,6 @@ namespace Fika.Core.Coop.ClientClasses
 					}
 				}
 			}
-		}
+		}*/
 	}
 }

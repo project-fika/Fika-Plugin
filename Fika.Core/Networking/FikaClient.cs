@@ -1087,7 +1087,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.CommonPlayerPackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.CommonPlayerPackets.Enqueue(packet);
 			}
 		}
 
@@ -1095,7 +1095,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.InventoryPackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.InventoryPackets.Enqueue(packet);
 			}
 		}
 
@@ -1103,7 +1103,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.DamagePackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
 			}
 		}
 
@@ -1111,7 +1111,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.ArmorDamagePackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.ArmorDamagePackets.Enqueue(packet);
 			}
 		}
 
@@ -1119,7 +1119,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.FirearmPackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.FirearmPackets.Enqueue(packet);
 			}
 		}
 

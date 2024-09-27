@@ -31,9 +31,10 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId) : base(player, profile, examined)
+		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
 		{
-			mongoID_0 = firstId;
+			// For some reason bots need to be incremented by 1 since version 32678
+			mongoID_0 = aiControl ? firstId++ : firstId;
 			ushort_0 = firstOperationId;
 			searchController = new GClass1898();
 			coopPlayer = (CoopPlayer)player;

@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public static async Task<LocalPlayer> CreateBot(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
+		public static async Task<CoopBot> CreateBot(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,

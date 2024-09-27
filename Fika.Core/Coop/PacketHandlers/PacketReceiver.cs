@@ -1,10 +1,13 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using UnityEngine;
 
 namespace Fika.Core.Coop.PacketHandlers
@@ -21,6 +24,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<InventoryPacket> InventoryPackets { get; private set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; private set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; private set; } = new(50);
+		private readonly Queue<GClass3119> inventoryOperations = new();
 
 		protected void Awake()
 		{
@@ -105,7 +109,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				for (int i = 0; i < inventoryPackets; i++)
 				{
-					player.HandleInventoryPacket(InventoryPackets.Dequeue());
+					ConvertInventoryPacket(InventoryPackets.Dequeue());
 				}
 			}
 			int commonPlayerPackets = CommonPlayerPackets.Count;
@@ -115,6 +119,64 @@ namespace Fika.Core.Coop.PacketHandlers
 				{
 					player.HandleCommonPacket(CommonPlayerPackets.Dequeue());
 				}
+			}
+			int inventoryOps = inventoryOperations.Count;
+			if ( inventoryOps > 0)
+			{
+				if (inventoryOperations.Peek().WaitingForForeignEvents())
+				{
+					return;
+				}
+				inventoryOperations.Dequeue().method_1(HandleResult);
+			}
+		}
+
+		private void ConvertInventoryPacket(in InventoryPacket packet)
+		{
+			if (packet.HasItemControllerExecutePacket)
+			{
+				if (packet.ItemControllerExecutePacket.OperationBytes.Length == 0)
+				{
+					FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Bytes were null!");
+					return;
+				}
+
+				InventoryController controller = player.InventoryController;
+				if (controller != null)
+				{
+					try
+					{
+						if (controller is Interface15 networkController)
+						{
+							GClass1170 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+							GClass1670 descriptor = reader.ReadPolymorph<GClass1670>();
+							GStruct423 result = networkController.CreateOperationFromDescriptor(descriptor);
+							if (!result.Succeeded)
+							{
+								FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
+								return;
+							}
+
+							inventoryOperations.Enqueue(result.Value);
+						}
+					}
+					catch (Exception exception)
+					{
+						FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Exception thrown: {exception}");
+					}
+				}
+				else
+				{
+					FikaPlugin.Instance.FikaLogger.LogError("ConvertInventoryPacket: inventory was null!");
+				}
+			}
+		}
+
+		private void HandleResult(IResult result)
+		{
+			if (result.Failed)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error}");
 			}
 		}
 	}

@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
 using static Fika.Core.Networking.FikaSerialization;
 
 namespace Fika.Core.Coop.Players
@@ -46,7 +47,7 @@ namespace Fika.Core.Coop.Players
 		public bool HasGround = false;
 		public int NetId;
 		public bool IsObservedAI = false;
-		public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+		public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
 		public FikaSnapshotter Snapshotter;
 		public ClientMovementContext ClientMovementContext
 		{
@@ -1170,91 +1171,19 @@ namespace Fika.Core.Coop.Players
 
 		public void HandleCallbackFromServer(in OperationCallbackPacket operationCallbackPacket)
 		{
-			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Callback<EOperationStatus> callback))
+			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Action<ServerOperationStatus> callback))
 			{
 				if (operationCallbackPacket.OperationStatus != EOperationStatus.Started)
 				{
 					OperationCallbacks.Remove(operationCallbackPacket.CallbackId);
 				}
-				if (operationCallbackPacket.OperationStatus != EOperationStatus.Failed)
-				{
-					callback(new(operationCallbackPacket.OperationStatus));
-				}
-				else
-				{
-					callback(new()
-					{
-						Error = operationCallbackPacket.Error
-					});
-				}
+				ServerOperationStatus status = new(operationCallbackPacket.OperationStatus, operationCallbackPacket.Error);
+				callback(status);
 			}
 			else
 			{
 				FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId: {operationCallbackPacket.CallbackId}!");
 			}
-		}
-
-		public virtual void HandleInventoryPacket(in InventoryPacket packet)
-		{
-			if (packet.HasItemControllerExecutePacket)
-			{
-				if (packet.ItemControllerExecutePacket.OperationBytes.Length == 0)
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Bytes were null!");
-					return;
-				}
-
-				if (_inventoryController != null)
-				{
-					try
-					{
-						if (InventoryController is Interface15 networkController)
-						{
-							GClass1170 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
-							GClass1670 descriptor = reader.ReadPolymorph<GClass1670>();
-							GStruct423 result = networkController.CreateOperationFromDescriptor(descriptor);
-							if (!result.Succeeded)
-							{
-								FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
-								return;
-							}
-
-							InventoryOperationHandler opHandler = new(result);
-
-							opHandler.opResult.Value.method_1(new Callback(opHandler.HandleResult));
-						}
-					}
-					catch (Exception exception)
-					{
-						FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Exception thrown: {exception}");
-					}
-				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError("HandleInventoryPacket: inventory was null!");
-				}
-			}
-
-			// Currently unused
-			/*if (packet.HasSearchPacket)
-            {
-                if (!packet.SearchPacket.IsStop)
-                {
-                    if (FindItem(packet.SearchPacket.ItemId) is SearchableItemClass item)
-                    {
-                        GClass2869 operation = new((ushort)packet.SearchPacket.OperationId, _inventoryController, item);
-                        _inventoryController.Execute(operation, null);
-                    }
-                }
-                else if (packet.SearchPacket.IsStop)
-                {
-                    if (FindItem(packet.SearchPacket.ItemId) is SearchableItemClass item)
-                    {
-                        GClass2869 operation = new((ushort)packet.SearchPacket.OperationId, _inventoryController, item);
-                        _inventoryController.ExecuteStop(operation);
-                    }
-                }
-            }*/
 		}
 
 		public virtual void HandleWeaponPacket(in WeaponPacket packet)
@@ -1572,19 +1501,6 @@ namespace Fika.Core.Coop.Players
 			internal void HandleKeyEvent()
 			{
 				unlockResult.Value.RaiseEvents(player._inventoryController, CommandStatus.Succeed);
-			}
-		}
-
-		private class InventoryOperationHandler(GStruct423 opResult)
-		{
-			public readonly GStruct423 opResult = opResult;
-
-			internal void HandleResult(IResult result)
-			{
-				if (!result.Succeed || !string.IsNullOrEmpty(result.Error))
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error}");
-				}
 			}
 		}
 

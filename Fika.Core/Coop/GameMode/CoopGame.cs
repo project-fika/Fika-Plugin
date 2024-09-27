@@ -272,7 +272,9 @@ namespace Fika.Core.Coop.GameMode
 			weather.ScaterringFogDensity = weather2.ScaterringFogDensity = timeAndWeather.FogType.ToValue();
 			weather.Time = dateTime.Ticks;
 			weather2.Time = dateTime2.Ticks;
-			WeatherController.Instance.method_0([weather, weather2]);
+			WeatherClass[] weatherClasses = [weather, weather2];
+			WeatherClasses = weatherClasses;
+			WeatherController.Instance.method_0(weatherClasses);
 		}
 
 		public override void SetMatchmakerStatus(string status, float? progress = null)
@@ -454,7 +456,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			int netId = 1000;
-			LocalPlayer localPlayer;
+			CoopBot coopBot;
 			if (Bots.ContainsKey(profile.Id))
 			{
 				return null;
@@ -477,16 +479,16 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			// Check for GClass increments on filter
-			localPlayer = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
+			coopBot = await CoopBot.CreateBot(GameWorld_0, netId, position, Quaternion.identity, "Player",
 			   "Bot_", EPointOfView.ThirdPerson, profile, true, UpdateQueue, Player.EUpdateMode.Auto,
 			   Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
 				FikaGlobals.GetOtherPlayerSensitivity, GClass1574.Default, mongoId, nextOperationId);
 
-			localPlayer.Location = Location_0.Id;
+			coopBot.Location = Location_0.Id;
 #if DEBUG
 			Logger.LogInfo($"Bot {profile.Info.Settings.Role} created at {position} SUCCESSFULLY!");
 #endif
-			Bots.Add(localPlayer.ProfileId, localPlayer);
+			Bots.Add(coopBot.ProfileId, coopBot);
 
 			if (profile.Info.Side is not EPlayerSide.Savage)
 			{
@@ -511,7 +513,6 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
-			CoopBot coopBot = (CoopBot)localPlayer;
 			coopBot.NetId = netId;
 			if (FikaPlugin.DisableBotMetabolism.Value)
 			{
@@ -524,7 +525,7 @@ namespace Fika.Core.Coop.GameMode
 				botSender.AssignManager(botStateManager);
 			}
 
-			return localPlayer;
+			return coopBot;
 		}
 
 		/// <summary>
@@ -1493,7 +1494,7 @@ namespace Fika.Core.Coop.GameMode
 				gameWorld.BtrController = new BTRControllerClass(gameWorld);
 			}
 
-			bool transitActive;
+			/*bool transitActive;
 			if (instance == null)
 			{
 				transitActive = false;
@@ -1511,7 +1512,9 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				GClass1615.DisableTransitPoints();
-			}
+			}*/
+
+			GClass1615.DisableTransitPoints();
 
 			if (isServer)
 			{

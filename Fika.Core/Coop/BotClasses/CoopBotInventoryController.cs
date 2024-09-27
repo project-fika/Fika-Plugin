@@ -29,8 +29,7 @@ namespace Fika.Core.Coop.BotClasses
 			coopBot = (CoopBot)player;
 			mongoID_0 = currentId;
 			ushort_0 = nextOperationId;
-			IPlayerSearchController playerSearchController = new GClass1902(profile);
-			searchController = playerSearchController;
+			searchController = new GClass1902(profile);
 		}
 
 		public override IPlayerSearchController PlayerSearchController
@@ -65,6 +64,29 @@ namespace Fika.Core.Coop.BotClasses
 			BotInventoryOperationHandler handler = new(this, operation, callback);
 			if (vmethod_0(operation))
 			{
+				// Check for GClass increments
+				// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
+				if (operation is not GClass3137)
+				{
+#if DEBUG
+					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
+#endif
+					InventoryPacket packet = new()
+					{
+						HasItemControllerExecutePacket = true
+					};
+
+					GClass1175 writer = new();
+					writer.WritePolymorph(operation.ToDescriptor());
+					packet.ItemControllerExecutePacket = new()
+					{
+						CallbackId = operation.Id,
+						OperationBytes = writer.ToArray()
+					};
+
+					coopBot.PacketSender.InventoryPackets.Enqueue(packet);
+					return;
+				}
 				handler.Operation.method_1(handler.HandleResult);
 				return;
 			}
@@ -92,30 +114,7 @@ namespace Fika.Core.Coop.BotClasses
 					return;
 				}
 
-				// Check for GClass increments
-				// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-				if (Operation is GClass3137)
-				{
-					return;
-				}
-
-#if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}");
-#endif
-
 				Callback?.Invoke(result);
-				InventoryPacket packet = new()
-				{
-					HasItemControllerExecutePacket = true
-				};
-				GClass1175 writer = new();
-				writer.WritePolymorph(Operation.ToDescriptor());
-				packet.ItemControllerExecutePacket = new()
-				{
-					CallbackId = Operation.Id,
-					OperationBytes = writer.ToArray()
-				};
-				controller.coopBot.PacketSender.InventoryPackets.Enqueue(packet);
 			}
 		}
 	}
