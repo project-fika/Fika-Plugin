@@ -6,6 +6,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using System.Collections.Generic;
 
@@ -34,7 +35,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
 		{
 			// For some reason bots need to be incremented by 1 since version 32678
-			mongoID_0 = aiControl ? firstId++ : firstId;
+			mongoID_0 = (aiControl && !FikaBackendUtils.IsReconnect) ? firstId++ : firstId;
 			ushort_0 = firstOperationId;
 			searchController = new GClass1898();
 			coopPlayer = (CoopPlayer)player;

@@ -2,17 +2,16 @@
 using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	/// <summary>
-	/// <see cref="ClientLocalGameWorld"/> used in Fika for clients to override methods and logic
-	/// </summary>
-	public class CoopClientGameWorld : ClientLocalGameWorld
+    /// <summary>
+    /// <see cref="ClientLocalGameWorld"/> used in Fika for clients to override methods and logic
+    /// </summary>
+    public class CoopClientGameWorld : ClientLocalGameWorld
 	{
 		public static CoopClientGameWorld Create(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
 		{
@@ -25,7 +24,7 @@ namespace Fika.Core.Coop.ClientClasses
 			gameWorld.CurrentProfileId = currentProfileId;
 			gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
 			gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
-			gameObject.AddComponent<FikaWorld>();
+			gameObject.AddComponent<FikaClientWorld>();
 			return gameWorld;
 		}
 
