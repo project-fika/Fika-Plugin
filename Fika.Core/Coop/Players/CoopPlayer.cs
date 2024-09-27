@@ -8,6 +8,7 @@ using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
+using EFT.UI;
 using EFT.Vehicle;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ClientClasses;
