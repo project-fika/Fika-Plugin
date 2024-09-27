@@ -35,18 +35,29 @@ namespace Fika.Core.Coop.GameMode
 			int grenadePacketsCount = gameWorld.GrenadesCriticalStates.Count;
 			if (grenadePacketsCount > 0)
 			{
-				for (int i = 0; i < grenadePacketsCount; i++)
+				ThrowablePacket packet = new()
 				{
-					ThrowablePacket packet = new()
-					{
-						Data = gameWorld.GrenadesCriticalStates[i]
-					};
+					Count = grenadePacketsCount,
+					Data = gameWorld.GrenadesCriticalStates
+				};
 
-					server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-				}
+				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+			}
+
+			int artilleryPacketsCount = gameWorld.ArtilleryProjectilesStates.Count;
+			if (artilleryPacketsCount > 0)
+			{
+				ArtilleryPacket packet = new()
+				{
+					Count = artilleryPacketsCount,
+					Data = gameWorld.ArtilleryProjectilesStates
+				};
+
+				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 			}
 
 			gameWorld.GrenadesCriticalStates.Clear();
+			gameWorld.ArtilleryProjectilesStates.Clear();
 		}
 
 		/// <summary>

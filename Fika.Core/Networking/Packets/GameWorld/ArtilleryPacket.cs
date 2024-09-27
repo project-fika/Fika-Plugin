@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking
 {
-	internal struct ThrowablePacket : INetSerializable
+	public struct ArtilleryPacket : INetSerializable
 	{
 		public int Count;
-		public List<GStruct131> Data;
+		public List<GStruct130> Data;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -16,7 +16,7 @@ namespace Fika.Core.Networking
 				Data = [];
 				for (int i = 0; i < Count; i++)
 				{
-					Data.Add(reader.GetGrenadeStruct());
+					Data.Add(reader.GetArtilleryStruct());
 				}
 			}
 		}
@@ -28,7 +28,7 @@ namespace Fika.Core.Networking
 			{
 				for (int i = 0; i < Count; i++)
 				{
-					writer.PutGrenadeStruct(Data[i]);
+					writer.PutArtilleryStruct(Data[i]);
 				}
 			}
 		}

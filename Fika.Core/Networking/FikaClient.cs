@@ -155,6 +155,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
 			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
+			packetProcessor.SubscribeNetSerializable<ArtilleryPacket>(OnArtilleryPacketReceived);
 
 			netClient = new NetManager(this)
 			{
@@ -200,6 +201,12 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnArtilleryPacketReceived(ArtilleryPacket packet)
+		{
+			List<GStruct130> artilleryPackets = [packet.Data];
+			Singleton<GameWorld>.Instance.ClientShellingController.SyncProjectilesStates(ref artilleryPackets);
 		}
 
 		private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)

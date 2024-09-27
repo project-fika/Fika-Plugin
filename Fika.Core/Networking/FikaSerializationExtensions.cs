@@ -530,5 +530,67 @@ namespace Fika.Core.Networking
 			writer.Write(valueInfo.Minimum);
 			writer.Write(valueInfo.Maximum);
 		}
+
+		/// <summary>
+		/// Serializes a <see cref="GStruct130"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="artilleryStruct"></param>
+		public static void PutArtilleryStruct(this NetDataWriter writer, in GStruct130 artilleryStruct)
+		{
+			writer.Put(artilleryStruct.id);
+			writer.Put(artilleryStruct.position);
+			writer.Put(artilleryStruct.explosion);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="GStruct130"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="GStruct130"/> with data</returns>
+		public static GStruct130 GetArtilleryStruct(this NetDataReader reader)
+		{
+			return new()
+			{
+				id = reader.GetInt(),
+				position = reader.GetVector3(),
+				explosion = reader.GetBool()
+			};
+		}
+
+		public static void PutGrenadeStruct(this NetDataWriter writer, in GStruct131 grenadeStruct)
+		{
+			writer.Put(grenadeStruct.Id);
+			writer.Put(grenadeStruct.Position);
+			writer.Put(grenadeStruct.Rotation);
+			writer.Put(grenadeStruct.CollisionNumber);
+			writer.Put(grenadeStruct.Done);
+			if (!grenadeStruct.Done)
+			{
+				writer.Put(grenadeStruct.Velocity);
+				writer.Put(grenadeStruct.AngularVelocity);
+			}
+		}
+
+		public static GStruct131 GetGrenadeStruct(this NetDataReader reader)
+		{
+			GStruct131 grenadeStruct = new()
+			{
+				Id = reader.GetInt(),
+				Position = reader.GetVector3(),
+				Rotation = reader.GetQuaternion(),
+				CollisionNumber = reader.GetByte()
+			};
+
+			if (!reader.GetBool())
+			{
+				grenadeStruct.Velocity = reader.GetVector3();
+				grenadeStruct.AngularVelocity = reader.GetVector3();
+				return grenadeStruct;
+			}
+
+			grenadeStruct.Done = true;
+			return grenadeStruct;
+		}
 	}
 }
