@@ -205,8 +205,7 @@ namespace Fika.Core.Networking
 
 		private void OnArtilleryPacketReceived(ArtilleryPacket packet)
 		{
-			List<GStruct130> artilleryPackets = [packet.Data];
-			Singleton<GameWorld>.Instance.ClientShellingController.SyncProjectilesStates(ref artilleryPackets);
+			Singleton<GameWorld>.Instance.ClientShellingController.SyncProjectilesStates(ref packet.Data);
 		}
 
 		private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)
@@ -545,9 +544,12 @@ namespace Fika.Core.Networking
 		private void OnThrowablePacketReceived(ThrowablePacket packet)
 		{
 			GClass770<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
-			if (grenades.TryGetByKey(packet.Data.Id, out Throwable throwable))
+			foreach (GStruct131 grenadeData in packet.Data)
 			{
-				throwable.ApplyNetPacket(packet.Data);
+				if (grenades.TryGetByKey(grenadeData.Id, out Throwable throwable))
+				{
+					throwable.ApplyNetPacket(grenadeData);
+				} 
 			}
 		}
 
