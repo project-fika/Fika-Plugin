@@ -775,25 +775,35 @@ namespace Fika.Core.Networking
 
 		public struct FlareShotPacket
 		{
+			public bool StartOneShotFire;
 			public Vector3 ShotPosition;
 			public Vector3 ShotForward;
 			public string AmmoTemplateId;
 
 			public static FlareShotPacket Deserialize(NetDataReader reader)
 			{
-				return new FlareShotPacket()
+				FlareShotPacket packet = new()
 				{
-					ShotPosition = reader.GetVector3(),
-					ShotForward = reader.GetVector3(),
-					AmmoTemplateId = reader.GetString()
+					StartOneShotFire = reader.GetBool()
 				};
+				if (!packet.StartOneShotFire)
+				{
+					packet.ShotPosition = reader.GetVector3();
+					packet.ShotForward = reader.GetVector3();
+					packet.AmmoTemplateId = reader.GetString();
+				}
+				return packet;
 			}
 
 			public static void Serialize(NetDataWriter writer, FlareShotPacket packet)
 			{
-				writer.Put(packet.ShotPosition);
-				writer.Put(packet.ShotForward);
-				writer.Put(packet.AmmoTemplateId);
+				writer.Put(packet.StartOneShotFire);
+				if (!packet.StartOneShotFire)
+				{
+					writer.Put(packet.ShotPosition);
+					writer.Put(packet.ShotForward);
+					writer.Put(packet.AmmoTemplateId); 
+				}
 			}
 		}
 

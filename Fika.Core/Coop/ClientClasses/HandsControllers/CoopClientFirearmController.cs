@@ -500,7 +500,14 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void SendStartOneShotFire()
 		{
-			base.SendStartOneShotFire();
+			player.PacketSender.FirearmPackets.Enqueue(new()
+			{
+				HasFlareShot = true,
+				FlareShotPacket = new()
+				{
+					StartOneShotFire = true
+				}
+			});
 		}
 
 		public override void CreateFlareShot(BulletClass flareItem, Vector3 shotPosition, Vector3 forward)

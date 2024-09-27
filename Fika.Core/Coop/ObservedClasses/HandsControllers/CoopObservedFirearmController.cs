@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static EFT.Player;
+using static EFT.Player.GrenadeHandsController;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
@@ -62,6 +63,19 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				return -CurrentFireport.up;
 			}
+		}
+
+		public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
+		{
+			// Check for GClass increments..
+			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
+			operationFactoryDelegates[typeof(GClass1748)] = new OperationFactoryDelegate(Flare1);
+			return operationFactoryDelegates;
+		}
+
+		private BaseAnimationOperation Flare1()
+		{
+			return new ObservedFlareOperation(this);
 		}
 
 		protected void Awake()
@@ -217,8 +231,6 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			if (packet.HasShotInfo)
 			{
-				// TODO: Flares, GClass2376::method_12
-
 				if (packet.ShotInfoPacket.ShotType != EShotType.RegularShot && packet.ShotInfoPacket.ShotType != EShotType.DryFire)
 				{
 					switch (packet.ShotInfoPacket.ShotType)
@@ -518,26 +530,32 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (packet.HasFlareShot)
 			{
-				FirearmsAnimator.SetFire(true);
-				// Check for GClass increments
-				if (Weapon is not GClass2973)
+				if (packet.FlareShotPacket.StartOneShotFire)
 				{
-					FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0f);
-					Weapon.Repairable.Durability = 0;
+					FirearmsAnimator.SetFire(true);
+					// Check for GClass increments
+					if (Weapon is not GClass2973)
+					{
+						FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0f);
+						Weapon.Repairable.Durability = 0;
+					}
+					else
+					{
+						FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0f);
+					}
 				}
 				else
-				{
-					FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0f);
+				{					
+					BulletClass bulletClass = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.FlareShotPacket.AmmoTemplateId, null);
+					InitiateFlare(bulletClass, packet.FlareShotPacket.ShotPosition, packet.FlareShotPacket.ShotForward);
+					bulletClass.IsUsed = true;
+					if (weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+					{
+						weaponEffectsManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);
+					}
+					bulletClass = null;
+					FirearmsAnimator.SetFire(false);
 				}
-				BulletClass bulletClass = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.FlareShotPacket.AmmoTemplateId, null);
-				InitiateFlare(bulletClass, packet.FlareShotPacket.ShotPosition, packet.FlareShotPacket.ShotForward);
-				bulletClass.IsUsed = true;
-				if (weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
-				{
-					weaponEffectsManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);
-				}
-				bulletClass = null;
-				FirearmsAnimator.SetFire(false);
 			}
 
 			if (packet.ReloadBoltAction)
@@ -772,6 +790,14 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 
 			weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.33f, 0);
+		}
+
+		private class ObservedFlareOperation(FirearmController controller) : GClass1748(controller)
+		{
+			public override void ProcessRemoveOneOffWeapon()
+			{
+				// Do nothing
+			}
 		}
 	}
 }
