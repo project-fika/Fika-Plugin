@@ -414,6 +414,38 @@ namespace Fika.Core.Coop.Players
 			return hitInfo;
 		}
 
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfo damageInfo)
+		{
+			if (isServer)
+			{
+				_preAllocatedArmorComponents.Clear();
+				Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
+				List<ArmorComponent> armorComponents = [];
+				foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
+				{
+					float num = 0f;
+					foreach (KeyValuePair<GStruct209, float> keyValuePair in armorDamage)
+					{
+						if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
+						{
+							num += keyValuePair.Value;
+							armorComponents.Add(armorComponent);
+						}
+					}
+					if (num > 0f)
+					{
+						num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
+						method_95(num, armorComponent);
+					}
+				}
+
+				if (armorComponents.Count > 0)
+				{
+					QueueArmorDamagePackets([.. armorComponents]);
+				}
+			}
+		}
+
 		public ShotInfoClass ApplyClientShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct400 shotId)
 		{
 			ShotReactions(damageInfo, bodyPartType);
