@@ -7,7 +7,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using UnityEngine;
 
 namespace Fika.Core.Coop.PacketHandlers
@@ -45,6 +44,17 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				Client = Singleton<FikaClient>.Instance;
 			}
+		}
+
+		protected void OnDestroy()
+		{
+			FirearmPackets.Clear();
+			DamagePackets.Clear();
+			ArmorDamagePackets.Clear();
+			InventoryPackets.Clear();
+			CommonPlayerPackets.Clear();
+			HealthSyncPackets.Clear();
+			inventoryOperations.Clear();
 		}
 
 		protected void Update()
@@ -121,7 +131,7 @@ namespace Fika.Core.Coop.PacketHandlers
 				}
 			}
 			int inventoryOps = inventoryOperations.Count;
-			if ( inventoryOps > 0)
+			if (inventoryOps > 0)
 			{
 				if (inventoryOperations.Peek().WaitingForForeignEvents())
 				{

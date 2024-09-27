@@ -132,10 +132,10 @@ namespace Fika.Core.Coop.Custom
 				return;
 			}
 
-			if (!bot.AIData.BotOwner.Memory.IsPeace)
+			/*if (!bot.AIData.BotOwner.Memory.IsPeace)
 			{
 				return;
-			}
+			}*/
 #if DEBUG
 			logger.LogWarning($"Disabling {bot.gameObject.name}");
 #endif

@@ -151,7 +151,6 @@ namespace Fika.Core.Coop.Players
 			observedTraverse.Field<GClass869>("gclass869_0").Value = new();
 			player.cullingHandler = observedTraverse.Field<GClass869>("gclass869_0").Value;
 			player.cullingHandler.Initialize(player, player.PlayerBones);
-			player.cullingHandler.Disable();
 
 			if (!aiControl)
 			{
@@ -1174,7 +1173,7 @@ namespace Fika.Core.Coop.Players
 
 			method_13(deltaTime);
 
-			UpdateTriggerColliderSearcher(deltaTime, SqrCameraDistance < 1600);
+			UpdateTriggerColliderSearcher(deltaTime, true);
 			if (cullingHandler != null)
 			{
 				cullingHandler.ManualUpdate(deltaTime);

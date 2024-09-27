@@ -1516,24 +1516,27 @@ namespace Fika.Core.Coop.GameMode
 
 			GClass1615.DisableTransitPoints();
 
-			if (isServer)
+			if (WeatherController.Instance != null)
 			{
-				LocalGame.Class1474 weatherHandler = new()
+				if (isServer)
 				{
-					weather = iSession.WeatherRequest()
-				};
-				while (!weatherHandler.weather.IsCompleted)
-				{
-					await Task.Yield();
+					LocalGame.Class1474 weatherHandler = new()
+					{
+						weather = iSession.WeatherRequest()
+					};
+					while (!weatherHandler.weather.IsCompleted)
+					{
+						await Task.Yield();
+					}
+					WeatherClasses = weatherHandler.weather.Result.Weathers;
+					WeatherController.Instance.method_0(WeatherClasses);
+					weatherHandler = null;
 				}
-				WeatherClasses = weatherHandler.weather.Result.Weathers;
-				WeatherController.Instance.method_0(WeatherClasses);
-				weatherHandler = null;
-			}
-			else
-			{
-				await GetWeather();
-				WeatherController.Instance.method_0(WeatherClasses);
+				else
+				{
+					await GetWeather();
+					WeatherController.Instance.method_0(WeatherClasses);
+				} 
 			}
 
 			ESeason season = iSession.Season;
@@ -2008,6 +2011,11 @@ namespace Fika.Core.Coop.GameMode
 
 			if (isServer)
 			{
+				Destroy(botStateManager);
+				if (GameWorld_0.ServerShellingController != null)
+				{
+					UpdateByUnity -= GameWorld_0.ServerShellingController.OnUpdate;
+				}
 				botsController_0.Stop();
 				bossSpawnScenario?.Stop();
 				if (nonWavesSpawnScenario_0 != null)
@@ -2019,8 +2027,6 @@ namespace Fika.Core.Coop.GameMode
 					wavesSpawnScenario_0.Stop();
 				}
 			}
-
-
 
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
@@ -2043,11 +2049,6 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			Destroy(coopHandler);
-
-			if (isServer)
-			{
-				Destroy(botStateManager);
-			}
 
 			ExitManager stopManager = new()
 			{
@@ -2295,7 +2296,11 @@ namespace Fika.Core.Coop.GameMode
 			{
 				Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
 			}
-			return base.vmethod_7();
+			using (CounterCreatorAbstractClass.StartWithToken("CollectMetrics"))
+			{
+				gclass2314_0.Stop();
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -2330,10 +2335,9 @@ namespace Fika.Core.Coop.GameMode
 				CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 				coopPlayer.PacketSender.DestroyThis();
 
-				FikaDynamicAI newDynamicAI = gameObject.GetComponent<FikaDynamicAI>();
-				if (newDynamicAI != null)
+				if (DynamicAI != null)
 				{
-					Destroy(newDynamicAI);
+					Destroy(DynamicAI);
 				}
 
 				NetManagerUtils.StopPinger();

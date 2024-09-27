@@ -15,7 +15,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static bool Prefix(GClass869 ___gclass869_0)
 		{
-			//___gclass869_0.Hide();
+			___gclass869_0.Hide();
 			return false;
 		}
 	}
