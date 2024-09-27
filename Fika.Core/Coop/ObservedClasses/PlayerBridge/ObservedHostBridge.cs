@@ -33,9 +33,9 @@ namespace Fika.Core.Coop.ObservedClasses
 				return;
 			}
 
-			if (damageInfo.DamageType is EDamageType.Landmine)
+			if (damageInfo.DamageType is EDamageType.Landmine or EDamageType.Artillery)
 			{
-				observedPlayer.HandleMineDamage(damageInfo, bodyPartType, bodyPartCollider);
+				observedPlayer.HandleExplosive(damageInfo, bodyPartType, bodyPartCollider);
 				return;
 			}
 

@@ -266,6 +266,9 @@ namespace Fika.Core
 			new RaidSettingsWindow_method_8_Patch().Enable();
 			new AIPlaceLogicPartisan_Dispose_Patch().Enable();
 			new Player_SpawnInHands_Patch().Enable();
+			new GClass596_method_0_Patch().Enable();
+			new GClass596_method_30_Patch().Enable();
+			new GClass1350_Constructor_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();

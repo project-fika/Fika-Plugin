@@ -283,7 +283,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public void HandleMineDamage(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
+		public void HandleExplosive(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
 		{
 			if (HealthController.DamageCoeff == 0)
 			{

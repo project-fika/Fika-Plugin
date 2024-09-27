@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
 		{
-			if (damageInfo.DamageType.IsEnvironmental())
+			if (damageInfo.DamageType.IsEnvironmental() || damageInfo.DamageType is EDamageType.Landmine or EDamageType.Artillery)
 			{
 				return;
 			}
