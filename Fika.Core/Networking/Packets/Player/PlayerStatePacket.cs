@@ -44,7 +44,7 @@ namespace Fika.Core.Networking
 			writer.Put(Rotation);
 			writer.Put(HeadRotation);
 			writer.Put(MovementDirection);
-			writer.Put((int)State);
+			writer.Put((byte)State);
 			writer.Put(Tilt);
 			writer.Put(Step);
 			writer.Put(AnimatorStateIndex);
@@ -58,7 +58,7 @@ namespace Fika.Core.Networking
 			writer.Put(LeftStanceDisabled);
 			writer.Put(IsGrounded);
 			writer.Put(HasGround);
-			writer.Put((int)SurfaceSound);
+			writer.Put((byte)SurfaceSound);
 			writer.Put(SurfaceNormal);
 			writer.Put(RemoteTime);
 		}
@@ -70,7 +70,7 @@ namespace Fika.Core.Networking
 			Rotation = reader.GetVector2();
 			HeadRotation = reader.GetVector3();
 			MovementDirection = reader.GetVector2();
-			State = (EPlayerState)reader.GetInt();
+			State = (EPlayerState)reader.GetByte();
 			Tilt = reader.GetFloat();
 			Step = reader.GetInt();
 			AnimatorStateIndex = reader.GetInt();
@@ -84,7 +84,7 @@ namespace Fika.Core.Networking
 			LeftStanceDisabled = reader.GetBool();
 			IsGrounded = reader.GetBool();
 			HasGround = reader.GetBool();
-			SurfaceSound = (ESurfaceSound)reader.GetInt();
+			SurfaceSound = (ESurfaceSound)reader.GetByte();
 			SurfaceNormal = reader.GetVector3();
 			RemoteTime = reader.GetDouble();
 		}
