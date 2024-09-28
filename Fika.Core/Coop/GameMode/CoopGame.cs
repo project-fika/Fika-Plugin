@@ -2300,7 +2300,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				gclass2314_0.Stop();
 			}
-			return null;
+			return new();
 		}
 
 		/// <summary>
