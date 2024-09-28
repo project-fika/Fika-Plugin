@@ -199,6 +199,8 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				// Clear out all spectate positions
 				DetachCamera();
+
+				return;
 			}
 
 			// Start spectating a player if we haven't before
