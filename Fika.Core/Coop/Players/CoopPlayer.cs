@@ -420,6 +420,11 @@ namespace Fika.Core.Coop.Players
 			float distance, int hour, List<string> targetEquipment,
 			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer, int experience)
 		{
+			if (!HealthController.IsAlive)
+			{
+				return;
+			}
+
 			if (role != WildSpawnType.pmcBEAR)
 			{
 				if (role == WildSpawnType.pmcUSEC)

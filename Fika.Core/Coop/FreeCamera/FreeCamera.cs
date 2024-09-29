@@ -420,6 +420,7 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
+			// Zooming
 			float scrollValue = Input.GetAxisRaw("Mouse ScrollWheel");
 			if (scrollValue != 0)
 			{
