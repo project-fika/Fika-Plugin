@@ -112,16 +112,6 @@ namespace Fika.Core.Coop.FreeCamera
 
 		private void MainPlayer_DiedEvent(EDamageType obj)
 		{
-			if (Singleton<SpatialAudioSystem>.Instantiated)
-			{
-				SpatialAudioSystem spatialAudioSystem = Singleton<SpatialAudioSystem>.Instance;
-				ISpatialAudioRoom currentRoom = spatialAudioSystem.ListenerCurrentRoom;
-				if (currentRoom != null && currentRoom is SpatialAudioRoom spatialRoom)
-				{
-					spatialAudioSystem.RemovePlayerCurrentRoom(spatialRoom, Player);
-				}
-			}
-
 			Player.ActiveHealthController.DiedEvent -= MainPlayer_DiedEvent;
 
 			if (!deathFadeEnabled)
