@@ -1,15 +1,15 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	/// <summary>
-	/// This is only used by AI
-	/// </summary>
-	internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
+    /// <summary>
+    /// This is only used by AI
+    /// </summary>
+    internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
 		protected CoopPlayer player;
 
@@ -27,7 +27,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HasGrenadePacket = true,
 				GrenadePacket = new()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.None,
+					PacketType = SubPackets.GrenadePacketType.None,
 					HasGrenade = true,
 					GrenadeRotation = rotation,
 					GrenadePosition = position,

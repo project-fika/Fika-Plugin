@@ -2,11 +2,11 @@
 
 using EFT.InventoryLogic;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
-	public struct WeaponPacket(int netId) : INetSerializable
+    public struct WeaponPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
 		public bool HasShotInfo = false;
@@ -19,9 +19,9 @@ namespace Fika.Core.Networking
 		public bool CheckAmmo = false;
 		public bool CheckChamber = false;
 		public bool CheckFireMode = false;
-		public bool ToggleTacticalCombo = false;
+		public bool ToggleLightStates = false;
 		public LightStatesPacket LightStatesPacket;
-		public bool ChangeSightMode = false;
+		public bool ToggleScopeStates = false;
 		public ScopeStatesPacket ScopeStatesPacket;
 		public bool ToggleLauncher = false;
 		public bool EnableInventory = false;
@@ -32,13 +32,13 @@ namespace Fika.Core.Networking
 		public bool HasQuickReloadMagPacket = false;
 		public QuickReloadMagPacket QuickReloadMagPacket;
 		public bool HasReloadWithAmmoPacket = false;
-		public ReloadWithAmmoPacket ReloadWithAmmo;
+		public ReloadWithAmmoPacket ReloadWithAmmoPacket;
 		public bool HasCylinderMagPacket = false;
-		public CylinderMagPacket CylinderMag;
+		public CylinderMagPacket CylinderMagPacket;
 		public bool HasReloadLauncherPacket = false;
-		public ReloadLauncherPacket ReloadLauncher;
+		public ReloadLauncherPacket ReloadLauncherPacket;
 		public bool HasReloadBarrelsPacket = false;
-		public ReloadBarrelsPacket ReloadBarrels;
+		public ReloadBarrelsPacket ReloadBarrelsPacket;
 		public bool HasGrenadePacket = false;
 		public GrenadePacket GrenadePacket;
 		public bool CancelGrenade = false;
@@ -63,7 +63,7 @@ namespace Fika.Core.Networking
 			HasShotInfo = reader.GetBool();
 			if (HasShotInfo)
 			{
-				ShotInfoPacket = ShotInfoPacket.Deserialize(reader);
+				ShotInfoPacket = reader.GetShotInfoPacket();
 			}
 			ChangeFireMode = reader.GetBool();
 			FireMode = (Weapon.EFireMode)reader.GetInt();
@@ -76,16 +76,16 @@ namespace Fika.Core.Networking
 			CheckAmmo = reader.GetBool();
 			CheckChamber = reader.GetBool();
 			CheckFireMode = reader.GetBool();
-			ToggleTacticalCombo = reader.GetBool();
-			if (ToggleTacticalCombo)
+			ToggleLightStates = reader.GetBool();
+			if (ToggleLightStates)
 			{
-				LightStatesPacket = LightStatesPacket.Deserialize(reader);
+				LightStatesPacket = reader.GetLightStatesPacket();
 			}
 
-			ChangeSightMode = reader.GetBool();
-			if (ChangeSightMode)
+			ToggleScopeStates = reader.GetBool();
+			if (ToggleScopeStates)
 			{
-				ScopeStatesPacket = ScopeStatesPacket.Deserialize(reader);
+				ScopeStatesPacket = reader.GetScopeStatesPacket();
 			}
 			ToggleLauncher = reader.GetBool();
 			EnableInventory = reader.GetBool();
@@ -94,37 +94,37 @@ namespace Fika.Core.Networking
 			HasReloadMagPacket = reader.GetBool();
 			if (HasReloadMagPacket)
 			{
-				ReloadMagPacket = ReloadMagPacket.Deserialize(reader);
+				ReloadMagPacket = reader.GetReloadMagPacket();
 			}
 			HasQuickReloadMagPacket = reader.GetBool();
 			if (HasQuickReloadMagPacket)
 			{
-				QuickReloadMagPacket = QuickReloadMagPacket.Deserialize(reader);
+				QuickReloadMagPacket = reader.GetQuickReloadMagPacket();
 			}
 			HasReloadWithAmmoPacket = reader.GetBool();
 			if (HasReloadWithAmmoPacket)
 			{
-				ReloadWithAmmo = ReloadWithAmmoPacket.Deserialize(reader);
+				ReloadWithAmmoPacket = reader.GetReloadWithAmmoPacket();
 			}
 			HasCylinderMagPacket = reader.GetBool();
 			if (HasCylinderMagPacket)
 			{
-				CylinderMag = CylinderMagPacket.Deserialize(reader);
+				CylinderMagPacket = reader.GetCylinderMagPacket();
 			}
 			HasReloadLauncherPacket = reader.GetBool();
 			if (HasReloadLauncherPacket)
 			{
-				ReloadLauncher = ReloadLauncherPacket.Deserialize(reader);
+				ReloadLauncherPacket = reader.GetReloadLauncherPacket();
 			}
 			HasReloadBarrelsPacket = reader.GetBool();
 			if (HasReloadBarrelsPacket)
 			{
-				ReloadBarrels = ReloadBarrelsPacket.Deserialize(reader);
+				ReloadBarrelsPacket = reader.GetReloadBarrelsPacket();
 			}
 			HasGrenadePacket = reader.GetBool();
 			if (HasGrenadePacket)
 			{
-				GrenadePacket = GrenadePacket.Deserialize(reader);
+				GrenadePacket = reader.GetGrenadePacket();
 			}
 			CancelGrenade = reader.GetBool();
 			HasCompassChange = reader.GetBool();
@@ -135,7 +135,7 @@ namespace Fika.Core.Networking
 			HasKnifePacket = reader.GetBool();
 			if (HasKnifePacket)
 			{
-				KnifePacket = KnifePacket.Deserialize(reader);
+				KnifePacket = reader.GetKnifePacket();
 			}
 			HasStanceChange = reader.GetBool();
 			if (HasStanceChange)
@@ -145,7 +145,7 @@ namespace Fika.Core.Networking
 			HasFlareShot = reader.GetBool();
 			if (HasFlareShot)
 			{
-				FlareShotPacket = FlareShotPacket.Deserialize(reader);
+				FlareShotPacket = reader.GetFlareShotPacket();
 			}
 			ReloadBoltAction = reader.GetBool();
 			HasRollCylinder = reader.GetBool();
@@ -164,7 +164,7 @@ namespace Fika.Core.Networking
 			writer.Put(HasShotInfo);
 			if (HasShotInfo)
 			{
-				ShotInfoPacket.Serialize(writer, ShotInfoPacket);
+				writer.PutShotInfoPacket(ShotInfoPacket);
 			}
 			writer.Put(ChangeFireMode);
 			writer.Put((int)FireMode);
@@ -177,15 +177,15 @@ namespace Fika.Core.Networking
 			writer.Put(CheckAmmo);
 			writer.Put(CheckChamber);
 			writer.Put(CheckFireMode);
-			writer.Put(ToggleTacticalCombo);
-			if (ToggleTacticalCombo)
+			writer.Put(ToggleLightStates);
+			if (ToggleLightStates)
 			{
-				LightStatesPacket.Serialize(writer, LightStatesPacket);
+				writer.PutLightStatesPacket(LightStatesPacket);
 			}
-			writer.Put(ChangeSightMode);
-			if (ChangeSightMode)
+			writer.Put(ToggleScopeStates);
+			if (ToggleScopeStates)
 			{
-				ScopeStatesPacket.Serialize(writer, ScopeStatesPacket);
+				writer.PutScopeStatesPacket(ScopeStatesPacket);
 			}
 			writer.Put(ToggleLauncher);
 			writer.Put(EnableInventory);
@@ -194,37 +194,37 @@ namespace Fika.Core.Networking
 			writer.Put(HasReloadMagPacket);
 			if (HasReloadMagPacket)
 			{
-				ReloadMagPacket.Serialize(writer, ReloadMagPacket);
+				writer.PutReloadMagPacket(ReloadMagPacket);
 			}
 			writer.Put(HasQuickReloadMagPacket);
 			if (HasQuickReloadMagPacket)
 			{
-				QuickReloadMagPacket.Serialize(writer, QuickReloadMagPacket);
+				writer.PutQuickReloadMagPacket(QuickReloadMagPacket);
 			}
 			writer.Put(HasReloadWithAmmoPacket);
 			if (HasReloadWithAmmoPacket)
 			{
-				ReloadWithAmmoPacket.Serialize(writer, ReloadWithAmmo);
+				writer.PutReloadWithAmmoPacket(ReloadWithAmmoPacket);
 			}
 			writer.Put(HasCylinderMagPacket);
 			if (HasCylinderMagPacket)
 			{
-				CylinderMagPacket.Serialize(writer, CylinderMag);
+				writer.PutCylinderMagPacket(CylinderMagPacket);
 			}
 			writer.Put(HasReloadLauncherPacket);
 			if (HasReloadLauncherPacket)
 			{
-				ReloadLauncherPacket.Serialize(writer, ReloadLauncher);
+				writer.PutReloadLauncherPacket(ReloadLauncherPacket);
 			}
 			writer.Put(HasReloadBarrelsPacket);
 			if (HasReloadBarrelsPacket)
 			{
-				ReloadBarrelsPacket.Serialize(writer, ReloadBarrels);
+				writer.PutReloadBarrelsPacket(ReloadBarrelsPacket);
 			}
 			writer.Put(HasGrenadePacket);
 			if (HasGrenadePacket)
 			{
-				GrenadePacket.Serialize(writer, GrenadePacket);
+				writer.PutGrenadePacket(GrenadePacket);
 			}
 			writer.Put(CancelGrenade);
 			writer.Put(HasCompassChange);
@@ -235,7 +235,7 @@ namespace Fika.Core.Networking
 			writer.Put(HasKnifePacket);
 			if (HasKnifePacket)
 			{
-				KnifePacket.Serialize(writer, KnifePacket);
+				writer.PutKnifePacket(KnifePacket);
 			}
 			writer.Put(HasStanceChange);
 			if (HasStanceChange)
@@ -245,7 +245,7 @@ namespace Fika.Core.Networking
 			writer.Put(HasFlareShot);
 			if (HasFlareShot)
 			{
-				FlareShotPacket.Serialize(writer, FlareShotPacket);
+				writer.PutFlareShotPacket(FlareShotPacket);
 			}
 			writer.Put(ReloadBoltAction);
 			writer.Put(HasRollCylinder);

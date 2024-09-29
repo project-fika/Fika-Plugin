@@ -712,11 +712,11 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			if (packet.PlayerInfo.Profile.ProfileId != myProfileId)
+			if (packet.PlayerInfoPacket.Profile.ProfileId != myProfileId)
 			{
-				coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.PlayerInfo.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-							 packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId, packet.PlayerInfo.ControllerType,
-							 packet.PlayerInfo.ItemId);
+				coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
+							 packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.ControllerType,
+							 packet.PlayerInfoPacket.ItemId);
 			}
 		}
 
@@ -1054,12 +1054,12 @@ namespace Fika.Core.Networking
 
 			if (!packet.IsRequest)
 			{
-				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfo.Profile.ProfileId}, Nickname: {packet.PlayerInfo.Profile.Nickname}");
+				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}");
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
-					coopHandler.QueueProfile(packet.PlayerInfo.Profile, packet.PlayerInfo.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-						packet.PlayerInfo.ControllerId.Value, packet.PlayerInfo.FirstOperationId, packet.PlayerInfo.ControllerType,
-						packet.PlayerInfo.ItemId);
+					coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
+						packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.ControllerType,
+						packet.PlayerInfoPacket.ItemId);
 				}
 			}
 			else if (packet.IsRequest)
@@ -1068,7 +1068,7 @@ namespace Fika.Core.Networking
 				AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
 				{
 					IsRequest = false,
-					PlayerInfo = new(MyPlayer.Profile, MyPlayer.InventoryController.CurrentId, MyPlayer.InventoryController.NextOperationId),
+					PlayerInfoPacket = new(MyPlayer.Profile, MyPlayer.InventoryController.CurrentId, MyPlayer.InventoryController.NextOperationId),
 					IsAlive = MyPlayer.ActiveHealthController.IsAlive,
 					IsAI = MyPlayer.IsAI,
 					Position = MyPlayer.Transform.position,
@@ -1077,14 +1077,14 @@ namespace Fika.Core.Networking
 
 				if (MyPlayer.ActiveHealthController != null)
 				{
-					requestPacket.PlayerInfo.HealthByteArray = MyPlayer.ActiveHealthController.SerializeState();
+					requestPacket.PlayerInfoPacket.HealthByteArray = MyPlayer.ActiveHealthController.SerializeState();
 				}
 
 				if (MyPlayer.HandsController != null)
 				{
-					requestPacket.PlayerInfo.ControllerType = GClass1783.FromController(MyPlayer.HandsController);
-					requestPacket.PlayerInfo.ItemId = MyPlayer.HandsController.Item.Id;
-					requestPacket.PlayerInfo.IsStationary = MyPlayer.MovementContext.IsStationaryWeaponInHands;
+					requestPacket.PlayerInfoPacket.ControllerType = GClass1783.FromController(MyPlayer.HandsController);
+					requestPacket.PlayerInfoPacket.ItemId = MyPlayer.HandsController.Item.Id;
+					requestPacket.PlayerInfoPacket.IsStationary = MyPlayer.MovementContext.IsStationaryWeaponInHands;
 				}
 
 				SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);

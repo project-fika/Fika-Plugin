@@ -1,16 +1,18 @@
 ﻿using Comfort.Common;
+using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
+using EFT.Vaulting;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using UnityEngine;
-using static BasePhysicalClass; // Physical struct
+using static BasePhysicalClass;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
@@ -558,6 +560,11 @@ namespace Fika.Core.Networking
 			};
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="GStruct131"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="grenadeStruct"></param>
 		public static void PutGrenadeStruct(this NetDataWriter writer, in GStruct131 grenadeStruct)
 		{
 			writer.Put(grenadeStruct.Id);
@@ -572,6 +579,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="GStruct131"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="GStruct131"/> with data</returns>
 		public static GStruct131 GetGrenadeStruct(this NetDataReader reader)
 		{
 			GStruct131 grenadeStruct = new()
@@ -592,5 +604,1032 @@ namespace Fika.Core.Networking
 			grenadeStruct.Done = true;
 			return grenadeStruct;
 		}
+
+		/// <summary>
+		/// Serializes a <see cref="PlayerInfoPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutPlayerInfoPacket(this NetDataWriter writer, PlayerInfoPacket packet)
+		{
+			byte[] profileBytes = SimpleZlib.CompressToBytes(packet.Profile.ToJson(), 4, null);
+			writer.PutByteArray(profileBytes);
+			writer.PutByteArray(packet.HealthByteArray);
+			writer.PutMongoID(packet.ControllerId);
+			writer.Put(packet.FirstOperationId);
+			writer.Put((byte)packet.ControllerType);
+			if (packet.ControllerType != EHandsControllerType.None)
+			{
+				writer.Put(packet.ItemId);
+				writer.Put(packet.IsStationary);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="PlayerInfoPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="PlayerInfoPacket"/> with data</returns>
+		public static PlayerInfoPacket GetPlayerInfoPacket(this NetDataReader reader)
+		{
+			byte[] profileBytes = reader.GetByteArray();
+			byte[] healthBytes = reader.GetByteArray();
+			PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>(), reader.GetMongoID(), reader.GetUShort())
+			{
+				HealthByteArray = healthBytes,
+				ControllerType = (EHandsControllerType)reader.GetByte()
+			};
+			if (packet.ControllerType != EHandsControllerType.None)
+			{
+				packet.ItemId = reader.GetString();
+				packet.IsStationary = reader.GetBool();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="LightStatesPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutLightStatesPacket(this NetDataWriter writer, LightStatesPacket packet)
+		{
+			writer.Put(packet.Amount);
+			if (packet.Amount > 0)
+			{
+				for (int i = 0; i < packet.Amount; i++)
+				{
+					writer.Put(packet.LightStates[i].Id);
+					writer.Put(packet.LightStates[i].IsActive);
+					writer.Put(packet.LightStates[i].LightMode);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="LightStatesPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="LightStatesPacket"/> with data</returns>
+		public static LightStatesPacket GetLightStatesPacket(this NetDataReader reader)
+		{
+			LightStatesPacket packet = new()
+			{
+				Amount = reader.GetInt()
+			};
+			if (packet.Amount > 0)
+			{
+				packet.LightStates = new FirearmLightStateStruct[packet.Amount];
+				for (int i = 0; i < packet.Amount; i++)
+				{
+					packet.LightStates[i] = new()
+					{
+						Id = reader.GetString(),
+						IsActive = reader.GetBool(),
+						LightMode = reader.GetInt()
+					};
+				}
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="HeadLightsPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutHeadLightsPacket(this NetDataWriter writer, HeadLightsPacket packet)
+		{
+			writer.Put(packet.Amount);
+			writer.Put(packet.IsSilent);
+			if (packet.Amount > 0)
+			{
+				for (int i = 0; i < packet.Amount; i++)
+				{
+					writer.Put(packet.LightStates[i].Id);
+					writer.Put(packet.LightStates[i].IsActive);
+					writer.Put(packet.LightStates[i].LightMode);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="HeadLightsPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="HeadLightsPacket"/> with data</returns>
+		public static HeadLightsPacket GetHeadLightsPacket(this NetDataReader reader)
+		{
+			HeadLightsPacket packet = new()
+			{
+				Amount = reader.GetInt(),
+				IsSilent = reader.GetBool()
+			};
+			if (packet.Amount > 0)
+			{
+				packet.LightStates = new FirearmLightStateStruct[packet.Amount];
+				for (int i = 0; i < packet.Amount; i++)
+				{
+					packet.LightStates[i] = new()
+					{
+						Id = reader.GetString(),
+						IsActive = reader.GetBool(),
+						LightMode = reader.GetInt()
+					};
+				}
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ScopeStatesPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutScopeStatesPacket(this NetDataWriter writer, ScopeStatesPacket packet)
+		{
+			writer.Put(packet.Amount);
+			if (packet.Amount > 0)
+			{
+				for (int i = 0; i < packet.Amount; i++)
+				{
+					writer.Put(packet.FirearmScopeStateStruct[i].Id);
+					writer.Put(packet.FirearmScopeStateStruct[i].ScopeMode);
+					writer.Put(packet.FirearmScopeStateStruct[i].ScopeIndexInsideSight);
+					writer.Put(packet.FirearmScopeStateStruct[i].ScopeCalibrationIndex);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ScopeStatesPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ScopeStatesPacket"/> with data</returns>
+		public static ScopeStatesPacket GetScopeStatesPacket(this NetDataReader reader)
+		{
+			ScopeStatesPacket packet = new()
+			{
+				Amount = reader.GetInt()
+			};
+			if (packet.Amount > 0)
+			{
+				packet.FirearmScopeStateStruct = new FirearmScopeStateStruct[packet.Amount];
+				for (int i = 0; i < packet.Amount; i++)
+				{
+					packet.FirearmScopeStateStruct[i] = new()
+					{
+						Id = reader.GetString(),
+						ScopeMode = reader.GetInt(),
+						ScopeIndexInsideSight = reader.GetInt(),
+						ScopeCalibrationIndex = reader.GetInt()
+					};
+				}
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ReloadMagPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutReloadMagPacket(this NetDataWriter writer, ReloadMagPacket packet)
+		{
+			writer.Put(packet.Reload);
+			if (packet.Reload)
+			{
+				writer.Put(packet.MagId);
+				writer.PutByteArray(packet.LocationDescription);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ReloadMagPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ReloadMagPacket"/> with data</returns>
+		public static ReloadMagPacket GetReloadMagPacket(this NetDataReader reader)
+		{
+			ReloadMagPacket packet = new()
+			{
+				Reload = reader.GetBool()
+			};
+			if (packet.Reload)
+			{
+				packet.MagId = reader.GetString();
+				packet.LocationDescription = reader.GetByteArray();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="QuickReloadMagPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutQuickReloadMagPacket(this NetDataWriter writer, QuickReloadMagPacket packet)
+		{
+			writer.Put(packet.Reload);
+			if (packet.Reload)
+			{
+				writer.Put(packet.MagId);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="QuickReloadMagPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="QuickReloadMagPacket"/> with data</returns>
+		public static QuickReloadMagPacket GetQuickReloadMagPacket(this NetDataReader reader)
+		{
+			QuickReloadMagPacket packet = new()
+			{
+				Reload = reader.GetBool()
+			};
+			if (packet.Reload)
+			{
+				packet.MagId = reader.GetString();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ReloadWithAmmoPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutReloadWithAmmoPacket(this NetDataWriter writer, ReloadWithAmmoPacket packet)
+		{
+			writer.Put(packet.Reload);
+			if (packet.Reload)
+			{
+				writer.Put((byte)packet.Status);
+				if (packet.Status == EReloadWithAmmoStatus.StartReload)
+				{
+					writer.PutArray(packet.AmmoIds);
+				}
+				if (packet.AmmoLoadedToMag > 0)
+				{
+					writer.Put(packet.AmmoLoadedToMag);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ReloadWithAmmoPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ReloadWithAmmoPacket"/> with data</returns>
+		public static ReloadWithAmmoPacket GetReloadWithAmmoPacket(this NetDataReader reader)
+		{
+			ReloadWithAmmoPacket packet = new()
+			{
+				Reload = reader.GetBool()
+			};
+			if (packet.Reload)
+			{
+				packet.Status = (EReloadWithAmmoStatus)reader.GetByte();
+				if (packet.Status == EReloadWithAmmoStatus.StartReload)
+				{
+					packet.AmmoIds = reader.GetStringArray();
+				}
+				if (packet.Status is EReloadWithAmmoStatus.EndReload or EReloadWithAmmoStatus.AbortReload)
+				{
+					packet.AmmoLoadedToMag = reader.GetInt();
+				}
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="CylinderMagPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutCylinderMagPacket(this NetDataWriter writer, CylinderMagPacket packet)
+		{
+			writer.Put(packet.Changed);
+			if (packet.Changed)
+			{
+				writer.Put(packet.CamoraIndex);
+				writer.Put(packet.HammerClosed);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="CylinderMagPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="CylinderMagPacket"/> with data</returns>
+		public static CylinderMagPacket GetCylinderMagPacket(this NetDataReader reader)
+		{
+			CylinderMagPacket packet = new()
+			{
+				Changed = reader.GetBool()
+			};
+			if (packet.Changed)
+			{
+				packet.CamoraIndex = reader.GetInt();
+				packet.HammerClosed = reader.GetBool();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ReloadLauncherPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutReloadLauncherPacket(this NetDataWriter writer, ReloadLauncherPacket packet)
+		{
+			writer.Put(packet.Reload);
+			if (packet.Reload)
+			{
+				writer.PutArray(packet.AmmoIds);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ReloadLauncherPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ReloadLauncherPacket"/> with data</returns>
+		public static ReloadLauncherPacket GetReloadLauncherPacket(this NetDataReader reader)
+		{
+			ReloadLauncherPacket packet = new()
+			{
+				Reload = reader.GetBool()
+			};
+			if (packet.Reload)
+			{
+				packet.AmmoIds = reader.GetStringArray();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ReloadBarrelsPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutReloadBarrelsPacket(this NetDataWriter writer, ReloadBarrelsPacket packet)
+		{
+			writer.Put(packet.Reload);
+			if (packet.Reload)
+			{
+				writer.PutArray(packet.AmmoIds);
+				writer.PutByteArray(packet.LocationDescription);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ReloadBarrelsPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ReloadBarrelsPacket"/> with data</returns>
+		public static ReloadBarrelsPacket GetReloadBarrelsPacket(this NetDataReader reader)
+		{
+			ReloadBarrelsPacket packet = new()
+			{
+				Reload = reader.GetBool()
+			};
+			if (packet.Reload)
+			{
+				packet.AmmoIds = reader.GetStringArray();
+				packet.LocationDescription = reader.GetByteArray();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="GrenadePacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutGrenadePacket(this NetDataWriter writer, GrenadePacket packet)
+		{
+			writer.Put((int)packet.PacketType);
+			writer.Put(packet.HasGrenade);
+			if (packet.HasGrenade)
+			{
+				writer.Put(packet.GrenadeRotation);
+				writer.Put(packet.GrenadePosition);
+				writer.Put(packet.ThrowForce);
+				writer.Put(packet.LowThrow);
+			}
+			writer.Put(packet.PlantTripwire);
+			writer.Put(packet.ChangeToIdle);
+			writer.Put(packet.ChangeToPlant);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="GrenadePacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="GrenadePacket"/> with data</returns>
+		public static GrenadePacket GetGrenadePacket(this NetDataReader reader)
+		{
+			GrenadePacket packet = new()
+			{
+				PacketType = (GrenadePacketType)reader.GetInt(),
+				HasGrenade = reader.GetBool()
+			};
+			if (packet.HasGrenade)
+			{
+				packet.GrenadeRotation = reader.GetQuaternion();
+				packet.GrenadePosition = reader.GetVector3();
+				packet.ThrowForce = reader.GetVector3();
+				packet.LowThrow = reader.GetBool();
+			}
+			packet.PlantTripwire = reader.GetBool();
+			packet.ChangeToIdle = reader.GetBool();
+			packet.ChangeToPlant = reader.GetBool();
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ItemControllerExecutePacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutItemControllerExecutePacket(this NetDataWriter writer, ItemControllerExecutePacket packet)
+		{
+			writer.Put(packet.CallbackId);
+			writer.PutByteArray(packet.OperationBytes);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ItemControllerExecutePacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ItemControllerExecutePacket"/> with data</returns>
+		public static ItemControllerExecutePacket GetItemControllerExecutePacket(this NetDataReader reader)
+		{
+			ItemControllerExecutePacket packet = new()
+			{
+				CallbackId = reader.GetUInt(),
+				OperationBytes = reader.GetByteArray()
+			};
+			return packet;
+		}
+
+
+		/// <summary>
+		/// Serializes a <see cref="WorldInteractionPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutWorldInteractionPacket(this NetDataWriter writer, WorldInteractionPacket packet)
+		{
+			writer.Put(packet.InteractiveId);
+			writer.Put((byte)packet.InteractionType);
+			writer.Put((byte)packet.InteractionStage);
+			if (packet.InteractionType == EInteractionType.Unlock)
+			{
+				writer.Put(packet.ItemId);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="WorldInteractionPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="WorldInteractionPacket"/> with data</returns>
+		public static WorldInteractionPacket GetWorldInteractionPacket(this NetDataReader reader)
+		{
+			WorldInteractionPacket packet = new()
+			{
+				InteractiveId = reader.GetString(),
+				InteractionType = (EInteractionType)reader.GetByte(),
+				InteractionStage = (EInteractionStage)reader.GetByte(),
+			};
+			if (packet.InteractionType == EInteractionType.Unlock)
+			{
+				packet.ItemId = reader.GetString();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ContainerInteractionPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutContainerInteractionPacket(this NetDataWriter writer, ContainerInteractionPacket packet)
+		{
+			writer.Put(packet.InteractiveId);
+			writer.Put((int)packet.InteractionType);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ContainerInteractionPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ContainerInteractionPacket"/> with data</returns>
+		public static ContainerInteractionPacket GetContainerInteractionPacket(this NetDataReader reader)
+		{
+			ContainerInteractionPacket packet = new()
+			{
+				InteractiveId = reader.GetString(),
+				InteractionType = (EInteractionType)reader.GetInt()
+			};
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ProceedPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutProceedPacket(this NetDataWriter writer, ProceedPacket packet)
+		{
+			writer.Put((int)packet.ProceedType);
+			writer.Put(packet.ItemId);
+			writer.Put(packet.Amount);
+			writer.Put(packet.AnimationVariant);
+			writer.Put(packet.Scheduled);
+			writer.Put((int)packet.BodyPart);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ProceedPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ProceedPacket"/> with data</returns>
+		public static ProceedPacket GetProceedPacket(this NetDataReader reader)
+		{
+			return new ProceedPacket
+			{
+				ProceedType = (EProceedType)reader.GetInt(),
+				ItemId = reader.GetString(),
+				Amount = reader.GetFloat(),
+				AnimationVariant = reader.GetInt(),
+				Scheduled = reader.GetBool(),
+				BodyPart = (EBodyPart)reader.GetInt()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="DropPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutDropPacket(this NetDataWriter writer, DropPacket packet)
+		{
+			writer.Put(packet.FastDrop);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="DropPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="DropPacket"/>with data</returns>
+		public static DropPacket GetDropPacket(this NetDataReader reader)
+		{
+			return new DropPacket
+			{
+				FastDrop = reader.GetBool()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="StationaryPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutStationaryPacket(this NetDataWriter writer, StationaryPacket packet)
+		{
+			writer.Put((byte)packet.Command);
+			if (packet.Command == EStationaryCommand.Occupy && !string.IsNullOrEmpty(packet.Id))
+			{
+				writer.Put(packet.Id);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="StationaryPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="StationaryPacket"/> with data</returns>
+		public static StationaryPacket GetStationaryPacket(this NetDataReader reader)
+		{
+			StationaryPacket packet = new()
+			{
+				Command = (EStationaryCommand)reader.GetByte()
+			};
+
+			if (packet.Command == EStationaryCommand.Occupy)
+			{
+				packet.Id = reader.GetString();
+			}
+
+			return packet;
+		}		
+
+		/// <summary>
+		/// Serializes a <see cref="KnifePacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutKnifePacket(this NetDataWriter writer, KnifePacket packet)
+		{
+			writer.Put(packet.Examine);
+			writer.Put(packet.Kick);
+			writer.Put(packet.AltKick);
+			writer.Put(packet.BreakCombo);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="KnifePacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="KnifePacket"/> with data</returns>
+		public static KnifePacket GetKnifePacket(this NetDataReader reader)
+		{
+			return new KnifePacket()
+			{
+				Examine = reader.GetBool(),
+				Kick = reader.GetBool(),
+				AltKick = reader.GetBool(),
+				BreakCombo = reader.GetBool()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="ShotInfoPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutShotInfoPacket(this NetDataWriter writer, ShotInfoPacket packet)
+		{
+			writer.Put((int)packet.ShotType);
+			writer.Put(packet.ShotPosition);
+			writer.Put(packet.ShotDirection);
+			writer.Put(packet.ChamberIndex);
+			writer.Put(packet.Overheat);
+			writer.Put(packet.UnderbarrelShot);
+			writer.Put(packet.AmmoTemplate);
+			writer.Put(packet.LastShotOverheat);
+			writer.Put(packet.LastShotTime);
+			writer.Put(packet.SlideOnOverheatReached);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="ShotInfoPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="ShotInfoPacket"/> with data</returns>
+		public static ShotInfoPacket GetShotInfoPacket(this NetDataReader reader)
+		{
+			ShotInfoPacket packet = new()
+			{
+				ShotType = (EShotType)reader.GetInt(),
+				ShotPosition = reader.GetVector3(),
+				ShotDirection = reader.GetVector3(),
+				ChamberIndex = reader.GetInt(),
+				Overheat = reader.GetFloat(),
+				UnderbarrelShot = reader.GetBool(),
+				AmmoTemplate = reader.GetString(),
+				LastShotOverheat = reader.GetFloat(),
+				LastShotTime = reader.GetFloat(),
+				SlideOnOverheatReached = reader.GetBool()
+			};
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="WeatherClass"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="weatherClass"></param>
+		public static void PutWeatherClass(this NetDataWriter writer, WeatherClass weatherClass)
+		{
+			writer.Put(weatherClass.AtmospherePressure);
+			writer.Put(weatherClass.Cloudness);
+			writer.Put(weatherClass.GlobalFogDensity);
+			writer.Put(weatherClass.GlobalFogHeight);
+			writer.Put(weatherClass.LyingWater);
+			writer.Put(weatherClass.MainWindDirection);
+			writer.Put(weatherClass.MainWindPosition);
+			writer.Put(weatherClass.Rain);
+			writer.Put(weatherClass.RainRandomness);
+			writer.Put(weatherClass.ScaterringFogDensity);
+			writer.Put(weatherClass.ScaterringFogHeight);
+			writer.Put(weatherClass.Temperature);
+			writer.Put(weatherClass.Time);
+			writer.Put(weatherClass.TopWindDirection);
+			writer.Put(weatherClass.TopWindPosition);
+			writer.Put(weatherClass.Turbulence);
+			writer.Put(weatherClass.Wind);
+			writer.Put(weatherClass.WindDirection);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="WeatherClass"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="WeatherClass"/> with data</returns>
+		public static WeatherClass GetWeatherClass(this NetDataReader reader)
+		{
+			return new WeatherClass()
+			{
+				AtmospherePressure = reader.GetFloat(),
+				Cloudness = reader.GetFloat(),
+				GlobalFogDensity = reader.GetFloat(),
+				GlobalFogHeight = reader.GetFloat(),
+				LyingWater = reader.GetFloat(),
+				MainWindDirection = reader.GetVector2(),
+				MainWindPosition = reader.GetVector2(),
+				Rain = reader.GetFloat(),
+				RainRandomness = reader.GetFloat(),
+				ScaterringFogDensity = reader.GetFloat(),
+				ScaterringFogHeight = reader.GetFloat(),
+				Temperature = reader.GetFloat(),
+				Time = reader.GetLong(),
+				TopWindDirection = reader.GetVector2(),
+				TopWindPosition = reader.GetVector2(),
+				Turbulence = reader.GetFloat(),
+				Wind = reader.GetFloat(),
+				WindDirection = reader.GetInt()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="FlareShotPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutFlareShotPacket(this NetDataWriter writer, FlareShotPacket packet)
+		{
+			writer.Put(packet.StartOneShotFire);
+			if (!packet.StartOneShotFire)
+			{
+				writer.Put(packet.ShotPosition);
+				writer.Put(packet.ShotForward);
+				writer.Put(packet.AmmoTemplateId);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="FlareShotPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="FlareShotPacket"/> with data</returns>
+		public static FlareShotPacket GetFlareShotPacket(this NetDataReader reader)
+		{
+			FlareShotPacket packet = new()
+			{
+				StartOneShotFire = reader.GetBool()
+			};
+			if (!packet.StartOneShotFire)
+			{
+				packet.ShotPosition = reader.GetVector3();
+				packet.ShotForward = reader.GetVector3();
+				packet.AmmoTemplateId = reader.GetString();
+			}
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="VaultPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutVaultPacket(this NetDataWriter writer, VaultPacket packet)
+		{
+			writer.Put((byte)packet.VaultingStrategy);
+			writer.Put(packet.VaultingPoint);
+			writer.Put(packet.VaultingHeight);
+			writer.Put(packet.VaultingLength);
+			writer.Put(packet.VaultingSpeed);
+			writer.Put(packet.BehindObstacleHeight);
+			writer.Put(packet.AbsoluteForwardVelocity);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="VaultPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="VaultPacket"/> with data</returns>
+		public static VaultPacket GetVaultPacket(this NetDataReader reader)
+		{
+			return new VaultPacket()
+			{
+				VaultingStrategy = (EVaultingStrategy)reader.GetByte(),
+				VaultingPoint = reader.GetVector3(),
+				VaultingHeight = reader.GetFloat(),
+				VaultingLength = reader.GetFloat(),
+				VaultingSpeed = reader.GetFloat(),
+				BehindObstacleHeight = reader.GetFloat(),
+				AbsoluteForwardVelocity = reader.GetFloat()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="BTRDataPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutBTRDataPacket(this NetDataWriter writer, BTRDataPacket packet)
+		{
+			writer.Put(packet.position);
+			writer.Put(packet.BtrBotId);
+			writer.Put(packet.MoveSpeed);
+			writer.Put(packet.moveDirection);
+			writer.Put(packet.timeToEndPause);
+			writer.Put(packet.currentSpeed);
+			writer.Put(packet.RightSlot1State);
+			writer.Put(packet.RightSlot0State);
+			writer.Put(packet.RightSideState);
+			writer.Put(packet.LeftSlot1State);
+			writer.Put(packet.LeftSlot0State);
+			writer.Put(packet.LeftSideState);
+			writer.Put(packet.RouteState);
+			writer.Put(packet.State);
+			writer.Put(packet.gunsBlockRotation);
+			writer.Put(packet.turretRotation);
+			writer.Put(packet.rotation);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="BTRDataPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="BTRDataPacket"/> with data</returns>
+		public static BTRDataPacket GetBTRDataPacket(this NetDataReader reader)
+		{
+			return new()
+			{
+				position = reader.GetVector3(),
+				BtrBotId = reader.GetInt(),
+				MoveSpeed = reader.GetFloat(),
+				moveDirection = reader.GetByte(),
+				timeToEndPause = reader.GetFloat(),
+				currentSpeed = reader.GetFloat(),
+				RightSlot1State = reader.GetByte(),
+				RightSlot0State = reader.GetByte(),
+				RightSideState = reader.GetByte(),
+				LeftSlot1State = reader.GetByte(),
+				LeftSlot0State = reader.GetByte(),
+				LeftSideState = reader.GetByte(),
+				RouteState = reader.GetByte(),
+				State = reader.GetByte(),
+				gunsBlockRotation = reader.GetFloat(),
+				turretRotation = reader.GetFloat(),
+				rotation = reader.GetQuaternion()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="CorpseSyncPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPacket packet)
+		{
+			writer.Put((int)packet.BodyPartColliderType);
+			writer.Put(packet.Direction);
+			writer.Put(packet.Point);
+			writer.Put(packet.Force);
+			writer.Put(packet.OverallVelocity);
+			writer.PutItem(packet.Equipment);
+			writer.Put((byte)packet.ItemSlot);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="CorpseSyncPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="CorpseSyncPacket"/> with data</returns>
+		public static CorpseSyncPacket GetCorpseSyncPacket(this NetDataReader reader)
+		{
+			return new CorpseSyncPacket()
+			{
+				BodyPartColliderType = (EBodyPartColliderType)reader.GetInt(),
+				Direction = reader.GetVector3(),
+				Point = reader.GetVector3(),
+				Force = reader.GetFloat(),
+				OverallVelocity = reader.GetVector3(),
+				Equipment = (InventoryEquipment)reader.GetItem(),
+				ItemSlot = (EquipmentSlot)reader.GetByte()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="DeathInfoPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutDeathInfoPacket(this NetDataWriter writer, DeathInfoPacket packet)
+		{
+			writer.Put(packet.AccountId);
+			writer.Put(packet.ProfileId);
+			writer.Put(packet.Nickname);
+			writer.Put(packet.KillerAccountId);
+			writer.Put(packet.KillerProfileId);
+			writer.Put(packet.KillerName);
+			writer.Put((byte)packet.Side);
+			writer.Put(packet.Level);
+			writer.Put(packet.Time);
+			writer.Put(packet.Status);
+			writer.Put(packet.WeaponName);
+			writer.Put(packet.GroupId);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="DeathInfoPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="DeathInfoPacket"/> with data</returns>
+		public static DeathInfoPacket GetDeathInfoPacket(this NetDataReader reader)
+		{
+			return new()
+			{
+				AccountId = reader.GetString(),
+				ProfileId = reader.GetString(),
+				Nickname = reader.GetString(),
+				KillerAccountId = reader.GetString(),
+				KillerProfileId = reader.GetString(),
+				KillerName = reader.GetString(),
+				Side = (EPlayerSide)reader.GetByte(),
+				Level = reader.GetInt(),
+				Time = reader.GetDateTime(),
+				Status = reader.GetString(),
+				WeaponName = reader.GetString(),
+				GroupId = reader.GetString()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="MountingPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutMountingPacket(this NetDataWriter writer, MountingPacket packet)
+		{
+			writer.Put((byte)packet.Command);
+			if (packet.Command == GStruct179.EMountingCommand.Update)
+			{
+				writer.Put(packet.CurrentMountingPointVerticalOffset);
+			}
+			if (packet.Command is GStruct179.EMountingCommand.Enter or GStruct179.EMountingCommand.Exit)
+			{
+				writer.Put(packet.IsMounted);
+			}
+			if (packet.Command == GStruct179.EMountingCommand.Enter)
+			{
+				writer.Put(packet.MountDirection);
+				writer.Put(packet.MountingPoint);
+				writer.Put(packet.MountingDirection);
+				writer.Put(packet.TransitionTime);
+				writer.Put(packet.TargetPos);
+				writer.Put(packet.TargetPoseLevel);
+				writer.Put(packet.TargetHandsRotation);
+				writer.Put(packet.TargetBodyRotation);
+				writer.Put(packet.PoseLimit);
+				writer.Put(packet.PitchLimit);
+				writer.Put(packet.YawLimit);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="MountingPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="MountingPacket"/> with data</returns>
+		public static MountingPacket GetMountingPacket(this NetDataReader reader)
+		{
+			MountingPacket packet = new()
+			{
+				Command = (GStruct179.EMountingCommand)reader.GetByte()
+			};
+			if (packet.Command == GStruct179.EMountingCommand.Update)
+			{
+				packet.CurrentMountingPointVerticalOffset = reader.GetFloat();
+			}
+			if (packet.Command is GStruct179.EMountingCommand.Enter or GStruct179.EMountingCommand.Exit)
+			{
+				packet.IsMounted = reader.GetBool();
+			};
+			if (packet.Command == GStruct179.EMountingCommand.Enter)
+			{
+				packet.MountDirection = reader.GetVector3();
+				packet.MountingPoint = reader.GetVector3();
+				packet.MountingDirection = reader.GetShort();
+				packet.TransitionTime = reader.GetFloat();
+				packet.TargetPos = reader.GetVector3();
+				packet.TargetPoseLevel = reader.GetFloat();
+				packet.TargetHandsRotation = reader.GetFloat();
+				packet.TargetBodyRotation = reader.GetQuaternion();
+				packet.PoseLimit = reader.GetVector2();
+				packet.PitchLimit = reader.GetVector2();
+				packet.YawLimit = reader.GetVector2();
+			}
+			return packet;
+		}
+
+
 	}
 }

@@ -189,8 +189,6 @@ namespace Fika.Core.Coop.GameMode
 				coopGame.SetupCustomWeather(timeAndWeather);
 			}
 
-			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
-
 			SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
 			coopGame.func_1 = setupGamePlayerOwnerHandler.HandleSetup;
 
@@ -467,7 +465,7 @@ namespace Fika.Core.Coop.GameMode
 			MongoID mongoId = MongoID.Generate(true);
 			ushort nextOperationId = 0;
 			SendCharacterPacket packet = new(new(profile, mongoId, nextOperationId), true, true, position, netId);
-			packet.PlayerInfo.HealthByteArray = profile.Health.SerializeHealthInfo();
+			packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
 			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 
 			if (server.NetServer.ConnectedPeersCount > 0)
@@ -944,14 +942,14 @@ namespace Fika.Core.Coop.GameMode
 
 				if (coopPlayer.ActiveHealthController != null)
 				{
-					packet.PlayerInfo.HealthByteArray = coopPlayer.ActiveHealthController.SerializeState();
+					packet.PlayerInfoPacket.HealthByteArray = coopPlayer.ActiveHealthController.SerializeState();
 				}
 
 				if (coopPlayer.HandsController != null)
 				{
-					packet.PlayerInfo.ControllerType = GClass1783.FromController(coopPlayer.HandsController);
-					packet.PlayerInfo.ItemId = coopPlayer.HandsController.Item.Id;
-					packet.PlayerInfo.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
+					packet.PlayerInfoPacket.ControllerType = GClass1783.FromController(coopPlayer.HandsController);
+					packet.PlayerInfoPacket.ItemId = coopPlayer.HandsController.Item.Id;
+					packet.PlayerInfoPacket.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
 				}
 
 				do
@@ -1461,7 +1459,7 @@ namespace Fika.Core.Coop.GameMode
 			Logger.LogInfo($"Location: {Location_0.Name}");
 			BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
 
-			if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
+			/*if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
 				instance.ArtilleryShelling.ArtilleryMapsConfigs.Keys.Contains(Location_0.Id))
 			{
 				if (isServer)
@@ -1469,7 +1467,7 @@ namespace Fika.Core.Coop.GameMode
 					Singleton<GameWorld>.Instance.ServerShellingController = new GClass596();
 				}
 				Singleton<GameWorld>.Instance.ClientShellingController = new GClass1356(isServer);
-			}
+			}*/
 
 			if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
 			{
@@ -1518,7 +1516,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (WeatherController.Instance != null)
 			{
-				if (isServer)
+				if (isServer && !OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
 				{
 					LocalGame.Class1474 weatherHandler = new()
 					{
@@ -1538,6 +1536,8 @@ namespace Fika.Core.Coop.GameMode
 					WeatherController.Instance.method_0(WeatherClasses);
 				} 
 			}
+
+			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
 			ESeason season = iSession.Season;
 			Class428 seasonHandler = new();

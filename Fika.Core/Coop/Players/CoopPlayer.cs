@@ -28,14 +28,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Coop.Players
 {
-	/// <summary>
-	/// <see cref="CoopPlayer"/> is the <see cref="LocalPlayer"/>, there can only be one <see cref="CoopPlayer"/> in every game and that is always yourself.
-	/// </summary>
-	public class CoopPlayer : LocalPlayer
+    /// <summary>
+    /// <see cref="CoopPlayer"/> is the <see cref="LocalPlayer"/>, there can only be one <see cref="CoopPlayer"/> in every game and that is always yourself.
+    /// </summary>
+    public class CoopPlayer : LocalPlayer
 	{
 		#region Fields and Properties
 		public PacketReceiver PacketReceiver;
@@ -553,7 +553,7 @@ namespace Fika.Core.Coop.Players
 				HasStationaryPacket = true,
 				StationaryPacket = new()
 				{
-					Command = (StationaryPacket.EStationaryCommand)command,
+					Command = (EStationaryCommand)command,
 					Id = stationaryWeapon.Id
 				}
 			});
@@ -1055,7 +1055,7 @@ namespace Fika.Core.Coop.Players
 
 			if (packet.HasStationaryPacket)
 			{
-				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy)
+				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == EStationaryCommand.Occupy)
 					? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
 				ObservedStationaryInteract(stationaryWeapon, (GStruct177.EStationaryCommand)packet.StationaryPacket.Command);
 			}
@@ -1204,27 +1204,27 @@ namespace Fika.Core.Coop.Players
 				{
 					switch (packet.GrenadePacket.PacketType)
 					{
-						case GrenadePacket.GrenadePacketType.ExamineWeapon:
+						case GrenadePacketType.ExamineWeapon:
 							{
 								grenadeController.ExamineWeapon();
 								break;
 							}
-						case GrenadePacket.GrenadePacketType.HighThrow:
+						case GrenadePacketType.HighThrow:
 							{
 								grenadeController.HighThrow();
 								break;
 							}
-						case GrenadePacket.GrenadePacketType.LowThrow:
+						case GrenadePacketType.LowThrow:
 							{
 								grenadeController.LowThrow();
 								break;
 							}
-						case GrenadePacket.GrenadePacketType.PullRingForHighThrow:
+						case GrenadePacketType.PullRingForHighThrow:
 							{
 								grenadeController.PullRingForHighThrow();
 								break;
 							}
-						case GrenadePacket.GrenadePacketType.PullRingForLowThrow:
+						case GrenadePacketType.PullRingForLowThrow:
 							{
 								grenadeController.PullRingForLowThrow();
 								break;

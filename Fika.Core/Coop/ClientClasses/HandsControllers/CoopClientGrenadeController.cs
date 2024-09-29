@@ -4,13 +4,13 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using System;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	internal class CoopClientGrenadeController : Player.GrenadeHandsController
+    internal class CoopClientGrenadeController : Player.GrenadeHandsController
 	{
 		protected CoopPlayer player;
 
@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HasGrenadePacket = true,
 				GrenadePacket = new()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.ExamineWeapon
+					PacketType = SubPackets.GrenadePacketType.ExamineWeapon
 				}
 			});
 			base.ExamineWeapon();
@@ -41,7 +41,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HasGrenadePacket = true,
 				GrenadePacket = new()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.HighThrow
+					PacketType = SubPackets.GrenadePacketType.HighThrow
 				}
 			});
 			base.HighThrow();
@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HasGrenadePacket = true,
 				GrenadePacket = new()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.LowThrow
+					PacketType = SubPackets.GrenadePacketType.LowThrow
 				}
 			});
 			base.LowThrow();
@@ -67,7 +67,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HasGrenadePacket = true,
 				GrenadePacket = new()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.PullRingForHighThrow
+					PacketType = SubPackets.GrenadePacketType.PullRingForHighThrow
 				}
 			});
 			base.PullRingForHighThrow();
@@ -80,7 +80,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HasGrenadePacket = true,
 				GrenadePacket = new()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.PullRingForLowThrow
+					PacketType = SubPackets.GrenadePacketType.PullRingForLowThrow
 				}
 			});
 			base.PullRingForLowThrow();
@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.ClientClasses
 				HasGrenadePacket = true,
 				GrenadePacket = new()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.None,
+					PacketType = SubPackets	.GrenadePacketType.None,
 					HasGrenade = true,
 					GrenadeRotation = rotation,
 					GrenadePosition = position,

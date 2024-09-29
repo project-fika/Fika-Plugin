@@ -1,10 +1,10 @@
 ﻿using EFT;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
-	public struct HealthSyncPacket(int netId) : INetSerializable
+    public struct HealthSyncPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
 		public GStruct358 Packet;
@@ -134,7 +134,7 @@ namespace Fika.Core.Networking
 						{
 							packet.Data.IsAlive.DamageType = (EDamageType)reader.GetInt();
 							KillerId = reader.GetString();
-							CorpseSyncPacket = CorpseSyncPacket.Deserialize(reader);
+							CorpseSyncPacket = reader.GetCorpseSyncPacket();
 							TriggerZones = reader.GetStringArray();
 							break;
 						}
@@ -344,7 +344,7 @@ namespace Fika.Core.Networking
 						{
 							writer.Put((int)packet.IsAlive.DamageType);
 							writer.Put(KillerId);
-							CorpseSyncPacket.Serialize(writer, CorpseSyncPacket);
+							writer.PutCorpseSyncPacket(CorpseSyncPacket);
 							writer.PutArray(TriggerZones);
 							break;
 						}

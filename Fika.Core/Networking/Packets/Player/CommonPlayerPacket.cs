@@ -1,9 +1,9 @@
 ﻿using LiteNetLib.Utils;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
-	public struct CommonPlayerPacket(int netId) : INetSerializable
+    public struct CommonPlayerPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
 		public EPhraseTrigger Phrase = EPhraseTrigger.PhraseNone;
@@ -39,22 +39,22 @@ namespace Fika.Core.Networking
 			HasWorldInteractionPacket = reader.GetBool();
 			if (HasWorldInteractionPacket)
 			{
-				WorldInteractionPacket = WorldInteractionPacket.Deserialize(reader);
+				WorldInteractionPacket = reader.GetWorldInteractionPacket();
 			}
 			HasContainerInteractionPacket = reader.GetBool();
 			if (HasContainerInteractionPacket)
 			{
-				ContainerInteractionPacket = ContainerInteractionPacket.Deserialize(reader);
+				ContainerInteractionPacket = reader.GetContainerInteractionPacket();
 			}
 			HasProceedPacket = reader.GetBool();
 			if (HasProceedPacket)
 			{
-				ProceedPacket = ProceedPacket.Deserialize(reader);
+				ProceedPacket = reader.GetProceedPacket();
 			}
 			HasHeadLightsPacket = reader.GetBool();
 			if (HasHeadLightsPacket)
 			{
-				HeadLightsPacket = HeadLightsPacket.Deserialize(reader);
+				HeadLightsPacket = reader.GetHeadLightsPacket();
 			}
 			HasInventoryChanged = reader.GetBool();
 			if (HasInventoryChanged)
@@ -64,23 +64,23 @@ namespace Fika.Core.Networking
 			HasDrop = reader.GetBool();
 			if (HasDrop)
 			{
-				DropPacket = DropPacket.Deserialize(reader);
+				DropPacket = reader.GetDropPacket();
 			}
 			HasStationaryPacket = reader.GetBool();
 			if (HasStationaryPacket)
 			{
-				StationaryPacket = StationaryPacket.Deserialize(reader);
+				StationaryPacket = reader.GetStationaryPacket();
 			}
 			HasVaultPacket = reader.GetBool();
 			if (HasVaultPacket)
 			{
-				VaultPacket = VaultPacket.Deserialize(reader);
+				VaultPacket = reader.GetVaultPacket();
 			}
 			Interaction = (EInteraction)reader.GetByte();
 			HasMountingPacket = reader.GetBool();
 			if (HasMountingPacket)
 			{
-				MountingPacket = MountingPacket.Deserialize(reader);
+				MountingPacket = reader.GetMountingPacket();
 			}
 		}
 
@@ -95,22 +95,22 @@ namespace Fika.Core.Networking
 			writer.Put(HasWorldInteractionPacket);
 			if (HasWorldInteractionPacket)
 			{
-				WorldInteractionPacket.Serialize(writer, WorldInteractionPacket);
+				writer.PutWorldInteractionPacket(WorldInteractionPacket);
 			}
 			writer.Put(HasContainerInteractionPacket);
 			if (HasContainerInteractionPacket)
 			{
-				ContainerInteractionPacket.Serialize(writer, ContainerInteractionPacket);
+				writer.PutContainerInteractionPacket(ContainerInteractionPacket);
 			}
 			writer.Put(HasProceedPacket);
 			if (HasProceedPacket)
 			{
-				ProceedPacket.Serialize(writer, ProceedPacket);
+				writer.PutProceedPacket(ProceedPacket);
 			}
 			writer.Put(HasHeadLightsPacket);
 			if (HasHeadLightsPacket)
 			{
-				HeadLightsPacket.Serialize(writer, HeadLightsPacket);
+				writer.PutHeadLightsPacket(HeadLightsPacket);
 			}
 			writer.Put(HasInventoryChanged);
 			if (HasInventoryChanged)
@@ -120,23 +120,23 @@ namespace Fika.Core.Networking
 			writer.Put(HasDrop);
 			if (HasDrop)
 			{
-				DropPacket.Serialize(writer, DropPacket);
+				writer.PutDropPacket(DropPacket);
 			}
 			writer.Put(HasStationaryPacket);
 			if (HasStationaryPacket)
 			{
-				StationaryPacket.Serialize(writer, StationaryPacket);
+				writer.PutStationaryPacket(StationaryPacket);
 			}
 			writer.Put(HasVaultPacket);
 			if (HasVaultPacket)
 			{
-				VaultPacket.Serialize(writer, VaultPacket);
+				writer.PutVaultPacket(VaultPacket);
 			}
 			writer.Put((byte)Interaction);
 			writer.Put(HasMountingPacket);
 			if (HasMountingPacket)
 			{
-				MountingPacket.Serialize(writer, MountingPacket);
+				writer.PutMountingPacket(MountingPacket);
 			}
 		}
 	}

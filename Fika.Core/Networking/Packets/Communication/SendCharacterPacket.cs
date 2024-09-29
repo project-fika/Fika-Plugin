@@ -1,12 +1,12 @@
 ﻿using LiteNetLib.Utils;
 using UnityEngine;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
-	public struct SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId) : INetSerializable
+    public struct SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId) : INetSerializable
 	{
-		public PlayerInfoPacket PlayerInfo = playerInfoPacket;
+		public PlayerInfoPacket PlayerInfoPacket = playerInfoPacket;
 		public bool IsAlive = isAlive;
 		public bool IsAI = isAi;
 		public Vector3 Position = position;
@@ -14,7 +14,7 @@ namespace Fika.Core.Networking
 
 		public void Deserialize(NetDataReader reader)
 		{
-			PlayerInfo = PlayerInfoPacket.Deserialize(reader);
+			PlayerInfoPacket = reader.GetPlayerInfoPacket();
 			IsAlive = reader.GetBool();
 			IsAI = reader.GetBool();
 			Position = reader.GetVector3();
@@ -23,7 +23,7 @@ namespace Fika.Core.Networking
 
 		public void Serialize(NetDataWriter writer)
 		{
-			PlayerInfoPacket.Serialize(writer, PlayerInfo);
+			writer.PutPlayerInfoPacket(PlayerInfoPacket);
 			writer.Put(IsAlive);
 			writer.Put(IsAI);
 			writer.Put(Position);

@@ -5,6 +5,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -15,7 +16,7 @@ using static EFT.Player.GrenadeHandsController;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public class CoopObservedFirearmController : FirearmController
+    public class CoopObservedFirearmController : FirearmController
 	{
 		public CoopPlayer coopPlayer;
 		bool triggerPressed = false;
@@ -311,12 +312,12 @@ namespace Fika.Core.Coop.ObservedClasses
 				CheckFireMode();
 			}
 
-			if (packet.ToggleTacticalCombo)
+			if (packet.ToggleLightStates)
 			{
 				SetLightsState(packet.LightStatesPacket.LightStates, true);
 			}
 
-			if (packet.ChangeSightMode)
+			if (packet.ToggleScopeStates)
 			{
 				SetScopeMode(packet.ScopeStatesPacket.FirearmScopeStateStruct);
 			}
@@ -420,16 +421,16 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (packet.HasReloadWithAmmoPacket)
 			{
-				if (packet.ReloadWithAmmo.Status == FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.AbortReload)
+				if (packet.ReloadWithAmmoPacket.Status == SubPackets.EReloadWithAmmoStatus.AbortReload)
 				{
 					CurrentOperation.SetTriggerPressed(true);
 				}
 
-				if (packet.ReloadWithAmmo.Reload)
+				if (packet.ReloadWithAmmoPacket.Reload)
 				{
-					if (packet.ReloadWithAmmo.Status == FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.StartReload)
+					if (packet.ReloadWithAmmoPacket.Status == SubPackets.EReloadWithAmmoStatus.StartReload)
 					{
-						List<BulletClass> bullets = FindAmmoByIds(packet.ReloadWithAmmo.AmmoIds);
+						List<BulletClass> bullets = FindAmmoByIds(packet.ReloadWithAmmoPacket.AmmoIds);
 						AmmoPackReloadingClass ammoPack = new(bullets);
 						if (!packet.HasCylinderMagPacket)
 						{
@@ -441,10 +442,10 @@ namespace Fika.Core.Coop.ObservedClasses
 						}
 					}
 
-					if (packet.CylinderMag.Changed && Weapon.GetCurrentMagazine() is CylinderMagazineClass cylinderMagazine)
+					if (packet.CylinderMagPacket.Changed && Weapon.GetCurrentMagazine() is CylinderMagazineClass cylinderMagazine)
 					{
-						cylinderMagazine.SetCurrentCamoraIndex(packet.CylinderMag.CamoraIndex);
-						Weapon.CylinderHammerClosed = packet.CylinderMag.HammerClosed;
+						cylinderMagazine.SetCurrentCamoraIndex(packet.CylinderMagPacket.CamoraIndex);
+						Weapon.CylinderHammerClosed = packet.CylinderMagPacket.HammerClosed;
 					}
 				}
 			}
@@ -477,9 +478,9 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (packet.HasReloadLauncherPacket)
 			{
-				if (packet.ReloadLauncher.Reload)
+				if (packet.ReloadLauncherPacket.Reload)
 				{					
-					List<BulletClass> ammo = FindAmmoByIds(packet.ReloadLauncher.AmmoIds);
+					List<BulletClass> ammo = FindAmmoByIds(packet.ReloadLauncherPacket.AmmoIds);
 					AmmoPackReloadingClass ammoPack = new(ammo);
 					ReloadGrenadeLauncher(ammoPack, null);
 				}
@@ -487,18 +488,18 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (packet.HasReloadBarrelsPacket)
 			{
-				if (packet.ReloadBarrels.Reload)
+				if (packet.ReloadBarrelsPacket.Reload)
 				{
-					List<BulletClass> ammo = FindAmmoByIds(packet.ReloadBarrels.AmmoIds);
+					List<BulletClass> ammo = FindAmmoByIds(packet.ReloadBarrelsPacket.AmmoIds);
 
 					AmmoPackReloadingClass ammoPack = new(ammo);
 
 					ItemAddress gridItemAddress = null;
 
-					GClass1170 reader = new(packet.ReloadBarrels.LocationDescription);
+					GClass1170 reader = new(packet.ReloadBarrelsPacket.LocationDescription);
 					try
 					{
-						if (packet.ReloadBarrels.LocationDescription.Length > 0)
+						if (packet.ReloadBarrelsPacket.LocationDescription.Length > 0)
 						{
 							GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
 							gridItemAddress = inventoryController.ToItemAddress(descriptor);

@@ -19,15 +19,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
 {
-	/// <summary>
-	/// Used to simulate bots for the host.
-	/// </summary>
-	public class CoopBot : CoopPlayer
+    /// <summary>
+    /// Used to simulate bots for the host.
+    /// </summary>
+    public class CoopBot : CoopPlayer
 	{
 		public CoopPlayer MainPlayer
 		{

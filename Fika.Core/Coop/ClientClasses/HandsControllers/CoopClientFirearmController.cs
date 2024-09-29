@@ -4,14 +4,14 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public class CoopClientFirearmController : Player.FirearmController
+    public class CoopClientFirearmController : Player.FirearmController
 	{
 		protected CoopPlayer player;
 
@@ -330,7 +330,7 @@ namespace Fika.Core.Coop.ClientClasses
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasReloadLauncherPacket = true,
-				ReloadLauncher = new()
+				ReloadLauncherPacket = new()
 				{
 					Reload = true,
 					AmmoIds = reloadingAmmoIds
@@ -372,7 +372,7 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
-					ToggleTacticalCombo = true,
+					ToggleLightStates = true,
 					LightStatesPacket = new()
 					{
 						Amount = lightsStates.Length,
@@ -410,7 +410,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				ChangeSightMode = true,
+				ToggleScopeStates = true,
 				ScopeStatesPacket = new()
 				{
 					Amount = scopeStates.Length,
@@ -530,10 +530,10 @@ namespace Fika.Core.Coop.ClientClasses
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasReloadWithAmmoPacket = true,
-				ReloadWithAmmo = new()
+				ReloadWithAmmoPacket = new()
 				{
 					Reload = true,
-					Status = FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.AbortReload,
+					Status = SubPackets.EReloadWithAmmoStatus.AbortReload,
 					AmmoLoadedToMag = amount
 				}
 			});
@@ -560,10 +560,10 @@ namespace Fika.Core.Coop.ClientClasses
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
 				HasReloadWithAmmoPacket = true,
-				ReloadWithAmmo = new()
+				ReloadWithAmmoPacket = new()
 				{
 					Reload = true,
-					Status = FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.EndReload,
+					Status = SubPackets.EReloadWithAmmoStatus.EndReload,
 					AmmoLoadedToMag = amount
 				}
 			});
@@ -752,14 +752,14 @@ namespace Fika.Core.Coop.ClientClasses
 				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 				{
 					HasReloadWithAmmoPacket = true,
-					ReloadWithAmmo = new()
+					ReloadWithAmmoPacket = new()
 					{
 						Reload = true,
-						Status = FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.StartReload,
+						Status = SubPackets.EReloadWithAmmoStatus.StartReload,
 						AmmoIds = ammoIds
 					},
 					HasCylinderMagPacket = true,
-					CylinderMag = new()
+					CylinderMagPacket = new()
 					{
 						Changed = true,
 						CamoraIndex = cylinderMagazine.CurrentCamoraIndex,
@@ -798,7 +798,7 @@ namespace Fika.Core.Coop.ClientClasses
 					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
 						HasReloadBarrelsPacket = true,
-						ReloadBarrels = new()
+						ReloadBarrelsPacket = new()
 						{
 							Reload = true,
 							AmmoIds = ammoIds,
@@ -821,10 +821,10 @@ namespace Fika.Core.Coop.ClientClasses
 					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
 						HasReloadWithAmmoPacket = true,
-						ReloadWithAmmo = new()
+						ReloadWithAmmoPacket = new()
 						{
 							Reload = true,
-							Status = FikaSerialization.ReloadWithAmmoPacket.EReloadWithAmmoStatus.StartReload,
+							Status = SubPackets.EReloadWithAmmoStatus.StartReload,
 							AmmoIds = ammoIds
 						}
 					});
