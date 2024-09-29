@@ -1530,7 +1530,7 @@ namespace Fika.Core.Coop.GameMode
 					WeatherController.Instance.method_0(WeatherClasses);
 					weatherHandler = null;
 				}
-				else
+				else if (!isServer)
 				{
 					await GetWeather();
 					WeatherController.Instance.method_0(WeatherClasses);
