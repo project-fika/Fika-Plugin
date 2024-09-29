@@ -8,6 +8,7 @@ using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
+using JetBrains.Annotations;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -63,6 +64,23 @@ namespace Fika.Core.Coop.ObservedClasses
 			return true;
 		}
 
+		public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3653 error)
+		{
+			error = null;
+			return true;
+		}
+
+		public override bool IsLimitedAtAddress(Item item, [CanBeNull] ItemAddress address, out int limit)
+		{
+			return IsLimitedAtAddress(item.TemplateId, address, out limit);
+		}
+
+		public override bool IsLimitedAtAddress(string templateId, ItemAddress address, out int limit)
+		{
+			limit = -1;
+			return false;
+		}
+
 		public override void StrictCheckMagazine(MagazineClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
 		{
 			// Do nothing
@@ -86,6 +104,11 @@ namespace Fika.Core.Coop.ObservedClasses
 		public override bool IsInventoryBlocked()
 		{
 			return false;
+		}
+
+		public override void CheckChamber(Weapon weapon, bool status)
+		{
+			base.CheckChamber(weapon, status);
 		}
 
 		public override bool vmethod_0(GClass3119 operation)

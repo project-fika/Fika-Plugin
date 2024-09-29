@@ -101,7 +101,7 @@ namespace Fika.Core.Coop.ClientClasses
 			if (operation is GClass3122 moveOperation)
 			{
 				Item lootedItem = moveOperation.Item;
-				if (lootedItem.Template.QuestItem)
+				if (lootedItem.QuestItem)
 				{
 					if (CoopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
 					{
@@ -122,7 +122,7 @@ namespace Fika.Core.Coop.ClientClasses
 			// Do not replicate stashing quest items
 			if (operation is GClass3140 discardOperation)
 			{
-				if (discardOperation.Item.Template.QuestItem)
+				if (discardOperation.Item.QuestItem)
 				{
 					base.vmethod_1(operation, callback);
 					return;

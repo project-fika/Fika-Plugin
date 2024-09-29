@@ -96,7 +96,7 @@ namespace Fika.Core.Coop.HostClasses
 			if (operation is GClass3122 moveOperation)
 			{
 				Item lootedItem = moveOperation.Item;
-				if (lootedItem.Template.QuestItem)
+				if (lootedItem.QuestItem)
 				{
 					if (CoopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
 					{
