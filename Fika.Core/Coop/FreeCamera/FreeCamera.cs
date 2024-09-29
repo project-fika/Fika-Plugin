@@ -38,6 +38,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private float yaw = 0f;
 		private float pitch = 0f;
 		private const float lookSensitivity = 3f;
+		private float originalFov;
 
 		private KeyCode forwardKey = KeyCode.W;
 		private KeyCode backKey = KeyCode.S;
@@ -69,6 +70,7 @@ namespace Fika.Core.Coop.FreeCamera
 			thermalVision = CameraClass.Instance.ThermalVision;
 
 			freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
+			originalFov = CameraClass.Instance.Fov;
 		}
 
 		private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
@@ -418,6 +420,17 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
+			float scrollValue = Input.GetAxisRaw("Mouse ScrollWheel");
+			if (scrollValue != 0)
+			{
+				float currentFov = CameraClass.Instance.Fov;
+				if (currentFov >= 15f && currentFov <= originalFov)
+				{
+					float newFov = Mathf.Clamp(currentFov -= (scrollValue * 50), 15, 67);
+					CameraClass.Instance.SetFov(newFov, 1f);
+				}
+			}
+
 			float x = Input.GetAxis("Mouse X");
 			float y = Input.GetAxis("Mouse Y");
 
@@ -548,9 +561,9 @@ namespace Fika.Core.Coop.FreeCamera
 			isFollowing = true;
 		}
 
-		public void SetActive(bool status)
+		public void SetActive(bool active)
 		{
-			if (!status)
+			if (!active)
 			{
 				if (nightVision != null && nightVision.On)
 				{
@@ -561,9 +574,14 @@ namespace Fika.Core.Coop.FreeCamera
 				{
 					thermalVision.method_1(false);
 				}
+
+				if (CameraClass.Instance.Fov != originalFov)
+				{
+					CameraClass.Instance.SetFov(originalFov, 0.1f);
+				}
 			}
 
-			if (status)
+			if (active)
 			{
 				Player player = Singleton<GameWorld>.Instance.MainPlayer;
 				if (player != null && player.HealthController.IsAlive)
@@ -592,7 +610,7 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
-			IsActive = status;
+			IsActive = active;
 			isFollowing = false;
 			leftMode = false;
 			transform.parent = null;
