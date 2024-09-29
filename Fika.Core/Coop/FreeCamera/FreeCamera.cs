@@ -427,7 +427,7 @@ namespace Fika.Core.Coop.FreeCamera
 				float currentFov = CameraClass.Instance.Fov;
 				if (currentFov >= 15f && currentFov <= originalFov)
 				{
-					float newFov = Mathf.Clamp(currentFov -= (scrollValue * 50), 15, originalFov);
+					float newFov = Mathf.Clamp(currentFov -= (scrollValue * 100), 15, originalFov);
 					CameraClass.Instance.SetFov(newFov, 1f);
 				}
 			}
