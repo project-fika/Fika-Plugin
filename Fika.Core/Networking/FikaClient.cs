@@ -13,7 +13,6 @@ using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.UI.BattleTimer;
 using EFT.Vehicle;
-using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
@@ -44,7 +43,7 @@ namespace Fika.Core.Networking
 	/// Client used in P2P connections
 	/// </summary>
 	public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
-	{		
+	{
 		public CoopPlayer MyPlayer;
 		public NetPacketProcessor packetProcessor = new();
 		public int Ping = 0;
@@ -53,7 +52,7 @@ namespace Fika.Core.Networking
 		public int ReadyClients = 0;
 		public bool HostReady = false;
 		public bool HostLoaded = false;
-		public bool ReconnectDone = false;		
+		public bool ReconnectDone = false;
 		public NetPeer ServerConnection { get; private set; }
 		public bool ExfilPointsReceived { get; private set; } = false;
 		public NetManager NetClient
@@ -549,7 +548,7 @@ namespace Fika.Core.Networking
 				if (grenades.TryGetByKey(grenadeData.Id, out Throwable throwable))
 				{
 					throwable.ApplyNetPacket(grenadeData);
-				} 
+				}
 			}
 		}
 
@@ -1293,6 +1292,16 @@ namespace Fika.Core.Networking
 				Destroy(this);
 				Singleton<FikaClient>.Release(this);
 			}
+		}
+
+		public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
+		{
+			packetProcessor.SubscribeNetSerializable(handle);
+		}
+
+		public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
+		{
+			packetProcessor.SubscribeNetSerializable(handle);
 		}
 	}
 }

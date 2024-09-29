@@ -29,10 +29,12 @@ using LiteNetLib.Utils;
 using Open.Nat;
 using SPT.Common.Http;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -1319,6 +1321,16 @@ namespace Fika.Core.Networking
 					await Task.Delay(250);
 				}
 			});
+		}
+
+		public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
+		{
+			packetProcessor.SubscribeNetSerializable(handle);
+		}
+
+		public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
+		{
+			packetProcessor.SubscribeNetSerializable(handle);
 		}
 
 		private class InventoryOperationHandler(GStruct423 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
