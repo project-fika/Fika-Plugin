@@ -133,7 +133,6 @@ namespace Fika.Core.Networking
 			currentNetId = 1;
 
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-			packetProcessor.SubscribeNetSerializable<GameTimerPacket, NetPeer>(OnGameTimerPacketReceived);
 			packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnFirearmPacketReceived);
 			packetProcessor.SubscribeNetSerializable<DamagePacket, NetPeer>(OnDamagePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
@@ -1100,23 +1099,6 @@ namespace Fika.Core.Networking
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-		}
-
-		private void OnGameTimerPacketReceived(GameTimerPacket packet, NetPeer peer)
-		{
-			if (!packet.IsRequest)
-				return;
-
-			CoopGame game = coopHandler.LocalGameInstance;
-			if (game != null)
-			{
-				GameTimerPacket gameTimerPacket = new(false, (game.GameTimer.SessionTime - game.GameTimer.PastTime).Value.Ticks, game.GameTimer.StartDateTime.Value.Ticks);
-				SendDataToPeer(peer, ref gameTimerPacket, DeliveryMethod.ReliableOrdered);
-			}
-			else
-			{
-				logger.LogError("OnGameTimerPacketReceived: Game was null!");
-			}
 		}
 
 		private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)

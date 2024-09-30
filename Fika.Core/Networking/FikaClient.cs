@@ -114,7 +114,6 @@ namespace Fika.Core.Networking
 			myProfileId = FikaBackendUtils.Profile.ProfileId;
 
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
-			packetProcessor.SubscribeNetSerializable<GameTimerPacket>(OnGameTimerPacketReceived);
 			packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnFirearmPacketReceived);
 			packetProcessor.SubscribeNetSerializable<DamagePacket>(OnDamagePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ArmorDamagePacket>(OnArmorDamagePacketReceived);
@@ -1135,33 +1134,6 @@ namespace Fika.Core.Networking
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
 				playerToApply.PacketReceiver.FirearmPackets.Enqueue(packet);
-			}
-		}
-
-		private void OnGameTimerPacketReceived(GameTimerPacket packet)
-		{
-			TimeSpan sessionTime = new(packet.Tick);
-
-			CoopGame coopGame = coopHandler.LocalGameInstance;
-
-			GameTimerClass gameTimer = coopGame.GameTimer;
-			if (gameTimer.StartDateTime.HasValue && gameTimer.SessionTime.HasValue)
-			{
-				TimeSpan timeRemain = gameTimer.PastTime + sessionTime;
-
-				gameTimer.ChangeSessionTime(timeRemain);
-
-				Traverse timerPanel = Traverse.Create(coopGame.GameUi.TimerPanel);
-				timerPanel.Field("dateTime_0").SetValue(gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds));
-
-				MainTimerPanel mainTimerPanel = timerPanel.Field<MainTimerPanel>("_mainTimerPanel").Value;
-				if (mainTimerPanel != null)
-				{
-					Traverse.Create(mainTimerPanel).Field<DateTime>("dateTime_0").Value = gameTimer.StartDateTime.Value.AddSeconds(timeRemain.TotalSeconds);
-					mainTimerPanel.UpdateTimer();
-				}
-
-				Traverse.Create(gameTimer).Field<DateTime?>("nullable_0").Value = new DateTime(packet.StartTime);
 			}
 		}
 
