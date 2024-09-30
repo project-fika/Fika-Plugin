@@ -27,17 +27,11 @@ namespace Fika.Core.Networking
 		public bool EnableInventory = false;
 		public bool InventoryStatus = false;
 		public bool Loot = false;
-		public bool HasReloadMagPacket = false;
 		public ReloadMagPacket ReloadMagPacket;
-		public bool HasQuickReloadMagPacket = false;
 		public QuickReloadMagPacket QuickReloadMagPacket;
-		public bool HasReloadWithAmmoPacket = false;
 		public ReloadWithAmmoPacket ReloadWithAmmoPacket;
-		public bool HasCylinderMagPacket = false;
 		public CylinderMagPacket CylinderMagPacket;
-		public bool HasReloadLauncherPacket = false;
 		public ReloadLauncherPacket ReloadLauncherPacket;
-		public bool HasReloadBarrelsPacket = false;
 		public ReloadBarrelsPacket ReloadBarrelsPacket;
 		public bool HasGrenadePacket = false;
 		public GrenadePacket GrenadePacket;
@@ -91,36 +85,12 @@ namespace Fika.Core.Networking
 			EnableInventory = reader.GetBool();
 			InventoryStatus = reader.GetBool();
 			Loot = reader.GetBool();
-			HasReloadMagPacket = reader.GetBool();
-			if (HasReloadMagPacket)
-			{
-				ReloadMagPacket = reader.GetReloadMagPacket();
-			}
-			HasQuickReloadMagPacket = reader.GetBool();
-			if (HasQuickReloadMagPacket)
-			{
-				QuickReloadMagPacket = reader.GetQuickReloadMagPacket();
-			}
-			HasReloadWithAmmoPacket = reader.GetBool();
-			if (HasReloadWithAmmoPacket)
-			{
-				ReloadWithAmmoPacket = reader.GetReloadWithAmmoPacket();
-			}
-			HasCylinderMagPacket = reader.GetBool();
-			if (HasCylinderMagPacket)
-			{
-				CylinderMagPacket = reader.GetCylinderMagPacket();
-			}
-			HasReloadLauncherPacket = reader.GetBool();
-			if (HasReloadLauncherPacket)
-			{
-				ReloadLauncherPacket = reader.GetReloadLauncherPacket();
-			}
-			HasReloadBarrelsPacket = reader.GetBool();
-			if (HasReloadBarrelsPacket)
-			{
-				ReloadBarrelsPacket = reader.GetReloadBarrelsPacket();
-			}
+			ReloadMagPacket = reader.GetReloadMagPacket();
+			QuickReloadMagPacket = reader.GetQuickReloadMagPacket();
+			ReloadWithAmmoPacket = reader.GetReloadWithAmmoPacket();
+			CylinderMagPacket = reader.GetCylinderMagPacket();
+			ReloadLauncherPacket = reader.GetReloadLauncherPacket();
+			ReloadBarrelsPacket = reader.GetReloadBarrelsPacket();
 			HasGrenadePacket = reader.GetBool();
 			if (HasGrenadePacket)
 			{
@@ -191,36 +161,12 @@ namespace Fika.Core.Networking
 			writer.Put(EnableInventory);
 			writer.Put(InventoryStatus);
 			writer.Put(Loot);
-			writer.Put(HasReloadMagPacket);
-			if (HasReloadMagPacket)
-			{
-				writer.PutReloadMagPacket(ReloadMagPacket);
-			}
-			writer.Put(HasQuickReloadMagPacket);
-			if (HasQuickReloadMagPacket)
-			{
-				writer.PutQuickReloadMagPacket(QuickReloadMagPacket);
-			}
-			writer.Put(HasReloadWithAmmoPacket);
-			if (HasReloadWithAmmoPacket)
-			{
-				writer.PutReloadWithAmmoPacket(ReloadWithAmmoPacket);
-			}
-			writer.Put(HasCylinderMagPacket);
-			if (HasCylinderMagPacket)
-			{
-				writer.PutCylinderMagPacket(CylinderMagPacket);
-			}
-			writer.Put(HasReloadLauncherPacket);
-			if (HasReloadLauncherPacket)
-			{
-				writer.PutReloadLauncherPacket(ReloadLauncherPacket);
-			}
-			writer.Put(HasReloadBarrelsPacket);
-			if (HasReloadBarrelsPacket)
-			{
-				writer.PutReloadBarrelsPacket(ReloadBarrelsPacket);
-			}
+			writer.PutReloadMagPacket(ReloadMagPacket);
+			writer.PutQuickReloadMagPacket(QuickReloadMagPacket);
+			writer.PutReloadWithAmmoPacket(ReloadWithAmmoPacket);
+			writer.PutCylinderMagPacket(CylinderMagPacket);
+			writer.PutReloadLauncherPacket(ReloadLauncherPacket);
+			writer.PutReloadBarrelsPacket(ReloadBarrelsPacket);
 			writer.Put(HasGrenadePacket);
 			if (HasGrenadePacket)
 			{

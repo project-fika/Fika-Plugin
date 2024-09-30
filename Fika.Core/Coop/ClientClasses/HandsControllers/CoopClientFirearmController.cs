@@ -279,7 +279,6 @@ namespace Fika.Core.Coop.ClientClasses
 
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasQuickReloadMagPacket = true,
 				QuickReloadMagPacket = new()
 				{
 					Reload = true,
@@ -329,7 +328,6 @@ namespace Fika.Core.Coop.ClientClasses
 			string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasReloadLauncherPacket = true,
 				ReloadLauncherPacket = new()
 				{
 					Reload = true,
@@ -529,7 +527,6 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasReloadWithAmmoPacket = true,
 				ReloadWithAmmoPacket = new()
 				{
 					Reload = true,
@@ -559,7 +556,6 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasReloadWithAmmoPacket = true,
 				ReloadWithAmmoPacket = new()
 				{
 					Reload = true,
@@ -726,7 +722,6 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
-						HasReloadMagPacket = true,
 						ReloadMagPacket = new()
 						{
 							Reload = true,
@@ -751,14 +746,12 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 				{
-					HasReloadWithAmmoPacket = true,
 					ReloadWithAmmoPacket = new()
 					{
 						Reload = true,
 						Status = SubPackets.EReloadWithAmmoStatus.StartReload,
 						AmmoIds = ammoIds
 					},
-					HasCylinderMagPacket = true,
 					CylinderMagPacket = new()
 					{
 						Changed = true,
@@ -797,7 +790,6 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
-						HasReloadBarrelsPacket = true,
 						ReloadBarrelsPacket = new()
 						{
 							Reload = true,
@@ -820,7 +812,6 @@ namespace Fika.Core.Coop.ClientClasses
 				{
 					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
-						HasReloadWithAmmoPacket = true,
 						ReloadWithAmmoPacket = new()
 						{
 							Reload = true,

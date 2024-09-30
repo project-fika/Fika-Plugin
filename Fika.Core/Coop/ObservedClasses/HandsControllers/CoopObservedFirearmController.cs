@@ -332,94 +332,88 @@ namespace Fika.Core.Coop.ObservedClasses
 				SetInventoryOpened(packet.InventoryStatus);
 			}
 
-			if (packet.HasReloadMagPacket)
+			if (packet.ReloadMagPacket.Reload)
 			{
-				if (packet.ReloadMagPacket.Reload)
+				MagazineClass magazine = null;
+				try
 				{
-					MagazineClass magazine = null;
-					try
+					GStruct428<Item> result = coopPlayer.FindItemById(packet.ReloadMagPacket.MagId);
+					if (!result.Succeeded)
 					{
-						GStruct428<Item> result = coopPlayer.FindItemById(packet.ReloadMagPacket.MagId);
-						if (!result.Succeeded)
-						{
-							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
-							return;
-						}
-						if (result.Value is MagazineClass magazineClass)
-						{
-							magazine = magazineClass;
-						}
-						else
-						{
-							FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
-						}
+						FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+						return;
 					}
-					catch (Exception ex)
+					if (result.Value is MagazineClass magazineClass)
 					{
-						FikaPlugin.Instance.FikaLogger.LogError(ex);
-						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
-						throw;
-					}
-					ItemAddress gridItemAddress = null;
-					if (packet.ReloadMagPacket.LocationDescription != null)
-					{
-						try
-						{
-							GClass1170 reader = new(packet.ReloadMagPacket.LocationDescription);
-							if (packet.ReloadMagPacket.LocationDescription.Length != 0)
-							{
-								GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
-								gridItemAddress = inventoryController.ToItemAddress(descriptor);
-							}
-						}
-						catch (GException4 exception2)
-						{
-							FikaPlugin.Instance.FikaLogger.LogError(exception2);
-						}
-					}
-					if (magazine != null)
-					{
-						ReloadMag(magazine, gridItemAddress, null);
+						magazine = magazineClass;
 					}
 					else
 					{
-						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::ReloadMag final variables were null! Mag: {magazine}, Address: {gridItemAddress}");
+						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
 					}
 				}
-			}
-
-
-			if (packet.HasQuickReloadMagPacket)
-			{
-				if (packet.QuickReloadMagPacket.Reload)
+				catch (Exception ex)
+				{
+					FikaPlugin.Instance.FikaLogger.LogError(ex);
+					FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
+					throw;
+				}
+				ItemAddress gridItemAddress = null;
+				if (packet.ReloadMagPacket.LocationDescription != null)
 				{
 					try
 					{
-						GStruct428<Item> result = coopPlayer.FindItemById(packet.QuickReloadMagPacket.MagId, false, false);
-						if (!result.Succeeded)
+						GClass1170 reader = new(packet.ReloadMagPacket.LocationDescription);
+						if (packet.ReloadMagPacket.LocationDescription.Length != 0)
 						{
-							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
-							return;
-						}
-						if (result.Value is MagazineClass magazine)
-						{
-							QuickReloadMag(magazine, null);
-						}
-						else
-						{
-							FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::QuickReloadMag item was not of type MagazineClass, was {result.Value.GetType()}");
+							GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
+							gridItemAddress = inventoryController.ToItemAddress(descriptor);
 						}
 					}
-					catch (Exception ex)
+					catch (GException4 exception2)
 					{
-						FikaPlugin.Instance.FikaLogger.LogError(ex);
-						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
-						throw;
+						FikaPlugin.Instance.FikaLogger.LogError(exception2);
 					}
+				}
+				if (magazine != null)
+				{
+					ReloadMag(magazine, gridItemAddress, null);
+				}
+				else
+				{
+					FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::ReloadMag final variables were null! Mag: {magazine}, Address: {gridItemAddress}");
 				}
 			}
 
-			if (packet.HasReloadWithAmmoPacket)
+
+			if (packet.QuickReloadMagPacket.Reload)
+			{
+				try
+				{
+					GStruct428<Item> result = coopPlayer.FindItemById(packet.QuickReloadMagPacket.MagId, false, false);
+					if (!result.Succeeded)
+					{
+						FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+						return;
+					}
+					if (result.Value is MagazineClass magazine)
+					{
+						QuickReloadMag(magazine, null);
+					}
+					else
+					{
+						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::QuickReloadMag item was not of type MagazineClass, was {result.Value.GetType()}");
+					}
+				}
+				catch (Exception ex)
+				{
+					FikaPlugin.Instance.FikaLogger.LogError(ex);
+					FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController: There is no item {packet.ReloadMagPacket.MagId} in profile {coopPlayer.ProfileId}");
+					throw;
+				}
+			}
+
+			if (packet.ReloadWithAmmoPacket.Reload)
 			{
 				if (packet.ReloadWithAmmoPacket.Status == SubPackets.EReloadWithAmmoStatus.AbortReload)
 				{
@@ -432,7 +426,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					{
 						List<BulletClass> bullets = FindAmmoByIds(packet.ReloadWithAmmoPacket.AmmoIds);
 						AmmoPackReloadingClass ammoPack = new(bullets);
-						if (!packet.HasCylinderMagPacket)
+						if (!packet.CylinderMagPacket.Changed)
 						{
 							CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
 						}
@@ -476,48 +470,42 @@ namespace Fika.Core.Coop.ObservedClasses
 				RollCylinder(packet.RollToZeroCamora);
 			}
 
-			if (packet.HasReloadLauncherPacket)
+			if (packet.ReloadLauncherPacket.Reload)
 			{
-				if (packet.ReloadLauncherPacket.Reload)
-				{					
-					List<BulletClass> ammo = FindAmmoByIds(packet.ReloadLauncherPacket.AmmoIds);
-					AmmoPackReloadingClass ammoPack = new(ammo);
-					ReloadGrenadeLauncher(ammoPack, null);
-				}
+				List<BulletClass> ammo = FindAmmoByIds(packet.ReloadLauncherPacket.AmmoIds);
+				AmmoPackReloadingClass ammoPack = new(ammo);
+				ReloadGrenadeLauncher(ammoPack, null);
 			}
 
-			if (packet.HasReloadBarrelsPacket)
+			if (packet.ReloadBarrelsPacket.Reload)
 			{
-				if (packet.ReloadBarrelsPacket.Reload)
+				List<BulletClass> ammo = FindAmmoByIds(packet.ReloadBarrelsPacket.AmmoIds);
+
+				AmmoPackReloadingClass ammoPack = new(ammo);
+
+				ItemAddress gridItemAddress = null;
+
+				GClass1170 reader = new(packet.ReloadBarrelsPacket.LocationDescription);
+				try
 				{
-					List<BulletClass> ammo = FindAmmoByIds(packet.ReloadBarrelsPacket.AmmoIds);
-
-					AmmoPackReloadingClass ammoPack = new(ammo);
-
-					ItemAddress gridItemAddress = null;
-
-					GClass1170 reader = new(packet.ReloadBarrelsPacket.LocationDescription);
-					try
+					if (packet.ReloadBarrelsPacket.LocationDescription.Length > 0)
 					{
-						if (packet.ReloadBarrelsPacket.LocationDescription.Length > 0)
-						{
-							GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
-							gridItemAddress = inventoryController.ToItemAddress(descriptor);
-						}
+						GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
+						gridItemAddress = inventoryController.ToItemAddress(descriptor);
 					}
-					catch (GException4 exception2)
-					{
-						FikaPlugin.Instance.FikaLogger.LogError(exception2);
-					}
+				}
+				catch (GException4 exception2)
+				{
+					FikaPlugin.Instance.FikaLogger.LogError(exception2);
+				}
 
-					if (ammoPack != null)
-					{
-						ReloadBarrels(ammoPack, gridItemAddress, null);
-					}
-					else
-					{
-						FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::ReloadBarrel final variables were null! Ammo: {ammoPack}, Address: {gridItemAddress}");
-					}
+				if (ammoPack != null)
+				{
+					ReloadBarrels(ammoPack, gridItemAddress, null);
+				}
+				else
+				{
+					FikaPlugin.Instance.FikaLogger.LogError($"CoopObservedFirearmController::HandleFirearmPacket::ReloadBarrel final variables were null! Ammo: {ammoPack}, Address: {gridItemAddress}");
 				}
 			}
 

@@ -105,11 +105,6 @@ namespace Fika.Core.Coop.ObservedClasses
 			return false;
 		}
 
-		public override void CheckChamber(Weapon weapon, bool status)
-		{
-			base.CheckChamber(weapon, status);
-		}
-
 		public override bool vmethod_0(GClass3119 operation)
 		{
 			return true;
