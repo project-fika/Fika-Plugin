@@ -762,9 +762,10 @@ namespace Fika.Core.Coop.Players
 			string accountId = AccountId;
 			string profileId = ProfileId;
 			string nickname = Profile.Nickname;
-			string killerAccountId = LastAggressor != null ? LastAggressor.AccountId : string.Empty;
-			string killerProfileId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty;
-			string killerNickname = LastAggressor != null ? LastAggressor.Profile.Nickname : string.Empty;
+			bool hasAggressor = LastAggressor != null;
+			string killerAccountId = hasAggressor ? LastAggressor.AccountId : string.Empty;
+			string killerProfileId = hasAggressor ? LastAggressor.ProfileId : string.Empty;
+			string killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : string.Empty;
 			EPlayerSide side = Side;
 			int level = Profile.Info.Level;
 			DateTime time = EFTDateTimeClass.UtcNow;
