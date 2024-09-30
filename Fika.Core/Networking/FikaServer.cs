@@ -29,12 +29,10 @@ using LiteNetLib.Utils;
 using Open.Nat;
 using SPT.Common.Http;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -830,61 +828,78 @@ namespace Fika.Core.Networking
 
 		private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
 		{
-			if (packet.PacketType == EPackageType.ClientExtract)
+			switch (packet.PacketType)
 			{
-				if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-				{
-					coopHandler.Players.Remove(packet.NetId);
-					coopHandler.HumanPlayers.Remove(playerToApply);
-					if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
+				case EPackageType.ClientExtract:
 					{
-						coopHandler.ExtractedPlayers.Add(packet.NetId);
+						if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+						{
+							coopHandler.Players.Remove(packet.NetId);
+							coopHandler.HumanPlayers.Remove(playerToApply);
+							if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
+							{
+								coopHandler.ExtractedPlayers.Add(packet.NetId);
+								CoopGame coopGame = coopHandler.LocalGameInstance;
+								coopGame.ExtractedPlayers.Add(packet.NetId);
+								coopGame.ClearHostAI(playerToApply);
+
+								if (FikaPlugin.ShowNotifications.Value)
+								{
+									string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
+									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+										ColorizeText(Colors.GREEN, nickname)),
+									EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+								}
+							}
+
+							playerToApply.Dispose();
+							AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
+						}
+					}
+					break;
+				case EPackageType.Ping:
+					{
+						if (FikaPlugin.UsePingSystem.Value)
+						{
+							PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
+						}
+					}
+					break;
+				case EPackageType.ExfilCountdown:
+					{
+						if (ExfiltrationControllerClass.Instance != null)
+						{
+							ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+
+							ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
+							if (exfilPoint != null)
+							{
+								CoopGame game = coopHandler.LocalGameInstance;
+								exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
+
+								if (exfilPoint.Status != EExfiltrationStatus.Countdown)
+								{
+									exfilPoint.Status = EExfiltrationStatus.Countdown;
+								}
+							}
+						}
+					}
+					break;
+
+				case EPackageType.LoadBot:
+					{
 						CoopGame coopGame = coopHandler.LocalGameInstance;
-						coopGame.ExtractedPlayers.Add(packet.NetId);
-						coopGame.ClearHostAI(playerToApply);
-
-						if (FikaPlugin.ShowNotifications.Value)
-						{
-							string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
-								ColorizeText(Colors.GREEN, nickname)),
-							EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
-						}
+						coopGame.IncreaseLoadedPlayers(packet.BotNetId);
 					}
-
-					playerToApply.Dispose();
-					AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
-				}
-			}
-			else if (packet.PacketType == EPackageType.Ping && FikaPlugin.UsePingSystem.Value)
-			{
-				PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
-			}
-			else if (packet.PacketType == EPackageType.LoadBot)
-			{
-				CoopGame coopGame = coopHandler.LocalGameInstance;
-				coopGame.IncreaseLoadedPlayers(packet.BotNetId);
-
-				return;
-			}
-			else if (packet.PacketType == EPackageType.ExfilCountdown)
-			{
-				if (ExfiltrationControllerClass.Instance != null)
-				{
-					ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
-					ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
-					if (exfilPoint != null)
-					{
-						CoopGame game = coopHandler.LocalGameInstance;
-						exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
-
-						if (exfilPoint.Status != EExfiltrationStatus.Countdown)
-						{
-							exfilPoint.Status = EExfiltrationStatus.Countdown;
-						}
-					}
-				}
+					break;
+				case EPackageType.TrainSync:
+				case EPackageType.TraderServiceNotification:
+				case EPackageType.DisposeBot:
+				case EPackageType.EnableBot:
+				case EPackageType.DisableBot:
+				case EPackageType.ClearEffects:
+				default:
+					break;
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
