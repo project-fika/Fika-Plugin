@@ -11,7 +11,6 @@ using EFT.Interactive;
 using EFT.MovingPlatforms;
 using EFT.SynchronizableObjects;
 using EFT.UI;
-using EFT.UI.BattleTimer;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -155,7 +154,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ArtilleryPacket>(OnArtilleryPacketReceived);
 
-			netClient = new NetManager(this)
+			netClient = new(this)
 			{
 				UnconnectedMessagesEnabled = true,
 				UpdateTime = 15,
@@ -907,7 +906,7 @@ namespace Fika.Core.Networking
 					{
 						if (FikaPlugin.UsePingSystem.Value)
 						{
-							PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId); 
+							PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
 						}
 					}
 					break;
@@ -1149,7 +1148,10 @@ namespace Fika.Core.Networking
 			switch (packet.PacketType)
 			{
 				case EHalloweenPacketType.Summon:
-					controller.method_5(new EFT.GlobalEvents.HalloweenSummonStartedEvent() { PointPosition = packet.SummonPosition });
+					controller.method_5(new()
+					{
+						PointPosition = packet.SummonPosition
+					});
 					break;
 				case EHalloweenPacketType.Sync:
 					controller.SetEventState(packet.EventState, false);
@@ -1179,11 +1181,7 @@ namespace Fika.Core.Networking
 		private void OnBTRPacketReceived(BTRPacket packet)
 		{
 			BTRControllerClass btrController = Singleton<GameWorld>.Instance.BtrController;
-
-			if (btrController != null)
-			{
-				btrController.SyncBTRVehicleFromServer(packet.Data);
-			}
+			btrController?.SyncBTRVehicleFromServer(packet.Data);
 		}
 
 		private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
@@ -1197,11 +1195,6 @@ namespace Fika.Core.Networking
 		protected void Update()
 		{
 			netClient?.PollEvents();
-
-			/*if (_netClient.FirstPeer == null)
-            {
-                _netClient.SendBroadcast([1], Port);
-            }*/
 		}
 
 		protected void OnDestroy()

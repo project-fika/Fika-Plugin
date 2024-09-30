@@ -162,7 +162,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
 
-			netServer = new NetManager(this)
+			netServer = new(this)
 			{
 				BroadcastReceiveEnabled = true,
 				UnconnectedMessagesEnabled = true,
@@ -1155,12 +1155,11 @@ namespace Fika.Core.Networking
 					packetProcessor.WriteNetSerializable(dataWriter, ref packet);
 					netServer.SendToAll(dataWriter, deliveryMethod, peerToExclude);
 				}
+				return;
 			}
-			else
-			{
-				packetProcessor.WriteNetSerializable(dataWriter, ref packet);
-				netServer.SendToAll(dataWriter, deliveryMethod);
-			}
+
+			packetProcessor.WriteNetSerializable(dataWriter, ref packet);
+			netServer.SendToAll(dataWriter, deliveryMethod);
 		}
 
 		public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
