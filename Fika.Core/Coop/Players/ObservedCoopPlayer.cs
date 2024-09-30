@@ -647,8 +647,8 @@ namespace Fika.Core.Coop.Players
 				ProceduralWeaponAnimation.SetHeadRotation(newRotation); 
 			}
 
-			bool isGronded = to.IsGrounded;
-			MovementContext.IsGrounded = isGronded;
+			bool isGrounded = to.IsGrounded;
+			MovementContext.IsGrounded = isGrounded;
 
 			EPlayerState newState = to.State;
 
@@ -661,7 +661,7 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
-			if (isJumpSet && isGronded)
+			if (isJumpSet && isGrounded)
 			{
 				MovementContext.PlayerAnimatorEnableJump(false);
 				MovementContext.PlayerAnimatorEnableLanding(true);
@@ -702,7 +702,7 @@ namespace Fika.Core.Coop.Players
 				MovementContext.SetBlindFire(to.Blindfire);
 			}
 
-			if (!IsInventoryOpened && isGronded)
+			if (!IsInventoryOpened && isGrounded)
 			{
 				Move(Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, interpolateRatio));
 				if (isServer)
