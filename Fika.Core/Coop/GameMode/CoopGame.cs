@@ -1850,12 +1850,6 @@ namespace Fika.Core.Coop.GameMode
 
 			}
 
-			if (fikaDebug != null)
-			{
-				Destroy(fikaDebug);
-			}
-
-
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
 				CoopPlayer coopPlayer = player;
@@ -1979,6 +1973,14 @@ namespace Fika.Core.Coop.GameMode
 		{
 			NetworkTimeSync.Reset();
 			Logger.LogDebug("Stop");
+
+			ToggleDebug(false);
+
+			if (fikaDebug != null)
+			{
+				Destroy(fikaDebug);
+				fikaDebug = null;
+			}
 
 			CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			myPlayer.PacketSender.DestroyThis();

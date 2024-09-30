@@ -463,10 +463,6 @@ namespace Fika.Core.UI.Custom
 					NetManagerUtils.DestroyPingingClient();
 				}
 
-				//DestroyThis();
-
-				//AcceptButton.OnClick.Invoke();
-
 				callback?.Invoke(true);
 			}
 			else
