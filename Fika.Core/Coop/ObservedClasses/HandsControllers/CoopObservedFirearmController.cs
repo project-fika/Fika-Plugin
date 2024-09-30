@@ -390,7 +390,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				try
 				{
-					GStruct428<Item> result = coopPlayer.FindItemById(packet.QuickReloadMagPacket.MagId, false, false);
+					GStruct428<Item> result = coopPlayer.FindItemById(packet.QuickReloadMagPacket.MagId);
 					if (!result.Succeeded)
 					{
 						FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -714,7 +714,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			_preallocatedAmmoList.Clear();
 			foreach (string id in ammoIds)
 			{
-				GStruct428<Item> gstruct = _player.FindItemById(id, true, true);
+				GStruct428<Item> gstruct = _player.FindItemById(id);
 				if (gstruct.Succeeded && gstruct.Value is BulletClass bulletClass)
 				{
 					_preallocatedAmmoList.Add(bulletClass);
@@ -732,7 +732,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (weaponPrefab != null && weaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
 			{
-				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.33f, 0);
+				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
 			}
 
 			MagazineClass magazine = controller.Item.GetCurrentMagazine();
@@ -778,7 +778,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				return;
 			}
 
-			weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.33f, 0);
+			weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
 		}
 
 		private class ObservedFlareOperation(FirearmController controller) : GClass1748(controller)
