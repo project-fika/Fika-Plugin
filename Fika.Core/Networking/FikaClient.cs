@@ -385,7 +385,7 @@ namespace Fika.Core.Networking
 		{
 			CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
 			List<AirplaneDataPacketStruct> structs = [packet.Data];
-			gameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(structs);
+			gameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(structs);
 		}
 
 		private void OnReconnectPacketReceived(ReconnectPacket packet)
