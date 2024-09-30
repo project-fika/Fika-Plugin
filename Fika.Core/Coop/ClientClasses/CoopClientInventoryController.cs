@@ -38,6 +38,7 @@ namespace Fika.Core.Coop.ClientClasses
 		public CoopClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
 		{
 			this.player = player;
+			mongoID_0 = new(profile);
 			searchController = new GClass1896(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 		}

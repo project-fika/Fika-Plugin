@@ -32,6 +32,14 @@ namespace Fika.Core.Coop.BotClasses
 			searchController = new GClass1902(profile);
 		}
 
+#if DEBUG
+		public override void RollBack()
+		{
+			FikaPlugin.Instance.FikaLogger.LogWarning("Rolling back on bot: " + coopBot.NetId);
+			base.RollBack();
+		} 
+#endif
+
 		public override IPlayerSearchController PlayerSearchController
 		{
 			get
@@ -63,30 +71,7 @@ namespace Fika.Core.Coop.BotClasses
 		{
 			BotInventoryOperationHandler handler = new(this, operation, callback);
 			if (vmethod_0(operation))
-			{
-				// Check for GClass increments
-				// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-				if (operation is not GClass3137)
-				{
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
-#endif
-					InventoryPacket packet = new()
-					{
-						HasItemControllerExecutePacket = true
-					};
-
-					GClass1175 writer = new();
-					writer.WritePolymorph(operation.ToDescriptor());
-					packet.ItemControllerExecutePacket = new()
-					{
-						CallbackId = operation.Id,
-						OperationBytes = writer.ToArray()
-					};
-
-					coopBot.PacketSender.InventoryPackets.Enqueue(packet);
-					return;
-				}
+			{				
 				handler.Operation.method_1(handler.HandleResult);
 				return;
 			}
@@ -112,6 +97,29 @@ namespace Fika.Core.Coop.BotClasses
 					FikaPlugin.Instance.FikaLogger.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {controller.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
 					Callback?.Invoke(result);
 					return;
+				}
+
+				// Check for GClass increments
+				// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
+				if (Operation is not GClass3137)
+				{
+#if DEBUG
+					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}");
+#endif
+					InventoryPacket packet = new()
+					{
+						HasItemControllerExecutePacket = true
+					};
+
+					GClass1175 writer = new();
+					writer.WritePolymorph(Operation.ToDescriptor());
+					packet.ItemControllerExecutePacket = new()
+					{
+						CallbackId = Operation.Id,
+						OperationBytes = writer.ToArray()
+					};
+
+					controller.coopBot.PacketSender.InventoryPackets.Enqueue(packet);
 				}
 
 				Callback?.Invoke(result);

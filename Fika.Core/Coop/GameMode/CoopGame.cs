@@ -462,7 +462,7 @@ namespace Fika.Core.Coop.GameMode
 			FikaServer server = Singleton<FikaServer>.Instance;
 			netId = server.PopNetId();
 
-			MongoID mongoId = MongoID.Generate(true);
+			MongoID mongoId = new(profile);
 			ushort nextOperationId = 0;
 			SendCharacterPacket packet = new(new(profile, mongoId, nextOperationId), true, true, position, netId);
 			packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
