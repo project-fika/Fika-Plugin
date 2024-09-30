@@ -521,6 +521,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void AttachToPlayer()
 		{
+			CheckAndResetFov();
 #if DEBUG
 			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
 #endif
@@ -544,6 +545,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void Attach3rdPerson()
 		{
+			CheckAndResetFov();
 #if DEBUG
 			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
 #endif
@@ -576,10 +578,7 @@ namespace Fika.Core.Coop.FreeCamera
 					thermalVision.method_1(false);
 				}
 
-				if (CameraClass.Instance.Fov != originalFov)
-				{
-					CameraClass.Instance.SetFov(originalFov, 0.1f);
-				}
+				CheckAndResetFov();
 			}
 
 			if (active)
@@ -615,6 +614,14 @@ namespace Fika.Core.Coop.FreeCamera
 			isFollowing = false;
 			leftMode = false;
 			transform.parent = null;
+		}
+
+		private void CheckAndResetFov()
+		{
+			if (CameraClass.Instance.Fov != originalFov)
+			{
+				CameraClass.Instance.SetFov(originalFov, 0.1f);
+			}
 		}
 
 		protected void OnDestroy()
