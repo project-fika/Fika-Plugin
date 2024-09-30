@@ -35,8 +35,6 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
 		{
-			// For some reason bots need to be incremented by 1 since version 32678
-			//mongoID_0 = (aiControl && !FikaBackendUtils.IsReconnect) ? firstId++ : firstId;
 			mongoID_0 = firstId;
 			ushort_0 = firstOperationId;
 			searchController = new GClass1898();
