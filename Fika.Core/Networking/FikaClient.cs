@@ -906,7 +906,10 @@ namespace Fika.Core.Networking
 					break;
 				case EPackageType.Ping:
 					{
-						PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
+						if (FikaPlugin.UsePingSystem.Value)
+						{
+							PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId); 
+						}
 					}
 					break;
 				case EPackageType.TrainSync:
