@@ -640,8 +640,12 @@ namespace Fika.Core.Coop.Players
 			Rotation = new Vector2(Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, interpolateRatio),
 				Mathf.LerpUnclamped(from.Rotation.y, to.Rotation.y, interpolateRatio));
 
-			HeadRotation = to.HeadRotation;
-			ProceduralWeaponAnimation.SetHeadRotation(HeadRotation);
+			if (to.HeadRotation != default)
+			{
+				Vector3 newRotation = Vector3.LerpUnclamped(HeadRotation, to.HeadRotation, interpolateRatio);
+				HeadRotation = newRotation;
+				ProceduralWeaponAnimation.SetHeadRotation(newRotation); 
+			}
 
 			bool isGronded = to.IsGrounded;
 			MovementContext.IsGrounded = isGronded;
@@ -709,9 +713,11 @@ namespace Fika.Core.Coop.Players
 
 			Transform.position = Vector3.LerpUnclamped(from.Position, to.Position, interpolateRatio);
 
-			if (!Mathf.Approximately(MovementContext.Tilt, to.Tilt))
+			float currentTilt = MovementContext.Tilt;
+			if (!Mathf.Approximately(currentTilt, to.Tilt))
 			{
-				MovementContext.SetTilt(to.Tilt, true);
+				float newTilt = Mathf.LerpUnclamped(currentTilt, to.Tilt, interpolateRatio);
+				MovementContext.SetTilt(newTilt, true);
 			}
 
 			ObservedOverlap = to.WeaponOverlap;
