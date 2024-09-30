@@ -716,7 +716,6 @@ namespace Fika.Core.Coop.Players
 
 			ObservedOverlap = to.WeaponOverlap;
 			LeftStanceDisabled = to.LeftStanceDisabled;
-			MovementContext.SurfaceNormal = to.SurfaceNormal;
 		}
 
 		public override void InteractionRaycast()

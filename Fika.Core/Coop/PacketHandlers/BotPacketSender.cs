@@ -93,8 +93,7 @@ namespace Fika.Core.Coop.PacketHandlers
 				player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
 				player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
 				player.MovementContext.BlindFire, player.ObservedOverlap, player.LeftStanceDisabled,
-				player.MovementContext.IsGrounded, player.HasGround, player.CurrentSurface, player.MovementContext.SurfaceNormal,
-				NetworkTimeSync.Time);
+				player.MovementContext.IsGrounded, player.HasGround, player.CurrentSurface, NetworkTimeSync.Time);
 
 			Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
 		}
