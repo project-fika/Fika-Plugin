@@ -1057,7 +1057,9 @@ namespace Fika.Core.Networking
 
 			if (!packet.IsRequest)
 			{
-				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}");
+#if DEBUG
+				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}"); 
+#endif
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
 					coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
@@ -1067,7 +1069,9 @@ namespace Fika.Core.Networking
 			}
 			else if (packet.IsRequest)
 			{
-				logger.LogInfo($"Received CharacterRequest from server, send my Profile.");
+#if DEBUG
+				logger.LogInfo($"Received CharacterRequest from server, send my Profile."); 
+#endif
 				AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
 				{
 					IsRequest = false,
