@@ -638,6 +638,11 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
+		public override void HealthControllerUpdate(float deltaTime)
+		{
+			_healthController.ManualUpdate(deltaTime);
+		}
+
 		public override void OnMounting(GStruct179.EMountingCommand command)
 		{
 			MountingPacket packet = new(command)

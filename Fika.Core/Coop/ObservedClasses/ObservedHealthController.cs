@@ -4,6 +4,7 @@ using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -27,6 +28,23 @@ namespace Fika.Core.Coop.ObservedClasses
 		public override void CancelApplyingItem()
 		{
 			// Do nothing
+		}
+
+		public void PauseAllEffects()
+		{
+			EffectHandler handler = new(this);
+			for (int i = list_1.Count - 1; i >= 0; i--)
+			{
+				handler.PausedEffects.Add(list_1[i]);
+				GStruct357 gstruct = gclass787_0.Withdraw();
+				gstruct.SaveInfo(list_1[i].Id, list_1[i].HealthController, list_1[i].Type, list_1[i].BodyPart, list_1[i].Strength,
+					list_1[i].CurrentStrength, list_1[i].DelayTime, list_1[i].StateTime, list_1[i].WorkStateTime, list_1[i].BuildUpTime,
+					list_1[i].ResidueTime, list_1[i].State);
+				method_0(list_1[i]);
+				list_1[i].ForceRemove();
+				handler.PausedEffectsInfo.Add(gstruct);
+			}
+			action_2 = new Action(handler.UnpauseEffects);
 		}
 
 		public override Profile.ProfileHealthClass Store(Profile.ProfileHealthClass health = null)
@@ -98,6 +116,27 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 
 			return health;
+		}
+
+		private class EffectHandler(ObservedHealthController healthController)
+		{
+			private readonly ObservedHealthController healthController = healthController;
+			public readonly List<NetworkBodyEffectsAbstractClass> PausedEffects = [];
+			public readonly List<GStruct357> PausedEffectsInfo = [];
+
+			public void UnpauseEffects()
+			{
+				for (int i = PausedEffects.Count - 1; i >= 0; i--)
+				{
+					PausedEffects[i].SetEffectInfo(PausedEffectsInfo[i].ID, PausedEffectsInfo[i].HealthController, PausedEffectsInfo[i].Type,
+						PausedEffectsInfo[i].BodyPart, PausedEffectsInfo[i].Strength, PausedEffectsInfo[i].CurrentStrength,
+						PausedEffectsInfo[i].DelayTime, PausedEffectsInfo[i].StateTime, PausedEffectsInfo[i].WorkStateTime,
+						PausedEffectsInfo[i].BuildUpTime, PausedEffectsInfo[i].ResidueStateTime, PausedEffectsInfo[i].State);
+					healthController.AddEffectToList(PausedEffects[i]);
+					PausedEffects[i].UnPauseEffect();
+					healthController.gclass787_0.Return(PausedEffectsInfo[i]);
+				}
+			}
 		}
 	}
 }

@@ -542,6 +542,11 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
+		public override void ConnectSkillManager()
+		{
+			// Do nothing
+		}
+
 		#region proceed
 		public override void Proceed(KnifeComponent knife, Callback<IKnifeController> callback, bool scheduled = true)
 		{
@@ -608,6 +613,11 @@ namespace Fika.Core.Coop.Players
 		}
 
 		public override void ShowHelloNotification(string sender)
+		{
+			// Do nothing
+		}
+
+		public override void HealthControllerUpdate(float deltaTime)
 		{
 			// Do nothing
 		}
@@ -1156,14 +1166,12 @@ namespace Fika.Core.Coop.Players
 
 		public override void PauseAllEffectsOnPlayer()
 		{
-			// Do nothing
-			// TODO: Implement
+			NetworkHealthController.PauseAllEffects();
 		}
 
 		public override void UnpauseAllEffectsOnPlayer()
 		{
-			// Do nothing
-			// TODO: Implement
+			NetworkHealthController.UnpauseAllEffects();
 		}
 
 		public override void OnVaulting()

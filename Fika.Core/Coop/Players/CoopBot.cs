@@ -113,6 +113,11 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
+		public override void ConnectSkillManager()
+		{
+			// Do nothing
+		}
+
 		public override void CreateMovementContext()
 		{
 			LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
