@@ -1238,6 +1238,23 @@ namespace Fika.Core.Coop.GameMode
 				await InitExfils();
 			}
 
+			if (Location_0.AccessKeys != null && Location_0.AccessKeys.Length > 0)
+			{				
+				IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
+				if (items != null)
+				{
+					Class1463 keyFinder = new()
+					{
+						accessKeys = Location_0.AccessKeys
+					};
+					Item accessKey = items.FirstOrDefault(keyFinder.method_0);
+					if (accessKey != null)
+					{
+						method_5(Profile_0, accessKey.Id);
+					}
+				}
+			}
+
 			IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
 
 			LocalPlayer myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
