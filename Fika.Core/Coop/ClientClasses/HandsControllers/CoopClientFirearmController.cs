@@ -554,15 +554,18 @@ namespace Fika.Core.Coop.ClientClasses
 
 		private void SendEndReloadPacket(int amount)
 		{
-			player.PacketSender.FirearmPackets.Enqueue(new()
+			if (player.HealthController.IsAlive)
 			{
-				ReloadWithAmmoPacket = new()
+				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
-					Reload = true,
-					Status = SubPackets.EReloadWithAmmoStatus.EndReload,
-					AmmoLoadedToMag = amount
-				}
-			});
+					ReloadWithAmmoPacket = new()
+					{
+						Reload = true,
+						Status = SubPackets.EReloadWithAmmoStatus.EndReload,
+						AmmoLoadedToMag = amount
+					}
+				}); 
+			}
 		}
 
 		private void SendBoltActionReloadPacket()
@@ -701,7 +704,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly ItemAddress gridItemAddress = gridItemAddress;
 			private readonly MagazineClass magazine = magazine;
 
-			public void Process(IResult error)
+			public void Process(IResult result)
 			{
 				ItemAddress itemAddress = gridItemAddress;
 				GClass1664 descriptor = itemAddress?.ToDescriptor();
@@ -715,10 +718,10 @@ namespace Fika.Core.Coop.ClientClasses
 				}
 				else
 				{
-					locationDescription = Array.Empty<byte>();
+					locationDescription = [];
 				}
 
-				if (error.Succeed)
+				if (coopPlayer.HealthController.IsAlive)
 				{
 					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
@@ -742,23 +745,26 @@ namespace Fika.Core.Coop.ClientClasses
 			public readonly List<int> shellsIndexes = shellsIndexes;
 			private readonly CylinderMagazineClass cylinderMagazine = cylinderMagazine;
 
-			public void Process(IResult error)
+			public void Process(IResult result)
 			{
-				coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+				if (coopPlayer.HealthController.IsAlive)
 				{
-					ReloadWithAmmoPacket = new()
+					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
-						Reload = true,
-						Status = SubPackets.EReloadWithAmmoStatus.StartReload,
-						AmmoIds = ammoIds
-					},
-					CylinderMagPacket = new()
-					{
-						Changed = true,
-						CamoraIndex = cylinderMagazine.CurrentCamoraIndex,
-						HammerClosed = coopClientFirearmController.Item.CylinderHammerClosed
-					}
-				});
+						ReloadWithAmmoPacket = new()
+						{
+							Reload = true,
+							Status = SubPackets.EReloadWithAmmoStatus.StartReload,
+							AmmoIds = ammoIds
+						},
+						CylinderMagPacket = new()
+						{
+							Changed = true,
+							CamoraIndex = cylinderMagazine.CurrentCamoraIndex,
+							HammerClosed = coopClientFirearmController.Item.CylinderHammerClosed
+						}
+					}); 
+				}
 			}
 		}
 
@@ -768,7 +774,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly ItemAddress placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
 			private readonly AmmoPackReloadingClass ammoPack = ammoPack;
 
-			public void Process(IResult error)
+			public void Process(IResult result)
 			{
 				ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
 				GClass1664 descriptor = itemAddress?.ToDescriptor();
@@ -806,9 +812,9 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly CoopPlayer coopPlayer = coopPlayer;
 			private readonly string[] ammoIds = ammoIds;
 
-			public void Process(IResult error)
+			public void Process(IResult result)
 			{
-				if (error.Succeed)
+				if (coopPlayer.HealthController.IsAlive)
 				{
 					coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
 					{
