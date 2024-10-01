@@ -269,6 +269,8 @@ namespace Fika.Core
 			new GClass596_method_0_Patch().Enable();
 			new GClass596_method_30_Patch().Enable();
 			new GClass1350_Constructor_Patch().Enable();
+			new AchievementsScreen_Show_Patch().Enable();
+			new AchievementView_Show_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
