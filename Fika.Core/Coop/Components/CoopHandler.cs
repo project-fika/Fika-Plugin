@@ -278,15 +278,9 @@ namespace Fika.Core.Coop.Components
 			}
 
 			await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
-				PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.General).ContinueWith(x =>
+				PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.Low).ContinueWith(x =>
 				{
-					if (x.IsCompleted)
-					{
-#if DEBUG
-						Logger.LogInfo($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Complete");
-#endif
-					}
-					else if (x.IsFaulted)
+					if (x.IsFaulted)
 					{
 						Logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
 					}
