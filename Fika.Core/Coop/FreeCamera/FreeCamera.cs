@@ -38,6 +38,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private float yaw = 0f;
 		private float pitch = 0f;
 		private const float lookSensitivity = 3f;
+		private const float minFov = 10f;
 		private float originalFov;
 
 		private KeyCode forwardKey = KeyCode.W;
@@ -355,53 +356,69 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-			bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-			bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+			bool fastMode = Input.GetKey(KeyCode.LeftShift);
+			bool superFastMode = Input.GetKey(KeyCode.LeftControl);
 			float movementSpeed = fastMode ? 20f : 2f;
+			float deltaTime = Time.deltaTime;
 
 			if (superFastMode)
 			{
 				movementSpeed *= 8;
 			}
 
-			if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
+			if (Input.GetKey(leftKey))
 			{
-				transform.position += -transform.right * (movementSpeed * Time.deltaTime);
+				transform.position += -transform.right * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
+			if (Input.GetKey(rightKey))
 			{
-				transform.position += transform.right * (movementSpeed * Time.deltaTime);
+				transform.position += transform.right * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
+			if (FikaPlugin.DroneMode.Value)
 			{
-				transform.position += transform.forward * (movementSpeed * Time.deltaTime);
-			}
+				if (Input.GetKey(forwardKey))
+				{
+					transform.position += GetNormalizedVector3(transform) * (movementSpeed * deltaTime);
+				}
 
-			if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
+				if (Input.GetKey(backKey))
+				{
+					transform.position += -GetNormalizedVector3(transform) * (movementSpeed * deltaTime);
+				}
+			}
+			else
 			{
-				transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
+				if (Input.GetKey(forwardKey))
+				{
+					transform.position += transform.forward * (movementSpeed * deltaTime);
+				}
+
+				if (Input.GetKey(backKey))
+				{
+					transform.position += -transform.forward * (movementSpeed * deltaTime);
+				}
 			}
 
 			if (Input.GetKey(relUpKey))
 			{
-				transform.position += transform.up * (movementSpeed * Time.deltaTime);
+				transform.position += transform.up * (movementSpeed * deltaTime);
 			}
 
 			if (Input.GetKey(relDownKey))
 			{
-				transform.position += -transform.up * (movementSpeed * Time.deltaTime);
+				transform.position += -transform.up * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
+			if (Input.GetKey(upKey))
 			{
-				transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
+				transform.position += Vector3.up * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
+			if (Input.GetKey(downKey))
 			{
-				transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
+				transform.position += -Vector3.up * (movementSpeed * deltaTime);
 			}
 
 			// Teleportation
@@ -425,9 +442,9 @@ namespace Fika.Core.Coop.FreeCamera
 			if (scrollValue != 0)
 			{
 				float currentFov = CameraClass.Instance.Fov;
-				if (currentFov >= 15f && currentFov <= originalFov)
+				if (currentFov >= minFov && currentFov <= originalFov)
 				{
-					float newFov = Mathf.Clamp(currentFov -= (scrollValue * 100), 15, originalFov);
+					float newFov = Mathf.Clamp(currentFov -= (scrollValue * 100), minFov, originalFov);
 					CameraClass.Instance.SetFov(newFov, 1f);
 				}
 			}
@@ -439,6 +456,13 @@ namespace Fika.Core.Coop.FreeCamera
 			pitch = Mathf.Clamp(pitch, -89, 89);
 			transform.eulerAngles = new(-pitch, yaw, 0);
 			yaw = (yaw + x * lookSensitivity) % 360f;
+		}
+
+		private Vector3 GetNormalizedVector3(Transform transform)
+		{
+			Vector3 newForward = transform.forward;
+			newForward.y = 0f;
+			return newForward.normalized;
 		}
 
 		private void SetLeftShoulderMode(bool enabled)

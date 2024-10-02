@@ -149,6 +149,7 @@ namespace Fika.Core
 		public static ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
 		public static ConfigEntry<bool> AllowSpectateBots;
 		public static ConfigEntry<bool> AZERTYMode { get; set; }
+		public static ConfigEntry<bool> DroneMode { get; set; }
 		public static ConfigEntry<bool> KeybindOverlay { get; set; }
 
 		// Performance
@@ -516,6 +517,9 @@ namespace Fika.Core
 
 			AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false,
 				"If free camera should use AZERTY keys for input.");
+
+			DroneMode = Config.Bind("Coop | Debug", "Drone Mode", false,
+				"If the free camera should move only along the vertical axis like a drone");
 
 			KeybindOverlay = Config.Bind("Coop | Debug", "Keybind Overlay", true,
 				"If an overlay with all free cam keybinds should show.");
