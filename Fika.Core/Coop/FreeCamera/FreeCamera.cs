@@ -363,7 +363,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 			if (superFastMode)
 			{
-				movementSpeed *= 8;
+				movementSpeed *= 12;
 			}
 
 			if (Input.GetKey(leftKey))
