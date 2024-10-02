@@ -1995,6 +1995,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (fikaDebug != null)
 			{
+				ToggleDebug(false);
 				Destroy(fikaDebug);
 				fikaDebug = null;
 			}
