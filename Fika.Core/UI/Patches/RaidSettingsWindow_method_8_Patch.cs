@@ -20,14 +20,15 @@ namespace Fika.Core.UI.Patches
 		[PatchPrefix]
 		public static bool Prefix(CanvasGroup ____aiDifficultyCanvasGroup, CanvasGroup ____aiAmountCanvasGroup, DropDownBox ____aiAmountDropdown, List<CanvasGroup> ____wavesCanvasGroups)
 		{
+			bool hasAi = ____aiAmountDropdown.CurrentIndex != 1;
 			foreach (CanvasGroup canvasGroup in ____wavesCanvasGroups)
 			{
-				canvasGroup.interactable = true;
-				canvasGroup.blocksRaycasts = true;
-				canvasGroup.alpha = 1f;
+				canvasGroup.interactable = hasAi;
+				canvasGroup.blocksRaycasts = hasAi;
+				canvasGroup.alpha = hasAi ? 1f : 0.3f;
 			}
 
-			____aiDifficultyCanvasGroup.SetUnlockStatus(____aiAmountDropdown.CurrentIndex != 1, true);
+			____aiDifficultyCanvasGroup.SetUnlockStatus(hasAi, true);
 			____aiAmountCanvasGroup.SetUnlockStatus(true, true);
 
 			return false;
