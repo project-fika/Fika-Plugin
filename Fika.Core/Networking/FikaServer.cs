@@ -121,9 +121,24 @@ namespace Fika.Core.Networking
 
 		public async Task Init()
 		{
-			int sendRateSetting = FikaPlugin.SendRate.Value;
-			logger.LogInfo($"Starting server with SendRate: {sendRateSetting}");
-			sendRate = sendRateSetting;
+			switch (FikaPlugin.SendRate.Value)
+			{
+				case FikaPlugin.ESendRate.ExtremelyLow:
+					sendRate = 10;
+					break;
+				case FikaPlugin.ESendRate.Low:
+					sendRate = 20;
+					break;
+				case FikaPlugin.ESendRate.Medium:
+					sendRate = 40;
+					break;
+				case FikaPlugin.ESendRate.High:
+					sendRate = 60;
+					break;
+				default:
+					break;
+			};
+			logger.LogInfo($"Starting server with SendRate: {sendRate}");
 			port = FikaPlugin.UDPPort.Value;
 
 			NetworkGameSession.Rtt = 0;

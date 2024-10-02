@@ -23,6 +23,7 @@ using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -183,7 +184,7 @@ namespace Fika.Core
 		public static ConfigEntry<bool> UseUPnP { get; set; }
 		public static ConfigEntry<bool> UseNatPunching { get; set; }
 		public static ConfigEntry<int> ConnectionTimeout { get; set; }
-		public static ConfigEntry<int> SendRate { get; set; }
+		public static ConfigEntry<ESendRate> SendRate { get; set; }
 		public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
 
 		// Gameplay
@@ -605,8 +606,8 @@ namespace Fika.Core
 			ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15,
 				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 2 }));
 
-			SendRate = Config.Bind("Network", "Send Rate", 30,
-				new ConfigDescription("How often per second movement packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.", new AcceptableValueRange<int>(20, 60), new ConfigurationManagerAttributes() { Order = 1 }));
+			SendRate = Config.Bind("Network", "Send Rate", ESendRate.Low,
+				new ConfigDescription("How often per second movement packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.\nAmount is per second:\n\nExtremely Low = 10\nLow = 20\nMedium = 40\nHigh = 60\n\nRecommended to leave at no higher than Medium as the gains are insignificant after.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
 			SmoothingRate = Config.Bind("Network", "Smoothing Rate", ESmoothingRate.Medium,
 				new ConfigDescription("Local simulation is behind by Send Rate * Smoothing Rate. This guarantees that we always have enough snapshots in the buffer to mitigate lags & jitter during interpolation.\n\nLow = 1.5\nMedium = 2\nHigh = 2.5\n\nSet this to 'High' if movement isn't smooth. Cannot be changed during a raid.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
@@ -712,6 +713,15 @@ namespace Fika.Core
 
 		public enum ESmoothingRate
 		{
+			Low,
+			Medium,
+			High
+		}
+
+		public enum ESendRate
+		{
+			[Description("Extremely Low")]
+			ExtremelyLow,
 			Low,
 			Medium,
 			High

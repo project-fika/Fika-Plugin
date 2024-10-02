@@ -2,23 +2,14 @@
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
-	public struct ExponentialMovingAverage
+	public struct ExponentialMovingAverage(int n)
 	{
-		readonly double alpha;
-		bool initialized;
+		readonly double alpha = 2.0 / (n + 1);
+		bool initialized = false;
 
-		public double Value;
-		public double Variance;
-		public double StandardDeviation;
-
-		public ExponentialMovingAverage(int n)
-		{
-			alpha = 2.0 / (n + 1);
-			initialized = false;
-			Value = 0;
-			Variance = 0;
-			StandardDeviation = 0;
-		}
+		public double Value = 0;
+		public double Variance = 0;
+		public double StandardDeviation = 0;
 
 		public void Add(double newValue)
 		{
