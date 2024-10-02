@@ -72,7 +72,7 @@ namespace Fika.Core.Coop.Players
 
 			await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
 				new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
-				new CoopObservedStatisticsManager(), null, null, filter,
+				new ObservedStatisticsManager(), null, null, filter,
 				EVoipState.NotAvailable, aiControl, false);
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);

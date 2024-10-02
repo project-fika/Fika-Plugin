@@ -10,10 +10,8 @@ namespace Fika.Core.Coop.ObservedClasses
 	/// Created by: Paulov
 	/// Paulov: Uses stubs for all of Statistics Manager
 	/// </summary>
-	public sealed class CoopObservedStatisticsManager : IStatisticsManager
+	public sealed class ObservedStatisticsManager : IStatisticsManager
 	{
-		private Player Player;
-
 		public TimeSpan CurrentSessionLength
 		{
 			get
@@ -43,7 +41,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public void Init(Player player)
 		{
-			Player = player;
+
 		}
 
 		public void OnEnemyDamage(DamageInfo damage, EBodyPart bodyPart, string playerProfileId, EPlayerSide playerSide, WildSpawnType role, string groupId, float fullHealth, bool isHeavyDamage, float distance, int hour, List<string> targetEquipment, HealthEffects enemyEffects, List<string> zoneIds)

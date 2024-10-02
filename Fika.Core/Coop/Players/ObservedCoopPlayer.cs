@@ -130,7 +130,7 @@ namespace Fika.Core.Coop.Players
 			ObservedInventoryController inventoryController = new(player, profile, true, firstId, firstOperationId, aiControl);
 			ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
 
-			CoopObservedStatisticsManager statisticsManager = new();
+			ObservedStatisticsManager statisticsManager = new();
 			ObservedQuestController observedQuestController = null;
 			if (!aiControl)
 			{

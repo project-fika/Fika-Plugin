@@ -21,6 +21,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
+using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Patches;
@@ -901,10 +902,12 @@ namespace Fika.Core.Coop.GameMode
 			bool spawnedInSession = profile.Side == EPlayerSide.Savage || GClass1615.IsTransit(profile.Id, out int _);
 			profile.SetSpawnedInSession(spawnedInSession);
 
+			statisticsManager = FikaBackendUtils.IsDedicated ? new ObservedStatisticsManager() : new GClass1931();
+
 			CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
 				profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-				new GClass1931(), new GClass1573(), session, localMode, isServer ? 0 : 1000);
+				statisticsManager, new GClass1573(), session, localMode, isServer ? 0 : 1000);
 
 			coopPlayer.Location = Location_0.Id;
 
