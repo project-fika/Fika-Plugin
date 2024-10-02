@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	internal class ObservedSprintState : SprintState
+	public class ObservedSprintState : SprintState
 	{
 		public ObservedSprintState(MovementContext movementContext) : base(movementContext)
 		{
