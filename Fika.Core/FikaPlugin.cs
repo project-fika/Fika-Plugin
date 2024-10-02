@@ -101,7 +101,6 @@ namespace Fika.Core
 
 		//Advanced
 		public static ConfigEntry<bool> OfficialVersion { get; set; }
-		public static ConfigEntry<bool> DisableSPTAIPatches { get; set; }
 
 		// Coop
 		public static ConfigEntry<bool> ShowNotifications { get; set; }
