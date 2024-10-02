@@ -1275,5 +1275,15 @@ namespace Fika.Core.Networking
 		{
 			packetProcessor.SubscribeNetSerializable(handle);
 		}
+
+		public void PrintStatistics()
+		{
+			logger.LogInfo(":::: Fika Client Session Statistics ::::");
+			logger.LogInfo($"Sent packets: {netClient.Statistics.PacketsSent}");
+			logger.LogInfo($"Sent data: {FikaGlobals.FormatFileSize(netClient.Statistics.BytesSent)}");
+			logger.LogInfo($"Received packets: {netClient.Statistics.PacketsReceived}");
+			logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(netClient.Statistics.BytesReceived)}");
+			logger.LogInfo($"Packet loss: {netClient.Statistics.PacketLossPercent}%");
+		}
 	}
 }

@@ -1329,6 +1329,16 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable(handle);
 		}
 
+		public void PrintStatistics()
+		{
+			logger.LogInfo(":::: Fika Server Session Statistics ::::");
+			logger.LogInfo($"Sent packets: {netServer.Statistics.PacketsSent}");
+			logger.LogInfo($"Sent data: {FikaGlobals.FormatFileSize(netServer.Statistics.BytesSent)}");
+			logger.LogInfo($"Received packets: {netServer.Statistics.PacketsReceived}");
+			logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(netServer.Statistics.BytesReceived)}");
+			logger.LogInfo($"Packet loss: {netServer.Statistics.PacketLossPercent}%");
+		}
+
 		private class InventoryOperationHandler(GStruct423 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
 		{
 			public GStruct423 OperationResult = operationResult;

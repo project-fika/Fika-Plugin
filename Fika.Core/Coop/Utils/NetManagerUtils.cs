@@ -46,31 +46,6 @@ namespace Fika.Core.Coop.Utils
 			}
 		}
 
-		/// <summary>
-		/// Sends a <see cref="INetSerializable"/> reliable unordered packet
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="packet"></param>
-		[Obsolete("Do not use", true)]
-		public static void SendPacket<T>(ref T packet) where T : INetSerializable
-		{
-			if (FikaBackendUtils.IsServer)
-			{
-				FikaServer server = Singleton<FikaServer>.Instance;
-				if (server != null)
-				{
-					server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
-					return;
-				}
-			}
-
-			FikaClient client = Singleton<FikaClient>.Instance;
-			if (client != null)
-			{
-				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
-			}
-		}
-
 		public static void CreatePingingClient()
 		{
 			if (FikaGameObject == null)
@@ -96,6 +71,7 @@ namespace Fika.Core.Coop.Utils
 					}
 					try
 					{
+						server.PrintStatistics();
 						server.NetServer.Stop();
 					}
 					catch (Exception ex)
@@ -115,6 +91,7 @@ namespace Fika.Core.Coop.Utils
 					}
 					try
 					{
+						client.PrintStatistics();
 						client.NetClient.Stop();
 					}
 					catch (Exception ex)

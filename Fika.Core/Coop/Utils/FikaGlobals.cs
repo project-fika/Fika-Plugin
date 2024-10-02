@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.Utils
@@ -25,6 +26,15 @@ namespace Fika.Core.Coop.Utils
 		public static float GetLocalPlayerAimingSensitivity()
 		{
 			return Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity;
+		}
+
+		public static string FormatFileSize(long bytes)
+		{
+			int unit = 1024;
+			if (bytes < unit) { return $"{bytes} B"; }
+
+			int exp = (int)(Math.Log(bytes) / Math.Log(unit));
+			return $"{bytes / Math.Pow(unit, exp):F2} {("KMGTPE")[exp - 1]}B";
 		}
 	}
 }
