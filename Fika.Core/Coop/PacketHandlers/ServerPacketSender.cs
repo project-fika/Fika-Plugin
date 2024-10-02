@@ -285,7 +285,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 				SendPacket(ref genericPacket, true);
 
-				if (FikaPlugin.PlayPingAnimation.Value)
+				if (FikaPlugin.PlayPingAnimation.Value && player.HealthController.IsAlive)
 				{
 					player.vmethod_6(EInteraction.ThereGesture);
 				}
