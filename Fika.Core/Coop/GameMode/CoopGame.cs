@@ -150,8 +150,8 @@ namespace Fika.Core.Coop.GameMode
 				DateTime currentTime = backendDateTime.DateTime_1;
 				DateTime newTime = new(currentTime.Year, currentTime.Month, currentTime.Day, timeAndWeather.HourOfDay,
 					currentTime.Minute, currentTime.Second, currentTime.Millisecond);
+				backendDateTime.Reset(newTime);
 				dateTime = EDateTime.CURR;
-				backendDateTime.DateTime_1 = newTime;
 			}
 
 			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, backendDateTime, insurance, menuUI, gameUI,
