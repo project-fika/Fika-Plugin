@@ -1217,7 +1217,7 @@ namespace Fika.Core.Coop.GameMode
 				Location_0.SpawnPointParams);
 			int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
 			GStruct390 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-			SpawnSystem = GClass3228.CreateSpawnSystem(settings, Class1464.class1464_0.method_0, Singleton<GameWorld>.Instance, zones: botsController_0, spawnPoints);
+			SpawnSystem = GClass3228.CreateSpawnSystem(settings, Class1464.class1464_0.method_0, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
 
 			if (isServer)
 			{

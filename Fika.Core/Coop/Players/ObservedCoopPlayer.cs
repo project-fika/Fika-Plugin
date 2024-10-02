@@ -714,7 +714,7 @@ namespace Fika.Core.Coop.Players
 
 			if (!IsInventoryOpened && isGrounded)
 			{
-				Move(Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, interpolateRatio));
+				Move(to.MovementDirection);
 				if (isServer)
 				{
 					MovementContext.method_1(to.MovementDirection);
