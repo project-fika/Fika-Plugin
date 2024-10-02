@@ -429,11 +429,11 @@ namespace Fika.Core.Coop.FreeCamera
 					return;
 				}
 
-				Player player = Singleton<GameWorld>.Instance.MainPlayer;
+				CoopPlayer player = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
-				if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
+				if (player != null && !coopHandler.ExtractedPlayers.Contains(player.NetId) && player.HealthController.IsAlive)
 				{
-					player?.Teleport(transform.position);
+					player.Teleport(transform.position);
 				}
 			}
 
