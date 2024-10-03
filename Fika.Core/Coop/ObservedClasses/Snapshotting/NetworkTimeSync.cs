@@ -8,7 +8,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 	public static class NetworkTimeSync
 	{
 		private static readonly Stopwatch stopwatch = new();
-		private static double Offset = 0;
 
 		/// <summary>
 		/// Gets the current time in the game since start
@@ -17,7 +16,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		{
 			get
 			{
-				return stopwatch.Elapsed.TotalSeconds + Offset;
+				return stopwatch.Elapsed.TotalSeconds;
 			}
 		}
 
