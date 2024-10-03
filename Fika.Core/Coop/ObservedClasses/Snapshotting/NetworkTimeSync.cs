@@ -22,10 +22,11 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		}
 
 		/// <summary>
-		/// Starts the time counter
+		/// Starts the time counter (with an optional offset from server)
 		/// </summary>
-		public static void Start()
+		public static void Start(double serverOffset = 0)
 		{
+			Offset = serverOffset;
 			stopwatch.Restart();
 		}
 
@@ -35,6 +36,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		public static void Reset()
 		{
 			stopwatch.Reset();
+			Offset = 0;
 		}
 	}
 }
