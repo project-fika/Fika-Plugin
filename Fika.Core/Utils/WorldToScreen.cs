@@ -71,7 +71,7 @@ namespace Fika.Core.Utils
 				return 1f;
 			}
 
-			return weaponSight.GetCurrentOpticZoom();
+			return weaponSight.ScopeZoomValue;
 		}
 
 		private static Vector3 GetOpticCenterScreenPosition(ProceduralWeaponAnimation weaponAnimation, Camera worldCamera)
