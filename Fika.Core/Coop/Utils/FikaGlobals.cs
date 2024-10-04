@@ -1,6 +1,15 @@
 ﻿using Comfort.Common;
+using EFT;
+using EFT.Interactive;
+using EFT.InventoryLogic;
+using EFT.UI;
+using Fika.Core.Coop.Players;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -35,6 +44,41 @@ namespace Fika.Core.Coop.Utils
 
 			int exp = (int)(Math.Log(bytes) / Math.Log(unit));
 			return $"{bytes / Math.Pow(unit, exp):F2} {("KMGTPE")[exp - 1]}B";
+		}
+
+		public static void SpawnItemInWorld(Item item, CoopPlayer player)
+		{
+			StaticManager.BeginCoroutine(SpawnItemRoutine(item, player));
+		}
+
+		private static IEnumerator SpawnItemRoutine(Item item, CoopPlayer player)
+		{
+			List<ResourceKey> collection = [];
+			IEnumerable<Item> items = item.GetAllItems();
+			foreach (Item subItem in items)
+			{
+				foreach (ResourceKey resourceKey in subItem.Template.AllResources)
+				{
+					collection.Add(resourceKey);
+				}
+			}
+			Task loadTask = Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online,
+				[.. collection], JobPriority.Immediate, null, default);
+
+			while (!loadTask.IsCompleted)
+			{
+				yield return new WaitForEndOfFrame();
+			}
+
+			Singleton<GameWorld>.Instance.SetupItem(item, player,
+				player.Transform.Original.position + player.Transform.Original.forward + (player.Transform.Original.up / 2), Quaternion.identity);
+
+			if (player.IsYourPlayer)
+			{
+				ConsoleScreen.Log("Spawned item: " + item.ShortName.Localized());
+				yield break;
+			}
+			ConsoleScreen.Log($"{player.Profile.Info.Nickname} has spawned item: {item.ShortName.Localized()}");
 		}
 	}
 }

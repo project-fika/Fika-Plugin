@@ -168,6 +168,10 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
 
+#if DEBUG
+			AddDebugPackets();
+#endif
+
 			netServer = new(this)
 			{
 				BroadcastReceiveEnabled = true,
@@ -270,6 +274,20 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
 		}
 
+		private void AddDebugPackets()
+		{
+			packetProcessor.SubscribeNetSerializable<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
+		}
+
+		private void OnSpawnItemPacketReceived(SpawnItemPacket packet, NetPeer peer)
+		{
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
+			}
+		}
 		private void OnUsableItemPacketReceived(UsableItemPacket packet, NetPeer peer)
 		{
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);

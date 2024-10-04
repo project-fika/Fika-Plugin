@@ -1,11 +1,13 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Console.Core;
+using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,17 +20,8 @@ namespace Fika.Core.Console
 		[ConsoleCommand("bring", "", null, "Teleports all AI to yourself as the host", [])]
 		public static void Bring()
 		{
-			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-			if (coopGame == null)
+			if (!CheckForGame())
 			{
-				ConsoleScreen.LogWarning("You are not in a game.");
-				return;
-			}
-
-			if (coopGame.Status != GameStatus.Started)
-			{
-				ConsoleScreen.LogWarning("Game is not running.");
 				return;
 			}
 
@@ -62,17 +55,8 @@ namespace Fika.Core.Console
 		[ConsoleCommand("god", "", null, "Set god mode on/off", [])]
 		public static void God([ConsoleArgument(false, "true or false to toggle god mode")] bool state)
 		{
-			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-			if (coopGame == null)
+			if (!CheckForGame())
 			{
-				ConsoleScreen.LogWarning("You are not in a game.");
-				return;
-			}
-
-			if (coopGame.Status != GameStatus.Started)
-			{
-				ConsoleScreen.LogWarning("Game is not running.");
 				return;
 			}
 
@@ -192,6 +176,51 @@ namespace Fika.Core.Console
 			}
 		}
 
+		[ConsoleCommand("spawnItem", "", null, "Spawns an item from a templateId")]
+		public static void SpawnItem([ConsoleArgument("", "The templateId to spawn an item from")] string templateId,
+			[ConsoleArgument(1, "The amount to spawn if the item can stack")] int amount = 1)
+		{
+			if (!CheckForGame())
+			{
+				return;
+			}
+
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			CoopPlayer player = (CoopPlayer)gameWorld.MainPlayer;
+			if (!player.HealthController.IsAlive)
+			{
+				ConsoleScreen.LogError("You cannot spawn an item while dead!");
+				return;
+			}
+
+			ItemFactoryClass itemFactory = Singleton<ItemFactoryClass>.Instance;
+			if (itemFactory == null)
+			{
+				ConsoleScreen.LogError("ItemFactory was null!");
+				return;
+			}
+
+			Item item = itemFactory.GetPresetItem(templateId);
+            if (amount > 1 && item.StackMaxSize > 1)
+            {
+				item.StackObjectsCount = Mathf.Clamp(amount, 1, item.StackMaxSize);
+            }
+            FikaGlobals.SpawnItemInWorld(item, player);
+
+			SpawnItemPacket packet = new()
+			{
+				NetId = player.NetId,
+				Item = item
+			};
+
+			if (FikaBackendUtils.IsServer)
+			{
+				Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+				return;
+			}
+			Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+		}
+
 #endif
 
 		[ConsoleCommand("debug", "", null, "Toggle debug window", [])]
@@ -218,6 +247,25 @@ namespace Fika.Core.Console
 		public static void Clear()
 		{
 			Singleton<PreloaderUI>.Instance.Console.Clear();
+		}
+
+		private static bool CheckForGame()
+		{
+			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+
+			if (coopGame == null)
+			{
+				ConsoleScreen.LogWarning("You are not in a game.");
+				return false;
+			}
+
+			if (coopGame.Status != GameStatus.Started)
+			{
+				ConsoleScreen.LogWarning("Game is not running.");
+				return false;
+			}
+
+			return true;
 		}
 	}
 }

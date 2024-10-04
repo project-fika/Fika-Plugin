@@ -154,6 +154,10 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ArtilleryPacket>(OnArtilleryPacketReceived);
 
+#if DEBUG
+			AddDebugPackets();
+#endif
+
 			netClient = new(this)
 			{
 				UnconnectedMessagesEnabled = true,
@@ -200,6 +204,18 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
 		}
 
+		private void AddDebugPackets()
+		{
+			packetProcessor.SubscribeNetSerializable<SpawnItemPacket>(OnSpawnItemPacketReceived);
+		}
+
+		private void OnSpawnItemPacketReceived(SpawnItemPacket packet)
+		{
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
+			}
+		}
 		private void OnArtilleryPacketReceived(ArtilleryPacket packet)
 		{
 			Singleton<GameWorld>.Instance.ClientShellingController.SyncProjectilesStates(ref packet.Data);
@@ -1056,7 +1072,7 @@ namespace Fika.Core.Networking
 			if (!packet.IsRequest)
 			{
 #if DEBUG
-				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}"); 
+				logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}");
 #endif
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
@@ -1068,7 +1084,7 @@ namespace Fika.Core.Networking
 			else if (packet.IsRequest)
 			{
 #if DEBUG
-				logger.LogInfo($"Received CharacterRequest from server, send my Profile."); 
+				logger.LogInfo($"Received CharacterRequest from server, send my Profile.");
 #endif
 				AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
 				{
