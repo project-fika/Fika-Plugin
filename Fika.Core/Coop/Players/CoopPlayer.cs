@@ -994,7 +994,7 @@ namespace Fika.Core.Coop.Players
 			return string.Empty;
 		}
 
-		public virtual void HandleCommonPacket(in CommonPlayerPacket packet)
+		public virtual void HandleCommonPacket(CommonPlayerPacket packet)
 		{
 			if (packet.Phrase != EPhraseTrigger.PhraseNone)
 			{
@@ -1121,7 +1121,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void HandleUsableItemPacket(in UsableItemPacket packet)
+		public void HandleUsableItemPacket(UsableItemPacket packet)
 		{
 			if (HandsController is UsableItemController usableItemController)
 			{
@@ -1180,7 +1180,7 @@ namespace Fika.Core.Coop.Players
 			ActiveHealthController.UnpauseAllEffects();
 		}
 
-		public void HandleCallbackFromServer(in OperationCallbackPacket operationCallbackPacket)
+		public void HandleCallbackFromServer(OperationCallbackPacket operationCallbackPacket)
 		{
 			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Action<ServerOperationStatus> callback))
 			{
@@ -1197,11 +1197,11 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public virtual void HandleWeaponPacket(in WeaponPacket packet)
+		public virtual void HandleWeaponPacket(WeaponPacket packet)
 		{
 			if (HandsController is CoopObservedFirearmController firearmController)
 			{
-				firearmController.HandleFirearmPacket(packet, _inventoryController);
+				firearmController.HandleFirearmPacket(ref packet, _inventoryController);
 			}
 
 			if (packet.Loot)

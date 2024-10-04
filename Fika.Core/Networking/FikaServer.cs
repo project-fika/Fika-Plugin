@@ -293,7 +293,7 @@ namespace Fika.Core.Networking
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.HandleUsableItemPacket(in packet);
+				playerToApply.HandleUsableItemPacket(packet);
 			}
 		}
 

@@ -228,7 +228,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return HasBipod && CurrentOperation.ToggleBipod();
 		}
 
-		public void HandleFirearmPacket(in WeaponPacket packet, InventoryController inventoryController)
+		public void HandleFirearmPacket(ref WeaponPacket packet, InventoryController inventoryController)
 		{
 			if (packet.HasShotInfo)
 			{
@@ -278,7 +278,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				}
 				else if (packet.ShotInfoPacket.ShotType == EShotType.RegularShot)
 				{
-					HandleObservedShot(packet, inventoryController);
+					HandleObservedShot(ref packet, inventoryController);
 				}
 			}
 
@@ -568,7 +568,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		private void HandleObservedShot(in WeaponPacket packet, InventoryController inventoryController)
+		private void HandleObservedShot(ref WeaponPacket packet, InventoryController inventoryController)
 		{
 			if (string.IsNullOrEmpty(packet.ShotInfoPacket.AmmoTemplate))
 			{

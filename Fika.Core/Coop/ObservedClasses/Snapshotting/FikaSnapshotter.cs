@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 			{
 				SnapshotInterpolation.Step(buffer, Time.unscaledDeltaTime, ref localTimeline, localTimeScale, out PlayerStatePacket fromSnapshot,
 					out PlayerStatePacket toSnapshot, out double ratio);
-				player.Interpolate(toSnapshot, fromSnapshot, ratio);
+				player.Interpolate(ref toSnapshot, ref fromSnapshot, ratio);
 			}
 		}
 

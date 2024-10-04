@@ -640,7 +640,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, double ratio)
+		public void Interpolate(ref PlayerStatePacket to, ref PlayerStatePacket from, double ratio)
 		{
 			float interpolateRatio = (float)ratio;
 			bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();

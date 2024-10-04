@@ -231,7 +231,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.HandleUsableItemPacket(in packet);
+				playerToApply.HandleUsableItemPacket(packet);
 			}
 		}
 
@@ -660,7 +660,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player) && player.IsYourPlayer)
 			{
-				player.HandleCallbackFromServer(in packet);
+				player.HandleCallbackFromServer(packet);
 			}
 		}
 

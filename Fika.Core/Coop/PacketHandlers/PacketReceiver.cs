@@ -141,7 +141,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			}
 		}
 
-		private void ConvertInventoryPacket(in InventoryPacket packet)
+		private void ConvertInventoryPacket(InventoryPacket packet)
 		{
 			if (packet.HasItemControllerExecutePacket)
 			{
