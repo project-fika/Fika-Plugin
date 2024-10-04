@@ -201,11 +201,15 @@ namespace Fika.Core.Console
 			}
 
 			Item item = itemFactory.GetPresetItem(templateId);
-            if (amount > 1 && item.StackMaxSize > 1)
-            {
+			if (amount > 1 && item.StackMaxSize > 1)
+			{
 				item.StackObjectsCount = Mathf.Clamp(amount, 1, item.StackMaxSize);
-            }
-            FikaGlobals.SpawnItemInWorld(item, player);
+			}
+			else
+			{
+				item.StackObjectsCount = 1;
+			}
+			FikaGlobals.SpawnItemInWorld(item, player);
 
 			SpawnItemPacket packet = new()
 			{
