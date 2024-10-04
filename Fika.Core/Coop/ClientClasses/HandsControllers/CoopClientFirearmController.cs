@@ -44,6 +44,15 @@ namespace Fika.Core.Coop.ClientClasses
 			return operationFactoryDelegates;
 		}
 
+		public override void OnPlayerDead()
+		{
+			if (IsAiming)
+			{
+				SetAim(false);
+			}
+			base.OnPlayerDead();
+		}
+
 		public Player.BaseAnimationOperation Weapon1()
 		{
 			if (Item.ReloadMode == Weapon.EReloadMode.InternalMagazine && Item.Chambers.Length == 0)
@@ -155,7 +164,7 @@ namespace Fika.Core.Coop.ClientClasses
 			bool isAiming = IsAiming;
 			bool aimingInterruptedByOverlap = AimingInterruptedByOverlap;
 			base.SetAim(value);
-			if (IsAiming != isAiming || aimingInterruptedByOverlap)
+			if (IsAiming != isAiming || aimingInterruptedByOverlap && player.HealthController.IsAlive)
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
@@ -168,7 +177,7 @@ namespace Fika.Core.Coop.ClientClasses
 		public override void AimingChanged(bool newValue)
 		{
 			base.AimingChanged(newValue);
-			if (!IsAiming)
+			if (!IsAiming && player.HealthController.IsAlive)
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
@@ -181,7 +190,7 @@ namespace Fika.Core.Coop.ClientClasses
 		public override bool CheckFireMode()
 		{
 			bool flag = base.CheckFireMode();
-			if (flag)
+			if (flag && player.HealthController.IsAlive)
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
@@ -209,7 +218,7 @@ namespace Fika.Core.Coop.ClientClasses
 		public override bool ExamineWeapon()
 		{
 			bool flag = base.ExamineWeapon();
-			if (flag)
+			if (flag && player.HealthController.IsAlive)
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
