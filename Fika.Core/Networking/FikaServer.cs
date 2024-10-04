@@ -121,22 +121,13 @@ namespace Fika.Core.Networking
 
 		public async Task Init()
 		{
-			switch (FikaPlugin.SendRate.Value)
+			sendRate = FikaPlugin.SendRate.Value switch
 			{
-				case FikaPlugin.ESendRate.ExtremelyLow:
-					sendRate = 10;
-					break;
-				case FikaPlugin.ESendRate.Low:
-					sendRate = 20;
-					break;
-				case FikaPlugin.ESendRate.Medium:
-					sendRate = 40;
-					break;
-				case FikaPlugin.ESendRate.High:
-					sendRate = 60;
-					break;
-				default:
-					break;
+				FikaPlugin.ESendRate.ExtremelyLow => 10,
+				FikaPlugin.ESendRate.Low => 20,
+				FikaPlugin.ESendRate.Medium => 40,
+				FikaPlugin.ESendRate.High => 60,
+				_ => 20,
 			};
 			logger.LogInfo($"Starting server with SendRate: {sendRate}");
 			port = FikaPlugin.UDPPort.Value;
