@@ -720,7 +720,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 
 				float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
-				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)(1 / expectedPlayers));
+				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized());
 
 				if (isServer)
 				{
@@ -754,8 +754,7 @@ namespace Fika.Core.Coop.GameMode
 					foreach (CoopPlayer player in coopHandler.Players.Values)
 					{
 						SyncNetIdPacket syncPacket = new(player.ProfileId, player.NetId);
-
-						Singleton<FikaServer>.Instance.SendDataToAll(ref syncPacket, DeliveryMethod.ReliableUnordered);
+						server.SendDataToAll(ref syncPacket, DeliveryMethod.ReliableUnordered);
 					}
 
 					if (DynamicAI != null)
@@ -1504,7 +1503,7 @@ namespace Fika.Core.Coop.GameMode
 				halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
 			}
 
-			if (instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
+			if (FikaPlugin.Instance.UseBTR && instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
 			{
 #if DEBUG
 				Logger.LogWarning("Spawning BTR controller");
@@ -1536,6 +1535,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (WeatherController.Instance != null)
 			{
+				SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
 				if (isServer && !OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
 				{
 					LocalGame.Class1474 weatherHandler = new()
@@ -1568,6 +1568,8 @@ namespace Fika.Core.Coop.GameMode
 #endif
 			await seasonHandler.Run(season);
 			await WaitForOtherPlayers();
+
+			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
 			if (isServer)
 			{
@@ -1604,7 +1606,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			// Add FreeCamController to GameWorld GameObject
-			FreeCameraController freeCamController = Singleton<GameWorld>.Instance.gameObject.GetOrAddComponent<FreeCameraController>();
+			FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
 			Singleton<FreeCameraController>.Create(freeCamController);
 
 			await SetupRaidCode();
@@ -1617,9 +1619,6 @@ namespace Fika.Core.Coop.GameMode
 			}*/
 
 			Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
-
-			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
-
 			GameWorld_0.RegisterBorderZones();
 		}
 
@@ -1655,7 +1654,6 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			Locomotive platform = Singleton<GameWorld>.Instance.PlatformAdapters[0].Platform;
-
 			FikaServer server = Singleton<FikaServer>.Instance;
 
 			GenericPacket genericPacket = new()

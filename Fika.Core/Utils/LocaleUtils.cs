@@ -9,7 +9,7 @@ namespace Fika.Core.Utils
 	/// </summary>
 	public static class LocaleUtils
 	{
-		private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
+		private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];		
 
 		/// <summary>
 		/// Used to get the prefix of a word for EN locale, no longer used
@@ -201,5 +201,6 @@ namespace Fika.Core.Utils
 		public const string UI_COOP_RAID_SETTINGS = "F_UI_CoopRaidSettings";
 		public const string UI_FIKA_ALWAYS_COOP = "F_UI_FikaAlwaysCoop";
 		public const string UI_UPNP_FAILED = "F_UI_UpnpFailed";
+		public const string UI_INIT_WEATHER = "F_UI_InitWeather";
 	}
 }
