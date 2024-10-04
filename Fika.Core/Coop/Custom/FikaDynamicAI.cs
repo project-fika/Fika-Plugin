@@ -131,11 +131,7 @@ namespace Fika.Core.Coop.Custom
 			{
 				return;
 			}
-
-			/*if (!bot.AIData.BotOwner.Memory.IsPeace)
-			{
-				return;
-			}*/
+			
 #if DEBUG
 			logger.LogWarning($"Disabling {bot.gameObject.name}");
 #endif
@@ -150,6 +146,24 @@ namespace Fika.Core.Coop.Custom
 			if (!disabledBots.Add(bot))
 			{
 				logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
+			}
+
+			foreach (CoopBot otherBot in bots)
+			{
+				if (otherBot == bot)
+				{
+					continue;
+				}
+
+				if (!otherBot.gameObject.activeSelf)
+				{
+					continue;
+				}
+
+				if (otherBot.AIData.BotOwner?.Memory.GoalEnemy?.ProfileId == bot.ProfileId)
+				{
+					otherBot.AIData.BotOwner.Memory.GoalEnemy = null;
+				}
 			}
 		}
 
