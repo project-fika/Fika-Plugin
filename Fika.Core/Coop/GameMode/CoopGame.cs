@@ -926,7 +926,7 @@ namespace Fika.Core.Coop.GameMode
 			coopHandler.HumanPlayers.Add(coopPlayer);
 			coopPlayer.SetupMainPlayer();
 
-			PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GetGroupId());
+			PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
 			await FikaRequestHandler.UpdatePlayerSpawn(body);
 
 			coopPlayer.SpawnPoint = spawnPoint;
@@ -1600,7 +1600,7 @@ namespace Fika.Core.Coop.GameMode
 				FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
 				FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
 
-				SetStatusModel status = new(FikaBackendUtils.GetGroupId(), LobbyEntry.ELobbyStatus.IN_GAME);
+				SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
 
 				await FikaRequestHandler.UpdateSetStatus(status);
 			}
@@ -1668,7 +1668,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private Task SetupRaidCode()
 		{
-			string raidCode = FikaBackendUtils.GetRaidCode();
+			string raidCode = FikaBackendUtils.RaidCode;
 			if (!string.IsNullOrEmpty(raidCode))
 			{
 				Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);

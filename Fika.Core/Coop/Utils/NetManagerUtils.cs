@@ -196,9 +196,9 @@ namespace Fika.Core.Coop.Utils
 					CoopHandler coopHandler = FikaGameObject.AddComponent<CoopHandler>();
 					networkManager.CoopHandler = coopHandler;
 
-					if (!string.IsNullOrEmpty(FikaBackendUtils.GetGroupId()))
+					if (!string.IsNullOrEmpty(FikaBackendUtils.GroupId))
 					{
-						coopHandler.ServerId = FikaBackendUtils.GetGroupId();
+						coopHandler.ServerId = FikaBackendUtils.GroupId;
 						return Task.CompletedTask;
 					}
 

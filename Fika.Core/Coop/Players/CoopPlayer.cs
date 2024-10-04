@@ -805,7 +805,7 @@ namespace Fika.Core.Coop.Players
 
 		private IEnumerator LocalPlayerDied()
 		{
-			AddPlayerRequest request = new(FikaBackendUtils.GetGroupId(), ProfileId);
+			AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId);
 			Task diedTask = FikaRequestHandler.PlayerDied(request);
 			while (!diedTask.IsCompleted)
 			{

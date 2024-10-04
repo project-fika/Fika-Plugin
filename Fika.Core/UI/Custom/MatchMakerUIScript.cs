@@ -447,11 +447,11 @@ namespace Fika.Core.UI.Custom
 
 			if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
 			{
-				FikaBackendUtils.SetGroupId(result.ServerId);
+				FikaBackendUtils.				GroupId = result.ServerId;
 				FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
 				FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
-				AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
+				AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId);
 				FikaRequestHandler.UpdateAddPlayer(data);
 
 				if (FikaBackendUtils.IsHostNatPunch)

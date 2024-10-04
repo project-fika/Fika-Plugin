@@ -24,18 +24,8 @@ namespace Fika.Core.Coop.Utils
 		public static Profile Profile;
 		public static string PMCName;
 		public static EMatchmakerType MatchingType = EMatchmakerType.Single;
-		public static bool IsServer => MatchingType == EMatchmakerType.GroupLeader;
-		public static bool IsClient => MatchingType == EMatchmakerType.GroupPlayer;
 		public static bool IsDedicated = false;
 		public static bool IsReconnect = false;
-		public static bool IsSinglePlayer
-		{
-			get
-			{
-				return Singleton<FikaServer>.Instantiated
-					&& Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0;
-			}
-		}
 		public static bool IsDedicatedGame = false;
 		public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
 		public static MatchMakerGroupPreview MatchMakerGroupPreview;
@@ -48,28 +38,30 @@ namespace Fika.Core.Coop.Utils
 		public static bool RequestFikaWorld = false;
 		public static Vector3 ReconnectPosition = Vector3.zero;
 
-		private static string groupId;
-		private static string raidCode;
-
-		public static string GetGroupId()
+		public static bool IsServer
 		{
-			return groupId;
+			get
+			{
+				return MatchingType == EMatchmakerType.GroupLeader;
+			}
 		}
-
-		public static void SetGroupId(string newId)
+		public static bool IsClient
 		{
-			groupId = newId;
+			get
+			{
+				return MatchingType == EMatchmakerType.GroupPlayer;
+			}
 		}
-
-		public static void SetRaidCode(string newCode)
+		public static bool IsSinglePlayer
 		{
-			raidCode = newCode;
+			get
+			{
+				return Singleton<FikaServer>.Instantiated
+					&& Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0;
+			}
 		}
-
-		public static string GetRaidCode()
-		{
-			return raidCode;
-		}
+		public static string GroupId { get; set; }
+		public static string RaidCode { get; set; }
 
 		public static bool JoinMatch(string profileId, string serverId, out CreateMatch result, out string errorMessage)
 		{
@@ -97,7 +89,7 @@ namespace Fika.Core.Coop.Utils
 				return false;
 			}
 
-			SetRaidCode(result.RaidCode);
+			RaidCode = result.RaidCode;
 
 			return true;
 		}
@@ -112,10 +104,10 @@ namespace Fika.Core.Coop.Utils
 
 			await FikaRequestHandler.RaidCreate(body);
 
-			SetGroupId(profileId);
+			GroupId = profileId;
 			MatchingType = EMatchmakerType.GroupLeader;
 
-			SetRaidCode(raidCode);
+			RaidCode = raidCode;
 		}
 
 		public static string GenerateRaidCode(int length)

@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.Components
 				return networkManager.CoopHandler.ServerId;
 			}
 
-			return FikaBackendUtils.GetGroupId();
+			return FikaBackendUtils.GroupId;
 		}
 
 		protected void Awake()
