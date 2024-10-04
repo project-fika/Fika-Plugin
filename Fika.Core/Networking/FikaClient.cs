@@ -1130,7 +1130,7 @@ namespace Fika.Core.Networking
 
 		private void OnDamagePacketReceived(DamagePacket packet)
 		{
-			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply) && playerToApply.IsYourPlayer)
 			{
 				playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
 			}

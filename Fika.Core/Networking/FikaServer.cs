@@ -1099,10 +1099,14 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
-			}
-
-			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+				if (playerToApply.IsAI)
+				{
+					playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
+					return;
+				}
+				
+				SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+			}			
 		}
 
 		private void OnArmorDamagePacketReceived(ArmorDamagePacket packet, NetPeer peer)
