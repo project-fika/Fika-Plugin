@@ -119,7 +119,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				for (int i = 0; i < inventoryPackets; i++)
 				{
-					ConvertInventoryPacket(InventoryPackets.Dequeue());
+					ConvertInventoryPacket();
 				}
 			}
 			int commonPlayerPackets = CommonPlayerPackets.Count;
@@ -141,8 +141,9 @@ namespace Fika.Core.Coop.PacketHandlers
 			}
 		}
 
-		private void ConvertInventoryPacket(InventoryPacket packet)
+		private void ConvertInventoryPacket()
 		{
+			InventoryPacket packet = InventoryPackets.Dequeue();
 			if (packet.HasItemControllerExecutePacket)
 			{
 				if (packet.ItemControllerExecutePacket.OperationBytes.Length == 0)
