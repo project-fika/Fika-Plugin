@@ -142,6 +142,7 @@ namespace Fika.Core.Coop.Custom
 			bot.AIData.BotOwner.ShootData.EndShoot();
 			bot.ActiveHealthController.PauseAllEffects();
 			bot.AIData.BotOwner.StandBy.method_1();
+			bot.AIData.BotOwner.Deactivate();
 			bot.gameObject.SetActive(false);
 
 			if (!disabledBots.Add(bot))
@@ -181,9 +182,9 @@ namespace Fika.Core.Coop.Custom
 #endif
 			bot.gameObject.SetActive(true);
 			bot.AIData.BotOwner.PatrollingData.Unpause();
-			bot.AIData.BotOwner.PostActivate();
 			bot.ActiveHealthController.UnpauseAllEffects();
 			bot.AIData.BotOwner.StandBy.Activate();
+			bot.AIData.BotOwner.PostActivate();
 			disabledBots.Remove(bot);
 		}
 
