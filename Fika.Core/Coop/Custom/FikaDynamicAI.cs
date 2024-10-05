@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using System.Collections.Generic;
 using UnityEngine;
@@ -148,7 +149,13 @@ namespace Fika.Core.Coop.Custom
 				logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
 			}
 
-			foreach (CoopBot otherBot in bots)
+			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+			if (coopGame == null)
+			{
+				return;
+			}
+
+			foreach (CoopBot otherBot in coopGame.Bots.Values)
 			{
 				if (otherBot == bot)
 				{
