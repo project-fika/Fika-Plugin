@@ -142,7 +142,6 @@ namespace Fika.Core.Coop.Custom
 			bot.AIData.BotOwner.ShootData.EndShoot();
 			bot.ActiveHealthController.PauseAllEffects();
 			bot.AIData.BotOwner.StandBy.method_1();
-			bot.AIData.BotOwner.Deactivate();
 			bot.gameObject.SetActive(false);
 
 			if (!disabledBots.Add(bot))
