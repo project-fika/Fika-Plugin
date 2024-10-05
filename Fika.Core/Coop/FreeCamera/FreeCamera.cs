@@ -85,7 +85,7 @@ namespace Fika.Core.Coop.FreeCamera
 		{
 			currentPlayer = player;
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Setting player to {CurrentPlayer}");
+			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Setting player to {currentPlayer}");
 #endif
 		}
 
@@ -213,7 +213,7 @@ namespace Fika.Core.Coop.FreeCamera
 			{
 				currentPlayer = players[0];
 #if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}");
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: currentPlayer was null, setting to first player {players[0].Profile.Nickname}");
 #endif
 				SwitchSpectateMode();
 				return;
@@ -346,7 +346,7 @@ namespace Fika.Core.Coop.FreeCamera
 				else
 				{
 #if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: CurrentPlayer vanished while we were following, finding next player to attach to");
+					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: currentPlayer vanished while we were following, finding next player to attach to");
 #endif
 					CycleSpectatePlayers();
 					if (currentPlayer == null)
@@ -549,7 +549,7 @@ namespace Fika.Core.Coop.FreeCamera
 		{
 			CheckAndResetFov();
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
+			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {currentPlayer.Profile.Nickname}");
 #endif
 			transform.SetParent(currentPlayer.PlayerBones.Head.Original);
 			transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
@@ -562,7 +562,7 @@ namespace Fika.Core.Coop.FreeCamera
 			if (lastKnownPlayerPosition != null)
 			{
 #if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to last tracked player position {LastKnownPlayerPosition}");
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to last tracked player position {lastKnownPlayerPosition}");
 #endif
 				transform.position = lastKnownPlayerPosition;
 				return;
@@ -573,7 +573,7 @@ namespace Fika.Core.Coop.FreeCamera
 		{
 			CheckAndResetFov();
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
+			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {currentPlayer.Profile.Nickname}");
 #endif
 			if (!currentPlayer.IsAI)
 			{
