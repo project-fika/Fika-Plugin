@@ -132,7 +132,7 @@ namespace Fika.Core.Coop.Custom
 			{
 				return;
 			}
-			
+
 #if DEBUG
 			logger.LogWarning($"Disabling {bot.gameObject.name}");
 #endif
@@ -142,6 +142,7 @@ namespace Fika.Core.Coop.Custom
 			bot.AIData.BotOwner.ShootData.EndShoot();
 			bot.ActiveHealthController.PauseAllEffects();
 			bot.AIData.BotOwner.StandBy.method_1();
+			bot.AIData.BotOwner.StandBy.CanDoStandBy = false;
 			bot.gameObject.SetActive(false);
 
 			if (!disabledBots.Add(bot))
@@ -183,7 +184,7 @@ namespace Fika.Core.Coop.Custom
 			bot.AIData.BotOwner.PatrollingData.Unpause();
 			bot.ActiveHealthController.UnpauseAllEffects();
 			bot.AIData.BotOwner.StandBy.Activate();
-			bot.AIData.BotOwner.PostActivate();
+			bot.AIData.BotOwner.StandBy.CanDoStandBy = true;
 			disabledBots.Remove(bot);
 		}
 
@@ -192,12 +193,8 @@ namespace Fika.Core.Coop.Custom
 			// Do not run on bots that have no initialized yet
 			if (bot.AIData.BotOwner.BotState != EBotState.Active)
 			{
-				if (disabledBots.Contains(bot))
-				{
-					ActivateBot(bot);
-				}
 				return;
-			}					
+			}
 
 			int notInRange = 0;
 			float range = FikaPlugin.DynamicAIRange.Value;
