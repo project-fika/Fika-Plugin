@@ -48,7 +48,7 @@ namespace Fika.Core.Utils
 				}
 			}
 
-			//not able to find a zoomed optic screen point
+			// Not able to find a zoomed optic screen point
 			if (screenPoint == Vector3.zero)
 			{
 				screenPoint = worldCamera.WorldToScreenPoint(worldPosition);
@@ -71,7 +71,12 @@ namespace Fika.Core.Utils
 				return 1f;
 			}
 
-			return weaponSight.ScopeZoomValue;
+			if (weaponSight.ScopeZoomValue != 0)
+			{
+				return weaponSight.ScopeZoomValue;
+			}
+
+			return weaponSight.GetCurrentOpticZoom();
 		}
 
 		private static Vector3 GetOpticCenterScreenPosition(ProceduralWeaponAnimation weaponAnimation, Camera worldCamera)
@@ -81,7 +86,7 @@ namespace Fika.Core.Utils
 				return Vector3.zero;
 			}
 
-			OpticSight currentOptic = weaponAnimation.HandsContainer.Weapon.GetComponentInChildren<OpticSight>();
+			OpticSight currentOptic = CameraClass.Instance.OpticCameraManager.CurrentOpticSight;
 			if (currentOptic == null)
 			{
 				return Vector3.zero;

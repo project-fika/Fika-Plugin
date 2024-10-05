@@ -6,6 +6,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
+using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
@@ -261,6 +262,8 @@ namespace Fika.Core
 			new Player_method_138_Patch().Enable();
 			new Player_SetDogtagInfo_Patch().Enable();
 			new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
+			new WeaponManagerClass_method_12_Patch().Enable();
+			new OpticRetrice_UpdateTransform_Patch().Enable();
 			new MatchmakerOfflineRaidScreen_Close_Patch().Enable();
 			new BodyPartCollider_SetUpPlayer_Patch().Enable();
 			new MatchmakerOfflineRaidScreen_Show_Patch().Enable();
