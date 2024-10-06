@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.HostClasses
 			}
 		}
 
-		public override void RollBack()
+		/*public override void RollBack()
 		{
 			base.RollBack();
 			ResyncInventoryIdPacket packet = new(coopPlayer.NetId)
@@ -55,7 +55,7 @@ namespace Fika.Core.Coop.HostClasses
 				MongoId = mongoID_0
 			};
 			coopPlayer.PacketSender.SendPacket(ref packet, false);
-		}
+		}*/
 
 		public override void GetTraderServicesDataFromServer(string traderId)
 		{
