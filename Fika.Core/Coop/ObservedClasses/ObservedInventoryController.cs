@@ -168,10 +168,9 @@ namespace Fika.Core.Coop.ObservedClasses
 			// Do nothing
 		}
 
-		public void SetNewID(MongoID newId, ushort nextId)
+		public void SetNewID(MongoID newId)
 		{
 			mongoID_0 = newId;
-			ushort_0 = nextId;
 		}
 
 		public GStruct423 CreateOperationFromDescriptor(GClass1670 descriptor)

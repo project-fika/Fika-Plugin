@@ -241,18 +241,18 @@ namespace Fika.Core.Networking
 			{
 				if (playerToApply is ObservedCoopPlayer observedPlayer)
 				{
-					if (observedPlayer.InventoryController is ObservedInventoryController observedController)
+					if (observedPlayer.InventoryController is ObservedInventoryController observedController && packet.MongoId.HasValue)
 					{
-						observedController.SetNewID(new(packet.MongoId), packet.NextId);
+						observedController.SetNewID(packet.MongoId.Value);
 					}
 					return;
 				}
+
 				if (playerToApply.IsYourPlayer)
 				{
 					ResyncInventoryIdPacket response = new(playerToApply.NetId)
 					{
-						MongoId = playerToApply.InventoryController.CurrentId.ToString(),
-						NextId = playerToApply.InventoryController.NextOperationId
+						MongoId = playerToApply.InventoryController.CurrentId.ToString()
 					};
 					SendData(ref response, DeliveryMethod.ReliableOrdered);
 				}

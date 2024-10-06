@@ -387,7 +387,7 @@ namespace Fika.Core.Networking
 				writer.Put(0);
 				return;
 			}
-			writer.Put(1);
+			writer.Put((byte)1);
 			writer.Put(mongoId.Value.ToString());
 		}
 
@@ -398,7 +398,7 @@ namespace Fika.Core.Networking
 		/// <returns>A new <see cref="MongoID"/>? (nullable)</returns>
 		public static MongoID? GetMongoID(this NetDataReader reader)
 		{
-			int value = reader.GetInt();
+			int value = reader.GetByte();
 			if (value == 0)
 			{
 				return null;

@@ -28,18 +28,13 @@ namespace Fika.Core.Coop.HostClasses
 		}
 		private readonly ManualLogSource logger;
 		private readonly Player player;
-		private CoopPlayer CoopPlayer
-		{
-			get
-			{
-				return (CoopPlayer)player;
-			}
-		}
+		private CoopPlayer coopPlayer;
 		private readonly IPlayerSearchController searchController;
 
 		public CoopHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
 		{
 			this.player = player;
+			coopPlayer = (CoopPlayer)player;
 			searchController = new GClass1896(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopHostInventoryController));
 		}
@@ -52,11 +47,21 @@ namespace Fika.Core.Coop.HostClasses
 			}
 		}
 
+		public override void RollBack()
+		{
+			base.RollBack();
+			ResyncInventoryIdPacket packet = new(coopPlayer.NetId)
+			{
+				MongoId = mongoID_0
+			};
+			coopPlayer.PacketSender.SendPacket(ref packet, false);
+		}
+
 		public override void GetTraderServicesDataFromServer(string traderId)
 		{
 			if (FikaBackendUtils.IsClient)
 			{
-				TraderServicesPacket packet = new(CoopPlayer.NetId)
+				TraderServicesPacket packet = new(coopPlayer.NetId)
 				{
 					IsRequest = true,
 					TraderId = traderId
@@ -65,7 +70,7 @@ namespace Fika.Core.Coop.HostClasses
 				return;
 			}
 
-			CoopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
+			coopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
 		}
 
 		public override void CallMalfunctionRepaired(Weapon weapon)
@@ -98,15 +103,15 @@ namespace Fika.Core.Coop.HostClasses
 				Item lootedItem = moveOperation.Item;
 				if (lootedItem.QuestItem)
 				{
-					if (CoopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+					if (coopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
 					{
 						if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
 						{
 							sharedQuestController.AddLootedTemplateId(lootedItem.TemplateId);
 
 							// We use templateId because each client gets a unique itemId
-							QuestItemPacket packet = new(CoopPlayer.Profile.Info.MainProfileNickname, lootedItem.TemplateId);
-							CoopPlayer.PacketSender.SendPacket(ref packet);
+							QuestItemPacket packet = new(coopPlayer.Profile.Info.MainProfileNickname, lootedItem.TemplateId);
+							coopPlayer.PacketSender.SendPacket(ref packet);
 						}
 					}
 					base.vmethod_1(operation, callback);
@@ -150,7 +155,7 @@ namespace Fika.Core.Coop.HostClasses
 					OperationBytes = writer.ToArray()
 				};
 
-				CoopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
+				coopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
 				return;
 			}
 			handler.operation.Dispose();
@@ -175,7 +180,7 @@ namespace Fika.Core.Coop.HostClasses
 		private uint AddOperationCallback(GClass3119 operation, Action<ServerOperationStatus> callback)
 		{
 			ushort id = operation.Id;
-			CoopPlayer.OperationCallbacks.Add(id, callback);
+			coopPlayer.OperationCallbacks.Add(id, callback);
 			return id;
 		}
 

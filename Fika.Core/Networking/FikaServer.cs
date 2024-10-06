@@ -403,9 +403,9 @@ namespace Fika.Core.Networking
 				if (playerToApply is ObservedCoopPlayer observedPlayer)
 				{
 					SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-					if (observedPlayer.InventoryController is ObservedInventoryController observedController)
+					if (observedPlayer.InventoryController is ObservedInventoryController observedController && packet.MongoId.HasValue)
 					{
-						observedController.SetNewID(new(packet.MongoId), packet.NextId);
+						observedController.SetNewID(packet.MongoId.Value);
 					}
 				}
 			}
