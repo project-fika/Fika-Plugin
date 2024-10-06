@@ -32,14 +32,6 @@ namespace Fika.Core.Coop.BotClasses
 			searchController = new GClass1902(profile);
 		}
 
-#if DEBUG
-		public override void RollBack()
-		{
-			FikaPlugin.Instance.FikaLogger.LogWarning("Rolling back on bot: " + coopBot.NetId);
-			base.RollBack();
-		} 
-#endif
-
 		public override IPlayerSearchController PlayerSearchController
 		{
 			get
@@ -50,6 +42,9 @@ namespace Fika.Core.Coop.BotClasses
 
 		public override void RollBack()
 		{
+#if DEBUG
+			FikaPlugin.Instance.FikaLogger.LogWarning("Rolling back on bot: " + coopBot.NetId); 
+#endif
 			base.RollBack();
 			ResyncInventoryIdPacket packet = new(coopBot.NetId)
 			{
