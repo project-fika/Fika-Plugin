@@ -6,12 +6,12 @@ namespace Fika.Core.Networking
 	public struct ResyncInventoryIdPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
-		public MongoID? MongoId = string.Empty;
+		public MongoID MongoId = string.Empty;
 
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			MongoId = reader.GetMongoID();
+			MongoId = reader.GetMongoID().Value;
 		}
 
 		public void Serialize(NetDataWriter writer)
