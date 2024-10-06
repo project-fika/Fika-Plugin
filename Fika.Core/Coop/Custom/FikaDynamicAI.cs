@@ -78,17 +78,22 @@ namespace Fika.Core.Coop.Custom
 				return;
 			}
 
+			if (botOwner.IsRole(WildSpawnType.exUsec))
+			{
+				return;
+			}
+
+			if (botOwner.IsRole(WildSpawnType.shooterBTR))
+			{
+				return;
+			}
+
 			if (FikaPlugin.DynamicAIIgnoreSnipers.Value)
 			{
 				if (botOwner.IsRole(WildSpawnType.marksman))
 				{
 					return;
 				}
-			}
-
-			if (botOwner.IsRole(WildSpawnType.shooterBTR))
-			{
-				return;
 			}
 
 			bots.Add((CoopBot)botOwner.GetPlayer);
