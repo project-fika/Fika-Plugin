@@ -178,7 +178,11 @@ namespace Fika.Core.Coop.GameMode
 				coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, coopGame.botsController_0.ActivateBotsByWave, location);
 
 				// Boss Scenario setup
-				BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
+				BossLocationSpawn[] bossSpawns = [];
+				if (wavesSettings.IsBosses)
+				{
+					bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
+				}
 				coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, coopGame.botsController_0.ActivateBotsByWave);
 
 				coopGame.botStateManager = BotStateManager.Create(coopGame, Singleton<FikaServer>.Instance);
