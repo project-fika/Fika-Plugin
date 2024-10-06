@@ -1515,7 +1515,7 @@ namespace Fika.Core.Coop.GameMode
 				gameWorld.BtrController = new BTRControllerClass(gameWorld);
 			}
 
-			/*bool transitActive;
+			bool transitActive;
 			if (instance == null)
 			{
 				transitActive = false;
@@ -1527,15 +1527,13 @@ namespace Fika.Core.Coop.GameMode
 			}
 			if (transitActive)
 			{
-				Singleton<GameWorld>.Instance.TransitController = new GClass1617(instance.transitSettings, Location_0.transitParameters,
+				Singleton<GameWorld>.Instance.TransitController = new FikaTransitController(instance.transitSettings, Location_0.transitParameters,
 					Profile_0, localRaidSettings_0);
 			}
 			else
 			{
 				GClass1615.DisableTransitPoints();
-			}*/
-
-			GClass1615.DisableTransitPoints();
+			}
 
 			if (WeatherController.Instance != null)
 			{
