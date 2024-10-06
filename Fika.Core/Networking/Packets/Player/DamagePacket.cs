@@ -30,11 +30,11 @@ namespace Fika.Core.Networking
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			DamageType = (EDamageType)reader.GetInt();
+			DamageType = (EDamageType)reader.GetByte();
 			Damage = reader.GetFloat();
-			BodyPartType = (EBodyPart)reader.GetInt();
-			ColliderType = (EBodyPartColliderType)reader.GetInt();
-			ArmorPlateCollider = (EArmorPlateCollider)reader.GetInt();
+			BodyPartType = (EBodyPart)reader.GetByte();
+			ColliderType = (EBodyPartColliderType)reader.GetByte();
+			ArmorPlateCollider = (EArmorPlateCollider)reader.GetByte();
 			Direction = reader.GetVector3();
 			Point = reader.GetVector3();
 			HitNormal = reader.GetVector3();
@@ -46,17 +46,17 @@ namespace Fika.Core.Networking
 			FragmentIndex = reader.GetInt();
 			ArmorDamage = reader.GetFloat();
 			ProfileId = reader.GetString();
-			Material = (MaterialType)reader.GetInt();
+			Material = (MaterialType)reader.GetByte();
 		}
 
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put(NetId);
-			writer.Put((int)DamageType);
+			writer.Put((byte)DamageType);
 			writer.Put(Damage);
-			writer.Put((int)BodyPartType);
-			writer.Put((int)ColliderType);
-			writer.Put((int)ArmorPlateCollider);
+			writer.Put((byte)BodyPartType);
+			writer.Put((byte)ColliderType);
+			writer.Put((byte)ArmorPlateCollider);
 			writer.Put(Direction);
 			writer.Put(Point);
 			writer.Put(HitNormal);
@@ -68,7 +68,7 @@ namespace Fika.Core.Networking
 			writer.Put(FragmentIndex);
 			writer.Put(ArmorDamage);
 			writer.Put(ProfileId);
-			writer.Put((int)Material);
+			writer.Put((byte)Material);
 		}
 	}
 }
