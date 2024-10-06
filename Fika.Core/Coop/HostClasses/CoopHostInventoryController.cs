@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.HostClasses
 		}
 		private readonly ManualLogSource logger;
 		private readonly Player player;
-		private CoopPlayer coopPlayer;
+		private readonly CoopPlayer coopPlayer;
 		private readonly IPlayerSearchController searchController;
 
 		public CoopHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
