@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Custom
 			alreadyTransits.Add(profileId, gclass);
 			if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
-				coopGame.Extract((CoopPlayer)player, null);
+				coopGame.Extract((CoopPlayer)player, null, point);
 				//coopGame.Stop(profileId, ExitStatus.Transit, point.parameters.name, 0f);
 			}
 		}
