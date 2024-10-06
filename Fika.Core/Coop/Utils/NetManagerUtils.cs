@@ -60,6 +60,12 @@ namespace Fika.Core.Coop.Utils
 
 		public static void DestroyNetManager(bool isServer)
 		{
+			if (FikaBackendUtils.IsTransit)
+			{
+				Singleton<IFikaNetworkManager>.Instance.CoopHandler.CleanUpForTransit();
+				return;
+			}
+
 			if (FikaGameObject != null)
 			{
 				if (isServer)
@@ -187,6 +193,11 @@ namespace Fika.Core.Coop.Utils
 
 		public static Task CreateCoopHandler()
 		{
+			if (FikaBackendUtils.IsTransit)
+			{
+				return Task.CompletedTask;
+			}
+
 			logger.LogInfo("Creating CoopHandler...");
 			IFikaNetworkManager networkManager = Singleton<IFikaNetworkManager>.Instance;
 			if (networkManager != null)

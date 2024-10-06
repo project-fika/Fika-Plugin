@@ -27,6 +27,7 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsDedicated = false;
 		public static bool IsReconnect = false;
 		public static bool IsDedicatedGame = false;
+		public static bool IsTransit = false;
 		public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
 		public static MatchMakerGroupPreview MatchMakerGroupPreview;
 		public static int HostExpectedNumberOfPlayers = 1;

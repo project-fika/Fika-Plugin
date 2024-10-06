@@ -1801,9 +1801,10 @@ namespace Fika.Core.Coop.GameMode
 		/// When the local player successfully extracts, enable freecam, notify other players about the extract
 		/// </summary>
 		/// <param name="player">The local player to start the Coroutine on</param>
-		/// <param name="point">The point that was used to extract</param>
+		/// <param name="exfiltrationPoint">The exfiltration point that was used to extract</param>
+		/// <param name="transitPoint">The transit point that was used to transit</param>
 		/// <returns></returns>
-		public void Extract(CoopPlayer player, ExfiltrationPoint point)
+		public void Extract(CoopPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
 		{
 			PreloaderUI preloaderUI = Singleton<PreloaderUI>.Instance;
 			localTriggerZones = new(player.TriggerZones);
@@ -1829,13 +1830,13 @@ namespace Fika.Core.Coop.GameMode
 				MyExitStatus = ExitStatus.Runner;
 			}
 
-			if (point != null)
+			if (exfiltrationPoint != null)
 			{
-				point.Disable();
+				exfiltrationPoint.Disable();
 
-				if (point.HasRequirements && point.TransferItemRequirement != null)
+				if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement != null)
 				{
-					if (point.TransferItemRequirement.Met(player, point) && player.IsYourPlayer)
+					if (exfiltrationPoint.TransferItemRequirement.Met(player, exfiltrationPoint) && player.IsYourPlayer)
 					{
 						// Seems to already be handled by SPT so we only add it visibly
 						player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
@@ -1847,6 +1848,17 @@ namespace Fika.Core.Coop.GameMode
 			{
 				// Seems to already be handled by SPT so we only add it visibly
 				player.Profile.EftStats.SessionCounters.AddDouble(0.01, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
+			}
+
+			FikaTransitController transitController = (FikaTransitController)Singleton<GameWorld>.Instance.TransitController;
+			if (transitController != null)
+			{
+				if (transitController.alreadyTransits.TryGetValue(player.ProfileId, out GClass1883 data))
+				{
+					MyExitStatus = ExitStatus.Transit;
+					MyExitLocation = transitPoint.parameters.name;
+					FikaBackendUtils.IsTransit = true;
+				}
 			}
 
 			GenericPacket genericPacket = new()
@@ -1993,6 +2005,11 @@ namespace Fika.Core.Coop.GameMode
 		/// <param name="delay"></param>
 		public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
 		{
+			if (exitStatus < ExitStatus.Transit)
+			{
+				FikaBackendUtils.IsTransit = false;
+			}
+
 			NetworkTimeSync.Reset();
 			Logger.LogDebug("Stop");
 
@@ -2203,6 +2220,11 @@ namespace Fika.Core.Coop.GameMode
 		/// <param name="exitStatus"></param>
 		public void StopFromCancel(string profileId, ExitStatus exitStatus)
 		{
+			if (exitStatus < ExitStatus.Transit)
+			{
+				FikaBackendUtils.IsTransit = false;
+			}
+
 			Logger.LogWarning("Game init was cancelled!");
 
 			CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;

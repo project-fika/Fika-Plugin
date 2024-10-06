@@ -43,22 +43,7 @@ namespace Fika.Core.Coop.Components
 		private bool ready;
 		private bool isClient;
 		private float charSyncCounter;
-		private bool requestQuitGame = false;
-
-		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId)
-		{
-			public Profile Profile = profile;
-			public Vector3 Position = position;
-			public bool IsAlive = isAlive;
-			public bool IsAI = isAI;
-			public int NetId = netId;
-			public MongoID CurrentId = currentId;
-			public ushort FirstOperationId = firstOperationId;
-			public EHandsControllerType ControllerType;
-			public string ItemId;
-			public bool IsStationary;
-			public byte[] HealthBytes;
-		}
+		private bool requestQuitGame = false;		
 		#endregion
 
 		public static bool TryGetCoopHandler(out CoopHandler coopHandler)
@@ -83,6 +68,18 @@ namespace Fika.Core.Coop.Components
 			}
 
 			return FikaBackendUtils.GroupId;
+		}
+
+		public void CleanUpForTransit()
+		{
+			Players.Clear();
+			HumanPlayers.Clear();
+			AmountOfHumans = 1;
+			ExtractedPlayers.Clear();
+			queuedProfileIds.Clear();
+			spawnQueue.Clear();
+			ready = false;
+			LocalGameInstance = null;
 		}
 
 		protected void Awake()
@@ -126,7 +123,7 @@ namespace Fika.Core.Coop.Components
 			if (isClient)
 			{
 				charSyncCounter += Time.deltaTime;
-				int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
+				int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 5;
 
 				if (charSyncCounter > waitTime)
 				{
@@ -532,6 +529,21 @@ namespace Fika.Core.Coop.Components
 			None = -1,
 			Dead,
 			Extracted
+		}
+
+		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId)
+		{
+			public Profile Profile = profile;
+			public Vector3 Position = position;
+			public bool IsAlive = isAlive;
+			public bool IsAI = isAI;
+			public int NetId = netId;
+			public MongoID CurrentId = currentId;
+			public ushort FirstOperationId = firstOperationId;
+			public EHandsControllerType ControllerType;
+			public string ItemId;
+			public bool IsStationary;
+			public byte[] HealthBytes;
 		}
 	}
 }
