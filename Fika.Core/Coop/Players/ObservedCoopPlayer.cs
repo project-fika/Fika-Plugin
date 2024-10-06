@@ -274,7 +274,7 @@ namespace Fika.Core.Coop.Players
 
 		public override bool ShouldVocalizeDeath(EBodyPart bodyPart)
 		{
-			return true;
+			return bodyPart > EBodyPart.Head;
 		}
 
 		public override void SendHeadlightsPacket(bool isSilent)
