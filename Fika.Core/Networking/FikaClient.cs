@@ -241,9 +241,9 @@ namespace Fika.Core.Networking
 			{
 				if (playerToApply is ObservedCoopPlayer observedPlayer)
 				{
-					if (observedPlayer.InventoryController is ObservedInventoryController observedController && packet.MongoId.HasValue)
+					if (observedPlayer.InventoryController is ObservedInventoryController observedController)
 					{
-						observedController.SetNewID(packet.MongoId.Value);
+						observedController.SetNewID(packet.MongoId);
 					}
 					return;
 				}
