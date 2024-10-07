@@ -1523,7 +1523,7 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				BackendConfigSettingsClass.GClass1505 transitSettings = instance.transitSettings;
-				transitActive = (transitSettings != null) && transitSettings.active;
+				transitActive = transitSettings != null && transitSettings.active;
 			}
 			if (transitActive)
 			{

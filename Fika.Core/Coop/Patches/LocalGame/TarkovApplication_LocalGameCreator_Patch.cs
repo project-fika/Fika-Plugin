@@ -88,7 +88,8 @@ namespace Fika.Core.Coop.Patches
 				location = raidSettings.LocationId,
 				timeVariant = raidSettings.SelectedDateTime,
 				mode = ELocalMode.PVE_OFFLINE,
-				playerSide = raidSettings.Side
+				playerSide = raidSettings.Side,
+				isLocationTransition = raidSettings.isLocationTransition
 			};
 			Traverse applicationTraverse = Traverse.Create(instance);
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
@@ -96,6 +97,7 @@ namespace Fika.Core.Coop.Patches
 			LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
+			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = localSettings.transitionSettings;
 
 			GClass1284 profileInsurance = localSettings.profileInsurance;
 			if ((profileInsurance?.insuredItems) != null)
