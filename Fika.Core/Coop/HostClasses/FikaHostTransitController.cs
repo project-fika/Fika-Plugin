@@ -293,6 +293,8 @@ namespace Fika.Core.Coop.HostClasses
 
 		public override void Transit(TransitPoint point, int playersCount, string hash, Dictionary<string, ProfileKey> keys, Player player)
 		{
+			// TODO: Handle dedi
+
 			if (player.IsYourPlayer)
 			{
 				string location = point.parameters.location;
