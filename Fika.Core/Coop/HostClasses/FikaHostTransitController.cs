@@ -4,18 +4,18 @@ using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.UI;
+using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Fika.Core.Coop.HostClasses
 {
-    public class FikaHostTransitController : GClass1616
-    {
+	public class FikaHostTransitController : GClass1616
+	{
 		public FikaHostTransitController(BackendConfigSettingsClass.GClass1505 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
 			: base(settings, parameters)
 		{
@@ -26,10 +26,12 @@ namespace Fika.Core.Coop.HostClasses
 			summonedTransits[profile.Id] = new GClass1614(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
 			TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");
 			server = Singleton<FikaServer>.Instance;
+			playersInTransitZone = [];
 		}
 
 		private readonly LocalRaidSettings localRaidSettings;
 		private readonly FikaServer server;
+		private readonly Dictionary<Player, int> playersInTransitZone;
 
 		private void OnHostPlayerEnter(TransitPoint point, Player player)
 		{
@@ -37,17 +39,23 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				if (player.IsYourPlayer)
 				{
-					method_6(); 
+					method_6();
 				}
 				return;
 			}
 			else
-			{				
+			{
 				if (!method_4(player, point.parameters.id, out string _))
 				{
 					return;
 				}
 			}
+
+			if (!playersInTransitZone.ContainsKey(player))
+			{
+				playersInTransitZone.Add(player, point.parameters.id); 
+			}
+
 			if (!transitPlayers.ContainsKey(player.ProfileId))
 			{
 				TransferItemsController.InitPlayerStash(player);
@@ -57,7 +65,7 @@ namespace Fika.Core.Coop.HostClasses
 				}
 				if (player.IsYourPlayer)
 				{
-					method_7(point.parameters.id, player, method_9()); 
+					method_7(point.parameters.id, player, method_9());
 					return;
 				}
 				TransitEventPacket packet = new()
@@ -79,6 +87,14 @@ namespace Fika.Core.Coop.HostClasses
 
 		private void OnHostPlayerExit(TransitPoint point, Player player)
 		{
+			if (playersInTransitZone.TryGetValue(player, out int value))
+			{
+				if (value == point.parameters.id)
+				{
+					playersInTransitZone.Remove(player);
+				}
+			}
+
 			if (transitPlayers.ContainsKey(player.ProfileId))
 			{
 				point.GroupExit(player);
@@ -110,7 +126,7 @@ namespace Fika.Core.Coop.HostClasses
 				if (GamePlayerOwner.MyPlayer.Id == size.Key)
 				{
 					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Display();
-					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Show((int)size.Value); 
+					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Show((int)size.Value);
 				}
 			}
 
@@ -134,7 +150,7 @@ namespace Fika.Core.Coop.HostClasses
 				{
 					method_5(pointId);
 					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
-					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value); 
+					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value);
 				}
 			}
 
@@ -176,6 +192,17 @@ namespace Fika.Core.Coop.HostClasses
 
 		public override void InteractWithTransit(Player player, GStruct176 packet)
 		{
+			TransitPoint point = dictionary_0[packet.pointId];
+			if (point == null)
+			{
+				return;
+			}
+
+			if (!CheckForPlayers(player, packet.pointId))
+			{
+				return;
+			}
+
 			if (player.IsYourPlayer)
 			{
 				method_10(player);
@@ -208,8 +235,58 @@ namespace Fika.Core.Coop.HostClasses
 			server.SendDataToAll(ref eventPacket, DeliveryMethod.ReliableOrdered);
 		}
 
+		private bool CheckForPlayers(Player player, int pointId)
+		{
+			int humanPlayers = 0;
+			foreach (CoopPlayer coopPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
+			{
+				if (coopPlayer.HealthController.IsAlive)
+				{
+					humanPlayers++;
+				}
+			}
+
+			int playersInPoint = 0;
+			foreach (KeyValuePair<Player, int> item in playersInTransitZone)
+			{
+				if (item.Key.HealthController.IsAlive)
+				{
+					if (item.Value == pointId)
+					{
+						playersInPoint++;
+					}
+				}
+			}
+
+			if (playersInPoint < humanPlayers)
+			{
+				if (player.IsYourPlayer)
+				{
+					NotificationManagerClass.DisplayWarningNotification(TransitMessagesEvent.EType.NonAllTeammates.ToString(), ENotificationDurationType.Default);
+					return false;
+				}
+
+				Dictionary<int, TransitMessagesEvent.EType> messages = [];
+				messages.Add(player.Id, TransitMessagesEvent.EType.NonAllTeammates);
+
+				TransitEventPacket messagePacket = new()
+				{
+					EventType = TransitEventPacket.ETransitEventType.Messages,
+					TransitEvent = new TransitMessagesEvent()
+					{
+						Messages = messages
+					}
+				};
+
+				server.SendDataToAll(ref messagePacket, DeliveryMethod.ReliableOrdered);
+				return false;
+			}
+
+			return true;		
+		}
+
 		public override void Transit(TransitPoint point, int playersCount, string hash, Dictionary<string, ProfileKey> keys, Player player)
-        {
+		{
 			if (player.IsYourPlayer)
 			{
 				string location = point.parameters.location;
@@ -236,7 +313,7 @@ namespace Fika.Core.Coop.HostClasses
 				if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
 				{
 					coopGame.Extract((CoopPlayer)player, null, point);
-				} 
+				}
 			}
 
 			TransitEventPacket packet = new()
@@ -247,7 +324,7 @@ namespace Fika.Core.Coop.HostClasses
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-        }
+		}
 
 		public override void Dispose()
 		{

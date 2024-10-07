@@ -89,6 +89,7 @@ namespace Fika.Core.Networking
 							TransitMessagesEvent.EType value = (TransitMessagesEvent.EType)reader.GetByte();
 							messages.Add(key, value);
 						}
+						messagesEvent.Messages = messages;
 						TransitEvent = messagesEvent;
 					}
 					break;
