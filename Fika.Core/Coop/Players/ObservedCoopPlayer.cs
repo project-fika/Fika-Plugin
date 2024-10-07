@@ -28,12 +28,12 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
 {
-    /// <summary>
-    /// Observed players are any other players in the world for a client, including bots.
-    /// They are all being handled by the server that moves them through packets.
-    /// As a host this is only other clients.
-    /// </summary>
-    public class ObservedCoopPlayer : CoopPlayer
+	/// <summary>
+	/// Observed players are any other players in the world for a client, including bots.
+	/// They are all being handled by the server that moves them through packets.
+	/// As a host this is only other clients.
+	/// </summary>
+	public class ObservedCoopPlayer : CoopPlayer
 	{
 		#region Fields and Properties
 		public FikaHealthBar HealthBar
@@ -185,6 +185,14 @@ namespace Fika.Core.Coop.Players
 			return !(Distance - spreadRange > 0);
 		}
 
+		public override void Say(EPhraseTrigger phrase, bool demand = false, float delay = 0, ETagStatus mask = 0, int probability = 100, bool aggressive = false)
+		{
+			if (gameObject.activeSelf)
+			{
+				base.Say(phrase, demand, delay, mask, probability, aggressive);
+			}
+		}
+
 		public override void PlayGroundedSound(float fallHeight, float jumpHeight)
 		{
 			(bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_62();
@@ -280,6 +288,53 @@ namespace Fika.Core.Coop.Players
 		public override void SendHeadlightsPacket(bool isSilent)
 		{
 			// Do nothing
+		}
+
+		public override void ApplyHitDebuff(float damage, float staminaBurnRate, EBodyPart bodyPartType, EDamageType damageType)
+		{
+			if (damageType.IsEnemyDamage())
+			{
+				IncreaseAwareness(20f);
+			}
+			if (HealthController.IsAlive && (!MovementContext.PhysicalConditionIs(EPhysicalCondition.OnPainkillers) || damage > 4f) && !IsAI)
+			{
+				if (gameObject.activeSelf && Speaker != null)
+				{
+					Speaker.Play(EPhraseTrigger.OnBeingHurt, HealthStatus, true, null);
+				}
+			}
+		}
+
+		public override void UpdateBreathStatus()
+		{
+			ETagStatus healthStatus = HealthStatus;
+			bool isDying;
+			if (healthStatus != ETagStatus.BadlyInjured && healthStatus != ETagStatus.Dying)
+			{
+				isDying = false;
+			}
+			else
+			{
+				// Check for GClass increments
+				isDying = HealthController.FindActiveEffect<GInterface309>(EBodyPart.Common) == null;
+			}
+
+			bool isAudible = Physical.BreathIsAudible;
+			bool shouldHeavyBreathe = isAudible || Muffled;
+			if (gameObject.activeSelf && !HeavyBreath && shouldHeavyBreathe)
+			{
+				ETagStatus status1 = isDying ? healthStatus : ETagStatus.Healthy;
+				ETagStatus status2 = isAudible ? ETagStatus.Aware : ETagStatus.Unaware;
+				if (status1 == ETagStatus.Healthy && status2 == ETagStatus.Unaware)
+				{
+					Speaker.Play(EPhraseTrigger.OnBreath, status1 | status2, true, new int?(-1));
+				}
+				else
+				{
+					Speaker.Play(EPhraseTrigger.OnBreath, status1 | status2, true, null);
+				}
+			}
+			HeavyBreath = shouldHeavyBreathe;
 		}
 
 		public void HandleExplosive(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
@@ -530,7 +585,7 @@ namespace Fika.Core.Coop.Players
 		public override void OnHealthEffectAdded(IEffect effect)
 		{
 			// Remember for GClass increments
-			if (effect is GInterface294 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
+			if (gameObject.activeSelf && effect is GInterface294 && FractureSound != null && Singleton<BetterAudio>.Instantiated)
 			{
 				Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraClass.Instance.Distance(Position),
 					BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);
@@ -654,7 +709,7 @@ namespace Fika.Core.Coop.Players
 			{
 				Vector3 newRotation = Vector3.LerpUnclamped(HeadRotation, to.HeadRotation, interpolateRatio);
 				HeadRotation = newRotation;
-				ProceduralWeaponAnimation.SetHeadRotation(newRotation); 
+				ProceduralWeaponAnimation.SetHeadRotation(newRotation);
 			}
 
 			bool isGrounded = to.IsGrounded;
@@ -864,7 +919,7 @@ namespace Fika.Core.Coop.Players
 
 			ShotReactions(damageInfo, packet.BodyPartType);
 			ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
-			
+
 			LastDamageInfo = damageInfo;
 			LastBodyPart = packet.BodyPartType;
 			LastDamagedBodyPart = packet.BodyPartType;

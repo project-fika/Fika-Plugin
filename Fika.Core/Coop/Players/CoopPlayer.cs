@@ -564,9 +564,9 @@ namespace Fika.Core.Coop.Players
 			});
 		}
 
-		protected virtual void ReceiveSay(EPhraseTrigger trigger, int index)
+		protected void ReceiveSay(EPhraseTrigger trigger, int index)
 		{
-			if (HealthController.IsAlive)
+			if (gameObject.activeSelf && HealthController.IsAlive)
 			{
 				Speaker.PlayDirect(trigger, index);
 			}
