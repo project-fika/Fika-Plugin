@@ -7,6 +7,7 @@ using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using System.Collections.Generic;
@@ -242,6 +243,11 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				if (coopPlayer.HealthController.IsAlive)
 				{
+					if (coopPlayer.IsYourPlayer && FikaBackendUtils.IsDedicated)
+					{
+						continue;
+					}
+
 					humanPlayers++;
 				}
 			}
