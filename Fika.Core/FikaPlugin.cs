@@ -280,6 +280,7 @@ namespace Fika.Core
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
+			new GClass1615_method_0_Patch().Enable();
 #endif
 
 			gameObject.AddComponent<MainThreadDispatcher>();
