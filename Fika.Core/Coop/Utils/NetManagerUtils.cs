@@ -63,8 +63,22 @@ namespace Fika.Core.Coop.Utils
 			if (FikaBackendUtils.IsTransit)
 			{
 				Singleton<IFikaNetworkManager>.Instance.CoopHandler.CleanUpForTransit();
+				if (isServer)
+				{
+					FikaServer server = Singleton<FikaServer>.Instance;
+					server.RaidInitialized = false;
+					server.ReadyClients = 0;
+					return;
+				}
+
+				FikaClient client = Singleton<FikaClient>.Instance;
+				client.HostReady = false;
+				client.HostLoaded = false;
+				client.ReadyClients = 0;
 				return;
 			}
+
+			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
 
 			if (FikaGameObject != null)
 			{

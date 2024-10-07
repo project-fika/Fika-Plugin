@@ -1629,7 +1629,5 @@ namespace Fika.Core.Networking
 			}
 			return packet;
 		}
-
-
 	}
 }

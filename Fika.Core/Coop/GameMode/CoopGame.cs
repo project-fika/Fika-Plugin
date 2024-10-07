@@ -21,6 +21,7 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
@@ -45,10 +46,10 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.GameMode
 {
-	/// <summary>
-	/// Coop game used in Fika
-	/// </summary>
-	public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
+    /// <summary>
+    /// Coop game used in Fika
+    /// </summary>
+    public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
 	{
 		public string InfiltrationPoint;
 		public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
@@ -699,6 +700,40 @@ namespace Fika.Core.Coop.GameMode
 			{
 				NetworkTimeSync.Start();
 			}
+			SyncTransitControllers();
+		}
+
+		private void SyncTransitControllers()
+		{
+			GClass1615 transitController = Singleton<GameWorld>.Instance.TransitController;
+			if (transitController == null)
+			{
+				Logger.LogError("SyncTransitControllers: TransitController was null!");
+				return;
+			}
+
+			string profileId = Profile_0.Id;
+			if (transitController.summonedTransits.TryGetValue(profileId, out GClass1614 transitData))
+			{
+				SyncTransitControllersPacket packet = new()
+				{
+					ProfileId = profileId,
+					RaidId = transitData.raidId,
+					Count = transitData.count,
+					Maps = transitData.maps
+				};
+
+				if (isServer)
+				{
+					Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+					return;
+				}
+
+				Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+				return;
+			}
+
+			Logger.LogError("SyncTransitControllers: Could not find TransitData in Summonedtransits!");
 		}
 
 		/// <summary>
@@ -727,7 +762,7 @@ namespace Fika.Core.Coop.GameMode
 				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized());
 
 				if (isServer)
-				{
+				{					
 #if DEBUG
 					Logger.LogWarning("Server: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
 #endif
@@ -1045,6 +1080,10 @@ namespace Fika.Core.Coop.GameMode
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
 				coopHandler.LocalGameInstance = this;
+				if (isServer && FikaBackendUtils.IsTransit)
+				{
+					coopHandler.ReInitInteractables();
+				}
 			}
 			else
 			{
@@ -1527,7 +1566,8 @@ namespace Fika.Core.Coop.GameMode
 			}
 			if (transitActive)
 			{
-				Singleton<GameWorld>.Instance.TransitController = new FikaTransitController(instance.transitSettings, Location_0.transitParameters,
+				Singleton<GameWorld>.Instance.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
+					Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
 					Profile_0, localRaidSettings_0);
 			}
 			else
@@ -1762,14 +1802,25 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				exfilPoints = exfilController.EligiblePoints(Profile_0);
-			}
-
-			if (GClass1615.Exist(out GClass1617 gclass))
-			{
-				gclass.Init();
-			}
+			}			
 
 			GameUi.TimerPanel.SetTime(EFTDateTimeClass.UtcNow, Profile_0.Info.Side, GameTimer.EscapeTimeSeconds(), exfilPoints);
+
+			if (isServer)
+			{
+				if (GClass1615.Exist(out FikaHostTransitController gclass))
+				{
+					gclass.Init();
+					// TODO: Sync to clients!!!
+				}
+			}
+			else
+			{
+				if (GClass1615.Exist(out FikaClientTransitController gclass))
+				{
+					gclass.Init();
+				}
+			}
 
 			exfilManager = gameObject.AddComponent<CoopExfilManager>();
 			exfilManager.Run(exfilPoints);
@@ -1848,7 +1899,7 @@ namespace Fika.Core.Coop.GameMode
 				player.Profile.EftStats.SessionCounters.AddDouble(0.01, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
 			}
 
-			FikaTransitController transitController = (FikaTransitController)Singleton<GameWorld>.Instance.TransitController;
+			GClass1615 transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController != null)
 			{
 				if (transitController.alreadyTransits.TryGetValue(player.ProfileId, out GClass1883 data))
@@ -1914,7 +1965,7 @@ namespace Fika.Core.Coop.GameMode
 					GameUi.TimerPanel.Close();
 				}
 
-				if (FikaPlugin.AutoExtract.Value)
+				if (FikaPlugin.AutoExtract.Value && !FikaBackendUtils.IsTransit)
 				{
 					if (!isServer)
 					{
@@ -1939,7 +1990,7 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		private IEnumerator ExtractRoutine(CoopPlayer player)
 		{
-			while (true)
+			while (Status != GameStatus.Stopping)
 			{
 				if (player != null && player.ActiveHealthController != null)
 				{
@@ -2088,7 +2139,10 @@ namespace Fika.Core.Coop.GameMode
 				Logger.LogError("Stop: Could not find CoopHandler!");
 			}
 
-			Destroy(coopHandler);
+			if (!FikaBackendUtils.IsTransit)
+			{
+				Destroy(coopHandler); 
+			}
 
 			ExitManager stopManager = new()
 			{
@@ -2332,14 +2386,17 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		public override MetricsClass vmethod_7()
 		{
-			try
+			if (!FikaBackendUtils.IsTransit)
 			{
-				PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
-				FikaRequestHandler.RaidLeave(body);
-			}
-			catch (Exception ex)
-			{
-				Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
+				try
+				{
+					PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
+					FikaRequestHandler.RaidLeave(body);
+				}
+				catch (Exception ex)
+				{
+					Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
+				} 
 			}
 			using (CounterCreatorAbstractClass.StartWithToken("CollectMetrics"))
 			{
@@ -2391,7 +2448,10 @@ namespace Fika.Core.Coop.GameMode
 				FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
 			}
 
-			FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
+			if (!FikaBackendUtils.IsTransit)
+			{
+				FikaBackendUtils.HostExpectedNumberOfPlayers = 1; 
+			}
 			FikaBackendUtils.RequestFikaWorld = false;
 			FikaBackendUtils.IsReconnect = false;
 			FikaBackendUtils.ReconnectPosition = Vector3.zero;

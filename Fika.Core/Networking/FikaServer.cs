@@ -15,6 +15,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
@@ -41,10 +42,10 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
 {
-	/// <summary>
-	/// Server used in P2P connections
-	/// </summary>
-	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface231, IFikaNetworkManager
+    /// <summary>
+    /// Server used in P2P connections
+    /// </summary>
+    public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface231, IFikaNetworkManager
 	{
 		public int ReadyClients = 0;
 		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
@@ -167,6 +168,8 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
+			packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
+			packetProcessor.SubscribeNetSerializable<TransitInteractPacket, NetPeer>(OnSubscribeNetSerializableReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -272,6 +275,32 @@ namespace Fika.Core.Networking
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnSubscribeNetSerializableReceived(TransitInteractPacket packet, NetPeer peer)
+		{
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+			{
+				GClass1615 transitController = Singleton<GameWorld>.Instance.TransitController;
+				if (transitController != null)
+				{
+					transitController.InteractWithTransit(playerToApply, packet.Data);
+				}
+			}		
+		}
+
+		private void OnSyncTransitControllersPacketReceived(SyncTransitControllersPacket packet, NetPeer peer)
+		{
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+			GClass1615 transitController = Singleton<GameWorld>.Instance.TransitController;
+			if (transitController != null)
+			{
+				transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps);
+				return;
+			}
+
+			logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
 		}
 
 		private void AddDebugPackets()
@@ -942,7 +971,7 @@ namespace Fika.Core.Networking
 		{
 			ReadyClients += packet.ReadyPlayers;
 
-			bool hostReady = coopHandler != null && coopHandler.LocalGameInstance.Status == GameStatus.Started;
+			bool hostReady = coopHandler != null && coopHandler.LocalGameInstance != null && coopHandler.LocalGameInstance.Status == GameStatus.Started;
 
 			InformationPacket respondPackage = new(false)
 			{
@@ -1104,9 +1133,9 @@ namespace Fika.Core.Networking
 					playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
 					return;
 				}
-				
+
 				SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-			}			
+			}
 		}
 
 		private void OnArmorDamagePacketReceived(ArmorDamagePacket packet, NetPeer peer)

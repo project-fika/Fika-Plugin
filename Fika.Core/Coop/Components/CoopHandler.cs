@@ -80,6 +80,7 @@ namespace Fika.Core.Coop.Components
 			spawnQueue.Clear();
 			ready = false;
 			LocalGameInstance = null;
+			requestQuitGame = false;
 		}
 
 		protected void Awake()
@@ -145,6 +146,11 @@ namespace Fika.Core.Coop.Components
 			HumanPlayers.Clear();
 		}
 
+		public void ReInitInteractables()
+		{
+			Singleton<GameWorld>.Instance.World_0.method_0(null);
+		}
+
 		public EQuitState GetQuitState()
 		{
 			EQuitState quitState = EQuitState.None;
@@ -179,9 +185,13 @@ namespace Fika.Core.Coop.Components
 		/// </summary>
 		private void ProcessQuitting()
 		{
-			EQuitState quitState = GetQuitState();
+			if (!FikaPlugin.ExtractKey.Value.IsDown())
+			{
+				return;
+			}
 
-			if (FikaPlugin.ExtractKey.Value.IsDown() && quitState != EQuitState.None && !requestQuitGame)
+			EQuitState quitState = GetQuitState();
+			if (quitState != EQuitState.None && !requestQuitGame)
 			{
 				//Log to both the in-game console as well as into the BepInEx logfile
 				ConsoleScreen.Log($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
@@ -191,15 +201,20 @@ namespace Fika.Core.Coop.Components
 				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 
 				// If you are the server / host
-				if (FikaBackendUtils.IsServer)
+				if (!isClient)
 				{
+					if (coopGame.MyExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
+					{
+						coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, coopGame.MyExitLocation, 0);
+						return;
+					}
 					// A host needs to wait for the team to extract or die!
 					if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.None)
 					{
 						NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
 						requestQuitGame = false;
 						return;
-					}
+					}					
 					else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0
 						&& Singleton<FikaServer>.Instance.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
 						&& Singleton<FikaServer>.Instance.HasHadPeer)

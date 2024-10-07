@@ -1,0 +1,275 @@
+﻿using Comfort.Common;
+using EFT;
+using EFT.Communications;
+using EFT.GlobalEvents;
+using EFT.Interactive;
+using EFT.UI;
+using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Players;
+using Fika.Core.Networking;
+using LiteNetLib;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Fika.Core.Coop.HostClasses
+{
+    public class FikaHostTransitController : GClass1616
+    {
+		public FikaHostTransitController(BackendConfigSettingsClass.GClass1505 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+			: base(settings, parameters)
+		{
+			this.localRaidSettings = localRaidSettings;
+			OnPlayerEnter += OnHostPlayerEnter;
+			OnPlayerExit += OnHostPlayerExit;
+			string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
+			summonedTransits[profile.Id] = new GClass1614(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
+			TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");
+			server = Singleton<FikaServer>.Instance;
+		}
+
+		private readonly LocalRaidSettings localRaidSettings;
+		private readonly FikaServer server;
+
+		private void OnHostPlayerEnter(TransitPoint point, Player player)
+		{
+			if (!method_4(player, point.parameters.id, out string _))
+			{
+				if (player.IsYourPlayer)
+				{
+					method_6(); 
+				}
+				return;
+			}
+			else
+			{				
+				if (!method_4(player, point.parameters.id, out string _))
+				{
+					return;
+				}
+			}
+			if (!transitPlayers.ContainsKey(player.ProfileId))
+			{
+				TransferItemsController.InitPlayerStash(player);
+				if (player is CoopPlayer coopPlayer)
+				{
+					coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
+				}
+				if (player.IsYourPlayer)
+				{
+					method_7(point.parameters.id, player, method_9()); 
+					return;
+				}
+				TransitEventPacket packet = new()
+				{
+					EventType = TransitEventPacket.ETransitEventType.Interaction,
+					TransitEvent = new TransitInteractionEvent()
+					{
+						PlayerId = player.Id,
+						PointId = point.parameters.id,
+						Type = TransitInteractionEvent.EType.Show
+					}
+				};
+
+				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+				return;
+			}
+			dictionary_0[point.parameters.id].GroupEnter(player);
+		}
+
+		private void OnHostPlayerExit(TransitPoint point, Player player)
+		{
+			if (transitPlayers.ContainsKey(player.ProfileId))
+			{
+				point.GroupExit(player);
+			}
+			if (player.IsYourPlayer)
+			{
+				method_10(player);
+				return;
+			}
+
+			TransitEventPacket packet = new()
+			{
+				EventType = TransitEventPacket.ETransitEventType.Interaction,
+				TransitEvent = new TransitInteractionEvent()
+				{
+					PlayerId = player.Id,
+					PointId = point.parameters.id,
+					Type = TransitInteractionEvent.EType.Hide
+				}
+			};
+
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
+
+		public override void Sizes(Dictionary<int, byte> sizes)
+		{
+			foreach (KeyValuePair<int, byte> size in sizes)
+			{
+				if (GamePlayerOwner.MyPlayer.Id == size.Key)
+				{
+					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Display();
+					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Show((int)size.Value); 
+				}
+			}
+
+			TransitEventPacket packet = new()
+			{
+				EventType = TransitEventPacket.ETransitEventType.GroupSize,
+				TransitEvent = new TransitGroupSizeEvent()
+				{
+					Sizes = sizes
+				}
+			};
+
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
+
+		public override void Timers(int pointId, Dictionary<int, ushort> timers)
+		{
+			foreach (KeyValuePair<int, ushort> timer in timers)
+			{
+				if (GamePlayerOwner.MyPlayer.Id == timer.Key)
+				{
+					method_5(pointId);
+					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
+					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value); 
+				}
+			}
+
+			TransitEventPacket packet = new()
+			{
+				EventType = TransitEventPacket.ETransitEventType.GroupTimer,
+				TransitEvent = new TransitGroupTimerEvent()
+				{
+					PointId = pointId,
+					Timers = timers
+				}
+			};
+
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
+
+		public override void InactivePointNotification(int playerId, int pointId)
+		{
+			if (GamePlayerOwner.MyPlayer.Id == playerId)
+			{
+				NotificationManagerClass.DisplayWarningNotification("Transit/InactivePoint".Localized(null), ENotificationDurationType.Default);
+				method_5(pointId);
+				return;
+			}
+
+			TransitEventPacket packet = new()
+			{
+				EventType = TransitEventPacket.ETransitEventType.Interaction,
+				TransitEvent = new TransitInteractionEvent()
+				{
+					PlayerId = playerId,
+					PointId = pointId,
+					Type = TransitInteractionEvent.EType.InactivePoint
+				}
+			};
+
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+		}
+
+		public override void InteractWithTransit(Player player, GStruct176 packet)
+		{
+			if (player.IsYourPlayer)
+			{
+				method_10(player);
+				transitPlayers.Add(player.ProfileId, player.Id);
+				profileKeys[player.ProfileId] = packet.keyId;
+				dictionary_0[packet.pointId].GroupEnter(player);
+				ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
+				ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
+				ExfiltrationControllerClass.Instance.DisableExitsInteraction();
+				return;
+			}
+
+			transitPlayers[player.ProfileId] = player.Id;
+			profileKeys[player.ProfileId] = packet.keyId;
+			dictionary_0[packet.pointId].GroupEnter(player);
+			ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
+			ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
+
+			TransitEventPacket eventPacket = new()
+			{
+				EventType = TransitEventPacket.ETransitEventType.Interaction,
+				TransitEvent = new TransitInteractionEvent()
+				{
+					PlayerId = player.Id,
+					PointId = packet.pointId,
+					Type = TransitInteractionEvent.EType.Confirm
+				}
+			};
+
+			server.SendDataToAll(ref eventPacket, DeliveryMethod.ReliableOrdered);
+		}
+
+		public override void Transit(TransitPoint point, int playersCount, string hash, Dictionary<string, ProfileKey> keys, Player player)
+        {
+			if (player.IsYourPlayer)
+			{
+				string location = point.parameters.location;
+				ERaidMode eraidMode = ERaidMode.Local;
+				if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+				{
+					eraidMode = ERaidMode.Local;
+					tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+				}
+				string profileId = player.ProfileId;
+				GClass1883 gclass = new()
+				{
+					hash = hash,
+					playersCount = playersCount,
+					ip = "",
+					location = location,
+					profiles = keys,
+					transitionRaidId = summonedTransits[profileId].raidId,
+					raidMode = eraidMode,
+					side = player.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
+					dayTime = localRaidSettings.timeVariant
+				};
+				alreadyTransits.Add(profileId, gclass);
+				if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+				{
+					coopGame.Extract((CoopPlayer)player, null, point);
+				} 
+			}
+
+			TransitEventPacket packet = new()
+			{
+				EventType = TransitEventPacket.ETransitEventType.Extract,
+				PlayerId = player.PlayerId,
+				TransitId = point.parameters.id
+			};
+
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			OnPlayerEnter -= OnHostPlayerEnter;
+			OnPlayerExit -= OnHostPlayerExit;
+		}
+
+		public void Init()
+		{
+			foreach (TransitPoint transitPoint in dictionary_0.Values)
+			{
+				transitPoint.Enabled = true;
+			}
+			method_1(dictionary_0.Values);
+
+			/*TransitEventPacket packet = new()
+			{
+				EventType = TransitEventPacket.ETransitEventType.Init
+			};
+
+			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);*/
+		}
+	}
+}

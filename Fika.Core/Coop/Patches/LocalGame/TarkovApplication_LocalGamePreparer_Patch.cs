@@ -50,17 +50,20 @@ namespace Fika.Core.Coop.Patches
 				}
 			}
 
-			NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
-			if (isServer)
+			if (!FikaBackendUtils.IsTransit)
 			{
-				NetManagerUtils.StartPinger();
-			}
-			await NetManagerUtils.InitNetManager(isServer);
+				NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
+				if (isServer)
+				{
+					NetManagerUtils.StartPinger();
+				}
+				await NetManagerUtils.InitNetManager(isServer);
 
-			if (isServer)
-			{
-				SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.COMPLETE);
-				await FikaRequestHandler.UpdateSetStatus(status);
+				if (isServer)
+				{
+					SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.COMPLETE);
+					await FikaRequestHandler.UpdateSetStatus(status);
+				} 
 			}
 		}
 

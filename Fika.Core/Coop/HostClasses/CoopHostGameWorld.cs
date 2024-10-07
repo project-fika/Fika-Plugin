@@ -77,7 +77,6 @@ namespace Fika.Core.Coop.ClientClasses
 			base.Dispose();
 			MineManager.OnExplosion -= OnMineExplode;
 			NetManagerUtils.DestroyNetManager(true);
-			FikaBackendUtils.MatchingType = EMatchmakerType.Single;
 		}
 
 		public override void InitAirdrop(string lootTemplateId = null, bool takeNearbyPoint = false, Vector3 position = default)

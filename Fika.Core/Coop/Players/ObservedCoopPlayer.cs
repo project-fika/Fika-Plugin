@@ -17,6 +17,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
+using JsonType;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -819,6 +820,11 @@ namespace Fika.Core.Coop.Players
 				Corpse.SetItemInHandsLootedCallback(ReleaseHand);
 			}
 			CorpseSyncPacket = default;
+		}
+
+		public override void vmethod_3(GClass1615 controller, int transitPointId, string keyId, EDateTime time)
+		{
+			// Do nothing
 		}
 
 		public override void HandleDamagePacket(ref DamagePacket packet)

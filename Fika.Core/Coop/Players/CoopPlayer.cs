@@ -21,6 +21,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using HarmonyLib;
+using JsonType;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -670,6 +671,29 @@ namespace Fika.Core.Coop.Players
 				HasMountingPacket = true,
 				MountingPacket = packet
 			});
+		}
+
+		public override void vmethod_3(GClass1615 controller, int transitPointId, string keyId, EDateTime time)
+		{
+			GStruct176 packet = controller.GetInteractPacket(transitPointId, keyId, time);
+			if (FikaBackendUtils.IsServer)
+			{
+				controller.InteractWithTransit(this, packet);
+			}
+			else
+			{
+				TransitInteractPacket interactPacket = new()
+				{
+					NetId = NetId,
+					Data = packet
+				};
+				Singleton<FikaClient>.Instance.SendData(ref interactPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+				if (Singleton<GameWorld>.Instance.TransitController is FikaClientTransitController transitController)
+				{
+					transitController.InteractPacket = packet;
+				}
+			}
+			UpdateInteractionCast();
 		}
 
 		public override void vmethod_4(TripwireSynchronizableObject tripwire)

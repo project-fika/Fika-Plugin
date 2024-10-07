@@ -17,6 +17,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
@@ -38,10 +39,10 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
 {
-	/// <summary>
-	/// Client used in P2P connections
-	/// </summary>
-	public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
+    /// <summary>
+    /// Client used in P2P connections
+    /// </summary>
+    public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
 	{
 		public CoopPlayer MyPlayer;
 		public NetPacketProcessor packetProcessor = new();
@@ -153,6 +154,8 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
 			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ArtilleryPacket>(OnArtilleryPacketReceived);
+			packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
+			packetProcessor.SubscribeNetSerializable<TransitEventPacket>(OnTransitEventPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -202,6 +205,46 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnTransitEventPacketReceived(TransitEventPacket packet)
+		{
+			if (!(packet.EventType is TransitEventPacket.ETransitEventType.Init or TransitEventPacket.ETransitEventType.Extract))
+			{
+				packet.TransitEvent.Invoke();
+				return;
+			}
+
+			if (packet.EventType is TransitEventPacket.ETransitEventType.Init)
+			{
+				if (coopHandler.LocalGameInstance.GameWorld_0.TransitController is FikaClientTransitController transitController)
+				{
+					transitController.Init();
+					return;
+				} 
+			}
+
+			if (packet.EventType is TransitEventPacket.ETransitEventType.Extract)
+			{
+				if (coopHandler.LocalGameInstance.GameWorld_0.TransitController is FikaClientTransitController transitController)
+				{
+					transitController.HandleClientExtract(packet.TransitId, packet.PlayerId);
+				}
+			}
+
+			logger.LogError("OnTransitEventPacketReceived: TransitController was not FikaClientTransitController!");
+		}
+
+		private void OnSyncTransitControllersPacketReceived(SyncTransitControllersPacket packet)
+		{
+			GClass1615 transitController = Singleton<GameWorld>.Instance.TransitController;
+			if (transitController != null)
+			{
+				transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps);
+				return;
+			}
+
+			logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
 		}
 
 		private void AddDebugPackets()
