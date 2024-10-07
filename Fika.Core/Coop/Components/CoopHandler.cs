@@ -126,7 +126,7 @@ namespace Fika.Core.Coop.Components
 			if (isClient)
 			{
 				charSyncCounter += Time.deltaTime;
-				int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 5;
+				int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
 
 				if (charSyncCounter > waitTime)
 				{
