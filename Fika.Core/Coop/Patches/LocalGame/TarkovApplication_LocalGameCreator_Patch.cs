@@ -49,6 +49,16 @@ namespace Fika.Core.Coop.Patches
 			GameWorld gameWorld)
 		{
 			bool isServer = FikaBackendUtils.IsServer;
+			bool isTransit = FikaBackendUtils.IsTransit;
+			if (isServer && !isTransit)
+			{
+				FikaBackendUtils.TransitRaidSettings = raidSettings;
+			}
+
+			if (isTransit)
+			{
+				raidSettings = FikaBackendUtils.TransitRaidSettings;
+			}
 
 			metricsEvents.SetGamePrepared();
 

@@ -38,6 +38,7 @@ namespace Fika.Core.Coop.Utils
 		public static string HostLocationId;
 		public static bool RequestFikaWorld = false;
 		public static Vector3 ReconnectPosition = Vector3.zero;
+		public static RaidSettings TransitRaidSettings;
 
 		public static bool IsServer
 		{
