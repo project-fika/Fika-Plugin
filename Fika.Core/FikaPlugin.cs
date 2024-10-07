@@ -222,6 +222,7 @@ namespace Fika.Core
 			SetupConfig();
 
 			new FikaVersionLabel_Patch().Enable();
+			new TarkovApplication_method_18_Patch().Enable();
 			new DisableReadyButton_Patch().Enable();
 			new DisableInsuranceReadyButton_Patch().Enable();
 			new DisableMatchSettingsReadyButton_Patch().Enable();

@@ -1,0 +1,30 @@
+﻿using EFT.Communications;
+using Fika.Core.Utils;
+using Newtonsoft.Json;
+
+namespace Fika.Core.Networking.Websocket.Notifications
+{
+	public class StartRaidNotification : NotificationAbstractClass
+	{
+		public override ENotificationIconType Icon
+		{
+			get
+			{
+				return ENotificationIconType.Alert;
+			}
+		}
+
+		public override string Description
+		{
+			get
+			{
+				return string.Format(LocaleUtils.UI_NOTIFICATION_STARTED_RAID.Localized(), ColorUtils.ColorizeText(Colors.GREEN, Nickname), ColorUtils.ColorizeText(Colors.RED, Location));
+			}
+		}
+
+		[JsonProperty("nickname")]
+		public string Nickname;
+		[JsonProperty("location")]
+		public string Location;
+	}
+}
