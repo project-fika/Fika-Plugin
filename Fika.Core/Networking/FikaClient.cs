@@ -252,7 +252,7 @@ namespace Fika.Core.Networking
 				{
 					ResyncInventoryIdPacket response = new(playerToApply.NetId)
 					{
-						MongoId = playerToApply.InventoryController.CurrentId.ToString()
+						MongoId = playerToApply.InventoryController.CurrentId
 					};
 					SendData(ref response, DeliveryMethod.ReliableOrdered);
 				}
