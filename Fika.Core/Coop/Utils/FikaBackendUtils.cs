@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsHostNatPunch = false;
 		public static string HostLocationId;
 		public static bool RequestFikaWorld = false;
-		public static Vector3 ReconnectPosition = Vector3.zero;
+		public static Vector3 ReconnectPosition = Vector3.zero;		
 
 		public static bool IsServer
 		{
@@ -63,6 +63,35 @@ namespace Fika.Core.Coop.Utils
 		}
 		public static string GroupId { get; set; }
 		public static string RaidCode { get; set; }
+		public static GClass1322 TransitData
+		{
+			get
+			{
+				if (transitData == null)
+				{
+					return new()
+					{
+						isLocationTransition = false,
+						transitionCount = 0,
+						transitionRaidId = FikaGlobals.DefaultTransitId,
+						visitedLocations = []
+					};
+				}
+
+				return transitData;
+			}
+			set
+			{
+				transitData = value;
+			}
+		}
+
+		private static GClass1322 transitData;
+
+		public static void ResetTransitData()
+		{
+			TransitData = null;
+		}
 
 		public static bool JoinMatch(string profileId, string serverId, out CreateMatch result, out string errorMessage)
 		{
@@ -123,6 +152,6 @@ namespace Fika.Core.Coop.Utils
 			}
 
 			return raidCode;
-		}
+		}		
 	}
 }

@@ -2062,6 +2062,19 @@ namespace Fika.Core.Coop.GameMode
 				FikaBackendUtils.IsTransit = false;
 			}
 
+			if (FikaBackendUtils.IsTransit)
+			{
+				GClass1322 data = FikaBackendUtils.TransitData;
+				data.isLocationTransition = true;
+				data.transitionCount++;
+				data.visitedLocations = [.. data.visitedLocations, Location_0.Id];
+				FikaBackendUtils.TransitData = data;
+			}
+			else
+			{
+				FikaBackendUtils.ResetTransitData();
+			}
+
 			NetworkTimeSync.Reset();
 			Logger.LogDebug("Stop");
 

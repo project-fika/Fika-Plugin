@@ -15,6 +15,7 @@ namespace Fika.Core.Coop.Utils
 	{
 		public const string TransitTraderId = "656f0f98d80a697f855d34b1";
 		public const string TransiterTraderName = "BTR";
+		public const string DefaultTransitId = "66f5750951530ca5ae09876d";
 
 		public static readonly List<EInteraction> BlockedInteractions =
 		[

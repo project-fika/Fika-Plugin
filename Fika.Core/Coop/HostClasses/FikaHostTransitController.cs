@@ -5,7 +5,6 @@ using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;

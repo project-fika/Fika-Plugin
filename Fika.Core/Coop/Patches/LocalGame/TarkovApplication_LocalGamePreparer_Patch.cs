@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.Patches
 				{
 					SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.COMPLETE);
 					await FikaRequestHandler.UpdateSetStatus(status);
-				} 
+				}
 			}
 		}
 

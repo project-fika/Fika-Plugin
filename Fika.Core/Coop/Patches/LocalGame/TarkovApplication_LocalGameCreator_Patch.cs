@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.Patches
 			LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
-			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = localSettings.transitionSettings;
+			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = FikaBackendUtils.TransitData;
 
 			GClass1284 profileInsurance = localSettings.profileInsurance;
 			if ((profileInsurance?.insuredItems) != null)
