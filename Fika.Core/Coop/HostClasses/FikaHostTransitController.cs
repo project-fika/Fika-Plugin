@@ -349,11 +349,11 @@ namespace Fika.Core.Coop.HostClasses
 
 			if (FikaBackendUtils.IsDedicated && !dediTransit)
 			{
-				ExtractDedi(point);
+				ExtractDedicatedClient(point);
 			}
 		}
 
-		private void ExtractDedi(TransitPoint point)
+		private void ExtractDedicatedClient(TransitPoint point)
 		{
 			Dictionary<string, ProfileKey> keys;
 			dediTransit = true;
