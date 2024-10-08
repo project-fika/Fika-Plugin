@@ -3,6 +3,7 @@ using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using System;
 using System.Collections;
@@ -79,6 +80,11 @@ namespace Fika.Core.Coop.Utils
 				yield break;
 			}
 			ConsoleScreen.Log($"{player.Profile.Info.Nickname} has spawned item: {item.ShortName.Localized()}");
+		}
+
+		public static bool IsInRaid()
+		{
+			return Singleton<AbstractGame>.Instance is CoopGame coopGame && coopGame.InRaid;
 		}
 	}
 }
