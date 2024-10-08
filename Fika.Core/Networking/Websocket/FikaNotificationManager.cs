@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT.UI;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Websocket.Notifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -117,7 +118,10 @@ namespace Fika.Core.Networking.Websocket
 				case EFikaNotifications.StartedRaid:
 					StartRaidNotification startRaidNotification = e.Data.ParseJsonTo<StartRaidNotification>(Array.Empty<JsonConverter>());
 
-					// Todo: Check if user is in raid already, if so do not receive this notification
+					if(FikaGlobals.IsInRaid())
+					{
+						return;
+					}
 
 					notificationsQueue.Enqueue(startRaidNotification);
 					break;
