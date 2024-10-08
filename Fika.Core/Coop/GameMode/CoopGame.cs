@@ -157,6 +157,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			raidSettings.BotSettings.BotAmount = raidSettings.WavesSettings.BotAmount;
+
 			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, backendDateTime, insurance, menuUI, gameUI,
 				location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
 				new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
