@@ -192,7 +192,7 @@ namespace Fika.Core.Networking.Websocket
 					PushNotification PushNotification = new()
 					{
 						Notification = "Test notification",
-						NotificationIcon = "0"
+						NotificationIcon = EFT.Communications.ENotificationIconType.Note
 					};
 
 					Singleton<PreloaderUI>.Instance.NotifierView.method_3(PushNotification);
