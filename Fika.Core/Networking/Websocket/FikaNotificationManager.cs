@@ -46,6 +46,8 @@ namespace Fika.Core.Networking.Websocket
 				EmitOnPing = true
 			};
 
+			_webSocket.SetCredentials(SessionId, "", true);
+
 			_webSocket.OnError += WebSocket_OnError;
 			_webSocket.OnMessage += WebSocket_OnMessage;
 			_webSocket.OnClose += (sender, e) =>
