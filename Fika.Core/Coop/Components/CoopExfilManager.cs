@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.Components
 				if (playerHandler.startTime + playerHandler.point.Settings.ExfiltrationTime - game.PastTime <= 0)
 				{
 					playerHandlers.Remove(playerHandler);
-					game.MyExitLocation = playerHandler.point.Settings.Name;
+					game.ExitLocation = playerHandler.point.Settings.Name;
 					game.Extract(playerHandler.player, playerHandler.point);
 				}
 			}
@@ -71,7 +71,7 @@ namespace Fika.Core.Coop.Components
 
 						if (!exfiltrationPoint.UnmetRequirements(player).Any())
 						{
-							game.MyExitLocation = exfiltrationPoint.Settings.Name;
+							game.ExitLocation = exfiltrationPoint.Settings.Name;
 							game.Extract((CoopPlayer)player, exfiltrationPoint);
 						}
 					}

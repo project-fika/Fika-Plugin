@@ -5,6 +5,7 @@ using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -30,13 +31,20 @@ namespace Fika.Core.Coop.HostClasses
 			playersInTransitZone = [];
 			dediTransit = false;
 			transittedPlayers = [];
+
+			if (FikaBackendUtils.IsDedicated)
+			{
+				CoopPlayer dediPlayer = (CoopPlayer)GamePlayerOwner.MyPlayer;
+				TransferItemsController.InitPlayerStash(dediPlayer);
+				dediPlayer.UpdateBtrTraderServiceData().HandleExceptions();
+			}
 		}
 
 		private readonly LocalRaidSettings localRaidSettings;
 		private readonly FikaServer server;
 		private readonly Dictionary<Player, int> playersInTransitZone;
 		private bool dediTransit;
-		private List<int> transittedPlayers;
+		private readonly List<int> transittedPlayers;
 
 		private void OnHostPlayerEnter(TransitPoint point, Player player)
 		{
@@ -297,47 +305,6 @@ namespace Fika.Core.Coop.HostClasses
 
 		public override void Transit(TransitPoint point, int playersCount, string hash, Dictionary<string, ProfileKey> keys, Player player)
 		{
-			if (FikaBackendUtils.IsDedicated && !dediTransit)
-			{
-				dediTransit = true;
-
-				Player dediPlayer = GamePlayerOwner.MyPlayer;
-
-				string location = point.parameters.location;
-				ERaidMode eraidMode = ERaidMode.Local;
-				if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
-				{
-					eraidMode = ERaidMode.Local;
-					tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
-				}
-				string profileId = dediPlayer.ProfileId;
-				keys = [];
-				keys.Add(profileId, new()
-				{
-					isSolo = true,
-					keyId = "",
-					_id = profileId,
-				});
-
-				GClass1883 gclass = new()
-				{
-					hash = Guid.NewGuid().ToString(),
-					playersCount = 1,
-					ip = "",
-					location = location,
-					profiles = keys,
-					transitionRaidId = summonedTransits[profileId].raidId,
-					raidMode = eraidMode,
-					side = player.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
-					dayTime = localRaidSettings.timeVariant
-				};
-				alreadyTransits.Add(profileId, gclass);
-				if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
-				{
-					coopGame.Extract((CoopPlayer)player, null, point);
-				}
-			}
-
 			if (player.IsYourPlayer)
 			{
 				dediTransit = true;
@@ -381,12 +348,60 @@ namespace Fika.Core.Coop.HostClasses
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
-			if (FikaBackendUtils.IsDedicated)
+			if (FikaBackendUtils.IsDedicated && !dediTransit)
 			{
-				if (transittedPlayers.Count >= (FikaBackendUtils.HostExpectedNumberOfPlayers - 1))
+				ExtractDedi(point);
+			}
+		}
+
+		private void ExtractDedi(TransitPoint point)
+		{
+			Dictionary<string, ProfileKey> keys;
+			dediTransit = true;
+
+			CoopPlayer dediPlayer = (CoopPlayer)GamePlayerOwner.MyPlayer;
+
+			string location = point.parameters.location;
+			ERaidMode eraidMode = ERaidMode.Local;
+			if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+			{
+				eraidMode = ERaidMode.Local;
+				tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+			}
+			string profileId = dediPlayer.ProfileId;
+			keys = [];
+			keys.Add(profileId, new()
+			{
+				isSolo = true,
+				keyId = "",
+				_id = profileId,
+			});
+
+			GClass1883 gclass = new()
+			{
+				hash = Guid.NewGuid().ToString(),
+				playersCount = 1,
+				ip = "",
+				location = location,
+				profiles = keys,
+				transitionRaidId = summonedTransits[profileId].raidId,
+				raidMode = eraidMode,
+				side = dediPlayer.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
+				dayTime = localRaidSettings.timeVariant
+			};
+			alreadyTransits.Add(profileId, gclass);
+
+			GClass1615 transitController = Singleton<GameWorld>.Instance.TransitController;
+			if (transitController != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
+			{
+				if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1883 data))
 				{
-					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-					coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, ExitStatus.Transit, coopGame.MyExitLocation, 0);
+					coopGame.ExitStatus = ExitStatus.Transit;
+					coopGame.ExitLocation = point.parameters.name;
+					coopGame.ExtractedPlayers.Add(dediPlayer.NetId);
+					FikaBackendUtils.IsTransit = true;
+
+					coopGame.Stop(dediPlayer.ProfileId, coopGame.ExitStatus, coopGame.ExitLocation, 0);
 				}
 			}
 		}

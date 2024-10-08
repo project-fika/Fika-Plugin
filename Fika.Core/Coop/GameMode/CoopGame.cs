@@ -52,8 +52,8 @@ namespace Fika.Core.Coop.GameMode
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
 	{
 		public string InfiltrationPoint;
-		public ExitStatus MyExitStatus { get; set; } = ExitStatus.Survived;
-		public string MyExitLocation { get; set; } = null;
+		public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
+		public string ExitLocation { get; set; } = null;
 		public ISpawnSystem SpawnSystem;
 		public Dictionary<string, Player> Bots = [];
 		public List<int> ExtractedPlayers { get; } = [];
@@ -1863,7 +1863,7 @@ namespace Fika.Core.Coop.GameMode
 			position.y += 500;
 			player.Teleport(position);
 
-			if (MyExitStatus == ExitStatus.MissingInAction)
+			if (ExitStatus == ExitStatus.MissingInAction)
 			{
 				NotificationManagerClass.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
 			}
@@ -1876,7 +1876,7 @@ namespace Fika.Core.Coop.GameMode
 			BackendConfigSettingsClass.GClass1479.GClass1485 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
 			if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && PastTime < matchEndConfig.SurvivedTimeRequirement)
 			{
-				MyExitStatus = ExitStatus.Runner;
+				ExitStatus = ExitStatus.Runner;
 			}
 
 			if (exfiltrationPoint != null)
@@ -1904,8 +1904,8 @@ namespace Fika.Core.Coop.GameMode
 			{
 				if (transitController.alreadyTransits.TryGetValue(player.ProfileId, out GClass1883 data))
 				{
-					MyExitStatus = ExitStatus.Transit;
-					MyExitLocation = transitPoint.parameters.name;
+					ExitStatus = ExitStatus.Transit;
+					ExitLocation = transitPoint.parameters.name;
 					FikaBackendUtils.IsTransit = true;
 				}
 			}
@@ -1965,15 +1965,15 @@ namespace Fika.Core.Coop.GameMode
 					GameUi.TimerPanel.Close();
 				}
 
-				if (FikaPlugin.AutoExtract.Value && !FikaBackendUtils.IsTransit)
+				if (FikaPlugin.AutoExtract.Value || FikaBackendUtils.IsTransit)
 				{
 					if (!isServer)
 					{
-						Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
+						Stop(coopHandler.MyPlayer.ProfileId, ExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? ExitLocation : null, 0);
 					}
 					else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0)
 					{
-						Stop(coopHandler.MyPlayer.ProfileId, MyExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? MyExitLocation : null, 0);
+						Stop(coopHandler.MyPlayer.ProfileId, ExitStatus, coopHandler.MyPlayer.ActiveHealthController.IsAlive ? ExitLocation : null, 0);
 					}
 				}
 			}
@@ -2009,7 +2009,10 @@ namespace Fika.Core.Coop.GameMode
 
 		public void ClearHostAI(Player player)
 		{
-			botsController_0.DestroyInfo(player);
+			if (botsController_0 != null)
+			{
+				botsController_0.DestroyInfo(player); 
+			}
 		}
 
 		/// <summary>
@@ -2036,12 +2039,12 @@ namespace Fika.Core.Coop.GameMode
 			player.HealthController.DiedEvent -= HealthController_DiedEvent;
 
 			PlayerOwner.vmethod_1();
-			MyExitStatus = ExitStatus.Killed;
-			MyExitLocation = string.Empty;
+			ExitStatus = ExitStatus.Killed;
+			ExitLocation = string.Empty;
 
 			if (FikaPlugin.Instance.ForceSaveOnDeath)
 			{
-				await SavePlayer((CoopPlayer)player, MyExitStatus, string.Empty, true);
+				await SavePlayer((CoopPlayer)player, ExitStatus, string.Empty, true);
 			}
 		}
 
@@ -2159,7 +2162,7 @@ namespace Fika.Core.Coop.GameMode
 
 			Status = GameStatus.Stopping;
 			GameTimer.TryStop();
-			if (gameUI.TimerPanel.enabled)
+			if (gameUI.TimerPanel.isActiveAndEnabled)
 			{
 				gameUI.TimerPanel.Close();
 			}

@@ -1332,8 +1332,8 @@ namespace Fika.Core.Networking
 
 					// End the raid
 					Singleton<IFikaGame>.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId,
-							Singleton<IFikaGame>.Instance.MyExitStatus,
-							Singleton<IFikaGame>.Instance.MyExitLocation, 0);
+							Singleton<IFikaGame>.Instance.ExitStatus,
+							Singleton<IFikaGame>.Instance.ExitLocation, 0);
 				}
 			}
 		}

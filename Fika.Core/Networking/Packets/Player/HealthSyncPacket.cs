@@ -17,7 +17,7 @@ namespace Fika.Core.Networking
 			NetId = reader.GetInt();
 			GStruct358 packet = new()
 			{
-				SyncType = (GStruct358.ESyncType)reader.GetInt()
+				SyncType = (GStruct358.ESyncType)reader.GetByte()
 			};
 			switch (packet.SyncType)
 			{
@@ -27,13 +27,13 @@ namespace Fika.Core.Networking
 						{
 							EffectId = reader.GetInt(),
 							Type = reader.GetByte(),
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							DelayTime = reader.GetFloat(),
 							BuildUpTime = reader.GetFloat(),
 							WorkTime = reader.GetFloat(),
 							ResidueTime = reader.GetFloat(),
 							Strength = reader.GetFloat(),
-							ExtraDataType = (GStruct358.GStruct359.EExtraDataType)reader.GetInt()
+							ExtraDataType = (GStruct358.GStruct359.EExtraDataType)reader.GetByte()
 						};
 						switch (packet.Data.AddEffect.ExtraDataType)
 						{
@@ -144,7 +144,7 @@ namespace Fika.Core.Networking
 					{
 						packet.Data.BodyHealth = new()
 						{
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							Value = reader.GetFloat()
 						};
 						break;
@@ -185,7 +185,7 @@ namespace Fika.Core.Networking
 					{
 						packet.Data.ApplyDamage = new()
 						{
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							Damage = reader.GetFloat(),
 							DamageType = (EDamageType)reader.GetInt()
 						};
@@ -195,7 +195,7 @@ namespace Fika.Core.Networking
 					{
 						packet.Data.DestroyedBodyPart = new()
 						{
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							IsDestroyed = reader.GetBool()
 						};
 						if (packet.Data.DestroyedBodyPart.IsDestroyed)
@@ -262,20 +262,20 @@ namespace Fika.Core.Networking
 		{
 			writer.Put(NetId);
 			GStruct358.GStruct377 packet = Packet.Data;
-			writer.Put((int)Packet.SyncType);
+			writer.Put((byte)Packet.SyncType);
 			switch (Packet.SyncType)
 			{
 				case GStruct358.ESyncType.AddEffect:
 					{
 						writer.Put(packet.AddEffect.EffectId);
 						writer.Put(packet.AddEffect.Type);
-						writer.Put((int)packet.AddEffect.BodyPart);
+						writer.Put((byte)packet.AddEffect.BodyPart);
 						writer.Put(packet.AddEffect.DelayTime);
 						writer.Put(packet.AddEffect.BuildUpTime);
 						writer.Put(packet.AddEffect.WorkTime);
 						writer.Put(packet.AddEffect.ResidueTime);
 						writer.Put(packet.AddEffect.Strength);
-						writer.Put((int)packet.AddEffect.ExtraDataType);
+						writer.Put((byte)packet.AddEffect.ExtraDataType);
 						switch (packet.AddEffect.ExtraDataType)
 						{
 							case GStruct358.GStruct359.EExtraDataType.None:
@@ -352,7 +352,7 @@ namespace Fika.Core.Networking
 					}
 				case GStruct358.ESyncType.BodyHealth:
 					{
-						writer.Put((int)packet.BodyHealth.BodyPart);
+						writer.Put((byte)packet.BodyHealth.BodyPart);
 						writer.Put(packet.BodyHealth.Value);
 						break;
 					}
@@ -378,14 +378,14 @@ namespace Fika.Core.Networking
 					}
 				case GStruct358.ESyncType.ApplyDamage:
 					{
-						writer.Put((int)packet.ApplyDamage.BodyPart);
+						writer.Put((byte)packet.ApplyDamage.BodyPart);
 						writer.Put(packet.ApplyDamage.Damage);
 						writer.Put((int)packet.ApplyDamage.DamageType);
 						break;
 					}
 				case GStruct358.ESyncType.DestroyedBodyPart:
 					{
-						writer.Put((int)packet.DestroyedBodyPart.BodyPart);
+						writer.Put((byte)packet.DestroyedBodyPart.BodyPart);
 						writer.Put(packet.DestroyedBodyPart.IsDestroyed);
 						if (packet.DestroyedBodyPart.IsDestroyed)
 						{

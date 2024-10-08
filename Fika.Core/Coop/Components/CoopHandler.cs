@@ -204,9 +204,9 @@ namespace Fika.Core.Coop.Components
 				// If you are the server / host
 				if (!isClient)
 				{
-					if (coopGame.MyExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
+					if (coopGame.ExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
 					{
-						coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, coopGame.MyExitLocation, 0);
+						coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, coopGame.ExitLocation, 0);
 						return;
 					}
 					// A host needs to wait for the team to extract or die!
@@ -226,12 +226,12 @@ namespace Fika.Core.Coop.Components
 					}
 					else
 					{
-						coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.MyExitLocation : null, 0);
+						coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.ExitLocation : null, 0);
 					}
 				}
 				else
 				{
-					coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.MyExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.MyExitLocation : null, 0);
+					coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.ExitLocation : null, 0);
 				}
 				return;
 			}

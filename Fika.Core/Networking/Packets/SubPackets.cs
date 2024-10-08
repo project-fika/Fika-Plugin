@@ -200,8 +200,6 @@ namespace Fika.Core.Networking.Packets
 			public float VaultingSpeed;
 			public float BehindObstacleHeight;
 			public float AbsoluteForwardVelocity;
-
-
 		}
 
 		public struct CorpseSyncPacket

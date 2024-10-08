@@ -30,7 +30,7 @@ namespace Fika.Core.Networking
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			DamageType = (EDamageType)reader.GetByte();
+			DamageType = (EDamageType)reader.GetInt();
 			Damage = reader.GetFloat();
 			BodyPartType = (EBodyPart)reader.GetByte();
 			ColliderType = (EBodyPartColliderType)reader.GetByte();
@@ -52,7 +52,7 @@ namespace Fika.Core.Networking
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put(NetId);
-			writer.Put((byte)DamageType);
+			writer.Put((int)DamageType);
 			writer.Put(Damage);
 			writer.Put((byte)BodyPartType);
 			writer.Put((byte)ColliderType);
