@@ -1,6 +1,5 @@
 ﻿using EFT.Communications;
 using Newtonsoft.Json;
-using System;
 
 namespace Fika.Core.Networking.Websocket.Notifications
 {

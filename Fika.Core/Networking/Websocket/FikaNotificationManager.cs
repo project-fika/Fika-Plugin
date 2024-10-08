@@ -118,7 +118,7 @@ namespace Fika.Core.Networking.Websocket
 				case EFikaNotifications.StartedRaid:
 					StartRaidNotification startRaidNotification = e.Data.ParseJsonTo<StartRaidNotification>(Array.Empty<JsonConverter>());
 
-					if(FikaGlobals.IsInRaid())
+					if (FikaGlobals.IsInRaid())
 					{
 						return;
 					}
@@ -129,7 +129,7 @@ namespace Fika.Core.Networking.Websocket
 					ReceivedSentItemNotification SentItemNotification = e.Data.ParseJsonTo<ReceivedSentItemNotification>(Array.Empty<JsonConverter>());
 
 					// If we are not the target, ignore.
-					if(SentItemNotification.TargetId != SessionId)
+					if (SentItemNotification.TargetId != SessionId)
 					{
 						return;
 					}
@@ -150,7 +150,7 @@ namespace Fika.Core.Networking.Websocket
 
 			while (true)
 			{
-				if(_webSocket.ReadyState == WebSocketState.Open)
+				if (_webSocket.ReadyState == WebSocketState.Open)
 				{
 					break;
 				}
