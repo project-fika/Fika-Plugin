@@ -37,7 +37,8 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsHostNatPunch = false;
 		public static string HostLocationId;
 		public static bool RequestFikaWorld = false;
-		public static Vector3 ReconnectPosition = Vector3.zero;		
+		public static Vector3 ReconnectPosition = Vector3.zero;
+		public static RaidSettings CachedRaidSettings;
 
 		public static bool IsServer
 		{

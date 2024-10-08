@@ -51,6 +51,20 @@ namespace Fika.Core.Coop.Patches
 			bool isServer = FikaBackendUtils.IsServer;
 			bool isTransit = FikaBackendUtils.IsTransit;
 
+			if (isServer && !isTransit)
+			{
+				FikaBackendUtils.CachedRaidSettings = raidSettings;
+			}
+			else if (isServer && isTransit && FikaBackendUtils.CachedRaidSettings != null)
+			{
+				Logger.LogInfo("Applying cached raid settings from previous raid");
+				RaidSettings cachedSettings = FikaBackendUtils.CachedRaidSettings;
+				raidSettings.WavesSettings = cachedSettings.WavesSettings;
+				raidSettings.BotSettings = cachedSettings.BotSettings;
+				raidSettings.MetabolismDisabled = cachedSettings.MetabolismDisabled;
+				raidSettings.PlayersSpawnPlace = cachedSettings.PlayersSpawnPlace;
+			}
+
 			metricsEvents.SetGamePrepared();
 
 			LocationSettingsClass.Location location = raidSettings.SelectedLocation;
