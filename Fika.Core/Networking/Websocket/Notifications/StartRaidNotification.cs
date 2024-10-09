@@ -10,7 +10,7 @@ namespace Fika.Core.Networking.Websocket.Notifications
 		{
 			get
 			{
-				return ENotificationIconType.Alert;
+				return ENotificationIconType.EntryPoint;
 			}
 		}
 
