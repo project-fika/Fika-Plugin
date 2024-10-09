@@ -21,7 +21,7 @@ namespace Fika.Core.Networking
 			public EPhraseTrigger PhraseTrigger;
 			public int PhraseIndex;
 
-			public PhrasePacket(NetDataReader reader) : this()
+			public PhrasePacket(NetDataReader reader)
 			{
 				PhraseTrigger = (EPhraseTrigger)reader.GetByte();
 				PhraseIndex = reader.GetInt();
@@ -49,7 +49,7 @@ namespace Fika.Core.Networking
 			public EInteractionStage InteractionStage;
 			public string ItemId;
 
-			public WorldInteractionPacket(NetDataReader reader) : this()
+			public WorldInteractionPacket(NetDataReader reader)
 			{
 				InteractiveId = reader.GetString();
 				InteractionType = (EInteractionType)reader.GetByte();
@@ -149,7 +149,7 @@ namespace Fika.Core.Networking
 			public string InteractiveId;
 			public EInteractionType InteractionType;
 
-			public ContainerInteractionPacket(NetDataReader reader) : this()
+			public ContainerInteractionPacket(NetDataReader reader)
 			{
 				InteractiveId = reader.GetString();
 				InteractionType = (EInteractionType)reader.GetInt();
@@ -188,7 +188,7 @@ namespace Fika.Core.Networking
 			public bool Scheduled;
 			public EBodyPart BodyPart;
 
-			public ProceedPacket(NetDataReader reader) : this()
+			public ProceedPacket(NetDataReader reader)
 			{
 				ProceedType = (EProceedType)reader.GetInt();
 				ItemId = reader.GetString();
@@ -223,7 +223,7 @@ namespace Fika.Core.Networking
 			public bool IsSilent;
 			public FirearmLightStateStruct[] LightStates;
 
-			public HeadLightsPacket(NetDataReader reader) : this()
+			public HeadLightsPacket(NetDataReader reader)
 			{
 				Amount = reader.GetInt();
 				IsSilent = reader.GetBool();
@@ -267,7 +267,7 @@ namespace Fika.Core.Networking
 		{
 			public bool InventoryOpen;
 
-			public InventoryChangedPacket(NetDataReader reader) : this()
+			public InventoryChangedPacket(NetDataReader reader)
 			{
 				InventoryOpen = reader.GetBool();
 			}
@@ -287,7 +287,7 @@ namespace Fika.Core.Networking
 		{
 			public bool FastDrop;
 
-			public DropPacket(NetDataReader reader) : this()
+			public DropPacket(NetDataReader reader)
 			{
 				FastDrop = reader.GetBool();
 			}
@@ -308,7 +308,7 @@ namespace Fika.Core.Networking
 			public EStationaryCommand Command;
 			public string Id;
 
-			public StationaryPacket(NetDataReader reader) : this()
+			public StationaryPacket(NetDataReader reader)
 			{
 				Command = (EStationaryCommand)reader.GetByte();
 				if (Command == EStationaryCommand.Occupy)
@@ -338,7 +338,7 @@ namespace Fika.Core.Networking
 		{
 			public EInteraction Interaction;
 
-			public InteractionPacket(NetDataReader reader) : this()
+			public InteractionPacket(NetDataReader reader)
 			{
 				Interaction = (EInteraction)reader.GetByte();
 			}
@@ -364,7 +364,7 @@ namespace Fika.Core.Networking
 			public float BehindObstacleHeight;
 			public float AbsoluteForwardVelocity;
 
-			public VaultPacket(NetDataReader reader) : this()
+			public VaultPacket(NetDataReader reader)
 			{
 				VaultingStrategy = (EVaultingStrategy)reader.GetByte();
 				VaultingPoint = reader.GetVector3();
@@ -409,7 +409,7 @@ namespace Fika.Core.Networking
 			public short MountingDirection;
 			public float TransitionTime;
 
-			public MountingPacket(NetDataReader reader) : this()
+			public MountingPacket(NetDataReader reader)
 			{
 				Command = (GStruct179.EMountingCommand)reader.GetByte();
 				if (Command == GStruct179.EMountingCommand.Update)
