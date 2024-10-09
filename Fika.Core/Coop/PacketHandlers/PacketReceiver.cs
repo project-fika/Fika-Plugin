@@ -144,42 +144,39 @@ namespace Fika.Core.Coop.PacketHandlers
 		private void ConvertInventoryPacket()
 		{
 			InventoryPacket packet = InventoryPackets.Dequeue();
-			if (packet.HasItemControllerExecutePacket)
+			if (packet.OperationBytes.Length == 0)
 			{
-				if (packet.ItemControllerExecutePacket.OperationBytes.Length == 0)
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Bytes were null!");
-					return;
-				}
+				FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Bytes were null!");
+				return;
+			}
 
-				InventoryController controller = player.InventoryController;
-				if (controller != null)
+			InventoryController controller = player.InventoryController;
+			if (controller != null)
+			{
+				try
 				{
-					try
+					if (controller is Interface15 networkController)
 					{
-						if (controller is Interface15 networkController)
+						GClass1170 reader = new(packet.OperationBytes);
+						GClass1670 descriptor = reader.ReadPolymorph<GClass1670>();
+						GStruct423 result = networkController.CreateOperationFromDescriptor(descriptor);
+						if (!result.Succeeded)
 						{
-							GClass1170 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
-							GClass1670 descriptor = reader.ReadPolymorph<GClass1670>();
-							GStruct423 result = networkController.CreateOperationFromDescriptor(descriptor);
-							if (!result.Succeeded)
-							{
-								FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
-								return;
-							}
-
-							inventoryOperations.Enqueue(result.Value);
+							FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
+							return;
 						}
-					}
-					catch (Exception exception)
-					{
-						FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Exception thrown: {exception}");
+
+						inventoryOperations.Enqueue(result.Value);
 					}
 				}
-				else
+				catch (Exception exception)
 				{
-					FikaPlugin.Instance.FikaLogger.LogError("ConvertInventoryPacket: inventory was null!");
+					FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Exception thrown: {exception}");
 				}
+			}
+			else
+			{
+				FikaPlugin.Instance.FikaLogger.LogError("ConvertInventoryPacket: inventory was null!");
 			}
 		}
 

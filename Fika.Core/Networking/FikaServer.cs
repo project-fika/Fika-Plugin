@@ -1070,7 +1070,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				GClass1170 reader = new(packet.ItemControllerExecutePacket.OperationBytes);
+				GClass1170 reader = new(packet.OperationBytes);
 				try
 				{
 					OperationCallbackPacket operationCallbackPacket;
@@ -1085,7 +1085,7 @@ namespace Fika.Core.Networking
 						if (result.Failed)
 						{
 							logger.LogError($"ItemControllerExecutePacket::Operation conversion failed: {result.Error}");
-							OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+							OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Failed)
 							{
 								Error = result.Error.ToString()
 							};
@@ -1096,8 +1096,8 @@ namespace Fika.Core.Networking
 							return;
 						}
 
-						InventoryOperationHandler handler = new(result, packet.ItemControllerExecutePacket.CallbackId, packet.NetId, peer, this);
-						operationCallbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Started);
+						InventoryOperationHandler handler = new(result, packet.CallbackId, packet.NetId, peer, this);
+						operationCallbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Started);
 						SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
 						SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1111,7 +1111,7 @@ namespace Fika.Core.Networking
 				catch (Exception exception)
 				{
 					logger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed)
+					OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Failed)
 					{
 						Error = exception.Message
 					};

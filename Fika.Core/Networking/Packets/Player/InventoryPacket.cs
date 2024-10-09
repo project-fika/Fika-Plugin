@@ -1,32 +1,25 @@
 ﻿using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
 	public struct InventoryPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
-		public bool HasItemControllerExecutePacket = false;
-		public ItemControllerExecutePacket ItemControllerExecutePacket;
+		public uint CallbackId;
+		public byte[] OperationBytes;
 
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put(NetId);
-			writer.Put(HasItemControllerExecutePacket);
-			if (HasItemControllerExecutePacket)
-			{
-				writer.PutItemControllerExecutePacket(ItemControllerExecutePacket);
-			}
+			writer.Put(CallbackId);
+			writer.PutByteArray(OperationBytes);
 		}
 
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			HasItemControllerExecutePacket = reader.GetBool();
-			if (HasItemControllerExecutePacket)
-			{
-				ItemControllerExecutePacket = reader.GetItemControllerExecutePacket();
-			}
+			CallbackId = reader.GetUInt();
+			OperationBytes = reader.GetByteArray();
 		}
 	}
 }

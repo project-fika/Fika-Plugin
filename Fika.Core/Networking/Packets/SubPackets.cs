@@ -26,8 +26,7 @@ namespace Fika.Core.Networking.Packets
 
 		public struct ItemControllerExecutePacket
 		{
-			public uint CallbackId;
-			public byte[] OperationBytes;
+			
 		}
 
 		public struct WeatherClassPacket

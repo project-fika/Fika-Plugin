@@ -142,14 +142,9 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				handler.operation.method_1(handler.HandleResult);
 
-				InventoryPacket packet = new()
-				{
-					HasItemControllerExecutePacket = true
-				};
-
 				GClass1175 writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());
-				packet.ItemControllerExecutePacket = new()
+				InventoryPacket packet = new()
 				{
 					CallbackId = operation.Id,
 					OperationBytes = writer.ToArray()

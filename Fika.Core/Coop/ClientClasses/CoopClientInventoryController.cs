@@ -143,12 +143,6 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			GClass1175 writer = new();
-
-			InventoryPacket packet = new()
-			{
-				HasItemControllerExecutePacket = true
-			};
-
 			ClientInventoryOperationHandler handler = new()
 			{
 				Operation = operation,
@@ -158,7 +152,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			uint operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
 			writer.WritePolymorph(operation.ToDescriptor());
-			packet.ItemControllerExecutePacket = new()
+			InventoryPacket packet = new()
 			{
 				CallbackId = operationNum,
 				OperationBytes = writer.ToArray()

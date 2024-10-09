@@ -699,32 +699,6 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="ItemControllerExecutePacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutItemControllerExecutePacket(this NetDataWriter writer, ItemControllerExecutePacket packet)
-		{
-			writer.Put(packet.CallbackId);
-			writer.PutByteArray(packet.OperationBytes);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ItemControllerExecutePacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ItemControllerExecutePacket"/> with data</returns>
-		public static ItemControllerExecutePacket GetItemControllerExecutePacket(this NetDataReader reader)
-		{
-			ItemControllerExecutePacket packet = new()
-			{
-				CallbackId = reader.GetUInt(),
-				OperationBytes = reader.GetByteArray()
-			};
-			return packet;
-		}
-
-		/// <summary>
 		/// Serializes a <see cref="WeatherClass"/>
 		/// </summary>
 		/// <param name="writer"></param>

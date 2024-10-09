@@ -111,14 +111,9 @@ namespace Fika.Core.Coop.BotClasses
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}");
 #endif
-					InventoryPacket packet = new()
-					{
-						HasItemControllerExecutePacket = true
-					};
-
 					GClass1175 writer = new();
 					writer.WritePolymorph(Operation.ToDescriptor());
-					packet.ItemControllerExecutePacket = new()
+					InventoryPacket packet = new()
 					{
 						CallbackId = Operation.Id,
 						OperationBytes = writer.ToArray()
