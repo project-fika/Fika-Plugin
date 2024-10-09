@@ -152,7 +152,7 @@ namespace Fika.Core.Networking
 			public ContainerInteractionPacket(NetDataReader reader)
 			{
 				InteractiveId = reader.GetString();
-				InteractionType = (EInteractionType)reader.GetInt();
+				InteractionType = (EInteractionType)reader.GetByte();
 			}
 
 			public void Execute(CoopPlayer player)
