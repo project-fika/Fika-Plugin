@@ -650,54 +650,6 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="HeadLightsPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutHeadLightsPacket(this NetDataWriter writer, HeadLightsPacket packet)
-		{
-			writer.Put(packet.Amount);
-			writer.Put(packet.IsSilent);
-			if (packet.Amount > 0)
-			{
-				for (int i = 0; i < packet.Amount; i++)
-				{
-					writer.Put(packet.LightStates[i].Id);
-					writer.Put(packet.LightStates[i].IsActive);
-					writer.Put(packet.LightStates[i].LightMode);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="HeadLightsPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="HeadLightsPacket"/> with data</returns>
-		public static HeadLightsPacket GetHeadLightsPacket(this NetDataReader reader)
-		{
-			HeadLightsPacket packet = new()
-			{
-				Amount = reader.GetInt(),
-				IsSilent = reader.GetBool()
-			};
-			if (packet.Amount > 0)
-			{
-				packet.LightStates = new FirearmLightStateStruct[packet.Amount];
-				for (int i = 0; i < packet.Amount; i++)
-				{
-					packet.LightStates[i] = new()
-					{
-						Id = reader.GetString(),
-						IsActive = reader.GetBool(),
-						LightMode = reader.GetInt()
-					};
-				}
-			}
-			return packet;
-		}
-
-		/// <summary>
 		/// Serializes a <see cref="WeatherClass"/>
 		/// </summary>
 		/// <param name="writer"></param>
