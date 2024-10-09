@@ -149,7 +149,12 @@ namespace Fika.Core.Coop.ClientClasses
 						return;
 					}
 
-					QuestConditionPacket packet = new(player.Profile.Info.MainProfileNickname, counter.Id, counter.SourceId);
+					QuestConditionPacket packet = new() 
+					{
+						Nickname = player.Profile.Info.MainProfileNickname,
+						Id = counter.Id,
+						SourceId = counter.SourceId
+					};
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
 #endif

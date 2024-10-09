@@ -2,10 +2,10 @@
 
 namespace Fika.Core.Networking
 {
-	public struct QuestItemPacket(string nickname, string itemId) : INetSerializable
+	public struct QuestItemPacket : INetSerializable
 	{
-		public string Nickname = nickname;
-		public string ItemId = itemId;
+		public string Nickname;
+		public string ItemId;
 
 		public void Deserialize(NetDataReader reader)
 		{

@@ -110,7 +110,11 @@ namespace Fika.Core.Coop.HostClasses
 							sharedQuestController.AddLootedTemplateId(lootedItem.TemplateId);
 
 							// We use templateId because each client gets a unique itemId
-							QuestItemPacket packet = new(coopPlayer.Profile.Info.MainProfileNickname, lootedItem.TemplateId);
+							QuestItemPacket packet = new()
+							{
+								Nickname = coopPlayer.Profile.Info.MainProfileNickname,
+								ItemId = lootedItem.TemplateId,
+							};
 							coopPlayer.PacketSender.SendPacket(ref packet);
 						}
 					}
