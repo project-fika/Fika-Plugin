@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using static BasePhysicalClass;
+using static Fika.Core.Networking.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
@@ -648,52 +649,6 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="LightStatesPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutLightStatesPacket(this NetDataWriter writer, LightStatesPacket packet)
-		{
-			writer.Put(packet.Amount);
-			if (packet.Amount > 0)
-			{
-				for (int i = 0; i < packet.Amount; i++)
-				{
-					writer.Put(packet.LightStates[i].Id);
-					writer.Put(packet.LightStates[i].IsActive);
-					writer.Put(packet.LightStates[i].LightMode);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="LightStatesPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="LightStatesPacket"/> with data</returns>
-		public static LightStatesPacket GetLightStatesPacket(this NetDataReader reader)
-		{
-			LightStatesPacket packet = new()
-			{
-				Amount = reader.GetInt()
-			};
-			if (packet.Amount > 0)
-			{
-				packet.LightStates = new FirearmLightStateStruct[packet.Amount];
-				for (int i = 0; i < packet.Amount; i++)
-				{
-					packet.LightStates[i] = new()
-					{
-						Id = reader.GetString(),
-						IsActive = reader.GetBool(),
-						LightMode = reader.GetInt()
-					};
-				}
-			}
-			return packet;
-		}
-
-		/// <summary>
 		/// Serializes a <see cref="HeadLightsPacket"/>
 		/// </summary>
 		/// <param name="writer"></param>
@@ -738,314 +693,6 @@ namespace Fika.Core.Networking
 					};
 				}
 			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ScopeStatesPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutScopeStatesPacket(this NetDataWriter writer, ScopeStatesPacket packet)
-		{
-			writer.Put(packet.Amount);
-			if (packet.Amount > 0)
-			{
-				for (int i = 0; i < packet.Amount; i++)
-				{
-					writer.Put(packet.FirearmScopeStateStruct[i].Id);
-					writer.Put(packet.FirearmScopeStateStruct[i].ScopeMode);
-					writer.Put(packet.FirearmScopeStateStruct[i].ScopeIndexInsideSight);
-					writer.Put(packet.FirearmScopeStateStruct[i].ScopeCalibrationIndex);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ScopeStatesPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ScopeStatesPacket"/> with data</returns>
-		public static ScopeStatesPacket GetScopeStatesPacket(this NetDataReader reader)
-		{
-			ScopeStatesPacket packet = new()
-			{
-				Amount = reader.GetInt()
-			};
-			if (packet.Amount > 0)
-			{
-				packet.FirearmScopeStateStruct = new FirearmScopeStateStruct[packet.Amount];
-				for (int i = 0; i < packet.Amount; i++)
-				{
-					packet.FirearmScopeStateStruct[i] = new()
-					{
-						Id = reader.GetString(),
-						ScopeMode = reader.GetInt(),
-						ScopeIndexInsideSight = reader.GetInt(),
-						ScopeCalibrationIndex = reader.GetInt()
-					};
-				}
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ReloadMagPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutReloadMagPacket(this NetDataWriter writer, ReloadMagPacket packet)
-		{
-			writer.Put(packet.Reload);
-			if (packet.Reload)
-			{
-				writer.Put(packet.MagId);
-				writer.PutByteArray(packet.LocationDescription);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ReloadMagPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ReloadMagPacket"/> with data</returns>
-		public static ReloadMagPacket GetReloadMagPacket(this NetDataReader reader)
-		{
-			ReloadMagPacket packet = new()
-			{
-				Reload = reader.GetBool()
-			};
-			if (packet.Reload)
-			{
-				packet.MagId = reader.GetString();
-				packet.LocationDescription = reader.GetByteArray();
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="QuickReloadMagPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutQuickReloadMagPacket(this NetDataWriter writer, QuickReloadMagPacket packet)
-		{
-			writer.Put(packet.Reload);
-			if (packet.Reload)
-			{
-				writer.Put(packet.MagId);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="QuickReloadMagPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="QuickReloadMagPacket"/> with data</returns>
-		public static QuickReloadMagPacket GetQuickReloadMagPacket(this NetDataReader reader)
-		{
-			QuickReloadMagPacket packet = new()
-			{
-				Reload = reader.GetBool()
-			};
-			if (packet.Reload)
-			{
-				packet.MagId = reader.GetString();
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ReloadWithAmmoPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutReloadWithAmmoPacket(this NetDataWriter writer, ReloadWithAmmoPacket packet)
-		{
-			writer.Put(packet.Reload);
-			if (packet.Reload)
-			{
-				writer.Put((byte)packet.Status);
-				if (packet.Status == EReloadWithAmmoStatus.StartReload)
-				{
-					writer.PutArray(packet.AmmoIds);
-				}
-				if (packet.AmmoLoadedToMag > 0)
-				{
-					writer.Put(packet.AmmoLoadedToMag);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ReloadWithAmmoPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ReloadWithAmmoPacket"/> with data</returns>
-		public static ReloadWithAmmoPacket GetReloadWithAmmoPacket(this NetDataReader reader)
-		{
-			ReloadWithAmmoPacket packet = new()
-			{
-				Reload = reader.GetBool()
-			};
-			if (packet.Reload)
-			{
-				packet.Status = (EReloadWithAmmoStatus)reader.GetByte();
-				if (packet.Status == EReloadWithAmmoStatus.StartReload)
-				{
-					packet.AmmoIds = reader.GetStringArray();
-				}
-				if (packet.Status is EReloadWithAmmoStatus.EndReload or EReloadWithAmmoStatus.AbortReload)
-				{
-					packet.AmmoLoadedToMag = reader.GetInt();
-				}
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="CylinderMagPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutCylinderMagPacket(this NetDataWriter writer, CylinderMagPacket packet)
-		{
-			writer.Put(packet.Changed);
-			if (packet.Changed)
-			{
-				writer.Put(packet.CamoraIndex);
-				writer.Put(packet.HammerClosed);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="CylinderMagPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="CylinderMagPacket"/> with data</returns>
-		public static CylinderMagPacket GetCylinderMagPacket(this NetDataReader reader)
-		{
-			CylinderMagPacket packet = new()
-			{
-				Changed = reader.GetBool()
-			};
-			if (packet.Changed)
-			{
-				packet.CamoraIndex = reader.GetInt();
-				packet.HammerClosed = reader.GetBool();
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ReloadLauncherPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutReloadLauncherPacket(this NetDataWriter writer, ReloadLauncherPacket packet)
-		{
-			writer.Put(packet.Reload);
-			if (packet.Reload)
-			{
-				writer.PutArray(packet.AmmoIds);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ReloadLauncherPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ReloadLauncherPacket"/> with data</returns>
-		public static ReloadLauncherPacket GetReloadLauncherPacket(this NetDataReader reader)
-		{
-			ReloadLauncherPacket packet = new()
-			{
-				Reload = reader.GetBool()
-			};
-			if (packet.Reload)
-			{
-				packet.AmmoIds = reader.GetStringArray();
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ReloadBarrelsPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutReloadBarrelsPacket(this NetDataWriter writer, ReloadBarrelsPacket packet)
-		{
-			writer.Put(packet.Reload);
-			if (packet.Reload)
-			{
-				writer.PutArray(packet.AmmoIds);
-				writer.PutByteArray(packet.LocationDescription);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ReloadBarrelsPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ReloadBarrelsPacket"/> with data</returns>
-		public static ReloadBarrelsPacket GetReloadBarrelsPacket(this NetDataReader reader)
-		{
-			ReloadBarrelsPacket packet = new()
-			{
-				Reload = reader.GetBool()
-			};
-			if (packet.Reload)
-			{
-				packet.AmmoIds = reader.GetStringArray();
-				packet.LocationDescription = reader.GetByteArray();
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="GrenadePacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutGrenadePacket(this NetDataWriter writer, GrenadePacket packet)
-		{
-			writer.Put((int)packet.PacketType);
-			writer.Put(packet.HasGrenade);
-			if (packet.HasGrenade)
-			{
-				writer.Put(packet.GrenadeRotation);
-				writer.Put(packet.GrenadePosition);
-				writer.Put(packet.ThrowForce);
-				writer.Put(packet.LowThrow);
-			}
-			writer.Put(packet.PlantTripwire);
-			writer.Put(packet.ChangeToIdle);
-			writer.Put(packet.ChangeToPlant);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="GrenadePacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="GrenadePacket"/> with data</returns>
-		public static GrenadePacket GetGrenadePacket(this NetDataReader reader)
-		{
-			GrenadePacket packet = new()
-			{
-				PacketType = (GrenadePacketType)reader.GetInt(),
-				HasGrenade = reader.GetBool()
-			};
-			if (packet.HasGrenade)
-			{
-				packet.GrenadeRotation = reader.GetQuaternion();
-				packet.GrenadePosition = reader.GetVector3();
-				packet.ThrowForce = reader.GetVector3();
-				packet.LowThrow = reader.GetBool();
-			}
-			packet.PlantTripwire = reader.GetBool();
-			packet.ChangeToIdle = reader.GetBool();
-			packet.ChangeToPlant = reader.GetBool();
 			return packet;
 		}
 
@@ -1226,77 +873,6 @@ namespace Fika.Core.Networking
 			}
 
 			return packet;
-		}		
-
-		/// <summary>
-		/// Serializes a <see cref="KnifePacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutKnifePacket(this NetDataWriter writer, KnifePacket packet)
-		{
-			writer.Put(packet.Examine);
-			writer.Put(packet.Kick);
-			writer.Put(packet.AltKick);
-			writer.Put(packet.BreakCombo);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="KnifePacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="KnifePacket"/> with data</returns>
-		public static KnifePacket GetKnifePacket(this NetDataReader reader)
-		{
-			return new KnifePacket()
-			{
-				Examine = reader.GetBool(),
-				Kick = reader.GetBool(),
-				AltKick = reader.GetBool(),
-				BreakCombo = reader.GetBool()
-			};
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ShotInfoPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutShotInfoPacket(this NetDataWriter writer, ShotInfoPacket packet)
-		{
-			writer.Put((int)packet.ShotType);
-			writer.Put(packet.ShotPosition);
-			writer.Put(packet.ShotDirection);
-			writer.Put(packet.ChamberIndex);
-			writer.Put(packet.Overheat);
-			writer.Put(packet.UnderbarrelShot);
-			writer.Put(packet.AmmoTemplate);
-			writer.Put(packet.LastShotOverheat);
-			writer.Put(packet.LastShotTime);
-			writer.Put(packet.SlideOnOverheatReached);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ShotInfoPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ShotInfoPacket"/> with data</returns>
-		public static ShotInfoPacket GetShotInfoPacket(this NetDataReader reader)
-		{
-			ShotInfoPacket packet = new()
-			{
-				ShotType = (EShotType)reader.GetInt(),
-				ShotPosition = reader.GetVector3(),
-				ShotDirection = reader.GetVector3(),
-				ChamberIndex = reader.GetInt(),
-				Overheat = reader.GetFloat(),
-				UnderbarrelShot = reader.GetBool(),
-				AmmoTemplate = reader.GetString(),
-				LastShotOverheat = reader.GetFloat(),
-				LastShotTime = reader.GetFloat(),
-				SlideOnOverheatReached = reader.GetBool()
-			};
-			return packet;
 		}
 
 		/// <summary>
@@ -1354,42 +930,6 @@ namespace Fika.Core.Networking
 				Wind = reader.GetFloat(),
 				WindDirection = reader.GetInt()
 			};
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="FlareShotPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutFlareShotPacket(this NetDataWriter writer, FlareShotPacket packet)
-		{
-			writer.Put(packet.StartOneShotFire);
-			if (!packet.StartOneShotFire)
-			{
-				writer.Put(packet.ShotPosition);
-				writer.Put(packet.ShotForward);
-				writer.Put(packet.AmmoTemplateId);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="FlareShotPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="FlareShotPacket"/> with data</returns>
-		public static FlareShotPacket GetFlareShotPacket(this NetDataReader reader)
-		{
-			FlareShotPacket packet = new()
-			{
-				StartOneShotFire = reader.GetBool()
-			};
-			if (!packet.StartOneShotFire)
-			{
-				packet.ShotPosition = reader.GetVector3();
-				packet.ShotForward = reader.GetVector3();
-				packet.AmmoTemplateId = reader.GetString();
-			}
-			return packet;
 		}
 
 		/// <summary>
@@ -1628,6 +1168,117 @@ namespace Fika.Core.Networking
 				packet.YawLimit = reader.GetVector2();
 			}
 			return packet;
+		}
+
+		public static void PutFirearmSubPacket(this NetDataWriter writer, IFirearmSubPacket packet, EFirearmSubPacketType type)
+		{
+			switch (type)
+			{
+				case EFirearmSubPacketType.ShotInfo:
+				case EFirearmSubPacketType.ChangeFireMode:
+				case EFirearmSubPacketType.ToggleAim:
+				case EFirearmSubPacketType.ToggleLightStates:
+				case EFirearmSubPacketType.ToggleScopeStates:
+				case EFirearmSubPacketType.ToggleInventory:
+				case EFirearmSubPacketType.LeftStanceChange:
+				case EFirearmSubPacketType.ReloadMag:
+				case EFirearmSubPacketType.QuickReloadMag:
+				case EFirearmSubPacketType.ReloadWithAmmo:
+				case EFirearmSubPacketType.CylinderMag:
+				case EFirearmSubPacketType.ReloadLauncher:
+				case EFirearmSubPacketType.ReloadBarrels:
+				case EFirearmSubPacketType.Grenade:
+				case EFirearmSubPacketType.CompassChange:
+				case EFirearmSubPacketType.Knife:
+				case EFirearmSubPacketType.FlareShot:
+				case EFirearmSubPacketType.RollCylinder:
+					packet.Serialize(writer);
+					break;
+
+				case EFirearmSubPacketType.ToggleLauncher:
+				case EFirearmSubPacketType.CancelGrenade:
+				case EFirearmSubPacketType.ReloadBoltAction:
+				case EFirearmSubPacketType.UnderbarrelSightingRangeUp:
+				case EFirearmSubPacketType.UnderbarrelSightingRangeDown:
+				case EFirearmSubPacketType.ToggleBipod:
+				case EFirearmSubPacketType.ExamineWeapon:
+				case EFirearmSubPacketType.CheckAmmo:
+				case EFirearmSubPacketType.CheckChamber:
+				case EFirearmSubPacketType.CheckFireMode:
+				case EFirearmSubPacketType.Loot:
+					break;
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("IFirearmSubPacket: type was outside of bounds!");
+					break;
+			}
+		}
+
+		public static IFirearmSubPacket GetFirearmSubPacket(this NetDataReader reader, EFirearmSubPacketType type)
+		{
+			switch (type)
+			{
+				case EFirearmSubPacketType.ShotInfo:
+					return new ShotInfoPacket(reader);
+				case EFirearmSubPacketType.ChangeFireMode:
+					return new ChangeFireModePacket(reader);
+				case EFirearmSubPacketType.ToggleAim:
+					return new ToggleAimPacket(reader);
+				case EFirearmSubPacketType.ExamineWeapon:
+					return new ExamineWeaponPacket();
+				case EFirearmSubPacketType.CheckAmmo:
+					return new CheckAmmoPacket();
+				case EFirearmSubPacketType.CheckChamber:
+					return new CheckChamberPacket();
+				case EFirearmSubPacketType.CheckFireMode:
+					return new CheckFireModePacket();
+				case EFirearmSubPacketType.ToggleLightStates:
+					return new LightStatesPacket(reader);
+				case EFirearmSubPacketType.ToggleScopeStates:
+					return new ScopeStatesPacket(reader);
+				case EFirearmSubPacketType.ToggleLauncher:
+					return new ToggleLauncherPacket();
+				case EFirearmSubPacketType.ToggleInventory:
+					return new ToggleInventoryPacket(reader);
+				case EFirearmSubPacketType.Loot:
+					return new FirearmLootPacket();
+				case EFirearmSubPacketType.ReloadMag:
+					return new ReloadMagPacket(reader);
+				case EFirearmSubPacketType.QuickReloadMag:
+					return new QuickReloadMagPacket(reader);
+				case EFirearmSubPacketType.ReloadWithAmmo:
+					return new ReloadWithAmmoPacket(reader);
+				case EFirearmSubPacketType.CylinderMag:
+					return new CylinderMagPacket(reader);
+				case EFirearmSubPacketType.ReloadLauncher:
+					return new ReloadLauncherPacket(reader);
+				case EFirearmSubPacketType.ReloadBarrels:
+					return new ReloadBarrelsPacket(reader);
+				case EFirearmSubPacketType.Grenade:
+					return new GrenadePacket(reader);
+				case EFirearmSubPacketType.CancelGrenade:
+					return new CancelGrenadePacket();
+				case EFirearmSubPacketType.CompassChange:
+					return new CompassChangePacket(reader);
+				case EFirearmSubPacketType.Knife:
+					return new KnifePacket(reader);
+				case EFirearmSubPacketType.FlareShot:
+					return new FlareShotPacket(reader);
+				case EFirearmSubPacketType.ReloadBoltAction:
+					return new ReloadBoltActionPacket();
+				case EFirearmSubPacketType.RollCylinder:
+					return new RollCylinderPacket(reader);
+				case EFirearmSubPacketType.UnderbarrelSightingRangeUp:
+					return new UnderbarrelSightingRangeUpPacket();
+				case EFirearmSubPacketType.UnderbarrelSightingRangeDown:
+					return new UnderbarrelSightingRangeDownPacket();
+				case EFirearmSubPacketType.ToggleBipod:
+					return new ToggleBipodPacket();
+				case EFirearmSubPacketType.LeftStanceChange:
+					return new LeftStanceChangePacket(reader);
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("IFirearmSubPacket: type was outside of bounds!");
+					return null;
+			}
 		}
 	}
 }

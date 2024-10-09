@@ -24,79 +24,6 @@ namespace Fika.Core.Networking.Packets
 			public bool IsStationary;
 		}
 
-		public struct LightStatesPacket
-		{
-			public int Amount;
-			public FirearmLightStateStruct[] LightStates;
-		}
-
-		public struct HeadLightsPacket
-		{
-			public int Amount;
-			public bool IsSilent;
-			public FirearmLightStateStruct[] LightStates;
-		}
-
-		public struct ScopeStatesPacket
-		{
-			public int Amount;
-			public FirearmScopeStateStruct[] FirearmScopeStateStruct;
-		}
-
-		public struct ReloadMagPacket
-		{
-			public bool Reload;
-			public string MagId;
-			public byte[] LocationDescription;
-		}
-
-		public struct QuickReloadMagPacket
-		{
-			public bool Reload;
-			public string MagId;
-		}
-
-		public struct ReloadWithAmmoPacket
-		{
-			public bool Reload;
-			public EReloadWithAmmoStatus Status;
-			public int AmmoLoadedToMag;
-			public string[] AmmoIds;
-		}
-
-		public struct CylinderMagPacket
-		{
-			public bool Changed;
-			public int CamoraIndex;
-			public bool HammerClosed;
-		}
-
-		public struct ReloadLauncherPacket
-		{
-			public bool Reload;
-			public string[] AmmoIds;
-		}
-
-		public struct ReloadBarrelsPacket
-		{
-			public bool Reload;
-			public string[] AmmoIds;
-			public byte[] LocationDescription;
-		}
-
-		public struct GrenadePacket()
-		{
-			public GrenadePacketType PacketType;
-			public bool HasGrenade = false;
-			public Quaternion GrenadeRotation;
-			public Vector3 GrenadePosition;
-			public Vector3 ThrowForce;
-			public bool LowThrow;
-			public bool PlantTripwire = false;
-			public bool ChangeToIdle = false;
-			public bool ChangeToPlant = false;
-		}
-
 		public struct ItemControllerExecutePacket
 		{
 			public uint CallbackId;
@@ -115,6 +42,13 @@ namespace Fika.Core.Networking.Packets
 		{
 			public string InteractiveId;
 			public EInteractionType InteractionType;
+		}
+
+		public struct HeadLightsPacket
+		{
+			public int Amount;
+			public bool IsSilent;
+			public FirearmLightStateStruct[] LightStates;
 		}
 
 		public struct ProceedPacket()
@@ -138,29 +72,6 @@ namespace Fika.Core.Networking.Packets
 			public string Id;
 		}
 
-		public struct KnifePacket()
-		{
-			public bool Examine = false;
-			public bool Kick = false;
-			public bool AltKick = false;
-			public bool BreakCombo = false;
-		}
-
-		public struct ShotInfoPacket()
-		{
-
-			public EShotType ShotType = EShotType.Unknown;
-			public Vector3 ShotPosition = Vector3.zero;
-			public Vector3 ShotDirection = Vector3.zero;
-			public int ChamberIndex = 0;
-			public float Overheat = 0f;
-			public bool UnderbarrelShot = false;
-			public string AmmoTemplate;
-			public float LastShotOverheat;
-			public float LastShotTime;
-			public bool SlideOnOverheatReached;
-		}
-
 		public struct WeatherClassPacket
 		{
 			public float AtmospherePressure;
@@ -181,15 +92,7 @@ namespace Fika.Core.Networking.Packets
 			public float Turbulence;
 			public float Wind;
 			public int WindDirection;
-		}
-
-		public struct FlareShotPacket
-		{
-			public bool StartOneShotFire;
-			public Vector3 ShotPosition;
-			public Vector3 ShotForward;
-			public string AmmoTemplateId;
-		}
+		}		
 
 		public struct VaultPacket
 		{
@@ -246,32 +149,14 @@ namespace Fika.Core.Networking.Packets
 			public float CurrentMountingPointVerticalOffset;
 			public short MountingDirection;
 			public float TransitionTime;
-		}
-
-		public enum GrenadePacketType
-		{
-			None,
-			ExamineWeapon,
-			HighThrow,
-			LowThrow,
-			PullRingForHighThrow,
-			PullRingForLowThrow
-		};
+		}		
 
 		public enum EStationaryCommand
 		{
 			Occupy,
 			Leave,
 			Denied
-		}
-
-		public enum EReloadWithAmmoStatus
-		{
-			None = 0,
-			StartReload,
-			EndReload,
-			AbortReload
-		}
+		}		
 
 		public enum EProceedType
 		{

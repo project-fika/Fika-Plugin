@@ -29,6 +29,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
+using static Fika.Core.Networking.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Coop.Players
@@ -508,8 +509,11 @@ namespace Fika.Core.Coop.Players
 			base.SetCompassState(value);
 			PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasCompassChange = true,
-				CompassState = value
+				Type = EFirearmSubPacketType.CompassChange,
+				SubPacket = new CompassChangePacket()
+				{
+					Enabled = value
+				}
 			});
 		}
 
@@ -1218,130 +1222,6 @@ namespace Fika.Core.Coop.Players
 			else
 			{
 				FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId: {operationCallbackPacket.CallbackId}!");
-			}
-		}
-
-		public virtual void HandleWeaponPacket(WeaponPacket packet)
-		{
-			if (HandsController is CoopObservedFirearmController firearmController)
-			{
-				firearmController.HandleFirearmPacket(ref packet, _inventoryController);
-			}
-
-			if (packet.Loot)
-			{
-				HandsController.Loot(packet.Loot);
-			}
-
-			if (packet.HasGrenadePacket)
-			{
-				if (HandsController is CoopObservedGrenadeController grenadeController)
-				{
-					switch (packet.GrenadePacket.PacketType)
-					{
-						case GrenadePacketType.ExamineWeapon:
-							{
-								grenadeController.ExamineWeapon();
-								break;
-							}
-						case GrenadePacketType.HighThrow:
-							{
-								grenadeController.HighThrow();
-								break;
-							}
-						case GrenadePacketType.LowThrow:
-							{
-								grenadeController.LowThrow();
-								break;
-							}
-						case GrenadePacketType.PullRingForHighThrow:
-							{
-								grenadeController.PullRingForHighThrow();
-								break;
-							}
-						case GrenadePacketType.PullRingForLowThrow:
-							{
-								grenadeController.PullRingForLowThrow();
-								break;
-							}
-					}
-					if (packet.GrenadePacket.HasGrenade)
-					{
-						grenadeController.SpawnGrenade(0f, packet.GrenadePacket.GrenadePosition, packet.GrenadePacket.GrenadeRotation, packet.GrenadePacket.ThrowForce, packet.GrenadePacket.LowThrow);
-					}
-
-					if (packet.GrenadePacket.PlantTripwire)
-					{
-						grenadeController.PlantTripwire();
-					}
-
-					if (packet.GrenadePacket.ChangeToIdle)
-					{
-						grenadeController.ChangeFireMode(Weapon.EFireMode.grenadeThrowing);
-					}
-
-					if (packet.GrenadePacket.ChangeToPlant)
-					{
-						grenadeController.ChangeFireMode(Weapon.EFireMode.greanadePlanting);
-					}
-				}
-				else if (HandsController is CoopObservedQuickGrenadeController quickGrenadeController)
-				{
-					if (packet.GrenadePacket.HasGrenade)
-					{
-						quickGrenadeController.SpawnGrenade(0f, packet.GrenadePacket.GrenadePosition, packet.GrenadePacket.GrenadeRotation, packet.GrenadePacket.ThrowForce, packet.GrenadePacket.LowThrow);
-					}
-				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"HandleFirearmPacket::GrenadePacket: HandsController was not of type CoopObservedGrenadeController! Was {HandsController.GetType().Name}");
-				}
-			}
-
-			if (packet.CancelGrenade)
-			{
-				if (HandsController is CoopObservedGrenadeController grenadeController)
-				{
-					grenadeController.vmethod_3();
-				}
-			}
-
-			if (packet.HasCompassChange)
-			{
-				if (HandsController is ItemHandsController handsController)
-				{
-					handsController.CompassState.Value = packet.CompassState;
-				}
-			}
-
-			if (packet.HasKnifePacket)
-			{
-				if (HandsController is CoopObservedKnifeController knifeController)
-				{
-					if (packet.KnifePacket.Examine)
-					{
-						knifeController.ExamineWeapon();
-					}
-
-					if (packet.KnifePacket.Kick)
-					{
-						knifeController.MakeKnifeKick();
-					}
-
-					if (packet.KnifePacket.AltKick)
-					{
-						knifeController.MakeAlternativeKick();
-					}
-
-					if (packet.KnifePacket.BreakCombo)
-					{
-						knifeController.BrakeCombo();
-					}
-				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"HandleFirearmPacket::KnifePacket: HandsController was not of type CoopObservedKnifeController! Was {HandsController.GetType().Name}");
-				}
 			}
 		}
 

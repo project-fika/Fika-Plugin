@@ -114,7 +114,7 @@ namespace Fika.Core.Networking
 			myProfileId = FikaBackendUtils.Profile.ProfileId;
 
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
-			packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnFirearmPacketReceived);
+			packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnWeaponPacketReceived);
 			packetProcessor.SubscribeNetSerializable<DamagePacket>(OnDamagePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ArmorDamagePacket>(OnArmorDamagePacketReceived);
 			packetProcessor.SubscribeNetSerializable<InventoryPacket>(OnInventoryPacketReceived);
@@ -1187,7 +1187,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		private void OnFirearmPacketReceived(WeaponPacket packet)
+		private void OnWeaponPacketReceived(WeaponPacket packet)
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{

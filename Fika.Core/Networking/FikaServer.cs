@@ -140,7 +140,7 @@ namespace Fika.Core.Networking
 			currentNetId = 1;
 
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-			packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnFirearmPacketReceived);
+			packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
 			packetProcessor.SubscribeNetSerializable<DamagePacket, NetPeer>(OnDamagePacketReceived);
 			packetProcessor.SubscribeNetSerializable<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
 			packetProcessor.SubscribeNetSerializable<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
@@ -1148,7 +1148,7 @@ namespace Fika.Core.Networking
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 		}
 
-		private void OnFirearmPacketReceived(WeaponPacket packet, NetPeer peer)
+		private void OnWeaponPacketReceived(WeaponPacket packet, NetPeer peer)
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
