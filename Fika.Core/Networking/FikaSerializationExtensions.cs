@@ -4,7 +4,6 @@ using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using EFT.Vaulting;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,10 +11,10 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using static BasePhysicalClass;
-using static Fika.Core.Networking.FirearmSubPackets;
-using static Fika.Core.Networking.Packets.SubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.CommonSubPackets;
+using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {

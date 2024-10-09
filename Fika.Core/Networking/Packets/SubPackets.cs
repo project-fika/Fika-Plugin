@@ -2,7 +2,6 @@
 
 using EFT;
 using EFT.InventoryLogic;
-using EFT.Vaulting;
 using System;
 using UnityEngine;
 
@@ -26,7 +25,7 @@ namespace Fika.Core.Networking.Packets
 
 		public struct ItemControllerExecutePacket
 		{
-			
+
 		}
 
 		public struct WeatherClassPacket

@@ -8,7 +8,6 @@ using EFT.AssetsManager;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
-using EFT.MovingPlatforms;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;

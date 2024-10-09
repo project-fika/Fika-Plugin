@@ -1059,6 +1059,6 @@ namespace Fika.Core.Networking
 					writer.Put(AmmoTemplateId);
 				}
 			}
-		}		
+		}
 	}
 }

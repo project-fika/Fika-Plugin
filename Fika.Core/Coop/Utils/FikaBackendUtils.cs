@@ -153,6 +153,6 @@ namespace Fika.Core.Coop.Utils
 			}
 
 			return raidCode;
-		}		
+		}
 	}
 }
