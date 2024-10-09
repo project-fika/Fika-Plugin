@@ -946,11 +946,14 @@ namespace Fika.Core.Coop.Players
 			{
 				if (aggressor.GroupId == "Fika" && !aggressor.IsYourPlayer)
 				{
+#if DEBUG
+					FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname); 
+#endif
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 					if (mainPlayer != null)
 					{
 						float distance = Vector3.Distance(aggressor.Position, Position);
-						mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
+						mainPlayer.HandleTeammateKill(ref damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
 							distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
 							(CoopPlayer)aggressor, Profile.Info.Settings.Experience);
 					}
@@ -1573,13 +1576,14 @@ namespace Fika.Core.Coop.Players
 			CreateHandsController(handler.ReturnController, handler.item);
 		}
 
-		public void SetAggressor(string killerId)
+		public void SetAggressor(string killerId, EBodyPart bodyPart)
 		{
 			Player killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
 			if (killer != null)
 			{
 				LastAggressor = killer;
 			}
+			LastBodyPart = bodyPart;
 		}
 
 		private class RemoveHandsControllerHandler(ObservedCoopPlayer coopPlayer, Callback callback)

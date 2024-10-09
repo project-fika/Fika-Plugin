@@ -137,7 +137,7 @@ namespace Fika.Core.Coop.Players
 					if (mainPlayer != null)
 					{
 						float distance = Vector3.Distance(aggressor.Position, Position);
-						mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
+						mainPlayer.HandleTeammateKill(ref damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
 							distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
 							(CoopPlayer)aggressor, Profile.Info.Settings.Experience);
 					}

@@ -417,7 +417,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void HandleTeammateKill(DamageInfo damage, EBodyPart bodyPart,
+		public void HandleTeammateKill(ref DamageInfo damage, EBodyPart bodyPart,
 			EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
 			float distance, List<string> targetEquipment,
 			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer, int experience)
@@ -459,9 +459,19 @@ namespace Fika.Core.Coop.Players
 					break;
 			}
 
+			Item weapon;
+			if (killer.HandsController.Item is Weapon handsWeapon)
+			{
+				weapon = handsWeapon;
+			}
+			else
+			{
+				weapon = damage.Weapon;
+			}
+
 			foreach (string value in list)
 			{
-				AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
+				AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, weapon,
 								bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
 								killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
 
@@ -470,7 +480,7 @@ namespace Fika.Core.Coop.Players
                     killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
 			}
 
-			if (FikaPlugin.SharedBossExperience.Value && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR) && role.IsBoss())
+			if (FikaPlugin.SharedBossExperience.Value && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR) && role.CountAsBossForStatistics())
 			{
 				int toReceive = experience / 2;
 				Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
@@ -742,7 +752,8 @@ namespace Fika.Core.Coop.Players
 			HealthSyncPacket syncPacket = new(NetId)
 			{
 				Packet = packet,
-				KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
+				KillerId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty,
+				BodyPart = LastBodyPart,
 				CorpseSyncPacket = new()
 				{
 					BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
