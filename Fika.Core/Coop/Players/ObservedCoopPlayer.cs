@@ -1078,13 +1078,13 @@ namespace Fika.Core.Coop.Players
 
 			if (IsObservedAI)
 			{
-				GenericPacket genericPacket = new(EPackageType.LoadBot)
+				BotStatePacket packet = new()
 				{
 					NetId = NetId,
-					BotNetId = NetId
+					Type = BotStatePacket.EStateType.LoadBot
 				};
 
-				PacketSender.Client.SendData(ref genericPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+				PacketSender.Client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 
 				IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
 				if (vaultingComponent != null)

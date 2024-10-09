@@ -155,6 +155,8 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ArtilleryPacket>(OnArtilleryPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TransitEventPacket>(OnTransitEventPacketReceived);
+			packetProcessor.SubscribeNetSerializable<BotStatePacket>(OnBotStatePacketReceived);
+			packetProcessor.SubscribeNetSerializable<PingPacket>(OnPingPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -204,6 +206,75 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnPingPacketReceived(PingPacket packet)
+		{
+			if (FikaPlugin.UsePingSystem.Value)
+			{
+				PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
+			}
+		}
+
+		private void OnBotStatePacketReceived(BotStatePacket packet)
+		{
+			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer bot))
+			{
+				switch (packet.Type)
+				{
+					case BotStatePacket.EStateType.DisposeBot:
+						{
+							if (!bot.gameObject.activeSelf)
+							{
+								bot.gameObject.SetActive(true);
+							}
+
+							if (coopHandler.Players.Remove(packet.NetId))
+							{
+								bot.Dispose();
+								AssetPoolObject.ReturnToPool(bot.gameObject, true);
+#if DEBUG
+								logger.LogInfo("Disposing bot: " + packet.NetId);
+#endif
+							}
+							else
+							{
+								logger.LogWarning("Unable to dispose of bot: " + packet.NetId);
+							}
+						}
+						break;
+					case BotStatePacket.EStateType.EnableBot:
+						{
+							if (!bot.gameObject.activeSelf)
+							{
+#if DEBUG
+								logger.LogWarning("Enabling " + packet.NetId);
+#endif
+								bot.gameObject.SetActive(true);
+							}
+							else
+							{
+								logger.LogWarning($"Received packet to enable {bot.ProfileId}, netId {packet.NetId} but the bot was already enabled!");
+							}
+						}
+						break;
+					case BotStatePacket.EStateType.DisableBot:
+						{
+							if (bot.gameObject.activeSelf)
+							{
+#if DEBUG
+								logger.LogWarning("Disabling " + packet.NetId);
+#endif
+								bot.gameObject.SetActive(false);
+							}
+							else
+							{
+								logger.LogWarning($"Received packet to disable {bot.ProfileId}, netId {packet.NetId} but the bot was already disabled!");
+							}
+						}
+						break;
+				}
+			}
 		}
 
 		private void OnTransitEventPacketReceived(TransitEventPacket packet)
@@ -931,7 +1002,7 @@ namespace Fika.Core.Networking
 
 		private void OnGenericPacketReceived(GenericPacket packet)
 		{
-			switch (packet.PacketType)
+			switch (packet.Type)
 			{
 				case EPackageType.ClientExtract:
 					{
@@ -960,15 +1031,7 @@ namespace Fika.Core.Networking
 						}
 					}
 					break;
-				case EPackageType.Ping:
-					{
-						if (FikaPlugin.UsePingSystem.Value)
-						{
-							PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
-						}
-					}
-					break;
-				case EPackageType.TrainSync:
+				/*case EPackageType.TrainSync:
 					{
 						MovingPlatform.GClass3230 adapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
 						if (adapter != null)
@@ -982,7 +1045,7 @@ namespace Fika.Core.Networking
 							adapter.ApplyStoredPackets();
 						}
 					}
-					break;
+					break;*/
 				case EPackageType.ExfilCountdown:
 					{
 						if (ExfiltrationControllerClass.Instance != null)
@@ -999,68 +1062,6 @@ namespace Fika.Core.Networking
 								{
 									exfilPoint.Status = EExfiltrationStatus.Countdown;
 								}
-							}
-						}
-					}
-					break;
-				case EPackageType.DisposeBot:
-					{
-						if (coopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToDispose))
-						{
-							if (!botToDispose.gameObject.activeSelf)
-							{
-								botToDispose.gameObject.SetActive(true);
-							}
-
-							if (coopHandler.Players.Remove(packet.BotNetId))
-							{
-								botToDispose.Dispose();
-								AssetPoolObject.ReturnToPool(botToDispose.gameObject, true);
-								logger.LogInfo("Disposing bot: " + packet.BotNetId);
-							}
-							else
-							{
-								logger.LogWarning("Unable to dispose of bot: " + packet.BotNetId);
-							}
-						}
-						else
-						{
-							logger.LogWarning("Unable to dispose of bot: " + packet.BotNetId + ", unable to find GameObject");
-						}
-					}
-					break;
-				case EPackageType.EnableBot:
-					{
-						if (coopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToEnable))
-						{
-							if (!botToEnable.gameObject.activeSelf)
-							{
-#if DEBUG
-								logger.LogWarning("Enabling " + packet.BotNetId);
-#endif
-								botToEnable.gameObject.SetActive(true);
-							}
-							else
-							{
-								logger.LogWarning($"Received packet to enable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already enabled!");
-							}
-						}
-					}
-					break;
-				case EPackageType.DisableBot:
-					{
-						if (coopHandler.Players.TryGetValue(packet.BotNetId, out CoopPlayer botToEnable))
-						{
-							if (botToEnable.gameObject.activeSelf)
-							{
-#if DEBUG
-								logger.LogWarning("Disabling " + packet.BotNetId);
-#endif
-								botToEnable.gameObject.SetActive(false);
-							}
-							else
-							{
-								logger.LogWarning($"Received packet to disable {botToEnable.ProfileId}, netId {packet.BotNetId} but the bot was already disabled!");
 							}
 						}
 					}

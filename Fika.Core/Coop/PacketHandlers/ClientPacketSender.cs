@@ -272,10 +272,8 @@ namespace Fika.Core.Coop.PacketHandlers
 				// ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
 				abstractPing.Initialize(ref hitPoint, userData, pingColor);
 
-				GenericPacket genericPacket = new()
+				PingPacket packet = new()
 				{
-					NetId = player.NetId,
-					PacketType = EPackageType.Ping,
 					PingLocation = hitPoint,
 					PingType = pingType,
 					PingColor = pingColor,
@@ -283,7 +281,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
 				};
 
-				SendPacket(ref genericPacket, true);
+				SendPacket(ref packet, true);
 
 				if (FikaPlugin.PlayPingAnimation.Value && player.HealthController.IsAlive)
 				{

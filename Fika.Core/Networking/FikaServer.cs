@@ -169,6 +169,8 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TransitInteractPacket, NetPeer>(OnSubscribeNetSerializableReceived);
+			packetProcessor.SubscribeNetSerializable<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
+			packetProcessor.SubscribeNetSerializable<PingPacket, NetPeer>(OnPingPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -274,6 +276,37 @@ namespace Fika.Core.Networking
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnPingPacketReceived(PingPacket packet, NetPeer peer)
+		{
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+			if (FikaPlugin.UsePingSystem.Value)
+			{
+				PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
+			}
+		}
+
+		private void OnBotStatePacketReceived(BotStatePacket packet, NetPeer peer)
+		{
+			switch (packet.Type)
+			{
+				case BotStatePacket.EStateType.LoadBot:
+					{
+						CoopGame coopGame = coopHandler.LocalGameInstance;
+						if (coopGame != null)
+						{
+							coopGame.IncreaseLoadedPlayers(packet.NetId);
+						}
+					}
+					break;
+				case BotStatePacket.EStateType.DisposeBot:
+				case BotStatePacket.EStateType.EnableBot:
+				case BotStatePacket.EStateType.DisableBot:
+				default:
+					break;
+			}
 		}
 
 		private void OnSubscribeNetSerializableReceived(TransitInteractPacket packet, NetPeer peer)
@@ -463,9 +496,10 @@ namespace Fika.Core.Networking
 							SendDataToPeer(peer, ref ownCharacterPacket, DeliveryMethod.ReliableOrdered);
 
 							observedCoopPlayer.HealthBar.ClearEffects();
-							GenericPacket clearEffectsPacket = new(EPackageType.ClearEffects)
+							GenericPacket clearEffectsPacket = new()
 							{
-								NetId = observedCoopPlayer.NetId
+								NetId = observedCoopPlayer.NetId,
+								Type = EPackageType.ClearEffects
 							};
 
 							SendDataToAll(ref clearEffectsPacket, DeliveryMethod.ReliableUnordered, peer);
@@ -879,7 +913,7 @@ namespace Fika.Core.Networking
 
 		private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
 		{
-			switch (packet.PacketType)
+			switch (packet.Type)
 			{
 				case EPackageType.ClientExtract:
 					{
@@ -908,14 +942,6 @@ namespace Fika.Core.Networking
 						}
 					}
 					break;
-				case EPackageType.Ping:
-					{
-						if (FikaPlugin.UsePingSystem.Value)
-						{
-							PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
-						}
-					}
-					break;
 				case EPackageType.ExfilCountdown:
 					{
 						if (ExfiltrationControllerClass.Instance != null)
@@ -936,18 +962,7 @@ namespace Fika.Core.Networking
 						}
 					}
 					break;
-
-				case EPackageType.LoadBot:
-					{
-						CoopGame coopGame = coopHandler.LocalGameInstance;
-						coopGame.IncreaseLoadedPlayers(packet.BotNetId);
-					}
-					break;
-				case EPackageType.TrainSync:
 				case EPackageType.TraderServiceNotification:
-				case EPackageType.DisposeBot:
-				case EPackageType.EnableBot:
-				case EPackageType.DisableBot:
 				case EPackageType.ClearEffects:
 				default:
 					break;

@@ -13,19 +13,19 @@ namespace Fika.Core.Networking
 		public EBodyPart BodyPartType;
 		public EBodyPartColliderType ColliderType;
 		public EArmorPlateCollider ArmorPlateCollider;
-		public float Absorbed = 0f;
-		public Vector3 Direction = Vector3.zero;
-		public Vector3 Point = Vector3.zero;
-		public Vector3 HitNormal = Vector3.zero;
-		public float PenetrationPower = 0f;
+		public float Absorbed;
+		public Vector3 Direction;
+		public Vector3 Point;
+		public Vector3 HitNormal;
+		public float PenetrationPower;
 		public MongoID? BlockedBy;
 		public MongoID? DeflectedBy;
 		public string SourceId;
 		public string AmmoId;
 		public int FragmentIndex;
-		public float ArmorDamage = 0f;
+		public float ArmorDamage;
 		public string ProfileId;
-		public MaterialType Material = 0;
+		public MaterialType Material;
 
 		public void Deserialize(NetDataReader reader)
 		{

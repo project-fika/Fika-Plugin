@@ -1700,14 +1700,14 @@ namespace Fika.Core.Coop.GameMode
 			Locomotive platform = Singleton<GameWorld>.Instance.PlatformAdapters[0].Platform;
 			FikaServer server = Singleton<FikaServer>.Instance;
 
-			GenericPacket genericPacket = new()
+			/*GenericPacket genericPacket = new()
 			{
 				PacketType = EPackageType.TrainSync,
 				PlatformId = platformAdapter.Id,
 				PlatformPosition = platform.NormalCurvePosition
 			};
 
-			server.SendDataToAll(ref genericPacket, DeliveryMethod.ReliableUnordered);
+			server.SendDataToAll(ref genericPacket, DeliveryMethod.ReliableUnordered);*/
 		}
 
 		private Task SetupRaidCode()
@@ -1915,7 +1915,7 @@ namespace Fika.Core.Coop.GameMode
 			GenericPacket genericPacket = new()
 			{
 				NetId = player.NetId,
-				PacketType = EPackageType.ClientExtract
+				Type = EPackageType.ClientExtract
 			};
 
 			try // This is to allow clients to extract if they lose connection

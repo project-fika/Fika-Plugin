@@ -21,7 +21,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
-using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
@@ -269,10 +268,10 @@ namespace Fika.Core.Coop.Players
 			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 			if (coopGame != null && coopGame.Status == GameStatus.Started)
 			{
-				GenericPacket packet = new(EPackageType.EnableBot)
+				BotStatePacket packet = new()
 				{
-					NetId = MainPlayer.NetId,
-					BotNetId = NetId
+					NetId = NetId,
+					Type = BotStatePacket.EStateType.EnableBot
 				};
 				if (PacketSender != null)
 				{
@@ -286,10 +285,10 @@ namespace Fika.Core.Coop.Players
 			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 			if (coopGame != null && coopGame.Status == GameStatus.Started)
 			{
-				GenericPacket packet = new(EPackageType.DisableBot)
+				BotStatePacket packet = new()
 				{
-					NetId = MainPlayer.NetId,
-					BotNetId = NetId
+					NetId = NetId,
+					Type = BotStatePacket.EStateType.DisableBot
 				};
 				if (PacketSender != null)
 				{
@@ -309,10 +308,10 @@ namespace Fika.Core.Coop.Players
 				if (coopGame != null && coopGame.Status == GameStatus.Started)
 				{
 					FikaServer server = Singleton<FikaServer>.Instance;
-					GenericPacket packet = new(EPackageType.DisposeBot)
+					BotStatePacket packet = new()
 					{
-						NetId = MainPlayer.NetId,
-						BotNetId = NetId
+						NetId = NetId,
+						Type = BotStatePacket.EStateType.DisposeBot
 					};
 
 					server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);

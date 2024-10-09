@@ -193,9 +193,10 @@ namespace Fika.Core.Coop.Components
 					point.ExfiltrationStartTime = game.PastTime;
 
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-					GenericPacket packet = new(EPackageType.ExfilCountdown)
+					GenericPacket packet = new()
 					{
 						NetId = mainPlayer.NetId,
+						Type = EPackageType.ExfilCountdown,
 						ExfilName = point.Settings.Name,
 						ExfilStartTime = point.ExfiltrationStartTime
 					};
