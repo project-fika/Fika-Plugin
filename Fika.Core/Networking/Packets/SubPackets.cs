@@ -30,48 +30,6 @@ namespace Fika.Core.Networking.Packets
 			public byte[] OperationBytes;
 		}
 
-		public struct WorldInteractionPacket
-		{
-			public string InteractiveId;
-			public EInteractionType InteractionType;
-			public EInteractionStage InteractionStage;
-			public string ItemId;
-		}
-
-		public struct ContainerInteractionPacket
-		{
-			public string InteractiveId;
-			public EInteractionType InteractionType;
-		}
-
-		public struct HeadLightsPacket
-		{
-			public int Amount;
-			public bool IsSilent;
-			public FirearmLightStateStruct[] LightStates;
-		}
-
-		public struct ProceedPacket()
-		{
-			public EProceedType ProceedType;
-			public string ItemId = string.Empty;
-			public float Amount = 0f;
-			public int AnimationVariant = 0;
-			public bool Scheduled = false;
-			public EBodyPart BodyPart = EBodyPart.Common;
-		}
-
-		public struct DropPacket
-		{
-			public bool FastDrop;
-		}
-
-		public struct StationaryPacket
-		{
-			public EStationaryCommand Command;
-			public string Id;
-		}
-
 		public struct WeatherClassPacket
 		{
 			public float AtmospherePressure;
@@ -92,17 +50,6 @@ namespace Fika.Core.Networking.Packets
 			public float Turbulence;
 			public float Wind;
 			public int WindDirection;
-		}
-
-		public struct VaultPacket
-		{
-			public EVaultingStrategy VaultingStrategy;
-			public Vector3 VaultingPoint;
-			public float VaultingHeight;
-			public float VaultingLength;
-			public float VaultingSpeed;
-			public float BehindObstacleHeight;
-			public float AbsoluteForwardVelocity;
 		}
 
 		public struct CorpseSyncPacket
@@ -131,47 +78,6 @@ namespace Fika.Core.Networking.Packets
 			public string Status;
 			public string WeaponName;
 			public string GroupId;
-		}
-
-		public struct MountingPacket(GStruct179.EMountingCommand command)
-		{
-			public GStruct179.EMountingCommand Command = command;
-			public bool IsMounted;
-			public Vector3 MountDirection;
-			public Vector3 MountingPoint;
-			public Vector3 TargetPos;
-			public float TargetPoseLevel;
-			public float TargetHandsRotation;
-			public Vector2 PoseLimit;
-			public Vector2 PitchLimit;
-			public Vector2 YawLimit;
-			public Quaternion TargetBodyRotation;
-			public float CurrentMountingPointVerticalOffset;
-			public short MountingDirection;
-			public float TransitionTime;
-		}
-
-		public enum EStationaryCommand
-		{
-			Occupy,
-			Leave,
-			Denied
-		}
-
-		public enum EProceedType
-		{
-			EmptyHands,
-			FoodClass,
-			GrenadeClass,
-			MedsClass,
-			QuickGrenadeThrow,
-			QuickKnifeKick,
-			QuickUse,
-			UsableItem,
-			Weapon,
-			Stationary,
-			Knife,
-			TryProceed
 		}
 	}
 }

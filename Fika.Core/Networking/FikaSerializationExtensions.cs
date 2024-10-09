@@ -14,6 +14,8 @@ using UnityEngine;
 using static BasePhysicalClass;
 using static Fika.Core.Networking.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.CommonSubPackets;
 
 namespace Fika.Core.Networking
 {
@@ -722,159 +724,6 @@ namespace Fika.Core.Networking
 			return packet;
 		}
 
-
-		/// <summary>
-		/// Serializes a <see cref="WorldInteractionPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutWorldInteractionPacket(this NetDataWriter writer, WorldInteractionPacket packet)
-		{
-			writer.Put(packet.InteractiveId);
-			writer.Put((byte)packet.InteractionType);
-			writer.Put((byte)packet.InteractionStage);
-			if (packet.InteractionType == EInteractionType.Unlock)
-			{
-				writer.Put(packet.ItemId);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="WorldInteractionPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="WorldInteractionPacket"/> with data</returns>
-		public static WorldInteractionPacket GetWorldInteractionPacket(this NetDataReader reader)
-		{
-			WorldInteractionPacket packet = new()
-			{
-				InteractiveId = reader.GetString(),
-				InteractionType = (EInteractionType)reader.GetByte(),
-				InteractionStage = (EInteractionStage)reader.GetByte(),
-			};
-			if (packet.InteractionType == EInteractionType.Unlock)
-			{
-				packet.ItemId = reader.GetString();
-			}
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ContainerInteractionPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutContainerInteractionPacket(this NetDataWriter writer, ContainerInteractionPacket packet)
-		{
-			writer.Put(packet.InteractiveId);
-			writer.Put((int)packet.InteractionType);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ContainerInteractionPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ContainerInteractionPacket"/> with data</returns>
-		public static ContainerInteractionPacket GetContainerInteractionPacket(this NetDataReader reader)
-		{
-			ContainerInteractionPacket packet = new()
-			{
-				InteractiveId = reader.GetString(),
-				InteractionType = (EInteractionType)reader.GetInt()
-			};
-			return packet;
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="ProceedPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutProceedPacket(this NetDataWriter writer, ProceedPacket packet)
-		{
-			writer.Put((int)packet.ProceedType);
-			writer.Put(packet.ItemId);
-			writer.Put(packet.Amount);
-			writer.Put(packet.AnimationVariant);
-			writer.Put(packet.Scheduled);
-			writer.Put((int)packet.BodyPart);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="ProceedPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="ProceedPacket"/> with data</returns>
-		public static ProceedPacket GetProceedPacket(this NetDataReader reader)
-		{
-			return new ProceedPacket
-			{
-				ProceedType = (EProceedType)reader.GetInt(),
-				ItemId = reader.GetString(),
-				Amount = reader.GetFloat(),
-				AnimationVariant = reader.GetInt(),
-				Scheduled = reader.GetBool(),
-				BodyPart = (EBodyPart)reader.GetInt()
-			};
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="DropPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutDropPacket(this NetDataWriter writer, DropPacket packet)
-		{
-			writer.Put(packet.FastDrop);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="DropPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="DropPacket"/>with data</returns>
-		public static DropPacket GetDropPacket(this NetDataReader reader)
-		{
-			return new DropPacket
-			{
-				FastDrop = reader.GetBool()
-			};
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="StationaryPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutStationaryPacket(this NetDataWriter writer, StationaryPacket packet)
-		{
-			writer.Put((byte)packet.Command);
-			if (packet.Command == EStationaryCommand.Occupy && !string.IsNullOrEmpty(packet.Id))
-			{
-				writer.Put(packet.Id);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="StationaryPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="StationaryPacket"/> with data</returns>
-		public static StationaryPacket GetStationaryPacket(this NetDataReader reader)
-		{
-			StationaryPacket packet = new()
-			{
-				Command = (EStationaryCommand)reader.GetByte()
-			};
-
-			if (packet.Command == EStationaryCommand.Occupy)
-			{
-				packet.Id = reader.GetString();
-			}
-
-			return packet;
-		}
-
 		/// <summary>
 		/// Serializes a <see cref="WeatherClass"/>
 		/// </summary>
@@ -929,96 +778,6 @@ namespace Fika.Core.Networking
 				Turbulence = reader.GetFloat(),
 				Wind = reader.GetFloat(),
 				WindDirection = reader.GetInt()
-			};
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="VaultPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutVaultPacket(this NetDataWriter writer, VaultPacket packet)
-		{
-			writer.Put((byte)packet.VaultingStrategy);
-			writer.Put(packet.VaultingPoint);
-			writer.Put(packet.VaultingHeight);
-			writer.Put(packet.VaultingLength);
-			writer.Put(packet.VaultingSpeed);
-			writer.Put(packet.BehindObstacleHeight);
-			writer.Put(packet.AbsoluteForwardVelocity);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="VaultPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="VaultPacket"/> with data</returns>
-		public static VaultPacket GetVaultPacket(this NetDataReader reader)
-		{
-			return new VaultPacket()
-			{
-				VaultingStrategy = (EVaultingStrategy)reader.GetByte(),
-				VaultingPoint = reader.GetVector3(),
-				VaultingHeight = reader.GetFloat(),
-				VaultingLength = reader.GetFloat(),
-				VaultingSpeed = reader.GetFloat(),
-				BehindObstacleHeight = reader.GetFloat(),
-				AbsoluteForwardVelocity = reader.GetFloat()
-			};
-		}
-
-		/// <summary>
-		/// Serializes a <see cref="BTRDataPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutBTRDataPacket(this NetDataWriter writer, BTRDataPacket packet)
-		{
-			writer.Put(packet.position);
-			writer.Put(packet.BtrBotId);
-			writer.Put(packet.MoveSpeed);
-			writer.Put(packet.moveDirection);
-			writer.Put(packet.timeToEndPause);
-			writer.Put(packet.currentSpeed);
-			writer.Put(packet.RightSlot1State);
-			writer.Put(packet.RightSlot0State);
-			writer.Put(packet.RightSideState);
-			writer.Put(packet.LeftSlot1State);
-			writer.Put(packet.LeftSlot0State);
-			writer.Put(packet.LeftSideState);
-			writer.Put(packet.RouteState);
-			writer.Put(packet.State);
-			writer.Put(packet.gunsBlockRotation);
-			writer.Put(packet.turretRotation);
-			writer.Put(packet.rotation);
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="BTRDataPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="BTRDataPacket"/> with data</returns>
-		public static BTRDataPacket GetBTRDataPacket(this NetDataReader reader)
-		{
-			return new()
-			{
-				position = reader.GetVector3(),
-				BtrBotId = reader.GetInt(),
-				MoveSpeed = reader.GetFloat(),
-				moveDirection = reader.GetByte(),
-				timeToEndPause = reader.GetFloat(),
-				currentSpeed = reader.GetFloat(),
-				RightSlot1State = reader.GetByte(),
-				RightSlot0State = reader.GetByte(),
-				RightSideState = reader.GetByte(),
-				LeftSlot1State = reader.GetByte(),
-				LeftSlot0State = reader.GetByte(),
-				LeftSideState = reader.GetByte(),
-				RouteState = reader.GetByte(),
-				State = reader.GetByte(),
-				gunsBlockRotation = reader.GetFloat(),
-				turretRotation = reader.GetFloat(),
-				rotation = reader.GetQuaternion()
 			};
 		}
 
@@ -1102,75 +861,7 @@ namespace Fika.Core.Networking
 			};
 		}
 
-		/// <summary>
-		/// Serializes a <see cref="MountingPacket"/>
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="packet"></param>
-		public static void PutMountingPacket(this NetDataWriter writer, MountingPacket packet)
-		{
-			writer.Put((byte)packet.Command);
-			if (packet.Command == GStruct179.EMountingCommand.Update)
-			{
-				writer.Put(packet.CurrentMountingPointVerticalOffset);
-			}
-			if (packet.Command is GStruct179.EMountingCommand.Enter or GStruct179.EMountingCommand.Exit)
-			{
-				writer.Put(packet.IsMounted);
-			}
-			if (packet.Command == GStruct179.EMountingCommand.Enter)
-			{
-				writer.Put(packet.MountDirection);
-				writer.Put(packet.MountingPoint);
-				writer.Put(packet.MountingDirection);
-				writer.Put(packet.TransitionTime);
-				writer.Put(packet.TargetPos);
-				writer.Put(packet.TargetPoseLevel);
-				writer.Put(packet.TargetHandsRotation);
-				writer.Put(packet.TargetBodyRotation);
-				writer.Put(packet.PoseLimit);
-				writer.Put(packet.PitchLimit);
-				writer.Put(packet.YawLimit);
-			}
-		}
-
-		/// <summary>
-		/// Deserializes a <see cref="MountingPacket"/>
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>A <see cref="MountingPacket"/> with data</returns>
-		public static MountingPacket GetMountingPacket(this NetDataReader reader)
-		{
-			MountingPacket packet = new()
-			{
-				Command = (GStruct179.EMountingCommand)reader.GetByte()
-			};
-			if (packet.Command == GStruct179.EMountingCommand.Update)
-			{
-				packet.CurrentMountingPointVerticalOffset = reader.GetFloat();
-			}
-			if (packet.Command is GStruct179.EMountingCommand.Enter or GStruct179.EMountingCommand.Exit)
-			{
-				packet.IsMounted = reader.GetBool();
-			};
-			if (packet.Command == GStruct179.EMountingCommand.Enter)
-			{
-				packet.MountDirection = reader.GetVector3();
-				packet.MountingPoint = reader.GetVector3();
-				packet.MountingDirection = reader.GetShort();
-				packet.TransitionTime = reader.GetFloat();
-				packet.TargetPos = reader.GetVector3();
-				packet.TargetPoseLevel = reader.GetFloat();
-				packet.TargetHandsRotation = reader.GetFloat();
-				packet.TargetBodyRotation = reader.GetQuaternion();
-				packet.PoseLimit = reader.GetVector2();
-				packet.PitchLimit = reader.GetVector2();
-				packet.YawLimit = reader.GetVector2();
-			}
-			return packet;
-		}
-
-		public static void PutFirearmSubPacket(this NetDataWriter writer, IFirearmSubPacket packet, EFirearmSubPacketType type)
+		public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
 		{
 			switch (type)
 			{
@@ -1213,7 +904,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public static IFirearmSubPacket GetFirearmSubPacket(this NetDataReader reader, EFirearmSubPacketType type)
+		public static ISubPacket GetFirearmSubPacket(this NetDataReader reader, EFirearmSubPacketType type)
 		{
 			switch (type)
 			{
@@ -1276,9 +967,47 @@ namespace Fika.Core.Networking
 				case EFirearmSubPacketType.LeftStanceChange:
 					return new LeftStanceChangePacket(reader);
 				default:
-					FikaPlugin.Instance.FikaLogger.LogError("IFirearmSubPacket: type was outside of bounds!");
+					FikaPlugin.Instance.FikaLogger.LogError("GetFirearmSubPacket: type was outside of bounds!");
 					return null;
 			}
+		}
+
+		public static void PutCommonSubPacket(this NetDataWriter writer, ISubPacket packet)
+		{
+			packet.Serialize(writer);
+		}
+
+		public static ISubPacket GetCommonSubPacket(this NetDataReader reader, ECommonSubPacketType type)
+		{
+			switch (type)
+			{
+				case ECommonSubPacketType.Phrase:
+					return new PhrasePacket(reader);
+				case ECommonSubPacketType.WorldInteraction:
+					return new WorldInteractionPacket(reader);
+				case ECommonSubPacketType.ContainerInteraction:
+					return new ContainerInteractionPacket(reader);
+				case ECommonSubPacketType.Proceed:
+					return new ProceedPacket(reader);
+				case ECommonSubPacketType.HeadLights:
+					return new HeadLightsPacket(reader);
+				case ECommonSubPacketType.InventoryChanged:
+					return new InventoryChangedPacket(reader);
+				case ECommonSubPacketType.Drop:
+					return new DropPacket(reader);
+				case ECommonSubPacketType.Stationary:
+					return new StationaryPacket(reader);
+				case ECommonSubPacketType.Vault:
+					return new VaultPacket(reader);
+				case ECommonSubPacketType.Interaction:
+					return new InteractionPacket(reader);
+				case ECommonSubPacketType.Mounting:
+					return new MountingPacket(reader);
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("GetCommonSubPacket: type was outside of bounds!");
+					break;
+			}
+			return null;
 		}
 	}
 }

@@ -3,6 +3,7 @@
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.ClientClasses
 {

@@ -19,6 +19,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Networking.CommonSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.Utils.ColorUtils;
 
@@ -348,8 +350,8 @@ namespace Fika.Core.Coop.Players
 			{
 				coopBot.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon,
 						ItemId = weapon.Id

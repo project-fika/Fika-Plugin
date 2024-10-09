@@ -1,5 +1,6 @@
 ﻿using LiteNetLib.Utils;
 using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -7,7 +8,7 @@ namespace Fika.Core.Networking
 	{
 		public int NetId;
 		public EFirearmSubPacketType Type;
-		public IFirearmSubPacket SubPacket;
+		public ISubPacket SubPacket;
 
 		public void Deserialize(NetDataReader reader)
 		{

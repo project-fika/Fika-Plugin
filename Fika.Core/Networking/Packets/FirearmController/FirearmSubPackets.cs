@@ -8,45 +8,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static EFT.Player;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {
 	public class FirearmSubPackets
 	{
-		public enum EFirearmSubPacketType
-		{
-			ShotInfo,
-			ChangeFireMode,
-			ToggleAim,
-			ExamineWeapon,
-			CheckAmmo,
-			CheckChamber,
-			CheckFireMode,
-			ToggleLightStates,
-			ToggleScopeStates,
-			ToggleLauncher,
-			ToggleInventory,
-			Loot,
-			ReloadMag,
-			QuickReloadMag,
-			ReloadWithAmmo,
-			CylinderMag,
-			ReloadLauncher,
-			ReloadBarrels,
-			Grenade,
-			CancelGrenade,
-			CompassChange,
-			Knife,
-			FlareShot,
-			ReloadBoltAction,
-			RollCylinder,
-			UnderbarrelSightingRangeUp,
-			UnderbarrelSightingRangeDown,
-			ToggleBipod,
-			LeftStanceChange
-		}
-
-		public struct ToggleAimPacket : IFirearmSubPacket
+		public struct ToggleAimPacket : ISubPacket
 		{
 			public int AimingIndex;
 
@@ -55,7 +23,7 @@ namespace Fika.Core.Networking
 				AimingIndex = reader.GetInt();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -69,11 +37,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ChangeFireModePacket(NetDataReader reader) : IFirearmSubPacket
+		public struct ChangeFireModePacket(NetDataReader reader) : ISubPacket
 		{
 			public Weapon.EFireMode FireMode = (Weapon.EFireMode)reader.GetByte();
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -87,9 +55,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ExamineWeaponPacket : IFirearmSubPacket
+		public struct ExamineWeaponPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -103,9 +71,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct CheckAmmoPacket : IFirearmSubPacket
+		public struct CheckAmmoPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -119,9 +87,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ToggleLauncherPacket : IFirearmSubPacket
+		public struct ToggleLauncherPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -135,7 +103,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ToggleInventoryPacket : IFirearmSubPacket
+		public struct ToggleInventoryPacket : ISubPacket
 		{
 			public bool Open;
 
@@ -144,7 +112,7 @@ namespace Fika.Core.Networking
 				Open = reader.GetBool();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -158,9 +126,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct FirearmLootPacket : IFirearmSubPacket
+		public struct FirearmLootPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				player.HandsController.Loot(true);
 			}
@@ -171,9 +139,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct CancelGrenadePacket : IFirearmSubPacket
+		public struct CancelGrenadePacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedGrenadeController grenadeController)
 				{
@@ -187,7 +155,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct CompassChangePacket : IFirearmSubPacket
+		public struct CompassChangePacket : ISubPacket
 		{
 			public bool Enabled;
 
@@ -196,7 +164,7 @@ namespace Fika.Core.Networking
 				Enabled = reader.GetBool();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is ItemHandsController handsController)
 				{
@@ -210,7 +178,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct LeftStanceChangePacket : IFirearmSubPacket
+		public struct LeftStanceChangePacket : ISubPacket
 		{
 			public bool LeftStance;
 
@@ -219,7 +187,7 @@ namespace Fika.Core.Networking
 				LeftStance = reader.GetBool();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -236,7 +204,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct RollCylinderPacket : IFirearmSubPacket
+		public struct RollCylinderPacket : ISubPacket
 		{
 			public bool RollToZeroCamora;
 
@@ -245,7 +213,7 @@ namespace Fika.Core.Networking
 				RollToZeroCamora = reader.GetBool();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				// Check for GClass increments
 				if (player.HandsController is CoopObservedFirearmController controller && controller.Weapon is GClass2973)
@@ -260,9 +228,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ReloadBoltActionPacket : IFirearmSubPacket
+		public struct ReloadBoltActionPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -276,9 +244,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct CheckChamberPacket : IFirearmSubPacket
+		public struct CheckChamberPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -292,9 +260,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct CheckFireModePacket : IFirearmSubPacket
+		public struct CheckFireModePacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -308,9 +276,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct UnderbarrelSightingRangeUpPacket : IFirearmSubPacket
+		public struct UnderbarrelSightingRangeUpPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -324,9 +292,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct UnderbarrelSightingRangeDownPacket : IFirearmSubPacket
+		public struct UnderbarrelSightingRangeDownPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -340,9 +308,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ToggleBipodPacket : IFirearmSubPacket
+		public struct ToggleBipodPacket : ISubPacket
 		{
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -356,7 +324,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ShotInfoPacket : IFirearmSubPacket
+		public struct ShotInfoPacket : ISubPacket
 		{
 			public EShotType ShotType;
 			public Vector3 ShotPosition;
@@ -383,7 +351,7 @@ namespace Fika.Core.Networking
 				SlideOnOverheatReached = reader.GetBool();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -406,7 +374,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct KnifePacket : IFirearmSubPacket
+		public struct KnifePacket : ISubPacket
 		{
 			public bool Examine;
 			public bool Kick;
@@ -421,7 +389,7 @@ namespace Fika.Core.Networking
 				BreakCombo = reader.GetBool();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedKnifeController knifeController)
 				{
@@ -460,7 +428,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct GrenadePacket : IFirearmSubPacket
+		public struct GrenadePacket : ISubPacket
 		{
 			public EGrenadePacketType PacketType;
 			public bool HasGrenade;
@@ -488,7 +456,7 @@ namespace Fika.Core.Networking
 				ChangeToPlant = reader.GetBool();
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedGrenadeController controller)
 				{
@@ -570,7 +538,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct LightStatesPacket : IFirearmSubPacket
+		public struct LightStatesPacket : ISubPacket
 		{
 			public int Amount;
 			public FirearmLightStateStruct[] States;
@@ -593,7 +561,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -616,7 +584,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ScopeStatesPacket : IFirearmSubPacket
+		public struct ScopeStatesPacket : ISubPacket
 		{
 			public int Amount;
 			public FirearmScopeStateStruct[] States;
@@ -640,7 +608,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -664,7 +632,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ReloadMagPacket : IFirearmSubPacket
+		public struct ReloadMagPacket : ISubPacket
 		{
 			public bool Reload;
 			public string MagId;
@@ -680,7 +648,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -747,7 +715,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct QuickReloadMagPacket : IFirearmSubPacket
+		public struct QuickReloadMagPacket : ISubPacket
 		{
 			public bool Reload;
 			public string MagId;
@@ -761,7 +729,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -801,7 +769,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ReloadWithAmmoPacket : IFirearmSubPacket
+		public struct ReloadWithAmmoPacket : ISubPacket
 		{
 			public bool Reload;
 			public EReloadWithAmmoStatus Status;
@@ -825,7 +793,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -864,7 +832,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct CylinderMagPacket : IFirearmSubPacket
+		public struct CylinderMagPacket : ISubPacket
 		{
 			public bool Changed;
 			public int CamoraIndex;
@@ -891,7 +859,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -936,7 +904,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ReloadLauncherPacket : IFirearmSubPacket
+		public struct ReloadLauncherPacket : ISubPacket
 		{
 			public bool Reload;
 			public string[] AmmoIds;
@@ -950,7 +918,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -970,7 +938,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct ReloadBarrelsPacket : IFirearmSubPacket
+		public struct ReloadBarrelsPacket : ISubPacket
 		{
 			public bool Reload;
 			public string[] AmmoIds;
@@ -986,7 +954,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -1030,7 +998,7 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public struct FlareShotPacket : IFirearmSubPacket
+		public struct FlareShotPacket : ISubPacket
 		{
 			public bool StartOneShotFire;
 			public Vector3 ShotPosition;
@@ -1048,7 +1016,7 @@ namespace Fika.Core.Networking
 				}
 			}
 
-			public void Handle(CoopPlayer player)
+			public void Execute(CoopPlayer player)
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
@@ -1091,30 +1059,6 @@ namespace Fika.Core.Networking
 					writer.Put(AmmoTemplateId);
 				}
 			}
-		}
-
-		public interface IFirearmSubPacket
-		{
-			public void Handle(CoopPlayer player);
-			public void Serialize(NetDataWriter writer);
-		}
-
-		public enum EGrenadePacketType
-		{
-			None,
-			ExamineWeapon,
-			HighThrow,
-			LowThrow,
-			PullRingForHighThrow,
-			PullRingForLowThrow
-		};
-
-		public enum EReloadWithAmmoStatus
-		{
-			None = 0,
-			StartReload,
-			EndReload,
-			AbortReload
-		}
+		}		
 	}
 }

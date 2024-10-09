@@ -24,6 +24,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
+using static Fika.Core.Networking.CommonSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.Utils.ColorUtils;
 
@@ -1012,7 +1014,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void DoObservedVault(VaultPacket packet)
+		public override void DoObservedVault(ref VaultPacket packet)
 		{
 			if (packet.VaultingStrategy != EVaultingStrategy.Vault)
 			{
@@ -1300,7 +1302,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void HandleProceedPacket(ProceedPacket packet)
+		public void HandleProceedPacket(ref ProceedPacket packet)
 		{
 			switch (packet.ProceedType)
 			{

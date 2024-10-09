@@ -7,6 +7,7 @@ using Fika.Core.Coop.Players;
 using System;
 using UnityEngine;
 using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.ClientClasses
 {

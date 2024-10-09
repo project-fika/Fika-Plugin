@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				for (int i = 0; i < firearmPackets; i++)
 				{
-					FirearmPackets.Dequeue().SubPacket.Handle(player);
+					FirearmPackets.Dequeue().SubPacket.Execute(player);
 				}
 			}
 			int damagePackets = DamagePackets.Count;
@@ -127,7 +127,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				for (int i = 0; i < commonPlayerPackets; i++)
 				{
-					player.HandleCommonPacket(CommonPlayerPackets.Dequeue());
+					CommonPlayerPackets.Dequeue().SubPacket.Execute(player);
 				}
 			}
 			int inventoryOps = inventoryOperations.Count;
