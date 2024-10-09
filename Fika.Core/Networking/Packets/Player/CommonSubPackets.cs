@@ -244,7 +244,7 @@ namespace Fika.Core.Networking
 
 			public void Execute(CoopPlayer player)
 			{
-				throw new System.NotImplementedException();
+				player.HandleHeadLightsPacket(ref this);
 			}
 
 			public void Serialize(NetDataWriter writer)
