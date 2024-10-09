@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.GameMode;
@@ -8,7 +7,6 @@ using Fika.Core.Coop.Players;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -16,6 +14,10 @@ namespace Fika.Core.Coop.Utils
 {
 	public static class FikaGlobals
 	{
+		public const string TransitTraderId = "656f0f98d80a697f855d34b1";
+		public const string TransiterTraderName = "BTR";
+		public const string DefaultTransitId = "66f5750951530ca5ae09876d";
+
 		public static readonly List<EInteraction> BlockedInteractions =
 		[
 			EInteraction.DropBackpack, EInteraction.NightVisionOffGear, EInteraction.NightVisionOnGear,

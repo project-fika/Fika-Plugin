@@ -49,6 +49,21 @@ namespace Fika.Core.Coop.Patches
 			GameWorld gameWorld)
 		{
 			bool isServer = FikaBackendUtils.IsServer;
+			bool isTransit = FikaBackendUtils.IsTransit;
+
+			if (isServer && !isTransit)
+			{
+				FikaBackendUtils.CachedRaidSettings = raidSettings;
+			}
+			else if (isServer && isTransit && FikaBackendUtils.CachedRaidSettings != null)
+			{
+				Logger.LogInfo("Applying cached raid settings from previous raid");
+				RaidSettings cachedSettings = FikaBackendUtils.CachedRaidSettings;
+				raidSettings.WavesSettings = cachedSettings.WavesSettings;
+				raidSettings.BotSettings = cachedSettings.BotSettings;
+				raidSettings.MetabolismDisabled = cachedSettings.MetabolismDisabled;
+				raidSettings.PlayersSpawnPlace = cachedSettings.PlayersSpawnPlace;
+			}
 
 			metricsEvents.SetGamePrepared();
 
@@ -88,7 +103,8 @@ namespace Fika.Core.Coop.Patches
 				location = raidSettings.LocationId,
 				timeVariant = raidSettings.SelectedDateTime,
 				mode = ELocalMode.PVE_OFFLINE,
-				playerSide = raidSettings.Side
+				playerSide = raidSettings.Side,
+				isLocationTransition = raidSettings.isLocationTransition
 			};
 			Traverse applicationTraverse = Traverse.Create(instance);
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
@@ -96,6 +112,7 @@ namespace Fika.Core.Coop.Patches
 			LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
+			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = FikaBackendUtils.TransitData;
 
 			GClass1284 profileInsurance = localSettings.profileInsurance;
 			if ((profileInsurance?.insuredItems) != null)

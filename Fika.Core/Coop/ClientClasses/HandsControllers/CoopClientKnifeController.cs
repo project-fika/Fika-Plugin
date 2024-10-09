@@ -2,6 +2,7 @@
 
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using static Fika.Core.Networking.FirearmSubPackets;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -22,8 +23,8 @@ namespace Fika.Core.Coop.ClientClasses
 
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasKnifePacket = true,
-				KnifePacket = new()
+				Type = EFirearmSubPacketType.Knife,
+				SubPacket = new KnifePacket()
 				{
 					Examine = true
 				}
@@ -38,10 +39,10 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
-					HasKnifePacket = true,
-					KnifePacket = new()
+					Type = EFirearmSubPacketType.Knife,
+					SubPacket = new KnifePacket()
 					{
-						Kick = knifeKick
+						Kick = true
 					}
 				});
 			}
@@ -57,10 +58,10 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
 				{
-					HasKnifePacket = true,
-					KnifePacket = new()
+					Type = EFirearmSubPacketType.Knife,
+					SubPacket = new KnifePacket()
 					{
-						AltKick = alternateKnifeKick
+						AltKick = true
 					}
 				});
 			}
@@ -74,8 +75,8 @@ namespace Fika.Core.Coop.ClientClasses
 
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasKnifePacket = true,
-				KnifePacket = new()
+				Type = EFirearmSubPacketType.Knife,
+				SubPacket = new KnifePacket()
 				{
 					BreakCombo = true
 				}

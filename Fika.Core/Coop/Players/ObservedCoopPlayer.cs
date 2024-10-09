@@ -17,6 +17,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
+using JsonType;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -876,6 +877,11 @@ namespace Fika.Core.Coop.Players
 			CorpseSyncPacket = default;
 		}
 
+		public override void vmethod_3(GClass1615 controller, int transitPointId, string keyId, EDateTime time)
+		{
+			// Do nothing
+		}
+
 		public override void HandleDamagePacket(ref DamagePacket packet)
 		{
 			DamageInfo damageInfo = new()
@@ -936,7 +942,7 @@ namespace Fika.Core.Coop.Players
 
 			if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
 			{
-				if (aggressor.Profile.Info.GroupId == "Fika" && !aggressor.IsYourPlayer)
+				if (aggressor.GroupId == "Fika" && !aggressor.IsYourPlayer)
 				{
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 					if (mainPlayer != null)

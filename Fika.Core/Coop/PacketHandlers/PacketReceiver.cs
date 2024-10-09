@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				for (int i = 0; i < firearmPackets; i++)
 				{
-					player.HandleWeaponPacket(FirearmPackets.Dequeue());
+					FirearmPackets.Dequeue().SubPacket.Handle(player);
 				}
 			}
 			int damagePackets = DamagePackets.Count;
