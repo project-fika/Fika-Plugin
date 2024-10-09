@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-    internal class CoopObservedGrenadeController : Player.GrenadeHandsController
+	internal class CoopObservedGrenadeController : Player.GrenadeHandsController
 	{
 		public CoopPlayer coopPlayer;
 

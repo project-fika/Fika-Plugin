@@ -37,14 +37,14 @@ namespace Fika.Core.Coop.Components
 		public List<CoopPlayer> HumanPlayers = [];
 		public int AmountOfHumans = 1;
 		public List<int> ExtractedPlayers = [];
-		public List<string> queuedProfileIds = [];		
+		public List<string> queuedProfileIds = [];
 
 		private ManualLogSource logger;
 		private readonly Queue<SpawnObject> spawnQueue = new(50);
 		private bool ready;
 		private bool isClient;
 		private float charSyncCounter;
-		private bool requestQuitGame = false;		
+		private bool requestQuitGame = false;
 		#endregion
 
 		public static bool TryGetCoopHandler(out CoopHandler coopHandler)
@@ -215,7 +215,7 @@ namespace Fika.Core.Coop.Components
 						NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
 						requestQuitGame = false;
 						return;
-					}					
+					}
 					else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0
 						&& Singleton<FikaServer>.Instance.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
 						&& Singleton<FikaServer>.Instance.HasHadPeer)

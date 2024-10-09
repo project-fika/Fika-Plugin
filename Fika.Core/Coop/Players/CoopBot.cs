@@ -24,10 +24,10 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Coop.Players
 {
-    /// <summary>
-    /// Used to simulate bots for the host.
-    /// </summary>
-    public class CoopBot : CoopPlayer
+	/// <summary>
+	/// Used to simulate bots for the host.
+	/// </summary>
+	public class CoopBot : CoopPlayer
 	{
 		public CoopPlayer MainPlayer
 		{
@@ -203,7 +203,7 @@ namespace Fika.Core.Coop.Players
 
 			if (armorComponents.Count > 0)
 			{
-				QueueArmorDamagePackets([.. armorComponents]); 
+				QueueArmorDamagePackets([.. armorComponents]);
 			}
 		}
 

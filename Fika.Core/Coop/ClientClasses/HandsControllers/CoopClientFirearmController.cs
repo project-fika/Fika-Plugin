@@ -4,7 +4,6 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +11,7 @@ using static Fika.Core.Networking.FirearmSubPackets;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class CoopClientFirearmController : Player.FirearmController
+	public class CoopClientFirearmController : Player.FirearmController
 	{
 		protected CoopPlayer player;
 
@@ -599,7 +598,7 @@ namespace Fika.Core.Coop.ClientClasses
 						Status = EReloadWithAmmoStatus.EndReload,
 						AmmoLoadedToMag = amount
 					}
-				}); 
+				});
 			}
 		}
 
@@ -797,7 +796,7 @@ namespace Fika.Core.Coop.ClientClasses
 							Status = EReloadWithAmmoStatus.StartReload,
 							AmmoIds = ammoIds
 						}
-					}); 
+					});
 				}
 			}
 		}

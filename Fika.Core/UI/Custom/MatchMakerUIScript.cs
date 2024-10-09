@@ -447,7 +447,7 @@ namespace Fika.Core.UI.Custom
 
 			if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
 			{
-				FikaBackendUtils.				GroupId = result.ServerId;
+				FikaBackendUtils.GroupId = result.ServerId;
 				FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
 				FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 

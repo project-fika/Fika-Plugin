@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		public static FikaSnapshotter Create(ObservedCoopPlayer player)
 		{
 			FikaSnapshotter snapshotter = player.gameObject.AddComponent<FikaSnapshotter>();
-			snapshotter.player = player;			
+			snapshotter.player = player;
 			return snapshotter;
 		}
 

@@ -3,7 +3,7 @@ using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
-    public struct CommonPlayerPacket(int netId) : INetSerializable
+	public struct CommonPlayerPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
 		public EPhraseTrigger Phrase = EPhraseTrigger.PhraseNone;

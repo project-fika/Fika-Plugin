@@ -8,10 +8,10 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    /// <summary>
-    /// <see cref="ClientLocalGameWorld"/> used in Fika for clients to override methods and logic
-    /// </summary>
-    public class CoopClientGameWorld : ClientLocalGameWorld
+	/// <summary>
+	/// <see cref="ClientLocalGameWorld"/> used in Fika for clients to override methods and logic
+	/// </summary>
+	public class CoopClientGameWorld : ClientLocalGameWorld
 	{
 		public static CoopClientGameWorld Create(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
 		{

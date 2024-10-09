@@ -15,7 +15,6 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
@@ -42,10 +41,10 @@ using static Fika.Core.Utils.ColorUtils;
 
 namespace Fika.Core.Networking
 {
-    /// <summary>
-    /// Server used in P2P connections
-    /// </summary>
-    public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface231, IFikaNetworkManager
+	/// <summary>
+	/// Server used in P2P connections
+	/// </summary>
+	public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface231, IFikaNetworkManager
 	{
 		public int ReadyClients = 0;
 		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
@@ -286,7 +285,7 @@ namespace Fika.Core.Networking
 				{
 					transitController.InteractWithTransit(playerToApply, packet.Data);
 				}
-			}		
+			}
 		}
 
 		private void OnSyncTransitControllersPacketReceived(SyncTransitControllersPacket packet, NetPeer peer)

@@ -9,7 +9,7 @@ namespace Fika.Core.Utils
 	/// </summary>
 	public static class LocaleUtils
 	{
-		private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];		
+		private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
 
 		/// <summary>
 		/// Used to get the prefix of a word for EN locale, no longer used

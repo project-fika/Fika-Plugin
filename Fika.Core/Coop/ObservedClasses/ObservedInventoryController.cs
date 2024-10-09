@@ -6,7 +6,6 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;

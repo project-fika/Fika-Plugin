@@ -2,7 +2,6 @@
 using Fika.Core.Coop.GameMode;
 using SPT.Reflection.Patching;
 using System.Linq;
-using System.Numerics;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches

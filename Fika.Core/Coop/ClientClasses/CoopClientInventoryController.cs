@@ -1,6 +1,5 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
-using Comfort.Net;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;

@@ -6,7 +6,6 @@ using Fika.Core.Coop.Players;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using UnityEngine;
 using static EFT.Player;
 

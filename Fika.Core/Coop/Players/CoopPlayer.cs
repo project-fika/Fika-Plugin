@@ -34,10 +34,10 @@ using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Coop.Players
 {
-    /// <summary>
-    /// <see cref="CoopPlayer"/> is the <see cref="LocalPlayer"/>, there can only be one <see cref="CoopPlayer"/> in every game and that is always yourself.
-    /// </summary>
-    public class CoopPlayer : LocalPlayer
+	/// <summary>
+	/// <see cref="CoopPlayer"/> is the <see cref="LocalPlayer"/>, there can only be one <see cref="CoopPlayer"/> in every game and that is always yourself.
+	/// </summary>
+	public class CoopPlayer : LocalPlayer
 	{
 		#region Fields and Properties
 		public PacketReceiver PacketReceiver;
@@ -1233,7 +1233,7 @@ namespace Fika.Core.Coop.Players
 				Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
 				List<ArmorComponent> armorComponents = [];
 				foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
-				{					
+				{
 					float num = 0f;
 					foreach (KeyValuePair<GStruct209, float> keyValuePair in armorDamage)
 					{
@@ -1436,7 +1436,7 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured."); 
+			FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
 #endif
 			return null;
 		}

@@ -46,10 +46,10 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.GameMode
 {
-    /// <summary>
-    /// Coop game used in Fika
-    /// </summary>
-    public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
+	/// <summary>
+	/// Coop game used in Fika
+	/// </summary>
+	public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
 	{
 		public string InfiltrationPoint;
 		public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
@@ -764,7 +764,7 @@ namespace Fika.Core.Coop.GameMode
 				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized());
 
 				if (isServer)
-				{					
+				{
 #if DEBUG
 					Logger.LogWarning("Server: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
 #endif
@@ -1286,7 +1286,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			if (Location_0.AccessKeys != null && Location_0.AccessKeys.Length > 0)
-			{				
+			{
 				IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
 				if (items != null)
 				{
@@ -1598,7 +1598,7 @@ namespace Fika.Core.Coop.GameMode
 				{
 					await GetWeather();
 					WeatherController.Instance.method_0(WeatherClasses);
-				} 
+				}
 			}
 
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
@@ -1804,7 +1804,7 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				exfilPoints = exfilController.EligiblePoints(Profile_0);
-			}			
+			}
 
 			GameUi.TimerPanel.SetTime(EFTDateTimeClass.UtcNow, Profile_0.Info.Side, GameTimer.EscapeTimeSeconds(), exfilPoints);
 
@@ -2013,7 +2013,7 @@ namespace Fika.Core.Coop.GameMode
 		{
 			if (botsController_0 != null)
 			{
-				botsController_0.DestroyInfo(player); 
+				botsController_0.DestroyInfo(player);
 			}
 		}
 
@@ -2159,7 +2159,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!FikaBackendUtils.IsTransit)
 			{
-				Destroy(coopHandler); 
+				Destroy(coopHandler);
 			}
 
 			ExitManager stopManager = new()
@@ -2414,7 +2414,7 @@ namespace Fika.Core.Coop.GameMode
 				catch (Exception ex)
 				{
 					Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
-				} 
+				}
 			}
 			using (CounterCreatorAbstractClass.StartWithToken("CollectMetrics"))
 			{
@@ -2468,7 +2468,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!FikaBackendUtils.IsTransit)
 			{
-				FikaBackendUtils.HostExpectedNumberOfPlayers = 1; 
+				FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
 			}
 			FikaBackendUtils.RequestFikaWorld = false;
 			FikaBackendUtils.IsReconnect = false;

@@ -15,10 +15,10 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    /// <summary>
-    /// <see cref="ClientLocalGameWorld"/> used in Fika for hosts to override methods and logic
-    /// </summary>
-    public class CoopHostGameWorld : ClientLocalGameWorld
+	/// <summary>
+	/// <see cref="ClientLocalGameWorld"/> used in Fika for hosts to override methods and logic
+	/// </summary>
+	public class CoopHostGameWorld : ClientLocalGameWorld
 	{
 		private FikaServer Server
 		{

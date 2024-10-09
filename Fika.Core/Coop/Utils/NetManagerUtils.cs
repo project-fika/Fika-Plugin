@@ -3,8 +3,6 @@ using Comfort.Common;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using LiteNetLib;
-using LiteNetLib.Utils;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -231,7 +229,7 @@ namespace Fika.Core.Coop.Utils
 					logger.LogError("No ServerId found, deleting CoopHandler!");
 					throw new MissingReferenceException("No Server Id found");
 				}
-			}			
+			}
 
 			return Task.FromException(new NullReferenceException("CreateCoopHandler: IFikaNetworkManager or FikaGameObject was null"));
 		}

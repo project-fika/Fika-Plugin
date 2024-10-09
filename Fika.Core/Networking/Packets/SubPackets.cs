@@ -92,7 +92,7 @@ namespace Fika.Core.Networking.Packets
 			public float Turbulence;
 			public float Wind;
 			public int WindDirection;
-		}		
+		}
 
 		public struct VaultPacket
 		{
@@ -149,14 +149,14 @@ namespace Fika.Core.Networking.Packets
 			public float CurrentMountingPointVerticalOffset;
 			public short MountingDirection;
 			public float TransitionTime;
-		}		
+		}
 
 		public enum EStationaryCommand
 		{
 			Occupy,
 			Leave,
 			Denied
-		}		
+		}
 
 		public enum EProceedType
 		{

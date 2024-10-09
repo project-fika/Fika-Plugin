@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using CommonAssets.Scripts.ArtilleryShelling;
 using EFT;
-using EFT.UI;
 using Fika.Core.Coop.GameMode;
 using HarmonyLib;
 using SPT.Reflection.Patching;

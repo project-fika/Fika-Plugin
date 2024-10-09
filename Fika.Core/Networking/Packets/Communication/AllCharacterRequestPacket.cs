@@ -6,7 +6,7 @@ using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
-    public struct AllCharacterRequestPacket(string profileId) : INetSerializable
+	public struct AllCharacterRequestPacket(string profileId) : INetSerializable
 	{
 		public bool IsRequest = true;
 		public string ProfileId = profileId;

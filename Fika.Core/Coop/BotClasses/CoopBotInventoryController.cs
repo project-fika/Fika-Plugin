@@ -76,7 +76,7 @@ namespace Fika.Core.Coop.BotClasses
 		{
 			BotInventoryOperationHandler handler = new(this, operation, callback);
 			if (vmethod_0(operation))
-			{				
+			{
 				handler.Operation.method_1(handler.HandleResult);
 				return;
 			}

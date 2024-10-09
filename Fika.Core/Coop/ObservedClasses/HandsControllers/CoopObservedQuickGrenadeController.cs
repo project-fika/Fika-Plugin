@@ -6,10 +6,10 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-    /// <summary>
-    /// This is only used by AI
-    /// </summary>
-    internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
+	/// <summary>
+	/// This is only used by AI
+	/// </summary>
+	internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
 		public CoopPlayer coopPlayer;
 

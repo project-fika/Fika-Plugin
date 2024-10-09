@@ -4,7 +4,7 @@ using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
-    public struct HealthSyncPacket(int netId) : INetSerializable
+	public struct HealthSyncPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
 		public GStruct358 Packet;

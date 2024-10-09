@@ -4,20 +4,17 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static EFT.Player;
-using static EFT.Player.GrenadeHandsController;
 using static Fika.Core.Networking.FirearmSubPackets;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-    public class CoopObservedFirearmController : FirearmController
+	public class CoopObservedFirearmController : FirearmController
 	{
 		public WeaponPrefab WeaponPrefab
 		{
@@ -77,7 +74,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				return -CurrentFireport.up;
 			}
-		}	
+		}
 
 		public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
 		{
