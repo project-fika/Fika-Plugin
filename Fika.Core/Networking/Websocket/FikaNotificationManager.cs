@@ -205,6 +205,6 @@ namespace Fika.Core.Networking.Websocket
 					break;
 			}
 		}
-	}
 #endif
+	}
 }
