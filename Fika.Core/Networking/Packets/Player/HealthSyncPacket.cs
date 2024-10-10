@@ -9,9 +9,11 @@ namespace Fika.Core.Networking
 		public int NetId = netId;
 		public GStruct358 Packet;
 		public string KillerId;
+		public string WeaponId;
 		public EBodyPart BodyPart;
 		public CorpseSyncPacket CorpseSyncPacket;
 		public string[] TriggerZones;
+
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -135,6 +137,7 @@ namespace Fika.Core.Networking
 						{
 							packet.Data.IsAlive.DamageType = (EDamageType)reader.GetInt();
 							KillerId = reader.GetString();
+							WeaponId = reader.GetString();
 							BodyPart = (EBodyPart)reader.GetByte();
 							CorpseSyncPacket = reader.GetCorpseSyncPacket();
 							TriggerZones = reader.GetStringArray();
@@ -346,6 +349,7 @@ namespace Fika.Core.Networking
 						{
 							writer.Put((int)packet.IsAlive.DamageType);
 							writer.Put(KillerId);
+							writer.Put(WeaponId);
 							writer.Put((byte)BodyPart);
 							writer.PutCorpseSyncPacket(CorpseSyncPacket);
 							writer.PutArray(TriggerZones);

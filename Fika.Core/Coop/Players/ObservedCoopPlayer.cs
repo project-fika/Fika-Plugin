@@ -365,7 +365,8 @@ namespace Fika.Core.Coop.Players
 				BlockedBy = damageInfo.BlockedBy,
 				DeflectedBy = damageInfo.DeflectedBy,
 				SourceId = damageInfo.SourceId,
-				ArmorDamage = damageInfo.ArmorDamage
+				ArmorDamage = damageInfo.ArmorDamage,
+				WeaponId = damageInfo.Weapon.Id
 			});
 		}
 
@@ -404,7 +405,8 @@ namespace Fika.Core.Coop.Players
 				BlockedBy = damageInfo.BlockedBy,
 				DeflectedBy = damageInfo.DeflectedBy,
 				SourceId = damageInfo.SourceId,
-				ArmorDamage = damageInfo.ArmorDamage
+				ArmorDamage = damageInfo.ArmorDamage,
+				WeaponId = damageInfo.Weapon.Id
 			});
 
 			return new()
@@ -457,7 +459,8 @@ namespace Fika.Core.Coop.Players
 				SourceId = damageInfo.SourceId,
 				ArmorDamage = damageInfo.ArmorDamage,
 				ProfileId = damageInfo.Player.iPlayer.ProfileId,
-				Material = materialType
+				Material = materialType,
+				WeaponId = damageInfo.Weapon.Id
 			});
 
 			if (list != null)
@@ -551,7 +554,8 @@ namespace Fika.Core.Coop.Players
 				SourceId = damageInfo.SourceId,
 				ArmorDamage = damageInfo.ArmorDamage,
 				ProfileId = damageInfo.Player.iPlayer.ProfileId,
-				Material = materialType
+				Material = materialType,
+				WeaponId = damageInfo.Weapon.Id
 			});
 
 			if (list != null)
@@ -918,11 +922,12 @@ namespace Fika.Core.Coop.Players
 					}
 				}
 
-				// TODO: Fix this and consistently get the correct data...
+				/*// TODO: Fix this and consistently get the correct data...
 				if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
 				{
 					damageInfo.Weapon = weapon;
-				}
+				}*/
+				lastWeaponId = packet.WeaponId;
 			}
 
 			ShotReactions(damageInfo, packet.BodyPartType);
@@ -1576,7 +1581,7 @@ namespace Fika.Core.Coop.Players
 			CreateHandsController(handler.ReturnController, handler.item);
 		}
 
-		public void SetAggressor(string killerId, EBodyPart bodyPart)
+		public void SetAggressorData(string killerId, EBodyPart bodyPart, string weaponId)
 		{
 			Player killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
 			if (killer != null)
@@ -1584,6 +1589,7 @@ namespace Fika.Core.Coop.Players
 				LastAggressor = killer;
 			}
 			LastBodyPart = bodyPart;
+			lastWeaponId = weaponId;
 		}
 
 		private class RemoveHandsControllerHandler(ObservedCoopPlayer coopPlayer, Callback callback)

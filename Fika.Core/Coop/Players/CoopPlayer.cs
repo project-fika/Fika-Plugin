@@ -51,6 +51,9 @@ namespace Fika.Core.Coop.Players
 		public bool IsObservedAI = false;
 		public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
 		public FikaSnapshotter Snapshotter;
+
+		protected string lastWeaponId;
+
 		public ClientMovementContext ClientMovementContext
 		{
 			get
@@ -217,6 +220,11 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
+			if (damageInfo.Weapon != null)
+			{
+				lastWeaponId = damageInfo.Weapon.Id;
+			}
+
 			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
@@ -229,6 +237,10 @@ namespace Fika.Core.Coop.Players
 
 			if (damageInfo.Player != null && damageInfo.Player.IsAI)
 			{
+				if (damageInfo.Weapon != null)
+				{
+					lastWeaponId = damageInfo.Weapon.Id; 
+				}
 				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider);
 			}
 
@@ -457,21 +469,11 @@ namespace Fika.Core.Coop.Players
 					list.Add("Savage");
 					list.Add("Bot");
 					break;
-			}
-
-			Item weapon;
-			if (killer.HandsController.Item is Weapon handsWeapon)
-			{
-				weapon = handsWeapon;
-			}
-			else
-			{
-				weapon = damage.Weapon;
-			}
+			}			
 
 			foreach (string value in list)
 			{
-				AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, weapon,
+				AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
 								bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
 								killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
 
@@ -754,6 +756,7 @@ namespace Fika.Core.Coop.Players
 				Packet = packet,
 				KillerId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty,
 				BodyPart = LastBodyPart,
+				WeaponId = lastWeaponId,
 				CorpseSyncPacket = new()
 				{
 					BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
@@ -786,6 +789,10 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnDead(EDamageType damageType)
 		{
+			if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(lastWeaponId))
+			{
+				FindKillerWeapon();
+			}
 			base.OnDead(damageType);
 			PacketSender.Enabled = false;
 			if (IsYourPlayer)
@@ -799,6 +806,25 @@ namespace Fika.Core.Coop.Players
 					GenerateDogtagDetails();
 				}
 			}
+		}
+
+		private void FindKillerWeapon()
+		{
+			GStruct428<Item> itemResult = FindItemById(lastWeaponId, false, false);
+			if (!itemResult.Succeeded)
+			{
+				foreach (GrenadeClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
+				{
+					if (grenadeClass.Id == lastWeaponId)
+					{
+						LastDamageInfo.Weapon = grenadeClass;
+						break;
+					}
+				}
+				return;
+			}
+
+			LastDamageInfo.Weapon = itemResult.Value;
 		}
 
 		/// <summary>
@@ -1233,11 +1259,12 @@ namespace Fika.Core.Coop.Players
 					}
 				}
 
-				// TODO: Fix this and consistently get the correct data...
+				/*// TODO: Fix this and consistently get the correct data...
 				if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
 				{
 					damageInfo.Weapon = weapon;
-				}
+				}*/
+				lastWeaponId = packet.WeaponId;
 			}
 
 			ShotReactions(damageInfo, packet.BodyPartType);

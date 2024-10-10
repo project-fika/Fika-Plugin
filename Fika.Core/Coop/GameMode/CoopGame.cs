@@ -60,6 +60,7 @@ namespace Fika.Core.Coop.GameMode
 		public string SpawnId;
 		public bool InteractablesInitialized { get; set; } = false;
 		public bool HasReceivedLoot { get; set; } = false;
+		public List<GrenadeClass> ThrownGrenades;
 
 		private readonly Dictionary<int, int> botQueue = [];
 		private Coroutine extractRoutine;
@@ -215,6 +216,8 @@ namespace Fika.Core.Coop.GameMode
 
 			coopGame.timeManager = CoopTimeManager.Create(coopGame);
 			coopGame.RaidSettings = raidSettings;
+
+			coopGame.ThrownGrenades = [];
 
 			return coopGame;
 		}
@@ -2442,6 +2445,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 			dictionary_0.Clear();
+			ThrownGrenades.Clear();
 
 			if (extractRoutine != null)
 			{

@@ -176,7 +176,21 @@ namespace Fika.Core.Coop.Players
 				QueueArmorDamagePackets([.. list]);
 			}
 
+			if (damageInfo.Weapon != null)
+			{
+				lastWeaponId = damageInfo.Weapon.Id;
+			}
+
 			return hitInfo;
+		}
+
+		public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+		{
+			if (damageInfo.Weapon != null)
+			{
+				lastWeaponId = damageInfo.Weapon.Id;
+			}
+			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
 		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfo damageInfo)

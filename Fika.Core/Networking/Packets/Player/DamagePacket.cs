@@ -25,6 +25,7 @@ namespace Fika.Core.Networking
 		public float ArmorDamage;
 		public string ProfileId;
 		public MaterialType Material;
+		public string WeaponId;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -45,6 +46,7 @@ namespace Fika.Core.Networking
 			ArmorDamage = reader.GetFloat();
 			ProfileId = reader.GetString();
 			Material = (MaterialType)reader.GetByte();
+			WeaponId = reader.GetString();
 		}
 
 		public void Serialize(NetDataWriter writer)
@@ -66,6 +68,7 @@ namespace Fika.Core.Networking
 			writer.Put(ArmorDamage);
 			writer.Put(ProfileId);
 			writer.Put((byte)Material);
+			writer.Put(WeaponId);
 		}
 	}
 }

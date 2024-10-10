@@ -279,6 +279,7 @@ namespace Fika.Core
 			new GClass3224_IsValid_Patch().Enable();
 			new GClass3223_ExceptAI_Patch().Enable();
 			new GClass1616_method_8_Patch().Enable();
+			new GrenadeClass_Init_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
