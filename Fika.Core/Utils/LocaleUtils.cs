@@ -202,5 +202,7 @@ namespace Fika.Core.Utils
 		public const string UI_FIKA_ALWAYS_COOP = "F_UI_FikaAlwaysCoop";
 		public const string UI_UPNP_FAILED = "F_UI_UpnpFailed";
 		public const string UI_INIT_WEATHER = "F_UI_InitWeather";
+		public const string UI_NOTIFICATION_STARTED_RAID = "F_Notification_RaidStarted";
+		public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
 	}
 }
