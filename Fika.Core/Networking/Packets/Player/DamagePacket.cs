@@ -21,7 +21,6 @@ namespace Fika.Core.Networking
 		public MongoID? BlockedBy;
 		public MongoID? DeflectedBy;
 		public string SourceId;
-		public string AmmoId;
 		public int FragmentIndex;
 		public float ArmorDamage;
 		public string ProfileId;
@@ -42,7 +41,6 @@ namespace Fika.Core.Networking
 			BlockedBy = reader.GetMongoID();
 			DeflectedBy = reader.GetMongoID();
 			SourceId = reader.GetString();
-			AmmoId = reader.GetString();
 			FragmentIndex = reader.GetInt();
 			ArmorDamage = reader.GetFloat();
 			ProfileId = reader.GetString();
@@ -64,7 +62,6 @@ namespace Fika.Core.Networking
 			writer.PutMongoID(BlockedBy);
 			writer.PutMongoID(DeflectedBy);
 			writer.Put(SourceId);
-			writer.Put(AmmoId);
 			writer.Put(FragmentIndex);
 			writer.Put(ArmorDamage);
 			writer.Put(ProfileId);
