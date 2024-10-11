@@ -171,13 +171,13 @@ namespace Fika.Core.Coop.Patches
 				if(FikaBackendUtils.IsSpectator)
 				{
 
-				Player MyPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+					Player MyPlayer = Singleton<GameWorld>.Instance.MainPlayer;
 
-				DamageInfo damageInfo = new()
-				{
-					Damage = 1000,
-					DamageType = EDamageType.Impact
-				};
+					DamageInfo damageInfo = new()
+					{
+						Damage = 1000,
+						DamageType = EDamageType.Impact
+					};
 
 					// Kill the player to put it in spectator mode
 					MyPlayer.ApplyDamageInfo(damageInfo, EBodyPart.Head, EBodyPartColliderType.Eyes, 0);
