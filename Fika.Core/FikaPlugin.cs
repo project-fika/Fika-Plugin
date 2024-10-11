@@ -285,7 +285,7 @@ namespace Fika.Core
 			new PlayEndGameSound_Patch().Enable();
 
 #if DEBUG
-            TasksExtensions_HandleFinishedTask_Patches.Enable();
+			TasksExtensions_HandleFinishedTask_Patches.Enable();
 			new GClass1615_method_0_Patch().Enable();
 #endif
 
