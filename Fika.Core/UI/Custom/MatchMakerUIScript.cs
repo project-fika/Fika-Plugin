@@ -451,7 +451,7 @@ namespace Fika.Core.UI.Custom
 				FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
 				FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
-				AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId);
+				AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
 				FikaRequestHandler.UpdateAddPlayer(data);
 
 				if (FikaBackendUtils.IsHostNatPunch)

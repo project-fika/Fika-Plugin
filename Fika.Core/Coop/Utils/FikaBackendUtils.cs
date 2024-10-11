@@ -28,6 +28,7 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsReconnect = false;
 		public static bool IsDedicatedGame = false;
 		public static bool IsTransit = false;
+		public static bool IsSpectator = false;
 		public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
 		public static MatchMakerGroupPreview MatchMakerGroupPreview;
 		public static int HostExpectedNumberOfPlayers = 1;
@@ -130,7 +131,7 @@ namespace Fika.Core.Coop.Utils
 			NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
 			long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
 			string raidCode = GenerateRaidCode(6);
-			CreateMatch body = new(raidCode, profileId, hostUsername, timestamp, raidSettings,
+			CreateMatch body = new(raidCode, profileId, hostUsername, FikaBackendUtils.IsSpectator, timestamp, raidSettings,
 				HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
 			await FikaRequestHandler.RaidCreate(body);
