@@ -27,6 +27,8 @@ public class MatchMakerUI : MonoBehaviour
 	public GameObject LoadingScreen;
 	[SerializeField]
 	public Image LoadingImage;
+	[SerializeField]
+	public Toggle SpectatorToggle;
 
 	[SerializeField]
 	public TextMeshProUGUI RaidsText;
