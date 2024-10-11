@@ -166,7 +166,7 @@ namespace Fika.Core.UI.Custom
 				Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
 			});
 
-            fikaMatchMakerUi.LoadingAnimationText.text = "";
+			fikaMatchMakerUi.LoadingAnimationText.text = "";
 
 			fikaMatchMakerUi.DedicatedToggle.isOn = false;
 			fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
