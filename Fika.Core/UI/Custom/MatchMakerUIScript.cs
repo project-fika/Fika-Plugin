@@ -156,7 +156,17 @@ namespace Fika.Core.UI.Custom
 				fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
 			}
 
-			fikaMatchMakerUi.LoadingAnimationText.text = "";
+			// Reset IsSpectator field
+			FikaBackendUtils.IsSpectator = false;
+
+            fikaMatchMakerUi.SpectatorToggle.isOn = false;
+            fikaMatchMakerUi.SpectatorToggle.onValueChanged.AddListener((arg) =>
+            {
+				FikaBackendUtils.IsSpectator = !FikaBackendUtils.IsSpectator;
+				Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
+            });
+
+            fikaMatchMakerUi.LoadingAnimationText.text = "";
 
 			fikaMatchMakerUi.DedicatedToggle.isOn = false;
 			fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
