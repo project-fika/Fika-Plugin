@@ -1156,7 +1156,7 @@ namespace Fika.Core.Coop.Players
 				yield return null;
 			}
 
-			healthBar = gameObject.AddComponent<FikaHealthBar>();
+			healthBar = FikaHealthBar.Create(this);
 
 			yield break;
 		}
