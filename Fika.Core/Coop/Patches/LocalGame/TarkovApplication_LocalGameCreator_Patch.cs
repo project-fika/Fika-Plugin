@@ -170,7 +170,6 @@ namespace Fika.Core.Coop.Patches
 
 				if(FikaBackendUtils.IsSpectator)
 				{
-
 					Player MyPlayer = Singleton<GameWorld>.Instance.MainPlayer;
 
 					DamageInfo damageInfo = new()
