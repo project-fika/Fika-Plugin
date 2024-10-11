@@ -281,9 +281,10 @@ namespace Fika.Core
 			new GClass1616_method_8_Patch().Enable();
 			new GrenadeClass_Init_Patch().Enable();
 			new SessionResultExitStatus_Show_Patch().Enable();
+			new PlayUISound_Patch().Enable();
 
 #if DEBUG
-			TasksExtensions_HandleFinishedTask_Patches.Enable();
+            TasksExtensions_HandleFinishedTask_Patches.Enable();
 			new GClass1615_method_0_Patch().Enable();
 #endif
 
