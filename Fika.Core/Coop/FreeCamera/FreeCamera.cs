@@ -108,7 +108,7 @@ namespace Fika.Core.Coop.FreeCamera
 				GUILayout.BeginArea(new Rect(5, 5, 800, 800));
 				GUILayout.BeginVertical();
 
-				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
 				{
 					GUILayout.Label($"Left/Right Mouse Button: Jump between players");
 					GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
@@ -118,7 +118,7 @@ namespace Fika.Core.Coop.FreeCamera
 					GUILayout.Label($"Left/Right Mouse Button: Jump and spectate in 3rd person");
 				}
 				GUILayout.Label($"Spacebar + Left/Right Mouse Button: Jump and spectate in head cam");
-				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectatingBots)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator || isSpectatingBots)
 				{
 					GUILayout.Label($"G: Detach Camera");
 				}
@@ -158,7 +158,7 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			else
 			{
-				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
 				{
 					JumpToPlayer();
 				}
@@ -318,7 +318,7 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
-			if (Input.GetKeyDown(detachKey) && (isSpectatingBots || FikaPlugin.Instance.AllowSpectateFreeCam))
+			if (Input.GetKeyDown(detachKey) && (isSpectatingBots || FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator))
 			{
 				DetachCamera();
 			}

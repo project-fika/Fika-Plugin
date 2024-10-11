@@ -5,6 +5,7 @@ using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.UI;
 using HarmonyLib;
 using Koenigz.PerfectCulling;
@@ -148,7 +149,7 @@ namespace Fika.Core.Coop.FreeCamera
 			if (extracted && !freeCamScript.IsActive)
 			{
 				ToggleUi();
-				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
 				{
 					ToggleCamera();
 				}
@@ -186,7 +187,7 @@ namespace Fika.Core.Coop.FreeCamera
 				if (!freeCamScript.IsActive)
 				{
 					ToggleUi();
-					if (FikaPlugin.Instance.AllowSpectateFreeCam)
+					if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
 					{
 						freeCamScript.transform.position = LastKnownPosition;
 						ToggleCamera();
@@ -239,7 +240,7 @@ namespace Fika.Core.Coop.FreeCamera
 			if (!freeCamScript.IsActive)
 			{
 				ToggleUi();
-				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
 				{
 					ToggleCamera();
 				}
