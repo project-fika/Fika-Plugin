@@ -217,7 +217,10 @@ namespace Fika.Core.Coop.FreeCamera
 
 		private IEnumerator DeathRoutine()
 		{
-			yield return new WaitForSeconds(5);
+			if(!FikaBackendUtils.IsSpectator)
+			{
+				yield return new WaitForSeconds(5);
+			}
 
 			CameraClass cameraClassInstance = CameraClass.Instance;
 			if (cameraClassInstance == null)
@@ -243,6 +246,12 @@ namespace Fika.Core.Coop.FreeCamera
 				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
 				{
 					ToggleCamera();
+
+					if(FikaBackendUtils.IsSpectator)
+					{
+						// Cycle camera to any alive player
+						freeCamScript.CycleSpectatePlayers();
+					}
 				}
 				else
 				{
