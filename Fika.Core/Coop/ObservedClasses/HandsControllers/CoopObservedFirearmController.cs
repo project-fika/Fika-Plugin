@@ -267,10 +267,21 @@ namespace Fika.Core.Coop.ObservedClasses
 					return;
 				}
 
-				Weapon.MalfState.MalfunctionedAmmo = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+				BulletClass bullet = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+				Weapon.MalfState.MalfunctionedAmmo = bullet;
+				Weapon.MalfState.AmmoToFire = bullet;
 				if (WeaponPrefab != null)
 				{
+					if (Weapon.HasChambers && Weapon.Chambers[0].ContainedItem is BulletClass)
+					{
+						Weapon.Chambers[0].RemoveItemWithoutRestrictions();
+					}
 					WeaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
+					if (Weapon.MalfState.State == Weapon.EMalfunctionState.Misfire)
+					{
+						WeaponPrefab.RevertMalfunctionState(Weapon, true, true);
+						coopPlayer.InventoryController.ExamineMalfunction(Weapon, true);
+					}
 				}
 				else
 				{
