@@ -13,7 +13,7 @@ using static Fika.Core.Utils.ColorUtils;
 namespace Fika.Core.Coop.ClientClasses
 {
 	public sealed class CoopClientSharedQuestController(Profile profile, InventoryController inventoryController,
-		IQuestActions session, CoopPlayer player, bool fromServer = true) : LocalQuestControllerClass(profile, inventoryController, session, fromServer)
+		IQuestActions session, CoopPlayer player, bool fromServer = true) : GClass3515(profile, inventoryController, session, fromServer)
 	{
 		private readonly CoopPlayer player = player;
 		private readonly List<string> lastFromNetwork = [];

@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.Players
 			}
 			else
 			{
-				questController = new LocalQuestControllerClass(profile, inventoryController, session, true);
+				questController = new GClass3515(profile, inventoryController, session, true);
 			}
 			questController.Init();
 			questController.Run();
@@ -1369,6 +1369,15 @@ namespace Fika.Core.Coop.Players
 					traderInfo.SetServiceAvailability(serviceData.ServiceType, service.CanAfford, service.WasPurchasedInThisRaid);
 				}
 			}
+		}
+
+		public override void OnGameSessionEnd(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
+		{
+			if (AbstractQuestControllerClass is CoopClientSharedQuestController sharedController)
+			{
+				sharedController.ManageQuestStatusesForPveOfflineGameEnd();
+			}
+			base.OnGameSessionEnd(exitStatus, pastTime, locationId, exitName);
 		}
 
 		public Item FindQuestItem(string itemId)
