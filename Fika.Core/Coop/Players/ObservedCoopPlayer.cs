@@ -324,7 +324,7 @@ namespace Fika.Core.Coop.Players
 
 			bool isAudible = Physical.BreathIsAudible;
 			bool shouldHeavyBreathe = isAudible || Muffled;
-			if (gameObject.activeSelf && !HeavyBreath && shouldHeavyBreathe)
+			if (gameObject != null && gameObject.activeSelf && !HeavyBreath && shouldHeavyBreathe)
 			{
 				ETagStatus status1 = isDying ? healthStatus : ETagStatus.Healthy;
 				ETagStatus status2 = isAudible ? ETagStatus.Aware : ETagStatus.Unaware;
