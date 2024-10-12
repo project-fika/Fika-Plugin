@@ -280,6 +280,8 @@ namespace Fika.Core
 			new GClass3223_ExceptAI_Patch().Enable();
 			new GClass1616_method_8_Patch().Enable();
 			new GrenadeClass_Init_Patch().Enable();
+			new GameWorld_ThrowItem_Patch().Enable();
+			new ObservedLootItem_OnRigidBodyStopped_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();

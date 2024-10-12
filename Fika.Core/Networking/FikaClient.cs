@@ -96,6 +96,7 @@ namespace Fika.Core.Networking
 				coopHandler = value;
 			}
 		}
+		public FikaClientWorld FikaClientWorld { get; set; }
 		private int sendRate;
 		private NetManager netClient;
 		private CoopHandler coopHandler;
@@ -156,6 +157,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<TransitEventPacket>(OnTransitEventPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BotStatePacket>(OnBotStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<PingPacket>(OnPingPacketReceived);
+			packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -205,6 +207,14 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnLootSyncPacketReceived(LootSyncPacket packet)
+		{
+			if (FikaClientWorld != null)
+			{
+				FikaClientWorld.LootSyncPackets.Add(packet.Data);
+			}
 		}
 
 		private void OnPingPacketReceived(PingPacket packet)

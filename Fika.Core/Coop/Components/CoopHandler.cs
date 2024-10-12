@@ -82,6 +82,10 @@ namespace Fika.Core.Coop.Components
 			ready = false;
 			LocalGameInstance = null;
 			requestQuitGame = false;
+			if (isClient)
+			{
+				Singleton<FikaClient>.Instance.FikaClientWorld = null;
+			}
 		}
 
 		protected void Awake()
