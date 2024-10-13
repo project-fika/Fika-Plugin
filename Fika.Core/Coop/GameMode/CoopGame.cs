@@ -2484,7 +2484,7 @@ namespace Fika.Core.Coop.GameMode
 			FikaBackendUtils.RequestFikaWorld = false;
 			FikaBackendUtils.IsReconnect = false;
 			FikaBackendUtils.ReconnectPosition = Vector3.zero;
-    }
+		}
 
 		private class ExitManager : Class1467
 		{

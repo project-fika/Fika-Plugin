@@ -1,5 +1,4 @@
 ﻿using Comfort.Common;
-using EFT;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Networking;
 using SPT.Reflection.Patching;

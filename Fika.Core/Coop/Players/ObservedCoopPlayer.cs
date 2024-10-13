@@ -952,7 +952,7 @@ namespace Fika.Core.Coop.Players
 				if (aggressor.GroupId == "Fika" && !aggressor.IsYourPlayer)
 				{
 #if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname); 
+					FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
 #endif
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 					if (mainPlayer != null)

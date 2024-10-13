@@ -12,7 +12,7 @@ namespace Fika.Core.Networking
 			{
 				Id = reader.GetInt(),
 				Position = reader.GetVector3(),
-				Rotation = reader.GetQuaternion(),				
+				Rotation = reader.GetQuaternion(),
 				Done = reader.GetBool()
 			};
 			if (!Data.Done)
@@ -26,7 +26,7 @@ namespace Fika.Core.Networking
 		{
 			writer.Put(Data.Id);
 			writer.Put(Data.Position);
-			writer.Put(Data.Rotation);			
+			writer.Put(Data.Rotation);
 			writer.Put(Data.Done);
 			if (!Data.Done)
 			{

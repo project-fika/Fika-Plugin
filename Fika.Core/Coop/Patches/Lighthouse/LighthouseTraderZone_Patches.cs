@@ -176,7 +176,7 @@ namespace Fika.Core.Coop.Patches
 				RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
 				bool test = radioTransmitterRecodableComponent != null && radioTransmitterRecodableComponent.Handler.Status == RadioTransmitterStatus.Green;
 
-				if(test)
+				if (test)
 				{
 					Logger.LogInfo($"zryachiydebugpatch2: {player.Id} - Has transmitter: Yes");
 				}

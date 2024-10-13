@@ -239,7 +239,7 @@ namespace Fika.Core.Coop.Players
 			{
 				if (damageInfo.Weapon != null)
 				{
-					lastWeaponId = damageInfo.Weapon.Id; 
+					lastWeaponId = damageInfo.Weapon.Id;
 				}
 				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider);
 			}
@@ -469,7 +469,7 @@ namespace Fika.Core.Coop.Players
 					list.Add("Savage");
 					list.Add("Bot");
 					break;
-			}			
+			}
 
 			foreach (string value in list)
 			{
