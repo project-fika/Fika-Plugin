@@ -39,7 +39,10 @@ namespace Fika.Core.Networking.Http
 		[DataMember(Name = "time")]
 		public EDateTime Time;
 
-		public CreateMatch(string raidCode, string serverId, string hostUsername, long timestamp, RaidSettings settings, int expectedNumberOfPlayers, ESideType side, EDateTime time)
+		[DataMember(Name = "isSpectator")]
+		public bool IsSpectator;
+
+		public CreateMatch(string raidCode, string serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, int expectedNumberOfPlayers, ESideType side, EDateTime time)
 		{
 			RaidCode = raidCode;
 			ServerId = serverId;
@@ -51,6 +54,7 @@ namespace Fika.Core.Networking.Http
 			FikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
 			Side = side;
 			Time = time;
+			IsSpectator = isSpectator;
 		}
 	}
 }

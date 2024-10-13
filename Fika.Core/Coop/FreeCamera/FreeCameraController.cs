@@ -5,6 +5,7 @@ using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.UI;
 using HarmonyLib;
 using Koenigz.PerfectCulling;
@@ -24,6 +25,8 @@ namespace Fika.Core.Coop.FreeCamera
 
 	public class FreeCameraController : MonoBehaviour
 	{
+		private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
+
 		private FreeCamera freeCamScript;
 
 		private EftBattleUIScreen playerUi;
@@ -148,7 +151,7 @@ namespace Fika.Core.Coop.FreeCamera
 			if (extracted && !freeCamScript.IsActive)
 			{
 				ToggleUi();
-				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
 				{
 					ToggleCamera();
 				}
@@ -186,7 +189,7 @@ namespace Fika.Core.Coop.FreeCamera
 				if (!freeCamScript.IsActive)
 				{
 					ToggleUi();
-					if (FikaPlugin.Instance.AllowSpectateFreeCam)
+					if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
 					{
 						freeCamScript.transform.position = LastKnownPosition;
 						ToggleCamera();
@@ -216,7 +219,10 @@ namespace Fika.Core.Coop.FreeCamera
 
 		private IEnumerator DeathRoutine()
 		{
-			yield return new WaitForSeconds(5);
+			if (!isSpectator)
+			{
+				yield return new WaitForSeconds(5);
+			}
 
 			CameraClass cameraClassInstance = CameraClass.Instance;
 			if (cameraClassInstance == null)
@@ -239,9 +245,15 @@ namespace Fika.Core.Coop.FreeCamera
 			if (!freeCamScript.IsActive)
 			{
 				ToggleUi();
-				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
 				{
 					ToggleCamera();
+
+					if (isSpectator)
+					{
+						// Cycle camera to any alive player
+						freeCamScript.CycleSpectatePlayers();
+					}
 				}
 				else
 				{

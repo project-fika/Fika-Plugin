@@ -280,6 +280,9 @@ namespace Fika.Core
 			new GClass3223_ExceptAI_Patch().Enable();
 			new GClass1616_method_8_Patch().Enable();
 			new GrenadeClass_Init_Patch().Enable();
+			new SessionResultExitStatus_Show_Patch().Enable();
+			new PlayUISound_Patch().Enable();
+			new PlayEndGameSound_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();

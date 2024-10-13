@@ -167,6 +167,11 @@ namespace Fika.Core.Coop.Patches
 				MainMenuController mmc = Traverse.Create(instance).Field<MainMenuController>("mainMenuController").Value;
 				mmc?.Unsubscribe();
 				gameWorld.OnGameStarted();
+
+				if (FikaBackendUtils.IsSpectator)
+				{
+					await HandleJoinAsSpectator();
+				}
 			}
 		}
 
@@ -183,6 +188,27 @@ namespace Fika.Core.Coop.Patches
 			{
 				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
 			}
+		}
+
+		private static async Task HandleJoinAsSpectator()
+		{
+			Player MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+
+			// Teleport the player underground to avoid it from being looted
+			Vector3 currentPosition = MainPlayer.Position;
+			MainPlayer.Teleport(new(currentPosition.x, currentPosition.y - 75, currentPosition.z));
+
+			// Small delay to ensure the teleport command is processed first
+			await Task.Delay(250);
+
+			DamageInfo damageInfo = new()
+			{
+				Damage = 1000,
+				DamageType = EDamageType.Impact
+			};
+
+			// Kill the player to put it in spectator mode
+			MainPlayer.ApplyDamageInfo(damageInfo, EBodyPart.Head, EBodyPartColliderType.Eyes, 0);
 		}
 	}
 }

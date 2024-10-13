@@ -156,6 +156,16 @@ namespace Fika.Core.UI.Custom
 				fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
 			}
 
+			// Ensure the IsSpectator field is reset every time the matchmaker UI is created
+			FikaBackendUtils.IsSpectator = false;
+
+			fikaMatchMakerUi.SpectatorToggle.isOn = false;
+			fikaMatchMakerUi.SpectatorToggle.onValueChanged.AddListener((arg) =>
+			{
+				FikaBackendUtils.IsSpectator = !FikaBackendUtils.IsSpectator;
+				Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
+			});
+
 			fikaMatchMakerUi.LoadingAnimationText.text = "";
 
 			fikaMatchMakerUi.DedicatedToggle.isOn = false;
@@ -451,7 +461,7 @@ namespace Fika.Core.UI.Custom
 				FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
 				FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
-				AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId);
+				AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
 				FikaRequestHandler.UpdateAddPlayer(data);
 
 				if (FikaBackendUtils.IsHostNatPunch)
