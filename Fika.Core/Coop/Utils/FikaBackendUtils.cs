@@ -29,13 +29,13 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsDedicatedGame = false;
 		public static bool IsTransit = false;
 		public static bool IsSpectator = false;
-		public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
+        public static bool IsHostNatPunch = false;
+        public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
 		public static MatchMakerGroupPreview MatchMakerGroupPreview;
 		public static int HostExpectedNumberOfPlayers = 1;
 		public static string RemoteIp;
 		public static int RemotePort;
 		public static int LocalPort = 0;
-		public static bool IsHostNatPunch = false;
 		public static string HostLocationId;
 		public static bool RequestFikaWorld = false;
 		public static Vector3 ReconnectPosition = Vector3.zero;

@@ -168,7 +168,7 @@ namespace Fika.Core.Coop.Patches
 				mmc?.Unsubscribe();
 				gameWorld.OnGameStarted();
 
-				if(FikaBackendUtils.IsSpectator)
+				if (FikaBackendUtils.IsSpectator)
 				{
 					await HandleJoinAsSpectator();
 				}

@@ -25,7 +25,9 @@ namespace Fika.Core.Coop.FreeCamera
 
 	public class FreeCameraController : MonoBehaviour
 	{
-		private FreeCamera freeCamScript;
+        private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
+
+        private FreeCamera freeCamScript;
 
 		private EftBattleUIScreen playerUi;
 		private bool uiHidden;
@@ -149,7 +151,7 @@ namespace Fika.Core.Coop.FreeCamera
 			if (extracted && !freeCamScript.IsActive)
 			{
 				ToggleUi();
-				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
 				{
 					ToggleCamera();
 				}
@@ -187,7 +189,7 @@ namespace Fika.Core.Coop.FreeCamera
 				if (!freeCamScript.IsActive)
 				{
 					ToggleUi();
-					if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
+					if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
 					{
 						freeCamScript.transform.position = LastKnownPosition;
 						ToggleCamera();
@@ -217,7 +219,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		private IEnumerator DeathRoutine()
 		{
-			if(!FikaBackendUtils.IsSpectator)
+			if (!isSpectator)
 			{
 				yield return new WaitForSeconds(5);
 			}
@@ -243,11 +245,11 @@ namespace Fika.Core.Coop.FreeCamera
 			if (!freeCamScript.IsActive)
 			{
 				ToggleUi();
-				if (FikaPlugin.Instance.AllowSpectateFreeCam || FikaBackendUtils.IsSpectator)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
 				{
 					ToggleCamera();
 
-					if(FikaBackendUtils.IsSpectator)
+					if (isSpectator)
 					{
 						// Cycle camera to any alive player
 						freeCamScript.CycleSpectatePlayers();
