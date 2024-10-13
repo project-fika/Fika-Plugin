@@ -2478,8 +2478,8 @@ namespace Fika.Core.Coop.GameMode
 			if (!FikaBackendUtils.IsTransit)
 			{
 				FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
-                FikaBackendUtils.IsSpectator = false;
-            }
+				FikaBackendUtils.IsSpectator = false;
+			}
 
 			FikaBackendUtils.RequestFikaWorld = false;
 			FikaBackendUtils.IsReconnect = false;

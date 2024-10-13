@@ -25,8 +25,8 @@ namespace Fika.Core.Coop.FreeCamera
 	public class FreeCamera : MonoBehaviour
 	{
 		public bool IsActive = false;
-        private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
-        private CoopPlayer currentPlayer;
+		private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
+		private CoopPlayer currentPlayer;
 		private Vector3 lastKnownPlayerPosition;
 		private bool isFollowing = false;
 		private bool isSpectatingBots = false;

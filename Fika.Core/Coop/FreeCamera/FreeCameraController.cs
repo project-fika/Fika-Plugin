@@ -25,9 +25,9 @@ namespace Fika.Core.Coop.FreeCamera
 
 	public class FreeCameraController : MonoBehaviour
 	{
-        private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
+		private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
 
-        private FreeCamera freeCamScript;
+		private FreeCamera freeCamScript;
 
 		private EftBattleUIScreen playerUi;
 		private bool uiHidden;
