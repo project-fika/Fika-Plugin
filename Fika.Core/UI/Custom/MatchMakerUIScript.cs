@@ -156,7 +156,7 @@ namespace Fika.Core.UI.Custom
 				fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
 			}
 
-			// Reset IsSpectator field
+			// Ensure the IsSpectator field is reset every time the matchmaker UI is created
 			FikaBackendUtils.IsSpectator = false;
 
 			fikaMatchMakerUi.SpectatorToggle.isOn = false;
