@@ -18,7 +18,7 @@ namespace Fika.Core.UI.Patches
 		}
 
 		[PatchPostfix]
-		internal static void PatchPostfix()
+		internal static void Postfix()
 		{
 			Singleton<PreloaderUI>.Instance.gameObject.AddComponent<FikaNotificationManager>();
 		}

@@ -16,9 +16,9 @@ namespace Fika.Core.Networking.Http
 		public bool InRaid;
 
 		[DataMember(Name = "raidInformation")]
-		public RaidInformation RaidInformation;
+		public RaidInformation? RaidInformation;
 
-		public FikaPlayerPresence(string nickname, int level, bool inRaid, RaidInformation raidInformation)
+		public FikaPlayerPresence(string nickname, int level, bool inRaid, RaidInformation? raidInformation)
 		{
 			Nickname = nickname;
 			Level = level;

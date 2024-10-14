@@ -92,12 +92,13 @@ namespace Fika.Core.UI.Custom
 				GameObject newPlayer = GameObject.Instantiate(playerTemplate, playerTemplate.transform.parent);
 				MainMenuUIPlayer mainMenuUIPlayer = newPlayer.GetComponent<MainMenuUIPlayer>();
 				mainMenuUIPlayer.SetStatus(presence.Nickname, presence.Level, presence.InRaid);
-				if (presence.InRaid)
+				if (presence.InRaid && presence.RaidInformation.HasValue)
 				{
-					string side = presence.RaidInformation.Side == EFT.ESideType.Pmc ? "PMC" : "Scav";
+					RaidInformation information = presence.RaidInformation.Value;
+					string side = information.Side == EFT.ESideType.Pmc ? "PMC" : "Scav";
 					TooltipTextGetter tooltipTextGetter = new()
 					{
-						TooltipText = $"Playing as a {side} on {ColorUtils.ColorizeText(Colors.BLUE, presence.RaidInformation.Location.Localized())}"
+						TooltipText = $"Playing as a {side} on {ColorUtils.ColorizeText(Colors.BLUE, information.Location.Localized())}"
 					};
 					HoverTooltipArea tooltip = newPlayer.AddComponent<HoverTooltipArea>();
 					tooltip.enabled = true;
