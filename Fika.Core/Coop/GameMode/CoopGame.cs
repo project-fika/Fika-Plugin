@@ -147,17 +147,19 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
+			GameDateTime gameTime = backendDateTime;
 			if (timeAndWeather.HourOfDay != -1)
 			{
 				Logger.LogInfo($"Using custom time, hour of day: {timeAndWeather.HourOfDay}");
 				DateTime currentTime = backendDateTime.DateTime_1;
 				DateTime newTime = new(currentTime.Year, currentTime.Month, currentTime.Day, timeAndWeather.HourOfDay,
 					currentTime.Minute, currentTime.Second, currentTime.Millisecond);
-				backendDateTime.Reset(newTime);
+				gameTime = new(backendDateTime.DateTime_0, newTime, backendDateTime.TimeFactor);
+				gameTime.Reset(newTime);
 				dateTime = EDateTime.CURR;
 			}
 
-			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, backendDateTime, insurance, menuUI, gameUI,
+			CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, menuUI, gameUI,
 				location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
 				new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
 			coopGame.isServer = FikaBackendUtils.IsServer;
