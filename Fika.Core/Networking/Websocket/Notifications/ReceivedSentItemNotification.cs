@@ -18,7 +18,9 @@ namespace Fika.Core.Networking.Websocket.Notifications
 		{
 			get
 			{
-				return string.Format(LocaleUtils.UI_NOTIFICATION_RECEIVED_ITEM.Localized(), ColorUtils.ColorizeText(Colors.BLUE, ItemName), ColorUtils.ColorizeText(Colors.GREEN, Nickname));
+				return string.Format(LocaleUtils.UI_NOTIFICATION_RECEIVED_ITEM.Localized(),
+					ColorUtils.ColorizeText(Colors.BLUE, ItemName.Localized()),
+					ColorUtils.ColorizeText(Colors.GREEN, Nickname));
 			}
 		}
 

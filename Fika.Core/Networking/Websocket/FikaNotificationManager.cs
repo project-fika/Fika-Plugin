@@ -17,7 +17,7 @@ namespace Fika.Core.Networking.Websocket
 {
 	public class FikaNotificationManager : MonoBehaviour
 	{
-		private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaNotificationManager");
+		private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaNotificationManager");
 
 		public string Host { get; set; }
 		public string Url { get; set; }
@@ -116,7 +116,7 @@ namespace Fika.Core.Networking.Websocket
 			switch (type)
 			{
 				case EFikaNotifications.StartedRaid:
-					StartRaidNotification startRaidNotification = e.Data.ParseJsonTo<StartRaidNotification>(Array.Empty<JsonConverter>());
+					StartRaidNotification startRaidNotification = e.Data.ParseJsonTo<StartRaidNotification>([]);
 
 					if (FikaGlobals.IsInRaid())
 					{
@@ -126,7 +126,7 @@ namespace Fika.Core.Networking.Websocket
 					notificationsQueue.Enqueue(startRaidNotification);
 					break;
 				case EFikaNotifications.SentItem:
-					ReceivedSentItemNotification SentItemNotification = e.Data.ParseJsonTo<ReceivedSentItemNotification>(Array.Empty<JsonConverter>());
+					ReceivedSentItemNotification SentItemNotification = e.Data.ParseJsonTo<ReceivedSentItemNotification>([]);
 
 					// If we are not the target, ignore.
 					if (SentItemNotification.TargetId != SessionId)
@@ -137,7 +137,7 @@ namespace Fika.Core.Networking.Websocket
 					notificationsQueue.Enqueue(SentItemNotification);
 					break;
 				case EFikaNotifications.PushNotification:
-					PushNotification pushNotification = e.Data.ParseJsonTo<PushNotification>(Array.Empty<JsonConverter>());
+					PushNotification pushNotification = e.Data.ParseJsonTo<PushNotification>([]);
 
 					notificationsQueue.Enqueue(pushNotification);
 					break;
