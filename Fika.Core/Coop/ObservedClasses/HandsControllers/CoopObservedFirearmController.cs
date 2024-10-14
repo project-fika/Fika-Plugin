@@ -113,7 +113,8 @@ namespace Fika.Core.Coop.ObservedClasses
 		public override void ManualUpdate(float deltaTime)
 		{
 			base.ManualUpdate(deltaTime);
-			if (Time.time - lastFireTime > 0.05f)
+			lastFireTime += deltaTime;
+			if (lastFireTime > 0.05f)
 			{
 				if (hasFired)
 				{
@@ -295,7 +296,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				FirearmsAnimator.SetFire(true);
 				DryShot();
 				hasFired = true;
-				lastFireTime = Time.time;
+				lastFireTime = 0f;
 				return;
 			}
 
@@ -333,7 +334,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			triggerPressed = false;
 			hasFired = true;
-			lastFireTime = Time.time;
+			lastFireTime = 0f;
 			if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
 			{
 				needsReset = true;
