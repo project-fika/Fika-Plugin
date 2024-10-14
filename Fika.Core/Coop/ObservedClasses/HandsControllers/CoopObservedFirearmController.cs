@@ -113,19 +113,19 @@ namespace Fika.Core.Coop.ObservedClasses
 		public override void ManualUpdate(float deltaTime)
 		{
 			base.ManualUpdate(deltaTime);
-			lastFireTime += deltaTime;
-			if (lastFireTime > 0.05f)
+			if (hasFired)
 			{
-				if (hasFired)
+				lastFireTime += deltaTime;
+				if (lastFireTime > 0.05f)
 				{
 					FirearmsAnimator.SetFire(false);
 					hasFired = false;
-				}
-				if (needsReset)
-				{
-					needsReset = false;
-					WeaponSoundPlayer.OnBreakLoop();
-				}
+					if (needsReset)
+					{
+						needsReset = false;
+						WeaponSoundPlayer.OnBreakLoop();
+					}
+				} 
 			}
 		}
 
