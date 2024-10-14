@@ -213,5 +213,10 @@ namespace Fika.Core.Networking.Http
 		{
 			return GetJson<CheckVersionResponse>("/fika/client/check/version");
 		}
+
+		public static FikaPlayerPresence[] GetPlayerPresences()
+		{
+			return GetJson<FikaPlayerPresence[]>("/fika/presence/get");
+		}
 	}
 }

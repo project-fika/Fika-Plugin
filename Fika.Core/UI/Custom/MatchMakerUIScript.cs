@@ -17,6 +17,7 @@ using System.Net;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Fika.Core.UI.FikaUIUtils;
 
 namespace Fika.Core.UI.Custom
 {
@@ -730,16 +731,7 @@ namespace Fika.Core.UI.Custom
 						break;
 				}
 			}
-		}
-
-		public class TooltipTextGetter
-		{
-			public string GetText()
-			{
-				return TooltipText;
-			}
-			public string TooltipText;
-		}
+		}		
 
 		public IEnumerator ServerQuery()
 		{

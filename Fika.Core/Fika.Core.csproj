@@ -15,16 +15,18 @@
 
   <ItemGroup>
     <!-- hide files in vs2022 -->
+    <None Remove="Bundles\Files\mainmenuui.bundle" />
     <None Remove="Bundles\Files\newmatchmakerui.bundle" />
     <None Remove="Bundles\Files\playerui.bundle" />
+    <None Remove="Bundles\Files\ping.bundle" />
     <None Remove="Bundles\Files\senditemmenu.bundle" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- embedded resources -->
+    <EmbeddedResource Include="Bundles\Files\mainmenuui.bundle" />
     <EmbeddedResource Include="Bundles\Files\newmatchmakerui.bundle" />
     <EmbeddedResource Include="Bundles\Files\playerui.bundle" />
-    <None Remove="Bundles\Files\ping.bundle" />
     <EmbeddedResource Include="Bundles\Files\ping.bundle" />
     <EmbeddedResource Include="Bundles\Files\senditemmenu.bundle" />
   </ItemGroup>

@@ -220,7 +220,41 @@ namespace Fika.Core
 
 			GetNatPunchServerConfig();
 			SetupConfig();
+			EnableFikaPatches();
+			gameObject.AddComponent<MainThreadDispatcher>();
 
+#if GOLDMASTER
+            new TOS_Patch().Enable();
+#endif
+			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
+
+			DisableSPTPatches();
+			EnableOverridePatches();
+
+			GetClientConfig();
+
+			string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
+
+			Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
+
+			BundleLoaderPlugin = new();
+			BundleLoaderPlugin.Create();
+
+			BotSettingsRepoAbstractClass.Init();
+
+			BotDifficulties = FikaRequestHandler.GetBotDifficulties();
+			ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
+
+			if (AllowItemSending)
+			{
+				new ItemContext_Patch().Enable();
+			}
+
+			StartCoroutine(RunChecks());
+		}
+
+		private static void EnableFikaPatches()
+		{
 			new FikaVersionLabel_Patch().Enable();
 			new TarkovApplication_method_18_Patch().Enable();
 			new DisableReadyButton_Patch().Enable();
@@ -283,42 +317,12 @@ namespace Fika.Core
 			new SessionResultExitStatus_Show_Patch().Enable();
 			new PlayUISound_Patch().Enable();
 			new PlayEndGameSound_Patch().Enable();
+			new MenuScreen_Awake_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
 			new GClass1615_method_0_Patch().Enable();
 #endif
-
-			gameObject.AddComponent<MainThreadDispatcher>();
-
-#if GOLDMASTER
-            new TOS_Patch().Enable();
-#endif
-			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
-
-			DisableSPTPatches();
-			EnableOverridePatches();
-
-			GetClientConfig();
-
-			string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
-
-			Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
-
-			BundleLoaderPlugin = new();
-			BundleLoaderPlugin.Create();
-
-			BotSettingsRepoAbstractClass.Init();
-
-			BotDifficulties = FikaRequestHandler.GetBotDifficulties();
-			ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
-
-			if (AllowItemSending)
-			{
-				new ItemContext_Patch().Enable();
-			}
-
-			StartCoroutine(RunChecks());
 		}
 
 		private void VerifyServerVersion()
