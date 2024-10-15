@@ -392,7 +392,7 @@ namespace Fika.Core.Coop.Components
 			int netId = spawnObject.NetId;
 			MongoID firstId = spawnObject.CurrentId;
 			ushort firstOperationId = spawnObject.FirstOperationId;
-			bool isDedicatedProfile = !isAi && profile.Info.MainProfileNickname.Contains("dedicated_");
+			bool isDedicatedProfile = !isAi && profile.IsDedicatedProfile();
 			byte[] healthBytes = spawnObject.HealthBytes;
 
 			// Handle null bytes on players

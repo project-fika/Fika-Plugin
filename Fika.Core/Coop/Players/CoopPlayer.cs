@@ -107,6 +107,7 @@ namespace Fika.Core.Coop.Players
 				if (FikaBackendUtils.IsDedicated)
 				{
 					player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
+					player.Profile.Info.GroupId = "DEDICATED";
 				}
 				else
 				{
@@ -983,7 +984,7 @@ namespace Fika.Core.Coop.Players
 		public void SetupMainPlayer()
 		{
 			// Set own group id, ignore if dedicated
-			if (!Profile.Info.Nickname.Contains("dedicated_"))
+			if (!FikaBackendUtils.IsDedicated)
 			{
 				Profile.Info.GroupId = "Fika";
 			}

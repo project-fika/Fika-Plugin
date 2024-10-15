@@ -6,6 +6,7 @@ using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -123,7 +124,7 @@ namespace Fika.Core.Coop.Custom
 			foreach (CoopPlayer player in coopHandler.HumanPlayers)
 			{
 				// Do not count the dedicated profile as an active player
-				if (player.Profile.Nickname.Contains("dedicated_"))
+				if (player.Profile.IsDedicatedProfile())
 				{
 					continue;
 				}

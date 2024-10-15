@@ -88,5 +88,15 @@ namespace Fika.Core.Coop.Utils
 		{
 			return Singleton<AbstractGame>.Instance is CoopGame coopGame && coopGame.InRaid;
 		}
+
+		/// <summary>
+		/// Returns true if the profile is a dedicated user in game
+		/// </summary>
+		/// <param name="profile"></param>
+		/// <returns><see cref="bool"/></returns>
+		public static bool IsDedicatedProfile(this Profile profile)
+		{
+			return profile.Info.GroupId.ToLower() == "dedicated";
+		}
 	}
 }
