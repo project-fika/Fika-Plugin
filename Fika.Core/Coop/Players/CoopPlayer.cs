@@ -24,6 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
@@ -106,8 +107,7 @@ namespace Fika.Core.Coop.Players
 			{
 				if (FikaBackendUtils.IsDedicated)
 				{
-					player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
-					player.Profile.Info.GroupId = "DEDICATED";
+					player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();					
 				}
 				else
 				{
@@ -984,7 +984,11 @@ namespace Fika.Core.Coop.Players
 		public void SetupMainPlayer()
 		{
 			// Set own group id, ignore if dedicated
-			if (!FikaBackendUtils.IsDedicated)
+			if (FikaBackendUtils.IsDedicated)
+			{
+				Profile.Info.GroupId = "DEDICATED";				
+			}
+			else
 			{
 				Profile.Info.GroupId = "Fika";
 			}
