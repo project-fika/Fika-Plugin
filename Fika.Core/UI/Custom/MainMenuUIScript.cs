@@ -3,6 +3,7 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models.Presence;
+using JsonType;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -109,9 +110,10 @@ namespace Fika.Core.UI.Custom
 				{
 					RaidInformation information = presence.RaidInformation.Value;
 					string side = information.Side == EFT.ESideType.Pmc ? "PMC" : "Scav";
+					string time = information.Time is EDateTime.CURR ? "Left" : "Right";
 					HoverTooltipArea tooltip = newPlayer.AddComponent<HoverTooltipArea>();
 					tooltip.enabled = true;
-					tooltip.SetMessageText($"Playing as a {side} on {ColorizeText(EColor.BLUE, information.Location.Localized())}");
+					tooltip.SetMessageText($"Playing as a {side} on {ColorizeText(EColor.BLUE, information.Location.Localized())}\nTime: {time} side");
 				}
 				newPlayer.SetActive(true);
 				players.Add(newPlayer);
