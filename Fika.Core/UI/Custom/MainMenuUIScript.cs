@@ -96,13 +96,9 @@ namespace Fika.Core.UI.Custom
 				{
 					RaidInformation information = presence.RaidInformation.Value;
 					string side = information.Side == EFT.ESideType.Pmc ? "PMC" : "Scav";
-					TooltipTextGetter tooltipTextGetter = new()
-					{
-						TooltipText = $"Playing as a {side} on {ColorUtils.ColorizeText(Colors.BLUE, information.Location.Localized())}"
-					};
 					HoverTooltipArea tooltip = newPlayer.AddComponent<HoverTooltipArea>();
 					tooltip.enabled = true;
-					tooltip.SetMessageText(tooltipTextGetter.GetText);
+					tooltip.SetMessageText($"Playing as a {side} on {ColorUtils.ColorizeText(Colors.BLUE, information.Location.Localized())}");
 				}
 				newPlayer.SetActive(true);
 				players.Add(newPlayer);

@@ -184,14 +184,9 @@ namespace Fika.Core.UI.Custom
 					dedicatedText.color = new(1f, 1f, 1f, 0.5f);
 				}
 
-				TooltipTextGetter dediTooltipTextGetter = new()
-				{
-					TooltipText = LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized()
-				};
-
 				HoverTooltipArea dediTooltipArea = fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
 				dediTooltipArea.enabled = true;
-				dediTooltipArea.SetMessageText(dediTooltipTextGetter.GetText);
+				dediTooltipArea.SetMessageText(LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized());
 			}
 
 			TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
@@ -324,14 +319,9 @@ namespace Fika.Core.UI.Custom
 
 			fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
 
-			TooltipTextGetter tooltipTextGetter = new()
-			{
-				TooltipText = LocaleUtils.UI_REFRESH_RAIDS.Localized()
-			};
-
 			HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
 			tooltipArea.enabled = true;
-			tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+			tooltipArea.SetMessageText(LocaleUtils.UI_REFRESH_RAIDS.Localized());
 
 			acceptButton.gameObject.SetActive(false);
 			acceptButton.enabled = false;
@@ -572,18 +562,11 @@ namespace Fika.Core.UI.Custom
 					}, localPlayerInRaid));
 				});
 
-				TooltipTextGetter tooltipTextGetter;
 				HoverTooltipArea tooltipArea;
 				Image image = server.GetComponent<Image>();
 
 				if (raidSettings.LocationId != entry.Location && !(raidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
 				{
-					tooltipTextGetter = new()
-					{
-						TooltipText = string.Format(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_MAP.Localized(),
-						ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized()))
-					};
-
 					button.enabled = false;
 					if (image != null)
 					{
@@ -592,18 +575,14 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+					tooltipArea.SetMessageText(string.Format(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_MAP.Localized(),
+						ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized())));
 
 					continue;
 				}
 
 				if (raidSettings.SelectedDateTime != entry.Time)
 				{
-					tooltipTextGetter = new()
-					{
-						TooltipText = LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_TIME.Localized()
-					};
-
 					button.enabled = false;
 					if (image != null)
 					{
@@ -612,7 +591,7 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+					tooltipArea.SetMessageText(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_TIME.Localized());
 
 					continue;
 				}
@@ -629,11 +608,6 @@ namespace Fika.Core.UI.Custom
 						errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_PMC_AS_SCAV.Localized();
 					}
 
-					tooltipTextGetter = new()
-					{
-						TooltipText = errorText
-					};
-
 					button.enabled = false;
 					if (image != null)
 					{
@@ -642,7 +616,7 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+					tooltipArea.SetMessageText(errorText);
 
 					continue;
 				}
@@ -651,11 +625,6 @@ namespace Fika.Core.UI.Custom
 				{
 					case LobbyEntry.ELobbyStatus.LOADING:
 						{
-							tooltipTextGetter = new()
-							{
-								TooltipText = LocaleUtils.UI_HOST_STILL_LOADING.Localized()
-							};
-
 							button.enabled = false;
 							if (image != null)
 							{
@@ -664,17 +633,12 @@ namespace Fika.Core.UI.Custom
 
 							tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 							tooltipArea.enabled = true;
-							tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+							tooltipArea.SetMessageText(LocaleUtils.UI_HOST_STILL_LOADING.Localized());
 						}
 						break;
 					case LobbyEntry.ELobbyStatus.IN_GAME:
 						if (!localPlayerInRaid)
 						{
-							tooltipTextGetter = new()
-							{
-								TooltipText = LocaleUtils.UI_RAID_IN_PROGRESS.Localized()
-							};
-
 							button.enabled = false;
 							if (image != null)
 							{
@@ -683,28 +647,18 @@ namespace Fika.Core.UI.Custom
 
 							tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 							tooltipArea.enabled = true;
-							tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+							tooltipArea.SetMessageText(LocaleUtils.UI_RAID_IN_PROGRESS.Localized());
 						}
 						else
 						{
 							if (!localPlayerDead)
 							{
-								tooltipTextGetter = new()
-								{
-									TooltipText = LocaleUtils.UI_REJOIN_RAID.Localized()
-								};
-
 								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+								tooltipArea.SetMessageText(LocaleUtils.UI_REJOIN_RAID.Localized());
 							}
 							else
 							{
-								tooltipTextGetter = new()
-								{
-									TooltipText = LocaleUtils.UI_CANNOT_REJOIN_RAID_DIED.Localized()
-								};
-
 								button.enabled = false;
 								if (image != null)
 								{
@@ -713,19 +667,14 @@ namespace Fika.Core.UI.Custom
 
 								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+								tooltipArea.SetMessageText(LocaleUtils.UI_CANNOT_REJOIN_RAID_DIED.Localized());
 							}
 						}
 						break;
 					case LobbyEntry.ELobbyStatus.COMPLETE:
-						tooltipTextGetter = new()
-						{
-							TooltipText = LocaleUtils.UI_JOIN_RAID.Localized()
-						};
-
 						tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 						tooltipArea.enabled = true;
-						tooltipArea.SetMessageText(tooltipTextGetter.GetText);
+						tooltipArea.SetMessageText(LocaleUtils.UI_JOIN_RAID.Localized());
 						break;
 					default:
 						break;

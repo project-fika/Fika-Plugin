@@ -130,16 +130,6 @@ namespace Fika.Core.UI
 			return errorScreenHandler.context;
 		}
 
-		public class TooltipTextGetter
-		{
-			public string GetText()
-			{
-				return TooltipText;
-			}
-
-			public string TooltipText;
-		}
-
 		public enum EFikaRaidPresence
 		{
 			IN_MENU,
