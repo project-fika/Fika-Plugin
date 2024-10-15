@@ -318,6 +318,7 @@ namespace Fika.Core
 			new PlayUISound_Patch().Enable();
 			new PlayEndGameSound_Patch().Enable();
 			new MenuScreen_Awake_Patch().Enable();
+			new BotOwner_UpdateManual_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
