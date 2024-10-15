@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Models.Presence
@@ -17,6 +18,7 @@ namespace Fika.Core.Networking.Models.Presence
 			Presence = presence;
 		}
 
+		[Obsolete("Currently not used, handled on server", true)]
 		public FikaSetPresence(EFikaPlayerPresence presence, RaidInformation? raidInformation)
 		{
 			Presence = presence;
