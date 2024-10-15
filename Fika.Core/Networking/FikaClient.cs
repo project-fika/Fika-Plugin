@@ -1346,7 +1346,7 @@ namespace Fika.Core.Networking
 
 		public void PrintStatistics()
 		{
-			logger.LogInfo(":::: Fika Client Session Statistics ::::");
+			logger.LogInfo("..:: Fika Client Session Statistics ::..");
 			logger.LogInfo($"Sent packets: {netClient.Statistics.PacketsSent}");
 			logger.LogInfo($"Sent data: {FikaGlobals.FormatFileSize(netClient.Statistics.BytesSent)}");
 			logger.LogInfo($"Received packets: {netClient.Statistics.PacketsReceived}");
