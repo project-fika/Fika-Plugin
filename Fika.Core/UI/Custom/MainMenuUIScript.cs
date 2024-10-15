@@ -66,7 +66,7 @@ namespace Fika.Core.UI.Custom
 		{
 			while (true)
 			{
-				yield return new WaitForSeconds(1);
+				yield return new WaitForEndOfFrame();
 				ClearAndQueryPlayers();
 				yield return new WaitForSeconds(10);
 			}
