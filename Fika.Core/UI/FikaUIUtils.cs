@@ -136,7 +136,15 @@ namespace Fika.Core.UI
 			{
 				return TooltipText;
 			}
+
 			public string TooltipText;
+		}
+
+		public enum EFikaRaidPresence
+		{
+			IN_MENU,
+			IN_RAID,
+			IN_STASH
 		}
 	}
 }
