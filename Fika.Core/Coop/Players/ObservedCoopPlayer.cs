@@ -27,7 +27,7 @@ using UnityEngine.Audio;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
-using static Fika.Core.Utils.ColorUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Coop.Players
 {
@@ -846,12 +846,12 @@ namespace Fika.Core.Coop.Players
 					if (damageType != EDamageType.Undefined)
 					{
 						NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.GROUP_MEMBER_DIED_FROM.Localized(),
-							[ColorizeText(Colors.GREEN, nickname), ColorizeText(Colors.RED, ("DamageType_" + damageType.ToString()).Localized())]));
+							[ColorizeText(EColor.GREEN, nickname), ColorizeText(EColor.RED, ("DamageType_" + damageType.ToString()).Localized())]));
 					}
 					else
 					{
 						NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.GROUP_MEMBER_DIED.Localized(),
-							ColorizeText(Colors.GREEN, nickname)));
+							ColorizeText(EColor.GREEN, nickname)));
 					}
 				}
 				if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out string name) && IsObservedAI && LastAggressor != null)
@@ -862,7 +862,7 @@ namespace Fika.Core.Coop.Players
 						if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
 						{
 							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
-							[ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(Colors.BROWN, name)]),
+							[ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
 							iconType: EFT.Communications.ENotificationIconType.Friend);
 						}
 					}
@@ -1134,7 +1134,7 @@ namespace Fika.Core.Coop.Players
 				if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
 				{
 					NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
-						ColorizeText(Colors.GREEN, Profile.Info.MainProfileNickname)),
+						ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),
 					EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
 				}
 

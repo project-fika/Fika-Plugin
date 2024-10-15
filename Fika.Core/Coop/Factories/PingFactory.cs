@@ -4,6 +4,8 @@ using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
+using Fika.Core.UI;
 using Fika.Core.Utils;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,14 +37,14 @@ public static class PingFactory
 			Singleton<GUISounds>.Instance.PlayUISound(GetPingSound());
 			if (string.IsNullOrEmpty(localeId))
 			{
-				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING.Localized(), ColorUtils.ColorizeText(Colors.GREEN, nickname)),
+				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING.Localized(), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname)),
 							ENotificationDurationType.Default, ENotificationIconType.Friend);
 			}
 			else
 			{
 				string localizedName = localeId.Localized();
 				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
-					[ColorUtils.ColorizeText(Colors.GREEN, nickname), ColorUtils.ColorizeText(Colors.BLUE, localizedName)]),
+					[FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.BLUE, localizedName)]),
 					ENotificationDurationType.Default, ENotificationIconType.Friend);
 			}
 		}

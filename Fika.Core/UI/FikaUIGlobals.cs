@@ -5,14 +5,25 @@ using EFT.InputSystem;
 using EFT.UI;
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
 
 namespace Fika.Core.UI
 {
-	internal static class FikaUIUtils
+	internal static class FikaUIGlobals
 	{
+		private static readonly Dictionary<EColor, string> keyValuePairs = new()
+		{
+			{ EColor.WHITE, "ffffff" },
+			{ EColor.BLACK, "000000" },
+			{ EColor.GREEN, "32a852" },
+			{ EColor.BROWN, "a87332" },
+			{ EColor.BLUE, "51c6db" },
+			{ EColor.RED, "a83232" }
+		};
+
 		public static TextMeshProUGUI CreateOverlayText(string overlayText)
 		{
 			GameObject obj = GameObject.Find("/Preloader UI/Preloader UI/Watermark");
@@ -128,6 +139,19 @@ namespace Fika.Core.UI
 				errorScreenTraverse.Field("coroutine_0").SetValue(errorScreen.StartCoroutine(errorScreen.method_2(EFTDateTimeClass.Now.AddSeconds((double)waitingTime))));
 			}
 			return errorScreenHandler.context;
+		}		
+
+		private static string GetHexByColor(EColor color)
+		{
+			return keyValuePairs.TryGetValue(color, out string value) ? value : "ffffff";
+		}
+
+		/// <summary>
+		/// Utility used to color text within a <see cref="CustomTextMeshProUGUI"/>
+		/// </summary>
+		public static string ColorizeText(EColor color, string text)
+		{
+			return $"<color=#{GetHexByColor(color)}>{text}</color>";
 		}
 
 		public enum EFikaRaidPresence
@@ -135,6 +159,19 @@ namespace Fika.Core.UI
 			IN_MENU,
 			IN_RAID,
 			IN_STASH
+		}
+
+		/// <summary>
+		/// Enum used for <see cref="ColorizeText"/>
+		/// </summary>
+		public enum EColor
+		{
+			WHITE,
+			BLACK,
+			GREEN,
+			BROWN,
+			BLUE,
+			RED
 		}
 	}
 }

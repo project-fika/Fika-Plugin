@@ -33,7 +33,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Utils.ColorUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking
 {
@@ -1030,7 +1030,7 @@ namespace Fika.Core.Networking
 								{
 									string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
-										ColorizeText(Colors.GREEN, nickname)),
+										ColorizeText(EColor.GREEN, nickname)),
 										ENotificationDurationType.Default, ENotificationIconType.EntryPoint);
 								}
 							}

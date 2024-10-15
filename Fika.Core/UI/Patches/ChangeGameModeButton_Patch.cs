@@ -5,7 +5,7 @@ using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static Fika.Core.Utils.ColorUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
@@ -21,7 +21,7 @@ namespace Fika.Core.UI.Patches
 			GameObject ____availableState)
 		{
 			____buttonLabel.text = "PvE";
-			____buttonDescription.text = $"Fika will always be {ColorizeText(Colors.BLUE, "PvE")}";
+			____buttonDescription.text = $"Fika will always be {ColorizeText(EColor.BLUE, "PvE")}";
 			____buttonDescriptionIcon.gameObject.SetActive(false);
 			____availableState.SetActive(true);
 			return false;

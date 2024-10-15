@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
-using static Fika.Core.Utils.ColorUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Coop.Players
 {
@@ -254,7 +254,7 @@ namespace Fika.Core.Coop.Players
 					{
 						if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
 							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
-								[ColorizeText(Colors.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(Colors.BROWN, name)]),
+								[ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
 								iconType: EFT.Communications.ENotificationIconType.Friend);
 					}
 				}

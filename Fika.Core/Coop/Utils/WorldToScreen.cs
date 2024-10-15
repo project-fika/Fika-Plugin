@@ -4,7 +4,7 @@ using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using UnityEngine;
 
-namespace Fika.Core.Utils
+namespace Fika.Core.Coop.Utils
 {
 	/// <summary>
 	/// Class to convert screen space to world space

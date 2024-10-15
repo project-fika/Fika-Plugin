@@ -1,6 +1,7 @@
 ﻿using EFT.Communications;
 using Fika.Core.Utils;
 using Newtonsoft.Json;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Websocket.Notifications
 {
@@ -19,8 +20,8 @@ namespace Fika.Core.Networking.Websocket.Notifications
 			get
 			{
 				return string.Format(LocaleUtils.UI_NOTIFICATION_STARTED_RAID.Localized(),
-					ColorUtils.ColorizeText(Colors.GREEN, Nickname.StartsWith("dedicated_") ? "Dedicated Client" : Nickname),
-					ColorUtils.ColorizeText(Colors.BLUE, Location.Localized()));
+					ColorizeText(EColor.GREEN, Nickname.StartsWith("dedicated_") ? "Dedicated Client" : Nickname),
+					ColorizeText(EColor.BLUE, Location.Localized()));
 			}
 		}
 

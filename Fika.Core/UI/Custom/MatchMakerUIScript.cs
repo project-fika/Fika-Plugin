@@ -17,7 +17,7 @@ using System.Net;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static Fika.Core.UI.FikaUIUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Custom
 {
@@ -576,7 +576,7 @@ namespace Fika.Core.UI.Custom
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
 					tooltipArea.SetMessageText(string.Format(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_MAP.Localized(),
-						ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized())));
+						ColorizeText(EColor.BLUE, entry.Location.Localized())));
 
 					continue;
 				}

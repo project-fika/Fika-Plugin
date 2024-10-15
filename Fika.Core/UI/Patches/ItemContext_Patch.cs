@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
@@ -77,7 +78,7 @@ namespace Fika.Core.UI.Patches
 						{
 							if (attachedItem.TemplateId == itemId)
 							{
-								string itemText = ColorUtils.ColorizeText(Colors.BLUE, item.ShortName.Localized());
+								string itemText = ColorizeText(EColor.BLUE, item.ShortName.Localized());
 								if (attachedItem == item)
 								{
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_BLACKLISTED.Localized(), itemText),
@@ -86,7 +87,7 @@ namespace Fika.Core.UI.Patches
 								else
 								{
 									string itemName = attachedItem.ShortName.Localized();
-									string attachedItemText = ColorUtils.ColorizeText(Colors.BLUE, itemName);
+									string attachedItemText = FikaUIGlobals.ColorizeText(EColor.BLUE, itemName);
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
 										[itemText, attachedItemText]),
 										iconType: EFT.Communications.ENotificationIconType.Alert);

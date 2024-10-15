@@ -4,11 +4,12 @@ using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using Fika.Core.UI;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Fika.Core.Utils.ColorUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -187,7 +188,7 @@ namespace Fika.Core.Coop.ClientClasses
 						if (FikaPlugin.QuestSharingNotifications.Value)
 						{
 							NotificationManagerClass.DisplayMessageNotification(
-								$"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.BROWN, quest.Template.Name)}",
+								$"Received shared quest progression from {ColorizeText(EColor.GREEN, packet.Nickname)} for the quest {ColorizeText(EColor.BROWN, quest.Template.Name)}",
 												iconType: EFT.Communications.ENotificationIconType.Quest);
 						}
 					}
@@ -219,7 +220,7 @@ namespace Fika.Core.Coop.ClientClasses
 						if (FikaPlugin.QuestSharingNotifications.Value)
 						{
 							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PICKUP.Localized(),
-								[ColorizeText(Colors.GREEN, packet.Nickname), ColorizeText(Colors.BLUE, item.Name.Localized())]),
+								[ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BLUE, item.Name.Localized())]),
 												iconType: EFT.Communications.ENotificationIconType.Quest);
 						}
 					}
@@ -251,7 +252,7 @@ namespace Fika.Core.Coop.ClientClasses
 			if (FikaPlugin.QuestSharingNotifications.Value)
 			{
 				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PLANT.Localized(),
-					[ColorizeText(Colors.GREEN, packet.Nickname), ColorizeText(Colors.BROWN, questName)]),
+					[ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BROWN, questName)]),
 									iconType: EFT.Communications.ENotificationIconType.Quest);
 			}
 
