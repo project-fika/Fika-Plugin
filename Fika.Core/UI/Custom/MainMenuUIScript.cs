@@ -2,7 +2,7 @@
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Networking.Http;
-using Fika.Core.Utils;
+using Fika.Core.Networking.Models.Presence;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,16 +13,29 @@ namespace Fika.Core.UI.Custom
 {
 	public class MainMenuUIScript : MonoBehaviour
 	{
+		public static MainMenuUIScript Instance
+		{
+			get
+			{
+				return instance;
+			}
+		}
+
+		private static MainMenuUIScript instance;
+
 		private Coroutine queryRoutine;
 		private MainMenuUI mainMenuUI;
 		private GameObject playerTemplate;
 		private List<GameObject> players;
 		private DateTime lastRefresh;
+		private DateTime lastSet;
 
 		private void Start()
 		{
+			instance = this;
 			players = [];
 			lastRefresh = DateTime.Now;
+			lastSet = DateTime.Now;
 			CreateMainMenuUI();
 		}
 
@@ -91,8 +104,8 @@ namespace Fika.Core.UI.Custom
 			{
 				GameObject newPlayer = GameObject.Instantiate(playerTemplate, playerTemplate.transform.parent);
 				MainMenuUIPlayer mainMenuUIPlayer = newPlayer.GetComponent<MainMenuUIPlayer>();
-				mainMenuUIPlayer.SetStatus(presence.Nickname, presence.Level, presence.InRaid);
-				if (presence.InRaid && presence.RaidInformation.HasValue)
+				mainMenuUIPlayer.SetActivity(presence.Nickname, presence.Level, presence.Activity);
+				if (presence.Activity is EFikaPlayerPresence.IN_RAID && presence.RaidInformation.HasValue)
 				{
 					RaidInformation information = presence.RaidInformation.Value;
 					string side = information.Side == EFT.ESideType.Pmc ? "PMC" : "Scav";
@@ -103,6 +116,19 @@ namespace Fika.Core.UI.Custom
 				newPlayer.SetActive(true);
 				players.Add(newPlayer);
 			}
+		}
+
+		public void UpdatePresence(EFikaPlayerPresence presence)
+		{
+			// Prevent spamming going back and forth to the main menu causing server lag for no reason
+			if ((DateTime.Now - lastSet).TotalSeconds < 5)
+			{
+				return;
+			}
+
+			lastSet = DateTime.Now;
+			FikaSetPresence data = new(presence);
+			FikaRequestHandler.SetPresence(data);
 		}
 	}
 }

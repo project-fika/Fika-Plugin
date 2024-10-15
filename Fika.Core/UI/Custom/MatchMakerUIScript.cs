@@ -680,7 +680,7 @@ namespace Fika.Core.UI.Custom
 						break;
 				}
 			}
-		}		
+		}
 
 		public IEnumerator ServerQuery()
 		{

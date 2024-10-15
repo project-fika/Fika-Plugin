@@ -319,6 +319,9 @@ namespace Fika.Core
 			new PlayEndGameSound_Patch().Enable();
 			new MenuScreen_Awake_Patch().Enable();
 			new BotOwner_UpdateManual_Patch().Enable();
+			new GClass3421_ShowAction_Patch().Enable();
+			new MenuScreen_method_8_Patch().Enable();
+			new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();

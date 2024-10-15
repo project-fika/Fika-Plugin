@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Fika.Core.UI
 {
-	internal static class FikaUIGlobals
+	public static class FikaUIGlobals
 	{
 		private static readonly Dictionary<EColor, string> keyValuePairs = new()
 		{
@@ -154,11 +154,12 @@ namespace Fika.Core.UI
 			return $"<color=#{GetHexByColor(color)}>{text}</color>";
 		}
 
-		public enum EFikaRaidPresence
+		public enum EFikaPlayerPresence
 		{
 			IN_MENU,
 			IN_RAID,
-			IN_STASH
+			IN_STASH,
+			IN_HIDEOUT
 		}
 
 		/// <summary>

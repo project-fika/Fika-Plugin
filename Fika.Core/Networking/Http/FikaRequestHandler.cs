@@ -1,5 +1,6 @@
 using EFT;
 using Fika.Core.Models;
+using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Networking.Http
 {
-	public static class FikaRequestHandler
+    public static class FikaRequestHandler
 	{
 		private static readonly FuyuClient _httpClient;
 
@@ -217,6 +218,16 @@ namespace Fika.Core.Networking.Http
 		public static FikaPlayerPresence[] GetPlayerPresences()
 		{
 			return GetJson<FikaPlayerPresence[]>("/fika/presence/get");
+		}
+
+		public static void SetPresence(FikaSetPresence data)
+		{
+			PutJson("/fika/presence/set", data);
+		}
+
+		public static FikaPlayerPresence[] SetAndGetPresence(FikaSetPresence data)
+		{
+			return PostJson<FikaSetPresence, FikaPlayerPresence[]>("/fika/presence/setget", data);
 		}
 	}
 }
