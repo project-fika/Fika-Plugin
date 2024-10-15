@@ -9,7 +9,7 @@ using UnityEngine.AI;
 namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
-	/// Patch used to stop the allocation of a <see cref="Stopwatch"/> every frame for all active AI
+	/// Patch used to stop the allocation of a new <see cref="Stopwatch"/> every frame for all active AI
 	/// </summary>
 	public class BotOwner_UpdateManual_Patch : ModulePatch
 	{
