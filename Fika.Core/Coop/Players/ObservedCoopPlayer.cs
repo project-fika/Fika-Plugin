@@ -1384,6 +1384,10 @@ namespace Fika.Core.Coop.Players
 					HandsController.FastForwardCurrentState();
 				}
 				HandsController.Destroy();
+				if (HandsController != null)
+				{
+					Destroy(HandsController);
+				}
 				HandsController = null;
 			}
 
