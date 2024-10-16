@@ -322,6 +322,7 @@ namespace Fika.Core
 			new GClass3421_ShowAction_Patch().Enable();
 			new MenuScreen_method_8_Patch().Enable();
 			new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
+			new RagfairScreen_Show_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
