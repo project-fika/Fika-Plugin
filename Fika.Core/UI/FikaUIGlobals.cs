@@ -159,7 +159,8 @@ namespace Fika.Core.UI
 			IN_MENU,
 			IN_RAID,
 			IN_STASH,
-			IN_HIDEOUT
+			IN_HIDEOUT,
+			IN_FLEA
 		}
 
 		/// <summary>

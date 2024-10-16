@@ -24,6 +24,7 @@ public class MainMenuUIPlayer : MonoBehaviour
 			EFikaPlayerPresence.IN_RAID => "In Raid",
 			EFikaPlayerPresence.IN_STASH => "In Stash",
 			EFikaPlayerPresence.IN_HIDEOUT => "In Hideout",
+			EFikaPlayerPresence.IN_FLEA => "In Flea",
 			_ => "In Menu",
 		};
 		PlayerStatus.text = status;
@@ -36,7 +37,7 @@ public class MainMenuUIPlayer : MonoBehaviour
 		{
 			EFikaPlayerPresence.IN_MENU => Color.green,
 			EFikaPlayerPresence.IN_RAID => Color.red,
-			EFikaPlayerPresence.IN_STASH or EFikaPlayerPresence.IN_HIDEOUT => Color.yellow,
+			EFikaPlayerPresence.IN_STASH or EFikaPlayerPresence.IN_HIDEOUT or EFikaPlayerPresence.IN_FLEA => Color.yellow,
 			_ => Color.green,
 		};
 	}
