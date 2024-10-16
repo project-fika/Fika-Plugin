@@ -27,7 +27,7 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Install dependencies
-      run: dotnet restore --configfile Nuget.config
+      run: dotnet restore
 
     - name: Build
       run: dotnet build --nologo --no-restore --configuration Debug
