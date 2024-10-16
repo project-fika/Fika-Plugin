@@ -30,10 +30,12 @@ namespace Fika.Core.UI.Custom
 		private List<GameObject> players;
 		private DateTime lastRefresh;
 		private DateTime lastSet;
+		private int minSecondsToWait;
 
 		private void Start()
 		{
 			instance = this;
+			minSecondsToWait = 2;
 			players = [];
 			lastRefresh = DateTime.Now;
 			lastSet = DateTime.Now;
@@ -123,7 +125,7 @@ namespace Fika.Core.UI.Custom
 		public void UpdatePresence(EFikaPlayerPresence presence)
 		{
 			// Prevent spamming going back and forth to the main menu causing server lag for no reason
-			if ((DateTime.Now - lastSet).TotalSeconds < 5)
+			if ((DateTime.Now - lastSet).TotalSeconds < minSecondsToWait)
 			{
 				return;
 			}
