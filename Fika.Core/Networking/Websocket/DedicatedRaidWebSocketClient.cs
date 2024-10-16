@@ -35,13 +35,15 @@ namespace Fika.Core.Networking.Websocket
 		{
 			Host = RequestHandler.Host.Replace("http", "ws");
 			SessionId = RequestHandler.SessionId;
-			Url = $"{Host}/fika/dedicatedraidservice/{SessionId}?";
+			Url = $"{Host}/fika/dedicatedraidservice/";
 
 			_webSocket = new WebSocket(Url)
 			{
 				WaitTime = TimeSpan.FromMinutes(1),
 				EmitOnPing = true
 			};
+
+			_webSocket.SetCredentials(SessionId, "", true);
 
 			_webSocket.OnOpen += WebSocket_OnOpen;
 			_webSocket.OnError += WebSocket_OnError;
