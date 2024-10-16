@@ -128,12 +128,6 @@ namespace Fika.Core.Networking.Websocket
 				case EFikaNotifications.SentItem:
 					ReceivedSentItemNotification SentItemNotification = e.Data.ParseJsonTo<ReceivedSentItemNotification>([]);
 
-					// If we are not the target, ignore.
-					if (SentItemNotification.TargetId != SessionId)
-					{
-						return;
-					}
-
 					notificationsQueue.Enqueue(SentItemNotification);
 					break;
 				case EFikaNotifications.PushNotification:
