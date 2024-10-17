@@ -853,6 +853,7 @@ namespace Fika.Core.Networking
 					{
 						IsRequest = false,
 						HasData = true,
+						Season = coopGame.Season,
 						Amount = coopGame.WeatherClasses.Length,
 						WeatherClasses = coopGame.WeatherClasses
 					};

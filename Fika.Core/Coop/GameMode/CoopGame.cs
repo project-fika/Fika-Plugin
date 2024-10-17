@@ -116,6 +116,8 @@ namespace Fika.Core.Coop.GameMode
 			}
 		}
 
+		public ESeason Season { get; set; }
+
 		private static ManualLogSource Logger;
 
 		/// <summary>
@@ -1594,6 +1596,7 @@ namespace Fika.Core.Coop.GameMode
 						await Task.Yield();
 					}
 					WeatherClasses = weatherHandler.weather.Result.Weathers;
+					Season = weatherHandler.weather.Result.Season;
 					WeatherController.Instance.method_0(WeatherClasses);
 					weatherHandler = null;
 				}
@@ -1606,14 +1609,13 @@ namespace Fika.Core.Coop.GameMode
 
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
-			ESeason season = iSession.Season;
-			Class428 seasonHandler = new();
-			gameWorld.GInterface29_0 = seasonHandler;
+			Class428 seasonController = new();
+			gameWorld.GInterface29_0 = seasonController;
 
 #if DEBUG
 			Logger.LogWarning("Running season handler");
 #endif
-			await seasonHandler.Run(season);
+			await seasonController.Run(Season);
 			await WaitForOtherPlayers();
 
 			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
