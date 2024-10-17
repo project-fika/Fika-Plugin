@@ -310,6 +310,11 @@ namespace Fika.Core.Coop.Players
 
 		public override void UpdateBreathStatus()
 		{
+			if (HealthController == null || Speaker == null)
+			{
+				return;
+			}
+
 			ETagStatus healthStatus = HealthStatus;
 			bool isDying;
 			if (healthStatus != ETagStatus.BadlyInjured && healthStatus != ETagStatus.Dying)
@@ -324,7 +329,7 @@ namespace Fika.Core.Coop.Players
 
 			bool isAudible = Physical.BreathIsAudible;
 			bool shouldHeavyBreathe = isAudible || Muffled;
-			if (gameObject != null && gameObject.activeSelf && !HeavyBreath && shouldHeavyBreathe)
+			if (gameObject.activeSelf && !HeavyBreath && shouldHeavyBreathe)
 			{
 				ETagStatus status1 = isDying ? healthStatus : ETagStatus.Healthy;
 				ETagStatus status2 = isAudible ? ETagStatus.Aware : ETagStatus.Unaware;
