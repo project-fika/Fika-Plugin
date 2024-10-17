@@ -68,6 +68,11 @@ namespace Fika.Core
 
 		public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
+		public static Dictionary<string, string> TestVar = new()
+		{
+			{ "HELLO",			"Test"}
+		};
+
 		public static Dictionary<string, string> RespectedPlayersList = new()
 		{
 			{ "samswat",      "godfather of modern SPT modding ~ SSH"                                                       },
