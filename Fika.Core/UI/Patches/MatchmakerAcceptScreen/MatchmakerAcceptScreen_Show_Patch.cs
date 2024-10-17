@@ -21,7 +21,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 		public static GameObject MatchmakerObject { get; set; }
 
 		[PatchPrefix]
-		private static void Prefix(ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
+		private static void Prefix(ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton, CoopSettingsWindow ____coopSettingsWindow)
 		{
 			if (MatchmakerObject == null)
 			{
@@ -37,6 +37,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 			newMatchMaker.raidSettings = raidSettings;
 			newMatchMaker.acceptButton = ____acceptButton;
 			newMatchMaker.backButton = ____backButton;
+			newMatchMaker.coopSettingsWindow = ____coopSettingsWindow;
 		}
 
 		[PatchPostfix]
