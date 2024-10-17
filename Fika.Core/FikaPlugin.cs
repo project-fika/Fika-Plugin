@@ -70,7 +70,8 @@ namespace Fika.Core
 
 		public static Dictionary<string, string> TestVar = new()
 		{
-			{ "HELLO",			"Test"}
+			{ "HELLO",			"Test"},
+			{ "HELLO2",			"Test2"}
 		};
 
 		public static Dictionary<string, string> RespectedPlayersList = new()
