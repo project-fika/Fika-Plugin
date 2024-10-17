@@ -80,6 +80,7 @@ namespace Fika.Core.Coop.GameMode
 		private DateTime? gameTime;
 		private TimeSpan? sessionTime;
 		private BotStateManager botStateManager;
+		private ESeason season;
 
 		public FikaDynamicAI DynamicAI { get; private set; }
 		public RaidSettings RaidSettings { get; private set; }
@@ -116,7 +117,18 @@ namespace Fika.Core.Coop.GameMode
 			}
 		}
 
-		public ESeason Season { get; set; }
+		public ESeason Season
+		{ 
+			get 
+			{
+				return season;
+			}
+			set
+			{
+				season = value;
+				Logger.LogInfo($"Setting Season to: {value}");
+			}
+		}
 
 		private static ManualLogSource Logger;
 
@@ -1585,20 +1597,15 @@ namespace Fika.Core.Coop.GameMode
 			if (WeatherController.Instance != null)
 			{
 				SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
-				if (isServer && !OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
+				if (isServer)
 				{
-					LocalGame.Class1474 weatherHandler = new()
+					GClass1287 weather = await iSession.WeatherRequest();
+					Season = weather.Season;
+					if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
 					{
-						weather = iSession.WeatherRequest()
-					};
-					while (!weatherHandler.weather.IsCompleted)
-					{
-						await Task.Yield();
+						WeatherClasses = weather.Weathers;
+						WeatherController.Instance.method_0(WeatherClasses); 
 					}
-					WeatherClasses = weatherHandler.weather.Result.Weathers;
-					Season = weatherHandler.weather.Result.Season;
-					WeatherController.Instance.method_0(WeatherClasses);
-					weatherHandler = null;
 				}
 				else if (!isServer)
 				{
