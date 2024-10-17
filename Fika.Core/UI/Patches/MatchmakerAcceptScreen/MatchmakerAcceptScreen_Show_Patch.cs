@@ -3,6 +3,7 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Fika.Core.UI.Custom;
+using Fika.Core.Utils;
 using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
@@ -21,7 +22,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 		public static GameObject MatchmakerObject { get; set; }
 
 		[PatchPrefix]
-		private static void Prefix(ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton, CoopSettingsWindow ____coopSettingsWindow)
+		private static void Prefix(ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
 		{
 			if (MatchmakerObject == null)
 			{
@@ -37,7 +38,6 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 			newMatchMaker.raidSettings = raidSettings;
 			newMatchMaker.acceptButton = ____acceptButton;
 			newMatchMaker.backButton = ____backButton;
-			newMatchMaker.coopSettingsWindow = ____coopSettingsWindow;
 		}
 
 		[PatchPostfix]

@@ -46,7 +46,6 @@ namespace Fika.Core.UI.Custom
 		internal RaidSettings raidSettings;
 		internal DefaultUIButton backButton;
 		internal DefaultUIButton acceptButton;
-		internal CoopSettingsWindow coopSettingsWindow;
 
 		protected void OnEnable()
 		{
@@ -80,7 +79,7 @@ namespace Fika.Core.UI.Custom
 
 		protected void Update()
 		{
-			if (Input.GetKeyDown(KeyCode.Escape) && coopSettingsWindow != null && !coopSettingsWindow.IsActive)
+			if (Input.GetKeyDown(KeyCode.Escape))
 			{
 				DestroyThis();
 			}

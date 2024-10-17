@@ -324,6 +324,7 @@ namespace Fika.Core
 			new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
 			new RagfairScreen_Show_Patch().Enable();
 			new MatchmakerPlayerControllerClass_method_41_Patch().Enable();
+			new CoopSettingsWindow_Show_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
