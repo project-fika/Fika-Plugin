@@ -847,7 +847,7 @@ namespace Fika.Core.Networking
 			if (packet.IsRequest)
 			{
 				CoopGame coopGame = CoopHandler.LocalGameInstance;
-				if (coopGame != null && coopGame.WeatherClasses != null)
+				if (coopGame != null && coopGame.WeatherReady)
 				{
 					WeatherPacket weatherPacket2 = new()
 					{
