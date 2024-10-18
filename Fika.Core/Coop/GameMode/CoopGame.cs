@@ -61,6 +61,7 @@ namespace Fika.Core.Coop.GameMode
 		public bool InteractablesInitialized { get; set; } = false;
 		public bool HasReceivedLoot { get; set; } = false;
 		public List<GrenadeClass> ThrownGrenades;
+		public bool WeatherReady;
 
 		private readonly Dictionary<int, int> botQueue = [];
 		private Coroutine extractRoutine;
@@ -1614,6 +1615,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
+			WeatherReady = true;
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
 			Class428 seasonController = new();
