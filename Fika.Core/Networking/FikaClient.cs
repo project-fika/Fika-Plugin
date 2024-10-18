@@ -901,7 +901,7 @@ namespace Fika.Core.Networking
 		{
 			if (!packet.IsRequest)
 			{
-				if (CoopHandler.LocalGameInstance != null)
+				if (CoopHandler.LocalGameInstance != null && CoopHandler.LocalGameInstance.WeatherClasses == null)
 				{
 					CoopHandler.LocalGameInstance.WeatherClasses = packet.WeatherClasses;
 					CoopHandler.LocalGameInstance.Season = packet.Season;
