@@ -40,19 +40,6 @@ namespace Fika.Core.Coop.BotClasses
 			}
 		}
 
-		/*public override void RollBack()
-		{
-#if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogWarning("Rolling back on bot: " + coopBot.NetId); 
-#endif
-			base.RollBack();
-			ResyncInventoryIdPacket packet = new(coopBot.NetId)
-			{
-				MongoId = mongoID_0
-			};
-			coopBot.PacketSender.SendPacket(ref packet, false);
-		}*/
-
 		public override void CallMalfunctionRepaired(Weapon weapon)
 		{
 			// Do nothing
