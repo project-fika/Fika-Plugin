@@ -424,9 +424,9 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			ammo.IsUsed = true;
 
-			if (magazine != null && magazine is not CylinderMagazineClass && !Weapon.BoltAction)
+			if (magazine != null && magazine is not CylinderMagazineClass && magazine.Count > 0 && !Weapon.BoltAction)
 			{
-				if (Item.HasChambers)
+				if (Item.HasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
 				{
 					magazine.Cartridges.PopTo(inventoryController, Item.Chambers[0].CreateItemAddress());
 				}
