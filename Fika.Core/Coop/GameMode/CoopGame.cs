@@ -574,7 +574,8 @@ namespace Fika.Core.Coop.GameMode
 		{
 			botQueue.Add(netId, 0);
 			DateTime start = DateTime.Now;
-			int connectedPeers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
+			FikaServer server = Singleton<FikaServer>.Instance;
+			int connectedPeers = server.NetServer.ConnectedPeersCount;
 
 			while (botQueue[netId] < connectedPeers)
 			{
@@ -586,6 +587,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 
 				await Task.Delay(250);
+				connectedPeers = server.NetServer.ConnectedPeersCount;
 			}
 
 			botQueue.Remove(netId);
