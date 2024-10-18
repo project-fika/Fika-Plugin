@@ -6,6 +6,7 @@ using EFT.Vaulting;
 using EFT.WeaponMounting;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using LiteNetLib.Utils;
 using System;
 using UnityEngine;
@@ -377,7 +378,11 @@ namespace Fika.Core.Networking
 
 			public void Execute(CoopPlayer player)
 			{
-				player.DoObservedVault(ref this);
+				// Dedicated can get stuck in permanent high-velocity states due to vaulting, skip it
+				if (!FikaBackendUtils.IsDedicated)
+				{
+					player.DoObservedVault(ref this); 
+				}
 			}
 
 			public void Serialize(NetDataWriter writer)

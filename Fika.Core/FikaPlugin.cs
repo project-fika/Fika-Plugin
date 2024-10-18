@@ -38,9 +38,9 @@ namespace Fika.Core
 	/// <summary>
 	/// Fika.Core Plugin. <br/> <br/>
 	/// Originally by: Paulov <br/>
-	/// Re-written by: Lacyway
+	/// Re-written by: Lacyway & the Fika team
 	/// </summary>
-	[BepInPlugin("com.fika.core", "Fika.Core", "0.9.9015")]
+	[BepInPlugin("com.fika.core", "Fika.Core", "1.0.0")]
 	[BepInProcess("EscapeFromTarkov.exe")]
 	[BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-custom, that way we can disable its patches
 	[BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
