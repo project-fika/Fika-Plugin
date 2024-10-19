@@ -113,6 +113,7 @@ public static class PingFactory
 			mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			canvasRect = GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
 			rangeText = GetComponentInChildren<TextMeshProUGUI>(true);
+			rangeText.color = Color.clear;
 			displayRange = FikaPlugin.ShowPingRange.Value;
 			rangeText.gameObject.SetActive(displayRange);
 			if (mainPlayer == null)
