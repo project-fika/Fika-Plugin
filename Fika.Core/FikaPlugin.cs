@@ -325,6 +325,7 @@ namespace Fika.Core
 			new RagfairScreen_Show_Patch().Enable();
 			new MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch().Enable();
 			new CoopSettingsWindow_Show_Patch().Enable();
+			new MainMenuController_method_48_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
