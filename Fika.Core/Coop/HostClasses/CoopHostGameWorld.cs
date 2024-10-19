@@ -1,13 +1,11 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
-using JetBrains.Annotations;
 using LiteNetLib;
 using System;
 using System.Collections.Generic;
@@ -41,20 +39,8 @@ namespace Fika.Core.Coop.ClientClasses
 			gameWorld.CurrentProfileId = currentProfileId;
 			gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
 			gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
-			gameObject.AddComponent<FikaHostWorld>();
+			FikaHostWorld.Create(gameWorld);
 			return gameWorld;
-		}
-
-		public override LootItem CreateLootWithRigidbody(GameObject lootObject, Item item, string objectName, bool randomRotation, [CanBeNull] string[] validProfiles, out BoxCollider objectCollider, bool syncable, bool performPickUpValidation = true, float makeVisibleAfterDelay = 0)
-		{
-			if (syncable)
-			{
-				ObservedLootItem lootItem = ObservedLootItem.CreateLootWithRigidbody(lootObject, item, objectName, this, randomRotation, validProfiles, out objectCollider, performPickUpValidation, makeVisibleAfterDelay);
-				HostItemPositionSync.Create(lootObject, Server, lootItem);
-				return lootItem;
-			}
-
-			return base.CreateLootWithRigidbody(lootObject, item, objectName, randomRotation, validProfiles, out objectCollider, syncable, performPickUpValidation, makeVisibleAfterDelay);
 		}
 
 		public override GClass722 CreateGrenadeFactory()

@@ -1,11 +1,9 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -28,18 +26,6 @@ namespace Fika.Core.Coop.ClientClasses
 			gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
 			FikaClientWorld.Create(gameWorld);
 			return gameWorld;
-		}
-
-		public override LootItem CreateLootWithRigidbody(GameObject lootObject, Item item, string objectName, bool randomRotation, [CanBeNull] string[] validProfiles, out BoxCollider objectCollider, bool syncable, bool performPickUpValidation = true, float makeVisibleAfterDelay = 0)
-		{
-			if (syncable)
-			{
-				ObservedLootItem observedLootItem = ObservedLootItem.CreateLootWithRigidbody(lootObject, item, objectName, this, randomRotation, validProfiles, out objectCollider, performPickUpValidation, makeVisibleAfterDelay);
-				Traverse.Create(observedLootItem).Field<bool>("bool_3").Value = true;
-				return observedLootItem;
-			}
-
-			return base.CreateLootWithRigidbody(lootObject, item, objectName, randomRotation, validProfiles, out objectCollider, true, performPickUpValidation, makeVisibleAfterDelay);
 		}
 
 		public override GClass722 CreateGrenadeFactory()

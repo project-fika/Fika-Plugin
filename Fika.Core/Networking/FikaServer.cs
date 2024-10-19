@@ -15,6 +15,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
@@ -50,6 +51,7 @@ namespace Fika.Core.Networking
 		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
 		public bool HasHadPeer = false;
 		public bool RaidInitialized = false;
+		public FikaHostWorld FikaHostWorld { get; set; }
 		public bool Started
 		{
 			get
@@ -171,6 +173,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<TransitInteractPacket, NetPeer>(OnSubscribeNetSerializableReceived);
 			packetProcessor.SubscribeNetSerializable<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<PingPacket, NetPeer>(OnPingPacketReceived);
+			packetProcessor.SubscribeNetSerializable<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -276,6 +279,16 @@ namespace Fika.Core.Networking
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnLootSyncPacketReceived(LootSyncPacket packet, NetPeer peer)
+		{
+			SendDataToAll(ref packet, packet.Data.Done ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable, peer);
+
+			if (FikaHostWorld != null)
+			{
+				FikaHostWorld.LootSyncPackets.Add(packet.Data);
+			}
 		}
 
 		private void OnPingPacketReceived(PingPacket packet, NetPeer peer)

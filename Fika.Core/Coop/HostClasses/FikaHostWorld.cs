@@ -1,8 +1,10 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Networking;
 using LiteNetLib;
+using System.Collections.Generic;
 
 namespace Fika.Core.Coop.HostClasses
 {
@@ -11,13 +13,24 @@ namespace Fika.Core.Coop.HostClasses
 	/// </summary>
 	public class FikaHostWorld : World
 	{
+		public List<GStruct128> LootSyncPackets;
+
 		private FikaServer server;
 		private GameWorld gameWorld;
 
-		protected void Start()
+		public static FikaHostWorld Create(CoopHostGameWorld gameWorld)
 		{
-			server = Singleton<FikaServer>.Instance;
-			gameWorld = GetComponent<GameWorld>();
+			FikaHostWorld hostWorld = gameWorld.gameObject.AddComponent<FikaHostWorld>();
+			hostWorld.server = Singleton<FikaServer>.Instance;
+			hostWorld.server.FikaHostWorld = hostWorld;
+			hostWorld.gameWorld = gameWorld;
+			hostWorld.LootSyncPackets = new List<GStruct128>(8);
+			return hostWorld;
+		}
+
+		protected void Update()
+		{
+			UpdateLootItems(gameWorld.LootItems);
 		}
 
 		protected void FixedUpdate()
@@ -58,6 +71,22 @@ namespace Fika.Core.Coop.HostClasses
 
 			gameWorld.GrenadesCriticalStates.Clear();
 			gameWorld.ArtilleryProjectilesStates.Clear();
+		}
+
+		public void UpdateLootItems(GClass770<int, LootItem> lootItems)
+		{
+			for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
+			{
+				GStruct128 gstruct = LootSyncPackets[i];
+				if (lootItems.TryGetByKey(gstruct.Id, out LootItem lootItem))
+				{
+					if (lootItem is ObservedLootItem observedLootItem)
+					{
+						observedLootItem.ApplyNetPacket(gstruct);
+					}
+					LootSyncPackets.RemoveAt(i);
+				}
+			}
 		}
 
 		/// <summary>
