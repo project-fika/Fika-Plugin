@@ -13,16 +13,13 @@ namespace Fika.Core.Coop.ObservedClasses
 {
 	internal class CoopObservedGrenadeController : Player.GrenadeHandsController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
+		private CoopPlayer coopPlayer;
 
 		public static CoopObservedGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
-			return smethod_9<CoopObservedGrenadeController>(player, item);
+			CoopObservedGrenadeController controller = smethod_9<CoopObservedGrenadeController>(player, item);
+			controller.coopPlayer = player;
+			return controller;
 		}
 
 		public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()

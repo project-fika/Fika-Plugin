@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public CoopPlayer coopPlayer;
+		private CoopPlayer coopPlayer;
 		private bool triggerPressed = false;
 		private bool needsReset = false;
 		private float lastFireTime = 0f;
@@ -89,11 +89,6 @@ namespace Fika.Core.Coop.ObservedClasses
 			return new ObservedFlareOperation(this);
 		}
 
-		protected void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
-
 		protected void Start()
 		{
 			_objectInHandsAnimator.SetAiming(false);
@@ -107,7 +102,9 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public static CoopObservedFirearmController Create(CoopPlayer player, Weapon weapon)
 		{
-			return smethod_6<CoopObservedFirearmController>(player, weapon);
+			CoopObservedFirearmController controller = smethod_6<CoopObservedFirearmController>(player, weapon);
+			controller.coopPlayer = player;
+			return controller;
 		}
 
 		public override void ManualUpdate(float deltaTime)

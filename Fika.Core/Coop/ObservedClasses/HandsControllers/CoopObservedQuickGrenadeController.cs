@@ -11,13 +11,6 @@ namespace Fika.Core.Coop.ObservedClasses
 	/// </summary>
 	internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
-
 		public static CoopObservedQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
 			return smethod_9<CoopObservedQuickGrenadeController>(player, item);
