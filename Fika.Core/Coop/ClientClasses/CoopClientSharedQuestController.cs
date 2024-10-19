@@ -258,7 +258,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			foreach (Item questItem in player.Inventory.QuestRaidItems.GetAllItems())
 			{
-				if (questItem.TemplateId == itemId)
+				if (questItem.TemplateId == itemId && questItem.QuestItem)
 				{
 					GStruct426<GClass3058> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
 					player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
