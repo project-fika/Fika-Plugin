@@ -323,7 +323,7 @@ namespace Fika.Core
 			new MenuScreen_method_8_Patch().Enable();
 			new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
 			new RagfairScreen_Show_Patch().Enable();
-			new MatchmakerPlayerControllerClass_method_41_Patch().Enable();
+			new MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch().Enable();
 			new CoopSettingsWindow_Show_Patch().Enable();
 
 #if DEBUG
