@@ -7,6 +7,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.UI;
 using Fika.Core.Utils;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = System.Object;
@@ -94,6 +95,8 @@ public static class PingFactory
 		protected Image image;
 		protected Vector3 hitPoint;
 		private RectTransform canvasRect;
+		private TextMeshProUGUI rangeText;
+		private bool displayRange;
 		private float screenScale = 1f;
 		private Color _pingColor = Color.white;
 		private CoopPlayer mainPlayer;
@@ -109,6 +112,9 @@ public static class PingFactory
 			image.color = Color.clear;
 			mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			canvasRect = GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
+			rangeText = GetComponentInChildren<TextMeshProUGUI>(true);
+			displayRange = FikaPlugin.ShowPingRange.Value;
+			rangeText.gameObject.SetActive(displayRange);
 			if (mainPlayer == null)
 			{
 				Destroy(gameObject);
@@ -124,6 +130,10 @@ public static class PingFactory
 				if (mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic && !FikaPlugin.ShowPingDuringOptics.Value)
 				{
 					image.color = Color.clear;
+					if (displayRange)
+					{
+						rangeText.color = Color.clear; 
+					}
 					return;
 				}
 			}
@@ -145,11 +155,21 @@ public static class PingFactory
 
 				if (distanceToCenter < 200)
 				{
-					image.color = new(_pingColor.r, _pingColor.g, _pingColor.b, Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200));
+					float alpha = Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200);
+					Color newColor = new(_pingColor.r, _pingColor.g, _pingColor.b, alpha);
+					image.color = newColor;
+					if (displayRange)
+					{
+						rangeText.color = Color.white.SetAlpha(alpha); 
+					}
 				}
 				else
 				{
 					image.color = _pingColor;
+					if (displayRange)
+					{
+						rangeText.color = Color.white; 
+					}
 				}
 
 				if (screenPoint.z >= 0f
@@ -177,6 +197,11 @@ public static class PingFactory
 				}
 
 				image.transform.position = screenScale < 1 ? screenPoint : screenPoint * screenScale;
+				if (displayRange)
+				{
+					int distance = (int)CameraClass.Instance.Distance(hitPoint);
+					rangeText.text = $"[{distance}m]"; 
+				}
 			}
 		}
 

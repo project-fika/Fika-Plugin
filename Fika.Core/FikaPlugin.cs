@@ -144,6 +144,7 @@ namespace Fika.Core
 		public static ConfigEntry<bool> PingUseOpticZoom { get; set; }
 		public static ConfigEntry<bool> PingScaleWithDistance { get; set; }
 		public static ConfigEntry<float> PingMinimumOpacity { get; set; }
+		public static ConfigEntry<bool> ShowPingRange { get; set; }
 		public static ConfigEntry<EPingSound> PingSound { get; set; }
 
 		// Coop | Debug
@@ -497,34 +498,37 @@ namespace Fika.Core
 			// Coop | Custom
 
 			UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false,
-				new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+				new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
 
 			PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U),
-				new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+				new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
 			PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white,
-				new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+				new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
 			PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f,
-				new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 7 }));
+				new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 8 }));
 
 			PingTime = Config.Bind("Coop | Custom", "Ping Time", 3,
-				new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 6 }));
+				new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 7 }));
 
 			PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false,
-				new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+				new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
 			ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false,
-				new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+				new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
 			PingUseOpticZoom = Config.Bind("Coop | Custom", "Ping Use Optic Zoom", true,
-				new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 3, IsAdvanced = true }));
+				new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 4, IsAdvanced = true }));
 
 			PingScaleWithDistance = Config.Bind("Coop | Custom", "Ping Scale With Distance", true,
-				new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
+				new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 3, IsAdvanced = true }));
 
 			PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f,
-				new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 1, IsAdvanced = true }));
+				new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
+
+			ShowPingRange = Config.Bind("Coop | Custom", "Show Ping Range", false,
+				new ConfigDescription("Shows the range from your player to the ping if enabled.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
 			PingSound = Config.Bind("Coop | Custom", "Ping Sound", EPingSound.SubQuestComplete,
 				new ConfigDescription("The audio that plays on ping", tags: new ConfigurationManagerAttributes() { Order = 0 }));
