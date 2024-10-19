@@ -12,9 +12,9 @@ namespace Fika.Core.UI.Patches
 		}
 
 		[PatchPrefix]
-		public static bool Prefix(ref ECoopBlock __result)
+		public static bool Prefix(ref ECoopBlock reason)
 		{
-			__result = ECoopBlock.NoBlock;
+			reason = ECoopBlock.NoBlock;
 			return false;
 		}
 	}
