@@ -6,6 +6,7 @@ using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using GPUInstancer;
 using JetBrains.Annotations;
 using System.Threading.Tasks;
 using static EFT.Player;
@@ -47,6 +48,23 @@ namespace Fika.Core.Coop.BotClasses
 
 		public override void vmethod_1(GClass3119 operation, [CanBeNull] Callback callback)
 		{
+			// Check for GClass increments
+			// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
+			if (operation is not GClass3137)
+			{
+#if DEBUG
+					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}");
+#endif
+				GClass1175 writer = new();
+				writer.WritePolymorph(operation.ToDescriptor());
+				InventoryPacket packet = new()
+				{
+					CallbackId = operation.Id,
+					OperationBytes = writer.ToArray()
+				};
+
+				coopBot.PacketSender.InventoryPackets.Enqueue(packet);
+			}
 			HandleOperation(operation, callback).HandleExceptions();
 		}
 
@@ -84,29 +102,9 @@ namespace Fika.Core.Coop.BotClasses
 
 			public void HandleResult(IResult result)
 			{
-				if (!result.Succeed)
+				if (result.Failed)
 				{
 					FikaPlugin.Instance.FikaLogger.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {controller.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
-					Callback?.Invoke(result);
-					return;
-				}
-
-				// Check for GClass increments
-				// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-				if (Operation is not GClass3137)
-				{
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}");
-#endif
-					GClass1175 writer = new();
-					writer.WritePolymorph(Operation.ToDescriptor());
-					InventoryPacket packet = new()
-					{
-						CallbackId = Operation.Id,
-						OperationBytes = writer.ToArray()
-					};
-
-					controller.coopBot.PacketSender.InventoryPackets.Enqueue(packet);
 				}
 
 				Callback?.Invoke(result);
