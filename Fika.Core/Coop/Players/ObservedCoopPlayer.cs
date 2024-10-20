@@ -1004,25 +1004,26 @@ namespace Fika.Core.Coop.Players
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-				PlayerBody.GClass2008 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
+				PlayerBody.GClass2008 slowView = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass2008 gclass2 = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, gclass);
-				if (gclass2 != null)
+				PlayerBody.GClass2008 oldSlotView = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, slowView);
+				if (oldSlotView != null)
 				{
-					gclass2.Dispose();
+					oldSlotView.Dispose();
 				}
+				PlayerBody.ValidateHoodedDress(equipmentSlot);
 			}
 
 			if (PlayerBody.HaveHolster && PlayerBody.SlotViews.ContainsKey(EquipmentSlot.Holster))
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(EquipmentSlot.Holster);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(EquipmentSlot.Holster);
-				PlayerBody.GClass2008 gclass = new(PlayerBody, Inventory.Equipment.GetSlot(EquipmentSlot.Holster), slotBone, EquipmentSlot.Holster,
+				PlayerBody.GClass2008 slotView = new(PlayerBody, Inventory.Equipment.GetSlot(EquipmentSlot.Holster), slotBone, EquipmentSlot.Holster,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass2008 gclass2 = PlayerBody.SlotViews.AddOrReplace(EquipmentSlot.Holster, gclass);
-				if (gclass2 != null)
+				PlayerBody.GClass2008 oldSlotView = PlayerBody.SlotViews.AddOrReplace(EquipmentSlot.Holster, slotView);
+				if (oldSlotView != null)
 				{
-					gclass2.Dispose();
+					oldSlotView.Dispose();
 				}
 			}
 		}
