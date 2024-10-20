@@ -53,7 +53,7 @@ namespace Fika.Core.Coop.BotClasses
 			if (operation is not GClass3137)
 			{
 #if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {Operation.GetType()} from {controller.coopBot.Profile.Nickname}");
+					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
 				GClass1175 writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());
