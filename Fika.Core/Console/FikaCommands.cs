@@ -9,7 +9,9 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Console
@@ -183,7 +185,7 @@ namespace Fika.Core.Console
 			if (!CheckForGame())
 			{
 				return;
-			}
+			}			
 
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			CoopPlayer player = (CoopPlayer)gameWorld.MainPlayer;
@@ -223,6 +225,66 @@ namespace Fika.Core.Console
 				return;
 			}
 			Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+		}
+
+		/// <summary>
+		/// Based on SSH's TarkyMenu command
+		/// </summary>
+		/// <param name="wildSpawnType"></param>
+		/// <param name="number"></param>
+		[ConsoleCommand("SpawnNPC", "", null, "Spawn NPC with specified WildSpawnType")]
+		public static void SpawnNPC([ConsoleArgument("pmcBot", "The WildSpawnType to spawn (use help for a list)")] string wildSpawnType, [ConsoleArgument(1, "The amount of AI to spawn")] int amount)
+		{
+			if (!CheckForGame())
+			{
+				return;
+			}
+
+			if (!FikaBackendUtils.IsServer)
+			{
+				ConsoleScreen.LogWarning("You cannot spawn AI as a client!");
+				return;
+			}
+
+			if (string.IsNullOrEmpty(wildSpawnType) || wildSpawnType.ToLower() == "help")
+			{
+				foreach (object availableSpawnType in Enum.GetValues(typeof(WildSpawnType)))
+				{
+					ConsoleScreen.Log(availableSpawnType.ToString());
+				}
+				ConsoleScreen.Log("Available WildSpawnType options below");
+				return;
+			}
+
+			if (!Enum.TryParse(wildSpawnType, true, out WildSpawnType selectedSpawnType))
+			{
+				ConsoleScreen.Log($"Invalid WildSpawnType: {wildSpawnType}");
+				return;
+			}
+
+			if (amount <= 0)
+			{
+				ConsoleScreen.Log($"Invalid number: {amount}. Please enter a valid positive integer.");
+				return;
+			}
+
+			BotWaveDataClass newBotData = new()
+			{
+				BotsCount = amount,
+				Side = EPlayerSide.Savage,
+				SpawnAreaName = "",
+				Time = 0f,
+				WildSpawnType = selectedSpawnType,
+				IsPlayers = false,
+				Difficulty = BotDifficulty.easy,
+				ChanceGroup = 100f,
+				WithCheckMinMax = false
+			};
+
+
+			IBotGame botController = (IBotGame)Singleton<AbstractGame>.Instance;
+			botController.BotsController.BotSpawner.ActivateBotsByWave(newBotData);
+			ConsoleScreen.Log($"SpawnNPC completed. {amount} bots spawned.");
 		}
 
 #endif
