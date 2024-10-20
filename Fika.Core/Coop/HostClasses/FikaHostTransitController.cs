@@ -133,6 +133,13 @@ namespace Fika.Core.Coop.HostClasses
 
 		public override void Sizes(Dictionary<int, byte> sizes)
 		{
+#if DEBUG
+			foreach (KeyValuePair<int, byte> item in sizes)
+			{
+				FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, byte: {item.Value}");
+			} 
+#endif
+
 			foreach (KeyValuePair<int, byte> size in sizes)
 			{
 				if (GamePlayerOwner.MyPlayer.Id == size.Key)
@@ -156,6 +163,13 @@ namespace Fika.Core.Coop.HostClasses
 
 		public override void Timers(int pointId, Dictionary<int, ushort> timers)
 		{
+#if DEBUG
+			foreach (KeyValuePair<int, ushort> item in timers)
+			{
+				FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, ushort: {item.Value}");
+			} 
+#endif
+
 			foreach (KeyValuePair<int, ushort> timer in timers)
 			{
 				if (GamePlayerOwner.MyPlayer.Id == timer.Key)
