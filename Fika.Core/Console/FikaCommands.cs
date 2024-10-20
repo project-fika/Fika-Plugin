@@ -232,7 +232,7 @@ namespace Fika.Core.Console
 		/// </summary>
 		/// <param name="wildSpawnType"></param>
 		/// <param name="number"></param>
-		[ConsoleCommand("SpawnNPC", "", null, "Spawn NPC with specified WildSpawnType")]
+		[ConsoleCommand("spawnNPC", "", null, "Spawn NPC with specified WildSpawnType")]
 		public static void SpawnNPC([ConsoleArgument("pmcBot", "The WildSpawnType to spawn (use help for a list)")] string wildSpawnType, [ConsoleArgument(1, "The amount of AI to spawn")] int amount)
 		{
 			if (!CheckForGame())
