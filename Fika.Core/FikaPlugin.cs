@@ -206,6 +206,7 @@ namespace Fika.Core
 		public bool ForceSaveOnDeath;
 		public bool UseInertia;
 		public bool SharedQuestProgression;
+		public bool CanEditRaidSettings;
 		#endregion
 
 		#region natpunch config
@@ -327,6 +328,7 @@ namespace Fika.Core
 			new CoopSettingsWindow_Show_Patch().Enable();
 			new MainMenuController_method_48_Patch().Enable();
 			new GameWorld_ThrowItem_Patch().Enable();
+			new RaidSettingsWindow_Show_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
@@ -391,6 +393,7 @@ namespace Fika.Core
 			ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
 			UseInertia = clientConfig.UseInertia;
 			SharedQuestProgression = clientConfig.SharedQuestProgression;
+			CanEditRaidSettings = clientConfig.CanEditRaidSettings;
 
 			clientConfig.LogValues();
 		}

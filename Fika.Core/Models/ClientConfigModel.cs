@@ -37,8 +37,11 @@ namespace Fika.Core.UI.Models
 		[DataMember(Name = "sharedQuestProgression")]
 		public bool SharedQuestProgression;
 
+		[DataMember(Name = "canEditRaidSettings")]
+		public bool CanEditRaidSettings;
+
 		public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowSpectateFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
-			bool sharedQuestProgression)
+			bool sharedQuestProgression, bool canEditRaidSettings)
 		{
 			UseBTR = useBTR;
 			FriendlyFire = friendlyFire;
@@ -50,6 +53,7 @@ namespace Fika.Core.UI.Models
 			ForceSaveOnDeath = forceSaveOnDeath;
 			UseInertia = useInertia;
 			SharedQuestProgression = sharedQuestProgression;
+			CanEditRaidSettings = canEditRaidSettings;
 		}
 
 		public void LogValues()
