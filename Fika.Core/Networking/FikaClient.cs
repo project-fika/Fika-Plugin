@@ -142,7 +142,6 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnThrowablePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
-			packetProcessor.SubscribeNetSerializable<LightkeeperGuardDeathPacket>(OnLightkeeperGuardDeathPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
@@ -1229,36 +1228,6 @@ namespace Fika.Core.Networking
 				case EHalloweenPacketType.Exit:
 					controller.method_3(packet.Exit);
 					break;
-			}
-		}
-
-		private void OnLightkeeperGuardDeathPacketReceived(LightkeeperGuardDeathPacket packet)
-		{
-			GameWorld gameWorld = Singleton<GameWorld>.Instance;
-
-			// Zryachiy is dead, change zone availability status.
-			if (packet.WildType == WildSpawnType.bossZryachiy)
-			{
-				gameWorld.BufferZoneController.SetInnerZoneAvailabilityStatus(false, EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead);
-			}
-
-			RadioTransmitterRecodableComponent transmitter = this.MyPlayer.FindRadioTransmitter();
-
-			if (transmitter != null)
-			{
-				if (packet.ProfileId == MyPlayer.ProfileId)
-				{
-					return;
-				}
-
-				// If player has a transmitted that's encoded or green deny access to LK for player and decode DSP
-				if (transmitter.IsEncoded || transmitter.Status == RadioTransmitterStatus.Green)
-				{
-					gameWorld.BufferZoneController.SetPlayerAccessStatus(packet.ProfileId, false);
-					transmitter.SetStatus(RadioTransmitterStatus.Red);
-					transmitter.SetEncoded(false);
-					this.MyPlayer.Profile.TradersInfo["638f541a29ffd1183d187f57"].SetStanding(-0.01);
-				}
 			}
 		}
 

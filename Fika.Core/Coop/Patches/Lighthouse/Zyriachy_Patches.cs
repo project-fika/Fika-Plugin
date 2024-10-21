@@ -29,35 +29,14 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 			[PatchPostfix]
 			public static void Postfix(ref BotOwner ___botOwner_0)
 			{
-				___botOwner_0.GetPlayer.OnPlayerDead += OnBossOrFollowerDead;
-				___botOwner_0.Boss.OnFollowerStatusChange += Boss_OnFollowerStatusChange;
+				___botOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
 			}
 
-			private static void Boss_OnFollowerStatusChange(BotOwner follower, FollowerStatusChange status)
+			private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
 			{
-				switch (status)
-				{
-					case FollowerStatusChange.Add:
-						follower.GetPlayer.OnPlayerDead += OnBossOrFollowerDead;
-						break;
-					case FollowerStatusChange.Remove:
-						follower.GetPlayer.OnPlayerDead -= OnBossOrFollowerDead;
-						break;
-				}
-			}
+				player.OnPlayerDead -= OnZryachiyDead;
 
-			private static void OnBossOrFollowerDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
-			{
-				player.OnPlayerDead -= OnBossOrFollowerDead;
-
-				WildSpawnType SpawnType = WildSpawnType.followerZryachiy;
-
-				if (player.AIData.BotOwner.IsRole(WildSpawnType.bossZryachiy))
-				{
-					SpawnType = WildSpawnType.bossZryachiy;
-				}
-
-				Singleton<FikaServer>.Instance.SendLighthouseBossOrFollowerDeadEvent(player.KillerId, SpawnType);
+				Singleton<GameWorld>.Instance.BufferZoneController.SetInnerZoneAvailabilityStatus(false, EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead);
 			}
 		}
 
