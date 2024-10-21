@@ -4,11 +4,11 @@ using BepInEx.Logging;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
+using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.EssentialPatches;
-using Fika.Core.Models;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
 using Fika.Core.UI;
@@ -20,6 +20,7 @@ using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
 using SPT.SinglePlayer.Patches.MainMenu;
+using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
@@ -35,12 +36,12 @@ using UnityEngine;
 
 namespace Fika.Core
 {
-	/// <summary>
-	/// Fika.Core Plugin. <br/> <br/>
-	/// Originally by: Paulov <br/>
-	/// Re-written by: Lacyway & the Fika team
-	/// </summary>
-	[BepInPlugin("com.fika.core", "Fika.Core", "1.0.0")]
+    /// <summary>
+    /// Fika.Core Plugin. <br/> <br/>
+    /// Originally by: Paulov <br/>
+    /// Re-written by: Lacyway & the Fika team
+    /// </summary>
+    [BepInPlugin("com.fika.core", "Fika.Core", "1.0.0")]
 	[BepInProcess("EscapeFromTarkov.exe")]
 	[BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-custom, that way we can disable its patches
 	[BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
@@ -716,6 +717,7 @@ namespace Fika.Core
 			new GetProfileAtEndOfRaidPatch().Disable();
 			new FixSavageInventoryScreenPatch().Disable();
 			new ScavExfilPatch().Disable();
+			new OverrideMaxAiAliveInRaidValuePatch().Disable();
 		}
 
 		private void EnableOverridePatches()
