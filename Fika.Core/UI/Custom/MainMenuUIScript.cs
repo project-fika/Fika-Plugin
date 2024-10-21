@@ -31,6 +31,7 @@ namespace Fika.Core.UI.Custom
 		private DateTime lastRefresh;
 		private DateTime lastSet;
 		private int minSecondsToWait;
+		private RectTransform transformToScale;
 
 		private void Start()
 		{
@@ -44,6 +45,11 @@ namespace Fika.Core.UI.Custom
 
 		private void OnEnable()
 		{
+			if (transformToScale != null)
+			{
+				float scale = FikaPlugin.OnlinePlayersScale.Value;
+				transformToScale.localScale = new(scale, scale, scale); 
+			}
 			queryRoutine = StartCoroutine(QueryPlayers());
 		}
 
@@ -66,7 +72,17 @@ namespace Fika.Core.UI.Custom
 			mainMenuUI.transform.SetParent(newParent);
 			gameObject.transform.SetParent(newParent);
 
+			Transform mainMenuUITransform = this.mainMenuUI.gameObject.transform;
+			GameObject objectToAttach = mainMenuUITransform.GetChild(0).GetChild(0).gameObject;
+			transformToScale = objectToAttach.RectTransform();
+			float scale = FikaPlugin.OnlinePlayersScale.Value;
+			transformToScale.localScale = new(scale, scale, scale);
+			objectToAttach.AddComponent<UIDragComponent>().Init(transformToScale, true);
 			this.mainMenuUI.RefreshButton.onClick.AddListener(ManualRefresh);
+
+			gameObject.SetActive(false);
+			this.WaitFrames(3, null);
+			gameObject.SetActive(true);
 		}
 
 		private void ManualRefresh()

@@ -125,7 +125,7 @@ namespace Fika.Core.Networking
 		{
 			sendRate = FikaPlugin.SendRate.Value switch
 			{
-				FikaPlugin.ESendRate.ExtremelyLow => 10,
+				FikaPlugin.ESendRate.VeryLow => 10,
 				FikaPlugin.ESendRate.Low => 20,
 				FikaPlugin.ESendRate.Medium => 40,
 				FikaPlugin.ESendRate.High => 60,

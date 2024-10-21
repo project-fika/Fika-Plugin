@@ -110,6 +110,7 @@ namespace Fika.Core
 		public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
 		public static ConfigEntry<bool> EnableChat { get; set; }
 		public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
+		public static ConfigEntry<float> OnlinePlayersScale { get; set; }
 
 		// Coop | Name Plates
 		public static ConfigEntry<bool> UseNamePlates { get; set; }
@@ -133,7 +134,7 @@ namespace Fika.Core
 		public static ConfigEntry<bool> EasyKillConditions { get; set; }
 		public static ConfigEntry<bool> SharedBossExperience { get; set; }
 
-		// Coop | Custom
+		// Coop | Pinging
 		public static ConfigEntry<bool> UsePingSystem { get; set; }
 		public static ConfigEntry<KeyboardShortcut> PingButton { get; set; }
 		public static ConfigEntry<Color> PingColor { get; set; }
@@ -425,22 +426,27 @@ namespace Fika.Core
 			// Coop
 
 			ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true,
-				new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+				new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
 			AutoExtract = Config.Bind("Coop", "Auto Extract", false,
-				new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+				new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.",
+				tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
 			ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true,
-				new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+				new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
 			ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8),
-				new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+				new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
 			EnableChat = Config.Bind("Coop", "Enable Chat", false,
-				new ConfigDescription("Toggle to enable chat in game. Cannot be change mid raid", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+				new ConfigDescription("Toggle to enable chat in game. Cannot be change mid raid", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
 			ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.RightControl),
-				new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+				new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+			OnlinePlayersScale = Config.Bind("Coop", "Online Players Scale", 1f,
+				new ConfigDescription("The scale of the window that displays online players. Only change if it looks out of proportion.\n\nRequires a refresh of the main menu to take effect.",
+				new AcceptableValueRange<float>(0.5f, 1.5f), new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Name Plates
 
@@ -500,42 +506,42 @@ namespace Fika.Core
 			SharedBossExperience = Config.Bind("Coop | Quest Sharing", "Shared Boss Experience", false,
 				new ConfigDescription("If enabled you will receive ½ of the experience when a friendly player kills a boss", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
-			// Coop | Custom
+			// Coop | Pinginging
 
-			UsePingSystem = Config.Bind("Coop | Custom", "Ping System", false,
+			UsePingSystem = Config.Bind("Coop | Pinging", "Ping System", false,
 				new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
 
-			PingButton = Config.Bind("Coop | Custom", "Ping Button", new KeyboardShortcut(KeyCode.U),
+			PingButton = Config.Bind("Coop | Pinging", "Ping Button", new KeyboardShortcut(KeyCode.U),
 				new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-			PingColor = Config.Bind("Coop | Custom", "Ping Color", Color.white,
+			PingColor = Config.Bind("Coop | Pinging", "Ping Color", Color.white,
 				new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-			PingSize = Config.Bind("Coop | Custom", "Ping Size", 1f,
+			PingSize = Config.Bind("Coop | Pinging", "Ping Size", 1f,
 				new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 8 }));
 
-			PingTime = Config.Bind("Coop | Custom", "Ping Time", 3,
+			PingTime = Config.Bind("Coop | Pinging", "Ping Time", 3,
 				new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 7 }));
 
-			PlayPingAnimation = Config.Bind("Coop | Custom", "Play Ping Animation", false,
+			PlayPingAnimation = Config.Bind("Coop | Pinging", "Play Ping Animation", false,
 				new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-			ShowPingDuringOptics = Config.Bind("Coop | Custom", "Show Ping During Optics", false,
+			ShowPingDuringOptics = Config.Bind("Coop | Pinging", "Show Ping During Optics", false,
 				new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-			PingUseOpticZoom = Config.Bind("Coop | Custom", "Ping Use Optic Zoom", true,
+			PingUseOpticZoom = Config.Bind("Coop | Pinging", "Ping Use Optic Zoom", true,
 				new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 4, IsAdvanced = true }));
 
-			PingScaleWithDistance = Config.Bind("Coop | Custom", "Ping Scale With Distance", true,
+			PingScaleWithDistance = Config.Bind("Coop | Pinging", "Ping Scale With Distance", true,
 				new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 3, IsAdvanced = true }));
 
-			PingMinimumOpacity = Config.Bind("Coop | Custom", "Ping Minimum Opacity", 0.05f,
+			PingMinimumOpacity = Config.Bind("Coop | Pinging", "Ping Minimum Opacity", 0.05f,
 				new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
 
-			ShowPingRange = Config.Bind("Coop | Custom", "Show Ping Range", false,
+			ShowPingRange = Config.Bind("Coop | Pinging", "Show Ping Range", false,
 				new ConfigDescription("Shows the range from your player to the ping if enabled.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
-			PingSound = Config.Bind("Coop | Custom", "Ping Sound", EPingSound.SubQuestComplete,
+			PingSound = Config.Bind("Coop | Pinging", "Ping Sound", EPingSound.SubQuestComplete,
 				new ConfigDescription("The audio that plays on ping", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Debug
@@ -637,7 +643,7 @@ namespace Fika.Core
 				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 2 }));
 
 			SendRate = Config.Bind("Network", "Send Rate", ESendRate.Low,
-				new ConfigDescription("How often per second movement packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.\nAmount is per second:\n\nExtremely Low = 10\nLow = 20\nMedium = 40\nHigh = 60\n\nRecommended to leave at no higher than Medium as the gains are insignificant after.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+				new ConfigDescription("How often per second movement packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.\nAmount is per second:\n\nVery Low = 10\nLow = 20\nMedium = 40\nHigh = 60\n\nRecommended to leave at no higher than Medium as the gains are insignificant after.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
 			SmoothingRate = Config.Bind("Network", "Smoothing Rate", ESmoothingRate.Medium,
 				new ConfigDescription("Local simulation is behind by Send Rate * Smoothing Rate. This guarantees that we always have enough snapshots in the buffer to mitigate lags & jitter during interpolation.\n\nLow = 1.5\nMedium = 2\nHigh = 2.5\n\nSet this to 'High' if movement isn't smooth. Cannot be changed during a raid.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
@@ -750,8 +756,8 @@ namespace Fika.Core
 
 		public enum ESendRate
 		{
-			[Description("Extremely Low")]
-			ExtremelyLow,
+			[Description("Very Low")]
+			VeryLow,
 			Low,
 			Medium,
 			High
