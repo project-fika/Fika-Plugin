@@ -414,6 +414,44 @@ namespace Fika.Core.Networking
 			SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 		}
 
+		public void SendLighthouseBossOrFollowerDeadEvent(string aggressorProfileId, WildSpawnType wildtype)
+		{
+			LightkeeperGuardDeathPacket packet = new LightkeeperGuardDeathPacket()
+			{
+				ProfileId = aggressorProfileId,
+				WildType = wildtype
+			};
+
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+
+			// Zryachiy is dead, change zone availability status.
+			if (wildtype == WildSpawnType.bossZryachiy)
+			{
+				gameWorld.BufferZoneController.SetInnerZoneAvailabilityStatus(false, EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead);
+			}
+
+			RadioTransmitterRecodableComponent transmitter = this.MyPlayer.FindRadioTransmitter();
+
+			if (transmitter != null)
+			{
+				if (aggressorProfileId == MyPlayer.ProfileId)
+				{
+					return;
+				}
+
+				// If player has a transmitted that's encoded or green deny access to LK for player and decode DSP
+				if (transmitter.IsEncoded || transmitter.Status == RadioTransmitterStatus.Green)
+				{
+					gameWorld.BufferZoneController.SetPlayerAccessStatus(aggressorProfileId, false);
+					transmitter.SetStatus(RadioTransmitterStatus.Red);
+					transmitter.SetEncoded(false);
+					this.MyPlayer.Profile.TradersInfo["638f541a29ffd1183d187f57"].SetStanding(-0.01);
+				}
+			}
+		}
+
 		private void OnTraderServicesPacketReceived(TraderServicesPacket packet, NetPeer peer)
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))

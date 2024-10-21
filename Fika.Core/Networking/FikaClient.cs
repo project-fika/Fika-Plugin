@@ -8,6 +8,7 @@ using EFT.AssetsManager;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
@@ -1233,18 +1234,32 @@ namespace Fika.Core.Networking
 
 		private void OnLightkeeperGuardDeathPacketReceived(LightkeeperGuardDeathPacket packet)
 		{
-			/*
-			FikaLighthouseProgressionClass Component = Singleton<GameWorld>.Instance.gameObject.GetComponent<FikaLighthouseProgressionClass>();
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 
-			if (Component != null)
+			// Zryachiy is dead, change zone availability status.
+			if (packet.WildType == WildSpawnType.bossZryachiy)
 			{
-				Component.HandlePacket(packet);
+				gameWorld.BufferZoneController.SetInnerZoneAvailabilityStatus(false, EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead);
 			}
-			else
+
+			RadioTransmitterRecodableComponent transmitter = this.MyPlayer.FindRadioTransmitter();
+
+			if (transmitter != null)
 			{
-				logger.LogError("OnLightkeeperGuardDeathPacketReceived: Received packet but manager is not initialized");
+				if (packet.ProfileId == MyPlayer.ProfileId)
+				{
+					return;
+				}
+
+				// If player has a transmitted that's encoded or green deny access to LK for player and decode DSP
+				if (transmitter.IsEncoded || transmitter.Status == RadioTransmitterStatus.Green)
+				{
+					gameWorld.BufferZoneController.SetPlayerAccessStatus(packet.ProfileId, false);
+					transmitter.SetStatus(RadioTransmitterStatus.Red);
+					transmitter.SetEncoded(false);
+					this.MyPlayer.Profile.TradersInfo["638f541a29ffd1183d187f57"].SetStanding(-0.01);
+				}
 			}
-			*/
 		}
 
 		private void OnBTRPacketReceived(BTRPacket packet)

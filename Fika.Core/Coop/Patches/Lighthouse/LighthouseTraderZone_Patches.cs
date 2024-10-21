@@ -18,8 +18,6 @@ namespace Fika.Core.Coop.Patches
 			new LighthouseTraderZone_AddPlayer_Patch().Enable();
 			new LighthouseTraderZone_RemovePlayer_Patch().Enable();
 			new LighthouseTraderZone_Awake_Patch().Enable();
-			new zryachiydebugpatch1().Enable();
-			new zryachiydebugpatch2().Enable();
 		}
 
 		internal class LighthouseTraderZone_AddPlayer_Patch : ModulePatch
@@ -146,44 +144,6 @@ namespace Fika.Core.Coop.Patches
 					return false;
 				}
 				return true;
-			}
-		}
-
-		internal class zryachiydebugpatch1 : ModulePatch
-		{
-			protected override MethodBase GetTargetMethod()
-			{
-				return typeof(GClass414).GetMethod(nameof(GClass414.IsEnemyNow));
-			}
-
-			[PatchPostfix]
-			public static void Postfix(IPlayer person, ref bool __result)
-			{
-				Logger.LogInfo($"zryachiydebugpatch1: {person.Id} - Is Enemy: {__result}");
-			}
-		}
-
-		internal class zryachiydebugpatch2 : ModulePatch
-		{
-			protected override MethodBase GetTargetMethod()
-			{
-				return typeof(GClass414).GetMethod(nameof(GClass414.method_6));
-			}
-
-			[PatchPostfix]
-			public static void Postfix(IPlayer player, ref bool __result)
-			{
-				RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
-				bool test = radioTransmitterRecodableComponent != null && radioTransmitterRecodableComponent.Handler.Status == RadioTransmitterStatus.Green;
-
-				if (test)
-				{
-					Logger.LogInfo($"zryachiydebugpatch2: {player.Id} - Has transmitter: Yes");
-				}
-				else
-				{
-					Logger.LogInfo($"zryachiydebugpatch2: {player.Id} - Has transmitter: Nope");
-				}
 			}
 		}
 	}
