@@ -10,6 +10,7 @@ using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -210,7 +211,7 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 			int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
-			if (Physics.Raycast(sourceRaycast, out RaycastHit hit, 500f, layer))
+			if (Physics.Raycast(sourceRaycast, out RaycastHit hit, FikaGlobals.PingRange, layer))
 			{
 				lastPingTime = DateTime.Now;
 				//GameObject gameObject = new("Ping", typeof(FikaPing));

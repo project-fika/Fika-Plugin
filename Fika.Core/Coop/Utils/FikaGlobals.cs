@@ -18,6 +18,8 @@ namespace Fika.Core.Coop.Utils
 		public const string TransiterTraderName = "BTR";
 		public const string DefaultTransitId = "66f5750951530ca5ae09876d";
 
+		public const int PingRange = 1000;
+
 		public static readonly List<EInteraction> BlockedInteractions =
 		[
 			EInteraction.DropBackpack, EInteraction.NightVisionOffGear, EInteraction.NightVisionOnGear,
