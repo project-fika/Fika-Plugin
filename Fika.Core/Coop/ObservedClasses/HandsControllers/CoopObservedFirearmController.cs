@@ -398,18 +398,21 @@ namespace Fika.Core.Coop.ObservedClasses
 
 				if (magazine is CylinderMagazineClass cylinderMagazine)
 				{
+					int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!Weapon.CylinderHammerClosed);
 					BulletClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
 					if (cylinderAmmo != null)
 					{
 						cylinderAmmo.IsUsed = true;
-						cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
-						FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
-						if (!cylinderAmmo.AmmoTemplate.RemoveShellAfterFire)
+						GStruct426<GInterface373> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
+						if (removeOperation.Failed)
 						{
-							Weapon.ShellsInChambers[cylinderMagazine.CurrentCamoraIndex] = cylinderAmmo.AmmoTemplate;
+							FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}");
 						}
+						coopPlayer.InventoryController.CheckChamber(Weapon, false);
+						FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
+						Weapon.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
 					}
-					if (Weapon.CylinderHammerClosed)
+					if (Weapon.CylinderHammerClosed || Weapon.FireMode.FireMode != Weapon.EFireMode.doubleaction)
 					{
 						cylinderMagazine.IncrementCamoraIndex(false);
 					}
