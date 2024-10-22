@@ -8,6 +8,7 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
+using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
@@ -291,6 +292,7 @@ namespace Fika.Core
 			new GClass2336_UpdateOfflineClientLogic_Patch().Enable();
 			new GClass2329_GetSyncObjectStrategyByType_Patch().Enable();
 			LighthouseTraderZone_Patches.Enable();
+			Zyriachy_Patches.Enable();
 			new BufferZoneControllerClass_method_1_Patch().Enable();
 			new BufferZoneControllerClass_SetPlayerInZoneStatus_Patch().Enable();
 			new BufferInnerZone_ChangeZoneInteractionAvailability_Patch().Enable();

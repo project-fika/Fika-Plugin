@@ -8,6 +8,7 @@ using EFT.AssetsManager;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
@@ -141,7 +142,6 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnThrowablePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
-			packetProcessor.SubscribeNetSerializable<LightkeeperGuardDeathPacket>(OnLightkeeperGuardDeathPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
@@ -1229,22 +1229,6 @@ namespace Fika.Core.Networking
 					controller.method_3(packet.Exit);
 					break;
 			}
-		}
-
-		private void OnLightkeeperGuardDeathPacketReceived(LightkeeperGuardDeathPacket packet)
-		{
-			/*
-			FikaLighthouseProgressionClass Component = Singleton<GameWorld>.Instance.gameObject.GetComponent<FikaLighthouseProgressionClass>();
-
-			if (Component != null)
-			{
-				Component.HandlePacket(packet);
-			}
-			else
-			{
-				logger.LogError("OnLightkeeperGuardDeathPacketReceived: Received packet but manager is not initialized");
-			}
-			*/
 		}
 
 		private void OnBTRPacketReceived(BTRPacket packet)
