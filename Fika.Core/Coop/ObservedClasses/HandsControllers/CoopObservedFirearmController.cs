@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using GPUInstancer;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -44,6 +45,8 @@ namespace Fika.Core.Coop.ObservedClasses
 		private bool hasFired = false;
 		private WeaponPrefab weaponPrefab;
 		private GClass1723 underBarrelManager;
+		private bool boltActionReload;
+
 		public override bool IsAiming
 		{
 			get
@@ -193,6 +196,20 @@ namespace Fika.Core.Coop.ObservedClasses
 			if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
 			{
 				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
+				if (boltActionReload)
+				{
+					MagazineClass magazine = Item.GetCurrentMagazine();
+					Weapon weapon = Weapon;
+					if (magazine != null && magazine is not CylinderMagazineClass && weapon.HasChambers)
+					{
+						magazine.Cartridges.PopTo(coopPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
+					}
+
+					FirearmsAnimator.SetBoltActionReload(false);
+					FirearmsAnimator.SetFire(false);
+
+					boltActionReload = false;
+				}
 			}
 		}
 
@@ -458,7 +475,10 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public void HandleObservedBoltAction()
 		{
-			StartCoroutine(ObservedBoltAction(FirearmsAnimator, this, coopPlayer.InventoryController));
+			FirearmsAnimator.SetBoltActionReload(true);
+			FirearmsAnimator.SetFire(true);
+
+			boltActionReload = true;
 		}
 
 		public List<BulletClass> FindAmmoByIds(string[] ammoIds)
@@ -474,30 +494,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 			return _preallocatedAmmoList;
 		}
-
-		private IEnumerator ObservedBoltAction(FirearmsAnimator animator, FirearmController controller, InventoryController inventoryController)
-		{
-			animator.SetBoltActionReload(true);
-			animator.SetFire(true);
-
-			yield return new WaitForSeconds(0.75f);
-
-			/*if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
-			{
-				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
-			}*/
-
-			MagazineClass magazine = controller.Item.GetCurrentMagazine();
-			Weapon weapon = controller.Weapon;
-
-			if (magazine != null && magazine is not CylinderMagazineClass && weapon.HasChambers)
-			{
-				magazine.Cartridges.PopTo(inventoryController, controller.Item.Chambers[0].CreateItemAddress());
-			}
-
-			animator.SetBoltActionReload(false);
-			animator.SetFire(false);
-		}
+		
 
 		private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, ref ShotInfoPacket packet, BulletClass ammo, MagazineClass magazine)
 		{
