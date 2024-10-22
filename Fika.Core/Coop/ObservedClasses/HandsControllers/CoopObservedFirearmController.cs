@@ -188,6 +188,14 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
+		public override void IEventsConsumerOnShellEject()
+		{
+			if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+			{
+				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
+			}
+		}
+
 		private IEnumerator BreakFiringLoop()
 		{
 			Traverse<bool> isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
@@ -474,10 +482,10 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			yield return new WaitForSeconds(0.75f);
 
-			if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+			/*if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
 			{
 				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
-			}
+			}*/
 
 			MagazineClass magazine = controller.Item.GetCurrentMagazine();
 			Weapon weapon = controller.Weapon;
@@ -522,7 +530,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				return;
 			}
 
-			weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
+			//weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
 		}
 
 		private class ObservedFlareOperation(FirearmController controller) : GClass1748(controller)
