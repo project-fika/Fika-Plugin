@@ -3,6 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Networking;
 using SPT.Reflection.Patching;
+using System;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches.Lighthouse
@@ -16,6 +17,10 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 #if DEBUG
 			new zryachiydebugpatch1().Enable();
 			new zryachiydebugpatch2().Enable();
+			//new zryachiydebugpatch3().Enable();
+			new zryachiydebugpatch4().Enable();
+			new zryachiydebugpatch5().Enable();
+			new zryachiydebugpatch6().Enable();
 #endif
 		}
 
@@ -75,6 +80,67 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 				{
 					Logger.LogInfo($"zryachiydebugpatch2: {player.Profile.ProfileId} ({player.Profile.Nickname}) - Has transmitter: Nope");
 				}
+			}
+		}
+
+		internal class zryachiydebugpatch3 : ModulePatch
+		{
+			protected override MethodBase GetTargetMethod()
+			{
+				return typeof(BotsGroup).GetMethod(nameof(BotsGroup.IsPlayerEnemy));
+			}
+
+			[PatchPostfix]
+			public static void Postfix(BotsGroup __instance, bool __result, IPlayer player)
+			{
+				if (__instance.InitialBotType is WildSpawnType.bossZryachiy or WildSpawnType.followerZryachiy)
+				{
+					FikaPlugin.Instance.FikaLogger.LogWarning($"LightkeeperDebug::IsPlayerEnemy: Result {__result}, player {player.Profile.Nickname}");
+				}
+			}
+		}
+
+		internal class zryachiydebugpatch4 : ModulePatch
+		{
+			protected override MethodBase GetTargetMethod()
+			{
+				return typeof(ShallBeGroupParams).GetProperty(nameof(ShallBeGroupParams.IsBossSetted)).GetGetMethod();
+			}
+
+			[PatchPostfix]
+			public static void Postfix(bool __result)
+			{
+				FikaPlugin.Instance.FikaLogger.LogWarning($"ShallBeGroupParams.IsBossSetted: Result {__result}");
+			}
+		}
+
+		internal class zryachiydebugpatch5 : ModulePatch
+		{
+			protected override MethodBase GetTargetMethod()
+			{
+				return typeof(BotBoss).GetProperty(nameof(BotBoss.BossLogic)).GetSetMethod();
+			}
+
+			[PatchPostfix]
+			public static void Postfix(BotBoss __instance)
+			{
+				FikaPlugin.Instance.FikaLogger.LogWarning($"BotBoss.BossLogic: Role {__instance.Owner.Profile.Info.Settings.Role}");
+				//FikaPlugin.Instance.FikaLogger.LogWarning($"BotBoss.BossLogic: Stack {Environment.StackTrace}");				
+				FikaPlugin.Instance.FikaLogger.LogWarning($"BotBoss.BossLogic: Result {__instance.BossLogic}");
+			}
+		}
+
+		internal class zryachiydebugpatch6 : ModulePatch
+		{
+			protected override MethodBase GetTargetMethod()
+			{
+				return typeof(BossSpawnerClass.Class324).GetMethod(nameof(BossSpawnerClass.Class324.method_0));
+			}
+
+			[PatchPostfix]
+			public static void Postfix(BotOwner owner)
+			{
+				FikaPlugin.Instance.FikaLogger.LogWarning($"BossSpawnerClass.Class324.method_0: State {owner.BotState}, role {owner.Profile.Info.Settings.Role}");
 			}
 		}
 	}
