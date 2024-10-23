@@ -30,13 +30,19 @@ namespace Fika.Core.Coop.Utils
 				if (weaponAnimation.IsAiming && weaponAnimation.CurrentScope.IsOptic)
 				{
 					Camera opticCamera = worldCameraInstance.OpticCameraManager.Camera;
-
 					if (GetScopeZoomLevel(weaponAnimation) > 1f)
 					{
+						int width = worldCameraInstance.SSAA.GetInputWidth();
+						int height = worldCameraInstance.SSAA.GetInputHeight();
+						if (worldCameraInstance.SSAA.GetCurrentSSRatio() > 1)
+						{
+							width = Screen.width;
+							height = Screen.height;
+						}
 						Vector3 opticCenterScreenPosition = GetOpticCenterScreenPosition(weaponAnimation, worldCamera);
-						Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(Screen.width, Screen.height, 0f) / 2);
+						Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(width, height, 0f) / 2);
 
-						float opticScale = Screen.height / opticCamera.scaledPixelHeight;
+						float opticScale = height / opticCamera.scaledPixelHeight;
 						Vector3 opticCameraOffset = new(worldCamera.pixelWidth / 2 - opticCamera.pixelWidth / 2, worldCamera.pixelHeight / 2 - opticCamera.pixelHeight / 2, 0);
 						Vector3 opticScreenPoint = (opticCamera.WorldToScreenPoint(worldPosition) + opticCameraOffset) * opticScale;
 
