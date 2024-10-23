@@ -2583,15 +2583,12 @@ namespace Fika.Core.Coop.GameMode
 			{
 				GameWorld gameWorld = Singleton<GameWorld>.Instance;
 				List<LootItemPositionClass> list = new(gameWorld.LootList.Count);
-				using (List<IKillableLootItem>.Enumerator enumerator = gameWorld.LootList.GetEnumerator())
+				for (int i = 0; i < gameWorld.LootList.Count; i++)
 				{
-					while (enumerator.MoveNext())
+					IKillableLootItem item = gameWorld.LootList[i];
+					if (item is LootItem lootItem && (item is not Corpse or ObservedCorpse))
 					{
-						LootItem lootItem;
-						if ((lootItem = enumerator.Current as LootItem) != null)
-						{
-							list.Add(SerializeLootItem(lootItem, gameWorld));
-						}
+						list.Add(SerializeLootItem(lootItem, gameWorld));
 					}
 				}
 				foreach (LootableContainer lootableContainer in LocationScene.GetAllObjects<LootableContainer>(false))
@@ -2645,6 +2642,10 @@ namespace Fika.Core.Coop.GameMode
 				num = (short)Array.IndexOf(gameWorld.Platforms, lootItem.Platform);
 			}
 			/*Corpse corpse;*/
+			if (lootItem is Corpse or ObservedCorpse)
+			{
+				return null;
+			}
 			LootItemPositionClass lootItemPositionClass;
 			// TODO: Send corpses instead of killing the players...
 			/*if ((corpse = lootItem as Corpse) != null)
