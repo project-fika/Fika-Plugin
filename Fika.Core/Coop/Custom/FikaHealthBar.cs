@@ -162,12 +162,10 @@ namespace Fika.Core.Coop.Custom
 			bool isSSAAEnabled = ssaa != null && ssaa.isActiveAndEnabled;
 			if (isSSAAEnabled)
 			{
-				int outputWidth = ssaa.GetOutputWidth();
-				float inputWidth = ssaa.GetInputWidth();
-				screenScale = outputWidth / inputWidth;
+				screenScale = ssaa.GetCurrentSSRatio();
 			}
 
-			playerPlate.ScalarObjectScreen.transform.position = screenScale < 1 ? screenPoint : screenPoint * screenScale;
+			playerPlate.ScalarObjectScreen.transform.position = screenScale < 1 ? screenPoint : screenPoint / screenScale;
 
 			float distFromCenterMultiplier = 1f;
 			if (FikaPlugin.DecreaseOpacityNotLookingAt.Value)
