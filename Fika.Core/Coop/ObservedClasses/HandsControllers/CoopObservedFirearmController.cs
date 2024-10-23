@@ -46,6 +46,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		private WeaponPrefab weaponPrefab;
 		private GClass1723 underBarrelManager;
 		private bool boltActionReload;
+		private bool isThrowingPatron;
 
 		public override bool IsAiming
 		{
@@ -83,13 +84,37 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(GClass1748)] = new OperationFactoryDelegate(Flare1);
+			operationFactoryDelegates[typeof(GClass1748)] = new OperationFactoryDelegate(Idle1);
+			operationFactoryDelegates[typeof(GClass1733)] = new OperationFactoryDelegate(ThrowPatron1);
+			operationFactoryDelegates[typeof(GClass1734)] = new OperationFactoryDelegate(ThrowPatron2);
+			operationFactoryDelegates[typeof(GClass1759)] = new OperationFactoryDelegate(ThrowPatron3);
+			operationFactoryDelegates[typeof(GClass1762)] = new OperationFactoryDelegate(ThrowPatron4);
 			return operationFactoryDelegates;
 		}
 
-		private BaseAnimationOperation Flare1()
+		private BaseAnimationOperation ThrowPatron1()
 		{
-			return new ObservedFlareOperation(this);
+			return new ObservedThrowPatronOperation1(this);
+		}
+
+		private BaseAnimationOperation ThrowPatron2()
+		{
+			return new ObservedThrowPatronOperation2(this);
+		}
+
+		private BaseAnimationOperation ThrowPatron3()
+		{
+			return new ObservedThrowPatronOperation3(this);
+		}
+
+		private BaseAnimationOperation ThrowPatron4()
+		{
+			return new ObservedThrowPatronOperation4(this);
+		}
+
+		private BaseAnimationOperation Idle1()
+		{
+			return new ObservedIdleOperation(this);
 		}
 
 		protected void Start()
@@ -193,6 +218,13 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public override void IEventsConsumerOnShellEject()
 		{
+			if (isThrowingPatron)
+			{
+				isThrowingPatron = false;
+				CurrentOperation.OnShellEjectEvent();
+				return;
+			}
+
 			if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
 			{
 				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
@@ -530,11 +562,55 @@ namespace Fika.Core.Coop.ObservedClasses
 			//weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
 		}
 
-		private class ObservedFlareOperation(FirearmController controller) : GClass1748(controller)
+		private class ObservedIdleOperation(FirearmController controller) : GClass1748(controller)
 		{
 			public override void ProcessRemoveOneOffWeapon()
 			{
 				// Do nothing
+			}
+		}
+
+		private class ObservedThrowPatronOperation1(FirearmController controller) : GClass1733(controller)
+		{
+			private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+
+			public override void Start(GClass1720 reloadMultiBarrelResult, Callback callback)
+			{
+				observedController.isThrowingPatron = true;
+				base.Start(reloadMultiBarrelResult, callback);
+			}
+		}
+
+		private class ObservedThrowPatronOperation2(FirearmController controller) : GClass1734(controller)
+		{
+			private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+
+			public override void Start(GClass1721 reloadSingleBarrelResult, Callback callback)
+			{
+				observedController.isThrowingPatron = true;
+				base.Start(reloadSingleBarrelResult, callback);
+			}
+		}
+
+		private class ObservedThrowPatronOperation3(FirearmController controller) : GClass1759(controller)
+		{
+			private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+
+			public override void Start()
+			{
+				observedController.isThrowingPatron = true;
+				base.Start();
+			}
+		}
+
+		private class ObservedThrowPatronOperation4(FirearmController controller) : GClass1762(controller)
+		{
+			private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+
+			public override void Start(BulletClass ammo, Callback callback)
+			{
+				observedController.isThrowingPatron = true;
+				base.Start(ammo, callback);
 			}
 		}
 	}
