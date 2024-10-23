@@ -2624,7 +2624,7 @@ namespace Fika.Core.Coop.GameMode
 						});
 					}
 				}
-				list.Sort(new Comparison<LootItemPositionClass>(LootCompare));
+				list.Sort(LootCompare);
 
 				return SimpleZlib.CompressToBytes(list.ToJson([]), 6);
 			}
