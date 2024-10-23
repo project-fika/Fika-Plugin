@@ -1234,7 +1234,10 @@ namespace Fika.Core.Networking
 		private void OnBTRPacketReceived(BTRPacket packet)
 		{
 			BTRControllerClass btrController = Singleton<GameWorld>.Instance.BtrController;
-			btrController?.SyncBTRVehicleFromServer(packet.Data);
+			if (btrController != null)
+			{
+				btrController.SyncBTRVehicleFromServer(packet.Data); 
+			}
 		}
 
 		private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
