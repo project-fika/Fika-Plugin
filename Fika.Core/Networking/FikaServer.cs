@@ -1337,7 +1337,7 @@ namespace Fika.Core.Networking
 				TimeSinceLastPeerDisconnected = DateTime.Now;
 			}
 
-			if (FikaBackendUtils.IsDedicatedGame)
+			if (FikaBackendUtils.IsDedicated)
 			{
 				if (netServer.ConnectedPeersCount == 0)
 				{
