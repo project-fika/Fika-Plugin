@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
@@ -230,7 +231,7 @@ namespace Fika.Core
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
+			SetupConfigEventHandlers();
 
 			DisableSPTPatches();
 			EnableOverridePatches();
@@ -256,6 +257,11 @@ namespace Fika.Core
 
 			StartCoroutine(RunChecks());
 		}
+
+		private void SetupConfigEventHandlers()
+		{
+			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
+		}		
 
 		private static void EnableFikaPatches()
 		{
