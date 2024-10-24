@@ -28,16 +28,6 @@ namespace Fika.Core.Coop.Components
 		{
 			Logger.LogInfo("Initializing");
 
-			//Destroy on client as we dont need to listen to these events, and receive them from the host.
-			if (FikaBackendUtils.IsClient)
-			{
-				Logger.LogInfo("Running on client, destroying");
-
-				Destroy(this);
-
-				return;
-			}
-
 			server = Singleton<FikaServer>.Instance;
 
 			summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSummonStartedEvent>(OnHalloweenSummonStarted);

@@ -1565,7 +1565,10 @@ namespace Fika.Core.Coop.GameMode
 					transform.InstantiatePrefab(gameObject);
 				}
 
-				halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
+				if (isServer)
+				{
+					halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>(); 
+				}
 			}
 
 			if (FikaPlugin.Instance.UseBTR && instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
