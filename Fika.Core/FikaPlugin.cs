@@ -182,7 +182,6 @@ namespace Fika.Core
 		public static ConfigEntry<bool> NativeSockets { get; set; }
 		public static ConfigEntry<string> ForceIP { get; set; }
 		public static ConfigEntry<string> ForceBindIP { get; set; }
-		public static ConfigEntry<string> ForceBindIP2 { get; set; }
 		public static ConfigEntry<float> AutoRefreshRate { get; set; }
 		public static ConfigEntry<int> UDPPort { get; set; }
 		public static ConfigEntry<bool> UseUPnP { get; set; }
