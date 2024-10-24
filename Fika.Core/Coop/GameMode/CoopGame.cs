@@ -1564,6 +1564,10 @@ namespace Fika.Core.Coop.GameMode
 				{
 					transform.InstantiatePrefab(gameObject);
 				}
+				else
+				{
+					Logger.LogError("CoopGame::vmethod_1: Error instantiating the HalloweenEventControllerClass!");
+				}
 
 				if (isServer)
 				{

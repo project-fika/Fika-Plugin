@@ -38,7 +38,7 @@ namespace Fika.Core.Coop.Components
 		private void OnHalloweenSummonStarted(HalloweenSummonStartedEvent summonStartedEvent)
 		{
 #if DEBUG
-			Logger.LogWarning("OnHalloweenSummonStarted"); 
+			logger.LogWarning("OnHalloweenSummonStarted"); 
 #endif
 
 			HalloweenEventPacket packet = new(EHalloweenPacketType.Summon)
@@ -52,7 +52,7 @@ namespace Fika.Core.Coop.Components
 		private void OnHalloweenSyncStateEvent(HalloweenSyncStateEvent syncStateEvent)
 		{
 #if DEBUG
-			Logger.LogWarning("OnHalloweenSyncStateEvent"); 
+			logger.LogWarning("OnHalloweenSyncStateEvent"); 
 #endif
 
 			HalloweenEventPacket packet = new(EHalloweenPacketType.Sync)
@@ -66,7 +66,7 @@ namespace Fika.Core.Coop.Components
 		private void OnHalloweenSyncExitsEvent(HalloweenSyncExitsEvent syncStateEvent)
 		{
 #if DEBUG
-			Logger.LogWarning("OnHalloweenSyncExitsEvent"); 
+			logger.LogWarning("OnHalloweenSyncExitsEvent"); 
 #endif
 
 			HalloweenEventPacket packet = new(EHalloweenPacketType.Exit)
