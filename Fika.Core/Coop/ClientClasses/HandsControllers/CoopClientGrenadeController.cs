@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using System;
 using UnityEngine;
 using static Fika.Core.Networking.FirearmSubPackets;
@@ -14,12 +15,24 @@ namespace Fika.Core.Coop.ClientClasses
 	internal class CoopClientGrenadeController : Player.GrenadeHandsController
 	{
 		protected CoopPlayer player;
+		private bool isClient;
 
 		public static CoopClientGrenadeController Create(CoopPlayer player, GrenadeClass item)
 		{
 			CoopClientGrenadeController controller = smethod_9<CoopClientGrenadeController>(player, item);
 			controller.player = player;
+			controller.isClient = FikaBackendUtils.IsClient;
 			return controller;
+		}
+
+		public override bool CanThrow()
+		{
+			if (isClient)
+			{
+				return !player.WaitingForCallback && base.CanThrow();
+			}
+
+			return base.CanThrow();
 		}
 
 		public override void ExamineWeapon()

@@ -51,6 +51,13 @@ namespace Fika.Core.Coop.Players
 		public bool IsObservedAI = false;
 		public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
 		public FikaSnapshotter Snapshotter;
+		public bool WaitingForCallback
+		{
+			get
+			{
+				return OperationCallbacks.Count > 0;
+			}
+		}
 
 		protected string lastWeaponId;
 

@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,11 +16,13 @@ namespace Fika.Core.Coop.ClientClasses
 	public class CoopClientFirearmController : Player.FirearmController
 	{
 		protected CoopPlayer player;
+		private bool isClient;
 
 		public static CoopClientFirearmController Create(CoopPlayer player, Weapon weapon)
 		{
 			CoopClientFirearmController controller = smethod_6<CoopClientFirearmController>(player, weapon);
 			controller.player = player;
+			controller.isClient = FikaBackendUtils.IsClient;
 			return controller;
 		}
 
@@ -52,6 +55,26 @@ namespace Fika.Core.Coop.ClientClasses
 				SetAim(false);
 			}
 			base.OnPlayerDead();
+		}
+
+		public override bool CanStartReload()
+		{
+			if (isClient)
+			{
+				return !player.WaitingForCallback && base.CanStartReload();
+			}
+
+			return base.CanStartReload();
+		}
+
+		public override bool CanPressTrigger()
+		{
+			if (isClient)
+			{
+				return !player.WaitingForCallback && base.CanPressTrigger();
+			}
+
+			return base.CanPressTrigger();
 		}
 
 		public Player.BaseAnimationOperation Weapon1()
