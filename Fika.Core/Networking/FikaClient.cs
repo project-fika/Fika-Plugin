@@ -1211,22 +1211,41 @@ namespace Fika.Core.Networking
 
 			if (controller == null)
 			{
+				logger.LogError("Received HalloweenEventPacket but controller was null!");
 				return;
 			}
 
 			switch (packet.PacketType)
 			{
 				case EHalloweenPacketType.Summon:
-					controller.method_5(new()
+#if DEBUG
+					logger.LogWarning($"Received SummonEvent: pos: {packet.SummonPosition.ToStringHighResolution()}"); 
+#endif
+					HalloweenSummonStartedEvent summonEvent = new()
 					{
 						PointPosition = packet.SummonPosition
-					});
+					};
+					summonEvent.Invoke();
 					break;
 				case EHalloweenPacketType.Sync:
-					controller.SetEventState(packet.EventState, false);
+#if DEBUG
+					logger.LogWarning($"Received StateEvent: type: {packet.EventState}"); 
+#endif
+					HalloweenSyncStateEvent stateEvent = new()
+					{
+						EventState = packet.EventState
+					};
+					stateEvent.Invoke();
 					break;
 				case EHalloweenPacketType.Exit:
-					controller.method_3(packet.Exit);
+#if DEBUG
+					logger.LogWarning($"Received Exit: name: {packet.Exit}"); 
+#endif
+					HalloweenSyncExitsEvent exitEvent = new()
+					{
+						ExitName = packet.Exit
+					};
+					exitEvent.Invoke();
 					break;
 			}
 		}
