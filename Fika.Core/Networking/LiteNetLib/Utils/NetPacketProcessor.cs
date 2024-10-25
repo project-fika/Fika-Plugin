@@ -259,15 +259,8 @@ namespace LiteNetLib.Utils
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                try
-                {
-                    reference.Deserialize(reader);
-                }
-                catch
-                {
-                    FikaPlugin.Instance.FikaLogger.LogError("Error when deserializing " + reference.GetType().Name + " packet.");
-                }
-                onReceive(reference, (TUserData)userData);
+				reference.Deserialize(reader);
+				onReceive(reference, (TUserData)userData);
             };
         }
 
@@ -277,15 +270,8 @@ namespace LiteNetLib.Utils
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                try
-                {
-                    reference.Deserialize(reader);
-                }
-                catch
-                {
-                    FikaPlugin.Instance.FikaLogger.LogError("Error when deserializing " + reference.GetType().Name + " packet.");
-                }
-                onReceive(reference);
+				reference.Deserialize(reader);
+				onReceive(reference);
             };
         }
 
