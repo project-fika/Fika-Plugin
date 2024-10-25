@@ -1566,7 +1566,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 				else
 				{
-					Logger.LogError("CoopGame::vmethod_1: Error instantiating the HalloweenEventControllerClass!");
+					Logger.LogError("CoopGame::vmethod_1: Error loading Halloween assets!");
 				}
 
 				if (isServer)
