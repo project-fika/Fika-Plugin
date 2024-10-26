@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT.GlobalEvents;
-using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using System;
@@ -41,9 +40,10 @@ namespace Fika.Core.Coop.Components
 			logger.LogWarning("OnHalloweenSummonStarted"); 
 #endif
 
-			HalloweenEventPacket packet = new(EHalloweenPacketType.Summon)
+			HalloweenEventPacket packet = new()
 			{
-				SummonPosition = summonStartedEvent.PointPosition
+				PacketType = EHalloweenPacketType.Summon,
+				SyncEvent = summonStartedEvent
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
@@ -55,9 +55,10 @@ namespace Fika.Core.Coop.Components
 			logger.LogWarning("OnHalloweenSyncStateEvent"); 
 #endif
 
-			HalloweenEventPacket packet = new(EHalloweenPacketType.Sync)
+			HalloweenEventPacket packet = new()
 			{
-				EventState = syncStateEvent.EventState
+				PacketType = EHalloweenPacketType.Sync,
+				SyncEvent = syncStateEvent
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
@@ -69,9 +70,10 @@ namespace Fika.Core.Coop.Components
 			logger.LogWarning("OnHalloweenSyncExitsEvent"); 
 #endif
 
-			HalloweenEventPacket packet = new(EHalloweenPacketType.Exit)
+			HalloweenEventPacket packet = new()
 			{
-				Exit = syncStateEvent.ExitName
+				PacketType = EHalloweenPacketType.Exit,
+				SyncEvent = syncStateEvent
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);

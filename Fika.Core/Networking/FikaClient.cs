@@ -1211,43 +1211,17 @@ namespace Fika.Core.Networking
 
 			if (controller == null)
 			{
-				logger.LogError("Received HalloweenEventPacket but controller was null!");
+				logger.LogError("OnHalloweenEventPacketReceived: controller was null!");
 				return;
 			}
 
-			switch (packet.PacketType)
+			if (packet.SyncEvent == null)
 			{
-				case EHalloweenPacketType.Summon:
-#if DEBUG
-					logger.LogWarning($"Received SummonEvent: pos: {packet.SummonPosition.ToStringHighResolution()}"); 
-#endif
-					HalloweenSummonStartedEvent summonEvent = new()
-					{
-						PointPosition = packet.SummonPosition
-					};
-					summonEvent.Invoke();
-					break;
-				case EHalloweenPacketType.Sync:
-#if DEBUG
-					logger.LogWarning($"Received StateEvent: type: {packet.EventState}"); 
-#endif
-					HalloweenSyncStateEvent stateEvent = new()
-					{
-						EventState = packet.EventState
-					};
-					stateEvent.Invoke();
-					break;
-				case EHalloweenPacketType.Exit:
-#if DEBUG
-					logger.LogWarning($"Received Exit: name: {packet.Exit}"); 
-#endif
-					HalloweenSyncExitsEvent exitEvent = new()
-					{
-						ExitName = packet.Exit
-					};
-					exitEvent.Invoke();
-					break;
+				logger.LogError("OnHalloweenEventPacketReceived: event was null!");
+				return;
 			}
+
+			packet.SyncEvent.Invoke();
 		}
 
 		private void OnBTRPacketReceived(BTRPacket packet)
