@@ -11,7 +11,7 @@ namespace Fika.Core.Networking
 		public bool IsRequest = true;
 		public string ProfileId = profileId;
 		public bool HasCharacters = false;
-		public string[] Characters;
+		public int[] Characters;
 		public PlayerInfoPacket PlayerInfoPacket;
 		public bool IsAlive = true;
 		public bool IsAI = false;
@@ -25,7 +25,7 @@ namespace Fika.Core.Networking
 			HasCharacters = reader.GetBool();
 			if (HasCharacters)
 			{
-				Characters = reader.GetStringArray();
+				Characters = reader.GetIntArray();
 			}
 			if (!IsRequest)
 			{

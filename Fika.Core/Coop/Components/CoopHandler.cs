@@ -33,6 +33,9 @@ namespace Fika.Core.Coop.Components
 			}
 		}
 
+		/// <summary>
+		/// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>
+		/// </summary>
 		public Dictionary<int, CoopPlayer> Players = [];
 		public List<CoopPlayer> HumanPlayers = [];
 		public int AmountOfHumans = 1;
@@ -253,10 +256,10 @@ namespace Fika.Core.Coop.Components
 			if (Players.Count > 0)
 			{
 				requestPacket.HasCharacters = true;
-				List<string> characters = new(queuedProfileIds);
-				foreach (CoopPlayer player in Players.Values)
+				List<int> characters = [];
+				foreach (int netId in Players.Keys)
 				{
-					characters.Add(player.ProfileId);
+					characters.Add(netId);
 				}
 				requestPacket.Characters = [.. characters];
 			}

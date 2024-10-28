@@ -1028,38 +1028,38 @@ namespace Fika.Core.Networking
 
 			if (packet.IsRequest)
 			{
-				foreach (CoopPlayer player in coopHandler.Players.Values)
+				foreach (KeyValuePair<int, CoopPlayer> pair in coopHandler.Players)
 				{
-					if (player.ProfileId == packet.ProfileId)
+					if (pair.Value.ProfileId == packet.ProfileId)
 					{
 						continue;
 					}
 
-					if (packet.Characters.Contains(player.ProfileId))
+					if (packet.Characters.Contains(pair.Key))
 					{
 						continue;
 					}
 
-					AllCharacterRequestPacket requestPacket = new(player.ProfileId)
+					AllCharacterRequestPacket requestPacket = new(pair.Value.ProfileId)
 					{
 						IsRequest = false,
-						PlayerInfoPacket = new(player.Profile, player.InventoryController.CurrentId, player.InventoryController.NextOperationId),
-						IsAlive = player.HealthController.IsAlive,
-						IsAI = player is CoopBot,
-						Position = player.Transform.position,
-						NetId = player.NetId
+						PlayerInfoPacket = new(pair.Value.Profile, pair.Value.InventoryController.CurrentId, pair.Value.InventoryController.NextOperationId),
+						IsAlive = pair.Value.HealthController.IsAlive,
+						IsAI = pair.Value is CoopBot,
+						Position = pair.Value.Transform.position,
+						NetId = pair.Value.NetId
 					};
 
-					if (player.ActiveHealthController != null)
+					if (pair.Value.ActiveHealthController != null)
 					{
-						requestPacket.PlayerInfoPacket.HealthByteArray = player.ActiveHealthController.SerializeState();
+						requestPacket.PlayerInfoPacket.HealthByteArray = pair.Value.ActiveHealthController.SerializeState();
 					}
 
-					if (player.HandsController != null)
+					if (pair.Value.HandsController != null)
 					{
-						requestPacket.PlayerInfoPacket.ControllerType = GClass1783.FromController(player.HandsController);
-						requestPacket.PlayerInfoPacket.ItemId = player.HandsController.Item.Id;
-						requestPacket.PlayerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
+						requestPacket.PlayerInfoPacket.ControllerType = GClass1783.FromController(pair.Value.HandsController);
+						requestPacket.PlayerInfoPacket.ItemId = pair.Value.HandsController.Item.Id;
+						requestPacket.PlayerInfoPacket.IsStationary = pair.Value.MovementContext.IsStationaryWeaponInHands;
 					}
 
 					SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
