@@ -399,14 +399,35 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (packet.UnderbarrelShot)
 			{
-				if (UnderbarrelWeapon.Chamber.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
+				if (UnderbarrelWeapon != null)
 				{
-					grenadeBullet.IsUsed = true;
-					UnderbarrelWeapon.Chamber.RemoveItem();
-					underBarrelManager?.DestroyPatronInWeapon();
+					if (UnderbarrelWeapon.Chamber.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
+					{
+						grenadeBullet.IsUsed = true;
+						UnderbarrelWeapon.Chamber.RemoveItem();
+						underBarrelManager?.DestroyPatronInWeapon();
+					}
+					FirearmsAnimator.SetFire(false);
+					return; 
 				}
-				FirearmsAnimator.SetFire(false);
-				return;
+
+				if (Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
+				{
+					Slot slot = Weapon.FirstLoadedChamberSlot;
+					int index = Weapon.Chambers.IndexOf(slot);
+					if (slot.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
+					{
+						grenadeBullet.IsUsed = true;
+						slot.RemoveItem();
+						if (WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+						{
+							weaponEffectsManager.MoveAmmoFromChamberToShellPort(true, index);
+						}
+						Weapon.ShellsInChambers[index] = grenadeBullet.AmmoTemplate;
+						FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
+						FirearmsAnimator.SetShellsInWeapon(Weapon.ShellsInWeaponCount);
+					}
+				}
 			}
 
 			if (Weapon.HasChambers)

@@ -300,7 +300,7 @@ namespace Fika.Core.Coop.ClientClasses
 					ShotDirection = shotDirection,
 					ChamberIndex = chamberIndex,
 					Overheat = overheat,
-					UnderbarrelShot = Weapon.IsUnderBarrelDeviceActive,
+					UnderbarrelShot = Weapon.IsUnderBarrelDeviceActive || Weapon.IsGrenadeLauncher,
 					AmmoTemplate = ammo.AmmoTemplate._id,
 					LastShotOverheat = weapon.MalfState.LastShotOverheat,
 					LastShotTime = weapon.MalfState.LastShotTime,
