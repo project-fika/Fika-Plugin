@@ -692,11 +692,6 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
-		{
-			HandsController.Drop(1f, null, fastDrop, nextControllerItem);
-		}
-
 		public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
 		{
 			method_32(clip);
