@@ -327,7 +327,7 @@ namespace Fika.Core.Coop.Players
 				isDying = HealthController != null && HealthController.FindActiveEffect<GInterface309>(EBodyPart.Common) == null;
 			}
 
-			bool isAudible = Physical.BreathIsAudible;
+			bool isAudible = Physical != null && Physical.BreathIsAudible;
 			bool shouldHeavyBreathe = isAudible || Muffled;
 			if (gameObject.activeSelf && !HeavyBreath && shouldHeavyBreathe)
 			{
