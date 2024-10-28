@@ -4,7 +4,6 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using GPUInstancer;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -150,7 +149,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						needsReset = false;
 						WeaponSoundPlayer.OnBreakLoop();
 					}
-				} 
+				}
 			}
 		}
 
@@ -526,7 +525,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 			return _preallocatedAmmoList;
 		}
-		
+
 
 		private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, ref ShotInfoPacket packet, BulletClass ammo, MagazineClass magazine)
 		{
