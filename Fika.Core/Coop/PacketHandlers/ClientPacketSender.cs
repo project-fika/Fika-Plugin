@@ -48,7 +48,8 @@ namespace Fika.Core.Coop.PacketHandlers
 
 		private DateTime lastPingTime;
 		private int updateRate;
-		private float frameCounter;
+		private int fixedUpdateCount;
+		private int fixedUpdatesPerTick;
 
 		protected void Awake()
 		{
@@ -57,7 +58,8 @@ namespace Fika.Core.Coop.PacketHandlers
 			enabled = false;
 			lastPingTime = DateTime.Now;
 			updateRate = Client.SendRate;
-			frameCounter = 0f;
+			fixedUpdateCount = 0;
+			fixedUpdatesPerTick = Mathf.FloorToInt(60f / updateRate);
 		}
 
 		public void Init()
@@ -87,12 +89,11 @@ namespace Fika.Core.Coop.PacketHandlers
 				return;
 			}
 
-			float dur = 1f / updateRate;
-			frameCounter += Time.fixedDeltaTime;
-			while (frameCounter >= dur)
+			fixedUpdateCount++;
+			if (fixedUpdateCount >= fixedUpdatesPerTick)
 			{
-				frameCounter -= dur;
 				SendPlayerState();
+				fixedUpdateCount = 0;
 			}
 		}
 

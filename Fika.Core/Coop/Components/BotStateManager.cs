@@ -9,24 +9,24 @@ namespace Fika.Core.Coop.Components
 		public delegate void UpdateAction();
 		public event UpdateAction OnUpdate;
 
-		private float updateRate;
-		private float frameCounter;
+		private int fixedUpdateCount;
+		private int fixedUpdatesPerTick;
 
 		public static BotStateManager Create(CoopGame game, FikaServer server)
 		{
 			BotStateManager component = game.gameObject.AddComponent<BotStateManager>();
-			component.updateRate = server.SendRate;
+			component.fixedUpdateCount = 0;
+			component.fixedUpdatesPerTick = Mathf.FloorToInt(60f / server.SendRate);
 			return component;
 		}
 
-		private void Update()
+		private void FixedUpdate()
 		{
-			float dur = 1f / updateRate;
-			frameCounter += Time.deltaTime;
-			while (frameCounter >= dur)
+			fixedUpdateCount++;
+			if (fixedUpdateCount >= fixedUpdatesPerTick)
 			{
-				frameCounter -= dur;
 				OnUpdate?.Invoke();
+				fixedUpdateCount = 0;
 			}
 		}
 
