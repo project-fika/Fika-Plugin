@@ -253,12 +253,12 @@ namespace Fika.Core.Coop.Players
 			{
 				_isDeadAlready = true;
 			}
-			Player player = (damageInfo.Player == null) ? null : Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(damageInfo.Player.iPlayer.ProfileId);
-			if (player == this)
+			if (damageInfo.Player == null)
 			{
 				return;
 			}
-			if (player == null)
+			Player player = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(damageInfo.Player.iPlayer.ProfileId);
+			if (player == this)
 			{
 				return;
 			}
