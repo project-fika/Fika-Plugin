@@ -319,12 +319,12 @@ namespace Fika.Core.Coop.Players
 			bool isDying;
 			if (healthStatus != ETagStatus.BadlyInjured && healthStatus != ETagStatus.Dying)
 			{
-				isDying = false;
+				isDying = false;				
 			}
 			else
 			{
 				// Check for GClass increments
-				isDying = HealthController.FindActiveEffect<GInterface309>(EBodyPart.Common) == null;
+				isDying = HealthController != null && HealthController.FindActiveEffect<GInterface309>(EBodyPart.Common) == null;
 			}
 
 			bool isAudible = Physical.BreathIsAudible;
@@ -333,13 +333,16 @@ namespace Fika.Core.Coop.Players
 			{
 				ETagStatus status1 = isDying ? healthStatus : ETagStatus.Healthy;
 				ETagStatus status2 = isAudible ? ETagStatus.Aware : ETagStatus.Unaware;
-				if (status1 == ETagStatus.Healthy && status2 == ETagStatus.Unaware)
+				if (Speaker != null)
 				{
-					Speaker.Play(EPhraseTrigger.OnBreath, status1 | status2, true, new int?(-1));
-				}
-				else
-				{
-					Speaker.Play(EPhraseTrigger.OnBreath, status1 | status2, true, null);
+					if (status1 == ETagStatus.Healthy && status2 == ETagStatus.Unaware)
+					{
+						Speaker.Play(EPhraseTrigger.OnBreath, status1 | status2, true, new int?(-1));
+					}
+					else
+					{
+						Speaker.Play(EPhraseTrigger.OnBreath, status1 | status2, true, null);
+					} 
 				}
 			}
 			HeavyBreath = shouldHeavyBreathe;
