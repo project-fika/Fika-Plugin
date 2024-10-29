@@ -862,7 +862,7 @@ namespace Fika.Core.Networking
 				CoopGame coopGame = CoopHandler.LocalGameInstance;
 				if (coopGame != null && coopGame.WeatherReady)
 				{
-					WeatherPacket weatherPacket2 = new()
+					WeatherPacket response = new()
 					{
 						IsRequest = false,
 						HasData = true,
@@ -871,7 +871,7 @@ namespace Fika.Core.Networking
 						WeatherClasses = coopGame.WeatherClasses
 					};
 
-					SendDataToPeer(peer, ref weatherPacket2, DeliveryMethod.ReliableUnordered);
+					SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
 				};
 			}
 		}

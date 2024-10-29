@@ -901,14 +901,14 @@ namespace Fika.Core.Networking
 		{
 			if (!packet.IsRequest)
 			{
-				if (CoopHandler.LocalGameInstance != null && CoopHandler.LocalGameInstance.WeatherClasses == null)
+				if (CoopHandler.LocalGameInstance != null)
 				{
 					CoopHandler.LocalGameInstance.WeatherClasses = packet.WeatherClasses;
 					CoopHandler.LocalGameInstance.Season = packet.Season;
 					return;
 				}
 
-				logger.LogWarning("WeatherPacketReceived: WeatherControl was null!");
+				logger.LogError("OnWeatherPacketReceived: LocalGameInstance was null!");
 			}
 		}
 

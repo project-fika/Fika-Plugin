@@ -1623,6 +1623,10 @@ namespace Fika.Core.Coop.GameMode
 					WeatherController.Instance.method_0(WeatherClasses);
 				}
 			}
+			else
+			{
+				Logger.LogError("WeatherController was null!");
+			}
 
 			WeatherReady = true;
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
