@@ -138,6 +138,7 @@ namespace Fika.Core.Coop.ClientClasses
 				return;
 			}
 
+			// Check for GClass increments
 			Class1111 currentOperation = CurrentOperation;
 			if (currentOperation != null)
 			{

@@ -2,7 +2,6 @@
 using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
@@ -13,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ClientClasses
+namespace Fika.Core.Coop.HostClasses
 {
 	/// <summary>
 	/// <see cref="ClientLocalGameWorld"/> used in Fika for hosts to override methods and logic
@@ -95,11 +94,26 @@ namespace Fika.Core.Coop.ClientClasses
 			ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
 		}
 
+		public override GClass2329 SyncObjectProcessorFactory()
+		{
+			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
+			{
+				TripwireManager = new(Singleton<GameWorld>.Instance)
+			};
+			return ClientSynchronizableObjectLogicProcessor;
+		}
+
 		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
 		{
 			if (item is not GrenadeClass grenadeClass)
 			{
 				return;
+			}
+
+			if (SynchronizableObjectLogicProcessor.TripwireManager == null)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError("TripwireManager was null! Creating new...");
+				SynchronizableObjectLogicProcessor.TripwireManager = new GClass2331(this);
 			}
 
 			TripwireSynchronizableObject tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);
