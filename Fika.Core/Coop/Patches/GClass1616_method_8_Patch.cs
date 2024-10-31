@@ -6,11 +6,11 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-	public class GClass1616_method_8_Patch : ModulePatch
+	public class GClass1641_method_8_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass1616).GetMethod(nameof(GClass1616.method_8));
+			return typeof(GClass1641).GetMethod(nameof(GClass1641.method_8));
 		}
 
 		[PatchPrefix]

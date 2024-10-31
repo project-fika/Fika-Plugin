@@ -108,7 +108,7 @@ namespace Fika.Core.Coop.Patches
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = FikaBackendUtils.TransitData;
 
-			GClass1284 profileInsurance = localSettings.profileInsurance;
+			GClass1307 profileInsurance = localSettings.profileInsurance;
 			if ((profileInsurance?.insuredItems) != null)
 			{
 				profile.InsuredItems = localSettings.profileInsurance.insuredItems;
@@ -116,7 +116,7 @@ namespace Fika.Core.Coop.Patches
 
 			if (!isServer)
 			{
-				timeHasComeScreenController.ChangeStatus("Joining coop game...");
+				instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Joining coop game...");
 
 				RaidSettingsRequest data = new();
 				RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
@@ -128,10 +128,10 @@ namespace Fika.Core.Coop.Patches
 			}
 			else
 			{
-				timeHasComeScreenController.ChangeStatus("Creating coop game...");
+				instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Creating coop game...");
 			}
 
-			StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation, timeHasComeScreenController);
+			StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation);
 
 			TimeSpan raidLimits = instance.method_47(raidSettings.SelectedLocation.EscapeTimeLimit);
 
@@ -139,7 +139,7 @@ namespace Fika.Core.Coop.Patches
 				MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
 				timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
 				fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-				new GClass2314(metricsConfig, instance), localRaidSettings, raidSettings);
+				new GClass2385(metricsConfig, instance), localRaidSettings, raidSettings);
 
 			Singleton<AbstractGame>.Create(coopGame);
 			metricsEvents.SetGameCreated();
@@ -170,17 +170,16 @@ namespace Fika.Core.Coop.Patches
 		}
 
 		private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile,
-			LocationSettingsClass.Location location, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController)
+			LocationSettingsClass.Location location)
 		{
 			private readonly TarkovApplication tarkovApplication = tarkovApplication;
 			private readonly Profile pmcProfile = pmcProfile;
 			private readonly Profile scavProfile = scavProfile;
 			private readonly LocationSettingsClass.Location location = location;
-			private readonly MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController = timeHasComeScreenController;
 
 			public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
 			{
-				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result, timeHasComeScreenController);
+				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result);
 			}
 		}
 
@@ -195,7 +194,7 @@ namespace Fika.Core.Coop.Patches
 			// Small delay to ensure the teleport command is processed first
 			await Task.Delay(250);
 
-			DamageInfo damageInfo = new()
+			GStruct421 damageInfo = new()
 			{
 				Damage = 1000,
 				DamageType = EDamageType.Impact

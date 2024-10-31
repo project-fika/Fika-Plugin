@@ -15,16 +15,16 @@ using System.Linq;
 
 namespace Fika.Core.Coop.HostClasses
 {
-	public class FikaHostTransitController : GClass1616
+	public class FikaHostTransitController : GClass1641
 	{
-		public FikaHostTransitController(BackendConfigSettingsClass.GClass1505 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+		public FikaHostTransitController(BackendConfigSettingsClass.GClass1529 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
 			: base(settings, parameters)
 		{
 			this.localRaidSettings = localRaidSettings;
 			OnPlayerEnter += OnHostPlayerEnter;
 			OnPlayerExit += OnHostPlayerExit;
 			string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
-			summonedTransits[profile.Id] = new GClass1614(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
+			summonedTransits[profile.Id] = new GClass1639(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
 			TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");
 			server = Singleton<FikaServer>.Instance;
 			playersInTransitZone = [];
@@ -329,7 +329,7 @@ namespace Fika.Core.Coop.HostClasses
 					tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
 				}
 				string profileId = player.ProfileId;
-				GClass1883 gclass = new()
+				GClass1926 gclass = new()
 				{
 					hash = hash,
 					playersCount = playersCount,
@@ -390,7 +390,7 @@ namespace Fika.Core.Coop.HostClasses
 				_id = profileId,
 			});
 
-			GClass1883 gclass = new()
+			GClass1926 gclass = new()
 			{
 				hash = Guid.NewGuid().ToString(),
 				playersCount = 1,
@@ -404,10 +404,10 @@ namespace Fika.Core.Coop.HostClasses
 			};
 			alreadyTransits.Add(profileId, gclass);
 
-			GClass1615 transitController = Singleton<GameWorld>.Instance.TransitController;
+			GClass1640 transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
-				if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1883 data))
+				if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1926 data))
 				{
 					coopGame.ExitStatus = ExitStatus.Transit;
 					coopGame.ExitLocation = point.parameters.name;

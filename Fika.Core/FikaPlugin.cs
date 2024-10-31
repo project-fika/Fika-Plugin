@@ -245,7 +245,7 @@ namespace Fika.Core
 			BundleLoaderPlugin = new();
 			BundleLoaderPlugin.Create();
 
-			BotSettingsRepoAbstractClass.Init();
+			GClass759.Init();
 
 			BotDifficulties = FikaRequestHandler.GetBotDifficulties();
 			ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
@@ -293,9 +293,9 @@ namespace Fika.Core
 			new Player_Hide_Patch().Enable();
 			new Player_UpdateBtrTraderServiceData_Patch().Enable();
 			BTRSide_Patches.Enable();
-			new GClass2335_UpdateOfflineClientLogic_Patch().Enable();
-			new GClass2336_UpdateOfflineClientLogic_Patch().Enable();
-			new GClass2329_GetSyncObjectStrategyByType_Patch().Enable();
+			new GClass2406_UpdateOfflineClientLogic_Patch().Enable();
+			new GClass2407_UpdateOfflineClientLogic_Patch().Enable();
+			new GClass2400_GetSyncObjectStrategyByType_Patch().Enable();
 			LighthouseTraderZone_Patches.Enable();
 			Zyriachy_Patches.Enable();
 			new BufferZoneControllerClass_method_1_Patch().Enable();
@@ -316,20 +316,20 @@ namespace Fika.Core
 			new RaidSettingsWindow_method_8_Patch().Enable();
 			new AIPlaceLogicPartisan_Dispose_Patch().Enable();
 			new Player_SpawnInHands_Patch().Enable();
-			new GClass596_method_0_Patch().Enable();
-			new GClass596_method_30_Patch().Enable();
+			new GClass607_method_0_Patch().Enable();
+			new GClass607_method_30_Patch().Enable();
 			new GClass1350_Constructor_Patch().Enable();
 			new AchievementsScreen_Show_Patch().Enable();
 			new AchievementView_Show_Patch().Enable();
 			new GClass3224_IsValid_Patch().Enable();
-			new GClass3223_ExceptAI_Patch().Enable();
-			new GClass1616_method_8_Patch().Enable();
+			new GClass3299_ExceptAI_Patch().Enable();
+			new GClass1641_method_8_Patch().Enable();
 			new GrenadeClass_Init_Patch().Enable();
 			new SessionResultExitStatus_Show_Patch().Enable();
 			new PlayUISound_Patch().Enable();
 			new PlayEndGameSound_Patch().Enable();
 			new MenuScreen_Awake_Patch().Enable();
-			new GClass3421_ShowAction_Patch().Enable();
+			new GClass3511_ShowAction_Patch().Enable();
 			new MenuScreen_method_8_Patch().Enable();
 			new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
 			new RagfairScreen_Show_Patch().Enable();
@@ -341,7 +341,7 @@ namespace Fika.Core
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
-			new GClass1615_method_0_Patch().Enable();
+			new GClass1640_method_0_Patch().Enable();
 			new TestHalloweenPatch().Enable();
 #endif
 		}

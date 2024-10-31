@@ -26,12 +26,20 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
+		public bool UsingSimplifiedSkeleton
+		{
+			get
+			{
+				return bot.UsedSimplifiedSkeleton;
+			}
+		}
+
+		public void ApplyDamageInfo(GStruct421 damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
 		{
 			bot.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
 		}
 
-		public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct400 shotId)
+		public ShotInfoClass ApplyShot(GStruct421 damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
 			{

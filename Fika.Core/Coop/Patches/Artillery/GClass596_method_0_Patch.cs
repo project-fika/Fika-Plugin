@@ -13,21 +13,21 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Patches
 {
-	public class GClass596_method_0_Patch : ModulePatch
+	public class GClass607_method_0_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass596).GetMethod(nameof(GClass596.method_0));
+			return typeof(GClass607).GetMethod(nameof(GClass607.method_0));
 		}
 
 		[PatchPrefix]
-		public static bool Prefix(GClass596 __instance, ref Task __result, CancellationToken cancellationToken)
+		public static bool Prefix(GClass607 __instance, ref Task __result, CancellationToken cancellationToken)
 		{
 			__result = SetupServerArtilleryController(cancellationToken, __instance);
 			return false;
 		}
 
-		private static async Task SetupServerArtilleryController(CancellationToken token, GClass596 instance)
+		private static async Task SetupServerArtilleryController(CancellationToken token, GClass607 instance)
 		{
 			Traverse controllerTraverse = Traverse.Create(instance);
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Patches
 
 			if (localGame == null)
 			{
-				throw new NullReferenceException("GClass596_method_0_Patch: CoopGame was null!");
+				throw new NullReferenceException("GClass607_method_0_Patch: CoopGame was null!");
 			}
 
 			while (localGame.Status != GameStatus.Started)

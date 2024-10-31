@@ -8,11 +8,11 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-	public class GClass3223_ExceptAI_Patch : ModulePatch
+	public class GClass3299_ExceptAI_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass3223).GetMethod(nameof(GClass3223.ExceptAI));
+			return typeof(GClass3299).GetMethod(nameof(GClass3299.ExceptAI));
 		}
 
 		[PatchPrefix]

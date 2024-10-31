@@ -17,5 +17,7 @@ namespace Fika.Core.Coop.GameMode
 		public void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f);
 
 		public ESeason Season { get; set; }
+
+		public GClass2359 SeasonsSettings { get; set; }
 	}
 }

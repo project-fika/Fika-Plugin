@@ -125,7 +125,7 @@ namespace Fika.Core.Coop.Custom
 			alivePlayers.Add(player);
 		}
 
-		private void PlayerDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
+		private void PlayerDied(EFT.Player player, EFT.IPlayer lastAggressor, GStruct421 damageInfo, EBodyPart part)
 		{
 			player.OnPlayerDead -= PlayerDied;
 			alivePlayers.Remove((CoopPlayer)player);
@@ -137,7 +137,7 @@ namespace Fika.Core.Coop.Custom
 			aliveBots.Add(bot);
 		}
 
-		private void BotDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
+		private void BotDied(EFT.Player player, EFT.IPlayer lastAggressor, GStruct421 damageInfo, EBodyPart part)
 		{
 			player.OnPlayerDead -= BotDied;
 			aliveBots.Remove((CoopPlayer)player);

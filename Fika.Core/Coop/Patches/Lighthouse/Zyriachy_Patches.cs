@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 				___botOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
 			}
 
-			private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
+			private static void OnZryachiyDead(Player player, IPlayer lastAggressor, GStruct421 damageInfo, EBodyPart part)
 			{
 				player.OnPlayerDead -= OnZryachiyDead;
 
@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 		{
 			protected override MethodBase GetTargetMethod()
 			{
-				return typeof(GClass414).GetMethod(nameof(GClass414.IsEnemyNow));
+				return typeof(GClass414).GetMethod(nameof(GClass422.IsEnemyNow));
 			}
 
 			[PatchPostfix]
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 		{
 			protected override MethodBase GetTargetMethod()
 			{
-				return typeof(GClass414).GetMethod(nameof(GClass414.method_6));
+				return typeof(GClass414).GetMethod(nameof(GClass422.method_6));
 			}
 
 			[PatchPostfix]
@@ -134,7 +134,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 		{
 			protected override MethodBase GetTargetMethod()
 			{
-				return typeof(BossSpawnerClass.Class324).GetMethod(nameof(BossSpawnerClass.Class324.method_0));
+				return typeof(BossSpawnerClass.Class328).GetMethod(nameof(BossSpawnerClass.Class328.method_0));
 			}
 
 			[PatchPostfix]

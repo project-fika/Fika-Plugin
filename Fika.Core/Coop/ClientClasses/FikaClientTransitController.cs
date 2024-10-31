@@ -10,15 +10,15 @@ using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public class FikaClientTransitController : GClass1618
+	public class FikaClientTransitController : GClass1643
 	{
-		public FikaClientTransitController(BackendConfigSettingsClass.GClass1505 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+		public FikaClientTransitController(BackendConfigSettingsClass.GClass1529 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
 			: base(settings, parameters)
 		{
 			OnPlayerEnter += OnClientPlayerEnter;
 			OnPlayerExit += OnClientPlayerExit;
 			string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
-			summonedTransits[profile.Id] = new GClass1614(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
+			summonedTransits[profile.Id] = new GClass1639(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
 			TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransiterTraderName);
 			this.localRaidSettings = localRaidSettings;
 		}
@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public void Init()
 		{
-			method_1(dictionary_0.Values);
+			method_5(dictionary_0.Values);
 		}
 
 		public override void Dispose()
@@ -84,7 +84,7 @@ namespace Fika.Core.Coop.ClientClasses
 				isSolo = true
 			});
 
-			GClass1883 gclass = new()
+			GClass1926 gclass = new()
 			{
 				hash = Guid.NewGuid().ToString(),
 				playersCount = 1,

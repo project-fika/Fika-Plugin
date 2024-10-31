@@ -1,9 +1,11 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
+using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,6 +42,36 @@ namespace Fika.Core.Coop.Utils
 		public static float GetLocalPlayerAimingSensitivity()
 		{
 			return Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity;
+		}
+
+		public static float GetApplicationTime()
+		{
+			return Time.time;
+		}
+
+		public static bool LampControllerNetIdNot0(LampController controller)
+		{
+			return controller.NetId != 0;
+		}
+
+		public static int LampControllerGetNetId(LampController controller)
+		{
+			return controller.NetId;
+		}
+
+		public static bool WindowBreakerAvailableToSync(WindowBreaker breaker)
+		{
+			return breaker.AvailableToSync;
+		}
+
+		public static Item GetLootItemPositionItem(LootItemPositionClass positionClass)
+		{
+			return positionClass.Item;
+		}
+
+		public static EBodyPart GetBodyPartFromCollider(BodyPartCollider collider)
+		{
+			return collider.BodyPartType;
 		}
 
 		public static string FormatFileSize(long bytes)
@@ -99,6 +131,11 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsDedicatedProfile(this Profile profile)
 		{
 			return profile.Info.GroupId.ToLower() == "dedicated";
+		}
+
+		public static void SetProfileNickname(this InfoClass infoClass, string nickname)
+		{
+			Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
 		}
 	}
 }

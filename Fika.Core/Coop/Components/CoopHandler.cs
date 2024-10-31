@@ -409,7 +409,7 @@ namespace Fika.Core.Coop.Components
 				isAi == true ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
 				EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode, FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
-				GClass1574.Default, firstId, firstOperationId).Result;
+				GClass1599.Default, firstId, firstOperationId).Result;
 
 			if (otherPlayer == null)
 			{

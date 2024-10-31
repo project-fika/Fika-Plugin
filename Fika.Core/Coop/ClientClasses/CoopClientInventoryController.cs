@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.ClientClasses
 			this.player = player;
 			coopPlayer = (CoopPlayer)player;
 			mongoID_0 = new(profile);
-			searchController = new GClass1896(profile, this);
+			searchController = new GClass1967(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 		}
 
@@ -79,12 +79,12 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		public override void vmethod_1(GClass3119 operation, Callback callback)
+		public override void vmethod_1(GClass3192 operation, Callback callback)
 		{
 			HandleOperation(operation, callback).HandleExceptions();
 		}
 
-		private async Task HandleOperation(GClass3119 operation, Callback callback)
+		private async Task HandleOperation(GClass3192 operation, Callback callback)
 		{
 			if (player.HealthController.IsAlive)
 			{
@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.ClientClasses
 			RunClientOperation(operation, callback);
 		}
 
-		private void RunClientOperation(GClass3119 operation, Callback callback)
+		private void RunClientOperation(GClass3192 operation, Callback callback)
 		{
 			if (!vmethod_0(operation))
 			{
@@ -103,7 +103,7 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			// Do not replicate picking up quest items, throws an error on the other clients            
-			if (operation is GClass3122 moveOperation)
+			if (operation is GClass3195 moveOperation)
 			{
 				Item lootedItem = moveOperation.Item;
 				if (lootedItem.QuestItem)
@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			// Do not replicate stashing quest items
-			if (operation is GClass3140 discardOperation)
+			if (operation is GClass3213 discardOperation)
 			{
 				if (discardOperation.Item.QuestItem)
 				{
@@ -140,13 +140,13 @@ namespace Fika.Core.Coop.ClientClasses
 
 			// Do not replicate quest operations / search operations
 			// Check for GClass increments, ReadPolymorph
-			if (operation is GClass3158 or GClass3162 or GClass3163 or GClass3164)
+			if (operation is GClass3232 or GClass3236 or GClass3237 or GClass3238)
 			{
 				base.vmethod_1(operation, callback);
 				return;
 			}
 
-			GClass1175 writer = new();
+			GClass1198 writer = new();
 			ClientInventoryOperationHandler handler = new()
 			{
 				Operation = operation,
@@ -184,7 +184,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return false;
 		}
 
-		private uint AddOperationCallback(GClass3119 operation, Action<ServerOperationStatus> callback)
+		private uint AddOperationCallback(GClass3192 operation, Action<ServerOperationStatus> callback)
 		{
 			ushort id = operation.Id;
 			coopPlayer.OperationCallbacks.Add(id, callback);
@@ -193,12 +193,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override SearchContentOperation vmethod_2(SearchableItemClass item)
 		{
-			return new GClass3158(method_12(), this, PlayerSearchController, Profile, item);
+			return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
 		}
 
 		private class ClientInventoryOperationHandler
 		{
-			public GClass3119 Operation;
+			public GClass3192 Operation;
 			public Callback Callback;
 			public CoopClientInventoryController InventoryController;
 			public IResult OperationResult = null;
@@ -249,7 +249,7 @@ namespace Fika.Core.Coop.ClientClasses
 				EOperationStatus localStatus = Operation.Status;
 				if (localStatus.InProgress())
 				{
-					if (Operation is GInterface391 ginterface)
+					if (Operation is GInterface403 ginterface)
 					{
 						ginterface.Terminate();
 					}

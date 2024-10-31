@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.Patches
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass722).GetMethod(nameof(GClass722.Create));
+			return typeof(GClass737).GetMethod(nameof(GClass737.Create));
 		}
 
 		[PatchPostfix]

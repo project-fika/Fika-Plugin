@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.HostClasses
 			gameWorld.ArtilleryProjectilesStates.Clear();
 		}
 
-		public void UpdateLootItems(GClass770<int, LootItem> lootItems)
+		public void UpdateLootItems(GClass786<int, LootItem> lootItems)
 		{
 			for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
 			{

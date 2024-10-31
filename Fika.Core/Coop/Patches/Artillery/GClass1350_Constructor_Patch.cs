@@ -10,11 +10,11 @@ namespace Fika.Core.Coop.Patches
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass1350).GetConstructors().Single();
+			return typeof(GClass1375).GetConstructors().Single();
 		}
 
 		[PatchPrefix]
-		public static bool Prefix(GClass1350 __instance, ref GClass1349 ___gclass1349_0)
+		public static bool Prefix(GClass1375 __instance, ref GClass1374 ___gclass1374_0)
 		{
 			__instance.speed = 50f;
 			__instance.arcHeight = -150f;
@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.Patches
 			__instance.zoneID = "";
 			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 			coopGame.UpdateByUnity += __instance.OnUpdate;
-			___gclass1349_0 = new();
+			___gclass1374_0 = new();
 			return false;
 		}
 	}

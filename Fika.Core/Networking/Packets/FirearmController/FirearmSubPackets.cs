@@ -217,7 +217,7 @@ namespace Fika.Core.Networking
 			public void Execute(CoopPlayer player)
 			{
 				// Check for GClass increments
-				if (player.HandsController is CoopObservedFirearmController controller && controller.Weapon is GClass2973)
+				if (player.HandsController is CoopObservedFirearmController controller && controller.Weapon is GClass3048)
 				{
 					controller.RollCylinder(RollToZeroCamora);
 				}
@@ -656,7 +656,7 @@ namespace Fika.Core.Networking
 					MagazineClass magazine = null;
 					try
 					{
-						GStruct428<Item> result = player.FindItemById(MagId);
+						GStruct448<Item> result = player.FindItemById(MagId);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -682,10 +682,10 @@ namespace Fika.Core.Networking
 					{
 						try
 						{
-							GClass1170 reader = new(LocationDescription);
+							GClass1193 reader = new(LocationDescription);
 							if (LocationDescription.Length != 0)
 							{
-								GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
+								GClass1687 descriptor = reader.ReadPolymorph<GClass1687>();
 								gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
 							}
 						}
@@ -736,7 +736,7 @@ namespace Fika.Core.Networking
 				{
 					try
 					{
-						GStruct428<Item> result = player.FindItemById(MagId);
+						GStruct448<Item> result = player.FindItemById(MagId);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -963,12 +963,12 @@ namespace Fika.Core.Networking
 					AmmoPackReloadingClass ammoPack = new(ammo);
 					ItemAddress gridItemAddress = null;
 
-					GClass1170 reader = new(LocationDescription);
+					GClass1193 reader = new(LocationDescription);
 					try
 					{
 						if (LocationDescription.Length > 0)
 						{
-							GClass1664 descriptor = reader.ReadPolymorph<GClass1664>();
+							GClass1687 descriptor = reader.ReadPolymorph<GClass1687>();
 							gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
 						}
 					}
@@ -1025,7 +1025,7 @@ namespace Fika.Core.Networking
 					{
 						controller.FirearmsAnimator.SetFire(true);
 						// Check for GClass increments
-						if (controller.Weapon is not GClass2973)
+						if (controller.Weapon is not GClass3048)
 						{
 							controller.FirearmsAnimator.Animator.Play(controller.FirearmsAnimator.FullFireStateName, 1, 0f);
 							controller.Weapon.Repairable.Durability = 0;

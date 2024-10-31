@@ -65,7 +65,7 @@ namespace Fika.Core.Coop.Utils
 		}
 		public static string GroupId { get; set; }
 		public static string RaidCode { get; set; }
-		public static GClass1322 TransitData
+		public static GClass1348 TransitData
 		{
 			get
 			{
@@ -88,7 +88,7 @@ namespace Fika.Core.Coop.Utils
 			}
 		}
 
-		private static GClass1322 transitData;
+		private static GClass1348 transitData;
 
 		public static void ResetTransitData()
 		{

@@ -1,6 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using LiteNetLib.Utils;
+using UnityEngine;
 
 namespace Fika.Core.Networking
 {
@@ -9,6 +10,7 @@ namespace Fika.Core.Networking
 		public bool IsRequest;
 		public bool HasData;
 		public ESeason Season;
+		public Vector3 SpringSnowFactor;
 		public int Amount;
 		public WeatherClass[] WeatherClasses;
 
@@ -19,6 +21,7 @@ namespace Fika.Core.Networking
 			if (HasData)
 			{
 				Season = (ESeason)reader.GetByte();
+				SpringSnowFactor = reader.GetVector3();
 				Amount = reader.GetInt();
 				WeatherClasses = new WeatherClass[Amount];
 				for (int i = 0; i < Amount; i++)
@@ -35,6 +38,7 @@ namespace Fika.Core.Networking
 			if (HasData)
 			{
 				writer.Put((byte)Season);
+				writer.Put(SpringSnowFactor);
 				writer.Put(Amount);
 				for (int i = 0; i < Amount; i++)
 				{

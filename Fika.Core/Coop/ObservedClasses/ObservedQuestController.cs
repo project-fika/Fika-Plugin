@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return SuccessfulResult.Task;
 		}
 
-		public override Task<GStruct426<GStruct388<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
+		public override Task<GStruct446<GStruct388<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
 		{
 			return default;
 		}
@@ -37,8 +37,8 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		public override void Init()
 		{
-			Quests = new GClass3676(Profile.Id, Profile.Side, Profile.QuestsData, Profile.TaskConditionCounters, Profile.Info.Type, false);
-			gclass3675_0 = Quests;
+			Quests = new GClass3773(Profile.Id, Profile.Side, Profile.QuestsData, Profile.TaskConditionCounters, Profile.Info.Type, false);
+			gclass3772_0 = Quests;
 		}
 
 		public override void Run()

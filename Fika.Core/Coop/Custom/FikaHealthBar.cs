@@ -371,7 +371,7 @@ namespace Fika.Core.Coop.Custom
 			UpdateHealth();
 		}
 
-		private void HealthController_HealthChangedEvent(EBodyPart arg1, float arg2, DamageInfo arg3)
+		private void HealthController_HealthChangedEvent(EBodyPart arg1, float arg2, GStruct421 arg3)
 		{
 			UpdateHealth();
 		}

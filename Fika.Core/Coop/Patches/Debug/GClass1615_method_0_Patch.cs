@@ -6,11 +6,11 @@ namespace Fika.Core.Coop.Patches
 	/// <summary>
 	/// Used to speed up debugging
 	/// </summary>
-	public class GClass1615_method_0_Patch : ModulePatch
+	public class GClass1640_method_0_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass1615).GetMethod(nameof(GClass1615.method_0));
+			return typeof(GClass1640).GetMethod(nameof(GClass1640.method_0));
 		}
 
 		[PatchPrefix]

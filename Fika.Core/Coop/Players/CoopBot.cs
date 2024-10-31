@@ -61,8 +61,10 @@ namespace Fika.Core.Coop.Players
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
 			Func<float> getAimingSensitivity, IViewFilter filter, MongoID currentId, ushort nextOperationId)
 		{
-			CoopBot player = Create<CoopBot>(gameWorld, ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
-				bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl);
+			bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
+			ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
+			CoopBot player = Create<CoopBot>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
+				bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
 			player.IsYourPlayer = false;
 
@@ -79,18 +81,18 @@ namespace Fika.Core.Coop.Players
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new GClass540(null, player)
+			player.AIData = new GClass551(null, player)
 			{
 				IsAI = true
 			};
 
 			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass869>("gclass869_0").Value = new();
-			botTraverse.Field<GClass869>("gclass869_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass886>("gclass886_0").Value = new();
+			botTraverse.Field<GClass886>("gclass886_0").Value.Initialize(player, player.PlayerBones);
 
 			if (FikaBackendUtils.IsDedicated)
 			{
-				botTraverse.Field<GClass869>("gclass869_0").Value.SetMode(GClass868.EMode.Disabled);
+				botTraverse.Field<GClass886>("gclass886_0").Value.SetMode(GClass885.EMode.Disabled);
 			}
 
 			player.AggressorFound = false;
@@ -125,7 +127,7 @@ namespace Fika.Core.Coop.Players
 			MovementContext = BotMovementContext.Create(this, GetBodyAnimatorCommon, GetCharacterControllerCommon, movement_MASK);
 		}
 
-		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+		public override void OnBeenKilledByAggressor(IPlayer aggressor, GStruct421 damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
 		{
 			base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
@@ -145,7 +147,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct400 shotId)
+		public override ShotInfoClass ApplyShot(GStruct421 damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			ActiveHealthController activeHealthController = ActiveHealthController;
 			if (activeHealthController != null && !activeHealthController.IsAlive)
@@ -184,7 +186,7 @@ namespace Fika.Core.Coop.Players
 			return hitInfo;
 		}
 
-		public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+		public override void ApplyDamageInfo(GStruct421 damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 		{
 			if (damageInfo.Weapon != null)
 			{
@@ -193,7 +195,7 @@ namespace Fika.Core.Coop.Players
 			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfo damageInfo)
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, GStruct421 damageInfo)
 		{
 			_preAllocatedArmorComponents.Clear();
 			Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
@@ -212,7 +214,7 @@ namespace Fika.Core.Coop.Players
 				if (num > 0f)
 				{
 					num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
-					method_95(num, armorComponent);
+					method_99(num, armorComponent);
 				}
 			}
 

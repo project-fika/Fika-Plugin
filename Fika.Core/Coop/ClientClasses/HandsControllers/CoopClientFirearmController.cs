@@ -42,9 +42,9 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(GClass1729)] = new OperationFactoryDelegate(Weapon1);
-			operationFactoryDelegates[typeof(GClass1730)] = new OperationFactoryDelegate(Weapon2);
-			operationFactoryDelegates[typeof(GClass1742)] = new OperationFactoryDelegate(Weapon3);
+			operationFactoryDelegates[typeof(GClass1752)] = new OperationFactoryDelegate(Weapon1);
+			operationFactoryDelegates[typeof(GClass1753)] = new OperationFactoryDelegate(Weapon2);
+			operationFactoryDelegates[typeof(GClass1765)] = new OperationFactoryDelegate(Weapon3);
 			return operationFactoryDelegates;
 		}
 
@@ -79,10 +79,6 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public Player.BaseAnimationOperation Weapon1()
 		{
-			if (Item.ReloadMode == Weapon.EReloadMode.InternalMagazine && Item.Chambers.Length == 0)
-			{
-				return new FirearmClass2(this);
-			}
 			if (Item.MustBoltBeOpennedForInternalReload)
 			{
 				return new FirearmClass3(this);
@@ -99,23 +95,23 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			if (Item.IsFlareGun)
 			{
-				return new GClass1745(this);
+				return new GClass1767(this);
 			}
 			if (Item.IsOneOff)
 			{
-				return new GClass1747(this);
+				return new GClass1767(this);
 			}
 			if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
 			{
 				return new FireOnlyBarrelFireOperation(this);
 			}
-			if (Item is GClass2973) // This is a revolver
+			if (Item is GClass3048) // This is a revolver
 			{
-				return new GClass1744(this);
+				return new GClass1767(this);
 			}
 			if (!Item.BoltAction)
 			{
-				return new GClass1742(this);
+				return new GClass1765(this);
 			}
 			return new FirearmClass4(this);
 		}
@@ -634,7 +630,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		private class FirearmClass1(Player.FirearmController controller) : GClass1730(controller)
+		private class FirearmClass1(Player.FirearmController controller) : GClass1753(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -656,7 +652,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass2(Player.FirearmController controller) : GClass1731(controller)
+		private class FirearmClass2(Player.FirearmController controller) : GClass1754(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -677,7 +673,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass3(Player.FirearmController controller) : GClass1732(controller)
+		private class FirearmClass3(Player.FirearmController controller) : GClass1755(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -699,7 +695,7 @@ namespace Fika.Core.Coop.ClientClasses
 		}
 
 		// Check for GClass increments
-		private class FirearmClass4(Player.FirearmController controller) : GClass1743(controller)
+		private class FirearmClass4(Player.FirearmController controller) : GClass1766(controller)
 		{
 			public override void Start()
 			{
@@ -765,8 +761,8 @@ namespace Fika.Core.Coop.ClientClasses
 			public void Process(IResult result)
 			{
 				ItemAddress itemAddress = gridItemAddress;
-				GClass1664 descriptor = itemAddress?.ToDescriptor();
-				GClass1175 writer = new();
+				GClass1687 descriptor = itemAddress?.ToDescriptor();
+				GClass1198 writer = new();
 
 				byte[] locationDescription;
 				if (descriptor != null)
@@ -834,8 +830,8 @@ namespace Fika.Core.Coop.ClientClasses
 			public void Process(IResult result)
 			{
 				ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
-				GClass1664 descriptor = itemAddress?.ToDescriptor();
-				GClass1175 writer = new();
+				GClass1687 descriptor = itemAddress?.ToDescriptor();
+				GClass1198 writer = new();
 				string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
 				byte[] locationDescription;

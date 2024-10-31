@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.BotClasses
 			coopBot = (CoopBot)player;
 			mongoID_0 = currentId;
 			ushort_0 = nextOperationId;
-			searchController = new GClass1902(profile);
+			searchController = new GClass1973(profile);
 		}
 
 		public override IPlayerSearchController PlayerSearchController
@@ -46,16 +46,16 @@ namespace Fika.Core.Coop.BotClasses
 			// Do nothing
 		}
 
-		public override void vmethod_1(GClass3119 operation, [CanBeNull] Callback callback)
+		public override void vmethod_1(GClass3192 operation, [CanBeNull] Callback callback)
 		{
 			// Check for GClass increments
 			// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-			if (operation is not GClass3137)
+			if (operation is not GClass3210)
 			{
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
-				GClass1175 writer = new();
+				GClass1198 writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());
 				InventoryPacket packet = new()
 				{
@@ -68,7 +68,7 @@ namespace Fika.Core.Coop.BotClasses
 			HandleOperation(operation, callback).HandleExceptions();
 		}
 
-		private async Task HandleOperation(GClass3119 operation, Callback callback)
+		private async Task HandleOperation(GClass3192 operation, Callback callback)
 		{
 			if (coopBot.HealthController.IsAlive)
 			{
@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.BotClasses
 			RunBotOperation(operation, callback);
 		}
 
-		private void RunBotOperation(GClass3119 operation, Callback callback)
+		private void RunBotOperation(GClass3192 operation, Callback callback)
 		{
 			BotInventoryOperationHandler handler = new(this, operation, callback);
 			if (vmethod_0(operation))
@@ -91,13 +91,13 @@ namespace Fika.Core.Coop.BotClasses
 
 		public override SearchContentOperation vmethod_2(SearchableItemClass item)
 		{
-			return new GClass3158(method_12(), this, PlayerSearchController, Profile, item);
+			return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
 		}
 
-		private class BotInventoryOperationHandler(CoopBotInventoryController controller, GClass3119 operation, Callback callback)
+		private class BotInventoryOperationHandler(CoopBotInventoryController controller, GClass3192 operation, Callback callback)
 		{
 			private readonly CoopBotInventoryController controller = controller;
-			public readonly GClass3119 Operation = operation;
+			public readonly GClass3192 Operation = operation;
 			public readonly Callback Callback = callback;
 
 			public void HandleResult(IResult result)

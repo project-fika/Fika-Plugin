@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<InventoryPacket> InventoryPackets { get; private set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; private set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; private set; } = new(50);
-		private readonly Queue<GClass3119> inventoryOperations = new();
+		private readonly Queue<GClass3192> inventoryOperations = new();
 
 		protected void Awake()
 		{
@@ -155,11 +155,11 @@ namespace Fika.Core.Coop.PacketHandlers
 			{
 				try
 				{
-					if (controller is Interface15 networkController)
+					if (controller is Interface16 networkController)
 					{
-						GClass1170 reader = new(packet.OperationBytes);
-						GClass1670 descriptor = reader.ReadPolymorph<GClass1670>();
-						GStruct423 result = networkController.CreateOperationFromDescriptor(descriptor);
+						GClass1193 reader = new(packet.OperationBytes);
+						GClass1693 descriptor = reader.ReadPolymorph<GClass1693>();
+						GStruct443 result = networkController.CreateOperationFromDescriptor(descriptor);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");

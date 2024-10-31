@@ -80,7 +80,7 @@ namespace Fika.Core.Networking
 								return;
 							}
 
-							GStruct428<Item> result = player.FindItemById(ItemId, false, false);
+							GStruct448<Item> result = player.FindItemById(ItemId, false, false);
 							if (!result.Succeeded)
 							{
 								FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
@@ -94,7 +94,7 @@ namespace Fika.Core.Networking
 								return;
 							}
 
-							keyHandler.unlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player);
+							keyHandler.unlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player, worldInteractiveObject);
 							if (keyHandler.unlockResult.Error != null)
 							{
 								FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Error when processing unlockResult: " + keyHandler.unlockResult.Error);
