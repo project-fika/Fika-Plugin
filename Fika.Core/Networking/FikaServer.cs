@@ -878,7 +878,7 @@ namespace Fika.Core.Networking
 						IsRequest = false,
 						HasData = true,
 						Season = coopGame.Season,
-						SpringSnowFactor = coopGame.SeasonsSettings.SpringSnowFactor,
+						SpringSnowFactor = coopGame.SeasonsSettings != null ? coopGame.SeasonsSettings.SpringSnowFactor : Vector3.zero, // Temp fix
 						Amount = coopGame.WeatherClasses.Length,
 						WeatherClasses = coopGame.WeatherClasses
 					};
