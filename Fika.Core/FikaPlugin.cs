@@ -706,6 +706,8 @@ namespace Fika.Core
 				}
 
 				LocalIPs = ips.Skip(1).ToArray();
+				string allIps = string.Join(", ", LocalIPs);
+				Logger.LogInfo($"Cached local IPs: {allIps}");
 				return [.. ips];
 			}
 			catch (Exception ex)
