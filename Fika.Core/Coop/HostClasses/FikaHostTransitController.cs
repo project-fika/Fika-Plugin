@@ -47,17 +47,17 @@ namespace Fika.Core.Coop.HostClasses
 
 		private void OnHostPlayerEnter(TransitPoint point, Player player)
 		{
-			if (!method_4(player, point.parameters.id, out string _))
+			if (!method_8(player, point.parameters.id, out string _))
 			{
 				if (player.IsYourPlayer)
 				{
-					method_6();
+					method_10();
 				}
 				return;
 			}
 			else
 			{
-				if (!method_4(player, point.parameters.id, out string _))
+				if (!method_8(player, point.parameters.id, out string _))
 				{
 					return;
 				}
@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.HostClasses
 				}
 				if (player.IsYourPlayer)
 				{
-					method_7(point.parameters.id, player, method_9());
+					method_11(point.parameters.id, player, method_13());
 					return;
 				}
 				TransitEventPacket packet = new()
@@ -113,7 +113,7 @@ namespace Fika.Core.Coop.HostClasses
 			}
 			if (player.IsYourPlayer)
 			{
-				method_10(player);
+				method_14(player);
 				return;
 			}
 
@@ -174,7 +174,7 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				if (GamePlayerOwner.MyPlayer.Id == timer.Key)
 				{
-					method_5(pointId);
+					method_9(pointId);
 					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
 					MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value);
 				}
@@ -198,7 +198,7 @@ namespace Fika.Core.Coop.HostClasses
 			if (GamePlayerOwner.MyPlayer.Id == playerId)
 			{
 				NotificationManagerClass.DisplayWarningNotification("Transit/InactivePoint".Localized(null), ENotificationDurationType.Default);
-				method_5(pointId);
+				method_9(pointId);
 				return;
 			}
 
@@ -231,7 +231,7 @@ namespace Fika.Core.Coop.HostClasses
 
 			if (player.IsYourPlayer)
 			{
-				method_10(player);
+				method_14(player);
 				transitPlayers.Add(player.ProfileId, player.Id);
 				profileKeys[player.ProfileId] = packet.keyId;
 				dictionary_0[packet.pointId].GroupEnter(player);
@@ -432,7 +432,7 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				transitPoint.Enabled = true;
 			}
-			method_1(dictionary_0.Values);
+			method_5(dictionary_0.Values);
 
 			/*TransitEventPacket packet = new()
 			{
