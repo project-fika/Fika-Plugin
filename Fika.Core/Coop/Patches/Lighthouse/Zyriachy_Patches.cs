@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 	{
 		public static void Enable()
 		{
-			new GClass414_Activate_Patch().Enable();
+			new GClass422_Activate_Patch().Enable();
 
 #if DEBUG
 			new zryachiydebugpatch1().Enable();
@@ -24,11 +24,11 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 #endif
 		}
 
-		internal class GClass414_Activate_Patch : ModulePatch
+		internal class GClass422_Activate_Patch : ModulePatch
 		{
 			protected override MethodBase GetTargetMethod()
 			{
-				return typeof(GClass414).GetMethod(nameof(GClass414.Activate));
+				return typeof(GClass422).GetMethod(nameof(GClass422.Activate));
 			}
 
 			[PatchPostfix]
@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 				___botOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
 			}
 
-			private static void OnZryachiyDead(Player player, IPlayer lastAggressor, GStruct421 damageInfo, EBodyPart part)
+			private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
 			{
 				player.OnPlayerDead -= OnZryachiyDead;
 
@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 		{
 			protected override MethodBase GetTargetMethod()
 			{
-				return typeof(GClass414).GetMethod(nameof(GClass422.IsEnemyNow));
+				return typeof(GClass422).GetMethod(nameof(GClass422.IsEnemyNow));
 			}
 
 			[PatchPostfix]
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 		{
 			protected override MethodBase GetTargetMethod()
 			{
-				return typeof(GClass414).GetMethod(nameof(GClass422.method_6));
+				return typeof(GClass422).GetMethod(nameof(GClass422.method_6));
 			}
 
 			[PatchPostfix]

@@ -201,7 +201,7 @@ namespace Fika.Core.Coop.Players
 				masterSkill.Level.ToString()), ENotificationDurationType.Default, ENotificationIconType.Default, null);
 		}
 
-		public override void ApplyDamageInfo(GStruct421 damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+		public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 		{
 			if (IsYourPlayer)
 			{
@@ -236,7 +236,7 @@ namespace Fika.Core.Coop.Players
 			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
-		public override ShotInfoClass ApplyShot(GStruct421 damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
 			{
@@ -255,7 +255,7 @@ namespace Fika.Core.Coop.Players
 			return null;
 		}
 
-		private ShotInfoClass SimulatedApplyShot(GStruct421 damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
+		private ShotInfoClass SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
 		{
 			ActiveHealthController activeHealthController = ActiveHealthController;
 			if (activeHealthController != null && !activeHealthController.IsAlive)
@@ -412,7 +412,7 @@ namespace Fika.Core.Coop.Players
 			base.DropCurrentController(callback, fastDrop, nextControllerItem);
 		}
 
-		public override void OnBeenKilledByAggressor(IPlayer aggressor, GStruct421 damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
 		{
 			base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
@@ -436,7 +436,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void HandleTeammateKill(ref GStruct421 damage, EBodyPart bodyPart,
+		public void HandleTeammateKill(ref DamageInfo damage, EBodyPart bodyPart,
 			EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
 			float distance, List<string> targetEquipment,
 			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer, int experience)
@@ -1183,7 +1183,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, GStruct421 damageInfo)
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfo damageInfo)
 		{
 			if (IsYourPlayer)
 			{
@@ -1239,7 +1239,7 @@ namespace Fika.Core.Coop.Players
 
 		public virtual void HandleDamagePacket(ref DamagePacket packet)
 		{
-			GStruct421 damageInfo = new()
+			DamageInfo damageInfo = new()
 			{
 				Damage = packet.Damage,
 				DamageType = packet.DamageType,

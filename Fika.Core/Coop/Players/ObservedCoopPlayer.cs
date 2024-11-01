@@ -245,7 +245,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void ManageAggressor(GStruct421 GStruct421, EBodyPart bodyPart, EBodyPartColliderType colliderType)
+		public override void ManageAggressor(DamageInfo DamageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
 		{
 			if (_isDeadAlready)
 			{
@@ -255,25 +255,25 @@ namespace Fika.Core.Coop.Players
 			{
 				_isDeadAlready = true;
 			}
-			if (GStruct421.Player == null)
+			if (DamageInfo.Player == null)
 			{
 				return;
 			}
-			Player player = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(GStruct421.Player.iPlayer.ProfileId);
+			Player player = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(DamageInfo.Player.iPlayer.ProfileId);
 			if (player == this)
 			{
 				return;
 			}
-			if (GStruct421.Weapon != null)
+			if (DamageInfo.Weapon != null)
 			{
-				player.ExecuteShotSkill(GStruct421.Weapon);
+				player.ExecuteShotSkill(DamageInfo.Weapon);
 			}
 
 			if (player.IsYourPlayer)
 			{
 				// Check for GClass increment
-				bool flag = GStruct421.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface303>(bodyPart) != null;
-				player.StatisticsManager.OnEnemyDamage(GStruct421, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
+				bool flag = DamageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface303>(bodyPart) != null;
+				player.StatisticsManager.OnEnemyDamage(DamageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
 					GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
 					Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
 					Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones);
@@ -311,7 +311,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void HandleExplosive(GStruct421 GStruct421, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
+		public void HandleExplosive(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
 		{
 			if (HealthController.DamageCoeff == 0)
 			{
@@ -320,37 +320,37 @@ namespace Fika.Core.Coop.Players
 
 			LastDamagedBodyPart = bodyPartType;
 			LastBodyPart = bodyPartType;
-			LastDamageInfo = GStruct421;
-			LastDamageType = GStruct421.DamageType;
+			LastDamageInfo = DamageInfo;
+			LastDamageType = DamageInfo.DamageType;
 
 			PacketSender.DamagePackets.Enqueue(new()
 			{
-				Damage = GStruct421.Damage,
-				DamageType = GStruct421.DamageType,
+				Damage = DamageInfo.Damage,
+				DamageType = DamageInfo.DamageType,
 				BodyPartType = bodyPartType,
 				ColliderType = colliderType,
-				Direction = GStruct421.Direction,
-				Point = GStruct421.HitPoint,
-				HitNormal = GStruct421.HitNormal,
-				PenetrationPower = GStruct421.PenetrationPower,
-				BlockedBy = GStruct421.BlockedBy,
-				DeflectedBy = GStruct421.DeflectedBy,
-				SourceId = GStruct421.SourceId,
-				ArmorDamage = GStruct421.ArmorDamage,
-				WeaponId = GStruct421.Weapon.Id
+				Direction = DamageInfo.Direction,
+				Point = DamageInfo.HitPoint,
+				HitNormal = DamageInfo.HitNormal,
+				PenetrationPower = DamageInfo.PenetrationPower,
+				BlockedBy = DamageInfo.BlockedBy,
+				DeflectedBy = DamageInfo.DeflectedBy,
+				SourceId = DamageInfo.SourceId,
+				ArmorDamage = DamageInfo.ArmorDamage,
+				WeaponId = DamageInfo.Weapon.Id
 			});
 		}
 
-		public override void ApplyDamageInfo(GStruct421 GStruct421, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+		public override void ApplyDamageInfo(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 		{
-			LastAggressor = GStruct421.Player.iPlayer;
+			LastAggressor = DamageInfo.Player.iPlayer;
 			LastDamagedBodyPart = bodyPartType;
 			LastBodyPart = bodyPartType;
-			LastDamageInfo = GStruct421;
-			LastDamageType = GStruct421.DamageType;
+			LastDamageInfo = DamageInfo;
+			LastDamageType = DamageInfo.DamageType;
 		}
 
-		public ShotInfoClass HandleSniperShot(GStruct421 GStruct421, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass HandleSniperShot(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			if (HealthController.DamageCoeff == 0)
 			{
@@ -359,79 +359,79 @@ namespace Fika.Core.Coop.Players
 
 			LastDamagedBodyPart = bodyPartType;
 			LastBodyPart = bodyPartType;
-			LastDamageInfo = GStruct421;
-			LastDamageType = GStruct421.DamageType;
+			LastDamageInfo = DamageInfo;
+			LastDamageType = DamageInfo.DamageType;
 
 			PacketSender.DamagePackets.Enqueue(new()
 			{
-				Damage = GStruct421.Damage,
-				DamageType = GStruct421.DamageType,
+				Damage = DamageInfo.Damage,
+				DamageType = DamageInfo.DamageType,
 				BodyPartType = bodyPartType,
 				ColliderType = colliderType,
 				ArmorPlateCollider = armorPlateCollider,
-				Direction = GStruct421.Direction,
-				Point = GStruct421.HitPoint,
-				HitNormal = GStruct421.HitNormal,
-				PenetrationPower = GStruct421.PenetrationPower,
-				BlockedBy = GStruct421.BlockedBy,
-				DeflectedBy = GStruct421.DeflectedBy,
-				SourceId = GStruct421.SourceId,
-				ArmorDamage = GStruct421.ArmorDamage,
-				WeaponId = GStruct421.Weapon.Id
+				Direction = DamageInfo.Direction,
+				Point = DamageInfo.HitPoint,
+				HitNormal = DamageInfo.HitNormal,
+				PenetrationPower = DamageInfo.PenetrationPower,
+				BlockedBy = DamageInfo.BlockedBy,
+				DeflectedBy = DamageInfo.DeflectedBy,
+				SourceId = DamageInfo.SourceId,
+				ArmorDamage = DamageInfo.ArmorDamage,
+				WeaponId = DamageInfo.Weapon.Id
 			});
 
 			return new()
 			{
 				PoV = EPointOfView.ThirdPerson,
-				Penetrated = GStruct421.Penetrated,
+				Penetrated = DamageInfo.Penetrated,
 				Material = MaterialType.Body
 			};
 		}
 
-		public override ShotInfoClass ApplyShot(GStruct421 GStruct421, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			if (HealthController != null && !HealthController.IsAlive)
 			{
 				return null;
 			}
 
-			ShotReactions(GStruct421, bodyPartType);
-			bool flag = !string.IsNullOrEmpty(GStruct421.DeflectedBy);
-			float damage = GStruct421.Damage;
-			List<ArmorComponent> list = ProceedDamageThroughArmor(ref GStruct421, colliderType, armorPlateCollider, true);
+			ShotReactions(DamageInfo, bodyPartType);
+			bool flag = !string.IsNullOrEmpty(DamageInfo.DeflectedBy);
+			float damage = DamageInfo.Damage;
+			List<ArmorComponent> list = ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true);
 			MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
 			ShotInfoClass hitInfo = new()
 			{
 				PoV = PointOfView,
-				Penetrated = string.IsNullOrEmpty(GStruct421.BlockedBy) || string.IsNullOrEmpty(GStruct421.DeflectedBy),
+				Penetrated = string.IsNullOrEmpty(DamageInfo.BlockedBy) || string.IsNullOrEmpty(DamageInfo.DeflectedBy),
 				Material = materialType
 			};
-			float num = damage - GStruct421.Damage;
+			float num = damage - DamageInfo.Damage;
 			if (num > 0)
 			{
-				GStruct421.DidArmorDamage = num;
+				DamageInfo.DidArmorDamage = num;
 			}
-			GStruct421.DidBodyDamage = GStruct421.Damage;
-			ReceiveDamage(GStruct421.Damage, bodyPartType, GStruct421.DamageType, num, hitInfo.Material);
+			DamageInfo.DidBodyDamage = DamageInfo.Damage;
+			ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
 
 			PacketSender.DamagePackets.Enqueue(new()
 			{
-				Damage = GStruct421.Damage,
-				DamageType = GStruct421.DamageType,
+				Damage = DamageInfo.Damage,
+				DamageType = DamageInfo.DamageType,
 				BodyPartType = bodyPartType,
 				ColliderType = colliderType,
 				ArmorPlateCollider = armorPlateCollider,
-				Direction = GStruct421.Direction,
-				Point = GStruct421.HitPoint,
-				HitNormal = GStruct421.HitNormal,
-				PenetrationPower = GStruct421.PenetrationPower,
-				BlockedBy = GStruct421.BlockedBy,
-				DeflectedBy = GStruct421.DeflectedBy,
-				SourceId = GStruct421.SourceId,
-				ArmorDamage = GStruct421.ArmorDamage,
-				ProfileId = GStruct421.Player.iPlayer.ProfileId,
+				Direction = DamageInfo.Direction,
+				Point = DamageInfo.HitPoint,
+				HitNormal = DamageInfo.HitNormal,
+				PenetrationPower = DamageInfo.PenetrationPower,
+				BlockedBy = DamageInfo.BlockedBy,
+				DeflectedBy = DamageInfo.DeflectedBy,
+				SourceId = DamageInfo.SourceId,
+				ArmorDamage = DamageInfo.ArmorDamage,
+				ProfileId = DamageInfo.Player.iPlayer.ProfileId,
 				Material = materialType,
-				WeaponId = GStruct421.Weapon.Id
+				WeaponId = DamageInfo.Weapon.Id
 			});
 
 			if (list != null)
@@ -440,12 +440,12 @@ namespace Fika.Core.Coop.Players
 			}
 
 			// Run this to get weapon skill
-			ManageAggressor(GStruct421, bodyPartType, colliderType);
+			ManageAggressor(DamageInfo, bodyPartType, colliderType);
 
 			return hitInfo;
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, GStruct421 GStruct421)
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfo DamageInfo)
 		{
 			if (isServer)
 			{
@@ -465,7 +465,7 @@ namespace Fika.Core.Coop.Players
 					}
 					if (num > 0f)
 					{
-						num = armorComponent.ApplyExplosionDurabilityDamage(num, GStruct421, _preAllocatedArmorComponents);
+						num = armorComponent.ApplyExplosionDurabilityDamage(num, DamageInfo, _preAllocatedArmorComponents);
 						method_99(num, armorComponent);
 					}
 				}
@@ -477,56 +477,56 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public ShotInfoClass ApplyClientShot(GStruct421 GStruct421, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass ApplyClientShot(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
-			ShotReactions(GStruct421, bodyPartType);
-			LastAggressor = GStruct421.Player.iPlayer;
+			ShotReactions(DamageInfo, bodyPartType);
+			LastAggressor = DamageInfo.Player.iPlayer;
 			LastDamagedBodyPart = bodyPartType;
 			LastBodyPart = bodyPartType;
-			LastDamageInfo = GStruct421;
-			LastDamageType = GStruct421.DamageType;
+			LastDamageInfo = DamageInfo;
+			LastDamageType = DamageInfo.DamageType;
 
 			if (HealthController != null && !HealthController.IsAlive)
 			{
 				return null;
 			}
 
-			bool flag = !string.IsNullOrEmpty(GStruct421.DeflectedBy);
-			float damage = GStruct421.Damage;
-			List<ArmorComponent> list = ProceedDamageThroughArmor(ref GStruct421, colliderType, armorPlateCollider, true);
+			bool flag = !string.IsNullOrEmpty(DamageInfo.DeflectedBy);
+			float damage = DamageInfo.Damage;
+			List<ArmorComponent> list = ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true);
 			MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
 			ShotInfoClass hitInfo = new()
 			{
 				PoV = PointOfView,
-				Penetrated = string.IsNullOrEmpty(GStruct421.BlockedBy) || string.IsNullOrEmpty(GStruct421.DeflectedBy),
+				Penetrated = string.IsNullOrEmpty(DamageInfo.BlockedBy) || string.IsNullOrEmpty(DamageInfo.DeflectedBy),
 				Material = materialType
 			};
-			float num = damage - GStruct421.Damage;
+			float num = damage - DamageInfo.Damage;
 			if (num > 0)
 			{
-				GStruct421.DidArmorDamage = num;
+				DamageInfo.DidArmorDamage = num;
 			}
-			GStruct421.DidBodyDamage = GStruct421.Damage;
-			ReceiveDamage(GStruct421.Damage, bodyPartType, GStruct421.DamageType, num, hitInfo.Material);
+			DamageInfo.DidBodyDamage = DamageInfo.Damage;
+			ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
 
 			PacketSender.DamagePackets.Enqueue(new()
 			{
-				Damage = GStruct421.Damage,
-				DamageType = GStruct421.DamageType,
+				Damage = DamageInfo.Damage,
+				DamageType = DamageInfo.DamageType,
 				BodyPartType = bodyPartType,
 				ColliderType = colliderType,
 				ArmorPlateCollider = armorPlateCollider,
-				Direction = GStruct421.Direction,
-				Point = GStruct421.HitPoint,
-				HitNormal = GStruct421.HitNormal,
-				PenetrationPower = GStruct421.PenetrationPower,
-				BlockedBy = GStruct421.BlockedBy,
-				DeflectedBy = GStruct421.DeflectedBy,
-				SourceId = GStruct421.SourceId,
-				ArmorDamage = GStruct421.ArmorDamage,
-				ProfileId = GStruct421.Player.iPlayer.ProfileId,
+				Direction = DamageInfo.Direction,
+				Point = DamageInfo.HitPoint,
+				HitNormal = DamageInfo.HitNormal,
+				PenetrationPower = DamageInfo.PenetrationPower,
+				BlockedBy = DamageInfo.BlockedBy,
+				DeflectedBy = DamageInfo.DeflectedBy,
+				SourceId = DamageInfo.SourceId,
+				ArmorDamage = DamageInfo.ArmorDamage,
+				ProfileId = DamageInfo.Player.iPlayer.ProfileId,
 				Material = materialType,
-				WeaponId = GStruct421.Weapon.Id
+				WeaponId = DamageInfo.Weapon.Id
 			});
 
 			if (list != null)
@@ -535,7 +535,7 @@ namespace Fika.Core.Coop.Players
 			}
 
 			// Run this to get weapon skill
-			ManageAggressor(GStruct421, bodyPartType, colliderType);
+			ManageAggressor(DamageInfo, bodyPartType, colliderType);
 
 			return hitInfo;
 		}
@@ -856,7 +856,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void HandleDamagePacket(ref DamagePacket packet)
 		{
-			GStruct421 GStruct421 = new()
+			DamageInfo DamageInfo = new()
 			{
 				Damage = packet.Damage,
 				DamageType = packet.DamageType,
@@ -877,11 +877,11 @@ namespace Fika.Core.Coop.Players
 
 				if (player != null)
 				{
-					GStruct421.Player = player;
+					DamageInfo.Player = player;
 					LastAggressor = player.iPlayer;
 					if (IsYourPlayer)
 					{
-						if (!FikaPlugin.Instance.FriendlyFire && GStruct421.Player.iPlayer.GroupId == GroupId)
+						if (!FikaPlugin.Instance.FriendlyFire && DamageInfo.Player.iPlayer.GroupId == GroupId)
 						{
 							return;
 						}
@@ -891,25 +891,25 @@ namespace Fika.Core.Coop.Players
 				/*// TODO: Fix this and consistently get the correct data...
 				if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
 				{
-					GStruct421.Weapon = weapon;
+					DamageInfo.Weapon = weapon;
 				}*/
 				lastWeaponId = packet.WeaponId;
 			}
 
-			ShotReactions(GStruct421, packet.BodyPartType);
-			ReceiveDamage(GStruct421.Damage, packet.BodyPartType, GStruct421.DamageType, packet.Absorbed, packet.Material);
+			ShotReactions(DamageInfo, packet.BodyPartType);
+			ReceiveDamage(DamageInfo.Damage, packet.BodyPartType, DamageInfo.DamageType, packet.Absorbed, packet.Material);
 
-			LastDamageInfo = GStruct421;
+			LastDamageInfo = DamageInfo;
 			LastBodyPart = packet.BodyPartType;
 			LastDamagedBodyPart = packet.BodyPartType;
 		}
 
-		public override void OnBeenKilledByAggressor(IPlayer aggressor, GStruct421 GStruct421, EBodyPart bodyPart, EDamageType lethalDamageType)
+		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo DamageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
 		{
 			// Only handle if it was ourselves as otherwise it's irrelevant
 			if (LastAggressor.IsYourPlayer)
 			{
-				base.OnBeenKilledByAggressor(aggressor, GStruct421, bodyPart, lethalDamageType);
+				base.OnBeenKilledByAggressor(aggressor, DamageInfo, bodyPart, lethalDamageType);
 				return;
 			}
 
@@ -924,7 +924,7 @@ namespace Fika.Core.Coop.Players
 					if (mainPlayer != null)
 					{
 						float distance = Vector3.Distance(aggressor.Position, Position);
-						mainPlayer.HandleTeammateKill(ref GStruct421, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
+						mainPlayer.HandleTeammateKill(ref DamageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
 							distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
 							(CoopPlayer)aggressor, Profile.Info.Settings.Experience);
 					}
