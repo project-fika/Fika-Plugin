@@ -145,6 +145,8 @@ namespace Fika.Core.Coop.Patches
 			metricsEvents.SetGameCreated();
 			FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
 
+			ScreenUpdater updater = new(instance.MatchmakerPlayerControllerClass, coopGame);
+
 			if (!isServer)
 			{
 				coopGame.SetMatchmakerStatus("Coop game joined");
@@ -161,6 +163,7 @@ namespace Fika.Core.Coop.Patches
 				MainMenuController mmc = Traverse.Create(instance).Field<MainMenuController>("mainMenuController").Value;
 				mmc?.Unsubscribe();
 				gameWorld.OnGameStarted();
+				updater.Dispose();
 
 				if (FikaBackendUtils.IsSpectator)
 				{
@@ -202,6 +205,29 @@ namespace Fika.Core.Coop.Patches
 
 			// Kill the player to put it in spectator mode
 			MainPlayer.ApplyDamageInfo(damageInfo, EBodyPart.Head, EBodyPartColliderType.Eyes, 0);
+		}
+	}
+
+	internal class ScreenUpdater : IDisposable
+	{
+		private readonly MatchmakerPlayerControllerClass matchmakerPlayerControllerClass;
+		private readonly CoopGame coopGame;
+
+		public ScreenUpdater(MatchmakerPlayerControllerClass controller, CoopGame game)
+		{
+			matchmakerPlayerControllerClass = controller;
+			coopGame = game;
+			game.OnMatchingStatusChanged += UpdateStatus;
+		}
+
+		private void UpdateStatus(string text, float? progress)
+		{
+			matchmakerPlayerControllerClass.UpdateMatchingStatus(text, progress);
+		}
+
+		public void Dispose()
+		{
+			coopGame.OnMatchingStatusChanged -= UpdateStatus;
 		}
 	}
 }
