@@ -723,20 +723,28 @@ namespace Fika.Core.Networking
 
 		private bool ValidateLocalIP(string LocalIP)
 		{
-			if (LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
+			try
 			{
-				return true;
+				if (LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
+				{
+					return true;
+				}
+
+				//Check for RFC1918's 20 bit block.
+				int[] ip = Array.ConvertAll(LocalIP.Split('.'), int.Parse);
+
+				if (ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31))
+				{
+					return true;
+				}
+
+				return false;
 			}
-
-			//Check for RFC1918's 20 bit block.
-			int[] ip = Array.ConvertAll(LocalIP.Split('.'), int.Parse);
-
-			if (ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31))
+			catch (Exception ex)
 			{
-				return true;
+				logger.LogError($"Error parsing {LocalIP}, exception: {ex}");
+				return false;
 			}
-
-			return false;
 		}
 
 		private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
