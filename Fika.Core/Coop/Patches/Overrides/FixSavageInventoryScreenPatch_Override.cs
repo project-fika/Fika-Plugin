@@ -11,6 +11,7 @@ namespace Fika.Core.Coop.Patches
 	public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
 	{
 		public static string Profile { get; private set; }
+
 		protected override MethodBase GetTargetMethod()
 		{
 			return AccessTools.Method(typeof(CoopGame), nameof(CoopGame.Stop));
