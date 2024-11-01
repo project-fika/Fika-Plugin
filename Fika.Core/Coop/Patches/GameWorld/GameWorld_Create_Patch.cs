@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.Patches
 		}
 
 		[PatchPrefix]
-		public static bool Prefix(ref GameWorld __result, GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+		public static bool Prefix(ref GameWorld __result, GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
 		{
 
 			if (!FikaBackendUtils.RequestFikaWorld)
@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Patches
 			return false;
 		}
 
-		private static GameWorld CreateHideoutWorld(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+		private static GameWorld CreateHideoutWorld(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
 		{
 			HideoutGameWorld gameWorld = gameObject.AddComponent<HideoutGameWorld>();
 			Traverse gameWorldTraverse = Traverse.Create(gameWorld);

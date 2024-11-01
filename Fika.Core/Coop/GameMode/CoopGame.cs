@@ -9,6 +9,7 @@ using EFT.CameraControl;
 using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
+using EFT.GameTriggers;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
@@ -1494,7 +1495,13 @@ namespace Fika.Core.Coop.GameMode
 			{
 				BotsPresets botsPresets = new(iSession, wavesSpawnScenario_0.SpawnWaves,
 					bossSpawnScenario.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1622_0, false);
-				await botsPresets.TryLoadBotsProfilesOnStart();
+				List<WaveInfo> waveInfos = [];
+				LocationSettingsClass.Location.GClass1336 halloween = Location_0.Events.Halloween2024;
+				if (halloween != null && halloween.InfectionPercentage > 0)
+				{
+					waveInfos.AddRange(BotHalloweenWithZombies.GetProfilesOnStart());
+				}
+				await botsPresets.TryLoadBotsProfilesOnStart(waveInfos);
 				GClass888 botCreator = new(this, botsPresets, CreateBot);
 				BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
 
@@ -1636,6 +1643,9 @@ namespace Fika.Core.Coop.GameMode
 				Logger.LogError("WeatherController was null!");
 			}
 
+			gameWorld.TriggersModule = gameObject.AddComponent<LocalClientTriggersModule>();
+			gameWorld.FillLampControllers();
+
 			WeatherReady = true;
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
@@ -1675,6 +1685,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 
 				bossSpawnScenario.Run(EBotsSpawnMode.Anyway);
+				botsController_0.EventsController.SpawnAction();
 
 				FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
 				FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
