@@ -1146,7 +1146,12 @@ namespace Fika.Core.Networking
 				AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
 				{
 					IsRequest = false,
-					PlayerInfoPacket = new(MyPlayer.Profile, MyPlayer.InventoryController.CurrentId, MyPlayer.InventoryController.NextOperationId),
+					PlayerInfoPacket = new()
+					{
+						Profile = MyPlayer.Profile,
+						ControllerId = MyPlayer.InventoryController.CurrentId,
+						FirstOperationId = MyPlayer.InventoryController.NextOperationId
+					},
 					IsAlive = MyPlayer.ActiveHealthController.IsAlive,
 					IsAI = MyPlayer.IsAI,
 					Position = MyPlayer.Transform.position,

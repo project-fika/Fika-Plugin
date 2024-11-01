@@ -489,7 +489,12 @@ namespace Fika.Core.Coop.GameMode
 
 			MongoID mongoId = new(profile);
 			ushort nextOperationId = 0;
-			SendCharacterPacket packet = new(new(profile, mongoId, nextOperationId), true, true, position, netId);
+			SendCharacterPacket packet = new(new()
+			{
+				Profile = profile,
+				ControllerId = mongoId,
+				FirstOperationId = nextOperationId,
+			}, true, true, position, netId);
 			packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
 			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 
@@ -998,8 +1003,12 @@ namespace Fika.Core.Coop.GameMode
 
 			if (!isServer && !FikaBackendUtils.IsReconnect)
 			{
-				SendCharacterPacket packet = new(new(coopPlayer.Profile, coopPlayer.InventoryController.CurrentId,
-					coopPlayer.InventoryController.NextOperationId), coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
+				SendCharacterPacket packet = new(new()
+				{
+					Profile = coopPlayer.Profile,
+					ControllerId = coopPlayer.InventoryController.CurrentId,
+					FirstOperationId = coopPlayer.InventoryController.NextOperationId
+				}, coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
 				FikaClient client = Singleton<FikaClient>.Instance;
 
 				if (coopPlayer.ActiveHealthController != null)

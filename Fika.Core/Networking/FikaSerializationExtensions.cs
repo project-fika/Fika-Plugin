@@ -262,6 +262,29 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
+		/// Serializes a <see cref="Profile"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="profile"></param>
+		public static void PutProfile(this NetDataWriter writer, Profile profile)
+		{
+			GClass1198 eftWriter = new();
+			eftWriter.WriteEFTProfileDescriptor(new(profile, GClass1971.Instance));
+			writer.PutByteArray(eftWriter.ToArray());
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="Profile"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="Profile"/></returns>
+		public static Profile GetProfile(this NetDataReader reader)
+		{
+			GClass1193 eftReader = new(reader.GetByteArray());
+			return new(eftReader.ReadEFTProfileDescriptor());
+		}
+
+		/// <summary>
 		/// Deserializes a <see cref="List{T}"/> of <see cref="GStruct35"/>
 		/// </summary>
 		/// <param name="reader"></param>
@@ -629,11 +652,10 @@ namespace Fika.Core.Networking
 		/// <param name="packet"></param>
 		public static void PutPlayerInfoPacket(this NetDataWriter writer, PlayerInfoPacket packet)
 		{
-			byte[] profileBytes = SimpleZlib.CompressToBytes(packet.Profile.ToJson(), 4, null);
-			writer.PutByteArray(profileBytes);
-			writer.PutByteArray(packet.HealthByteArray);
+			writer.PutProfile(packet.Profile);
 			writer.PutMongoID(packet.ControllerId);
 			writer.Put(packet.FirstOperationId);
+			writer.PutByteArray(packet.HealthByteArray ?? ([]));
 			writer.Put((byte)packet.ControllerType);
 			if (packet.ControllerType != EHandsControllerType.None)
 			{
@@ -649,11 +671,12 @@ namespace Fika.Core.Networking
 		/// <returns>A <see cref="PlayerInfoPacket"/> with data</returns>
 		public static PlayerInfoPacket GetPlayerInfoPacket(this NetDataReader reader)
 		{
-			byte[] profileBytes = reader.GetByteArray();
-			byte[] healthBytes = reader.GetByteArray();
-			PlayerInfoPacket packet = new(SimpleZlib.Decompress(profileBytes, null).ParseJsonTo<Profile>(), reader.GetMongoID(), reader.GetUShort())
+			PlayerInfoPacket packet = new()
 			{
-				HealthByteArray = healthBytes,
+				Profile = reader.GetProfile(),
+				ControllerId = reader.GetMongoID(),
+				FirstOperationId = reader.GetUShort(),
+				HealthByteArray = reader.GetByteArray(),
 				ControllerType = (EHandsControllerType)reader.GetByte()
 			};
 			if (packet.ControllerType != EHandsControllerType.None)

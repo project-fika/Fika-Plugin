@@ -12,20 +12,15 @@ namespace Fika.Core.Networking.Packets
 	/// </summary>
 	public class SubPackets
 	{
-		public struct PlayerInfoPacket(Profile profile, MongoID? controllerId, ushort firstOperationId)
+		public struct PlayerInfoPacket
 		{
-			public Profile Profile = profile;
-			public byte[] HealthByteArray = [];
-			public MongoID? ControllerId = controllerId;
-			public ushort FirstOperationId = firstOperationId;
+			public Profile Profile;
+			public byte[] HealthByteArray;
+			public MongoID? ControllerId;
+			public ushort FirstOperationId;
 			public EHandsControllerType ControllerType;
 			public string ItemId;
 			public bool IsStationary;
-		}
-
-		public struct ItemControllerExecutePacket
-		{
-
 		}
 
 		public struct WeatherClassPacket

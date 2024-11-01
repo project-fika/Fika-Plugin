@@ -609,9 +609,12 @@ namespace Fika.Core.Networking
 
 				foreach (CoopPlayer player in coopHandler.Players.Values)
 				{
-					SendCharacterPacket characterPacket = new(new(player.Profile,
-						player.InventoryController.CurrentId,
-						player.InventoryController.NextOperationId),
+					SendCharacterPacket characterPacket = new(new()
+					{
+						Profile = player.Profile,
+						ControllerId = player.InventoryController.CurrentId,
+						FirstOperationId = player.InventoryController.NextOperationId
+					},
 						player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
 
 					if (player.ActiveHealthController != null)
@@ -1044,7 +1047,12 @@ namespace Fika.Core.Networking
 					AllCharacterRequestPacket requestPacket = new(pair.Value.ProfileId)
 					{
 						IsRequest = false,
-						PlayerInfoPacket = new(pair.Value.Profile, pair.Value.InventoryController.CurrentId, pair.Value.InventoryController.NextOperationId),
+						PlayerInfoPacket = new()
+						{
+							Profile = pair.Value.Profile,
+							ControllerId = pair.Value.InventoryController.CurrentId,
+							FirstOperationId = pair.Value.InventoryController.NextOperationId
+						},
 						IsAlive = pair.Value.HealthController.IsAlive,
 						IsAI = pair.Value is CoopBot,
 						Position = pair.Value.Transform.position,
