@@ -210,6 +210,20 @@ namespace Fika.Core.Networking
 			return GClass1685.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 		}
 
+		/// <summary>
+		/// Reads an <see cref="InventoryEquipment"/> serialized from <see cref="PutItem(NetDataWriter, Item)"/> and converts it into an <see cref="Inventory"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>An <see cref="Inventory"/></returns>
+		public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
+		{
+			GClass1193 eftReader = new(reader.GetByteArray());
+			return new GClass1651()
+			{
+				Equipment = eftReader.ReadEFTItemDescriptor()
+			}.ToInventory();
+		}
+
 		public static Item GetAirdropItem(this NetDataReader reader)
 		{
 			GClass1193 eftReader = new(reader.GetByteArray());
@@ -719,7 +733,7 @@ namespace Fika.Core.Networking
 			writer.Put(packet.Point);
 			writer.Put(packet.Force);
 			writer.Put(packet.OverallVelocity);
-			writer.PutItem(packet.Equipment);
+			writer.PutItem(packet.InventoryEquipment);
 			writer.Put((byte)packet.ItemSlot);
 		}
 
@@ -737,7 +751,7 @@ namespace Fika.Core.Networking
 				Point = reader.GetVector3(),
 				Force = reader.GetFloat(),
 				OverallVelocity = reader.GetVector3(),
-				Equipment = (InventoryEquipment)reader.GetItem(),
+				Inventory = reader.GetInventoryFromEquipment(),
 				ItemSlot = (EquipmentSlot)reader.GetByte()
 			};
 		}

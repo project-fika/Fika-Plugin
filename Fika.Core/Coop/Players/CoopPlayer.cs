@@ -771,7 +771,7 @@ namespace Fika.Core.Coop.Players
 					Point = LastDamageInfo.HitPoint,
 					Force = _corpseAppliedForce,
 					OverallVelocity = Velocity,
-					Equipment = Inventory.Equipment,
+					InventoryEquipment = Inventory.Equipment,
 					ItemSlot = EquipmentSlot.ArmBand
 				},
 				TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
