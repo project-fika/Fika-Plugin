@@ -133,9 +133,24 @@ namespace Fika.Core.Coop.Utils
 			return profile.Info.GroupId.ToLower() == "dedicated";
 		}
 
+		/// <summary>
+		/// Forces the <see cref="InfoClass.MainProfileNickname"/> to be set on a profile
+		/// </summary>
+		/// <param name="infoClass"></param>
+		/// <param name="nickname"></param>
 		public static void SetProfileNickname(this InfoClass infoClass, string nickname)
 		{
 			Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
+		}
+
+		/// <summary>
+		/// Checks whether a profile belongs to a player or an AI
+		/// </summary>
+		/// <param name="profile"></param>
+		/// <returns>True if the profile belongs to a player, false if it belongs to an AI</returns>
+		public static bool IsPlayerProfile(this Profile profile)
+		{
+			return profile.QuestsData != null || !string.IsNullOrEmpty(profile.PetId);
 		}
 	}
 }
