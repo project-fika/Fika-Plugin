@@ -3,6 +3,7 @@ using Fika.Core.Coop.GameMode;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
+using SPT.SinglePlayer.Patches.ScavMode;
 using System.Linq;
 using System.Reflection;
 
@@ -53,10 +54,8 @@ namespace Fika.Core.Coop.Patches
 			session.ProfileOfPet.LearnAll();
 
 			// make a request to the server, so it knows of the items we might transfer
-			RequestHandler.PutJson("/raid/profile/scavsave", new
-			{
-				profile = session.ProfileOfPet
-			}.ToJson());
+			RequestHandler.PutJson("/raid/profile/scavsave", 
+				GetProfileAtEndOfRaidPatch.ProfileDescriptor.ToUnparsedData([]).JObject.ToString());
 		}
 	}
 }
