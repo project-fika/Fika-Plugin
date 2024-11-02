@@ -629,7 +629,7 @@ namespace Fika.Core.Networking
 										coopGame.SetMatchmakerStatus(localizedString, progress / total);
 										try
 										{
-											DamageInfo damageInfo = default;
+											DamageInfoStruct damageInfo = default;
 											damageInfo.HitPoint = hitPosition;
 											windowBreaker.MakeHit(in damageInfo, true);
 										}

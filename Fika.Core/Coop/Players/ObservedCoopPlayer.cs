@@ -245,7 +245,7 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		public override void ManageAggressor(DamageInfo DamageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
+		public override void ManageAggressor(DamageInfoStruct DamageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
 		{
 			if (_isDeadAlready)
 			{
@@ -311,7 +311,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void HandleExplosive(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
+		public void HandleExplosive(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
 		{
 			if (HealthController.DamageCoeff == 0)
 			{
@@ -341,7 +341,7 @@ namespace Fika.Core.Coop.Players
 			});
 		}
 
-		public override void ApplyDamageInfo(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+		public override void ApplyDamageInfo(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 		{
 			LastAggressor = DamageInfo.Player.iPlayer;
 			LastDamagedBodyPart = bodyPartType;
@@ -350,7 +350,7 @@ namespace Fika.Core.Coop.Players
 			LastDamageType = DamageInfo.DamageType;
 		}
 
-		public ShotInfoClass HandleSniperShot(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass HandleSniperShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			if (HealthController.DamageCoeff == 0)
 			{
@@ -388,7 +388,7 @@ namespace Fika.Core.Coop.Players
 			};
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			if (HealthController != null && !HealthController.IsAlive)
 			{
@@ -445,7 +445,7 @@ namespace Fika.Core.Coop.Players
 			return hitInfo;
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfo DamageInfo)
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfoStruct DamageInfo)
 		{
 			if (isServer)
 			{
@@ -477,7 +477,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public ShotInfoClass ApplyClientShot(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass ApplyClientShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			ShotReactions(DamageInfo, bodyPartType);
 			LastAggressor = DamageInfo.Player.iPlayer;
@@ -856,7 +856,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void HandleDamagePacket(ref DamagePacket packet)
 		{
-			DamageInfo DamageInfo = new()
+			DamageInfoStruct DamageInfo = new()
 			{
 				Damage = packet.Damage,
 				DamageType = packet.DamageType,
@@ -904,7 +904,7 @@ namespace Fika.Core.Coop.Players
 			LastDamagedBodyPart = packet.BodyPartType;
 		}
 
-		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo DamageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfoStruct DamageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
 		{
 			// Only handle if it was ourselves as otherwise it's irrelevant
 			if (LastAggressor.IsYourPlayer)

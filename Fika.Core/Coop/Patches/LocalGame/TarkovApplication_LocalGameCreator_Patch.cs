@@ -197,7 +197,7 @@ namespace Fika.Core.Coop.Patches
 			// Small delay to ensure the teleport command is processed first
 			await Task.Delay(250);
 
-			DamageInfo damageInfo = new()
+			DamageInfoStruct damageInfo = new()
 			{
 				Damage = 1000,
 				DamageType = EDamageType.Impact

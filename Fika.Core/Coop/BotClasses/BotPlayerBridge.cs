@@ -34,12 +34,12 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 		}
 
-		public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
+		public void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
 		{
 			bot.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
 		}
 
-		public ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
 		{
 			if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
 			{

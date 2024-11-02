@@ -37,7 +37,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 				___botOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
 			}
 
-			private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
+			private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
 			{
 				player.OnPlayerDead -= OnZryachiyDead;
 
