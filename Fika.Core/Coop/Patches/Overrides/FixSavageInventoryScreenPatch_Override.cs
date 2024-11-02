@@ -3,7 +3,6 @@ using Fika.Core.Coop.GameMode;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
-using SPT.SinglePlayer.Patches.ScavMode;
 using System.Linq;
 using System.Reflection;
 
@@ -11,7 +10,7 @@ namespace Fika.Core.Coop.Patches
 {
 	public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
 	{
-		public static string Profile { get; private set; }
+		public static GClass1962 ProfileDescriptor { get; private set; }
 
 		protected override MethodBase GetTargetMethod()
 		{
@@ -21,7 +20,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static void PatchPrefix(CoopGame __instance)
 		{
-			Profile = __instance.Profile_0.ToJson();
+			ProfileDescriptor = new GClass1962(__instance.Profile_0, GClass1971.Instance);
 		}
 	}
 	/// <summary>
@@ -38,7 +37,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static void PatchPrefix(ref ISession ___iSession)
 		{
-			Profile profile = GetProfileAtEndOfRaidPatch_Override.Profile.ParseJsonTo<Profile>();
+			Profile profile = new(GetProfileAtEndOfRaidPatch_Override.ProfileDescriptor);
 
 			if (profile.Side != EPlayerSide.Savage)
 			{
@@ -54,8 +53,8 @@ namespace Fika.Core.Coop.Patches
 			session.ProfileOfPet.LearnAll();
 
 			// make a request to the server, so it knows of the items we might transfer
-			RequestHandler.PutJson("/raid/profile/scavsave", 
-				GetProfileAtEndOfRaidPatch.ProfileDescriptor.ToUnparsedData([]).JObject.ToString());
+			RequestHandler.PutJson("/raid/profile/scavsave",
+				GetProfileAtEndOfRaidPatch_Override.ProfileDescriptor.ToUnparsedData([]).JObject.ToString());
 		}
 	}
 }
