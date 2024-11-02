@@ -723,7 +723,7 @@ namespace Fika.Core
 			new AmmoUsedCounterPatch().Disable();
 			new ArmorDamageCounterPatch().Disable();
 			new ScavRepAdjustmentPatch().Disable();
-			new GetProfileAtEndOfRaidPatch().Disable();
+			//new GetProfileAtEndOfRaidPatch().Disable();
 			new FixSavageInventoryScreenPatch().Disable();
 			new ScavExfilPatch().Disable();
 			new OverrideMaxAiAliveInRaidValuePatch().Disable();
@@ -733,7 +733,7 @@ namespace Fika.Core
 		{
 			new ScavProfileLoad_Override().Enable();
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
-			new GetProfileAtEndOfRaidPatch_Override().Enable();
+			//new GetProfileAtEndOfRaidPatch_Override().Enable();
 			new FixSavageInventoryScreenPatch_Override().Enable();
 		}
 
