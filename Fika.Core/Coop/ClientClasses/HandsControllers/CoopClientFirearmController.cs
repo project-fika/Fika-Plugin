@@ -337,7 +337,7 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			ReloadBarrelsHandler handler = new(player, placeToPutContainedAmmoMagazine, ammoPack);
-			CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, new Callback(handler.Process));
+			CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, handler.Process);
 		}
 
 		public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback callback, bool quickReload = false)
@@ -357,7 +357,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 			ReloadCylinderMagazineHandler handler = new(player, this, quickReload, ammoPack.GetReloadingAmmoIds(), [], (CylinderMagazineClass)Item.GetCurrentMagazine());
 			Weapon.GetShellsIndexes(handler.shellsIndexes);
-			CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, new Callback(handler.Process), handler.quickReload);
+			CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.quickReload);
 		}
 
 		public override void ReloadGrenadeLauncher(AmmoPackReloadingClass ammoPack, Callback callback)
@@ -389,7 +389,7 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			ReloadMagHandler handler = new(player, gridItemAddress, magazine);
-			CurrentOperation.ReloadMag(magazine, gridItemAddress, callback, new Callback(handler.Process));
+			CurrentOperation.ReloadMag(magazine, gridItemAddress, callback, handler.Process);
 		}
 
 		public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
@@ -404,7 +404,7 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			ReloadWithAmmoHandler handler = new(player, ammoPack.GetReloadingAmmoIds());
-			CurrentOperation.ReloadWithAmmo(ammoPack, callback, new Callback(handler.Process));
+			CurrentOperation.ReloadWithAmmo(ammoPack, callback, handler.Process);
 		}
 
 		public override bool SetLightsState(FirearmLightStateStruct[] lightsStates, bool force = false, bool animated = true)
