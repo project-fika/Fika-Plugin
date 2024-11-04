@@ -95,11 +95,11 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			if (Item.IsFlareGun)
 			{
-				return new GClass1767(this);
+				return new GClass1768(this);
 			}
 			if (Item.IsOneOff)
 			{
-				return new GClass1767(this);
+				return new GClass1770(this);
 			}
 			if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
 			{
