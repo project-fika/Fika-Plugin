@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public class BotPlayerBridge(CoopBot bot) : BodyPartCollider.GInterface20
+	public class BotPlayerBridge(CoopBot bot) : BodyPartCollider.IPlayerBridge
 	{
 		private readonly CoopBot bot = bot;
 

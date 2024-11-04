@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Components
         private FikaClient client;
         private bool isServer;
         private ObservedLootItem lootItem;
-        private GStruct128 data;
+        private LootSyncStruct data;
 
         private Rigidbody Rigidbody
         {

@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.HostClasses
 	/// </summary>
 	public class FikaHostWorld : World
 	{
-		public List<GStruct128> LootSyncPackets;
+		public List<LootSyncStruct> LootSyncPackets;
 
 		private FikaServer server;
 		private GameWorld gameWorld;
@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.HostClasses
 			hostWorld.server = Singleton<FikaServer>.Instance;
 			hostWorld.server.FikaHostWorld = hostWorld;
 			hostWorld.gameWorld = gameWorld;
-			hostWorld.LootSyncPackets = new List<GStruct128>(8);
+			hostWorld.LootSyncPackets = new List<LootSyncStruct>(8);
 			return hostWorld;
 		}
 
@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.HostClasses
 		{
 			for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
 			{
-				GStruct128 gstruct = LootSyncPackets[i];
+				LootSyncStruct gstruct = LootSyncPackets[i];
 				if (lootItems.TryGetByKey(gstruct.Id, out LootItem lootItem))
 				{
 					if (lootItem is ObservedLootItem observedLootItem)

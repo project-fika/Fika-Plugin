@@ -11,14 +11,14 @@ namespace Fika.Core.Coop.ClientClasses
 	/// </summary>
 	public class FikaClientWorld : World
 	{
-		public List<GStruct128> LootSyncPackets;
+		public List<LootSyncStruct> LootSyncPackets;
 		private CoopClientGameWorld clientGameWorld;
 
 		public static FikaClientWorld Create(CoopClientGameWorld gameWorld)
 		{
 			FikaClientWorld clientWorld = gameWorld.gameObject.AddComponent<FikaClientWorld>();
 			clientWorld.clientGameWorld = gameWorld;
-			clientWorld.LootSyncPackets = new List<GStruct128>(8);
+			clientWorld.LootSyncPackets = new List<LootSyncStruct>(8);
 			Singleton<FikaClient>.Instance.FikaClientWorld = clientWorld;
 			return clientWorld;
 		}
@@ -32,7 +32,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
 			{
-				GStruct128 gstruct = LootSyncPackets[i];
+				LootSyncStruct gstruct = LootSyncPackets[i];
 				if (lootItems.TryGetByKey(gstruct.Id, out LootItem lootItem))
 				{
 					if (lootItem is ObservedLootItem observedLootItem)

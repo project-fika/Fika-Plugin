@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			for (int i = list_1.Count - 1; i >= 0; i--)
 			{
 				handler.PausedEffects.Add(list_1[i]);
-				GStruct357 gstruct = gclass803_0.Withdraw();
+				PausedEffectsStruct gstruct = gclass803_0.Withdraw();
 				gstruct.SaveInfo(list_1[i].Id, list_1[i].HealthController, list_1[i].Type, list_1[i].BodyPart, list_1[i].Strength,
 					list_1[i].CurrentStrength, list_1[i].DelayTime, list_1[i].StateTime, list_1[i].WorkStateTime, list_1[i].BuildUpTime,
 					list_1[i].ResidueTime, list_1[i].State);
@@ -121,7 +121,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			private readonly ObservedHealthController healthController = healthController;
 			public readonly List<NetworkBodyEffectsAbstractClass> PausedEffects = [];
-			public readonly List<GStruct357> PausedEffectsInfo = [];
+			public readonly List<PausedEffectsStruct> PausedEffectsInfo = [];
 
 			public void UnpauseEffects()
 			{

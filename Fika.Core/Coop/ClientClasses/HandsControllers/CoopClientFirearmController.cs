@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.ClientClasses
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
 			operationFactoryDelegates[typeof(GClass1752)] = new OperationFactoryDelegate(Weapon1);
 			operationFactoryDelegates[typeof(GClass1753)] = new OperationFactoryDelegate(Weapon2);
-			operationFactoryDelegates[typeof(GClass1765)] = new OperationFactoryDelegate(Weapon3);
+			operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
 			return operationFactoryDelegates;
 		}
 
@@ -95,11 +95,11 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			if (Item.IsFlareGun)
 			{
-				return new GClass1768(this);
+				return new FlareGunFireOperationClass(this);
 			}
 			if (Item.IsOneOff)
 			{
-				return new GClass1770(this);
+				return new IsOneOffFireOperationClass(this);
 			}
 			if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
 			{
@@ -107,11 +107,11 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 			if (Item is GClass3048) // This is a revolver
 			{
-				return new GClass1767(this);
+				return new RevolverFireOperationClass(this);
 			}
 			if (!Item.BoltAction)
 			{
-				return new GClass1765(this);
+				return new GenericFireOperationClass(this);
 			}
 			return new FirearmClass4(this);
 		}

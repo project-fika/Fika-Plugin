@@ -4,7 +4,7 @@ namespace Fika.Core.Networking
 {
 	public struct LootSyncPacket : INetSerializable
 	{
-		public GStruct128 Data;
+		public LootSyncStruct Data;
 
 		public void Deserialize(NetDataReader reader)
 		{

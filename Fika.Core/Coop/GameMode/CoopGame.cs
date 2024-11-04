@@ -132,7 +132,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 		}
 
-		public GClass2359 SeasonsSettings { get; set; }
+		public SeasonsSettingsClass SeasonsSettings { get; set; }
 
 		private static ManualLogSource Logger;
 

@@ -18,6 +18,6 @@ namespace Fika.Core.Coop.GameMode
 
 		public ESeason Season { get; set; }
 
-		public GClass2359 SeasonsSettings { get; set; }
+		public SeasonsSettingsClass SeasonsSettings { get; set; }
 	}
 }

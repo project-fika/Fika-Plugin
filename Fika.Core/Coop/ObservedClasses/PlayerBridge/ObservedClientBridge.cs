@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	public class ObservedClientBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.GInterface20
+	public class ObservedClientBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.IPlayerBridge
 	{
 		private readonly ObservedCoopPlayer observedPlayer = observedPlayer;
 
