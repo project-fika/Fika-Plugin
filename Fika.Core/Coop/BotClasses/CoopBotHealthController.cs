@@ -18,9 +18,9 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		public override void SendNetworkSyncPacket(NetworkHealthSyncStruct packet)
+		public override void SendNetworkSyncPacket(NetworkHealthSyncPacketStruct packet)
 		{
-			if (packet.SyncType == NetworkHealthSyncStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
+			if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
 			{
 				coopBot.PacketSender.HealthSyncPackets.Enqueue(coopBot.SetupCorpseSyncPacket(packet));
 				return;

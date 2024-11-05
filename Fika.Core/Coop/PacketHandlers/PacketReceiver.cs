@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<InventoryPacket> InventoryPackets { get; private set; } = new(50);
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; private set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; private set; } = new(50);
-		private readonly Queue<GClass3192> inventoryOperations = new();
+		private readonly Queue<BaseInventoryOperationClass> inventoryOperations = new();
 
 		protected void Awake()
 		{
@@ -67,7 +67,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					for (int i = 0; i < healthSyncPackets; i++)
 					{
 						HealthSyncPacket packet = HealthSyncPackets.Dequeue();
-						if (packet.Packet.SyncType == NetworkHealthSyncStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
+						if (packet.Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
 						{
 							observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
 							observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
@@ -158,7 +158,7 @@ namespace Fika.Core.Coop.PacketHandlers
 					if (controller is Interface16 networkController)
 					{
 						GClass1193 reader = new(packet.OperationBytes);
-						GClass1693 descriptor = reader.ReadPolymorph<GClass1693>();
+						BaseDescriptorClass descriptor = reader.ReadPolymorph<BaseDescriptorClass>();
 						GStruct443 result = networkController.CreateOperationFromDescriptor(descriptor);
 						if (!result.Succeeded)
 						{

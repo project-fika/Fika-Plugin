@@ -236,7 +236,7 @@ namespace Fika.Core.Coop.Players
 			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{
 			if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
 			{
@@ -700,7 +700,7 @@ namespace Fika.Core.Coop.Players
 			});
 		}
 
-		public override void vmethod_3(GClass1640 controller, int transitPointId, string keyId, EDateTime time)
+		public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
 		{
 			GStruct176 packet = controller.GetInteractPacket(transitPointId, keyId, time);
 			if (FikaBackendUtils.IsServer)
@@ -752,7 +752,7 @@ namespace Fika.Core.Coop.Players
 			Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
 		}
 
-		public HealthSyncPacket SetupCorpseSyncPacket(NetworkHealthSyncStruct packet)
+		public HealthSyncPacket SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
 		{
 			float num = EFTHardSettings.Instance.HIT_FORCE;
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);

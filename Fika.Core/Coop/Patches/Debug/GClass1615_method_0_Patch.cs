@@ -10,7 +10,7 @@ namespace Fika.Core.Coop.Patches
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass1640).GetMethod(nameof(GClass1640.method_0));
+			return typeof(TransitControllerAbstractClass).GetMethod(nameof(TransitControllerAbstractClass.method_0));
 		}
 
 		[PatchPrefix]

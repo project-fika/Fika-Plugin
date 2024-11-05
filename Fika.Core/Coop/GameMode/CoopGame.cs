@@ -732,7 +732,7 @@ namespace Fika.Core.Coop.GameMode
 
 		private void SyncTransitControllers()
 		{
-			GClass1640 transitController = Singleton<GameWorld>.Instance.TransitController;
+			TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController == null)
 			{
 				Logger.LogError("SyncTransitControllers: TransitController was null!");
@@ -964,7 +964,7 @@ namespace Fika.Core.Coop.GameMode
 		{
 			gameWorld.LocationId = Location_0.Id;
 
-			bool spawnedInSession = profile.Side == EPlayerSide.Savage || GClass1640.IsTransit(profile.Id, out int _);
+			bool spawnedInSession = profile.Side == EPlayerSide.Savage || TransitControllerAbstractClass.IsTransit(profile.Id, out int _);
 			profile.SetSpawnedInSession(spawnedInSession);
 
 			statisticsManager = FikaBackendUtils.IsDedicated ? new ObservedStatisticsManager() : new GClass1999();
@@ -1616,7 +1616,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 			else
 			{
-				GClass1640.DisableTransitPoints();
+				TransitControllerAbstractClass.DisableTransitPoints();
 			}
 
 			if (WeatherController.Instance != null)
@@ -1857,7 +1857,7 @@ namespace Fika.Core.Coop.GameMode
 
 			if (isServer)
 			{
-				if (GClass1640.Exist(out FikaHostTransitController gclass))
+				if (TransitControllerAbstractClass.Exist(out FikaHostTransitController gclass))
 				{
 					gclass.Init();
 					// TODO: Sync to clients!!!
@@ -1865,7 +1865,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 			else
 			{
-				if (GClass1640.Exist(out FikaClientTransitController gclass))
+				if (TransitControllerAbstractClass.Exist(out FikaClientTransitController gclass))
 				{
 					gclass.Init();
 				}
@@ -1948,7 +1948,7 @@ namespace Fika.Core.Coop.GameMode
 				player.Profile.EftStats.SessionCounters.AddDouble(0.01, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
 			}
 
-			GClass1640 transitController = Singleton<GameWorld>.Instance.TransitController;
+			TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController != null)
 			{
 				if (transitController.alreadyTransits.TryGetValue(player.ProfileId, out GClass1926 data))
@@ -2302,7 +2302,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 
 			}
-			if (GClass1640.Exist(out GClass1642 gclass))
+			if (TransitControllerAbstractClass.Exist(out GClass1642 gclass))
 			{
 				bool flag;
 				if (gclass == null)

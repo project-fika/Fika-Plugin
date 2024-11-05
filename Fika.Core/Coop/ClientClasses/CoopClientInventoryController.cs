@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.ClientClasses
 			this.player = player;
 			coopPlayer = (CoopPlayer)player;
 			mongoID_0 = new(profile);
-			searchController = new GClass1967(profile, this);
+			searchController = new PlayerSearchControllerClass(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 		}
 
@@ -79,12 +79,12 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		public override void vmethod_1(GClass3192 operation, Callback callback)
+		public override void vmethod_1(BaseInventoryOperationClass operation, Callback callback)
 		{
 			HandleOperation(operation, callback).HandleExceptions();
 		}
 
-		private async Task HandleOperation(GClass3192 operation, Callback callback)
+		private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
 		{
 			if (player.HealthController.IsAlive)
 			{
@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.ClientClasses
 			RunClientOperation(operation, callback);
 		}
 
-		private void RunClientOperation(GClass3192 operation, Callback callback)
+		private void RunClientOperation(BaseInventoryOperationClass operation, Callback callback)
 		{
 			if (!vmethod_0(operation))
 			{
@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			// Do not replicate stashing quest items
-			if (operation is GClass3213 discardOperation)
+			if (operation is RemoveOperationClass discardOperation)
 			{
 				if (discardOperation.Item.QuestItem)
 				{
@@ -184,7 +184,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return false;
 		}
 
-		private uint AddOperationCallback(GClass3192 operation, Action<ServerOperationStatus> callback)
+		private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
 		{
 			ushort id = operation.Id;
 			coopPlayer.OperationCallbacks.Add(id, callback);
@@ -198,7 +198,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		private class ClientInventoryOperationHandler
 		{
-			public GClass3192 Operation;
+			public BaseInventoryOperationClass Operation;
 			public Callback Callback;
 			public CoopClientInventoryController InventoryController;
 			public IResult OperationResult = null;

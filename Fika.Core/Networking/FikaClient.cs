@@ -316,7 +316,7 @@ namespace Fika.Core.Networking
 
 		private void OnSyncTransitControllersPacketReceived(SyncTransitControllersPacket packet)
 		{
-			GClass1640 transitController = Singleton<GameWorld>.Instance.TransitController;
+			TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController != null)
 			{
 				transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps);

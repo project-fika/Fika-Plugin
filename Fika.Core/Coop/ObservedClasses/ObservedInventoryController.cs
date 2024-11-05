@@ -36,16 +36,16 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			mongoID_0 = firstId;
 			ushort_0 = firstOperationId;
-			searchController = new GClass1969();
+			searchController = new AISearchControllerClass();
 			coopPlayer = (CoopPlayer)player;
 		}
 
-		public override void AddDiscardLimits(Item rootItem, IEnumerable<GStruct384> destroyedItems)
+		public override void AddDiscardLimits(Item rootItem, IEnumerable<DestroyedItemsStruct> destroyedItems)
 		{
 			// Do nothing
 		}
 
-		public override IEnumerable<GStruct384> GetItemsOverDiscardLimit(Item item)
+		public override IEnumerable<DestroyedItemsStruct> GetItemsOverDiscardLimit(Item item)
 		{
 			return [];
 		}
@@ -104,7 +104,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return false;
 		}
 
-		public override bool vmethod_0(GClass3192 operation)
+		public override bool vmethod_0(BaseInventoryOperationClass operation)
 		{
 			return true;
 		}
@@ -143,14 +143,14 @@ namespace Fika.Core.Coop.ObservedClasses
 				return;
 			}
 			// Check for GClass increments, fold operation
-			if ((item.Parent != to || operation is GClass3208) && handler.player_0.HandsController.CanExecute(operation))
+			if ((item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
 			{
 				Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
 				RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
 				handler.player_0.HandsController.Execute(operation, new Callback(handler.method_1));
 				return;
 			}
-			if (operation is GClass3208 && !handler.player_0.HandsController.CanExecute(operation))
+			if (operation is FoldOperationClass && !handler.player_0.HandsController.CanExecute(operation))
 			{
 				handler.callback.Fail("Can't perform operation");
 				return;
@@ -168,7 +168,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			mongoID_0 = newId;
 		}
 
-		public GStruct443 CreateOperationFromDescriptor(GClass1693 descriptor)
+		public GStruct443 CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
 		{
 			method_13(descriptor);
 			return descriptor.ToInventoryOperation(coopPlayer);

@@ -147,7 +147,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{
 			ActiveHealthController activeHealthController = ActiveHealthController;
 			if (activeHealthController != null && !activeHealthController.IsAlive)

@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.HostClasses
 			return new HostGrenadeFactory();
 		}
 
-		public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2011 config, bool loadBundlesAndCreatePools = true, List<ResourceKey> resources = null, IProgress<GStruct122> progress = null, CancellationToken ct = default)
+		public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2011 config, bool loadBundlesAndCreatePools = true, List<ResourceKey> resources = null, IProgress<LoadingProgressStruct> progress = null, CancellationToken ct = default)
 		{
 			await base.InitLevel(itemFactory, config, loadBundlesAndCreatePools, resources, progress, ct);
 			MineManager.OnExplosion += OnMineExplode;

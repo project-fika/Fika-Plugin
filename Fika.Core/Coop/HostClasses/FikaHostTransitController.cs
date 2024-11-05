@@ -404,7 +404,7 @@ namespace Fika.Core.Coop.HostClasses
 			};
 			alreadyTransits.Add(profileId, gclass);
 
-			GClass1640 transitController = Singleton<GameWorld>.Instance.TransitController;
+			TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
 				if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1926 data))

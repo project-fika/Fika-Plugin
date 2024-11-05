@@ -326,7 +326,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				GClass1640 transitController = Singleton<GameWorld>.Instance.TransitController;
+				TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 				if (transitController != null)
 				{
 					transitController.InteractWithTransit(playerToApply, packet.Data);
@@ -338,7 +338,7 @@ namespace Fika.Core.Networking
 		{
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
-			GClass1640 transitController = Singleton<GameWorld>.Instance.TransitController;
+			TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController != null)
 			{
 				transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps);
@@ -1122,7 +1122,7 @@ namespace Fika.Core.Networking
 					OperationCallbackPacket operationCallbackPacket;
 					if (playerToApply.InventoryController is Interface16 inventoryController)
 					{
-						GClass1693 descriptor = reader.ReadPolymorph<GClass1693>();
+						BaseDescriptorClass descriptor = reader.ReadPolymorph<BaseDescriptorClass>();
 						GStruct443 result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
 						ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");

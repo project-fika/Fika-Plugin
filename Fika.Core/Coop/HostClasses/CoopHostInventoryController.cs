@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.HostClasses
 		{
 			this.player = player;
 			coopPlayer = (CoopPlayer)player;
-			searchController = new GClass1967(profile, this);
+			searchController = new PlayerSearchControllerClass(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopHostInventoryController));
 		}
 
@@ -82,12 +82,12 @@ namespace Fika.Core.Coop.HostClasses
 			}
 		}
 
-		public override void vmethod_1(GClass3192 operation, Callback callback)
+		public override void vmethod_1(BaseInventoryOperationClass operation, Callback callback)
 		{
 			HandleOperation(operation, callback).HandleExceptions();
 		}
 
-		private async Task HandleOperation(GClass3192 operation, Callback callback)
+		private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
 		{
 			if (player.HealthController.IsAlive)
 			{
@@ -96,7 +96,7 @@ namespace Fika.Core.Coop.HostClasses
 			RunHostOperation(operation, callback);
 		}
 
-		private void RunHostOperation(GClass3192 operation, Callback callback)
+		private void RunHostOperation(BaseInventoryOperationClass operation, Callback callback)
 		{
 			// Do not replicate picking up quest items, throws an error on the other clients            
 			if (operation is GClass3195 moveOperation)
@@ -125,7 +125,7 @@ namespace Fika.Core.Coop.HostClasses
 			}
 
 			// Do not replicate stashing quest items
-			if (operation is GClass3213 discardOperation)
+			if (operation is RemoveOperationClass discardOperation)
 			{
 				if (discardOperation.Item.QuestItem)
 				{
@@ -187,7 +187,7 @@ namespace Fika.Core.Coop.HostClasses
 			return false;
 		}
 
-		private uint AddOperationCallback(GClass3192 operation, Action<ServerOperationStatus> callback)
+		private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
 		{
 			ushort id = operation.Id;
 			coopPlayer.OperationCallbacks.Add(id, callback);
@@ -199,10 +199,10 @@ namespace Fika.Core.Coop.HostClasses
 			return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
 		}
 
-		private class HostInventoryOperationHandler(CoopHostInventoryController inventoryController, GClass3192 operation, Callback callback)
+		private class HostInventoryOperationHandler(CoopHostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)
 		{
 			public readonly CoopHostInventoryController inventoryController = inventoryController;
-			public GClass3192 operation = operation;
+			public BaseInventoryOperationClass operation = operation;
 			public readonly Callback callback = callback;
 
 			public void HandleResult(IResult result)

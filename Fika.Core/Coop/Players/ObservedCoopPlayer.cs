@@ -350,7 +350,7 @@ namespace Fika.Core.Coop.Players
 			LastDamageType = DamageInfo.DamageType;
 		}
 
-		public ShotInfoClass HandleSniperShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass HandleSniperShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{
 			if (HealthController.DamageCoeff == 0)
 			{
@@ -388,7 +388,7 @@ namespace Fika.Core.Coop.Players
 			};
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{
 			if (HealthController != null && !HealthController.IsAlive)
 			{
@@ -477,7 +477,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public ShotInfoClass ApplyClientShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass ApplyClientShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{
 			ShotReactions(DamageInfo, bodyPartType);
 			LastAggressor = DamageInfo.Player.iPlayer;
@@ -849,7 +849,7 @@ namespace Fika.Core.Coop.Players
 			CorpseSyncPacket = default;
 		}
 
-		public override void vmethod_3(GClass1640 controller, int transitPointId, string keyId, EDateTime time)
+		public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
 		{
 			// Do nothing
 		}

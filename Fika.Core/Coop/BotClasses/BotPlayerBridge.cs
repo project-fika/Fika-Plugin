@@ -39,7 +39,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			bot.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
 		}
 
-		public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, GStruct420 shotId)
+		public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{
 			if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
 			{
@@ -70,7 +70,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return bot.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
 		}
 
-		public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out GStruct23 armorResistanceData)
+		public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceStruct armorResistanceData)
 		{
 			return bot.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
 		}
