@@ -14,7 +14,7 @@ namespace Fika.Core.Coop.ClientClasses
 	{
 		protected CoopPlayer player;
 
-		public static CoopClientQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
+		public static CoopClientQuickGrenadeController Create(CoopPlayer player, ThrowWeapItemClass item)
 		{
 			CoopClientQuickGrenadeController controller = smethod_9<CoopClientQuickGrenadeController>(player, item);
 			controller.player = player;

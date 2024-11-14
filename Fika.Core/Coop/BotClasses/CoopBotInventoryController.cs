@@ -89,7 +89,7 @@ namespace Fika.Core.Coop.BotClasses
 			handler.Callback?.Fail($"Can't execute {handler.Operation}", 1);
 		}
 
-		public override SearchContentOperation vmethod_2(SearchableItemClass item)
+		public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
 		{
 			return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
 		}

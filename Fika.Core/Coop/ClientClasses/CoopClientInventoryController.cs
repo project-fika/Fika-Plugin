@@ -169,13 +169,13 @@ namespace Fika.Core.Coop.ClientClasses
 			coopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
 		}
 
-		public override bool HasCultistAmulet(out CultistAmuletClass amulet)
+		public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
 		{
 			amulet = null;
 			using IEnumerator<Item> enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets]).GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				if (enumerator.Current is CultistAmuletClass cultistAmuletClass)
+				if (enumerator.Current is CultistAmuletItemClass cultistAmuletClass)
 				{
 					amulet = cultistAmuletClass;
 					return true;
@@ -191,7 +191,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return id;
 		}
 
-		public override SearchContentOperation vmethod_2(SearchableItemClass item)
+		public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
 		{
 			return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
 		}

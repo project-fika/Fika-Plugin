@@ -15,7 +15,7 @@ namespace Fika.Core.Coop.ObservedClasses
 	{
 		private CoopPlayer coopPlayer;
 
-		public static CoopObservedGrenadeController Create(CoopPlayer player, GrenadeClass item)
+		public static CoopObservedGrenadeController Create(CoopPlayer player, ThrowWeapItemClass item)
 		{
 			CoopObservedGrenadeController controller = smethod_9<CoopObservedGrenadeController>(player, item);
 			controller.coopPlayer = player;

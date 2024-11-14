@@ -589,7 +589,7 @@ namespace Fika.Core.Coop.Players
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(GrenadeClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
+		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this, throwWeap);
 			Func<GrenadeHandsController> func = new(factory.CreateObservedGrenadeController);
@@ -597,7 +597,7 @@ namespace Fika.Core.Coop.Players
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(GrenadeClass throwWeap, Callback<GInterface168> callback, bool scheduled = true)
+		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface168> callback, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this, throwWeap);
 			Func<QuickGrenadeThrowHandsController> func = new(factory.CreateObservedQuickGrenadeController);
@@ -613,7 +613,7 @@ namespace Fika.Core.Coop.Players
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(MedsItemClass meds, EBodyPart bodyPart, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this)
 			{
@@ -626,7 +626,7 @@ namespace Fika.Core.Coop.Players
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this)
 			{
@@ -1452,7 +1452,7 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 			handler.item = result.Value;
-			if (handler.item is GrenadeClass)
+			if (handler.item is ThrowWeapItemClass)
 			{
 				CreateHandsController(handler.ReturnController, handler.item);
 			}
@@ -1504,7 +1504,7 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 			handler.item = result.Value;
-			if (handler.item is GrenadeClass)
+			if (handler.item is ThrowWeapItemClass)
 			{
 				CreateHandsController(handler.ReturnController, handler.item);
 			}
@@ -1617,7 +1617,7 @@ namespace Fika.Core.Coop.Players
 
 			internal AbstractHandsController ReturnController()
 			{
-				return CoopObservedGrenadeController.Create(coopPlayer, (GrenadeClass)item);
+				return CoopObservedGrenadeController.Create(coopPlayer, (ThrowWeapItemClass)item);
 			}
 		}
 
@@ -1653,7 +1653,7 @@ namespace Fika.Core.Coop.Players
 
 			internal AbstractHandsController ReturnController()
 			{
-				return CoopObservedQuickGrenadeController.Create(coopPlayer, (GrenadeClass)item);
+				return CoopObservedQuickGrenadeController.Create(coopPlayer, (ThrowWeapItemClass)item);
 			}
 		}
 

@@ -69,7 +69,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			// Do nothing
 		}
 
-		public void OnShot(Weapon weapon, BulletClass ammo)
+		public void OnShot(Weapon weapon, AmmoItemClass ammo)
 		{
 			// Do nothing
 		}

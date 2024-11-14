@@ -217,7 +217,7 @@ namespace Fika.Core.Networking
 			public void Execute(CoopPlayer player)
 			{
 				// Check for GClass increments
-				if (player.HandsController is CoopObservedFirearmController controller && controller.Weapon is GClass3048)
+				if (player.HandsController is CoopObservedFirearmController controller && controller.Weapon is RevolverItemClass)
 				{
 					controller.RollCylinder(RollToZeroCamora);
 				}
@@ -653,7 +653,7 @@ namespace Fika.Core.Networking
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
-					MagazineClass magazine = null;
+					MagazineItemClass magazine = null;
 					try
 					{
 						GStruct448<Item> result = player.FindItemById(MagId);
@@ -662,7 +662,7 @@ namespace Fika.Core.Networking
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
 							return;
 						}
-						if (result.Value is MagazineClass magazineClass)
+						if (result.Value is MagazineItemClass magazineClass)
 						{
 							magazine = magazineClass;
 						}
@@ -742,7 +742,7 @@ namespace Fika.Core.Networking
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
 							return;
 						}
-						if (result.Value is MagazineClass magazine)
+						if (result.Value is MagazineItemClass magazine)
 						{
 							controller.QuickReloadMag(magazine, null);
 						}
@@ -807,7 +807,7 @@ namespace Fika.Core.Networking
 					{
 						if (Status == EReloadWithAmmoStatus.StartReload)
 						{
-							List<BulletClass> bullets = controller.FindAmmoByIds(AmmoIds);
+							List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
 							AmmoPackReloadingClass ammoPack = new(bullets);
 							controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
 						}
@@ -873,13 +873,13 @@ namespace Fika.Core.Networking
 					{
 						if (Status == EReloadWithAmmoStatus.StartReload)
 						{
-							List<BulletClass> bullets = controller.FindAmmoByIds(AmmoIds);
+							List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
 							AmmoPackReloadingClass ammoPack = new(bullets);
 							controller.CurrentOperation.ReloadCylinderMagazine(ammoPack, null, null);
 						}
 					}
 
-					if (Changed && controller.Weapon.GetCurrentMagazine() is CylinderMagazineClass cylinder)
+					if (Changed && controller.Weapon.GetCurrentMagazine() is CylinderMagazineItemClass cylinder)
 					{
 						cylinder.SetCurrentCamoraIndex(CamoraIndex);
 						controller.Weapon.CylinderHammerClosed = HammerClosed;
@@ -923,7 +923,7 @@ namespace Fika.Core.Networking
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
-					List<BulletClass> ammo = controller.FindAmmoByIds(AmmoIds);
+					List<AmmoItemClass> ammo = controller.FindAmmoByIds(AmmoIds);
 					AmmoPackReloadingClass ammoPack = new(ammo);
 					controller.ReloadGrenadeLauncher(ammoPack, null);
 				}
@@ -959,7 +959,7 @@ namespace Fika.Core.Networking
 			{
 				if (player.HandsController is CoopObservedFirearmController controller)
 				{
-					List<BulletClass> ammo = controller.FindAmmoByIds(AmmoIds);
+					List<AmmoItemClass> ammo = controller.FindAmmoByIds(AmmoIds);
 					AmmoPackReloadingClass ammoPack = new(ammo);
 					ItemAddress gridItemAddress = null;
 
@@ -1025,7 +1025,7 @@ namespace Fika.Core.Networking
 					{
 						controller.FirearmsAnimator.SetFire(true);
 						// Check for GClass increments
-						if (controller.Weapon is not GClass3048)
+						if (controller.Weapon is not RevolverItemClass)
 						{
 							controller.FirearmsAnimator.Animator.Play(controller.FirearmsAnimator.FullFireStateName, 1, 0f);
 							controller.Weapon.Repairable.Durability = 0;
@@ -1037,7 +1037,7 @@ namespace Fika.Core.Networking
 					}
 					else
 					{
-						BulletClass bulletClass = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
+						AmmoItemClass bulletClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
 						controller.InitiateFlare(bulletClass, ShotPosition, ShotForward);
 						bulletClass.IsUsed = true;
 						if (controller.WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)

@@ -17,8 +17,8 @@ namespace Fika.Core.Coop.Factories
 		public CoopPlayer player = player;
 		public Item item = item;
 		public KnifeComponent knifeComponent = knifeComponent;
-		public MedsClass meds;
-		public FoodClass food;
+		public MedsItemClass meds;
+		public FoodDrinkItemClass food;
 		public EBodyPart bodyPart;
 		public float amount;
 		public int animationVariant;
@@ -46,7 +46,7 @@ namespace Fika.Core.Coop.Factories
 		/// <returns>A new <see cref="CoopObservedGrenadeController"/> or null if the action failed.</returns>
 		public Player.GrenadeHandsController CreateObservedGrenadeController()
 		{
-			if (item is GrenadeClass grenade)
+			if (item is ThrowWeapItemClass grenade)
 			{
 				return CoopObservedGrenadeController.Create(player, grenade);
 			}
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.Factories
 		/// <returns>A new <see cref="CoopObservedQuickGrenadeController"/> or null if the action failed.</returns>
 		public Player.QuickGrenadeThrowHandsController CreateObservedQuickGrenadeController()
 		{
-			if (item is GrenadeClass grenade)
+			if (item is ThrowWeapItemClass grenade)
 			{
 				return CoopObservedQuickGrenadeController.Create(player, grenade);
 			}

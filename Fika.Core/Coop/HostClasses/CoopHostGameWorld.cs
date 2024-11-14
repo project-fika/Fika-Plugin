@@ -105,7 +105,7 @@ namespace Fika.Core.Coop.HostClasses
 
 		public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
 		{
-			if (item is not GrenadeClass grenadeClass)
+			if (item is not ThrowWeapItemClass grenadeClass)
 			{
 				return;
 			}

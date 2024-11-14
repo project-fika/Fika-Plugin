@@ -79,7 +79,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return false;
 		}
 
-		public override void StrictCheckMagazine(MagazineClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
+		public override void StrictCheckMagazine(MagazineItemClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
 		{
 			// Do nothing
 		}
@@ -109,7 +109,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return true;
 		}
 
-		public override SearchContentOperation vmethod_2(SearchableItemClass item)
+		public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
 		{
 			return null;
 		}

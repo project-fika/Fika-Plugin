@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.GameMode
 		public string SpawnId;
 		public bool InteractablesInitialized { get; set; } = false;
 		public bool HasReceivedLoot { get; set; } = false;
-		public List<GrenadeClass> ThrownGrenades;
+		public List<ThrowWeapItemClass> ThrownGrenades;
 		public bool WeatherReady;
 
 		private readonly Dictionary<int, int> botQueue = [];
@@ -2291,7 +2291,7 @@ namespace Fika.Core.Coop.GameMode
 			BTRControllerClass btrController = instance.BtrController;
 			if ((btrController?.TransferItemsController.Stash) != null)
 			{
-				StashClass stash = btrController.TransferItemsController.Stash;
+				StashItemClass stash = btrController.TransferItemsController.Stash;
 				string stashName = stash.Id + "_btr";
 				foreach (EFT.InventoryLogic.IContainer item in stash.Containers)
 				{
@@ -2316,7 +2316,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 				if (flag)
 				{
-					StashClass stash2 = gclass.TransferItemsController.Stash;
+					StashItemClass stash2 = gclass.TransferItemsController.Stash;
 					string stashName = stash2.Id + "_transit";
 					foreach (EFT.InventoryLogic.IContainer item in stash2.Containers)
 					{

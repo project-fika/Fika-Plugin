@@ -105,7 +105,7 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				return new FireOnlyBarrelFireOperation(this);
 			}
-			if (Item is GClass3048) // This is a revolver
+			if (Item is RevolverItemClass) // This is a revolver
 			{
 				return new RevolverFireOperationClass(this);
 			}
@@ -260,7 +260,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return flag;
 		}
 
-		public override void InitiateShot(IWeapon weapon, BulletClass ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
+		public override void InitiateShot(IWeapon weapon, AmmoItemClass ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
 		{
 			EShotType shotType = default;
 
@@ -309,7 +309,7 @@ namespace Fika.Core.Coop.ClientClasses
 			base.InitiateShot(weapon, ammo, shotPosition, shotDirection, fireportPosition, chamberIndex, overheat);
 		}
 
-		public override void QuickReloadMag(MagazineClass magazine, Callback callback)
+		public override void QuickReloadMag(MagazineItemClass magazine, Callback callback)
 		{
 			if (!CanStartReload())
 			{
@@ -355,7 +355,7 @@ namespace Fika.Core.Coop.ClientClasses
 				return;
 			}
 
-			ReloadCylinderMagazineHandler handler = new(player, this, quickReload, ammoPack.GetReloadingAmmoIds(), [], (CylinderMagazineClass)Item.GetCurrentMagazine());
+			ReloadCylinderMagazineHandler handler = new(player, this, quickReload, ammoPack.GetReloadingAmmoIds(), [], (CylinderMagazineItemClass)Item.GetCurrentMagazine());
 			Weapon.GetShellsIndexes(handler.shellsIndexes);
 			CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.quickReload);
 		}
@@ -381,7 +381,7 @@ namespace Fika.Core.Coop.ClientClasses
 			CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
 		}
 
-		public override void ReloadMag(MagazineClass magazine, ItemAddress gridItemAddress, Callback callback)
+		public override void ReloadMag(MagazineItemClass magazine, ItemAddress gridItemAddress, Callback callback)
 		{
 			if (!CanStartReload() || Blindfire)
 			{
@@ -460,7 +460,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		public override void ShotMisfired(BulletClass ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
+		public override void ShotMisfired(AmmoItemClass ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
 		{
 			EShotType shotType = new();
 
@@ -557,7 +557,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		public override void CreateFlareShot(BulletClass flareItem, Vector3 shotPosition, Vector3 forward)
+		public override void CreateFlareShot(AmmoItemClass flareItem, Vector3 shotPosition, Vector3 forward)
 		{
 			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
@@ -715,13 +715,13 @@ namespace Fika.Core.Coop.ClientClasses
 				SendBoltActionReloadPacket(true);
 			}
 
-			public override void ReloadMag(MagazineClass magazine, ItemAddress gridItemAddress, Callback finishCallback, Callback startCallback)
+			public override void ReloadMag(MagazineItemClass magazine, ItemAddress gridItemAddress, Callback finishCallback, Callback startCallback)
 			{
 				base.ReloadMag(magazine, gridItemAddress, finishCallback, startCallback);
 				SendBoltActionReloadPacket(true);
 			}
 
-			public override void QuickReloadMag(MagazineClass magazine, Callback finishCallback, Callback startCallback)
+			public override void QuickReloadMag(MagazineItemClass magazine, Callback finishCallback, Callback startCallback)
 			{
 				base.QuickReloadMag(magazine, finishCallback, startCallback);
 				SendBoltActionReloadPacket(true);
@@ -752,11 +752,11 @@ namespace Fika.Core.Coop.ClientClasses
 			private bool hasSent;
 		}
 
-		private class ReloadMagHandler(CoopPlayer coopPlayer, ItemAddress gridItemAddress, MagazineClass magazine)
+		private class ReloadMagHandler(CoopPlayer coopPlayer, ItemAddress gridItemAddress, MagazineItemClass magazine)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
 			private readonly ItemAddress gridItemAddress = gridItemAddress;
-			private readonly MagazineClass magazine = magazine;
+			private readonly MagazineItemClass magazine = magazine;
 
 			public void Process(IResult result)
 			{
@@ -791,14 +791,14 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		private class ReloadCylinderMagazineHandler(CoopPlayer coopPlayer, CoopClientFirearmController coopClientFirearmController, bool quickReload, string[] ammoIds, List<int> shellsIndexes, CylinderMagazineClass cylinderMagazine)
+		private class ReloadCylinderMagazineHandler(CoopPlayer coopPlayer, CoopClientFirearmController coopClientFirearmController, bool quickReload, string[] ammoIds, List<int> shellsIndexes, CylinderMagazineItemClass cylinderMagazine)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
 			private readonly CoopClientFirearmController coopClientFirearmController = coopClientFirearmController;
 			public readonly bool quickReload = quickReload;
 			private readonly string[] ammoIds = ammoIds;
 			public readonly List<int> shellsIndexes = shellsIndexes;
-			private readonly CylinderMagazineClass cylinderMagazine = cylinderMagazine;
+			private readonly CylinderMagazineItemClass cylinderMagazine = cylinderMagazine;
 
 			public void Process(IResult result)
 			{

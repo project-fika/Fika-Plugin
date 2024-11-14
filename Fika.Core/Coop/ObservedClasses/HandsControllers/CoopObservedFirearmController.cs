@@ -229,9 +229,9 @@ namespace Fika.Core.Coop.ObservedClasses
 				weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
 				if (boltActionReload)
 				{
-					MagazineClass magazine = Item.GetCurrentMagazine();
+					MagazineItemClass magazine = Item.GetCurrentMagazine();
 					Weapon weapon = Weapon;
-					if (magazine != null && magazine is not CylinderMagazineClass && weapon.HasChambers)
+					if (magazine != null && magazine is not CylinderMagazineItemClass && weapon.HasChambers)
 					{
 						magazine.Cartridges.PopTo(coopPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
 					}
@@ -321,12 +321,12 @@ namespace Fika.Core.Coop.ObservedClasses
 					return;
 				}
 
-				BulletClass bullet = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+				AmmoItemClass bullet = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
 				Weapon.MalfState.MalfunctionedAmmo = bullet;
 				Weapon.MalfState.AmmoToFire = bullet;
 				if (WeaponPrefab != null)
 				{
-					if (Weapon.HasChambers && Weapon.Chambers[0].ContainedItem is BulletClass)
+					if (Weapon.HasChambers && Weapon.Chambers[0].ContainedItem is AmmoItemClass)
 					{
 						Weapon.Chambers[0].RemoveItemWithoutRestrictions();
 					}
@@ -368,7 +368,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				return;
 			}
 
-			BulletClass ammo = (BulletClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+			AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
 			InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
 				CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
@@ -393,7 +393,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				needsReset = true;
 			}
 
-			MagazineClass magazine = Weapon.GetCurrentMagazine();
+			MagazineItemClass magazine = Weapon.GetCurrentMagazine();
 
 			FirearmsAnimator.SetFire(true);
 
@@ -401,7 +401,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			{
 				if (UnderbarrelWeapon != null)
 				{
-					if (UnderbarrelWeapon.Chamber.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
+					if (UnderbarrelWeapon.Chamber.ContainedItem is AmmoItemClass grenadeBullet && !grenadeBullet.IsUsed)
 					{
 						grenadeBullet.IsUsed = true;
 						UnderbarrelWeapon.Chamber.RemoveItem();
@@ -415,7 +415,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				{
 					Slot slot = Weapon.FirstLoadedChamberSlot;
 					int index = Weapon.Chambers.IndexOf(slot);
-					if (slot.ContainedItem is BulletClass grenadeBullet && !grenadeBullet.IsUsed)
+					if (slot.ContainedItem is AmmoItemClass grenadeBullet && !grenadeBullet.IsUsed)
 					{
 						grenadeBullet.IsUsed = true;
 						slot.RemoveItem();
@@ -436,7 +436,7 @@ namespace Fika.Core.Coop.ObservedClasses
 				{
 					for (int i = 0; i < Weapon.Chambers.Length; i++)
 					{
-						if (Weapon.Chambers[i].ContainedItem is BulletClass bClass && !bClass.IsUsed)
+						if (Weapon.Chambers[i].ContainedItem is AmmoItemClass bClass && !bClass.IsUsed)
 						{
 							bClass.IsUsed = true;
 							if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
@@ -469,14 +469,14 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 
 			// Check for GClass increments
-			if (Weapon is GClass3048)
+			if (Weapon is RevolverItemClass)
 			{
 				Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
 
-				if (magazine is CylinderMagazineClass cylinderMagazine)
+				if (magazine is CylinderMagazineItemClass cylinderMagazine)
 				{
 					int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!Weapon.CylinderHammerClosed);
-					BulletClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
+					AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
 					if (cylinderAmmo != null)
 					{
 						cylinderAmmo.IsUsed = true;
@@ -501,7 +501,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			ammo.IsUsed = true;
 
-			if (magazine != null && magazine is not CylinderMagazineClass && magazine.Count > 0 && !Weapon.BoltAction)
+			if (magazine != null && magazine is not CylinderMagazineItemClass && magazine.Count > 0 && !Weapon.BoltAction)
 			{
 				if (Item.HasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
 				{
@@ -533,13 +533,13 @@ namespace Fika.Core.Coop.ObservedClasses
 			boltActionReload = true;
 		}
 
-		public List<BulletClass> FindAmmoByIds(string[] ammoIds)
+		public List<AmmoItemClass> FindAmmoByIds(string[] ammoIds)
 		{
 			_preallocatedAmmoList.Clear();
 			foreach (string id in ammoIds)
 			{
 				GStruct448<Item> gstruct = _player.FindItemById(id);
-				if (gstruct.Succeeded && gstruct.Value is BulletClass bulletClass)
+				if (gstruct.Succeeded && gstruct.Value is AmmoItemClass bulletClass)
 				{
 					_preallocatedAmmoList.Add(bulletClass);
 				}
@@ -548,7 +548,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		}
 
 
-		private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, ref ShotInfoPacket packet, BulletClass ammo, MagazineClass magazine)
+		private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, ref ShotInfoPacket packet, AmmoItemClass ammo, MagazineItemClass magazine)
 		{
 			weaponEffectsManager.DestroyPatronInWeapon(packet.ChamberIndex);
 			if (!ammo.AmmoTemplate.RemoveShellAfterFire)
@@ -574,7 +574,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 
 			//Check for GClass increments
-			if (Weapon is GClass3048 || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
+			if (Weapon is RevolverItemClass || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
 			{
 				return;
 			}
@@ -627,7 +627,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		{
 			private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
-			public override void Start(BulletClass ammo, Callback callback)
+			public override void Start(AmmoItemClass ammo, Callback callback)
 			{
 				observedController.isThrowingPatron = true;
 				base.Start(ammo, callback);

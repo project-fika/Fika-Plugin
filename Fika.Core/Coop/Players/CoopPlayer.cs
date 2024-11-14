@@ -133,7 +133,7 @@ namespace Fika.Core.Coop.Players
 				statisticsManager, questController, achievementsController, filter,
 				EVoipState.NotAvailable, false, false);
 
-			foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
+			foreach (MagazineItemClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
 			{
 				player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
 			}
@@ -304,7 +304,7 @@ namespace Fika.Core.Coop.Players
 			});
 		}
 
-		public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
 		{
 			FoodControllerHandler handler = new(this, foodDrink, amount, EBodyPart.Head, animationVariant);
 
@@ -314,7 +314,7 @@ namespace Fika.Core.Coop.Players
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
 
-		public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(MedsItemClass meds, EBodyPart bodyPart, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
 		{
 			MedsControllerHandler handler = new(this, meds, bodyPart, animationVariant);
 
@@ -364,7 +364,7 @@ namespace Fika.Core.Coop.Players
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
 
-		public override void Proceed(GrenadeClass throwWeap, Callback<GInterface168> callback, bool scheduled = true)
+		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface168> callback, bool scheduled = true)
 		{
 			QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
@@ -374,7 +374,7 @@ namespace Fika.Core.Coop.Players
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
 
-		public override void Proceed(GrenadeClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
+		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
 		{
 			GrenadeControllerHandler handler = new(this, throwWeap);
 
@@ -820,7 +820,7 @@ namespace Fika.Core.Coop.Players
 			GStruct448<Item> itemResult = FindItemById(lastWeaponId, false, false);
 			if (!itemResult.Succeeded)
 			{
-				foreach (GrenadeClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
+				foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
 				{
 					if (grenadeClass.Id == lastWeaponId)
 					{
@@ -1549,10 +1549,10 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class MedsControllerHandler(CoopPlayer coopPlayer, MedsClass meds, EBodyPart bodyPart, int animationVariant)
+		private class MedsControllerHandler(CoopPlayer coopPlayer, MedsItemClass meds, EBodyPart bodyPart, int animationVariant)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly MedsClass meds = meds;
+			private readonly MedsItemClass meds = meds;
 			private readonly EBodyPart bodyPart = bodyPart;
 			private readonly int animationVariant = animationVariant;
 			public Process<MedsController, GInterface165> process;
@@ -1587,10 +1587,10 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class FoodControllerHandler(CoopPlayer coopPlayer, FoodClass foodDrink, float amount, EBodyPart bodyPart, int animationVariant)
+		private class FoodControllerHandler(CoopPlayer coopPlayer, FoodDrinkItemClass foodDrink, float amount, EBodyPart bodyPart, int animationVariant)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly FoodClass foodDrink = foodDrink;
+			private readonly FoodDrinkItemClass foodDrink = foodDrink;
 			private readonly float amount = amount;
 			private readonly EBodyPart bodyPart = bodyPart;
 			private readonly int animationVariant = animationVariant;
@@ -1695,10 +1695,10 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class GrenadeControllerHandler(CoopPlayer coopPlayer, GrenadeClass throwWeap)
+		private class GrenadeControllerHandler(CoopPlayer coopPlayer, ThrowWeapItemClass throwWeap)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly GrenadeClass throwWeap = throwWeap;
+			private readonly ThrowWeapItemClass throwWeap = throwWeap;
 			public Process<GrenadeHandsController, IHandsThrowController> process;
 			public Action confirmCallback;
 
@@ -1729,10 +1729,10 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class QuickGrenadeControllerHandler(CoopPlayer coopPlayer, GrenadeClass throwWeap)
+		private class QuickGrenadeControllerHandler(CoopPlayer coopPlayer, ThrowWeapItemClass throwWeap)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly GrenadeClass throwWeap = throwWeap;
+			private readonly ThrowWeapItemClass throwWeap = throwWeap;
 			public Process<QuickGrenadeThrowHandsController, GInterface168> process;
 			public Action confirmCallback;
 

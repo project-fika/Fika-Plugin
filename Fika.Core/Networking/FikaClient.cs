@@ -496,7 +496,7 @@ namespace Fika.Core.Networking
 					break;
 				case SynchronizableObjectType.Tripwire:
 					{
-						if (Singleton<ItemFactoryClass>.Instance.CreateItem(packet.GrenadeId, packet.GrenadeTemplate, null) is not GrenadeClass grenadeClass)
+						if (Singleton<ItemFactoryClass>.Instance.CreateItem(packet.GrenadeId, packet.GrenadeTemplate, null) is not ThrowWeapItemClass grenadeClass)
 						{
 							logger.LogError("OnSpawnSyncObjectPacketReceived: Item with id " + packet.GrenadeId + " is not a grenade!");
 							return;
