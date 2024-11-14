@@ -137,12 +137,13 @@ namespace Fika.Core.Coop.ObservedClasses
 				player_0 = coopPlayer,
 				callback = callback
 			};
+
 			if (!coopPlayer.HealthController.IsAlive)
 			{
 				handler.callback.Succeed();
 				return;
 			}
-			// Check for GClass increments, fold operation
+
 			if ((item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
 			{
 				Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
@@ -150,11 +151,13 @@ namespace Fika.Core.Coop.ObservedClasses
 				handler.player_0.HandsController.Execute(operation, new Callback(handler.method_1));
 				return;
 			}
+
 			if (operation is FoldOperationClass && !handler.player_0.HandsController.CanExecute(operation))
 			{
 				handler.callback.Fail("Can't perform operation");
 				return;
 			}
+
 			handler.callback.Succeed();
 		}
 

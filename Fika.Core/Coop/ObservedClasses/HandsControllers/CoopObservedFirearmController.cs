@@ -468,7 +468,6 @@ namespace Fika.Core.Coop.ObservedClasses
 				}
 			}
 
-			// Check for GClass increments
 			if (Weapon is RevolverItemClass)
 			{
 				Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
@@ -573,7 +572,6 @@ namespace Fika.Core.Coop.ObservedClasses
 				FirearmsAnimator.SetBoltCatch(true);
 			}
 
-			//Check for GClass increments
 			if (Weapon is RevolverItemClass || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
 			{
 				return;

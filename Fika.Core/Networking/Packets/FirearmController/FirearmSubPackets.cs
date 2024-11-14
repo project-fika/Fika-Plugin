@@ -216,7 +216,6 @@ namespace Fika.Core.Networking
 
 			public void Execute(CoopPlayer player)
 			{
-				// Check for GClass increments
 				if (player.HandsController is CoopObservedFirearmController controller && controller.Weapon is RevolverItemClass)
 				{
 					controller.RollCylinder(RollToZeroCamora);
@@ -1024,7 +1023,7 @@ namespace Fika.Core.Networking
 					if (StartOneShotFire)
 					{
 						controller.FirearmsAnimator.SetFire(true);
-						// Check for GClass increments
+
 						if (controller.Weapon is not RevolverItemClass)
 						{
 							controller.FirearmsAnimator.Animator.Play(controller.FirearmsAnimator.FullFireStateName, 1, 0f);
