@@ -758,6 +758,14 @@ namespace Fika.Core.Coop.Players
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
 			_corpseAppliedForce = num;
 
+			if (FikaBackendUtils.IsServer || IsYourPlayer)
+			{
+				if (Side is not EPlayerSide.Savage)
+				{
+					GenerateDogtagDetails();
+				}
+			}
+
 			HealthSyncPacket syncPacket = new(NetId)
 			{
 				Packet = packet,
@@ -805,14 +813,7 @@ namespace Fika.Core.Coop.Players
 			if (IsYourPlayer)
 			{
 				StartCoroutine(LocalPlayerDied());
-			}
-			if (FikaBackendUtils.IsServer || IsYourPlayer)
-			{
-				if (Side is not EPlayerSide.Savage)
-				{
-					GenerateDogtagDetails();
-				}
-			}
+			}			
 		}
 
 		private void FindKillerWeapon()
@@ -837,7 +838,6 @@ namespace Fika.Core.Coop.Players
 		/// <summary>
 		/// TODO: Refactor... BSG code makes this difficult
 		/// </summary>
-		/// <returns></returns>
 		private void GenerateDogtagDetails()
 		{
 			string accountId = AccountId;
