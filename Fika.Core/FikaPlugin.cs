@@ -726,6 +726,7 @@ namespace Fika.Core
 			new GetProfileAtEndOfRaidPatch().Disable();
 			new ScavExfilPatch().Disable();
 			new OverrideMaxAiAliveInRaidValuePatch().Disable();
+			new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
 		}
 
 		private void EnableOverridePatches()
