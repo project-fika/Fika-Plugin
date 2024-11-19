@@ -724,7 +724,6 @@ namespace Fika.Core
 			new ArmorDamageCounterPatch().Disable();
 			new ScavRepAdjustmentPatch().Disable();
 			new GetProfileAtEndOfRaidPatch().Disable();
-			new FixSavageInventoryScreenPatch().Disable();
 			new ScavExfilPatch().Disable();
 			new OverrideMaxAiAliveInRaidValuePatch().Disable();
 		}
