@@ -114,7 +114,7 @@ namespace Fika.Core.Coop.Players
 			{
 				if (FikaBackendUtils.IsDedicated)
 				{
-					player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();					
+					player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
 				}
 				else
 				{
@@ -806,16 +806,12 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnDead(EDamageType damageType)
 		{
-			if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(lastWeaponId))
-			{
-				FindKillerWeapon();
-			}
 			base.OnDead(damageType);
 			PacketSender.Enabled = false;
 			if (IsYourPlayer)
 			{
 				StartCoroutine(LocalPlayerDied());
-			}			
+			}
 		}
 
 		private void FindKillerWeapon()
@@ -842,6 +838,11 @@ namespace Fika.Core.Coop.Players
 		/// </summary>
 		private void GenerateDogtagDetails()
 		{
+			if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(lastWeaponId))
+			{
+				FindKillerWeapon();
+			}
+
 			string accountId = AccountId;
 			string profileId = ProfileId;
 			string nickname = Profile.Nickname;
@@ -994,7 +995,7 @@ namespace Fika.Core.Coop.Players
 			// Set own group id, ignore if dedicated
 			if (FikaBackendUtils.IsDedicated)
 			{
-				Profile.Info.GroupId = "DEDICATED";				
+				Profile.Info.GroupId = "DEDICATED";
 			}
 			else
 			{
