@@ -224,6 +224,19 @@ namespace Fika.Core.Networking
 			}.ToInventory();
 		}
 
+		public static void PutItemDescriptor(this NetDataWriter writer, GClass1659 descriptor)
+		{
+			GClass1198 eftWriter = new();
+			eftWriter.WriteEFTItemDescriptor(descriptor);
+			writer.PutByteArray(eftWriter.ToArray());
+		}
+
+		public static GClass1659 GetItemDescriptor(this NetDataReader reader)
+		{
+			GClass1193 eftReader = new(reader.GetByteArray());
+			return eftReader.ReadEFTItemDescriptor();
+		}
+
 		public static Item GetAirdropItem(this NetDataReader reader)
 		{
 			GClass1193 eftReader = new(reader.GetByteArray());
@@ -756,7 +769,7 @@ namespace Fika.Core.Networking
 			writer.Put(packet.Point);
 			writer.Put(packet.Force);
 			writer.Put(packet.OverallVelocity);
-			writer.PutItem(packet.InventoryEquipment);
+			writer.PutItemDescriptor(packet.InventoryDescriptor);
 			writer.Put((byte)packet.ItemSlot);
 		}
 
@@ -774,7 +787,7 @@ namespace Fika.Core.Networking
 				Point = reader.GetVector3(),
 				Force = reader.GetFloat(),
 				OverallVelocity = reader.GetVector3(),
-				Inventory = reader.GetInventoryFromEquipment(),
+				InventoryDescriptor = reader.GetItemDescriptor(),
 				ItemSlot = (EquipmentSlot)reader.GetByte()
 			};
 		}

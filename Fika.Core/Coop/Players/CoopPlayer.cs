@@ -766,6 +766,8 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
+			GClass1659 inventoryDescriptor = GClass1685.SerializeItem(Inventory.Equipment, GClass1971.Instance);
+
 			HealthSyncPacket syncPacket = new(NetId)
 			{
 				Packet = packet,
@@ -779,7 +781,7 @@ namespace Fika.Core.Coop.Players
 					Point = LastDamageInfo.HitPoint,
 					Force = _corpseAppliedForce,
 					OverallVelocity = Velocity,
-					InventoryEquipment = Inventory.Equipment,
+					InventoryDescriptor = inventoryDescriptor,
 					ItemSlot = EquipmentSlot.ArmBand
 				},
 				TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,

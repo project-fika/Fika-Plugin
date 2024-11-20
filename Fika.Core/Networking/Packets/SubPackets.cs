@@ -52,8 +52,7 @@ namespace Fika.Core.Networking.Packets
 			public Vector3 Point;
 			public float Force;
 			public Vector3 OverallVelocity;
-			public InventoryEquipment InventoryEquipment;
-			public Inventory Inventory;
+			public GClass1659 InventoryDescriptor;
 			public EquipmentSlot ItemSlot;
 			public Item ItemInHands;
 		}

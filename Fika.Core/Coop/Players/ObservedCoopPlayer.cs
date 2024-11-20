@@ -788,9 +788,9 @@ namespace Fika.Core.Coop.Players
 
 		public override Corpse CreateCorpse()
 		{
-			if (CorpseSyncPacket.InventoryEquipment != null)
+			if (CorpseSyncPacket.InventoryDescriptor != null)
 			{
-				SetInventory(CorpseSyncPacket.Inventory);
+				SetInventory(CorpseSyncPacket.InventoryDescriptor);
 			}
 			return CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
 		}
@@ -939,12 +939,17 @@ namespace Fika.Core.Coop.Players
 
 		// TODO: This code needs refactoring and hopefully removing
 		// The reason it was added was due to a lot of bots inventories desyncing because of their unnatural inventory operations
-		public void SetInventory(Inventory inventory)
+		public void SetInventory(GClass1659 inventoryDescriptor)
 		{
 			if (HandsController != null)
 			{
 				HandsController.FastForwardCurrentState();
 			}
+
+			Inventory inventory = new GClass1651()
+			{
+				Equipment = inventoryDescriptor,
+			}.ToInventory();
 
 			InventoryController.ReplaceInventory(inventory);
 			if (CorpseSyncPacket.ItemSlot <= EquipmentSlot.Scabbard)
