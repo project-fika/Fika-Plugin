@@ -849,7 +849,7 @@ namespace Fika.Core.Coop.Players
 			bool hasAggressor = LastAggressor != null;
 			string killerAccountId = hasAggressor ? LastAggressor.AccountId : string.Empty;
 			string killerProfileId = hasAggressor ? LastAggressor.ProfileId : string.Empty;
-			string killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : "Unknown";
+			string killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : string.Empty;
 			EPlayerSide side = Side;
 			int level = Profile.Info.Level;
 			DateTime time = EFTDateTimeClass.UtcNow;
@@ -872,7 +872,7 @@ namespace Fika.Core.Coop.Players
 					dogtagComponent.Side = side;
 					dogtagComponent.Level = level;
 					dogtagComponent.Time = time;
-					dogtagComponent.Status = LastAggressor != null ? "Killed by" : "Died";
+					dogtagComponent.Status = hasAggressor ? "Killed by" : "Died";
 					dogtagComponent.WeaponName = weaponName;
 					dogtagComponent.GroupId = groupId;
 					return;
