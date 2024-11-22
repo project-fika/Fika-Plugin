@@ -19,15 +19,15 @@ namespace Fika.Core.Networking
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			Type = (EGenericSubPacketType)reader.GetInt();
+			Type = (EGenericSubPacketType)reader.GetByte();
 			SubPacket = reader.GetGenericSubPacket(Type, NetId);
 		}
 
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put(NetId);
-			writer.Put((int)Type);
-			SubPacket.Serialize(writer);
+			writer.Put((byte)Type);
+			SubPacket?.Serialize(writer);
 		}
 	}	
 }
