@@ -339,11 +339,9 @@ namespace Fika.Core.Coop.Players
 				Point = DamageInfo.HitPoint,
 				HitNormal = DamageInfo.HitNormal,
 				PenetrationPower = DamageInfo.PenetrationPower,
-				BlockedBy = DamageInfo.BlockedBy,
-				DeflectedBy = DamageInfo.DeflectedBy,
 				SourceId = DamageInfo.SourceId,
 				ArmorDamage = DamageInfo.ArmorDamage,
-				WeaponId = DamageInfo.Weapon.Id
+				WeaponId = DamageInfo.Weapon != null ? DamageInfo.Weapon.Id : string.Empty
 			});
 		}
 
