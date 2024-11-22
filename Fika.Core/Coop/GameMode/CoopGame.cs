@@ -33,6 +33,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -1957,6 +1958,19 @@ namespace Fika.Core.Coop.GameMode
 					ExitStatus = ExitStatus.Transit;
 					ExitLocation = transitPoint.parameters.name;
 					FikaBackendUtils.IsTransit = true;
+				}
+				if (transitController is FikaHostTransitController hostController)
+				{
+					GenericPacket backendPacket = new()
+					{
+						NetId = player.NetId,
+						Type = EGenericSubPacketType.UpdateBackendData,
+						SubPacket = new GenericSubPackets.UpdateBackendData()
+						{
+							ExpectedPlayers = hostController.AliveTransitPlayers
+						}
+					};
+					Singleton<FikaServer>.Instance.SendDataToAll(ref backendPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
 

@@ -103,10 +103,11 @@ namespace Fika.Core.Networking.Packets
 		public enum EGenericSubPacketType
 		{
 			ClientExtract,
-			//TrainSync,
 			ExfilCountdown,
+			ClearEffects,
+			UpdateBackendData
+			//TrainSync,
 			//TraderServiceNotification,
-			ClearEffects
 		}
 	}
 }

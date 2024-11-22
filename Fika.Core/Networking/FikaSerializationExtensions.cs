@@ -998,6 +998,8 @@ namespace Fika.Core.Networking
 					return new ExfilCountdown(reader);
 				case EGenericSubPacketType.ClearEffects:
 					return new ClearEffects(netId);
+				case EGenericSubPacketType.UpdateBackendData:
+					return new UpdateBackendData(reader);
 				default:
 					FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
 					break;

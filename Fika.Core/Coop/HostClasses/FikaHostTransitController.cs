@@ -44,6 +44,13 @@ namespace Fika.Core.Coop.HostClasses
 		private readonly Dictionary<Player, int> playersInTransitZone;
 		private bool dediTransit;
 		private readonly List<int> transittedPlayers;
+		public int AliveTransitPlayers
+		{
+			get
+			{
+				return transittedPlayers.Count;
+			}
+		}
 
 		private void OnHostPlayerEnter(TransitPoint point, Player player)
 		{

@@ -7,7 +7,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
 using LiteNetLib.Utils;
-using System.Linq;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -149,6 +148,26 @@ namespace Fika.Core.Networking.Packets.GameWorld
 			public void Serialize(NetDataWriter writer)
 			{
 
+			}
+		}
+
+		public struct UpdateBackendData : ISubPacket
+		{
+			public int ExpectedPlayers;
+
+			public UpdateBackendData(NetDataReader reader)
+			{
+				ExpectedPlayers = reader.GetInt();
+			}
+
+			public void Execute(CoopPlayer player)
+			{
+				FikaBackendUtils.HostExpectedNumberOfPlayers = ExpectedPlayers;
+			}
+
+			public void Serialize(NetDataWriter writer)
+			{
+				writer.Put(ExpectedPlayers);
 			}
 		}
 	}
