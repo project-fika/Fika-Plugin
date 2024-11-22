@@ -652,7 +652,7 @@ namespace Fika.Core
 				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 2 }));
 
 			SendRate = Config.Bind("Network", "Send Rate", ESendRate.Medium,
-				new ConfigDescription("How often per second movement packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.\nAmount is per second:\n\nVery Low = 10\nLow = 20\nMedium = 40\nHigh = 60\n\nRecommended to leave at no higher than Medium as the gains are insignificant after.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+				new ConfigDescription("How often per second movement packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.\nAmount is per second:\n\nVery Low = 10\nLow = 15\nMedium = 20\nHigh = 30\n\nRecommended to leave at no higher than Medium as the gains are insignificant after.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
 			SmoothingRate = Config.Bind("Network", "Smoothing Rate", ESmoothingRate.Medium,
 				new ConfigDescription("Local simulation is behind by Send Rate * Smoothing Rate. This guarantees that we always have enough snapshots in the buffer to mitigate lags & jitter during interpolation.\n\nLow = 1.5\nMedium = 2\nHigh = 2.5\n\nSet this to 'High' if movement isn't smooth. Cannot be changed during a raid.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
