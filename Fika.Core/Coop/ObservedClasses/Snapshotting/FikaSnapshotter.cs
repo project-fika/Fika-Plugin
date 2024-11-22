@@ -9,9 +9,9 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
 	public class FikaSnapshotter : MonoBehaviour
 	{
-		private readonly SortedList<double, PlayerStatePacket> buffer = [];
+		private SortedList<double, PlayerStatePacket> buffer;
 		private double localTimeline;
-		private double localTimeScale = Time.timeScale;
+		private double localTimeScale;
 		private SnapshotInterpolationSettings interpolationSettings;
 		private ExponentialMovingAverage driftEma;
 		private ExponentialMovingAverage deliveryTimeEma;
@@ -22,6 +22,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 		public static FikaSnapshotter Create(ObservedCoopPlayer player)
 		{
 			FikaSnapshotter snapshotter = player.gameObject.AddComponent<FikaSnapshotter>();
+			snapshotter.buffer = [];
+			snapshotter.localTimeScale = Time.timeScale;
 			snapshotter.player = player;
 			return snapshotter;
 		}
