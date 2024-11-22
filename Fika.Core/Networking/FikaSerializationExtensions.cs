@@ -677,6 +677,7 @@ namespace Fika.Core.Networking
 				writer.Put(packet.ItemId);
 				writer.Put(packet.IsStationary);
 			}
+			writer.Put(packet.IsZombie);
 		}
 
 		/// <summary>
@@ -699,6 +700,7 @@ namespace Fika.Core.Networking
 				packet.ItemId = reader.GetString();
 				packet.IsStationary = reader.GetBool();
 			}
+			packet.IsZombie = reader.GetBool();
 			return packet;
 		}
 

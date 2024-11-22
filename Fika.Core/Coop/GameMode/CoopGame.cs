@@ -497,6 +497,7 @@ namespace Fika.Core.Coop.GameMode
 				Profile = profile,
 				ControllerId = mongoId,
 				FirstOperationId = nextOperationId,
+				IsZombie = profile.Info.Settings.UseSimpleAnimator
 			}, true, true, position, netId);
 			packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
 			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);

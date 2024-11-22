@@ -119,13 +119,19 @@ namespace Fika.Core.Coop.Players
 		private GClass886 cullingHandler;
 		#endregion
 
-		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
-			string layerName, string prefix, EPointOfView pointOfView, Profile profile, byte[] healthBytes,
-			bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode,
-			EUpdateMode bodyUpdateMode, CharacterControllerSpawner.Mode characterControllerMode,
-			Func<float> getSensitivity, Func<float> getAimingSensitivity, IViewFilter filter, MongoID firstId, ushort firstOperationId)
+		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
+			string prefix, EPointOfView pointOfView, Profile profile, byte[] healthBytes, bool aiControl,
+			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
+			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity, Func<float> getAimingSensitivity,
+			IViewFilter filter, MongoID firstId, ushort firstOperationId, bool isZombie)
 		{
-			bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
+			bool useSimpleAnimator = isZombie;
+#if DEBUG
+			if (useSimpleAnimator)
+			{
+				FikaPlugin.Instance.FikaLogger.LogWarning("Using SimpleAnimator!");
+			} 
+#endif
 			ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
 			ObservedCoopPlayer player = Create<ObservedCoopPlayer>(gameWorld, resourceKey, playerId, position, updateQueue,
 				armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);

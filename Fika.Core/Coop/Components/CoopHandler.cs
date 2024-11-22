@@ -345,7 +345,7 @@ namespace Fika.Core.Coop.Components
 			queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
 		}
 
-		public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId,
+		public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie,
 			EHandsControllerType controllerType = EHandsControllerType.None, string itemId = null)
 		{
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
@@ -371,7 +371,7 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
 			logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
 #endif
-			SpawnObject spawnObject = new(profile, position, isAlive, isAI, netId, firstId, firstOperationId);
+			SpawnObject spawnObject = new(profile, position, isAlive, isAI, netId, firstId, firstOperationId, isZombie);
 			if (controllerType != EHandsControllerType.None)
 			{
 				spawnObject.ControllerType = controllerType;
@@ -397,6 +397,7 @@ namespace Fika.Core.Coop.Components
 			ushort firstOperationId = spawnObject.FirstOperationId;
 			bool isDedicatedProfile = !isAi && profile.IsDedicatedProfile();
 			byte[] healthBytes = spawnObject.HealthBytes;
+			bool isZombie = spawnObject.IsZombie;
 
 			// Handle null bytes on players
 			if (!isAi && (spawnObject.HealthBytes == null || spawnObject.HealthBytes.Length == 0))
@@ -409,7 +410,7 @@ namespace Fika.Core.Coop.Components
 				isAi == true ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
 				EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
 				BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode, FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
-				GClass1599.Default, firstId, firstOperationId).Result;
+				GClass1599.Default, firstId, firstOperationId, isZombie).Result;
 
 			if (otherPlayer == null)
 			{
@@ -554,7 +555,7 @@ namespace Fika.Core.Coop.Components
 			Extracted
 		}
 
-		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId)
+		public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId, bool isZombie)
 		{
 			public Profile Profile = profile;
 			public Vector3 Position = position;
@@ -567,6 +568,7 @@ namespace Fika.Core.Coop.Components
 			public string ItemId;
 			public bool IsStationary;
 			public byte[] HealthBytes;
+			public bool IsZombie = isZombie;
 		}
 	}
 }

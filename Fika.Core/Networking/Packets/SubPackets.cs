@@ -21,6 +21,7 @@ namespace Fika.Core.Networking.Packets
 			public EHandsControllerType ControllerType;
 			public string ItemId;
 			public bool IsStationary;
+			public bool IsZombie;
 		}
 
 		public struct WeatherClassPacket

@@ -832,8 +832,8 @@ namespace Fika.Core.Networking
 			if (packet.PlayerInfoPacket.Profile.ProfileId != MyPlayer.ProfileId)
 			{
 				coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-					packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.ControllerType,
-					packet.PlayerInfoPacket.ItemId);
+					packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
+					packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
 			}
 
 			SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
@@ -1042,8 +1042,8 @@ namespace Fika.Core.Networking
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
 					coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-						packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.ControllerType,
-						packet.PlayerInfoPacket.ItemId);
+						packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
+						packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
 					playersMissing.Remove(packet.ProfileId);
 				}
 			}

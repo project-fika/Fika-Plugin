@@ -8,7 +8,6 @@ using EFT.AssetsManager;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
-using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
@@ -34,7 +33,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking
 {
@@ -308,6 +306,7 @@ namespace Fika.Core.Networking
 				if (coopHandler.LocalGameInstance.GameWorld_0.TransitController is FikaClientTransitController transitController)
 				{
 					transitController.HandleClientExtract(packet.TransitId, packet.PlayerId);
+					return;
 				}
 			}
 
@@ -851,8 +850,8 @@ namespace Fika.Core.Networking
 			if (packet.PlayerInfoPacket.Profile.ProfileId != myProfileId)
 			{
 				coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-							 packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.ControllerType,
-							 packet.PlayerInfoPacket.ItemId);
+							 packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
+							 packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
 			}
 		}
 
@@ -1059,8 +1058,8 @@ namespace Fika.Core.Networking
 				if (packet.ProfileId != MyPlayer.ProfileId)
 				{
 					coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-						packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.ControllerType,
-						packet.PlayerInfoPacket.ItemId);
+						packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
+						packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
 				}
 			}
 			else if (packet.IsRequest)
@@ -1163,7 +1162,7 @@ namespace Fika.Core.Networking
 			BTRControllerClass btrController = Singleton<GameWorld>.Instance.BtrController;
 			if (btrController != null)
 			{
-				btrController.SyncBTRVehicleFromServer(packet.Data); 
+				btrController.SyncBTRVehicleFromServer(packet.Data);
 			}
 		}
 
