@@ -44,6 +44,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -1962,7 +1963,7 @@ namespace Fika.Core.Coop.GameMode
 			GenericPacket genericPacket = new()
 			{
 				NetId = player.NetId,
-				Type = EPackageType.ClientExtract
+				Type = EGenericSubPacketType.ClientExtract
 			};
 
 			try // This is to allow clients to extract if they lose connection

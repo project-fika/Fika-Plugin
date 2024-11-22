@@ -9,6 +9,8 @@ using LiteNetLib;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.Components
 {
@@ -196,9 +198,12 @@ namespace Fika.Core.Coop.Components
 					GenericPacket packet = new()
 					{
 						NetId = mainPlayer.NetId,
-						Type = EPackageType.ExfilCountdown,
-						ExfilName = point.Settings.Name,
-						ExfilStartTime = point.ExfiltrationStartTime
+						Type = EGenericSubPacketType.ExfilCountdown,
+						SubPacket = new ExfilCountdown()
+						{
+							ExfilName = point.Settings.Name,
+							ExfilStartTime = point.ExfiltrationStartTime
+						}						
 					};
 
 					if (FikaBackendUtils.IsServer)

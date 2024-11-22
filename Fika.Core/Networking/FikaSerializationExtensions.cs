@@ -5,6 +5,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using UnityEngine;
 using static BasePhysicalClass;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 
@@ -981,6 +983,23 @@ namespace Fika.Core.Networking
 					return new MountingPacket(reader);
 				default:
 					FikaPlugin.Instance.FikaLogger.LogError("GetCommonSubPacket: type was outside of bounds!");
+					break;
+			}
+			return null;
+		}
+
+		public static ISubPacket GetGenericSubPacket(this NetDataReader reader, EGenericSubPacketType type, int netId)
+		{
+			switch (type)
+			{
+				case EGenericSubPacketType.ClientExtract:
+					return new ClientExtract(netId);
+				case EGenericSubPacketType.ExfilCountdown:
+					return new ExfilCountdown(reader);
+				case EGenericSubPacketType.ClearEffects:
+					return new ClearEffects(netId);
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
 					break;
 			}
 			return null;

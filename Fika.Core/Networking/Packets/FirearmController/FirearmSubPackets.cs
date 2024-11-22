@@ -3,7 +3,6 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;

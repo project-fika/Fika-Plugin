@@ -2,6 +2,7 @@
 
 using EFT;
 using LiteNetLib.Utils;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -12,63 +13,21 @@ namespace Fika.Core.Networking
 	public class GenericPacket : INetSerializable
 	{
 		public int NetId;
-		public EPackageType Type;
-
-		/*public byte PlatformId;
-		public float PlatformPosition;*/
-
-		public string ExfilName;
-		public float ExfilStartTime;
-
-		public ETraderServiceType TraderServiceType;
+		public EGenericSubPacketType Type;
+		public ISubPacket SubPacket;
 
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			Type = (EPackageType)reader.GetInt();
-			switch (Type)
-			{
-				/*case EPackageType.TrainSync:
-					PlatformId = reader.GetByte();
-					PlatformPosition = reader.GetFloat();
-					break;*/
-				case EPackageType.ExfilCountdown:
-					ExfilName = reader.GetString();
-					ExfilStartTime = reader.GetFloat();
-					break;
-				case EPackageType.TraderServiceNotification:
-					TraderServiceType = (ETraderServiceType)reader.GetInt();
-					break;
-			}
+			Type = (EGenericSubPacketType)reader.GetInt();
+			SubPacket = reader.GetGenericSubPacket(Type, NetId);
 		}
 
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put(NetId);
 			writer.Put((int)Type);
-			switch (Type)
-			{
-				/*case EPackageType.TrainSync:
-					writer.Put(PlatformId);
-					writer.Put(PlatformPosition);
-					break;*/
-				case EPackageType.ExfilCountdown:
-					writer.Put(ExfilName);
-					writer.Put(ExfilStartTime);
-					break;
-				case EPackageType.TraderServiceNotification:
-					writer.Put((int)TraderServiceType);
-					break;
-			}
+			SubPacket.Serialize(writer);
 		}
-	}
-
-	public enum EPackageType
-	{
-		ClientExtract,
-		//TrainSync,
-		ExfilCountdown,
-		TraderServiceNotification,
-		ClearEffects
-	}
+	}	
 }

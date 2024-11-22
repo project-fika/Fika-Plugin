@@ -99,5 +99,14 @@ namespace Fika.Core.Networking.Packets
 			Interaction,
 			Mounting,
 		}
+
+		public enum EGenericSubPacketType
+		{
+			ClientExtract,
+			//TrainSync,
+			ExfilCountdown,
+			//TraderServiceNotification,
+			ClearEffects
+		}
 	}
 }

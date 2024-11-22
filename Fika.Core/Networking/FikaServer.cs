@@ -37,6 +37,8 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -512,7 +514,7 @@ namespace Fika.Core.Networking
 							GenericPacket clearEffectsPacket = new()
 							{
 								NetId = observedCoopPlayer.NetId,
-								Type = EPackageType.ClearEffects
+								Type = EGenericSubPacketType.ClearEffects
 							};
 
 							SendDataToAll(ref clearEffectsPacket, DeliveryMethod.ReliableUnordered, peer);
@@ -939,72 +941,17 @@ namespace Fika.Core.Networking
 
 		private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
 		{
-			switch (packet.Type)
-			{
-				case EPackageType.ClientExtract:
-					{
-						if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-						{
-							coopHandler.Players.Remove(packet.NetId);
-							coopHandler.HumanPlayers.Remove(playerToApply);
-							if (!coopHandler.ExtractedPlayers.Contains(packet.NetId))
-							{
-								coopHandler.ExtractedPlayers.Add(packet.NetId);
-								CoopGame coopGame = coopHandler.LocalGameInstance;
-								coopGame.ExtractedPlayers.Add(packet.NetId);
-								coopGame.ClearHostAI(playerToApply);
-
-								if (FikaPlugin.ShowNotifications.Value)
-								{
-									string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
-										ColorizeText(EColor.GREEN, nickname)),
-									EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
-								}
-							}
-
-							playerToApply.Dispose();
-							AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
-						}
-					}
-					break;
-				case EPackageType.ExfilCountdown:
-					{
-						if (ExfiltrationControllerClass.Instance != null)
-						{
-							ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
-							ExfiltrationPoint exfilPoint = exfilController.ExfiltrationPoints.FirstOrDefault(x => x.Settings.Name == packet.ExfilName);
-							if (exfilPoint != null)
-							{
-								CoopGame game = coopHandler.LocalGameInstance;
-								exfilPoint.ExfiltrationStartTime = game != null ? game.PastTime : packet.ExfilStartTime;
-
-								if (exfilPoint.Status != EExfiltrationStatus.Countdown)
-								{
-									exfilPoint.Status = EExfiltrationStatus.Countdown;
-								}
-							}
-						}
-					}
-					break;
-				case EPackageType.TraderServiceNotification:
-				case EPackageType.ClearEffects:
-				default:
-					break;
-			}
-
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+			packet.SubPacket.Execute(null);
 		}
 
 		private void OnHealthSyncPacketReceived(HealthSyncPacket packet, NetPeer peer)
 		{
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.PacketReceiver.HealthSyncPackets?.Enqueue(packet);
+				playerToApply.PacketReceiver.HealthSyncPackets.Enqueue(packet);
 			}
-
-			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 		}
 
 		private void OnInformationPacketReceived(InformationPacket packet, NetPeer peer)
