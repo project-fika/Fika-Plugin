@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.Patches
 				timeVariant = raidSettings.SelectedDateTime,
 				mode = ELocalMode.PVE_OFFLINE,
 				playerSide = raidSettings.Side,
-				isLocationTransition = raidSettings.isLocationTransition
+				isLocationTransition = FikaBackendUtils.TransitData.visitedLocations.Length > 0
 			};
 			Traverse applicationTraverse = Traverse.Create(instance);
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
