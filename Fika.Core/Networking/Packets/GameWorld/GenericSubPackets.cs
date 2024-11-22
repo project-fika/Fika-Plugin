@@ -40,15 +40,18 @@ namespace Fika.Core.Networking.Packets.GameWorld
 					{
 						coopHandler.ExtractedPlayers.Add(NetId);
 						CoopGame coopGame = coopHandler.LocalGameInstance;
-						coopGame.ExtractedPlayers.Add(NetId);
-						coopGame.ClearHostAI(playerToApply);
-
-						if (FikaPlugin.ShowNotifications.Value)
+						if (coopGame != null)
 						{
-							string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
-								ColorizeText(EColor.GREEN, nickname)),
-							EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+							coopGame.ExtractedPlayers.Add(NetId);
+							coopGame.ClearHostAI(playerToApply);
+
+							if (FikaPlugin.ShowNotifications.Value)
+							{
+								string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
+								NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+									ColorizeText(EColor.GREEN, nickname)),
+								EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+							} 
 						}
 					}
 
