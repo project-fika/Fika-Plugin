@@ -299,9 +299,10 @@ namespace LiteNetLib
 		public int MtuOverride = 0;
 
 		/// <summary>
-		/// Sets initial MTU to lowest possible value according to RFC1191 (576 bytes)
+		/// Automatically discovery mtu starting from. Use at own risk because some routers can break MTU detection
+		/// and connection in result
 		/// </summary>
-		public bool UseSafeMtu = false;
+		public bool MtuDiscovery = false;
 
 		/// <summary>
 		/// First peer. Useful for Client mode
@@ -1602,6 +1603,13 @@ namespace LiteNetLib
 				return;
 			NetDebug.Write("[NM] Stop");
 
+			//Send last disconnect
+			for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
+				netPeer.Shutdown(null, 0, 0, !sendDisconnectMessages);
+
+			//Stop
+			CloseSocket();
+
 #if UNITY_SOCKET_FIX
             if (_useSocketFix)
             {
@@ -1610,12 +1618,6 @@ namespace LiteNetLib
             }
 #endif
 
-			//Send last disconnect
-			for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
-				netPeer.Shutdown(null, 0, 0, !sendDisconnectMessages);
-
-			//Stop
-			CloseSocket();
 			_updateTriggerEvent.Set();
 			if (!_manualMode)
 			{
