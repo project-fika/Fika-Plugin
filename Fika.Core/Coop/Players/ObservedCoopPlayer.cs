@@ -162,6 +162,7 @@ namespace Fika.Core.Coop.Players
 			observedTraverse.Field<GClass886>("gclass886_0").Value = new();
 			player.cullingHandler = observedTraverse.Field<GClass886>("gclass886_0").Value;
 			player.cullingHandler.Initialize(player, player.PlayerBones);
+			player.cullingHandler.Disable();
 
 			if (!aiControl)
 			{
@@ -176,11 +177,6 @@ namespace Fika.Core.Coop.Players
 			player._animators[0].enabled = true;
 			player.isServer = FikaBackendUtils.IsServer;
 			player.Snapshotter = FikaSnapshotter.Create(player);
-
-			if (FikaBackendUtils.IsDedicated)
-			{
-				player.cullingHandler.Disable();
-			}
 
 			return player;
 		}

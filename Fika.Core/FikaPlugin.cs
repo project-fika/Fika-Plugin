@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
@@ -38,12 +37,12 @@ using UnityEngine;
 
 namespace Fika.Core
 {
-    /// <summary>
-    /// Fika.Core Plugin. <br/> <br/>
-    /// Originally by: Paulov <br/>
-    /// Re-written by: Lacyway & the Fika team
-    /// </summary>
-    [BepInPlugin("com.fika.core", "Fika.Core", "1.0.0")]
+	/// <summary>
+	/// Fika.Core Plugin. <br/> <br/>
+	/// Originally by: Paulov <br/>
+	/// Re-written by: Lacyway & the Fika team
+	/// </summary>
+	[BepInPlugin("com.fika.core", "Fika.Core", "1.0.0")]
 	[BepInProcess("EscapeFromTarkov.exe")]
 	[BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-custom, that way we can disable its patches
 	[BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
@@ -261,7 +260,7 @@ namespace Fika.Core
 		private void SetupConfigEventHandlers()
 		{
 			OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
-		}		
+		}
 
 		private static void EnableFikaPatches()
 		{
@@ -334,7 +333,7 @@ namespace Fika.Core
 			new RagfairScreen_Show_Patch().Enable();
 			new MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch().Enable();
 			new CoopSettingsWindow_Show_Patch().Enable();
-			new MainMenuController_method_48_Patch().Enable();
+			new MainMenuController_method_49_Patch().Enable();
 			new GameWorld_ThrowItem_Patch().Enable();
 			new RaidSettingsWindow_Show_Patch().Enable();
 			new TransitControllerAbstractClass_Exist_Patch().Enable();
