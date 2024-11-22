@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.Utils
 				{
 					return new()
 					{
-						isLocationTransition = false,
+						isLocationTransition = true,
 						transitionCount = 0,
 						transitionRaidId = FikaGlobals.DefaultTransitId,
 						visitedLocations = []
