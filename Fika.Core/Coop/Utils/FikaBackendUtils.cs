@@ -9,7 +9,6 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -170,7 +169,7 @@ namespace Fika.Core.Coop.Utils
 					if (kvp.Value.Id == Profile.Id)
 					{
 						continue;
-					} 
+					}
 				}
 
 				Profile profile = kvp.Value;
@@ -215,7 +214,7 @@ namespace Fika.Core.Coop.Utils
 					}
 					FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MatchmakerPlayerControllerClass was null!");
 				}
-				FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: TarkovApplication was null!"); 
+				FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: TarkovApplication was null!");
 			}
 		}
 	}

@@ -203,7 +203,7 @@ namespace Fika.Core.Coop.Components
 						{
 							ExfilName = point.Settings.Name,
 							ExfilStartTime = point.ExfiltrationStartTime
-						}						
+						}
 					};
 
 					if (FikaBackendUtils.IsServer)

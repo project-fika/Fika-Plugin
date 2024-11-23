@@ -133,7 +133,7 @@ public static class PingFactory
 					image.color = Color.clear;
 					if (displayRange)
 					{
-						rangeText.color = Color.clear; 
+						rangeText.color = Color.clear;
 					}
 					return;
 				}
@@ -161,7 +161,7 @@ public static class PingFactory
 					image.color = newColor;
 					if (displayRange)
 					{
-						rangeText.color = Color.white.SetAlpha(alpha); 
+						rangeText.color = Color.white.SetAlpha(alpha);
 					}
 				}
 				else
@@ -169,7 +169,7 @@ public static class PingFactory
 					image.color = _pingColor;
 					if (displayRange)
 					{
-						rangeText.color = Color.white; 
+						rangeText.color = Color.white;
 					}
 				}
 
@@ -201,7 +201,7 @@ public static class PingFactory
 				if (displayRange)
 				{
 					int distance = (int)CameraClass.Instance.Distance(hitPoint);
-					rangeText.text = $"[{distance}m]"; 
+					rangeText.text = $"[{distance}m]";
 				}
 			}
 		}

@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
-using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Networking;
 using LiteNetLib;
 using System.Collections.Generic;

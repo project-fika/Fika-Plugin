@@ -11,7 +11,6 @@ using Fika.Core.Networking;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Console
@@ -185,7 +184,7 @@ namespace Fika.Core.Console
 			if (!CheckForGame())
 			{
 				return;
-			}			
+			}
 
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			CoopPlayer player = (CoopPlayer)gameWorld.MainPlayer;

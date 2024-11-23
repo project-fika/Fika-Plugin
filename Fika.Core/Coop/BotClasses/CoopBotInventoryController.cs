@@ -6,7 +6,6 @@ using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using GPUInstancer;
 using JetBrains.Annotations;
 using System.Threading.Tasks;
 using static EFT.Player;
@@ -53,7 +52,7 @@ namespace Fika.Core.Coop.BotClasses
 			if (operation is not GClass3210)
 			{
 #if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
 				GClass1198 writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());

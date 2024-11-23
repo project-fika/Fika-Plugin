@@ -139,7 +139,7 @@ namespace Fika.Core.UI
 				errorScreenTraverse.Field("coroutine_0").SetValue(errorScreen.StartCoroutine(errorScreen.method_2(EFTDateTimeClass.Now.AddSeconds((double)waitingTime))));
 			}
 			return errorScreenHandler.context;
-		}		
+		}
 
 		private static string GetHexByColor(EColor color)
 		{

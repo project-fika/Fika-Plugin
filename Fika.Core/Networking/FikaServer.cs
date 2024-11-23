@@ -126,7 +126,7 @@ namespace Fika.Core.Networking
 			visualProfiles = [];
 			if (FikaBackendUtils.Profile != null)
 			{
-				visualProfiles.Add(true, FikaBackendUtils.Profile); 
+				visualProfiles.Add(true, FikaBackendUtils.Profile);
 			}
 			else
 			{

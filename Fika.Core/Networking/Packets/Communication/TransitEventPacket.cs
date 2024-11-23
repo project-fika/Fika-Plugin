@@ -47,7 +47,7 @@ namespace Fika.Core.Networking
 							int key = reader.GetInt();
 							ushort value = reader.GetUShort();
 #if DEBUG
-							FikaPlugin.Instance.FikaLogger.LogWarning($"GroupTimer: int: {key}, ushort: {value}"); 
+							FikaPlugin.Instance.FikaLogger.LogWarning($"GroupTimer: int: {key}, ushort: {value}");
 #endif
 							timers.Add(key, value);
 						}
@@ -65,7 +65,7 @@ namespace Fika.Core.Networking
 							int key = reader.GetInt();
 							byte value = reader.GetByte();
 #if DEBUG
-							FikaPlugin.Instance.FikaLogger.LogWarning($"GroupSize: int: {key}, byte: {value}"); 
+							FikaPlugin.Instance.FikaLogger.LogWarning($"GroupSize: int: {key}, byte: {value}");
 #endif
 							sizes.Add(key, value);
 						}

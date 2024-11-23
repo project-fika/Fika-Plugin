@@ -10,8 +10,6 @@ using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.SynchronizableObjects;
 using EFT.UI;
-using EFT.UI.Matchmaker;
-using EFT.UI.UI.Matchmaker;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -1180,7 +1178,7 @@ namespace Fika.Core.Networking
 				if (btrController != null)
 				{
 					btrController.SyncBTRVehicleFromServer(packet.Data);
-				} 
+				}
 			}
 		}
 

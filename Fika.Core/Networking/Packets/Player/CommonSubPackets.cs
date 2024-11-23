@@ -381,7 +381,7 @@ namespace Fika.Core.Networking
 				// Dedicated can get stuck in permanent high-velocity states due to vaulting, skip it
 				if (!FikaBackendUtils.IsDedicated)
 				{
-					player.DoObservedVault(ref this); 
+					player.DoObservedVault(ref this);
 				}
 			}
 

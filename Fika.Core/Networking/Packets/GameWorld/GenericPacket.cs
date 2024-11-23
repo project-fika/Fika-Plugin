@@ -1,6 +1,5 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using EFT;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -29,5 +28,5 @@ namespace Fika.Core.Networking
 			writer.Put((byte)Type);
 			SubPacket?.Serialize(writer);
 		}
-	}	
+	}
 }

@@ -1,11 +1,9 @@
 ﻿using Comfort.Common;
-using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
-using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;

@@ -122,8 +122,8 @@ namespace Fika.Core.Coop.GameMode
 		}
 
 		public ESeason Season
-		{ 
-			get 
+		{
+			get
 			{
 				return season;
 			}
@@ -803,7 +803,7 @@ namespace Fika.Core.Coop.GameMode
 						await Task.Yield();
 						SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
 					} while (coopHandler.AmountOfHumans < expectedPlayers);
-					
+
 					InformationPacket packet = new(false)
 					{
 						NumberOfPlayers = server.NetServer.ConnectedPeersCount,
@@ -852,7 +852,7 @@ namespace Fika.Core.Coop.GameMode
 						SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
 					} while (coopHandler.AmountOfHumans < expectedPlayers);
 
-					
+
 					InformationPacket packet = new(true)
 					{
 						ReadyPlayers = 1
@@ -1592,7 +1592,7 @@ namespace Fika.Core.Coop.GameMode
 
 				if (isServer)
 				{
-					halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>(); 
+					halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
 				}
 			}
 
@@ -1636,7 +1636,7 @@ namespace Fika.Core.Coop.GameMode
 					if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
 					{
 						WeatherClasses = weather.Weathers;
-						WeatherController.Instance.method_0(WeatherClasses); 
+						WeatherController.Instance.method_0(WeatherClasses);
 					}
 				}
 				else if (!isServer)
@@ -2529,7 +2529,7 @@ namespace Fika.Core.Coop.GameMode
 
 				if (!FikaBackendUtils.IsTransit)
 				{
-					NetManagerUtils.StopPinger(); 
+					NetManagerUtils.StopPinger();
 				}
 
 				FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;

@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GameWorld_ThrowItem_Patch : ModulePatch
+	public class GameWorld_ThrowItem_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{

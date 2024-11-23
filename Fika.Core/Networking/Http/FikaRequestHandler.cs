@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Networking.Http
 {
-    public static class FikaRequestHandler
+	public static class FikaRequestHandler
 	{
 		private static readonly FuyuClient _httpClient;
 

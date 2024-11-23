@@ -130,7 +130,7 @@ namespace Fika.Core.Coop.Players
 			if (useSimpleAnimator)
 			{
 				FikaPlugin.Instance.FikaLogger.LogWarning("Using SimpleAnimator!");
-			} 
+			}
 #endif
 			ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
 			ObservedCoopPlayer player = Create<ObservedCoopPlayer>(gameWorld, resourceKey, playerId, position, updateQueue,

@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.UI;
-using EFT.UI.Matchmaker;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Utils;

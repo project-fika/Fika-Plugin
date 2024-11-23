@@ -51,7 +51,7 @@ namespace Fika.Core.Networking.Packets.GameWorld
 								NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
 									ColorizeText(EColor.GREEN, nickname)),
 								EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
-							} 
+							}
 						}
 					}
 

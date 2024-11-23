@@ -1,9 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using Fika.Core.Networking;
 using SPT.Reflection.Patching;
-using System;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches.Lighthouse

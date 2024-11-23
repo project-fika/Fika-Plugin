@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.Patches
 					if (transitController != null)
 					{
 						__result = true;
-					} 
+					}
 				}
 				return false;
 			}

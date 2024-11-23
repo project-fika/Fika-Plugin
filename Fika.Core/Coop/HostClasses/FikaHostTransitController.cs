@@ -144,7 +144,7 @@ namespace Fika.Core.Coop.HostClasses
 			foreach (KeyValuePair<int, byte> item in sizes)
 			{
 				FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, byte: {item.Value}");
-			} 
+			}
 #endif
 
 			foreach (KeyValuePair<int, byte> size in sizes)
@@ -174,7 +174,7 @@ namespace Fika.Core.Coop.HostClasses
 			foreach (KeyValuePair<int, ushort> item in timers)
 			{
 				FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, ushort: {item.Value}");
-			} 
+			}
 #endif
 
 			foreach (KeyValuePair<int, ushort> timer in timers)

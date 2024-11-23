@@ -1,5 +1,4 @@
 ﻿using EFT.UI;
-using Fika.Core.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 using TMPro;

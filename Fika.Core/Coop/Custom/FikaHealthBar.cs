@@ -8,7 +8,6 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
-using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using TMPro;

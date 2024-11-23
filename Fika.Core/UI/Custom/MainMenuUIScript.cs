@@ -48,7 +48,7 @@ namespace Fika.Core.UI.Custom
 			if (transformToScale != null)
 			{
 				float scale = FikaPlugin.OnlinePlayersScale.Value;
-				transformToScale.localScale = new(scale, scale, scale); 
+				transformToScale.localScale = new(scale, scale, scale);
 			}
 			queryRoutine = StartCoroutine(QueryPlayers());
 		}

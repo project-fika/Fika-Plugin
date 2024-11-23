@@ -408,7 +408,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						underBarrelManager?.DestroyPatronInWeapon();
 					}
 					FirearmsAnimator.SetFire(false);
-					return; 
+					return;
 				}
 
 				if (Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel)

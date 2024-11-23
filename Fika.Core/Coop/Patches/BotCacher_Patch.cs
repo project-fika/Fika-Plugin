@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.Patches
 						}
 					}
 				}
-			}			
+			}
 
 			__result = true;
 			return false;
