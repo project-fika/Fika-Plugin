@@ -796,13 +796,14 @@ namespace Fika.Core.Coop.GameMode
 #if DEBUG
 					Logger.LogWarning("Server: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
 #endif
+					FikaServer server = Singleton<FikaServer>.Instance;
+					server.ReadyClients++;
 					do
 					{
 						await Task.Yield();
+						SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
 					} while (coopHandler.AmountOfHumans < expectedPlayers);
-
-					FikaServer server = Singleton<FikaServer>.Instance;
-					server.ReadyClients++;
+					
 					InformationPacket packet = new(false)
 					{
 						NumberOfPlayers = server.NetServer.ConnectedPeersCount,
@@ -844,12 +845,14 @@ namespace Fika.Core.Coop.GameMode
 #if DEBUG
 					Logger.LogWarning("Client: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
 #endif
+					FikaClient client = Singleton<FikaClient>.Instance;
 					do
 					{
 						await Task.Yield();
+						SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
 					} while (coopHandler.AmountOfHumans < expectedPlayers);
 
-					FikaClient client = Singleton<FikaClient>.Instance;
+					
 					InformationPacket packet = new(true)
 					{
 						ReadyPlayers = 1
@@ -1561,15 +1564,15 @@ namespace Fika.Core.Coop.GameMode
 			Logger.LogInfo($"Location: {Location_0.Name}");
 			BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
 
-			/*if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
+			if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
 				instance.ArtilleryShelling.ArtilleryMapsConfigs.Keys.Contains(Location_0.Id))
 			{
 				if (isServer)
 				{
 					Singleton<GameWorld>.Instance.ServerShellingController = new GClass607();
 				}
-				Singleton<GameWorld>.Instance.ClientShellingController = new GClass1356(isServer);
-			}*/
+				Singleton<GameWorld>.Instance.ClientShellingController = new GClass1381(isServer);
+			}
 
 			if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
 			{
