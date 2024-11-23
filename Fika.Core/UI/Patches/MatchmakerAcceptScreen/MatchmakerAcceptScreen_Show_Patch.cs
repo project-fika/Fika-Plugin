@@ -3,7 +3,6 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Fika.Core.UI.Custom;
-using Fika.Core.Utils;
 using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;

@@ -4,7 +4,6 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.Airdrop;
-using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
@@ -37,10 +36,8 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
-using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking
 {
@@ -122,9 +119,20 @@ namespace Fika.Core.Networking
 		private FikaChat fikaChat;
 		private CancellationTokenSource natIntroduceRoutineCts;
 		private int statisticsCounter = 0;
+		private Dictionary<bool, Profile> visualProfiles;
 
 		public async Task Init()
 		{
+			visualProfiles = [];
+			if (FikaBackendUtils.Profile != null)
+			{
+				visualProfiles.Add(true, FikaBackendUtils.Profile); 
+			}
+			else
+			{
+				logger.LogError("Init: Own profile was null!");
+			}
+
 			sendRate = FikaPlugin.SendRate.Value switch
 			{
 				FikaPlugin.ESendRate.VeryLow => 10,
@@ -176,6 +184,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<PingPacket, NetPeer>(OnPingPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
+			packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -281,6 +290,20 @@ namespace Fika.Core.Networking
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+		}
+
+		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet, NetPeer peer)
+		{
+			if (packet.Profiles == null)
+			{
+				logger.LogError("OnLoadingProfilePacketReceived: Profiles was null!");
+				return;
+			}
+
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+			KeyValuePair<bool, Profile> kvp = packet.Profiles.First();
+			visualProfiles.Add(kvp.Key, kvp.Value);
+			FikaBackendUtils.AddPartyMembers(packet.Profiles);
 		}
 
 		private void OnLootSyncPacketReceived(LootSyncPacket packet, NetPeer peer)
@@ -1228,6 +1251,11 @@ namespace Fika.Core.Networking
 
 			NetworkSettingsPacket packet = new(sendRate);
 			SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
+			LoadingProfilePacket responsePacket = new()
+			{
+				Profiles = visualProfiles
+			};
+			SendDataToPeer(peer, ref responsePacket, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)

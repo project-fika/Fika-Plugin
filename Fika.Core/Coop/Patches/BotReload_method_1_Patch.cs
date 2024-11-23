@@ -1,7 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches

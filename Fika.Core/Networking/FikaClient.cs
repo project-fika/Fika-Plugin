@@ -10,6 +10,8 @@ using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.SynchronizableObjects;
 using EFT.UI;
+using EFT.UI.Matchmaker;
+using EFT.UI.UI.Matchmaker;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
@@ -156,6 +158,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<BotStatePacket>(OnBotStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<PingPacket>(OnPingPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
+			packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -205,6 +208,17 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+		}
+
+		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet)
+		{
+			if (packet.Profiles != null)
+			{
+				FikaBackendUtils.AddPartyMembers(packet.Profiles);
+				return;
+			}
+
+			logger.LogWarning("OnLoadingProfilePacketReceived: Profiles was null!");
 		}
 
 		private void OnLootSyncPacketReceived(LootSyncPacket packet)
@@ -1206,6 +1220,20 @@ namespace Fika.Core.Networking
 		{
 			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
 				ENotificationDurationType.Default, ENotificationIconType.Friend);
+
+			if (FikaBackendUtils.Profile == null)
+			{
+				logger.LogError("OnPeerConnected: Own profile was null!");
+				return;
+			}
+
+			Dictionary<bool, Profile> profiles = [];
+			profiles.Add(false, FikaBackendUtils.Profile);
+			LoadingProfilePacket profilePacket = new()
+			{
+				Profiles = profiles
+			};
+			SendData(ref profilePacket, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
