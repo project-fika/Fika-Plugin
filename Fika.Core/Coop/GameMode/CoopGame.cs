@@ -2291,7 +2291,7 @@ namespace Fika.Core.Coop.GameMode
 
 			try
 			{
-				await iSession.LocalRaidEnded(localRaidSettings_0, parameters, method_12(), GetOwnBTRTransfers(player.ProfileId));
+				await iSession.LocalRaidEnded(localRaidSettings_0, parameters, method_12(), GetOwnSentItems(player.ProfileId));
 			}
 			catch (Exception ex)
 			{
@@ -2300,7 +2300,7 @@ namespace Fika.Core.Coop.GameMode
 			hasSaved = true;
 		}
 
-		public Dictionary<string, GClass1301[]> GetOwnBTRTransfers(string profileId)
+		public Dictionary<string, GClass1301[]> GetOwnSentItems(string profileId)
 		{
 			GameWorld instance = Singleton<GameWorld>.Instance;
 			Dictionary<string, GClass1301[]> dictionary = [];
@@ -2318,27 +2318,27 @@ namespace Fika.Core.Coop.GameMode
 				}
 
 			}
-			if (TransitControllerAbstractClass.Exist(out GClass1642 gclass))
+			if (TransitControllerAbstractClass.Exist(out TransitControllerAbstractClass controller))
 			{
 				bool flag;
-				if (gclass == null)
+				if (controller == null)
 				{
 					flag = null != null;
 				}
 				else
 				{
-					GClass1636 transferItemsController = gclass.TransferItemsController;
+					GClass1636 transferItemsController = controller.TransferItemsController;
 					flag = (transferItemsController?.Stash) != null;
 				}
 				if (flag)
 				{
-					StashItemClass stash2 = gclass.TransferItemsController.Stash;
+					StashItemClass stash2 = controller.TransferItemsController.Stash;
 					string stashName = stash2.Id + "_transit";
 					foreach (EFT.InventoryLogic.IContainer item in stash2.Containers)
 					{
 						if (item.ID == profileId && !dictionary.ContainsKey(stashName))
 						{
-							dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems([stash2]));
+							dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
 						}
 					}
 				}

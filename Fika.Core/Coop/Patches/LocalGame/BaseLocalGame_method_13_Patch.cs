@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
 		{
 			if (__instance is CoopGame coopGame)
 			{
-				__result = coopGame.GetOwnBTRTransfers(coopGame.ProfileId);
+				__result = coopGame.GetOwnSentItems(coopGame.ProfileId);
 				return false;
 			}
 			return true;
