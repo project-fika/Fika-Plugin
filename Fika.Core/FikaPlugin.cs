@@ -337,6 +337,7 @@ namespace Fika.Core
 			new GameWorld_ThrowItem_Patch().Enable();
 			new RaidSettingsWindow_Show_Patch().Enable();
 			new TransitControllerAbstractClass_Exist_Patch().Enable();
+			new BotReload_method_1_Patch().Enable();
 
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
