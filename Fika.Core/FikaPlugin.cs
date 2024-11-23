@@ -42,7 +42,7 @@ namespace Fika.Core
 	/// Originally by: Paulov <br/>
 	/// Re-written by: Lacyway & the Fika team
 	/// </summary>
-	[BepInPlugin("com.fika.core", "Fika.Core", "1.0.0")]
+	[BepInPlugin("com.fika.core", "Fika.Core", FikaVersion)]
 	[BepInProcess("EscapeFromTarkov.exe")]
 	[BepInDependency("com.SPT.custom", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-custom, that way we can disable its patches
 	[BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
@@ -50,6 +50,7 @@ namespace Fika.Core
 	[BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 	public class FikaPlugin : BaseUnityPlugin
 	{
+		public const string FikaVersion = "1.0.0";
 		public static FikaPlugin Instance;
 		public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
 		public static string EFTVersionMajor { get; internal set; }
