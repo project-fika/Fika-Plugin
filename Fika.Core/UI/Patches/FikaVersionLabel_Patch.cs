@@ -60,9 +60,9 @@ namespace Fika.Core.EssentialPatches
 			else
 			{
 #if DEBUG
-				preloaderUiTraverse.Field("string_2").SetValue($"FIKA BETA {fikaVersion} (DEBUG) | {versionLabel}");
+				preloaderUiTraverse.Field("string_2").SetValue($"FIKA {fikaVersion} (DEBUG) | {versionLabel}");
 #else
-				preloaderUiTraverse.Field("string_2").SetValue($"FIKA BETA {fikaVersion} | {versionLabel}");
+				preloaderUiTraverse.Field("string_2").SetValue($"FIKA {fikaVersion} | {versionLabel}");
 #endif
 				versionNumberTraverse.Field("Major").SetValue($"{fikaVersion} {versionLabel}");
 			}
