@@ -2,7 +2,6 @@
 using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
-using EFT.UI.UI.Matchmaker;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Utils;
@@ -160,25 +159,24 @@ namespace Fika.Core.Coop.Utils
 			return raidCode;
 		}
 
-		public static void AddPartyMembers(Dictionary<bool, Profile> profiles)
+		public static void AddPartyMembers(Dictionary<Profile, bool> profiles)
 		{
-			foreach (KeyValuePair<bool, Profile> kvp in profiles)
+			if (Profile == null)
 			{
-				if (Profile != null)
-				{
-					if (kvp.Value.Id == Profile.Id)
-					{
-						continue;
-					}
-				}
+				FikaPlugin.Instance.FikaLogger.LogError("AddPartyMembers: Own profile was null!");
+				return;
+			}
 
-				Profile profile = kvp.Value;
+			GClass3771<GClass1323> playerList = [];
+			foreach (KeyValuePair<Profile, bool> kvp in profiles)
+			{
+				Profile profile = kvp.Key;
 				InfoClass info = profile.Info;
 				GClass1322 infoSet = new()
 				{
 					AccountId = profile.AccountId,
 					Id = profile.Id,
-					IsLeader = kvp.Key,
+					IsLeader = kvp.Value,
 					Info = new()
 					{
 						Level = info.Level,
@@ -195,27 +193,30 @@ namespace Fika.Core.Coop.Utils
 					PlayerVisualRepresentation = profile.GetVisualEquipmentState(false)
 				};
 
-				if (TarkovApplication.Exist(out TarkovApplication app))
+				playerList.Add(visualProfile);
+			}
+
+			if (TarkovApplication.Exist(out TarkovApplication app))
+			{
+				MatchmakerPlayerControllerClass controller = app.MatchmakerPlayerControllerClass;
+				if (controller != null)
 				{
-					MatchmakerPlayerControllerClass controller = app.MatchmakerPlayerControllerClass;
-					if (controller != null)
+					//controller.GroupPlayers.Add(visualProfile);
+					MenuUI menuUi = Singleton<MenuUI>.Instance;
+					if (menuUi != null)
 					{
-						controller.GroupPlayers.Add(visualProfile);
-						MenuUI menuUi = Singleton<MenuUI>.Instance;
-						if (menuUi != null)
-						{
-							PartyInfoPanel panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
-							PartyPlayerItem playerItem = Traverse.Create(panel).Field<PartyPlayerItem>("_playerItemTemplate").Value;
-							panel.method_1(visualProfile, playerItem);
-							return;
-						}
-						FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MenuUI was null!");
+						PartyInfoPanel panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
+						//PartyPlayerItem playerItem = Traverse.Create(panel).Field<PartyPlayerItem>("_playerItemTemplate").Value;
+						panel.Close();
+						panel.Show(playerList, Profile, false);
 						return;
 					}
-					FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MatchmakerPlayerControllerClass was null!");
+					FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MenuUI was null!");
+					return;
 				}
-				FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: TarkovApplication was null!");
+				FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MatchmakerPlayerControllerClass was null!");
 			}
+			FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: TarkovApplication was null!");
 		}
 	}
 }

@@ -119,14 +119,14 @@ namespace Fika.Core.Networking
 		private FikaChat fikaChat;
 		private CancellationTokenSource natIntroduceRoutineCts;
 		private int statisticsCounter = 0;
-		private Dictionary<bool, Profile> visualProfiles;
+		private Dictionary<Profile, bool> visualProfiles;
 
 		public async Task Init()
 		{
 			visualProfiles = [];
 			if (FikaBackendUtils.Profile != null)
 			{
-				visualProfiles.Add(true, FikaBackendUtils.Profile);
+				visualProfiles.Add(FikaBackendUtils.Profile, true);
 			}
 			else
 			{
@@ -300,10 +300,11 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-			KeyValuePair<bool, Profile> kvp = packet.Profiles.First();
+			KeyValuePair<Profile, bool> kvp = packet.Profiles.First();
 			visualProfiles.Add(kvp.Key, kvp.Value);
-			FikaBackendUtils.AddPartyMembers(packet.Profiles);
+			FikaBackendUtils.AddPartyMembers(visualProfiles);
+			packet.Profiles = visualProfiles;
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 		}
 
 		private void OnLootSyncPacketReceived(LootSyncPacket packet, NetPeer peer)
@@ -1251,11 +1252,6 @@ namespace Fika.Core.Networking
 
 			NetworkSettingsPacket packet = new(sendRate);
 			SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
-			LoadingProfilePacket responsePacket = new()
-			{
-				Profiles = visualProfiles
-			};
-			SendDataToPeer(peer, ref responsePacket, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)

@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
 {
 	public class LoadingProfilePacket : INetSerializable
 	{
-		public Dictionary<bool, Profile> Profiles;
+		public Dictionary<Profile, bool> Profiles;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -16,9 +16,9 @@ namespace Fika.Core.Networking
 				Profiles = [];
 				for (int i = 0; i < count; i++)
 				{
-					bool isLeader = reader.GetBool();
 					Profile profile = reader.GetProfile();
-					Profiles.Add(isLeader, profile);
+					bool isLeader = reader.GetBool();
+					Profiles.Add(profile, isLeader);
 				}
 			}
 		}
@@ -31,10 +31,10 @@ namespace Fika.Core.Networking
 				writer.Put(count);
 				if (count > 0)
 				{
-					foreach (KeyValuePair<bool, Profile> kvp in Profiles)
+					foreach (KeyValuePair<Profile, bool> kvp in Profiles)
 					{
-						writer.Put(kvp.Key);
-						writer.PutProfile(kvp.Value);
+						writer.PutProfile(kvp.Key);
+						writer.Put(kvp.Value);
 					}
 				}
 				return;

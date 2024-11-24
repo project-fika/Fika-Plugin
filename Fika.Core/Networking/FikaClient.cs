@@ -212,6 +212,9 @@ namespace Fika.Core.Networking
 		{
 			if (packet.Profiles != null)
 			{
+#if DEBUG
+				logger.LogWarning($"OnLoadingProfilePacketReceived: Received {packet.Profiles.Count} profiles"); 
+#endif
 				FikaBackendUtils.AddPartyMembers(packet.Profiles);
 				return;
 			}
@@ -1225,8 +1228,8 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			Dictionary<bool, Profile> profiles = [];
-			profiles.Add(false, FikaBackendUtils.Profile);
+			Dictionary<Profile, bool> profiles = [];
+			profiles.Add(FikaBackendUtils.Profile, false);
 			LoadingProfilePacket profilePacket = new()
 			{
 				Profiles = profiles
