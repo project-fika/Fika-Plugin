@@ -206,7 +206,7 @@ namespace Fika.Core.Networking
 				ServerConnection = netClient.Connect(ip, port, "fika.core");
 			}
 
-			FikaEventDispatcher.DispatchEvent(new FikaClientCreatedEvent(this));
+			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
 		}
 
 		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet)
@@ -1208,7 +1208,7 @@ namespace Fika.Core.Networking
 				Destroy(fikaChat);
 			}
 
-			FikaEventDispatcher.DispatchEvent(new FikaClientDestroyedEvent(this));
+			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
 		}
 
 		public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable

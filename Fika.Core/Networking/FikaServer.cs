@@ -289,7 +289,7 @@ namespace Fika.Core.Networking
 
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
-			FikaEventDispatcher.DispatchEvent(new FikaServerCreatedEvent(this));
+			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
 		}
 
 		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet, NetPeer peer)
@@ -1214,7 +1214,7 @@ namespace Fika.Core.Networking
 				Destroy(fikaChat);
 			}
 
-			FikaEventDispatcher.DispatchEvent(new FikaServerDestroyedEvent(this));
+			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
 		}
 
 		public void SendDataToAll<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToExclude = null) where T : INetSerializable
