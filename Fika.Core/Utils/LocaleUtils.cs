@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Utils
 {
+	/// <summary>
+	/// Utilities for locales/language
+	/// </summary>
 	public static class LocaleUtils
 	{
 		private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
@@ -13,7 +16,7 @@ namespace Fika.Core.Utils
 		/// </summary>
 		/// <param name="word"></param>
 		/// <returns></returns>
-		[Obsolete("No longer used")]
+		[Obsolete("No longer used", true)]
 		public static string GetPrefix(string word)
 		{
 			char firstLetter = char.ToUpper(word[0]);
@@ -33,7 +36,7 @@ namespace Fika.Core.Utils
 		/// <returns>true if it's a boss, false if not</returns>
 		public static bool IsBoss(WildSpawnType wildSpawnType, out string name)
 		{
-			name = null;
+			name = string.Empty;
 			switch (wildSpawnType)
 			{
 				case WildSpawnType.bossBoar:
@@ -101,8 +104,13 @@ namespace Fika.Core.Utils
 						name = "Kollontay";
 						break;
 					}
+				case WildSpawnType.bossPartisan:
+					{
+						name = "Partisan";
+						break;
+					}
 			}
-			return name != null;
+			return !string.IsNullOrEmpty(name);
 		}
 
 		public const string RECEIVED_SHARED_QUEST_PROGRESS = "F_Client_ReceivedSharedQuestProgress";
@@ -188,5 +196,14 @@ namespace Fika.Core.Utils
 		public const string UI_FINISH_RECONNECT = "F_UI_FinishReconnect";
 		public const string FREECAM_ENABLED = "F_Client_FreeCamInputEnabled";
 		public const string FREECAM_DISABLED = "F_Client_FreeCamInputDisabled";
+		public const string UI_RAID_SETTINGS_DESCRIPTION = "F_UI_RaidSettingsDescription";
+		public const string UI_COOP_GAME_MODE = "F_UI_CoopGameMode";
+		public const string UI_COOP_RAID_SETTINGS = "F_UI_CoopRaidSettings";
+		public const string UI_FIKA_ALWAYS_COOP = "F_UI_FikaAlwaysCoop";
+		public const string UI_UPNP_FAILED = "F_UI_UpnpFailed";
+		public const string UI_INIT_WEATHER = "F_UI_InitWeather";
+		public const string UI_NOTIFICATION_STARTED_RAID = "F_Notification_RaidStarted";
+		public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
+		public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
 	}
 }

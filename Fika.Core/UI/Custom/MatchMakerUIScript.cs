@@ -2,12 +2,10 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Patches.Overrides;
+using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Models.Dedicated;
 using Fika.Core.Networking.Websocket;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
@@ -19,27 +17,34 @@ using System.Net;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Custom
 {
 	public class MatchMakerUIScript : MonoBehaviour
 	{
-		public MatchMakerUI fikaMatchMakerUi;
-		public RaidSettings RaidSettings { get; set; }
-		private LobbyEntry[] Matches { get; set; }
-		private List<GameObject> MatchesListObjects { get; set; } = [];
+		public DefaultUIButton AcceptButton
+		{
+			get
+			{
+				return acceptButton;
+			}
+		}
+
+		private MatchMakerUI fikaMatchMakerUi;
+		private LobbyEntry[] matches;
+		private readonly List<GameObject> matchesListObjects = [];
 		private bool stopQuery = false;
-
-		public DefaultUIButton BackButton { get; internal set; }
-		public DefaultUIButton AcceptButton { get; internal set; }
-		public GameObject NewBackButton { get; internal set; }
-
-		private string ProfileId => FikaBackendUtils.Profile.ProfileId;
+		private GameObject newBackButton;
+		private string profileId;
 		private float lastRefreshed;
-
 		private bool _started;
 		private Coroutine serverQueryRoutine;
 		private float loadingTextTick = 0f;
+
+		internal RaidSettings raidSettings;
+		internal DefaultUIButton backButton;
+		internal DefaultUIButton acceptButton;
 
 		protected void OnEnable()
 		{
@@ -65,6 +70,7 @@ namespace Fika.Core.UI.Custom
 
 		protected void Start()
 		{
+			profileId = FikaBackendUtils.Profile.ProfileId;
 			CreateMatchMakerUI();
 			serverQueryRoutine = StartCoroutine(ServerQuery());
 			_started = true;
@@ -125,9 +131,9 @@ namespace Fika.Core.UI.Custom
 		protected void OnDestroy()
 		{
 			stopQuery = true;
-			if (NewBackButton != null)
+			if (newBackButton != null)
 			{
-				Destroy(NewBackButton);
+				Destroy(newBackButton);
 			}
 		}
 
@@ -151,6 +157,16 @@ namespace Fika.Core.UI.Custom
 				fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
 			}
 
+			// Ensure the IsSpectator field is reset every time the matchmaker UI is created
+			FikaBackendUtils.IsSpectator = false;
+
+			fikaMatchMakerUi.SpectatorToggle.isOn = false;
+			fikaMatchMakerUi.SpectatorToggle.onValueChanged.AddListener((arg) =>
+			{
+				FikaBackendUtils.IsSpectator = !FikaBackendUtils.IsSpectator;
+				Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
+			});
+
 			fikaMatchMakerUi.LoadingAnimationText.text = "";
 
 			fikaMatchMakerUi.DedicatedToggle.isOn = false;
@@ -168,14 +184,9 @@ namespace Fika.Core.UI.Custom
 					dedicatedText.color = new(1f, 1f, 1f, 0.5f);
 				}
 
-				TooltipTextGetter dediTooltipTextGetter = new()
-				{
-					TooltipText = LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized()
-				};
-
 				HoverTooltipArea dediTooltipArea = fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
 				dediTooltipArea.enabled = true;
-				dediTooltipArea.SetMessageText(new Func<string>(dediTooltipTextGetter.GetText));
+				dediTooltipArea.SetMessageText(LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized());
 			}
 
 			TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
@@ -260,8 +271,8 @@ namespace Fika.Core.UI.Custom
 					}
 
 					FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
-					await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
-					AcceptButton.OnClick.Invoke();
+					await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, raidSettings);
+					acceptButton.OnClick.Invoke();
 					DestroyThis();
 				}
 				else
@@ -308,35 +319,30 @@ namespace Fika.Core.UI.Custom
 
 			fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
 
-			TooltipTextGetter tooltipTextGetter = new()
-			{
-				TooltipText = LocaleUtils.UI_REFRESH_RAIDS.Localized()
-			};
-
 			HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
 			tooltipArea.enabled = true;
-			tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+			tooltipArea.SetMessageText(LocaleUtils.UI_REFRESH_RAIDS.Localized());
 
-			AcceptButton.gameObject.SetActive(false);
-			AcceptButton.enabled = false;
-			AcceptButton.Interactable = false;
+			acceptButton.gameObject.SetActive(false);
+			acceptButton.enabled = false;
+			acceptButton.Interactable = false;
 
-			NewBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
+			newBackButton = Instantiate(backButton.gameObject, backButton.transform.parent);
 			UnityEngine.Events.UnityEvent newEvent = new();
 			newEvent.AddListener(() =>
 			{
 				DestroyThis();
-				BackButton.OnClick.Invoke();
+				backButton.OnClick.Invoke();
 			});
-			DefaultUIButton newButtonComponent = NewBackButton.GetComponent<DefaultUIButton>();
+			DefaultUIButton newButtonComponent = newBackButton.GetComponent<DefaultUIButton>();
 			Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
-			if (!NewBackButton.active)
+			if (!newBackButton.active)
 			{
-				NewBackButton.SetActive(true);
+				newBackButton.SetActive(true);
 			}
 
-			BackButton.gameObject.SetActive(false);
+			backButton.gameObject.SetActive(false);
 		}
 
 		private void ToggleLoading(bool enabled)
@@ -363,7 +369,7 @@ namespace Fika.Core.UI.Custom
 
 		private void AutoRefresh()
 		{
-			Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+			matches = FikaRequestHandler.LocationRaids(raidSettings);
 
 			lastRefreshed = Time.time;
 
@@ -373,14 +379,14 @@ namespace Fika.Core.UI.Custom
 		private void ManualRefresh()
 		{
 			Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-			Matches = FikaRequestHandler.LocationRaids(RaidSettings);
+			matches = FikaRequestHandler.LocationRaids(raidSettings);
 
 			lastRefreshed = Time.time;
 
 			RefreshUI();
 		}
 
-		public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action successCallback, bool reconnect)
+		public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action<bool> callback, bool reconnect)
 		{
 			if (button != null)
 			{
@@ -426,6 +432,7 @@ namespace Fika.Core.UI.Custom
 					{
 						button.enabled = true;
 					}
+					callback.Invoke(false);
 					yield break;
 				}
 			}
@@ -435,16 +442,17 @@ namespace Fika.Core.UI.Custom
 					LocaleUtils.UI_ERROR_CONNECTING.Localized(),
 					LocaleUtils.UI_PINGER_START_FAIL.Localized(),
 					ErrorScreen.EButtonType.OkButton, 10f, null, null);
+				callback.Invoke(false);
 				yield break;
 			}
 
 			if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
 			{
-				FikaBackendUtils.SetGroupId(result.ServerId);
+				FikaBackendUtils.GroupId = result.ServerId;
 				FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
 				FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
-				AddPlayerRequest data = new(FikaBackendUtils.GetGroupId(), profileId);
+				AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
 				FikaRequestHandler.UpdateAddPlayer(data);
 
 				if (FikaBackendUtils.IsHostNatPunch)
@@ -456,11 +464,7 @@ namespace Fika.Core.UI.Custom
 					NetManagerUtils.DestroyPingingClient();
 				}
 
-				//DestroyThis();
-
-				//AcceptButton.OnClick.Invoke();
-
-				successCallback?.Invoke();
+				callback?.Invoke(true);
 			}
 			else
 			{
@@ -468,32 +472,34 @@ namespace Fika.Core.UI.Custom
 
 				Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage,
 					ErrorScreen.EButtonType.OkButton, 15, null, null);
+
+				callback?.Invoke(false);
 			}
 		}
 
 		private void RefreshUI()
 		{
-			if (Matches == null)
+			if (matches == null)
 			{
 				// not initialized
 				return;
 			}
 
-			if (MatchesListObjects != null)
+			if (matchesListObjects != null)
 			{
 				// cleanup old objects
-				foreach (GameObject match in MatchesListObjects)
+				foreach (GameObject match in matchesListObjects)
 				{
 					Destroy(match);
 				}
 			}
 
 			// create lobby listings
-			for (int i = 0; i < Matches.Length; ++i)
+			for (int i = 0; i < matches.Length; ++i)
 			{
-				LobbyEntry entry = Matches[i];
+				LobbyEntry entry = matches[i];
 
-				if (entry.ServerId == ProfileId)
+				if (entry.ServerId == profileId)
 				{
 					continue;
 				}
@@ -501,7 +507,7 @@ namespace Fika.Core.UI.Custom
 				// server object
 				GameObject server = Instantiate(fikaMatchMakerUi.RaidGroupDefaultToClone, fikaMatchMakerUi.RaidGroupDefaultToClone.transform.parent);
 				server.SetActive(true);
-				MatchesListObjects.Add(server);
+				matchesListObjects.Add(server);
 
 				server.name = entry.ServerId;
 
@@ -509,22 +515,26 @@ namespace Fika.Core.UI.Custom
 				bool localPlayerDead = false;
 				foreach (KeyValuePair<string, bool> player in entry.Players)
 				{
-					if (player.Key == ProfileId)
+					if (player.Key == profileId)
 					{
 						localPlayerInRaid = true;
 						localPlayerDead = player.Value;
 					}
 				}
 
+				bool isDedicated = entry.HostUsername.StartsWith("dedicated_");
+
 				// player label
 				GameObject playerLabel = GameObject.Find("PlayerLabel");
 				playerLabel.name = "PlayerLabel" + i;
-				playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = entry.HostUsername;
+				string sessionName = isDedicated ? "Dedicated" : entry.HostUsername;
+				playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
 
 				// players count label
 				GameObject playerCountLabel = GameObject.Find("PlayerCountLabel");
 				playerCountLabel.name = "PlayerCountLabel" + i;
-				playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = entry.PlayerCount.ToString();
+				int playerCount = isDedicated ? entry.PlayerCount - 1 : entry.PlayerCount;
+				playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
 
 				// player join button
 				GameObject joinButton = GameObject.Find("JoinButton");
@@ -539,25 +549,24 @@ namespace Fika.Core.UI.Custom
 
 					Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
 					FikaBackendUtils.HostLocationId = entry.Location;
-					StartCoroutine(JoinMatch(ProfileId, server.name, button, () =>
+					ToggleLoading(true);
+					StartCoroutine(JoinMatch(profileId, server.name, button, (bool success) =>
 					{
-						DestroyThis();
-						AcceptButton.OnClick.Invoke();
+						if (success)
+						{
+							DestroyThis();
+							acceptButton.OnClick.Invoke();
+							return;
+						}
+						ToggleLoading(false);
 					}, localPlayerInRaid));
 				});
 
-				TooltipTextGetter tooltipTextGetter;
 				HoverTooltipArea tooltipArea;
 				Image image = server.GetComponent<Image>();
 
-				if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
+				if (raidSettings.LocationId != entry.Location && !(raidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
 				{
-					tooltipTextGetter = new()
-					{
-						TooltipText = string.Format(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_MAP.Localized(),
-						ColorUtils.ColorizeText(Colors.BLUE, entry.Location.Localized()))
-					};
-
 					button.enabled = false;
 					if (image != null)
 					{
@@ -566,18 +575,14 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+					tooltipArea.SetMessageText(string.Format(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_MAP.Localized(),
+						ColorizeText(EColor.BLUE, entry.Location.Localized())));
 
 					continue;
 				}
 
-				if (RaidSettings.SelectedDateTime != entry.Time)
+				if (raidSettings.SelectedDateTime != entry.Time)
 				{
-					tooltipTextGetter = new()
-					{
-						TooltipText = LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_TIME.Localized()
-					};
-
 					button.enabled = false;
 					if (image != null)
 					{
@@ -586,28 +591,23 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+					tooltipArea.SetMessageText(LocaleUtils.UI_CANNOT_JOIN_RAID_OTHER_TIME.Localized());
 
 					continue;
 				}
 
-				if (RaidSettings.Side != entry.Side)
+				if (raidSettings.Side != entry.Side)
 				{
 					string errorText = "ERROR";
-					if (RaidSettings.Side == ESideType.Pmc)
+					if (raidSettings.Side == ESideType.Pmc)
 					{
 						errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_SCAV_AS_PMC.Localized();
 					}
-					else if (RaidSettings.Side == ESideType.Savage)
+					else if (raidSettings.Side == ESideType.Savage)
 					{
 						errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_PMC_AS_SCAV.Localized();
 					}
 
-					tooltipTextGetter = new()
-					{
-						TooltipText = errorText
-					};
-
 					button.enabled = false;
 					if (image != null)
 					{
@@ -616,7 +616,7 @@ namespace Fika.Core.UI.Custom
 
 					tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 					tooltipArea.enabled = true;
-					tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+					tooltipArea.SetMessageText(errorText);
 
 					continue;
 				}
@@ -625,11 +625,6 @@ namespace Fika.Core.UI.Custom
 				{
 					case LobbyEntry.ELobbyStatus.LOADING:
 						{
-							tooltipTextGetter = new()
-							{
-								TooltipText = LocaleUtils.UI_HOST_STILL_LOADING.Localized()
-							};
-
 							button.enabled = false;
 							if (image != null)
 							{
@@ -638,17 +633,12 @@ namespace Fika.Core.UI.Custom
 
 							tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 							tooltipArea.enabled = true;
-							tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+							tooltipArea.SetMessageText(LocaleUtils.UI_HOST_STILL_LOADING.Localized());
 						}
 						break;
 					case LobbyEntry.ELobbyStatus.IN_GAME:
 						if (!localPlayerInRaid)
 						{
-							tooltipTextGetter = new()
-							{
-								TooltipText = LocaleUtils.UI_RAID_IN_PROGRESS.Localized()
-							};
-
 							button.enabled = false;
 							if (image != null)
 							{
@@ -657,28 +647,18 @@ namespace Fika.Core.UI.Custom
 
 							tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 							tooltipArea.enabled = true;
-							tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+							tooltipArea.SetMessageText(LocaleUtils.UI_RAID_IN_PROGRESS.Localized());
 						}
 						else
 						{
 							if (!localPlayerDead)
 							{
-								tooltipTextGetter = new()
-								{
-									TooltipText = LocaleUtils.UI_REJOIN_RAID.Localized()
-								};
-
 								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+								tooltipArea.SetMessageText(LocaleUtils.UI_REJOIN_RAID.Localized());
 							}
 							else
 							{
-								tooltipTextGetter = new()
-								{
-									TooltipText = LocaleUtils.UI_CANNOT_REJOIN_RAID_DIED.Localized()
-								};
-
 								button.enabled = false;
 								if (image != null)
 								{
@@ -687,33 +667,19 @@ namespace Fika.Core.UI.Custom
 
 								tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 								tooltipArea.enabled = true;
-								tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+								tooltipArea.SetMessageText(LocaleUtils.UI_CANNOT_REJOIN_RAID_DIED.Localized());
 							}
 						}
 						break;
 					case LobbyEntry.ELobbyStatus.COMPLETE:
-						tooltipTextGetter = new()
-						{
-							TooltipText = LocaleUtils.UI_JOIN_RAID.Localized()
-						};
-
 						tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
 						tooltipArea.enabled = true;
-						tooltipArea.SetMessageText(new Func<string>(tooltipTextGetter.GetText));
+						tooltipArea.SetMessageText(LocaleUtils.UI_JOIN_RAID.Localized());
 						break;
 					default:
 						break;
 				}
 			}
-		}
-
-		public class TooltipTextGetter
-		{
-			public string GetText()
-			{
-				return TooltipText;
-			}
-			public string TooltipText;
 		}
 
 		public IEnumerator ServerQuery()

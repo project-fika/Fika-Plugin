@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; }
 
 		public void Init();
-		public void SendPacket<T>(ref T packet) where T : INetSerializable;
+		public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable;
 		public void DestroyThis();
 	}
 }

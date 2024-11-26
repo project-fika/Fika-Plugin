@@ -3,13 +3,13 @@
 using EFT;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses.MovementStates
+namespace Fika.Core.Coop.ObservedClasses
 {
-	internal class ObservedSprintState : GClass1719
+	public class ObservedSprintState : SprintState
 	{
 		public ObservedSprintState(MovementContext movementContext) : base(movementContext)
 		{
-			MovementContext = (ObservedMovementContext)movementContext;
+			MovementContext = movementContext;
 		}
 
 		public override void UpdatePosition(float deltaTime)
@@ -34,11 +34,10 @@ namespace Fika.Core.Coop.ObservedClasses.MovementStates
 		{
 			if (MovementContext.IsSprintEnabled)
 			{
-				/*MovementContext.ProcessSpeedLimits(deltaTime);*/
 				MovementContext.MovementDirection = Vector2.Lerp(MovementContext.MovementDirection, Direction, deltaTime * EFTHardSettings.Instance.DIRECTION_LERP_SPEED);
-				//MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
-				MovementContext.SetUpDiscreteDirection(GClass1669.ConvertToMovementDirection(Direction));
+				MovementContext.SetUpDiscreteDirection(GClass1810.ConvertToMovementDirection(Direction));
 				Direction = Vector2.zero;
+				MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
 				MovementContext.SprintAcceleration(deltaTime);
 				UpdateRotationAndPosition(deltaTime);
 			}

@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.Vehicle;
 using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
@@ -6,38 +7,41 @@ namespace Fika.Core.Networking
 	public struct BTRInteractionPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
-		public bool HasInteractPacket = false;
-		public PlayerInteractPacket InteractPacket;
+		public bool IsResponse = false;
+		public EBtrInteractionStatus Status;
+		public PlayerInteractPacket Data;
 
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			HasInteractPacket = reader.GetBool();
-			if (HasInteractPacket)
+			IsResponse = reader.GetBool();
+			if (IsResponse)
 			{
-				InteractPacket = new()
-				{
-					HasInteraction = reader.GetBool(),
-					InteractionType = (EInteractionType)reader.GetInt(),
-					SideId = reader.GetByte(),
-					SlotId = reader.GetByte(),
-					Fast = reader.GetBool()
-				};
+				Status = (EBtrInteractionStatus)reader.GetByte();
 			}
+			Data = new()
+			{
+				HasInteraction = reader.GetBool(),
+				InteractionType = (EInteractionType)reader.GetByte(),
+				SideId = reader.GetByte(),
+				SlotId = reader.GetByte(),
+				Fast = reader.GetBool()
+			};
 		}
 
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put(NetId);
-			writer.Put(HasInteractPacket);
-			if (HasInteractPacket)
+			writer.Put(IsResponse);
+			if (IsResponse)
 			{
-				writer.Put(InteractPacket.HasInteraction);
-				writer.Put((int)InteractPacket.InteractionType);
-				writer.Put(InteractPacket.SideId);
-				writer.Put(InteractPacket.SlotId);
-				writer.Put(InteractPacket.Fast);
+				writer.Put((byte)Status);
 			}
+			writer.Put(Data.HasInteraction);
+			writer.Put((byte)Data.InteractionType);
+			writer.Put(Data.SideId);
+			writer.Put(Data.SlotId);
+			writer.Put(Data.Fast);
 		}
 	}
 }

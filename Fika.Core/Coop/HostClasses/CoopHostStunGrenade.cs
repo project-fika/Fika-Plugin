@@ -2,6 +2,12 @@
 {
 	public class CoopHostStunGrenade : StunGrenade
 	{
-		public override bool HasNetData => true;
+		public override bool HasNetData
+		{
+			get
+			{
+				return true;
+			}
+		}
 	}
 }

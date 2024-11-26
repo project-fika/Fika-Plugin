@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT.GlobalEvents;
-using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using System;
@@ -11,7 +10,7 @@ namespace Fika.Core.Coop.Components
 {
 	internal class CoopHalloweenEventManager : MonoBehaviour
 	{
-		ManualLogSource Logger;
+		private ManualLogSource logger;
 
 		private Action summonStartedAction;
 		private Action syncStateEvent;
@@ -21,37 +20,30 @@ namespace Fika.Core.Coop.Components
 
 		protected void Awake()
 		{
-			Logger = BepInEx.Logging.Logger.CreateLogSource("CoopHalloweenEventManager");
+			logger = BepInEx.Logging.Logger.CreateLogSource("CoopHalloweenEventManager");
 		}
 
 		protected void Start()
 		{
-			Logger.LogInfo("Initializing");
-
-			//Destroy on client as we dont need to listen to these events, and receive them from the host.
-			if (FikaBackendUtils.IsClient)
-			{
-				Logger.LogInfo("Running on client, destroying");
-
-				Destroy(this);
-
-				return;
-			}
+			logger.LogInfo("Initializing CoopHalloweenEventManager");
 
 			server = Singleton<FikaServer>.Instance;
 
-			summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSummonStartedEvent>(this.OnHalloweenSummonStarted));
-			syncStateEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncStateEvent>(this.OnHalloweenSyncStateEvent));
-			syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<HalloweenSyncExitsEvent>(this.OnHalloweenSyncExitsEvent));
+			summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSummonStartedEvent>(OnHalloweenSummonStarted);
+			syncStateEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSyncStateEvent>(OnHalloweenSyncStateEvent);
+			syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSyncExitsEvent>(OnHalloweenSyncExitsEvent);
 		}
 
 		private void OnHalloweenSummonStarted(HalloweenSummonStartedEvent summonStartedEvent)
 		{
-			Logger.LogDebug("OnHalloweenSummonStarted");
+#if DEBUG
+			logger.LogWarning("OnHalloweenSummonStarted");
+#endif
 
-			HalloweenEventPacket packet = new(EHalloweenPacketType.Summon)
+			HalloweenEventPacket packet = new()
 			{
-				SummonPosition = summonStartedEvent.PointPosition
+				PacketType = EHalloweenPacketType.Summon,
+				SyncEvent = summonStartedEvent
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
@@ -59,11 +51,14 @@ namespace Fika.Core.Coop.Components
 
 		private void OnHalloweenSyncStateEvent(HalloweenSyncStateEvent syncStateEvent)
 		{
-			Logger.LogDebug("OnHalloweenSyncStateEvent");
+#if DEBUG
+			logger.LogWarning("OnHalloweenSyncStateEvent");
+#endif
 
-			HalloweenEventPacket packet = new(EHalloweenPacketType.Sync)
+			HalloweenEventPacket packet = new()
 			{
-				EventState = syncStateEvent.EventState
+				PacketType = EHalloweenPacketType.Sync,
+				SyncEvent = syncStateEvent
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
@@ -71,11 +66,14 @@ namespace Fika.Core.Coop.Components
 
 		private void OnHalloweenSyncExitsEvent(HalloweenSyncExitsEvent syncStateEvent)
 		{
-			Logger.LogDebug("OnHalloweenSyncExitsEvent");
+#if DEBUG
+			logger.LogWarning("OnHalloweenSyncExitsEvent");
+#endif
 
-			HalloweenEventPacket packet = new(EHalloweenPacketType.Exit)
+			HalloweenEventPacket packet = new()
 			{
-				Exit = syncStateEvent.ExitName
+				PacketType = EHalloweenPacketType.Exit,
+				SyncEvent = syncStateEvent
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);

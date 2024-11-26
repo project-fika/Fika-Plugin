@@ -15,16 +15,18 @@
 
   <ItemGroup>
     <!-- hide files in vs2022 -->
+    <None Remove="Bundles\Files\mainmenuui.bundle" />
     <None Remove="Bundles\Files\newmatchmakerui.bundle" />
     <None Remove="Bundles\Files\playerui.bundle" />
+    <None Remove="Bundles\Files\ping.bundle" />
     <None Remove="Bundles\Files\senditemmenu.bundle" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- embedded resources -->
+    <EmbeddedResource Include="Bundles\Files\mainmenuui.bundle" />
     <EmbeddedResource Include="Bundles\Files\newmatchmakerui.bundle" />
     <EmbeddedResource Include="Bundles\Files\playerui.bundle" />
-    <None Remove="Bundles\Files\ping.bundle" />
     <EmbeddedResource Include="Bundles\Files\ping.bundle" />
     <EmbeddedResource Include="Bundles\Files\senditemmenu.bundle" />
   </ItemGroup>
@@ -43,10 +45,10 @@
     <Reference Include="AnimationSystem.Types" HintPath="..\References\AnimationSystem.Types.dll" Private="false" />
     <Reference Include="Assembly-CSharp" HintPath="..\References\hollowed.dll" Private="false" />
     <Reference Include="bsg.componentace.compression.libs.zlib" HintPath="..\References\bsg.componentace.compression.libs.zlib.dll" Private="false" />
-	<Reference Include="com.unity.multiplayer-hlapi.Runtime">
-		<HintPath>..\References\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
-	</Reference>
     <Reference Include="bsg.console.core" HintPath="..\References\bsg.console.core.dll" Private="false" />
+    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
+      <HintPath>..\References\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="Comfort" HintPath="..\References\Comfort.dll" Private="false" />
     <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
     <Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />

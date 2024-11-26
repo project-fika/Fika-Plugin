@@ -1,14 +1,14 @@
 ﻿using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
+using Fika.Core.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Patches.Overrides
+namespace Fika.Core.Coop.Patches
 {
 	public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
 	{
@@ -22,20 +22,38 @@ namespace Fika.Core.Coop.Patches.Overrides
 		private static bool randomWeather;
 		public static bool UseCustomWeather
 		{
-			get => randomWeather;
-			set => randomWeather = value;
+			get
+			{
+				return randomWeather;
+			}
+			set
+			{
+				randomWeather = value;
+			}
 		}
 
 		[PatchPostfix]
-		private static void PatchPostfix(RaidSettingsWindow __instance, UiElementBlocker ____coopModeBlocker,
+		private static void PatchPostfix(RaidSettingsWindow __instance, RaidSettings raidSettings, UiElementBlocker ____coopModeBlocker,
 			List<CanvasGroup> ____weatherCanvasGroups, UpdatableToggle ____randomTimeToggle,
 			UpdatableToggle ____randomWeatherToggle, List<CanvasGroup> ____waterAndFoodCanvasGroups,
 			List<CanvasGroup> ____playersSpawnPlaceCanvasGroups, DropDownBox ____playersSpawnPlaceDropdown,
-			RaidSettings raidSettings)
+			List<CanvasGroup> ____timeCanvasGroups, DropDownBox ____timeFlowDropdown, UpdatableToggle ____coopModeToggle)
 		{
 			randomWeather = false;
 			// Always disable the Coop Mode checkbox
-			____coopModeBlocker.SetBlock(true, "Co-op is always enabled in Fika");
+			____coopModeBlocker.SetBlock(true, LocaleUtils.UI_FIKA_ALWAYS_COOP.Localized());
+			____coopModeToggle.onValueChanged.RemoveAllListeners();
+			____coopModeToggle.isOn = true;
+
+			LocalizedText captionText = __instance.gameObject.transform.GetChild(0).GetChild(1).GetComponent<LocalizedText>();
+			if (captionText != null)
+			{
+				captionText.method_2(LocaleUtils.UI_COOP_RAID_SETTINGS.Localized());
+			}
+
+			// Reset this one as otherwise it sticks
+			raidSettings.TimeAndWeatherSettings.HourOfDay = -1;
+			raidSettings.TimeAndWeatherSettings.TimeFlowType = ETimeFlowType.x1;
 
 			if (____weatherCanvasGroups != null)
 			{
@@ -52,8 +70,13 @@ namespace Fika.Core.Coop.Patches.Overrides
 				canvasGroup.SetUnlockStatus(true, true);
 			}
 
+			foreach (CanvasGroup canvasGroup in ____timeCanvasGroups)
+			{
+				canvasGroup.SetUnlockStatus(true, true);
+			}
+
 			// Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
-			List<BaseDropDownBox.Struct969> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct969>>("list_0").Value;
+			List<BaseDropDownBox.Struct1075> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1075>>("list_0").Value;
 			labelList.Clear();
 			labelList.Add(new()
 			{
@@ -69,10 +92,34 @@ namespace Fika.Core.Coop.Patches.Overrides
 
 			instance = __instance;
 
+			GameObject timeFlowDropDown = GameObject.Find("TimeFlowDropdown");
+			if (timeFlowDropDown != null)
+			{
+				GameObject tooltip = timeFlowDropDown.transform.parent.GetChild(1).gameObject;
+				tooltip.SetActive(false);
+
+				CanvasGroup timeFlowCanvasGroup = timeFlowDropDown.GetComponent<CanvasGroup>();
+				if (timeFlowCanvasGroup != null)
+				{
+					timeFlowCanvasGroup.SetUnlockStatus(true, true);
+				}
+				____timeFlowDropdown.Interactable = true;
+
+				GameObject timeFlowText = GameObject.Find("TimeFlowText");
+				if (timeFlowText != null)
+				{
+					CanvasGroup group = timeFlowText.GetComponent<CanvasGroup>();
+					if (group != null)
+					{
+						group.SetUnlockStatus(true, true);
+					}
+				}
+			}
+
 			// If enforced from server, this will be true by default
 			if (!raidSettings.TimeAndWeatherSettings.IsRandomWeather)
 			{
-				____randomWeatherToggle.Bind(new Action<bool>(ToggleWeather));
+				____randomWeatherToggle.Bind(ToggleWeather);
 				____randomTimeToggle.gameObject.GetComponent<CanvasGroup>().SetUnlockStatus(false, false);
 
 				GameObject weatherToggle = GameObject.Find("RandomWeatherCheckmark");

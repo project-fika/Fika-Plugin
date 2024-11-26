@@ -2,11 +2,11 @@
 
 namespace Fika.Core.Networking
 {
-	public struct QuestConditionPacket(string nickname, string id, string sourceId) : INetSerializable
+	public struct QuestConditionPacket : INetSerializable
 	{
-		public string Nickname = nickname;
-		public string Id = id;
-		public string SourceId = sourceId;
+		public string Nickname;
+		public string Id;
+		public string SourceId;
 
 		public void Deserialize(NetDataReader reader)
 		{

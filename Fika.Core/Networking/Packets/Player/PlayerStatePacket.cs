@@ -1,13 +1,14 @@
-﻿using LiteNetLib.Utils;
+﻿using Fika.Core.Coop.ObservedClasses.Snapshotting;
+using LiteNetLib.Utils;
 using UnityEngine;
 using static BaseBallistic;
 
 namespace Fika.Core.Networking
 {
 	public struct PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
-		EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed,
-		bool isProne, float poseLevel, bool isSprinting, BasePhysicalClass.GStruct36 stamina, int blindfire,
-		float weaponOverlap, bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, Vector3 surfaceNormal) : INetSerializable
+		EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed, bool isProne,
+		float poseLevel, bool isSprinting, BasePhysicalClass.GStruct36 stamina, int blindfire, float weaponOverlap,
+		bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, double remoteTime) : INetSerializable, ISnapshot
 	{
 		public int NetId = netId;
 		public Vector3 Position = position;
@@ -29,7 +30,10 @@ namespace Fika.Core.Networking
 		public bool IsGrounded = isGrounded;
 		public bool HasGround = hasGround;
 		public ESurfaceSound SurfaceSound = surfaceSound;
-		public Vector3 SurfaceNormal = surfaceNormal;
+
+		// Snapshot
+		public double RemoteTime { get; set; } = remoteTime;
+		public double LocalTime { get; set; }
 
 		public void Serialize(NetDataWriter writer)
 		{
@@ -38,7 +42,7 @@ namespace Fika.Core.Networking
 			writer.Put(Rotation);
 			writer.Put(HeadRotation);
 			writer.Put(MovementDirection);
-			writer.Put((int)State);
+			writer.Put((byte)State);
 			writer.Put(Tilt);
 			writer.Put(Step);
 			writer.Put(AnimatorStateIndex);
@@ -52,8 +56,8 @@ namespace Fika.Core.Networking
 			writer.Put(LeftStanceDisabled);
 			writer.Put(IsGrounded);
 			writer.Put(HasGround);
-			writer.Put((int)SurfaceSound);
-			writer.Put(SurfaceNormal);
+			writer.Put((byte)SurfaceSound);
+			writer.Put(RemoteTime);
 		}
 
 		public void Deserialize(NetDataReader reader)
@@ -63,7 +67,7 @@ namespace Fika.Core.Networking
 			Rotation = reader.GetVector2();
 			HeadRotation = reader.GetVector3();
 			MovementDirection = reader.GetVector2();
-			State = (EPlayerState)reader.GetInt();
+			State = (EPlayerState)reader.GetByte();
 			Tilt = reader.GetFloat();
 			Step = reader.GetInt();
 			AnimatorStateIndex = reader.GetInt();
@@ -77,8 +81,8 @@ namespace Fika.Core.Networking
 			LeftStanceDisabled = reader.GetBool();
 			IsGrounded = reader.GetBool();
 			HasGround = reader.GetBool();
-			SurfaceSound = (ESurfaceSound)reader.GetInt();
-			SurfaceNormal = reader.GetVector3();
+			SurfaceSound = (ESurfaceSound)reader.GetByte();
+			RemoteTime = reader.GetDouble();
 		}
 	}
 }

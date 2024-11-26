@@ -19,7 +19,7 @@ namespace Fika.Core.UI.Patches
 		protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_23));
 
 		[PatchPostfix]
-		public static void PostFix()
+		public static void Postfix()
 		{
 			if (HasShown)
 			{

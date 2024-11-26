@@ -14,40 +14,39 @@ namespace Fika.Core.Networking
 		public EBodyPartColliderType ColliderType;
 		public EArmorPlateCollider ArmorPlateCollider;
 		public float Absorbed;
-		public Vector3 Direction = Vector3.zero;
-		public Vector3 Point = Vector3.zero;
-		public Vector3 HitNormal = Vector3.zero;
-		public float PenetrationPower = 0f;
-		public string BlockedBy;
-		public string DeflectedBy;
+		public Vector3 Direction;
+		public Vector3 Point;
+		public Vector3 HitNormal;
+		public float PenetrationPower;
+		public MongoID? BlockedBy;
+		public MongoID? DeflectedBy;
 		public string SourceId;
-		public string AmmoId;
 		public int FragmentIndex;
-		public float ArmorDamage = 0f;
+		public float ArmorDamage;
 		public string ProfileId;
-		public MaterialType Material = 0;
+		public MaterialType Material;
+		public string WeaponId;
 
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
 			DamageType = (EDamageType)reader.GetInt();
 			Damage = reader.GetFloat();
-			BodyPartType = (EBodyPart)reader.GetInt();
-			ColliderType = (EBodyPartColliderType)reader.GetInt();
-			ArmorPlateCollider = (EArmorPlateCollider)reader.GetInt();
-			Absorbed = reader.GetFloat();
+			BodyPartType = (EBodyPart)reader.GetByte();
+			ColliderType = (EBodyPartColliderType)reader.GetByte();
+			ArmorPlateCollider = (EArmorPlateCollider)reader.GetByte();
 			Direction = reader.GetVector3();
 			Point = reader.GetVector3();
 			HitNormal = reader.GetVector3();
 			PenetrationPower = reader.GetFloat();
-			BlockedBy = reader.GetString();
-			DeflectedBy = reader.GetString();
+			BlockedBy = reader.GetMongoID();
+			DeflectedBy = reader.GetMongoID();
 			SourceId = reader.GetString();
-			AmmoId = reader.GetString();
 			FragmentIndex = reader.GetInt();
 			ArmorDamage = reader.GetFloat();
 			ProfileId = reader.GetString();
-			Material = (MaterialType)reader.GetInt();
+			Material = (MaterialType)reader.GetByte();
+			WeaponId = reader.GetString();
 		}
 
 		public void Serialize(NetDataWriter writer)
@@ -55,22 +54,21 @@ namespace Fika.Core.Networking
 			writer.Put(NetId);
 			writer.Put((int)DamageType);
 			writer.Put(Damage);
-			writer.Put((int)BodyPartType);
-			writer.Put((int)ColliderType);
-			writer.Put((int)ArmorPlateCollider);
-			writer.Put(Absorbed);
+			writer.Put((byte)BodyPartType);
+			writer.Put((byte)ColliderType);
+			writer.Put((byte)ArmorPlateCollider);
 			writer.Put(Direction);
 			writer.Put(Point);
 			writer.Put(HitNormal);
 			writer.Put(PenetrationPower);
-			writer.Put(BlockedBy);
-			writer.Put(DeflectedBy);
+			writer.PutMongoID(BlockedBy);
+			writer.PutMongoID(DeflectedBy);
 			writer.Put(SourceId);
-			writer.Put(AmmoId);
 			writer.Put(FragmentIndex);
 			writer.Put(ArmorDamage);
 			writer.Put(ProfileId);
-			writer.Put((int)Material);
+			writer.Put((byte)Material);
+			writer.Put(WeaponId);
 		}
 	}
 }

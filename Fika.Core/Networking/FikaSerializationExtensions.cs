@@ -3,13 +3,19 @@ using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
+using Fika.Core.Coop.Utils;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using static BasePhysicalClass; // Physical struct
+using static BasePhysicalClass;
+using static Fika.Core.Networking.CommonSubPackets;
+using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
@@ -157,7 +163,7 @@ namespace Fika.Core.Networking
 				reader.GetBytes(bytes, length);
 				return bytes;
 			}
-			return Array.Empty<byte>();
+			return [];
 		}
 
 		/// <summary>
@@ -181,66 +187,79 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Same as <see cref="PutItem(NetDataWriter, Item)"/>, however this one is specifically for airdrops to handle bundle loading
-		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="item">The <see cref="Item"/> to serialize</param>
-		public static void PutAirdropItem(this NetDataWriter writer, Item item)
-		{
-			using MemoryStream memoryStream = new();
-			using BinaryWriter binaryWriter = new(memoryStream);
-			binaryWriter.Write(GClass1535.SerializeItem(item));
-			writer.PutByteArray(memoryStream.ToArray());
-		}
-
-		/// <summary>
-		/// Same as <see cref="GetItem(NetDataReader)"/>, however this one is specifically for airdrops to handle bundle loading
-		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns>An <see cref="Item"/></returns>
-		public static Item GetAirdropItem(this NetDataReader reader)
-		{
-			using MemoryStream memoryStream = new(reader.GetByteArray());
-			using BinaryReader binaryReader = new(memoryStream);
-
-			Item item = GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
-
-			ContainerCollection[] containerCollections = [item as ContainerCollection];
-			ResourceKey[] resourceKeys = containerCollections.GetAllItemsFromCollections()
-				.Concat(containerCollections.Where(new Func<Item, bool>(AirdropSynchronizableObject.Class1832.class1832_0.method_2)))
-				.SelectMany(new Func<Item, IEnumerable<ResourceKey>>(AirdropSynchronizableObject.Class1832.class1832_0.method_3))
-				.ToArray();
-			Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online, resourceKeys, JobPriority.Immediate, null, default);
-
-			return item;
-		}
-
-		/// <summary>
 		/// This write and serializes an <see cref="Item"/>, which can be cast to different types of inherited classes. Casting should be handled inside packet for consistency.
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="item">The <see cref="Item"/> to serialize</param>
 		public static void PutItem(this NetDataWriter writer, Item item)
 		{
-			using MemoryStream memoryStream = new();
-			using BinaryWriter binaryWriter = new(memoryStream);
-			binaryWriter.Write(GClass1535.SerializeItem(item));
-			writer.PutByteArray(memoryStream.ToArray());
+			GClass1198 eftWriter = new();
+			GClass1659 descriptor = GClass1685.SerializeItem(item, GClass1971.Instance);
+			eftWriter.WriteEFTItemDescriptor(descriptor);
+			writer.PutByteArray(eftWriter.ToArray());
 		}
 
 		/// <summary>
 		/// Gets a serialized <see cref="Item"/>
 		/// </summary>
 		/// <param name="reader"></param>
-		/// <returns>An <see cref="Item"/></returns>
+		/// <returns>An <see cref="Item"/> (cast to type inside packet)</returns>
 		public static Item GetItem(this NetDataReader reader)
 		{
-			using MemoryStream memoryStream = new(reader.GetByteArray());
-			using BinaryReader binaryReader = new(memoryStream);
-
-			return GClass1535.DeserializeItem(Singleton<ItemFactory>.Instance, [], binaryReader.ReadEFTItemDescriptor());
+			GClass1193 eftReader = new(reader.GetByteArray());
+			return GClass1685.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 		}
 
+		/// <summary>
+		/// Reads an <see cref="InventoryEquipment"/> serialized from <see cref="PutItem(NetDataWriter, Item)"/> and converts it into an <see cref="Inventory"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>An <see cref="Inventory"/></returns>
+		public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
+		{
+			GClass1193 eftReader = new(reader.GetByteArray());
+			return new GClass1651()
+			{
+				Equipment = eftReader.ReadEFTItemDescriptor()
+			}.ToInventory();
+		}
+
+		public static void PutItemDescriptor(this NetDataWriter writer, GClass1659 descriptor)
+		{
+			GClass1198 eftWriter = new();
+			eftWriter.WriteEFTItemDescriptor(descriptor);
+			writer.PutByteArray(eftWriter.ToArray());
+		}
+
+		public static GClass1659 GetItemDescriptor(this NetDataReader reader)
+		{
+			GClass1193 eftReader = new(reader.GetByteArray());
+			return eftReader.ReadEFTItemDescriptor();
+		}
+
+		public static Item GetAirdropItem(this NetDataReader reader)
+		{
+			GClass1193 eftReader = new(reader.GetByteArray());
+			Item item = GClass1685.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+
+			GClass1315 enumerable = [new LootItemPositionClass()];
+			enumerable[0].Item = item;
+			Item[] array = enumerable.Select(FikaGlobals.GetLootItemPositionItem).ToArray();
+			ResourceKey[] resourceKeys = array.OfType<GClass2981>().GetAllItemsFromCollections()
+				.Concat(array.Where(AirdropSynchronizableObject.Class1967.class1967_0.method_1))
+				.SelectMany(AirdropSynchronizableObject.Class1967.class1967_0.method_2)
+				.ToArray();
+			Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online,
+				resourceKeys, JobPriority.Immediate, null, default).HandleExceptions();
+
+			return item;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="List{T}"/> of <see cref="GStruct35"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="throwables"></param>
 		public static void PutThrowableData(this NetDataWriter writer, List<GStruct35> throwables)
 		{
 			writer.Put(throwables.Count);
@@ -255,6 +274,34 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="Profile"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="profile"></param>
+		public static void PutProfile(this NetDataWriter writer, Profile profile)
+		{
+			GClass1198 eftWriter = new();
+			eftWriter.WriteEFTProfileDescriptor(new(profile, GClass1971.Instance));
+			writer.PutByteArray(eftWriter.ToArray());
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="Profile"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="Profile"/></returns>
+		public static Profile GetProfile(this NetDataReader reader)
+		{
+			GClass1193 eftReader = new(reader.GetByteArray());
+			return new(eftReader.ReadEFTProfileDescriptor());
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="List{T}"/> of <see cref="GStruct35"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="List{T}"/> of <see cref="GStruct35"/></returns>
 		public static List<GStruct35> GetThrowableData(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
@@ -276,7 +323,12 @@ namespace Fika.Core.Networking
 			return throwables;
 		}
 
-		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct384> interactiveObjectsData)
+		/// <summary>
+		/// Serializes a <see cref="List{WorldInteractiveObject.GStruct415}"/> of <see cref="WorldInteractiveObject"/> data
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="interactiveObjectsData"></param>
+		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct415> interactiveObjectsData)
 		{
 			writer.Put(interactiveObjectsData.Count);
 			for (int i = 0; i < interactiveObjectsData.Count; i++)
@@ -287,13 +339,18 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public static List<WorldInteractiveObject.GStruct384> GetInteractivesStates(this NetDataReader reader)
+		/// <summary>
+		/// Deserializes a <see cref="List{WorldInteractiveObject.GStruct415}"/> of <see cref="WorldInteractiveObject"/> data
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.GStruct415"/></returns>
+		public static List<WorldInteractiveObject.GStruct415> GetInteractivesStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
-			List<WorldInteractiveObject.GStruct384> interactivesStates = new(amount);
+			List<WorldInteractiveObject.GStruct415> interactivesStates = new(amount);
 			for (int i = 0; i < amount; i++)
 			{
-				WorldInteractiveObject.GStruct384 data = new()
+				WorldInteractiveObject.GStruct415 data = new()
 				{
 					NetId = reader.GetInt(),
 					State = reader.GetByte(),
@@ -305,6 +362,11 @@ namespace Fika.Core.Networking
 			return interactivesStates;
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="lampStates"></param>
 		public static void PutLampStates(this NetDataWriter writer, Dictionary<int, byte> lampStates)
 		{
 			int amount = lampStates.Count;
@@ -316,6 +378,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="LampController"/>s</returns>
 		public static Dictionary<int, byte> GetLampStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
@@ -328,6 +395,11 @@ namespace Fika.Core.Networking
 			return states;
 		}
 
+		/// <summary>
+		/// Serializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="windowBreakerStates"></param>
 		public static void PutWindowBreakerStates(this NetDataWriter writer, Dictionary<int, Vector3> windowBreakerStates)
 		{
 			int amount = windowBreakerStates.Count;
@@ -339,6 +411,11 @@ namespace Fika.Core.Networking
 			}
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="WindowBreaker"/>s</returns>
 		public static Dictionary<int, Vector3> GetWindowBreakerStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
@@ -351,26 +428,583 @@ namespace Fika.Core.Networking
 			return states;
 		}
 
-
+		/// <summary>
+		/// Serializes a <see cref="MongoID"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="mongoId"></param>
 		public static void PutMongoID(this NetDataWriter writer, MongoID? mongoId)
 		{
 			if (!mongoId.HasValue)
 			{
-				writer.Put(0);
+				writer.Put((byte)0);
 				return;
 			}
-			writer.Put(1);
+			writer.Put((byte)1);
 			writer.Put(mongoId.Value.ToString());
 		}
 
+		/// <summary>
+		/// Deserializes a <see cref="MongoID"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A new <see cref="MongoID"/>? (nullable)</returns>
 		public static MongoID? GetMongoID(this NetDataReader reader)
 		{
-			int value = reader.GetInt();
+			byte value = reader.GetByte();
 			if (value == 0)
 			{
 				return null;
 			}
 			return new(reader.GetString());
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="TraderServicesClass"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="traderService"></param>
+		public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
+		{
+			writer.PutMongoID(traderService.TraderId);
+			writer.Put((byte)traderService.ServiceType);
+			writer.Put(traderService.CanAfford);
+			writer.Put(traderService.WasPurchasedInThisRaid);
+			writer.Put(traderService.ItemsToPay.Count);
+			foreach (KeyValuePair<MongoID, int> pair in traderService.ItemsToPay)
+			{
+				writer.PutMongoID(pair.Key);
+				writer.Put(pair.Value);
+			}
+			int uniqueAmount = traderService.UniqueItems.Length;
+			writer.Put(uniqueAmount);
+			for (int i = 0; i < uniqueAmount; i++)
+			{
+				writer.PutMongoID(traderService.UniqueItems[i]);
+			}
+			writer.Put(traderService.SubServices.Count);
+			foreach (KeyValuePair<string, int> pair in traderService.SubServices)
+			{
+				writer.Put(pair.Key);
+				writer.Put(pair.Value);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="TraderServicesClass"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="TraderServicesClass"/></returns>
+		public static TraderServicesClass GetTraderService(this NetDataReader reader)
+		{
+			TraderServicesClass traderService = new()
+			{
+				TraderId = reader.GetMongoID().Value,
+				ServiceType = (ETraderServiceType)reader.GetByte(),
+				CanAfford = reader.GetBool(),
+				WasPurchasedInThisRaid = reader.GetBool()
+			};
+			int toPayAmount = reader.GetInt();
+			traderService.ItemsToPay = new(toPayAmount);
+			for (int i = 0; i < toPayAmount; i++)
+			{
+				traderService.ItemsToPay[reader.GetMongoID().Value] = reader.GetInt();
+			}
+			int uniqueAmount = reader.GetInt();
+			traderService.UniqueItems = new MongoID[uniqueAmount];
+			for (int i = 0; i < uniqueAmount; i++)
+			{
+				traderService.UniqueItems[i] = reader.GetMongoID().Value;
+			}
+			int subAmount = reader.GetInt();
+			traderService.SubServices = new(subAmount);
+			for (int i = 0; i < subAmount; i++)
+			{
+				traderService.SubServices[reader.GetString()] = reader.GetInt();
+			}
+			return traderService;
+		}
+
+		/// <summary>
+		/// Writes a <see cref="Profile.ProfileHealthClass"/> into a raw <see cref="byte"/>[]
+		/// </summary>
+		/// <param name="health"></param>
+		/// <returns><see cref="byte"/>[]</returns>
+		public static byte[] SerializeHealthInfo(this Profile.ProfileHealthClass health)
+		{
+			using MemoryStream stream = new();
+			using BinaryWriter writer = new(stream);
+
+			writer.WriteValueInfo(health.Energy);
+			writer.WriteValueInfo(health.Hydration);
+			writer.WriteValueInfo(health.Temperature);
+			writer.WriteValueInfo(health.Poison);
+			float standard = 1f;
+			// Heal Rate
+			writer.Write(standard);
+			// Damage Rate
+			writer.Write(standard);
+			// Damage Multiplier
+			writer.Write(standard);
+			// Energy Rate
+			writer.Write(standard);
+			// Hydration Rate
+			writer.Write(standard);
+			// Temperate Rate
+			writer.Write(standard);
+			// Damage Coeff
+			writer.Write(standard);
+			// Stamina Coeff
+			writer.Write(standard);
+
+			foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass1940> bodyPart in health.BodyParts)
+			{
+				Profile.ProfileHealthClass.ValueInfo bodyPartInfo = bodyPart.Value.Health;
+				writer.Write(bodyPartInfo.Current <= bodyPartInfo.Minimum);
+				writer.Write(bodyPartInfo.Current);
+				writer.Write(bodyPartInfo.Maximum);
+			}
+
+			// Effect Amount - Set to 0 as it's a fresh profile
+			short effectAmount = 0;
+			writer.Write(effectAmount);
+			byte end = 42;
+			writer.Write(end);
+
+			return stream.ToArray();
+		}
+
+		/// <summary>
+		/// Writes a <see cref="Profile.ProfileHealthClass.ValueInfo"/> into <see cref="byte"/>s
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="valueInfo"></param>
+		public static void WriteValueInfo(this BinaryWriter writer, Profile.ProfileHealthClass.ValueInfo valueInfo)
+		{
+			writer.Write(valueInfo.Current);
+			writer.Write(valueInfo.Minimum);
+			writer.Write(valueInfo.Maximum);
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="GStruct130"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="artilleryStruct"></param>
+		public static void PutArtilleryStruct(this NetDataWriter writer, in GStruct130 artilleryStruct)
+		{
+			writer.Put(artilleryStruct.id);
+			writer.Put(artilleryStruct.position);
+			writer.Put(artilleryStruct.explosion);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="GStruct130"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="GStruct130"/> with data</returns>
+		public static GStruct130 GetArtilleryStruct(this NetDataReader reader)
+		{
+			return new()
+			{
+				id = reader.GetInt(),
+				position = reader.GetVector3(),
+				explosion = reader.GetBool()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="GStruct131"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="grenadeStruct"></param>
+		public static void PutGrenadeStruct(this NetDataWriter writer, in GStruct131 grenadeStruct)
+		{
+			writer.Put(grenadeStruct.Id);
+			writer.Put(grenadeStruct.Position);
+			writer.Put(grenadeStruct.Rotation);
+			writer.Put(grenadeStruct.CollisionNumber);
+			writer.Put(grenadeStruct.Done);
+			if (!grenadeStruct.Done)
+			{
+				writer.Put(grenadeStruct.Velocity);
+				writer.Put(grenadeStruct.AngularVelocity);
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="GStruct131"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="GStruct131"/> with data</returns>
+		public static GStruct131 GetGrenadeStruct(this NetDataReader reader)
+		{
+			GStruct131 grenadeStruct = new()
+			{
+				Id = reader.GetInt(),
+				Position = reader.GetVector3(),
+				Rotation = reader.GetQuaternion(),
+				CollisionNumber = reader.GetByte()
+			};
+
+			if (!reader.GetBool())
+			{
+				grenadeStruct.Velocity = reader.GetVector3();
+				grenadeStruct.AngularVelocity = reader.GetVector3();
+				return grenadeStruct;
+			}
+
+			grenadeStruct.Done = true;
+			return grenadeStruct;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="PlayerInfoPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutPlayerInfoPacket(this NetDataWriter writer, PlayerInfoPacket packet)
+		{
+			writer.PutProfile(packet.Profile);
+			writer.PutMongoID(packet.ControllerId);
+			writer.Put(packet.FirstOperationId);
+			writer.PutByteArray(packet.HealthByteArray ?? ([]));
+			writer.Put((byte)packet.ControllerType);
+			if (packet.ControllerType != EHandsControllerType.None)
+			{
+				writer.Put(packet.ItemId);
+				writer.Put(packet.IsStationary);
+			}
+			writer.Put(packet.IsZombie);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="PlayerInfoPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="PlayerInfoPacket"/> with data</returns>
+		public static PlayerInfoPacket GetPlayerInfoPacket(this NetDataReader reader)
+		{
+			PlayerInfoPacket packet = new()
+			{
+				Profile = reader.GetProfile(),
+				ControllerId = reader.GetMongoID(),
+				FirstOperationId = reader.GetUShort(),
+				HealthByteArray = reader.GetByteArray(),
+				ControllerType = (EHandsControllerType)reader.GetByte()
+			};
+			if (packet.ControllerType != EHandsControllerType.None)
+			{
+				packet.ItemId = reader.GetString();
+				packet.IsStationary = reader.GetBool();
+			}
+			packet.IsZombie = reader.GetBool();
+			return packet;
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="WeatherClass"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="weatherClass"></param>
+		public static void PutWeatherClass(this NetDataWriter writer, WeatherClass weatherClass)
+		{
+			writer.Put(weatherClass.AtmospherePressure);
+			writer.Put(weatherClass.Cloudness);
+			writer.Put(weatherClass.GlobalFogDensity);
+			writer.Put(weatherClass.GlobalFogHeight);
+			writer.Put(weatherClass.LyingWater);
+			writer.Put(weatherClass.MainWindDirection);
+			writer.Put(weatherClass.MainWindPosition);
+			writer.Put(weatherClass.Rain);
+			writer.Put(weatherClass.RainRandomness);
+			writer.Put(weatherClass.ScaterringFogDensity);
+			writer.Put(weatherClass.ScaterringFogHeight);
+			writer.Put(weatherClass.Temperature);
+			writer.Put(weatherClass.Time);
+			writer.Put(weatherClass.TopWindDirection);
+			writer.Put(weatherClass.TopWindPosition);
+			writer.Put(weatherClass.Turbulence);
+			writer.Put(weatherClass.Wind);
+			writer.Put(weatherClass.WindDirection);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="WeatherClass"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="WeatherClass"/> with data</returns>
+		public static WeatherClass GetWeatherClass(this NetDataReader reader)
+		{
+			return new WeatherClass()
+			{
+				AtmospherePressure = reader.GetFloat(),
+				Cloudness = reader.GetFloat(),
+				GlobalFogDensity = reader.GetFloat(),
+				GlobalFogHeight = reader.GetFloat(),
+				LyingWater = reader.GetFloat(),
+				MainWindDirection = reader.GetVector2(),
+				MainWindPosition = reader.GetVector2(),
+				Rain = reader.GetFloat(),
+				RainRandomness = reader.GetFloat(),
+				ScaterringFogDensity = reader.GetFloat(),
+				ScaterringFogHeight = reader.GetFloat(),
+				Temperature = reader.GetFloat(),
+				Time = reader.GetLong(),
+				TopWindDirection = reader.GetVector2(),
+				TopWindPosition = reader.GetVector2(),
+				Turbulence = reader.GetFloat(),
+				Wind = reader.GetFloat(),
+				WindDirection = reader.GetInt()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="CorpseSyncPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPacket packet)
+		{
+			writer.Put((int)packet.BodyPartColliderType);
+			writer.Put(packet.Direction);
+			writer.Put(packet.Point);
+			writer.Put(packet.Force);
+			writer.Put(packet.OverallVelocity);
+			writer.PutItemDescriptor(packet.InventoryDescriptor);
+			writer.Put((byte)packet.ItemSlot);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="CorpseSyncPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="CorpseSyncPacket"/> with data</returns>
+		public static CorpseSyncPacket GetCorpseSyncPacket(this NetDataReader reader)
+		{
+			return new CorpseSyncPacket()
+			{
+				BodyPartColliderType = (EBodyPartColliderType)reader.GetInt(),
+				Direction = reader.GetVector3(),
+				Point = reader.GetVector3(),
+				Force = reader.GetFloat(),
+				OverallVelocity = reader.GetVector3(),
+				InventoryDescriptor = reader.GetItemDescriptor(),
+				ItemSlot = (EquipmentSlot)reader.GetByte()
+			};
+		}
+
+		/// <summary>
+		/// Serializes a <see cref="DeathInfoPacket"/>
+		/// </summary>
+		/// <param name="writer"></param>
+		/// <param name="packet"></param>
+		public static void PutDeathInfoPacket(this NetDataWriter writer, DeathInfoPacket packet)
+		{
+			writer.Put(packet.AccountId);
+			writer.Put(packet.ProfileId);
+			writer.Put(packet.Nickname);
+			writer.Put(packet.KillerAccountId);
+			writer.Put(packet.KillerProfileId);
+			writer.Put(packet.KillerName);
+			writer.Put((byte)packet.Side);
+			writer.Put(packet.Level);
+			writer.Put(packet.Time);
+			writer.Put(packet.Status);
+			writer.Put(packet.WeaponName);
+			writer.Put(packet.GroupId);
+		}
+
+		/// <summary>
+		/// Deserializes a <see cref="DeathInfoPacket"/>
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns>A <see cref="DeathInfoPacket"/> with data</returns>
+		public static DeathInfoPacket GetDeathInfoPacket(this NetDataReader reader)
+		{
+			return new()
+			{
+				AccountId = reader.GetString(),
+				ProfileId = reader.GetString(),
+				Nickname = reader.GetString(),
+				KillerAccountId = reader.GetString(),
+				KillerProfileId = reader.GetString(),
+				KillerName = reader.GetString(),
+				Side = (EPlayerSide)reader.GetByte(),
+				Level = reader.GetInt(),
+				Time = reader.GetDateTime(),
+				Status = reader.GetString(),
+				WeaponName = reader.GetString(),
+				GroupId = reader.GetString()
+			};
+		}
+
+		public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
+		{
+			switch (type)
+			{
+				case EFirearmSubPacketType.ShotInfo:
+				case EFirearmSubPacketType.ChangeFireMode:
+				case EFirearmSubPacketType.ToggleAim:
+				case EFirearmSubPacketType.ToggleLightStates:
+				case EFirearmSubPacketType.ToggleScopeStates:
+				case EFirearmSubPacketType.ToggleInventory:
+				case EFirearmSubPacketType.LeftStanceChange:
+				case EFirearmSubPacketType.ReloadMag:
+				case EFirearmSubPacketType.QuickReloadMag:
+				case EFirearmSubPacketType.ReloadWithAmmo:
+				case EFirearmSubPacketType.CylinderMag:
+				case EFirearmSubPacketType.ReloadLauncher:
+				case EFirearmSubPacketType.ReloadBarrels:
+				case EFirearmSubPacketType.Grenade:
+				case EFirearmSubPacketType.CompassChange:
+				case EFirearmSubPacketType.Knife:
+				case EFirearmSubPacketType.FlareShot:
+				case EFirearmSubPacketType.RollCylinder:
+					packet.Serialize(writer);
+					break;
+
+				case EFirearmSubPacketType.ToggleLauncher:
+				case EFirearmSubPacketType.CancelGrenade:
+				case EFirearmSubPacketType.ReloadBoltAction:
+				case EFirearmSubPacketType.UnderbarrelSightingRangeUp:
+				case EFirearmSubPacketType.UnderbarrelSightingRangeDown:
+				case EFirearmSubPacketType.ToggleBipod:
+				case EFirearmSubPacketType.ExamineWeapon:
+				case EFirearmSubPacketType.CheckAmmo:
+				case EFirearmSubPacketType.CheckChamber:
+				case EFirearmSubPacketType.CheckFireMode:
+				case EFirearmSubPacketType.Loot:
+					break;
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("IFirearmSubPacket: type was outside of bounds!");
+					break;
+			}
+		}
+
+		public static ISubPacket GetFirearmSubPacket(this NetDataReader reader, EFirearmSubPacketType type)
+		{
+			switch (type)
+			{
+				case EFirearmSubPacketType.ShotInfo:
+					return new ShotInfoPacket(reader);
+				case EFirearmSubPacketType.ChangeFireMode:
+					return new ChangeFireModePacket(reader);
+				case EFirearmSubPacketType.ToggleAim:
+					return new ToggleAimPacket(reader);
+				case EFirearmSubPacketType.ExamineWeapon:
+					return new ExamineWeaponPacket();
+				case EFirearmSubPacketType.CheckAmmo:
+					return new CheckAmmoPacket();
+				case EFirearmSubPacketType.CheckChamber:
+					return new CheckChamberPacket();
+				case EFirearmSubPacketType.CheckFireMode:
+					return new CheckFireModePacket();
+				case EFirearmSubPacketType.ToggleLightStates:
+					return new LightStatesPacket(reader);
+				case EFirearmSubPacketType.ToggleScopeStates:
+					return new ScopeStatesPacket(reader);
+				case EFirearmSubPacketType.ToggleLauncher:
+					return new ToggleLauncherPacket();
+				case EFirearmSubPacketType.ToggleInventory:
+					return new ToggleInventoryPacket(reader);
+				case EFirearmSubPacketType.Loot:
+					return new FirearmLootPacket();
+				case EFirearmSubPacketType.ReloadMag:
+					return new ReloadMagPacket(reader);
+				case EFirearmSubPacketType.QuickReloadMag:
+					return new QuickReloadMagPacket(reader);
+				case EFirearmSubPacketType.ReloadWithAmmo:
+					return new ReloadWithAmmoPacket(reader);
+				case EFirearmSubPacketType.CylinderMag:
+					return new CylinderMagPacket(reader);
+				case EFirearmSubPacketType.ReloadLauncher:
+					return new ReloadLauncherPacket(reader);
+				case EFirearmSubPacketType.ReloadBarrels:
+					return new ReloadBarrelsPacket(reader);
+				case EFirearmSubPacketType.Grenade:
+					return new GrenadePacket(reader);
+				case EFirearmSubPacketType.CancelGrenade:
+					return new CancelGrenadePacket();
+				case EFirearmSubPacketType.CompassChange:
+					return new CompassChangePacket(reader);
+				case EFirearmSubPacketType.Knife:
+					return new KnifePacket(reader);
+				case EFirearmSubPacketType.FlareShot:
+					return new FlareShotPacket(reader);
+				case EFirearmSubPacketType.ReloadBoltAction:
+					return new ReloadBoltActionPacket();
+				case EFirearmSubPacketType.RollCylinder:
+					return new RollCylinderPacket(reader);
+				case EFirearmSubPacketType.UnderbarrelSightingRangeUp:
+					return new UnderbarrelSightingRangeUpPacket();
+				case EFirearmSubPacketType.UnderbarrelSightingRangeDown:
+					return new UnderbarrelSightingRangeDownPacket();
+				case EFirearmSubPacketType.ToggleBipod:
+					return new ToggleBipodPacket();
+				case EFirearmSubPacketType.LeftStanceChange:
+					return new LeftStanceChangePacket(reader);
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("GetFirearmSubPacket: type was outside of bounds!");
+					return null;
+			}
+		}
+
+		public static void PutCommonSubPacket(this NetDataWriter writer, ISubPacket packet)
+		{
+			packet.Serialize(writer);
+		}
+
+		public static ISubPacket GetCommonSubPacket(this NetDataReader reader, ECommonSubPacketType type)
+		{
+			switch (type)
+			{
+				case ECommonSubPacketType.Phrase:
+					return new PhrasePacket(reader);
+				case ECommonSubPacketType.WorldInteraction:
+					return new WorldInteractionPacket(reader);
+				case ECommonSubPacketType.ContainerInteraction:
+					return new ContainerInteractionPacket(reader);
+				case ECommonSubPacketType.Proceed:
+					return new ProceedPacket(reader);
+				case ECommonSubPacketType.HeadLights:
+					return new HeadLightsPacket(reader);
+				case ECommonSubPacketType.InventoryChanged:
+					return new InventoryChangedPacket(reader);
+				case ECommonSubPacketType.Drop:
+					return new DropPacket(reader);
+				case ECommonSubPacketType.Stationary:
+					return new StationaryPacket(reader);
+				case ECommonSubPacketType.Vault:
+					return new VaultPacket(reader);
+				case ECommonSubPacketType.Interaction:
+					return new InteractionPacket(reader);
+				case ECommonSubPacketType.Mounting:
+					return new MountingPacket(reader);
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("GetCommonSubPacket: type was outside of bounds!");
+					break;
+			}
+			return null;
+		}
+
+		public static ISubPacket GetGenericSubPacket(this NetDataReader reader, EGenericSubPacketType type, int netId)
+		{
+			switch (type)
+			{
+				case EGenericSubPacketType.ClientExtract:
+					return new ClientExtract(netId);
+				case EGenericSubPacketType.ExfilCountdown:
+					return new ExfilCountdown(reader);
+				case EGenericSubPacketType.ClearEffects:
+					return new ClearEffects(netId);
+				case EGenericSubPacketType.UpdateBackendData:
+					return new UpdateBackendData(reader);
+				default:
+					FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
+					break;
+			}
+			return null;
 		}
 	}
 }

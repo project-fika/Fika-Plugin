@@ -1,7 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.FikaSerialization;
+using UnityEngine;
 
 namespace Fika.Core.Networking
 {
@@ -9,6 +9,8 @@ namespace Fika.Core.Networking
 	{
 		public bool IsRequest;
 		public bool HasData;
+		public ESeason Season;
+		public Vector3 SpringSnowFactor;
 		public int Amount;
 		public WeatherClass[] WeatherClasses;
 
@@ -18,32 +20,13 @@ namespace Fika.Core.Networking
 			HasData = reader.GetBool();
 			if (HasData)
 			{
+				Season = (ESeason)reader.GetByte();
+				SpringSnowFactor = reader.GetVector3();
 				Amount = reader.GetInt();
 				WeatherClasses = new WeatherClass[Amount];
 				for (int i = 0; i < Amount; i++)
 				{
-					WeatherClassPacket weatherClassPacket = WeatherClassPacket.Deserialize(reader);
-					WeatherClasses[i] = new()
-					{
-						AtmospherePressure = weatherClassPacket.AtmospherePressure,
-						Cloudness = weatherClassPacket.Cloudness,
-						GlobalFogDensity = weatherClassPacket.GlobalFogDensity,
-						GlobalFogHeight = weatherClassPacket.GlobalFogHeight,
-						LyingWater = weatherClassPacket.LyingWater,
-						MainWindDirection = weatherClassPacket.MainWindDirection,
-						MainWindPosition = weatherClassPacket.MainWindPosition,
-						Rain = weatherClassPacket.Rain,
-						RainRandomness = weatherClassPacket.RainRandomness,
-						ScaterringFogDensity = weatherClassPacket.ScaterringFogDensity,
-						ScaterringFogHeight = weatherClassPacket.ScaterringFogDensity,
-						Temperature = weatherClassPacket.Temperature,
-						Time = weatherClassPacket.Time,
-						TopWindDirection = weatherClassPacket.TopWindDirection,
-						TopWindPosition = weatherClassPacket.TopWindPosition,
-						Turbulence = weatherClassPacket.Turbulence,
-						Wind = weatherClassPacket.Wind,
-						WindDirection = weatherClassPacket.WindDirection
-					};
+					WeatherClasses[i] = reader.GetWeatherClass();
 				}
 			}
 		}
@@ -54,10 +37,12 @@ namespace Fika.Core.Networking
 			writer.Put(HasData);
 			if (HasData)
 			{
+				writer.Put((byte)Season);
+				writer.Put(SpringSnowFactor);
 				writer.Put(Amount);
 				for (int i = 0; i < Amount; i++)
 				{
-					WeatherClassPacket.Serialize(writer, WeatherClasses[i]);
+					writer.PutWeatherClass(WeatherClasses[i]);
 				}
 			}
 		}

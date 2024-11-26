@@ -21,7 +21,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 		public static GameObject MatchmakerObject { get; set; }
 
 		[PatchPrefix]
-		private static void PreFix(ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
+		private static void Prefix(ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
 		{
 			if (MatchmakerObject == null)
 			{
@@ -34,13 +34,13 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 			}
 
 			MatchMakerUIScript newMatchMaker = MatchmakerObject.GetOrAddComponent<MatchMakerUIScript>();
-			newMatchMaker.RaidSettings = raidSettings;
-			newMatchMaker.AcceptButton = ____acceptButton;
-			newMatchMaker.BackButton = ____backButton;
+			newMatchMaker.raidSettings = raidSettings;
+			newMatchMaker.acceptButton = ____acceptButton;
+			newMatchMaker.backButton = ____backButton;
 		}
 
 		[PatchPostfix]
-		private static void PostFix(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
+		private static void Postfix(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
 		{
 			FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
 			FikaBackendUtils.Profile = session.Profile;

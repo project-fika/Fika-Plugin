@@ -287,13 +287,12 @@ namespace LiteNetLib
 
 		internal void ResetMtu()
 		{
-			_finishMtu = false;
+			//finish if discovery disabled
+			_finishMtu = !NetManager.MtuDiscovery;
 			if (NetManager.MtuOverride > 0)
 				OverrideMtu(NetManager.MtuOverride);
-			else if (NetManager.UseSafeMtu)
-				SetMtu(0);
 			else
-				SetMtu(1);
+				SetMtu(0);
 		}
 
 		private void SetMtu(int mtuIdx)
@@ -1189,6 +1188,9 @@ namespace LiteNetLib
 					while (pos < packet.Size)
 					{
 						ushort size = BitConverter.ToUInt16(packet.RawData, pos);
+						if (size == 0)
+							break;
+
 						pos += 2;
 						if (packet.RawData.Length - pos < size)
 							break;

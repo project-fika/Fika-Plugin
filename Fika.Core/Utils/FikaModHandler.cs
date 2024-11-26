@@ -4,7 +4,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
-using Fika.Core.Networking.Http.Models;
+using Fika.Core.Networking.Http;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
@@ -17,6 +17,9 @@ using Logger = BepInEx.Logging.Logger;
 
 namespace Fika.Core.Utils
 {
+	/// <summary>
+	/// Class used to verify and handle other SPT mods
+	/// </summary>
 	public class FikaModHandler
 	{
 		private readonly ManualLogSource logger = Logger.CreateLogSource("FikaModHandler");

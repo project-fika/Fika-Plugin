@@ -4,6 +4,7 @@ using EFT;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
@@ -16,17 +17,19 @@ namespace Fika.Core.Coop.FreeCamera
 	/// A simple free camera to be added to a Unity game object. <br/><br/>
 	/// 
 	/// Full credit to Ashley Davis on GitHub for the inital code:<br/>
-	/// https://gist.github.com/ashleydavis/f025c03a9221bc840a2b<br/><br/>
+	/// <see href="https://gist.github.com/ashleydavis/f025c03a9221bc840a2b"/><br/><br/>
 	/// 
 	/// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
-	/// https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs
+	/// <see href="https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs"/>
 	/// </summary>
 	public class FreeCamera : MonoBehaviour
 	{
 		public bool IsActive = false;
-		private CoopPlayer CurrentPlayer;
-		private Vector3 LastKnownPlayerPosition;
+		private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
+		private CoopPlayer currentPlayer;
+		private Vector3 lastKnownPlayerPosition;
 		private bool isFollowing = false;
+		private bool isSpectatingBots = false;
 		private bool leftMode = false;
 		private bool disableInput = false;
 		private bool showOverlay;
@@ -35,7 +38,11 @@ namespace Fika.Core.Coop.FreeCamera
 		private FreeCameraController freeCameraController;
 		private float yaw = 0f;
 		private float pitch = 0f;
-		private float lookSensitivity = 3f;
+		private const float lookSensitivity = 3f;
+		private const float minFov = 10f;
+		private float originalFov;
+		private bool nightVisionActive = false;
+		private bool thermalVisionActive = false;
 
 		private KeyCode forwardKey = KeyCode.W;
 		private KeyCode backKey = KeyCode.S;
@@ -43,6 +50,7 @@ namespace Fika.Core.Coop.FreeCamera
 		private KeyCode rightKey = KeyCode.D;
 		private KeyCode relUpKey = KeyCode.E;
 		private KeyCode relDownKey = KeyCode.Q;
+		private KeyCode detachKey = KeyCode.G;
 		private readonly KeyCode upKey = KeyCode.R;
 		private readonly KeyCode downKey = KeyCode.F;
 
@@ -66,6 +74,7 @@ namespace Fika.Core.Coop.FreeCamera
 			thermalVision = CameraClass.Instance.ThermalVision;
 
 			freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
+			originalFov = CameraClass.Instance.Fov;
 		}
 
 		private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
@@ -75,9 +84,9 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void SetCurrentPlayer(CoopPlayer player)
 		{
-			CurrentPlayer = player;
+			currentPlayer = player;
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Setting player to {CurrentPlayer}");
+			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Setting player to {currentPlayer}");
 #endif
 		}
 
@@ -100,9 +109,20 @@ namespace Fika.Core.Coop.FreeCamera
 				GUILayout.BeginArea(new Rect(5, 5, 800, 800));
 				GUILayout.BeginVertical();
 
-				GUILayout.Label($"Left/Right Mouse Button: Jump between players");
-				GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
+				{
+					GUILayout.Label($"Left/Right Mouse Button: Jump between players");
+					GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
+				}
+				else
+				{
+					GUILayout.Label($"Left/Right Mouse Button: Jump and spectate in 3rd person");
+				}
 				GUILayout.Label($"Spacebar + Left/Right Mouse Button: Jump and spectate in head cam");
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator || isSpectatingBots)
+				{
+					GUILayout.Label($"G: Detach Camera");
+				}
 				GUILayout.Label($"T: Teleport to cam position");
 				GUILayout.Label($"N: {visionText}");
 				GUILayout.Label($"M: Disable culling");
@@ -112,6 +132,17 @@ namespace Fika.Core.Coop.FreeCamera
 				GUILayout.EndVertical();
 				GUILayout.EndArea();
 			}
+		}
+
+		public void DetachCamera()
+		{
+			currentPlayer = null;
+			if (isFollowing)
+			{
+				isFollowing = false;
+				transform.parent = null;
+			}
+			return;
 		}
 
 		public void SwitchSpectateMode()
@@ -128,7 +159,7 @@ namespace Fika.Core.Coop.FreeCamera
 			}
 			else
 			{
-				if (FikaPlugin.Instance.AllowSpectateFreeCam)
+				if (FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator)
 				{
 					JumpToPlayer();
 				}
@@ -147,41 +178,50 @@ namespace Fika.Core.Coop.FreeCamera
 		/// </param>
 		public void CycleSpectatePlayers(bool reverse = false)
 		{
-			CoopHandler coopHandler = CoopHandler.GetCoopHandler();
-			if (coopHandler == null)
+			if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
 				return;
 			}
-			List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
 
+			List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+			// If no alive players, add bots to spectate pool if enabled
+			if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
+			{
+				isSpectatingBots = true;
+				if (FikaBackendUtils.IsServer)
+				{
+					players = [.. coopHandler.Players.Values.Where(x => x.IsAI && x.HealthController.IsAlive)];
+				}
+				else
+				{
+					players = [.. coopHandler.Players.Values.Where(x => x.IsObservedAI && x.HealthController.IsAlive)];
+				}
+			}
 #if DEBUG
 			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {players.Count} players");
 #endif
-			if (players.Count() <= 0)
+
+			if (players.Count <= 0)
 			{
 				// Clear out all spectate positions
-				CurrentPlayer = null;
-				if (isFollowing)
-				{
-					isFollowing = false;
-					transform.parent = null;
-				}
+				DetachCamera();
+
 				return;
 			}
 
 			// Start spectating a player if we haven't before
-			if (CurrentPlayer == null && players[0])
+			if (currentPlayer == null && players[0])
 			{
-				CurrentPlayer = players[0];
+				currentPlayer = players[0];
 #if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: CurrentPlayer was null, setting to first player {players[0].Profile.Nickname}");
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: currentPlayer was null, setting to first player {players[0].Profile.Nickname}");
 #endif
 				SwitchSpectateMode();
 				return;
 			}
 
 			// Cycle through spectate-able players
-			int nextIndex = reverse ? players.IndexOf(CurrentPlayer) - 1 : players.IndexOf(CurrentPlayer) + 1;
+			int nextIndex = reverse ? players.IndexOf(currentPlayer) - 1 : players.IndexOf(currentPlayer) + 1;
 			if (!reverse)
 			{
 				if (nextIndex <= players.Count - 1)
@@ -189,7 +229,7 @@ namespace Fika.Core.Coop.FreeCamera
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to next player");
 #endif
-					CurrentPlayer = players[nextIndex];
+					currentPlayer = players[nextIndex];
 					SwitchSpectateMode();
 				}
 				else
@@ -198,7 +238,7 @@ namespace Fika.Core.Coop.FreeCamera
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to start player");
 #endif
-					CurrentPlayer = players[0];
+					currentPlayer = players[0];
 					SwitchSpectateMode();
 				}
 			}
@@ -209,7 +249,7 @@ namespace Fika.Core.Coop.FreeCamera
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to previous player");
 #endif
-					CurrentPlayer = players[nextIndex];
+					currentPlayer = players[nextIndex];
 					SwitchSpectateMode();
 				}
 				else
@@ -218,7 +258,7 @@ namespace Fika.Core.Coop.FreeCamera
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to end player");
 #endif
-					CurrentPlayer = players[players.Count - 1];
+					currentPlayer = players[players.Count - 1];
 					SwitchSpectateMode();
 				}
 			}
@@ -279,19 +319,24 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
+			if (Input.GetKeyDown(detachKey) && (isSpectatingBots || FikaPlugin.Instance.AllowSpectateFreeCam || isSpectator))
+			{
+				DetachCamera();
+			}
+
 			if (isFollowing)
 			{
-				if (CurrentPlayer != null)
+				if (currentPlayer != null)
 				{
-					LastKnownPlayerPosition = CurrentPlayer.PlayerBones.Neck.position;
-					if (CurrentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
+					lastKnownPlayerPosition = currentPlayer.PlayerBones.Neck.position;
+					if (currentPlayer.MovementContext.LeftStanceEnabled && !leftMode)
 					{
 #if DEBUG
 						FikaPlugin.Instance.FikaLogger.LogInfo("Setting left shoulder mode");
 #endif
 						SetLeftShoulderMode(true);
 					}
-					else if (!CurrentPlayer.MovementContext.LeftStanceEnabled && leftMode)
+					else if (!currentPlayer.MovementContext.LeftStanceEnabled && leftMode)
 					{
 #if DEBUG
 						FikaPlugin.Instance.FikaLogger.LogInfo("Unsetting left shoulder mode");
@@ -302,10 +347,10 @@ namespace Fika.Core.Coop.FreeCamera
 				else
 				{
 #if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: CurrentPlayer vanished while we were following, finding next player to attach to");
+					FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: currentPlayer vanished while we were following, finding next player to attach to");
 #endif
 					CycleSpectatePlayers();
-					if (CurrentPlayer == null)
+					if (currentPlayer == null)
 					{
 						// still no players, let's go to map
 						AttachToMap();
@@ -314,53 +359,69 @@ namespace Fika.Core.Coop.FreeCamera
 				return;
 			}
 
-			bool fastMode = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-			bool superFastMode = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+			bool fastMode = Input.GetKey(KeyCode.LeftShift);
+			bool superFastMode = Input.GetKey(KeyCode.LeftControl);
 			float movementSpeed = fastMode ? 20f : 2f;
+			float deltaTime = Time.deltaTime;
 
 			if (superFastMode)
 			{
-				movementSpeed *= 8;
+				movementSpeed *= 12;
 			}
 
-			if (Input.GetKey(leftKey) || Input.GetKey(KeyCode.LeftArrow))
+			if (Input.GetKey(leftKey))
 			{
-				transform.position += -transform.right * (movementSpeed * Time.deltaTime);
+				transform.position += -transform.right * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(rightKey) || Input.GetKey(KeyCode.RightArrow))
+			if (Input.GetKey(rightKey))
 			{
-				transform.position += transform.right * (movementSpeed * Time.deltaTime);
+				transform.position += transform.right * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(forwardKey) || Input.GetKey(KeyCode.UpArrow))
+			if (FikaPlugin.DroneMode.Value)
 			{
-				transform.position += transform.forward * (movementSpeed * Time.deltaTime);
-			}
+				if (Input.GetKey(forwardKey))
+				{
+					transform.position += GetNormalizedVector3(transform) * (movementSpeed * deltaTime);
+				}
 
-			if (Input.GetKey(backKey) || Input.GetKey(KeyCode.DownArrow))
+				if (Input.GetKey(backKey))
+				{
+					transform.position += -GetNormalizedVector3(transform) * (movementSpeed * deltaTime);
+				}
+			}
+			else
 			{
-				transform.position += -transform.forward * (movementSpeed * Time.deltaTime);
+				if (Input.GetKey(forwardKey))
+				{
+					transform.position += transform.forward * (movementSpeed * deltaTime);
+				}
+
+				if (Input.GetKey(backKey))
+				{
+					transform.position += -transform.forward * (movementSpeed * deltaTime);
+				}
 			}
 
 			if (Input.GetKey(relUpKey))
 			{
-				transform.position += transform.up * (movementSpeed * Time.deltaTime);
+				transform.position += transform.up * (movementSpeed * deltaTime);
 			}
 
 			if (Input.GetKey(relDownKey))
 			{
-				transform.position += -transform.up * (movementSpeed * Time.deltaTime);
+				transform.position += -transform.up * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(upKey) || Input.GetKey(KeyCode.PageUp))
+			if (Input.GetKey(upKey))
 			{
-				transform.position += Vector3.up * (movementSpeed * Time.deltaTime);
+				transform.position += Vector3.up * (movementSpeed * deltaTime);
 			}
 
-			if (Input.GetKey(downKey) || Input.GetKey(KeyCode.PageDown))
+			if (Input.GetKey(downKey))
 			{
-				transform.position += -Vector3.up * (movementSpeed * Time.deltaTime);
+				transform.position += -Vector3.up * (movementSpeed * deltaTime);
 			}
 
 			// Teleportation
@@ -371,11 +432,23 @@ namespace Fika.Core.Coop.FreeCamera
 					return;
 				}
 
-				Player player = Singleton<GameWorld>.Instance.MainPlayer;
+				CoopPlayer player = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
-				if (!coopHandler.ExtractedPlayers.Contains(((CoopPlayer)player).NetId) && player.HealthController.IsAlive)
+				if (player != null && !coopHandler.ExtractedPlayers.Contains(player.NetId) && player.HealthController.IsAlive)
 				{
-					player?.Teleport(transform.position);
+					player.Teleport(transform.position);
+				}
+			}
+
+			// Zooming
+			float scrollValue = Input.GetAxisRaw("Mouse ScrollWheel");
+			if (scrollValue != 0)
+			{
+				float currentFov = CameraClass.Instance.Fov;
+				if (currentFov >= minFov && currentFov <= originalFov)
+				{
+					float newFov = Mathf.Clamp(currentFov -= (scrollValue * 100), minFov, originalFov);
+					CameraClass.Instance.SetFov(newFov, 1f);
 				}
 			}
 
@@ -386,6 +459,13 @@ namespace Fika.Core.Coop.FreeCamera
 			pitch = Mathf.Clamp(pitch, -89, 89);
 			transform.eulerAngles = new(-pitch, yaw, 0);
 			yaw = (yaw + x * lookSensitivity) % 360f;
+		}
+
+		private Vector3 GetNormalizedVector3(Transform transform)
+		{
+			Vector3 newForward = transform.forward;
+			newForward.y = 0f;
+			return newForward.normalized;
 		}
 
 		private void SetLeftShoulderMode(bool enabled)
@@ -440,7 +520,7 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void JumpToPlayer()
 		{
-			Vector3 position = CurrentPlayer.PlayerBones.Neck.position;
+			Vector3 position = currentPlayer.PlayerBones.Neck.position;
 			transform.position = position + Vector3.back + (Vector3.up / 2);
 			transform.LookAt(position);
 
@@ -468,10 +548,11 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void AttachToPlayer()
 		{
+			CheckAndResetFov();
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {CurrentPlayer.Profile.Nickname}");
+			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {currentPlayer.Profile.Nickname}");
 #endif
-			transform.SetParent(CurrentPlayer.PlayerBones.Head.Original);
+			transform.SetParent(currentPlayer.PlayerBones.Head.Original);
 			transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
 			transform.localEulerAngles = new Vector3(260, 80, 0);
 			isFollowing = true;
@@ -479,30 +560,40 @@ namespace Fika.Core.Coop.FreeCamera
 
 		public void AttachToMap()
 		{
-			if (LastKnownPlayerPosition != null)
+			if (lastKnownPlayerPosition != null)
 			{
 #if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to last tracked player position {LastKnownPlayerPosition}");
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to last tracked player position {lastKnownPlayerPosition}");
 #endif
-				transform.position = LastKnownPlayerPosition;
+				transform.position = lastKnownPlayerPosition;
 				return;
 			}
 		}
 
 		public void Attach3rdPerson()
 		{
+			CheckAndResetFov();
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {CurrentPlayer.Profile.Nickname}");
+			FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {currentPlayer.Profile.Nickname}");
 #endif
-			transform.SetParent(CurrentPlayer.RaycastCameraTransform);
-			transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
-			transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
+			if (!currentPlayer.IsAI)
+			{
+				transform.SetParent(currentPlayer.SpectateTransform);
+				transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
+				transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
+			}
+			else
+			{
+				transform.SetParent(currentPlayer.PlayerBones.Head.Original);
+				transform.localPosition = new Vector3(0f, -0.32f, -0.53f);
+				transform.localEulerAngles = new Vector3(-115f, 99f, 5f);
+			}
 			isFollowing = true;
 		}
 
-		public void SetActive(bool status)
+		public void SetActive(bool active)
 		{
-			if (!status)
+			if (!active)
 			{
 				if (nightVision != null && nightVision.On)
 				{
@@ -513,21 +604,41 @@ namespace Fika.Core.Coop.FreeCamera
 				{
 					thermalVision.method_1(false);
 				}
+
+				Player player = Singleton<GameWorld>.Instance.MainPlayer;
+				if (player != null && player.HealthController.IsAlive)
+				{
+					if (nightVisionActive)
+					{
+						player.NightVisionObserver.Component.Togglable.ForceToggle(true);
+					}
+
+					if (thermalVisionActive)
+					{
+						player.ThermalVisionObserver.Component.Togglable.ForceToggle(true);
+					}
+				}
+
+				CheckAndResetFov();
 			}
 
-			if (status)
+			if (active)
 			{
+				nightVisionActive = false;
+				thermalVisionActive = false;
 				Player player = Singleton<GameWorld>.Instance.MainPlayer;
 				if (player != null && player.HealthController.IsAlive)
 				{
 					if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
 					{
 						player.NightVisionObserver.Component.Togglable.ForceToggle(false);
+						nightVisionActive = true;
 					}
 
 					if (player.ThermalVisionObserver.Component != null && player.ThermalVisionObserver.Component.Togglable.On)
 					{
 						player.ThermalVisionObserver.Component.Togglable.ForceToggle(false);
+						thermalVisionActive = true;
 					}
 				}
 				else if (player != null && !player.HealthController.IsAlive)
@@ -544,10 +655,18 @@ namespace Fika.Core.Coop.FreeCamera
 				}
 			}
 
-			IsActive = status;
+			IsActive = active;
 			isFollowing = false;
 			leftMode = false;
 			transform.parent = null;
+		}
+
+		private void CheckAndResetFov()
+		{
+			if (CameraClass.Instance.Fov != originalFov)
+			{
+				CameraClass.Instance.SetFov(originalFov, 0.1f);
+			}
 		}
 
 		protected void OnDestroy()

@@ -7,16 +7,13 @@ namespace Fika.Core.Coop.ObservedClasses
 {
 	internal class CoopObservedMedsController : EFT.Player.MedsController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
+		private CoopPlayer coopPlayer;
 
 		public static CoopObservedMedsController Create(CoopPlayer player, Item item, EBodyPart bodyPart, float amount, int animationVariant)
 		{
-			return smethod_5<CoopObservedMedsController>(player, item, bodyPart, amount, animationVariant);
+			CoopObservedMedsController controller = smethod_6<CoopObservedMedsController>(player, item, bodyPart, amount, animationVariant);
+			controller.coopPlayer = player;
+			return controller;
 		}
 
 		public override bool CanChangeCompassState(bool newState)

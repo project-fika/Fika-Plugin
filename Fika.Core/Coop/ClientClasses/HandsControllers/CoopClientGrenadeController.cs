@@ -1,35 +1,48 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Comfort.Common;
+using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking;
+using Fika.Core.Coop.Utils;
 using System;
 using UnityEngine;
+using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	internal class CoopClientGrenadeController : EFT.Player.GrenadeController
+	internal class CoopClientGrenadeController : Player.GrenadeHandsController
 	{
-		public CoopPlayer coopPlayer;
+		protected CoopPlayer player;
+		private bool isClient;
 
-		private void Awake()
+		public static CoopClientGrenadeController Create(CoopPlayer player, ThrowWeapItemClass item)
 		{
-			coopPlayer = GetComponent<CoopPlayer>();
+			CoopClientGrenadeController controller = smethod_9<CoopClientGrenadeController>(player, item);
+			controller.player = player;
+			controller.isClient = FikaBackendUtils.IsClient;
+			return controller;
 		}
 
-		public static CoopClientGrenadeController Create(CoopPlayer player, GrenadeClass item)
+		public override bool CanThrow()
 		{
-			return smethod_8<CoopClientGrenadeController>(player, item);
+			if (isClient)
+			{
+				return !player.WaitingForCallback && base.CanThrow();
+			}
+
+			return base.CanThrow();
 		}
 
 		public override void ExamineWeapon()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasGrenadePacket = true,
-				GrenadePacket = new()
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.ExamineWeapon
+					PacketType = EGrenadePacketType.ExamineWeapon
 				}
 			});
 			base.ExamineWeapon();
@@ -37,12 +50,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void HighThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasGrenadePacket = true,
-				GrenadePacket = new()
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.HighThrow
+					PacketType = EGrenadePacketType.HighThrow
 				}
 			});
 			base.HighThrow();
@@ -50,12 +63,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void LowThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasGrenadePacket = true,
-				GrenadePacket = new()
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.LowThrow
+					PacketType = EGrenadePacketType.LowThrow
 				}
 			});
 			base.LowThrow();
@@ -63,12 +76,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void PullRingForHighThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasGrenadePacket = true,
-				GrenadePacket = new()
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.PullRingForHighThrow
+					PacketType = EGrenadePacketType.PullRingForHighThrow
 				}
 			});
 			base.PullRingForHighThrow();
@@ -76,12 +89,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void PullRingForLowThrow()
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasGrenadePacket = true,
-				GrenadePacket = new()
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.PullRingForLowThrow
+					PacketType = EGrenadePacketType.PullRingForLowThrow
 				}
 			});
 			base.PullRingForLowThrow();
@@ -89,12 +102,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasGrenadePacket = true,
-				GrenadePacket = new()
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.None,
+					PacketType = EGrenadePacketType.None,
 					HasGrenade = true,
 					GrenadeRotation = rotation,
 					GrenadePosition = position,
@@ -105,13 +118,66 @@ namespace Fika.Core.Coop.ClientClasses
 			base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
 		}
 
+		public override void PlantTripwire()
+		{
+			player.PacketSender.FirearmPackets.Enqueue(new()
+			{
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
+				{
+					PlantTripwire = true
+				}
+			});
+			base.PlantTripwire();
+		}
+
+		public override void ChangeFireMode(Weapon.EFireMode fireMode)
+		{
+			if (!CurrentOperation.CanChangeFireMode(fireMode))
+			{
+				return;
+			}
+
+			// Check for GClass increments
+			Class1139 currentOperation = CurrentOperation;
+			if (currentOperation != null)
+			{
+				if (currentOperation is not Class1144)
+				{
+					if (currentOperation is Class1145)
+					{
+						player.PacketSender.FirearmPackets.Enqueue(new()
+						{
+							Type = EFirearmSubPacketType.Grenade,
+							SubPacket = new GrenadePacket()
+							{
+								ChangeToIdle = true
+							}
+						});
+					}
+				}
+				else
+				{
+					player.PacketSender.FirearmPackets.Enqueue(new()
+					{
+						Type = EFirearmSubPacketType.Grenade,
+						SubPacket = new GrenadePacket()
+						{
+							ChangeToPlant = true
+						}
+					});
+				}
+			}
+			base.ChangeFireMode(fireMode);
+		}
+
 		public override void ActualDrop(Result<IHandsThrowController> controller, float animationSpeed, Action callback, bool fastDrop)
 		{
 			// TODO: Override Class1025
 
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				CancelGrenade = true
+				Type = EFirearmSubPacketType.CancelGrenade
 			});
 			base.ActualDrop(controller, animationSpeed, callback, fastDrop);
 		}

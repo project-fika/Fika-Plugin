@@ -35,6 +35,11 @@ namespace Fuyu.Platform.Common.Http
 			Httpv = new HttpClient(handler);
 		}
 
+		public HttpClient GetClient()
+		{
+			return Httpv;
+		}
+
 		protected HttpRequestMessage GetNewRequest(HttpMethod method, string path)
 		{
 			return new HttpRequestMessage()

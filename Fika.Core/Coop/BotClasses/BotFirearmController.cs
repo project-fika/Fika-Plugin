@@ -17,7 +17,9 @@ namespace Fika.Core.Coop.BotClasses
 
 		public static BotFirearmController Create(CoopBot player, Weapon weapon)
 		{
-			return smethod_5<BotFirearmController>(player, weapon);
+			BotFirearmController controller = smethod_6<BotFirearmController>(player, weapon);
+			controller.player = player;
+			return controller;
 		}
 	}
 }

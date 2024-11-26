@@ -1,15 +1,13 @@
 ﻿using EFT;
+using EFT.GlobalEvents;
 using LiteNetLib.Utils;
-using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-	public struct HalloweenEventPacket(EHalloweenPacketType packetType) : INetSerializable
+	public struct HalloweenEventPacket : INetSerializable
 	{
-		public EHalloweenPacketType PacketType = packetType;
-		public Vector3 SummonPosition;
-		public EEventState EventState;
-		public string Exit;
+		public EHalloweenPacketType PacketType;
+		public BaseSyncEvent SyncEvent;
 
 		public void Deserialize(NetDataReader reader)
 		{
@@ -17,13 +15,22 @@ namespace Fika.Core.Networking
 			switch (PacketType)
 			{
 				case EHalloweenPacketType.Summon:
-					SummonPosition = reader.GetVector3();
+					SyncEvent = new HalloweenSummonStartedEvent()
+					{
+						PointPosition = reader.GetVector3()
+					};
 					break;
 				case EHalloweenPacketType.Sync:
-					EventState = (EEventState)reader.GetInt();
+					SyncEvent = new HalloweenSyncStateEvent()
+					{
+						EventState = (EEventState)reader.GetByte()
+					};
 					break;
 				case EHalloweenPacketType.Exit:
-					Exit = reader.GetString();
+					SyncEvent = new HalloweenSyncExitsEvent()
+					{
+						ExitName = reader.GetString()
+					};
 					break;
 			}
 		}
@@ -34,13 +41,22 @@ namespace Fika.Core.Networking
 			switch (PacketType)
 			{
 				case EHalloweenPacketType.Summon:
-					writer.Put(SummonPosition);
+					if (SyncEvent is HalloweenSummonStartedEvent startedEvent)
+					{
+						writer.Put(startedEvent.PointPosition);
+					}
 					break;
 				case EHalloweenPacketType.Sync:
-					writer.Put((int)EventState);
+					if (SyncEvent is HalloweenSyncStateEvent stateEvent)
+					{
+						writer.Put((byte)stateEvent.EventState);
+					}
 					break;
 				case EHalloweenPacketType.Exit:
-					writer.Put(Exit);
+					if (SyncEvent is HalloweenSyncExitsEvent exitsEvent)
+					{
+						writer.Put(exitsEvent.ExitName);
+					}
 					break;
 			}
 		}

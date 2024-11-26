@@ -7,16 +7,10 @@ namespace Fika.Core.Coop.ObservedClasses
 {
 	internal class CoopObservedKnifeController : EFT.Player.KnifeController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
-		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
-
 		public static CoopObservedKnifeController Create(CoopPlayer player, KnifeComponent item)
 		{
-			return smethod_8<CoopObservedKnifeController>(player, item);
+			CoopObservedKnifeController controller = smethod_9<CoopObservedKnifeController>(player, item);
+			return controller;
 		}
 	}
 }

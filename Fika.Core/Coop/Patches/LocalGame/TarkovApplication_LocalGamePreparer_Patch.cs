@@ -4,18 +4,20 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
 using SPT.Reflection.Patching;
-using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.LocalGame
+namespace Fika.Core.Coop.Patches
 {
 	/// <summary>
 	/// Created by: Lacyway
 	/// </summary>
 	internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 	{
-		protected override MethodBase GetTargetMethod() => typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_38));
+		protected override MethodBase GetTargetMethod()
+		{
+			return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_39));
+		}
 
 		[PatchPrefix]
 		public static async void Prefix(TarkovApplication __instance, RaidSettings ____raidSettings)
@@ -32,7 +34,7 @@ namespace Fika.Core.Coop.Patches.LocalGame
 					if (____raidSettings.LocationId.ToLower() == "sandbox" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox_high")
 					{
 						LocationSettingsClass.Location sandboxHigh = __instance.Session.LocationSettings.locations.Values.FirstOrDefault
-							(new Func<LocationSettingsClass.Location, bool>(IsSandboxHigh));
+							(IsSandboxHigh);
 						____raidSettings.SelectedLocation = sandboxHigh;
 
 						NotificationManagerClass.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
@@ -42,23 +44,26 @@ namespace Fika.Core.Coop.Patches.LocalGame
 					if (____raidSettings.LocationId.ToLower() == "sandbox_high" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox")
 					{
 						LocationSettingsClass.Location sandbox = __instance.Session.LocationSettings.locations.Values.FirstOrDefault
-							(new Func<LocationSettingsClass.Location, bool>(IsSandbox));
+							(IsSandbox);
 						____raidSettings.SelectedLocation = sandbox;
 					}
 				}
 			}
 
-			NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
-			if (isServer)
+			if (!FikaBackendUtils.IsTransit)
 			{
-				NetManagerUtils.StartPinger();
-			}
-			await NetManagerUtils.InitNetManager(isServer);
+				NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
+				if (isServer)
+				{
+					NetManagerUtils.StartPinger();
+				}
+				await NetManagerUtils.InitNetManager(isServer);
 
-			if (isServer)
-			{
-				SetStatusModel status = new(FikaBackendUtils.GetGroupId(), LobbyEntry.ELobbyStatus.COMPLETE);
-				await FikaRequestHandler.UpdateSetStatus(status);
+				if (isServer)
+				{
+					SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.COMPLETE);
+					await FikaRequestHandler.UpdateSetStatus(status);
+				}
 			}
 		}
 

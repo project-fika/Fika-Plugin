@@ -7,7 +7,7 @@ using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Coop.Players;
-using Fika.Core.Utils;
+using Fika.Core.Coop.Utils;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -28,18 +28,28 @@ namespace Fika.Core.Coop.Custom
 		private float screenScale = 1f;
 		private Dictionary<Type, Sprite> effectIcons;
 		private List<HealthBarEffect> effects;
-		private List<Type> ignoredTypes; // Check for GClass increments
+		private List<Type> ignoredTypes;
 		private float counter = 0;
 		private bool updatePos = true;
 
-		protected void Awake()
+		public static FikaHealthBar Create(ObservedCoopPlayer player)
 		{
-			currentPlayer = GetComponent<ObservedCoopPlayer>();
-			mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-			effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
-			effects = [];
-			ignoredTypes = [typeof(GInterface279), typeof(GInterface281), typeof(GInterface282), typeof(GInterface294), typeof(GInterface295), typeof(GInterface296)]; // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
-			CreateHealthBar();
+			if (player == null)
+			{
+				FikaPlugin.Instance.FikaLogger.LogError("FikaHealthBar::Create: Player was null!");
+				return null;
+			}
+
+			FikaHealthBar healthBar = player.gameObject.AddComponent<FikaHealthBar>();
+			healthBar.currentPlayer = player;
+			healthBar.mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+			healthBar.effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
+			healthBar.effects = [];
+			// Check for GClass increments, can be checked in EFT.UI.StaticIcons.EffectSprites method UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize
+			// Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
+			healthBar.ignoredTypes = [typeof(GInterface313), typeof(GInterface315), typeof(GInterface316), typeof(GInterface328), typeof(GInterface329), typeof(GInterface330)];
+			healthBar.CreateHealthBar();
+			return healthBar;
 		}
 
 		public void ClearEffects()
@@ -198,34 +208,31 @@ namespace Fika.Core.Coop.Custom
 
 		private void CreateHealthBar()
 		{
-			if (currentPlayer != null)
+			GameObject uiPrefab = InternalBundleLoader.Instance.GetAssetBundle("playerui").LoadAsset<GameObject>("PlayerFriendlyUI");
+			GameObject uiGameObj = Instantiate(uiPrefab);
+			playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
+			playerPlate.SetNameText(currentPlayer.Profile.Info.MainProfileNickname);
+			if (FikaPlugin.DevelopersList.ContainsKey(currentPlayer.Profile.Nickname.ToLower()))
 			{
-				GameObject uiPrefab = InternalBundleLoader.Instance.GetAssetBundle("playerui").LoadAsset<GameObject>("PlayerFriendlyUI");
-				GameObject uiGameObj = Instantiate(uiPrefab);
-				playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
-				playerPlate.SetNameText(currentPlayer.Profile.Info.MainProfileNickname);
-				if (FikaPlugin.DevelopersList.ContainsKey(currentPlayer.Profile.Nickname.ToLower()))
-				{
-					playerPlate.playerNameScreen.color = new Color(0, 0.6091f, 1, 1);
-					ChatSpecialIconSettings specialIcons = Resources.Load<ChatSpecialIconSettings>("ChatSpecialIconSettings");
-					playerPlate.bearPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[1].IconSprite;
-					playerPlate.bearPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
-					playerPlate.usecPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[1].IconSprite;
-					playerPlate.usecPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
-				}
-				else if (FikaPlugin.RespectedPlayersList.ContainsKey(currentPlayer.Profile.Nickname.ToLower()))
-				{
-					playerPlate.playerNameScreen.color = new Color(1, 0.6f, 0, 1);
-					ChatSpecialIconSettings specialIcons = Resources.Load<ChatSpecialIconSettings>("ChatSpecialIconSettings");
-					playerPlate.bearPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[2].IconSprite;
-					playerPlate.bearPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
-					playerPlate.usecPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[2].IconSprite;
-					playerPlate.usecPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
-				}
-				// Start the plates both disabled, the visibility will be set in the update loop
-				playerPlate.usecPlateScreen.gameObject.SetActive(false);
-				playerPlate.bearPlateScreen.gameObject.SetActive(false);
+				playerPlate.playerNameScreen.color = new Color(0, 0.6091f, 1, 1);
+				ChatSpecialIconSettings specialIcons = Resources.Load<ChatSpecialIconSettings>("ChatSpecialIconSettings");
+				playerPlate.bearPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[1].IconSprite;
+				playerPlate.bearPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
+				playerPlate.usecPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[1].IconSprite;
+				playerPlate.usecPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
 			}
+			else if (FikaPlugin.RespectedPlayersList.ContainsKey(currentPlayer.Profile.Nickname.ToLower()))
+			{
+				playerPlate.playerNameScreen.color = new Color(1, 0.6f, 0, 1);
+				ChatSpecialIconSettings specialIcons = Resources.Load<ChatSpecialIconSettings>("ChatSpecialIconSettings");
+				playerPlate.bearPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[2].IconSprite;
+				playerPlate.bearPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
+				playerPlate.usecPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[2].IconSprite;
+				playerPlate.usecPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
+			}
+			// Start the plates both disabled, the visibility will be set in the update loop
+			playerPlate.usecPlateScreen.gameObject.SetActive(false);
+			playerPlate.bearPlateScreen.gameObject.SetActive(false);
 
 			SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
 			SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
@@ -363,7 +370,7 @@ namespace Fika.Core.Coop.Custom
 			UpdateHealth();
 		}
 
-		private void HealthController_HealthChangedEvent(EBodyPart arg1, float arg2, DamageInfo arg3)
+		private void HealthController_HealthChangedEvent(EBodyPart arg1, float arg2, DamageInfoStruct arg3)
 		{
 			UpdateHealth();
 		}

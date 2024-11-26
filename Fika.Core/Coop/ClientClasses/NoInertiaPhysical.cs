@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.ClientClasses
 		public override void OnWeightUpdated()
 		{
 			BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
-			float num = iobserverToPlayerBridge_0.Skills.StrengthBuffElite ? coopPlayer.InventoryControllerClass.Inventory.TotalWeightEliteSkill : coopPlayer.InventoryControllerClass.Inventory.TotalWeight;
+			float num = iobserverToPlayerBridge_0.Skills.StrengthBuffElite ? coopPlayer.InventoryController.Inventory.TotalWeightEliteSkill : coopPlayer.InventoryController.Inventory.TotalWeight;
 			Inertia = 0.0113f;
 			SprintAcceleration = 0.9887f;
 			PreSprintAcceleration = 2.9853f;

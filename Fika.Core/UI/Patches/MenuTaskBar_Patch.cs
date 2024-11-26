@@ -10,7 +10,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using static Fika.Core.Utils.ColorUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
@@ -89,7 +89,7 @@ namespace Fika.Core.UI.Patches
 
 										File.WriteAllText(@$"{fikaDir}\{profileId}.json", profile.ToString());
 										NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
-											[ColorizeText(Colors.BLUE, profileId), fikaDir]));
+											[ColorizeText(EColor.BLUE, profileId), fikaDir]));
 
 										GameObject.Destroy(downloadProfileGameObject);
 									}

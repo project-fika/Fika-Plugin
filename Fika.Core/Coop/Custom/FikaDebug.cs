@@ -45,22 +45,25 @@ namespace Fika.Core.Coop.Custom
 
 		protected void Awake()
 		{
-			coopHandler = CoopHandler.GetCoopHandler();
-			if (coopHandler == null)
+			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("FikaDebug: CoopHandlera was null!");
-				Destroy(this);
+				this.coopHandler = coopHandler;
+
+				if (FikaBackendUtils.IsServer)
+				{
+					isServer = true;
+				}
+
+				alivePlayers = [];
+				aliveBots = [];
+
+				enabled = false;
+
+				return;
 			}
 
-			if (FikaBackendUtils.IsServer)
-			{
-				isServer = true;
-			}
-
-			alivePlayers = [];
-			aliveBots = [];
-
-			enabled = false;
+			FikaPlugin.Instance.FikaLogger.LogError("FikaDebug: CoopHandlera was null!");
+			Destroy(this);
 		}
 
 		protected void Update()
@@ -122,7 +125,7 @@ namespace Fika.Core.Coop.Custom
 			alivePlayers.Add(player);
 		}
 
-		private void PlayerDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
+		private void PlayerDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
 		{
 			player.OnPlayerDead -= PlayerDied;
 			alivePlayers.Remove((CoopPlayer)player);
@@ -134,7 +137,7 @@ namespace Fika.Core.Coop.Custom
 			aliveBots.Add(bot);
 		}
 
-		private void BotDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
+		private void BotDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
 		{
 			player.OnPlayerDead -= BotDied;
 			aliveBots.Remove((CoopPlayer)player);

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.HostClasses
 {
-	public class HostGrenadeFactory : GClass676
+	public class HostGrenadeFactory : GrenadeFactoryClass
 	{
 		public override Grenade AddGrenade(GameObject gameObject)
 		{

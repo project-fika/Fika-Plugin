@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Patches
 		}
 
 		[PatchPrefix]
-		private static bool PreFix(AbstractGame __instance, ref bool __result)
+		private static bool Prefix(AbstractGame __instance, ref bool __result)
 		{
 			__result = __instance is CoopGame;
 			return false;

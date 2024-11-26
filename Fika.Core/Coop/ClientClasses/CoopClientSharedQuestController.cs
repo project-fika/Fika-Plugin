@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Players;
@@ -7,12 +8,12 @@ using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Fika.Core.Utils.ColorUtils;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public sealed class CoopClientSharedQuestController(Profile profile, InventoryControllerClass inventoryController,
-		IQuestActions session, CoopPlayer player, bool fromServer = true) : LocalQuestControllerClass(profile, inventoryController, session, fromServer)
+	public sealed class CoopClientSharedQuestController(Profile profile, InventoryController inventoryController,
+		IQuestActions session, CoopPlayer player, bool fromServer = true) : GClass3608(profile, inventoryController, session, fromServer)
 	{
 		private readonly CoopPlayer player = player;
 		private readonly List<string> lastFromNetwork = [];
@@ -67,6 +68,11 @@ namespace Fika.Core.Coop.ClientClasses
 
 		private void Profile_OnItemZoneDropped(string itemId, string zoneId)
 		{
+			if (!canSendAndReceive)
+			{
+				return;
+			}
+
 			if (isItemBeingDropped)
 			{
 				return;
@@ -143,7 +149,12 @@ namespace Fika.Core.Coop.ClientClasses
 						return;
 					}
 
-					QuestConditionPacket packet = new(player.Profile.Info.MainProfileNickname, counter.Id, counter.SourceId);
+					QuestConditionPacket packet = new()
+					{
+						Nickname = player.Profile.Info.MainProfileNickname,
+						Id = counter.Id,
+						SourceId = counter.SourceId
+					};
 #if DEBUG
 					FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
 #endif
@@ -176,7 +187,7 @@ namespace Fika.Core.Coop.ClientClasses
 						if (FikaPlugin.QuestSharingNotifications.Value)
 						{
 							NotificationManagerClass.DisplayMessageNotification(
-								$"Received shared quest progression from {ColorizeText(Colors.GREEN, packet.Nickname)} for the quest {ColorizeText(Colors.BROWN, quest.Template.Name)}",
+								$"Received shared quest progression from {ColorizeText(EColor.GREEN, packet.Nickname)} for the quest {ColorizeText(EColor.BROWN, quest.Template.Name)}",
 												iconType: EFT.Communications.ENotificationIconType.Quest);
 						}
 					}
@@ -193,11 +204,11 @@ namespace Fika.Core.Coop.ClientClasses
 
 			if (!string.IsNullOrEmpty(packet.ItemId))
 			{
-				Item item = player.FindItem(packet.ItemId, true);
+				Item item = player.FindQuestItem(packet.ItemId);
 				if (item != null)
 				{
-					InventoryControllerClass playerInventory = player.InventoryControllerClass;
-					GStruct414<GInterface339> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
+					InventoryController playerInventory = player.InventoryController;
+					GStruct446<GInterface385> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
 						playerInventory.Inventory.Equipment.ToEnumerable(),
 						InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
 
@@ -208,7 +219,7 @@ namespace Fika.Core.Coop.ClientClasses
 						if (FikaPlugin.QuestSharingNotifications.Value)
 						{
 							NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PICKUP.Localized(),
-								[ColorizeText(Colors.GREEN, packet.Nickname), ColorizeText(Colors.BLUE, item.Name.Localized())]),
+								[ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BLUE, item.Name.Localized())]),
 												iconType: EFT.Communications.ENotificationIconType.Quest);
 						}
 					}
@@ -240,15 +251,23 @@ namespace Fika.Core.Coop.ClientClasses
 			if (FikaPlugin.QuestSharingNotifications.Value)
 			{
 				NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PLANT.Localized(),
-					[ColorizeText(Colors.GREEN, packet.Nickname), ColorizeText(Colors.BROWN, questName)]),
+					[ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BROWN, questName)]),
 									iconType: EFT.Communications.ENotificationIconType.Quest);
 			}
 
-			Item item = player.Inventory.QuestRaidItems.GetAllItems().FirstOrDefault(x => x.TemplateId == itemId);
-			if (item != null)
+			foreach (Item questItem in player.Inventory.QuestRaidItems.GetAllItems())
 			{
-				GStruct414<GClass2801> removeResult = InteractionsHandlerClass.Remove(item, player.InventoryControllerClass, true, false);
-				player.InventoryControllerClass.TryRunNetworkTransaction(removeResult);
+				if (questItem.TemplateId == itemId && questItem.QuestItem)
+				{
+					GStruct446<GClass3131> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
+					player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
+					{
+						if (!result.Succeed)
+						{
+							FikaPlugin.Instance.FikaLogger.LogError("ReceiveQuestDropItemPacket: Discard failed: " + result.Error);
+						}
+					});
+				}
 			}
 			player.Profile.ItemDroppedAtPlace(itemId, zoneId);
 			isItemBeingDropped = false;

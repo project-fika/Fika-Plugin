@@ -1,13 +1,16 @@
 using EFT;
-using Fika.Core.Models;
-using Fika.Core.Networking.Http.Models;
-using Fika.Core.Networking.Models.Dedicated;
+using Fika.Core.Coop.Custom;
+using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
+using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +23,40 @@ namespace Fika.Core.Networking.Http
 		static FikaRequestHandler()
 		{
 			_httpClient = new FuyuClient(RequestHandler.Host, RequestHandler.SessionId);
+		}
+
+		public static async Task<IPAddress> GetPublicIP()
+		{
+			HttpClient client = _httpClient.GetClient();
+			string ipString = await client.GetStringAsync("https://api.ipify.org/");
+			ipString = ipString.Replace("\n", "");
+			if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
+			{
+				if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+				{
+					return ipAddress;
+				}
+				throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
+			}
+			ipString = await client.GetStringAsync("https://checkip.amazonaws.com/");
+			if (IPAddress.TryParse(ipString, out ipAddress))
+			{
+				if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+				{
+					return ipAddress;
+				}
+				throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
+			}
+			ipString = await client.GetStringAsync("https://ipv4.icanhazip.com/");
+			if (IPAddress.TryParse(ipString, out ipAddress))
+			{
+				if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+				{
+					return ipAddress;
+				}
+				throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
+			}
+			throw new Exception("Could not retrieve or parse the external address!");
 		}
 
 		private static byte[] EncodeBody<T>(T o)
@@ -91,11 +128,6 @@ namespace Fika.Core.Networking.Http
 		public static async Task UpdateSetStatus(SetStatusModel data)
 		{
 			await PutJsonAsync("/fika/update/setstatus", data);
-		}
-
-		public static async Task UpdateSpawnPoint(UpdateSpawnPointRequest data)
-		{
-			await PutJsonAsync("/fika/update/spawnpoint", data);
 		}
 
 		public static async Task UpdatePlayerSpawn(PlayerSpawnRequest data)
@@ -181,6 +213,21 @@ namespace Fika.Core.Networking.Http
 		public static CheckVersionResponse CheckServerVersion()
 		{
 			return GetJson<CheckVersionResponse>("/fika/client/check/version");
+		}
+
+		public static FikaPlayerPresence[] GetPlayerPresences()
+		{
+			return GetJson<FikaPlayerPresence[]>("/fika/presence/get");
+		}
+
+		public static void SetPresence(FikaSetPresence data)
+		{
+			PutJson("/fika/presence/set", data);
+		}
+
+		public static FikaPlayerPresence[] SetAndGetPresence(FikaSetPresence data)
+		{
+			return PostJson<FikaSetPresence, FikaPlayerPresence[]>("/fika/presence/setget", data);
 		}
 	}
 }

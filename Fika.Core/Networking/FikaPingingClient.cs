@@ -1,7 +1,7 @@
 ﻿using BepInEx.Logging;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections;
@@ -12,13 +12,17 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
+	/// <summary>
+	/// Client used to verify that a P2P connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
+	/// </summary>
 	public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
 	{
 		public NetManager NetClient;
-		private readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
+		public bool Received = false;
+
+		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
 		private IPEndPoint remoteEndPoint;
 		private IPEndPoint localEndPoint;
-		public bool Received = false;
 		private Coroutine _keepAliveRoutine;
 
 		public bool Init(string serverId)
@@ -47,7 +51,7 @@ namespace Fika.Core.Networking
 
 				NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
-				_logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+				logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
 			}
 			else
 			{
@@ -61,13 +65,13 @@ namespace Fika.Core.Networking
 
 				if (string.IsNullOrEmpty(ip))
 				{
-					_logger.LogError("IP was empty when pinging!");
+					logger.LogError("IP was empty when pinging!");
 					return false;
 				}
 
 				if (port == default)
 				{
-					_logger.LogError("Port was empty when pinging!");
+					logger.LogError("Port was empty when pinging!");
 					return false;
 				}
 
@@ -157,13 +161,13 @@ namespace Fika.Core.Networking
 						// Do nothing
 						break;
 					default:
-						_logger.LogError("Data was not as expected");
+						logger.LogError("Data was not as expected");
 						break;
 				}
 			}
 			else
 			{
-				_logger.LogError("Could not parse string");
+				logger.LogError("Could not parse string");
 			}
 		}
 
@@ -189,7 +193,7 @@ namespace Fika.Core.Networking
 
 		public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
 		{
-			_logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+			logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
 
 			localEndPoint = natLocalEndPoint;
 			remoteEndPoint = natRemoteEndPoint;

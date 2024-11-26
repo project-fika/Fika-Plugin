@@ -1,36 +1,33 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking;
 using UnityEngine;
+using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.ClientClasses
 {
 	/// <summary>
 	/// This is only used by AI
 	/// </summary>
-	internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowController
+	internal class CoopClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
-		public CoopPlayer coopPlayer;
+		protected CoopPlayer player;
 
-		private void Awake()
+		public static CoopClientQuickGrenadeController Create(CoopPlayer player, ThrowWeapItemClass item)
 		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
-
-		public static CoopClientQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
-		{
-			return smethod_8<CoopClientQuickGrenadeController>(player, item);
+			CoopClientQuickGrenadeController controller = smethod_9<CoopClientQuickGrenadeController>(player, item);
+			controller.player = player;
+			return controller;
 		}
 
 		public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
 		{
-			coopPlayer.PacketSender.FirearmPackets.Enqueue(new()
+			player.PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasGrenadePacket = true,
-				GrenadePacket = new()
+				Type = EFirearmSubPacketType.Grenade,
+				SubPacket = new GrenadePacket()
 				{
-					PacketType = FikaSerialization.GrenadePacket.GrenadePacketType.None,
 					HasGrenade = true,
 					GrenadeRotation = rotation,
 					GrenadePosition = position,

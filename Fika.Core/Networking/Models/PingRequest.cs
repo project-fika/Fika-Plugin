@@ -1,7 +1,7 @@
 using Fika.Core.Coop.Utils;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http.Models
+namespace Fika.Core.Networking.Http
 {
 	[DataContract]
 	public struct PingRequest
@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Http.Models
 
 		public PingRequest()
 		{
-			ServerId = FikaBackendUtils.GetGroupId();
+			ServerId = FikaBackendUtils.GroupId;
 		}
 	}
 }

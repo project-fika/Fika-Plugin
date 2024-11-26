@@ -35,13 +35,15 @@ namespace Fika.Core.Networking.Websocket
 		{
 			Host = RequestHandler.Host.Replace("http", "ws");
 			SessionId = RequestHandler.SessionId;
-			Url = $"{Host}/fika/dedicatedraidservice/{SessionId}?";
+			Url = $"{Host}/fika/dedicatedraidservice/";
 
 			_webSocket = new WebSocket(Url)
 			{
 				WaitTime = TimeSpan.FromMinutes(1),
 				EmitOnPing = true
 			};
+
+			_webSocket.SetCredentials(SessionId, "", true);
 
 			_webSocket.OnOpen += WebSocket_OnOpen;
 			_webSocket.OnError += WebSocket_OnError;
@@ -109,13 +111,16 @@ namespace Fika.Core.Networking.Websocket
 					{
 						TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
 
-						tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, () =>
+						tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, (bool success) =>
 						{
-							// Hide matchmaker UI
-							matchmakerObject.SetActive(false);
+							if (success)
+							{
+								// Hide matchmaker UI
+								matchmakerObject.SetActive(false);
 
-							// Matchmaker next screen (accept)
-							matchMakerAcceptScreen.method_22();
+								// Matchmaker next screen (accept)
+								matchMakerAcceptScreen.method_19().HandleExceptions();
+							}
 						}, false));
 					}
 					else

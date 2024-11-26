@@ -1,6 +1,5 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
-using BepInEx.Logging;
 using Comfort.Common;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
@@ -15,8 +14,8 @@ namespace Fika.Core.Coop.PacketHandlers
 	{
 		private CoopPlayer player;
 
-		public bool Enabled { get; set; } = true;
-		public FikaServer Server { get; set; } = Singleton<FikaServer>.Instance;
+		public bool Enabled { get; set; } = false;
+		public FikaServer Server { get; set; }
 		public FikaClient Client { get; set; }
 		public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
 		public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
@@ -25,21 +24,20 @@ namespace Fika.Core.Coop.PacketHandlers
 		public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
 		public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
 
-		private ManualLogSource logger;
-
 		protected void Awake()
 		{
-			logger = BepInEx.Logging.Logger.CreateLogSource("ServerPacketSender");
 			player = GetComponent<CoopPlayer>();
+			Server = Singleton<FikaServer>.Instance;
 			enabled = false;
 		}
 
 		public void Init()
 		{
 			enabled = true;
+			Enabled = true;
 		}
 
-		public void SendPacket<T>(ref T packet) where T : INetSerializable
+		public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
 		{
 			Server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
 		}
@@ -113,6 +111,7 @@ namespace Fika.Core.Coop.PacketHandlers
 				}
 			}
 		}
+
 		public void DestroyThis()
 		{
 			FirearmPackets.Clear();

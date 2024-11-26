@@ -2,3 +2,9 @@
 
 # CS0618: Type or member is obsolete
 dotnet_diagnostic.CS0618.severity = none
+
+# Custom config
+tab_width = 4
+indent_size = 4
+end_of_line = crlf
+indent_style = tab

@@ -1,44 +1,52 @@
 ﻿using LiteNetLib.Utils;
-using UnityEngine;
-using static Fika.Core.Networking.FikaSerialization;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking;
+public struct BTRPacket : INetSerializable
 {
-	public struct BTRPacket() : INetSerializable
+	public BTRDataPacket Data;
+
+	public void Deserialize(NetDataReader reader)
 	{
-		public BTRDataPacket BTRDataPacket;
-		public bool HasBotProfileId = false;
-		public int BotNetId;
-		public bool HasShot = false;
-		public Vector3 ShotPosition;
-		public Vector3 ShotDirection;
-
-		public void Deserialize(NetDataReader reader)
+		Data = new BTRDataPacket
 		{
-			BTRDataPacket = BTRDataPacketUtils.Deserialize(reader);
-			HasBotProfileId = reader.GetBool();
-			if (HasBotProfileId)
-				BotNetId = reader.GetInt();
-			HasShot = reader.GetBool();
-			if (HasShot)
-			{
-				ShotPosition = reader.GetVector3();
-				ShotDirection = reader.GetVector3();
-			}
-		}
+			position = reader.GetVector3(),
+			BtrBotId = reader.GetInt(),
+			MoveSpeed = reader.GetFloat(),
+			moveDirection = reader.GetByte(),
+			timeToEndPause = reader.GetFloat(),
+			currentSpeed = reader.GetFloat(),
+			RightSlot1State = reader.GetByte(),
+			RightSlot0State = reader.GetByte(),
+			RightSideState = reader.GetByte(),
+			LeftSlot1State = reader.GetByte(),
+			LeftSlot0State = reader.GetByte(),
+			LeftSideState = reader.GetByte(),
+			RouteState = reader.GetByte(),
+			State = reader.GetByte(),
+			gunsBlockRotation = reader.GetFloat(),
+			turretRotation = reader.GetFloat(),
+			rotation = reader.GetQuaternion()
+		};
+	}
 
-		public void Serialize(NetDataWriter writer)
-		{
-			BTRDataPacketUtils.Serialize(writer, BTRDataPacket);
-			writer.Put(HasBotProfileId);
-			if (HasBotProfileId)
-				writer.Put(BotNetId);
-			writer.Put(HasShot);
-			if (HasShot)
-			{
-				writer.Put(ShotPosition);
-				writer.Put(ShotDirection);
-			}
-		}
+	public void Serialize(NetDataWriter writer)
+	{
+		writer.Put(Data.position);
+		writer.Put(Data.BtrBotId);
+		writer.Put(Data.MoveSpeed);
+		writer.Put(Data.moveDirection);
+		writer.Put(Data.timeToEndPause);
+		writer.Put(Data.currentSpeed);
+		writer.Put(Data.RightSlot1State);
+		writer.Put(Data.RightSlot0State);
+		writer.Put(Data.RightSideState);
+		writer.Put(Data.LeftSlot1State);
+		writer.Put(Data.LeftSlot0State);
+		writer.Put(Data.LeftSideState);
+		writer.Put(Data.RouteState);
+		writer.Put(Data.State);
+		writer.Put(Data.gunsBlockRotation);
+		writer.Put(Data.turretRotation);
+		writer.Put(Data.rotation);
 	}
 }

@@ -1,44 +1,46 @@
 ﻿using EFT;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
 	public struct HealthSyncPacket(int netId) : INetSerializable
 	{
 		public int NetId = netId;
-		public GStruct346 Packet;
+		public NetworkHealthSyncPacketStruct Packet;
 		public string KillerId;
-		public RagdollPacket RagdollPacket;
-		public EquipmentClass Equipment;
+		public string WeaponId;
+		public EBodyPart BodyPart;
+		public CorpseSyncPacket CorpseSyncPacket;
 		public string[] TriggerZones;
+
 
 		public void Deserialize(NetDataReader reader)
 		{
 			NetId = reader.GetInt();
-			GStruct346 packet = new()
+			NetworkHealthSyncPacketStruct packet = new()
 			{
-				SyncType = (GStruct346.ESyncType)reader.GetInt()
+				SyncType = (NetworkHealthSyncPacketStruct.ESyncType)reader.GetByte()
 			};
 			switch (packet.SyncType)
 			{
-				case GStruct346.ESyncType.AddEffect:
+				case NetworkHealthSyncPacketStruct.ESyncType.AddEffect:
 					{
 						packet.Data.AddEffect = new()
 						{
 							EffectId = reader.GetInt(),
 							Type = reader.GetByte(),
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							DelayTime = reader.GetFloat(),
 							BuildUpTime = reader.GetFloat(),
 							WorkTime = reader.GetFloat(),
 							ResidueTime = reader.GetFloat(),
 							Strength = reader.GetFloat(),
-							ExtraDataType = (GStruct346.GStruct347.EExtraDataType)reader.GetInt()
+							ExtraDataType = (NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType)reader.GetByte()
 						};
 						switch (packet.Data.AddEffect.ExtraDataType)
 						{
-							case GStruct346.GStruct347.EExtraDataType.MedEffect:
+							case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.MedEffect:
 								{
 									packet.Data.AddEffect.ExtraData = new()
 									{
@@ -50,7 +52,7 @@ namespace Fika.Core.Networking
 									};
 								}
 								break;
-							case GStruct346.GStruct347.EExtraDataType.Stimulator:
+							case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.Stimulator:
 								{
 									packet.Data.AddEffect.ExtraData = new()
 									{
@@ -64,7 +66,7 @@ namespace Fika.Core.Networking
 						}
 						break;
 					}
-				case GStruct346.ESyncType.RemoveEffect:
+				case NetworkHealthSyncPacketStruct.ESyncType.RemoveEffect:
 					{
 						packet.Data.RemoveEffect = new()
 						{
@@ -72,7 +74,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.EffectNextState:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectNextState:
 					{
 						packet.Data.EffectNextState = new()
 						{
@@ -81,7 +83,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.EffectStateTime:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectStateTime:
 					{
 						packet.Data.EffectStateTime = new()
 						{
@@ -90,7 +92,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.EffectStrength:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectStrength:
 					{
 						packet.Data.EffectStrength = new()
 						{
@@ -99,7 +101,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.EffectMedResource:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectMedResource:
 					{
 						packet.Data.EffectMedResource = new()
 						{
@@ -108,7 +110,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.EffectStimulatorBuff:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectStimulatorBuff:
 					{
 						packet.Data.EffectStimulatorBuff = new()
 						{
@@ -125,7 +127,7 @@ namespace Fika.Core.Networking
 						}
 						break;
 					}
-				case GStruct346.ESyncType.IsAlive:
+				case NetworkHealthSyncPacketStruct.ESyncType.IsAlive:
 					{
 						packet.Data.IsAlive = new()
 						{
@@ -135,23 +137,24 @@ namespace Fika.Core.Networking
 						{
 							packet.Data.IsAlive.DamageType = (EDamageType)reader.GetInt();
 							KillerId = reader.GetString();
-							RagdollPacket = RagdollPacket.Deserialize(reader);
-							Equipment = (EquipmentClass)reader.GetItem();
+							WeaponId = reader.GetString();
+							BodyPart = (EBodyPart)reader.GetByte();
+							CorpseSyncPacket = reader.GetCorpseSyncPacket();
 							TriggerZones = reader.GetStringArray();
 							break;
 						}
 						break;
 					}
-				case GStruct346.ESyncType.BodyHealth:
+				case NetworkHealthSyncPacketStruct.ESyncType.BodyHealth:
 					{
 						packet.Data.BodyHealth = new()
 						{
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							Value = reader.GetFloat()
 						};
 						break;
 					}
-				case GStruct346.ESyncType.Energy:
+				case NetworkHealthSyncPacketStruct.ESyncType.Energy:
 					{
 						packet.Data.Energy = new()
 						{
@@ -159,7 +162,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.Hydration:
+				case NetworkHealthSyncPacketStruct.ESyncType.Hydration:
 					{
 						packet.Data.Hydration = new()
 						{
@@ -167,7 +170,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.Temperature:
+				case NetworkHealthSyncPacketStruct.ESyncType.Temperature:
 					{
 						packet.Data.Temperature = new()
 						{
@@ -175,7 +178,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.DamageCoeff:
+				case NetworkHealthSyncPacketStruct.ESyncType.DamageCoeff:
 					{
 						packet.Data.DamageCoeff = new()
 						{
@@ -183,21 +186,21 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.ApplyDamage:
+				case NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage:
 					{
 						packet.Data.ApplyDamage = new()
 						{
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							Damage = reader.GetFloat(),
 							DamageType = (EDamageType)reader.GetInt()
 						};
 						break;
 					}
-				case GStruct346.ESyncType.DestroyedBodyPart:
+				case NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart:
 					{
 						packet.Data.DestroyedBodyPart = new()
 						{
-							BodyPart = (EBodyPart)reader.GetInt(),
+							BodyPart = (EBodyPart)reader.GetByte(),
 							IsDestroyed = reader.GetBool()
 						};
 						if (packet.Data.DestroyedBodyPart.IsDestroyed)
@@ -208,7 +211,7 @@ namespace Fika.Core.Networking
 						packet.Data.DestroyedBodyPart.HealthMaximum = reader.GetFloat();
 						break;
 					}
-				case GStruct346.ESyncType.HealthRates:
+				case NetworkHealthSyncPacketStruct.ESyncType.HealthRates:
 					{
 						packet.Data.HealthRates = new()
 						{
@@ -221,7 +224,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.HealerDone:
+				case NetworkHealthSyncPacketStruct.ESyncType.HealerDone:
 					{
 						packet.Data.HealerDone = new()
 						{
@@ -229,7 +232,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.BurnEyes:
+				case NetworkHealthSyncPacketStruct.ESyncType.BurnEyes:
 					{
 						packet.Data.BurnEyes = new()
 						{
@@ -239,7 +242,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.Poison:
+				case NetworkHealthSyncPacketStruct.ESyncType.Poison:
 					{
 						packet.Data.Poison = new()
 						{
@@ -247,7 +250,7 @@ namespace Fika.Core.Networking
 						};
 						break;
 					}
-				case GStruct346.ESyncType.StaminaCoeff:
+				case NetworkHealthSyncPacketStruct.ESyncType.StaminaCoeff:
 					{
 						packet.Data.StaminaCoeff = new()
 						{
@@ -263,32 +266,32 @@ namespace Fika.Core.Networking
 		public void Serialize(NetDataWriter writer)
 		{
 			writer.Put(NetId);
-			GStruct346.GStruct365 packet = Packet.Data;
-			writer.Put((int)Packet.SyncType);
+			NetworkHealthSyncPacketStruct.NetworkHealthDataPacketStruct packet = Packet.Data;
+			writer.Put((byte)Packet.SyncType);
 			switch (Packet.SyncType)
 			{
-				case GStruct346.ESyncType.AddEffect:
+				case NetworkHealthSyncPacketStruct.ESyncType.AddEffect:
 					{
 						writer.Put(packet.AddEffect.EffectId);
 						writer.Put(packet.AddEffect.Type);
-						writer.Put((int)packet.AddEffect.BodyPart);
+						writer.Put((byte)packet.AddEffect.BodyPart);
 						writer.Put(packet.AddEffect.DelayTime);
 						writer.Put(packet.AddEffect.BuildUpTime);
 						writer.Put(packet.AddEffect.WorkTime);
 						writer.Put(packet.AddEffect.ResidueTime);
 						writer.Put(packet.AddEffect.Strength);
-						writer.Put((int)packet.AddEffect.ExtraDataType);
+						writer.Put((byte)packet.AddEffect.ExtraDataType);
 						switch (packet.AddEffect.ExtraDataType)
 						{
-							case GStruct346.GStruct347.EExtraDataType.None:
+							case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.None:
 								break;
-							case GStruct346.GStruct347.EExtraDataType.MedEffect:
+							case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.MedEffect:
 								{
 									writer.Put(packet.AddEffect.ExtraData.MedEffect.ItemId);
 									writer.Put(packet.AddEffect.ExtraData.MedEffect.Amount);
 									break;
 								}
-							case GStruct346.GStruct347.EExtraDataType.Stimulator:
+							case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.Stimulator:
 								{
 									writer.Put(packet.AddEffect.ExtraData.Stimulator.BuffsName);
 									break;
@@ -296,36 +299,36 @@ namespace Fika.Core.Networking
 						}
 						break;
 					}
-				case GStruct346.ESyncType.RemoveEffect:
+				case NetworkHealthSyncPacketStruct.ESyncType.RemoveEffect:
 					{
 						writer.Put(packet.RemoveEffect.EffectId);
 						break;
 					}
-				case GStruct346.ESyncType.EffectNextState:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectNextState:
 					{
 						writer.Put(packet.EffectNextState.EffectId);
 						writer.Put(packet.EffectNextState.StateTime);
 						break;
 					}
-				case GStruct346.ESyncType.EffectStateTime:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectStateTime:
 					{
 						writer.Put(packet.EffectStateTime.EffectId);
 						writer.Put(packet.EffectStateTime.RemainingStateTime);
 						break;
 					}
-				case GStruct346.ESyncType.EffectStrength:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectStrength:
 					{
 						writer.Put(packet.EffectStrength.EffectId);
 						writer.Put(packet.EffectStrength.Strength);
 						break;
 					}
-				case GStruct346.ESyncType.EffectMedResource:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectMedResource:
 					{
 						writer.Put(packet.EffectMedResource.EffectId);
 						writer.Put(packet.EffectMedResource.Resource);
 						break;
 					}
-				case GStruct346.ESyncType.EffectStimulatorBuff:
+				case NetworkHealthSyncPacketStruct.ESyncType.EffectStimulatorBuff:
 					{
 						writer.Put(packet.EffectStimulatorBuff.EffectId);
 						writer.Put(packet.EffectStimulatorBuff.BuffIndex);
@@ -339,56 +342,57 @@ namespace Fika.Core.Networking
 						}
 						break;
 					}
-				case GStruct346.ESyncType.IsAlive:
+				case NetworkHealthSyncPacketStruct.ESyncType.IsAlive:
 					{
 						writer.Put(packet.IsAlive.IsAlive);
 						if (!packet.IsAlive.IsAlive)
 						{
 							writer.Put((int)packet.IsAlive.DamageType);
 							writer.Put(KillerId);
-							RagdollPacket.Serialize(writer, RagdollPacket);
-							writer.PutItem(Equipment);
+							writer.Put(WeaponId);
+							writer.Put((byte)BodyPart);
+							writer.PutCorpseSyncPacket(CorpseSyncPacket);
 							writer.PutArray(TriggerZones);
 							break;
 						}
 						break;
 					}
-				case GStruct346.ESyncType.BodyHealth:
+				case NetworkHealthSyncPacketStruct.ESyncType.BodyHealth:
 					{
-						writer.Put((int)packet.BodyHealth.BodyPart);
+						writer.Put((byte)packet.BodyHealth.BodyPart);
 						writer.Put(packet.BodyHealth.Value);
 						break;
 					}
-				case GStruct346.ESyncType.Energy:
+				case NetworkHealthSyncPacketStruct.ESyncType.Energy:
 					{
 						writer.Put(packet.Energy.Value);
 						break;
 					}
-				case GStruct346.ESyncType.Hydration:
+				case NetworkHealthSyncPacketStruct.ESyncType.Hydration:
 					{
 						writer.Put(packet.Hydration.Value);
 						break;
 					}
-				case GStruct346.ESyncType.Temperature:
+				case NetworkHealthSyncPacketStruct.ESyncType.Temperature:
 					{
 						writer.Put(packet.Temperature.Value);
 						break;
 					}
-				case GStruct346.ESyncType.DamageCoeff:
+				case NetworkHealthSyncPacketStruct.ESyncType.DamageCoeff:
 					{
 						writer.Put(packet.DamageCoeff.DamageCoeff);
 						break;
 					}
-				case GStruct346.ESyncType.ApplyDamage:
+				case NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage:
 					{
-						writer.Put((int)packet.ApplyDamage.BodyPart);
+						writer.Put((byte)packet.ApplyDamage.BodyPart);
 						writer.Put(packet.ApplyDamage.Damage);
 						writer.Put((int)packet.ApplyDamage.DamageType);
 						break;
 					}
-				case GStruct346.ESyncType.DestroyedBodyPart:
+				case NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart:
 					{
-						writer.Put((int)packet.DestroyedBodyPart.BodyPart);
+						writer.Put((byte)packet.DestroyedBodyPart.BodyPart);
 						writer.Put(packet.DestroyedBodyPart.IsDestroyed);
 						if (packet.DestroyedBodyPart.IsDestroyed)
 						{
@@ -398,7 +402,7 @@ namespace Fika.Core.Networking
 						writer.Put(packet.DestroyedBodyPart.HealthMaximum);
 						break;
 					}
-				case GStruct346.ESyncType.HealthRates:
+				case NetworkHealthSyncPacketStruct.ESyncType.HealthRates:
 					{
 						writer.Put(packet.HealthRates.HealRate);
 						writer.Put(packet.HealthRates.DamageRate);
@@ -408,24 +412,24 @@ namespace Fika.Core.Networking
 						writer.Put(packet.HealthRates.Temperature);
 						break;
 					}
-				case GStruct346.ESyncType.HealerDone:
+				case NetworkHealthSyncPacketStruct.ESyncType.HealerDone:
 					{
 						writer.Put(packet.HealerDone.EffectId);
 						break;
 					}
-				case GStruct346.ESyncType.BurnEyes:
+				case NetworkHealthSyncPacketStruct.ESyncType.BurnEyes:
 					{
 						writer.Put(packet.BurnEyes.Position);
 						writer.Put(packet.BurnEyes.DistanceStrength);
 						writer.Put(packet.BurnEyes.NormalTime);
 						break;
 					}
-				case GStruct346.ESyncType.Poison:
+				case NetworkHealthSyncPacketStruct.ESyncType.Poison:
 					{
 						writer.Put(packet.Poison.Value);
 						break;
 					}
-				case GStruct346.ESyncType.StaminaCoeff:
+				case NetworkHealthSyncPacketStruct.ESyncType.StaminaCoeff:
 					{
 						writer.Put(packet.StaminaCoeff.StaminaCoeff);
 						break;

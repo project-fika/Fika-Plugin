@@ -4,28 +4,33 @@ using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
 using EFT.Communications;
-using EFT.GlobalEvents;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
-using Fika.Core.Coop.Components;
-using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ClientClasses.HandsControllers;
+using Fika.Core.Coop.HostClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Http.Models;
+using HarmonyLib;
+using JsonType;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
+using static Fika.Core.Networking.CommonSubPackets;
+using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Coop.Players
 {
@@ -37,16 +42,25 @@ namespace Fika.Core.Coop.Players
 		#region Fields and Properties
 		public PacketReceiver PacketReceiver;
 		public IPacketSender PacketSender;
-		public bool hasSkilledScav = false;
-		public float observedOverlap = 0f;
-		public bool leftStanceDisabled = false;
-		public Vector2 LastDirection = Vector2.zero;
-		public RagdollPacket RagdollPacket = default;
-		public bool hasGround = false;
-		public Transform RaycastCameraTransform;
+		public bool HasSkilledScav = false;
+		public float ObservedOverlap = 0f;
+		public bool LeftStanceDisabled = false;
+		public CorpseSyncPacket CorpseSyncPacket = default;
+		public bool HasGround = false;
 		public int NetId;
 		public bool IsObservedAI = false;
-		public Dictionary<uint, Callback<EOperationStatus>> OperationCallbacks = [];
+		public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
+		public FikaSnapshotter Snapshotter;
+		public bool WaitingForCallback
+		{
+			get
+			{
+				return OperationCallbacks.Count > 0;
+			}
+		}
+
+		protected string lastWeaponId;
+
 		public ClientMovementContext ClientMovementContext
 		{
 			get
@@ -54,23 +68,32 @@ namespace Fika.Core.Coop.Players
 				return MovementContext as ClientMovementContext;
 			}
 		}
+		public Transform SpectateTransform
+		{
+			get
+			{
+				return PlayerBones.LootRaycastOrigin;
+			}
+		}
 		#endregion
 
-		public static async Task<LocalPlayer> Create(int playerId, Vector3 position, Quaternion rotation,
+		public static async Task<CoopPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
 			string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
 			EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-			Func<float> getAimingSensitivity, IViewFilter filter, int netId, IStatisticsManager statisticsManager)
+			Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
+			ELocalMode localMode, int netId)
 		{
-			CoopPlayer player = Create<CoopPlayer>(ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME, playerId, position, updateQueue, armsUpdateMode,
-						bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false);
+			bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
+			ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
+			CoopPlayer player = Create<CoopPlayer>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
+						bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false, useSimpleAnimator);
 
 			player.IsYourPlayer = true;
 			player.NetId = netId;
 
-			CoopClientInventoryController inventoryController = new(player, profile, false);
-
-			ISession session = Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession();
+			PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new CoopHostInventoryController(player, profile, false)
+				: new CoopClientInventoryController(player, profile, false);
 
 			LocalQuestControllerClass questController;
 			if (FikaPlugin.Instance.SharedQuestProgression)
@@ -79,14 +102,13 @@ namespace Fika.Core.Coop.Players
 			}
 			else
 			{
-				questController = new LocalQuestControllerClass(profile, inventoryController, session, true);
+				questController = new GClass3608(profile, inventoryController, session, true);
 			}
 			questController.Init();
-			questController.Run();
-
-			GClass3233 achievementsController = new(profile, inventoryController, session, true);
+			GClass3612 achievementsController = new(profile, inventoryController, session, true);
 			achievementsController.Init();
 			achievementsController.Run();
+			questController.Run();
 
 			if (FikaBackendUtils.IsServer)
 			{
@@ -111,21 +133,39 @@ namespace Fika.Core.Coop.Players
 				statisticsManager, questController, achievementsController, filter,
 				EVoipState.NotAvailable, false, false);
 
-			foreach (MagazineClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineClass>())
+			foreach (MagazineItemClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
 			{
-				player.InventoryControllerClass.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
+				player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
 			}
 
-			player._handsController = EmptyHandsController.smethod_5<EmptyHandsController>(player);
-			player._handsController.Spawn(1f, new Action(Class1526.class1526_0.method_0));
+			HashSet<ETraderServiceType> services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
+			foreach (ETraderServiceType etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
+			{
+				services.Add(etraderServiceType);
+			}
 
-			player.AIData = new AIData(null, player);
+			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
+			player._handsController.Spawn(1f, Class1631.class1631_0.method_0);
+
+			player.AIData = new GClass551(null, player);
 
 			player.AggressorFound = false;
 
 			player._animators[0].enabled = true;
 
-			player.Profile.Info.MainProfileNickname = FikaBackendUtils.PMCName;
+			RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
+			if (radioTransmitterRecodableComponent != null)
+			{
+				//Todo: (Archangel) method_131 refers to 'singlePlayerInventoryController_0' which is null in our case
+				//radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += player.method_131;
+
+				if (player.Profile.GetTraderStanding("638f541a29ffd1183d187f57").IsZero())
+				{
+					radioTransmitterRecodableComponent.SetEncoded(false);
+				}
+			}
+
+			player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName);
 
 			return player;
 		}
@@ -135,25 +175,23 @@ namespace Fika.Core.Coop.Players
 			LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
 			if (FikaPlugin.Instance.UseInertia)
 			{
-				MovementContext = ClientMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
-					new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
+				MovementContext = ClientMovementContext.Create(this, GetBodyAnimatorCommon,
+					GetCharacterControllerCommon, movement_MASK);
+				return;
 			}
-			else
-			{
-				MovementContext = NoInertiaMovementContext.Create(this, new Func<IAnimator>(GetBodyAnimatorCommon),
-					new Func<ICharacterController>(GetCharacterControllerCommon), movement_MASK);
-			}
+			MovementContext = NoInertiaMovementContext.Create(this, GetBodyAnimatorCommon,
+					GetCharacterControllerCommon, movement_MASK);
 		}
 
-		public override void OnSkillLevelChanged(GClass1778 skill)
+		public override void OnSkillLevelChanged(AbstractSkillClass skill)
 		{
-			NotificationManagerClass.DisplayNotification(new GClass2044(skill));
+			NotificationManagerClass.DisplayNotification(new GClass2267(skill));
 		}
 
-		public override bool CheckSurface()
+		public override bool CheckSurface(float range)
 		{
-			hasGround = base.CheckSurface();
-			return hasGround;
+			HasGround = base.CheckSurface(range);
+			return HasGround;
 		}
 
 		public override void OnWeaponMastered(MasterSkillClass masterSkill)
@@ -163,69 +201,13 @@ namespace Fika.Core.Coop.Players
 				masterSkill.Level.ToString()), ENotificationDurationType.Default, ENotificationIconType.Default, null);
 		}
 
-		public override void BtrInteraction(BTRSide btr, byte placeId, EInteractionType interaction)
-		{
-			base.BtrInteraction(btr, placeId, interaction);
-			if (FikaBackendUtils.IsClient)
-			{
-				BTRInteractionPacket packet = new(NetId)
-				{
-					HasInteractPacket = true,
-					InteractPacket = btr.GetInteractWithBtrPacket(placeId, interaction)
-				};
-
-				PacketSender.Client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-			}
-			else if (FikaBackendUtils.IsServer)
-			{
-				if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-				{
-					PlayerInteractPacket interactPacket = btr.GetInteractWithBtrPacket(placeId, interaction);
-
-					bool success = coopHandler.serverBTR.HostInteraction(this, interactPacket);
-					if (success)
-					{
-						BTRInteractionPacket packet = new(NetId)
-						{
-							HasInteractPacket = true,
-							InteractPacket = interactPacket
-						};
-
-						PacketSender.Server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-					}
-				}
-			}
-			UpdateInteractionCast();
-		}
-
-		public void ProcessInteractWithBTR(BTRInteractionPacket packet)
-		{
-			if (packet.HasInteractPacket)
-			{
-				if (packet.InteractPacket.HasInteraction)
-				{
-					if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-					{
-						if (coopHandler.clientBTR != null)
-						{
-							coopHandler.clientBTR.ClientInteraction(this, packet.InteractPacket);
-						}
-					}
-				}
-			}
-			else if (IsYourPlayer)
-			{
-				GlobalEventHandlerClass.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(PlayerId, EBtrInteractionStatus.Blacklisted);
-			}
-		}
-
-		public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+		public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
 		{
 			if (IsYourPlayer)
 			{
 				if (damageInfo.Player != null)
 				{
-					if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
+					if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
 					{
 						return;
 					}
@@ -246,25 +228,34 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
+			if (damageInfo.Weapon != null)
+			{
+				lastWeaponId = damageInfo.Weapon.Id;
+			}
+
 			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
-		public override ShotInfoClass ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+		public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{
 			if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
 			{
-				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider);
 			}
 
-			if (damageInfo.Player?.iPlayer is CoopBot)
+			if (damageInfo.Player != null && damageInfo.Player.IsAI)
 			{
-				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, shotId);
+				if (damageInfo.Weapon != null)
+				{
+					lastWeaponId = damageInfo.Weapon.Id;
+				}
+				return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider);
 			}
 
 			return null;
 		}
 
-		private ShotInfoClass SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, GStruct389 shotId)
+		private ShotInfoClass SimulatedApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
 		{
 			ActiveHealthController activeHealthController = ActiveHealthController;
 			if (activeHealthController != null && !activeHealthController.IsAlive)
@@ -275,37 +266,37 @@ namespace Fika.Core.Coop.Players
 			float damage = damageInfo.Damage;
 			List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
 			MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
-			ShotInfoClass gclass = new()
+			ShotInfoClass hitInfo = new()
 			{
 				PoV = PointOfView,
 				Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
 				Material = materialType
 			};
-			ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
-			ShotReactions(damageInfo, bodyPartType);
 			float num = damage - damageInfo.Damage;
 			if (num > 0)
 			{
 				damageInfo.DidArmorDamage = num;
 			}
-			ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, gclass.Material);
+			ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
+			ShotReactions(damageInfo, bodyPartType);
+			ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
 			if (list != null)
 			{
 				QueueArmorDamagePackets([.. list]);
 			}
 
-			return gclass;
+			return hitInfo;
 		}
 
 		#region Proceed
-		public override void Proceed(bool withNetwork, Callback<GInterface137> callback, bool scheduled = true)
+		public override void Proceed(bool withNetwork, Callback<GInterface160> callback, bool scheduled = true)
 		{
 			base.Proceed(withNetwork, callback, scheduled);
 			PacketSender.CommonPlayerPackets.Enqueue(new()
 			{
-				HasProceedPacket = true,
-				ProceedPacket = new()
+				Type = ECommonSubPacketType.Proceed,
+				SubPacket = new ProceedPacket()
 				{
 					ProceedType = EProceedType.EmptyHands,
 					Scheduled = scheduled
@@ -313,12 +304,32 @@ namespace Fika.Core.Coop.Players
 			});
 		}
 
-		public override void Proceed(FoodClass foodDrink, float amount, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
 		{
 			FoodControllerHandler handler = new(this, foodDrink, amount, EBodyPart.Head, animationVariant);
 
 			Func<MedsController> func = new(handler.ReturnController);
 			handler.process = new(this, func, foodDrink, false);
+			handler.confirmCallback = new(handler.SendPacket);
+			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+		}
+
+		public override void Proceed(MedsItemClass meds, EBodyPart bodyPart, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
+		{
+			MedsControllerHandler handler = new(this, meds, bodyPart, animationVariant);
+
+			Func<MedsController> func = new(handler.ReturnController);
+			handler.process = new(this, func, meds, false);
+			handler.confirmCallback = new(handler.SendPacket);
+			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+		}
+
+		public override void Proceed<T>(Item item, Callback<GInterface164> callback, bool scheduled = true)
+		{
+			UsableItemControllerHandler handler = new(this, item);
+
+			Func<UsableItemController> func = new(handler.ReturnController);
+			handler.process = new(this, func, item, false);
 			handler.confirmCallback = new(handler.SendPacket);
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
@@ -343,7 +354,7 @@ namespace Fika.Core.Coop.Players
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
 
-		public override void Proceed(KnifeComponent knife, Callback<GInterface146> callback, bool scheduled = true)
+		public override void Proceed(KnifeComponent knife, Callback<GInterface169> callback, bool scheduled = true)
 		{
 			QuickKnifeControllerHandler handler = new(this, knife);
 
@@ -353,31 +364,21 @@ namespace Fika.Core.Coop.Players
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
 
-		public override void Proceed(MedsClass meds, EBodyPart bodyPart, Callback<GInterface142> callback, int animationVariant, bool scheduled = true)
-		{
-			MedsControllerHandler handler = new(this, meds, bodyPart, animationVariant);
-
-			Func<MedsController> func = new(handler.ReturnController);
-			handler.process = new(this, func, meds, false);
-			handler.confirmCallback = new(handler.SendPacket);
-			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
-		}
-
-		public override void Proceed(GrenadeClass throwWeap, Callback<GInterface145> callback, bool scheduled = true)
+		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface168> callback, bool scheduled = true)
 		{
 			QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
-			Func<QuickGrenadeThrowController> func = new(handler.ReturnController);
+			Func<QuickGrenadeThrowHandsController> func = new(handler.ReturnController);
 			handler.process = new(this, func, throwWeap, false);
 			handler.confirmCallback = new(handler.SendPacket);
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
 
-		public override void Proceed(GrenadeClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
+		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
 		{
 			GrenadeControllerHandler handler = new(this, throwWeap);
 
-			Func<GrenadeController> func = new(handler.ReturnController);
+			Func<GrenadeHandsController> func = new(handler.ReturnController);
 			handler.process = new(this, func, throwWeap, false);
 			handler.confirmCallback = new(handler.SendPacket);
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
@@ -387,8 +388,7 @@ namespace Fika.Core.Coop.Players
 		{
 			FirearmControllerHandler handler = new(this, weapon);
 			bool flag = false;
-			FirearmController firearmController;
-			if ((firearmController = _handsController as FirearmController) != null)
+			if (_handsController is FirearmController firearmController)
 			{
 				flag = firearmController.CheckForFastWeaponSwitch(handler.weapon);
 			}
@@ -397,30 +397,22 @@ namespace Fika.Core.Coop.Players
 			handler.confirmCallback = new(handler.SendPacket);
 			handler.process.method_0(new(handler.HandleResult), callback, scheduled);
 		}
-
-		public override void Proceed<T>(Item item, Callback<GInterface141> callback, bool scheduled = true)
-		{
-			// what is this
-			base.Proceed<T>(item, callback, scheduled);
-		}
 		#endregion
 
 		public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
 		{
+			PacketSender.CommonPlayerPackets.Enqueue(new()
+			{
+				Type = ECommonSubPacketType.Drop,
+				SubPacket = new DropPacket()
+				{
+					FastDrop = fastDrop
+				}
+			});
 			base.DropCurrentController(callback, fastDrop, nextControllerItem);
-
-			/*PacketSender.CommonPlayerPackets.Enqueue(new()
-            {
-                HasDrop = true,
-                DropPacket = new()
-                {
-                    FastDrop = fastDrop,
-                    HasItemId = false
-                }
-            });*/
 		}
 
-		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
 		{
 			base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
@@ -432,23 +424,28 @@ namespace Fika.Core.Coop.Players
 					coopPlayer.Loyalty.method_1(this);
 				}
 
-				if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.hasSkilledScav)
+				if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.HasSkilledScav)
 				{
-					coopPlayer.hasSkilledScav = true;
+					coopPlayer.HasSkilledScav = true;
 					return;
 				}
-				else if (Side != EPlayerSide.Savage && hasSkilledScav && aggressor.Side == EPlayerSide.Savage)
+				else if (Side != EPlayerSide.Savage && HasSkilledScav && aggressor.Side == EPlayerSide.Savage)
 				{
 					coopPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
 				}
 			}
 		}
 
-		public void HandleTeammateKill(DamageInfo damage, EBodyPart bodyPart,
+		public void HandleTeammateKill(ref DamageInfoStruct damage, EBodyPart bodyPart,
 			EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
-			float distance, int hour, List<string> targetEquipment,
-			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer)
+			float distance, List<string> targetEquipment,
+			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer, int experience)
 		{
+			if (!HealthController.IsAlive)
+			{
+				return;
+			}
+
 			if (role != WildSpawnType.pmcBEAR)
 			{
 				if (role == WildSpawnType.pmcUSEC)
@@ -484,7 +481,7 @@ namespace Fika.Core.Coop.Players
 			foreach (string value in list)
 			{
 				AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
-								bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
+								bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
 								killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
 
 				/*AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
@@ -492,7 +489,11 @@ namespace Fika.Core.Coop.Players
                     killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
 			}
 
-
+			if (FikaPlugin.SharedBossExperience.Value && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR) && role.CountAsBossForStatistics())
+			{
+				int toReceive = experience / 2;
+				Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
+			}
 		}
 
 #if DEBUG
@@ -517,8 +518,11 @@ namespace Fika.Core.Coop.Players
 			base.SetInventoryOpened(opened);
 			PacketSender.CommonPlayerPackets.Enqueue(new()
 			{
-				HasInventoryChanged = true,
-				SetInventoryOpen = opened
+				Type = ECommonSubPacketType.InventoryChanged,
+				SubPacket = new InventoryChangedPacket()
+				{
+					InventoryOpen = opened
+				}
 			});
 		}
 
@@ -527,32 +531,24 @@ namespace Fika.Core.Coop.Players
 			base.SetCompassState(value);
 			PacketSender.FirearmPackets.Enqueue(new()
 			{
-				HasCompassChange = true,
-				CompassState = value
+				Type = EFirearmSubPacketType.CompassChange,
+				SubPacket = new CompassChangePacket()
+				{
+					Enabled = value
+				}
 			});
-		}
-
-		public void ClientApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
-		{
-			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
-		}
-
-		public void ClientApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
-		{
-			_ = base.ApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider, GStruct389.EMPTY_SHOT_ID);
 		}
 
 		public override void SendHeadlightsPacket(bool isSilent)
 		{
-			FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(new Func<TacticalComboVisualController,
-				FirearmLightStateStruct>(ClientPlayer.Class1456.class1456_0.method_0)).ToArray();
+			FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(ClientPlayer.Class1559.class1559_0.method_0).ToArray();
 
 			if (PacketSender != null)
 			{
 				PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasHeadLightsPacket = true,
-					HeadLightsPacket = new()
+					Type = ECommonSubPacketType.HeadLights,
+					SubPacket = new HeadLightsPacket()
 					{
 						Amount = lightStates.Count(),
 						IsSilent = isSilent,
@@ -575,32 +571,28 @@ namespace Fika.Core.Coop.Players
 			{
 				PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					Phrase = @event,
-					PhraseIndex = clip.NetId
+					Type = ECommonSubPacketType.Phrase,
+					SubPacket = new PhrasePacket()
+					{
+						PhraseTrigger = @event,
+						PhraseIndex = clip.NetId
+					}
 				});
 			}
 		}
 
-		public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct170.EStationaryCommand command)
+		public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct177.EStationaryCommand command)
 		{
 			base.OperateStationaryWeapon(stationaryWeapon, command);
 			PacketSender.CommonPlayerPackets.Enqueue(new()
 			{
-				HasStationaryPacket = true,
-				StationaryPacket = new()
+				Type = ECommonSubPacketType.Stationary,
+				SubPacket = new StationaryPacket()
 				{
-					Command = (StationaryPacket.EStationaryCommand)command,
+					Command = (EStationaryCommand)command,
 					Id = stationaryWeapon.Id
 				}
 			});
-		}
-
-		protected virtual void ReceiveSay(EPhraseTrigger trigger, int index)
-		{
-			if (HealthController.IsAlive)
-			{
-				Speaker.PlayDirect(trigger, index);
-			}
 		}
 
 		// Start
@@ -616,13 +608,13 @@ namespace Fika.Core.Coop.Players
 
 			CommonPlayerPacket packet = new()
 			{
-				HasWorldInteractionPacket = true,
-				WorldInteractionPacket = new()
+				Type = ECommonSubPacketType.WorldInteraction,
+				SubPacket = new WorldInteractionPacket()
 				{
 					InteractiveId = interactiveObject.Id,
 					InteractionType = interactionResult.InteractionType,
 					InteractionStage = EInteractionStage.Start,
-					ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+					ItemId = (interactionResult is GClass3344 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
 				}
 			};
 			PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -639,29 +631,120 @@ namespace Fika.Core.Coop.Players
 
 			base.vmethod_1(door, interactionResult);
 
-			CommonPlayerPacket packet = new()
+			if (!door.ForceLocalInteraction)
 			{
-				HasWorldInteractionPacket = true,
-				WorldInteractionPacket = new()
+				CommonPlayerPacket packet = new()
 				{
-					InteractiveId = door.Id,
-					InteractionType = interactionResult.InteractionType,
-					InteractionStage = EInteractionStage.Execute,
-					ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
-				}
-			};
-			PacketSender.CommonPlayerPackets.Enqueue(packet);
+					Type = ECommonSubPacketType.WorldInteraction,
+					SubPacket = new WorldInteractionPacket()
+					{
+						InteractiveId = door.Id,
+						InteractionType = interactionResult.InteractionType,
+						InteractionStage = EInteractionStage.Execute,
+						ItemId = (interactionResult is GClass3344 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+					}
+				};
+				PacketSender.CommonPlayerPackets.Enqueue(packet);
+			}
 
 			UpdateInteractionCast();
 		}
 
-		public override void vmethod_3(EGesture gesture)
+		public override void OnAnimatedInteraction(EInteraction interaction)
 		{
-			base.vmethod_3(gesture);
-			PacketSender.FirearmPackets.Enqueue(new()
+			if (!FikaGlobals.BlockedInteractions.Contains(interaction))
 			{
-				Gesture = gesture
+				PacketSender.CommonPlayerPackets.Enqueue(new()
+				{
+					Type = ECommonSubPacketType.Interaction,
+					SubPacket = new InteractionPacket()
+					{
+						Interaction = interaction
+					}
+				});
+			}
+		}
+
+		public override void HealthControllerUpdate(float deltaTime)
+		{
+			_healthController.ManualUpdate(deltaTime);
+		}
+
+		public override void OnMounting(GStruct179.EMountingCommand command)
+		{
+			MountingPacket packet = new()
+			{
+				Command = command,
+				IsMounted = MovementContext.IsInMountedState,
+				MountDirection = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
+				MountingPoint = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
+				CurrentMountingPointVerticalOffset = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
+				MountingDirection = MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0
+			};
+			if (command == GStruct179.EMountingCommand.Enter)
+			{
+				packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
+				packet.TargetPos = MovementContext.PlayerMountingPointData.PlayerTargetPos;
+				packet.TargetPoseLevel = MovementContext.PlayerMountingPointData.TargetPoseLevel;
+				packet.TargetHandsRotation = MovementContext.PlayerMountingPointData.TargetHandsRotation;
+				packet.TargetBodyRotation = MovementContext.PlayerMountingPointData.TargetBodyRotation;
+				packet.PoseLimit = MovementContext.PlayerMountingPointData.PoseLimit;
+				packet.PitchLimit = MovementContext.PlayerMountingPointData.PitchLimit;
+				packet.YawLimit = MovementContext.PlayerMountingPointData.YawLimit;
+			}
+
+			PacketSender.CommonPlayerPackets.Enqueue(new()
+			{
+				Type = ECommonSubPacketType.Mounting,
+				SubPacket = packet
 			});
+		}
+
+		public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
+		{
+			GStruct176 packet = controller.GetInteractPacket(transitPointId, keyId, time);
+			if (FikaBackendUtils.IsServer)
+			{
+				controller.InteractWithTransit(this, packet);
+			}
+			else
+			{
+				TransitInteractPacket interactPacket = new()
+				{
+					NetId = NetId,
+					Data = packet
+				};
+				Singleton<FikaClient>.Instance.SendData(ref interactPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+				if (Singleton<GameWorld>.Instance.TransitController is FikaClientTransitController transitController)
+				{
+					transitController.InteractPacket = packet;
+				}
+			}
+			UpdateInteractionCast();
+		}
+
+		public override void vmethod_4(TripwireSynchronizableObject tripwire)
+		{
+			base.vmethod_4(tripwire);
+			SyncObjectPacket packet = new(tripwire.ObjectId)
+			{
+				ObjectType = SynchronizableObjectType.Tripwire,
+				Data = new()
+				{
+					PacketData = new()
+					{
+						TripwireDataPacket = new()
+						{
+							State = ETripwireState.Inert
+						}
+					},
+					Position = tripwire.transform.position,
+					Rotation = tripwire.transform.rotation.eulerAngles,
+					IsActive = true
+				}
+			};
+			PacketSender.SendPacket(ref packet);
+			UpdateInteractionCast();
 		}
 
 		public override void ApplyCorpseImpulse()
@@ -669,58 +752,139 @@ namespace Fika.Core.Coop.Players
 			Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
 		}
 
-		public HealthSyncPacket SetupDeathPacket(GStruct346 packet)
+		public HealthSyncPacket SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
 		{
 			float num = EFTHardSettings.Instance.HIT_FORCE;
 			num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
 			_corpseAppliedForce = num;
 
-			if (LastAggressor != null)
+			if (FikaBackendUtils.IsServer || IsYourPlayer)
 			{
-				SetupDogTag();
+				if (Side is not EPlayerSide.Savage)
+				{
+					GenerateDogtagDetails();
+				}
 			}
 
-			return new(NetId)
+			GClass1659 inventoryDescriptor = GClass1685.SerializeItem(Inventory.Equipment, GClass1971.Instance);
+
+			HealthSyncPacket syncPacket = new(NetId)
 			{
 				Packet = packet,
-				KillerId = !string.IsNullOrEmpty(KillerId) ? KillerId : null,
-				RagdollPacket = new()
+				KillerId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty,
+				BodyPart = LastBodyPart,
+				WeaponId = lastWeaponId,
+				CorpseSyncPacket = new()
 				{
 					BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
 					Direction = LastDamageInfo.Direction,
 					Point = LastDamageInfo.HitPoint,
 					Force = _corpseAppliedForce,
-					OverallVelocity = Velocity
+					OverallVelocity = Velocity,
+					InventoryDescriptor = inventoryDescriptor,
+					ItemSlot = EquipmentSlot.ArmBand
 				},
-				Equipment = Equipment,
 				TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
 			};
+
+			if (HandsController.Item != null)
+			{
+				Item heldItem = HandsController.Item;
+				EquipmentSlot[] weaponSlots = [EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster, EquipmentSlot.Scabbard];
+				foreach (EquipmentSlot weaponSlot in weaponSlots)
+				{
+					if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
+					{
+						syncPacket.CorpseSyncPacket.ItemSlot = weaponSlot;
+						break;
+					}
+				}
+			}
+
+			return syncPacket;
 		}
 
 		public override void OnDead(EDamageType damageType)
 		{
 			base.OnDead(damageType);
-
-			StartCoroutine(DisableNetworkedComponents());
+			PacketSender.Enabled = false;
 			if (IsYourPlayer)
 			{
 				StartCoroutine(LocalPlayerDied());
 			}
 		}
 
-		private IEnumerator DisableNetworkedComponents()
+		private void FindKillerWeapon()
 		{
-			yield return new WaitForSeconds(2);
-
-			if (PacketSender != null)
+			GStruct448<Item> itemResult = FindItemById(lastWeaponId, false, false);
+			if (!itemResult.Succeeded)
 			{
-				PacketSender.Enabled = false;
+				foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
+				{
+					if (grenadeClass.Id == lastWeaponId)
+					{
+						LastDamageInfo.Weapon = grenadeClass;
+						break;
+					}
+				}
+				return;
 			}
+
+			LastDamageInfo.Weapon = itemResult.Value;
+		}
+
+		/// <summary>
+		/// TODO: Refactor... BSG code makes this difficult
+		/// </summary>
+		private void GenerateDogtagDetails()
+		{
+			if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(lastWeaponId))
+			{
+				FindKillerWeapon();
+			}
+
+			string accountId = AccountId;
+			string profileId = ProfileId;
+			string nickname = Profile.Nickname;
+			bool hasAggressor = LastAggressor != null;
+			string killerAccountId = hasAggressor ? LastAggressor.AccountId : string.Empty;
+			string killerProfileId = hasAggressor ? LastAggressor.ProfileId : string.Empty;
+			string killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : string.Empty;
+			EPlayerSide side = Side;
+			int level = Profile.Info.Level;
+			DateTime time = EFTDateTimeClass.UtcNow;
+			string weaponName = LastAggressor != null ? (LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.ShortName : string.Empty) : "-";
+			string groupId = GroupId;
+
+			Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+			if (item != null)
+			{
+				DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
+				if (dogtagComponent != null)
+				{
+					dogtagComponent.Item.SpawnedInSession = true;
+					dogtagComponent.AccountId = accountId;
+					dogtagComponent.ProfileId = profileId;
+					dogtagComponent.Nickname = nickname;
+					dogtagComponent.KillerAccountId = killerAccountId;
+					dogtagComponent.KillerProfileId = killerProfileId;
+					dogtagComponent.KillerName = killerNickname;
+					dogtagComponent.Side = side;
+					dogtagComponent.Level = level;
+					dogtagComponent.Time = time;
+					dogtagComponent.Status = hasAggressor ? "Killed by" : "Died";
+					dogtagComponent.WeaponName = weaponName;
+					dogtagComponent.GroupId = groupId;
+					return;
+				}
+			}
+
+			FikaPlugin.Instance.FikaLogger.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
 		}
 
 		private IEnumerator LocalPlayerDied()
 		{
-			AddPlayerRequest request = new(FikaBackendUtils.GetGroupId(), ProfileId);
+			AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId, FikaBackendUtils.IsSpectator);
 			Task diedTask = FikaRequestHandler.PlayerDied(request);
 			while (!diedTask.IsCompleted)
 			{
@@ -728,91 +892,75 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void Move(Vector2 direction)
+		public void HandleInteractPacket(WorldInteractionPacket packet)
 		{
-			if (direction.sqrMagnitude > 0)
+			WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
+			if (worldInteractiveObject != null)
 			{
-				base.Move(direction);
-				LastDirection = direction;
-			}
-		}
-
-		private void HandleInteractPacket(WorldInteractionPacket packet)
-		{
-			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-			{
-				WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(packet.InteractiveId);
-				if (worldInteractiveObject != null)
+				if (worldInteractiveObject.isActiveAndEnabled && !worldInteractiveObject.ForceLocalInteraction)
 				{
-					if (worldInteractiveObject.isActiveAndEnabled && !worldInteractiveObject.ForceLocalInteraction)
+					InteractionResult interactionResult;
+					Action action;
+					if (packet.InteractionType == EInteractionType.Unlock)
 					{
-						InteractionResult interactionResult;
-						Action action;
-						if (packet.InteractionType == EInteractionType.Unlock)
+						KeyHandler keyHandler = new(this);
+
+						if (string.IsNullOrEmpty(packet.ItemId))
 						{
-							KeyHandler keyHandler = new(this);
-
-							if (string.IsNullOrEmpty(packet.ItemId))
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: ItemID was null!");
-								return;
-							}
-
-							Item keyItem = FindItem(packet.ItemId);
-							if (keyItem == null)
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Could not find item: " + packet.ItemId);
-								return;
-							}
-
-							KeyComponent keyComponent = keyItem.GetItemComponent<KeyComponent>();
-							if (keyComponent == null)
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: keyComponent was null!");
-								return;
-							}
-
-							keyHandler.unlockResult = worldInteractiveObject.UnlockOperation(keyComponent, this);
-							if (keyHandler.unlockResult.Error != null)
-							{
-								FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Error when processing unlockResult: " + keyHandler.unlockResult.Error);
-								return;
-							}
-
-							interactionResult = keyHandler.unlockResult.Value;
-							keyHandler.unlockResult.Value.RaiseEvents(_inventoryController, CommandStatus.Begin);
-							action = new(keyHandler.HandleKeyEvent);
-						}
-						else
-						{
-							interactionResult = new InteractionResult(packet.InteractionType);
-							action = null;
-						}
-
-						if (packet.InteractionStage == EInteractionStage.Start)
-						{
-							vmethod_0(worldInteractiveObject, interactionResult, action);
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: ItemID was null!");
 							return;
 						}
 
-						if (packet.InteractionStage != EInteractionStage.Execute)
+						GStruct448<Item> result = FindItemById(packet.ItemId, false, false);
+						if (!result.Succeeded)
 						{
-							worldInteractiveObject.Interact(interactionResult);
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Could not find item: " + packet.ItemId);
 							return;
 						}
 
-						vmethod_1(worldInteractiveObject, interactionResult);
+						KeyComponent keyComponent = result.Value.GetItemComponent<KeyComponent>();
+						if (keyComponent == null)
+						{
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: keyComponent was null!");
+							return;
+						}
+
+						keyHandler.unlockResult = worldInteractiveObject.UnlockOperation(keyComponent, this, worldInteractiveObject);
+						if (keyHandler.unlockResult.Error != null)
+						{
+							FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Error when processing unlockResult: " + keyHandler.unlockResult.Error);
+							return;
+						}
+
+						interactionResult = keyHandler.unlockResult.Value;
+						keyHandler.unlockResult.Value.RaiseEvents(_inventoryController, CommandStatus.Begin);
+						action = new(keyHandler.HandleKeyEvent);
+					}
+					else
+					{
+						interactionResult = new InteractionResult(packet.InteractionType);
+						action = null;
 					}
 
+					if (packet.InteractionStage == EInteractionStage.Start)
+					{
+						vmethod_0(worldInteractiveObject, interactionResult, action);
+						return;
+					}
+
+					if (packet.InteractionStage != EInteractionStage.Execute)
+					{
+						worldInteractiveObject.Interact(interactionResult);
+						return;
+					}
+
+					vmethod_1(worldInteractiveObject, interactionResult);
 				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError("HandleInteractPacket: WorldInteractiveObject was null or disabled!");
-				}
+
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError("HandleInteractPacket: CoopHandler was null!");
+				FikaPlugin.Instance.FikaLogger.LogError("HandleInteractPacket: WorldInteractiveObject was null or disabled!");
 			}
 		}
 
@@ -821,15 +969,35 @@ namespace Fika.Core.Coop.Players
 			LootableContainerInteractionHandler handler = new(this, container);
 			if (handler.container != null && _openAction != null)
 			{
-				_openAction(new Action(handler.Handle));
+				_openAction(handler.Handle);
 			}
 			_openAction = null;
+		}
+
+		public override void vmethod_2(BTRSide btr, byte placeId, EInteractionType interaction)
+		{
+			if (FikaBackendUtils.IsServer)
+			{
+				base.vmethod_2(btr, placeId, interaction);
+				return;
+			}
+
+			FikaClient client = Singleton<FikaClient>.Instance;
+			BTRInteractionPacket packet = new(NetId)
+			{
+				Data = btr.GetInteractWithBtrPacket(placeId, interaction)
+			};
+			client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
 		}
 
 		public void SetupMainPlayer()
 		{
 			// Set own group id, ignore if dedicated
-			if (!Profile.Info.Nickname.Contains("dedicated_"))
+			if (FikaBackendUtils.IsDedicated)
+			{
+				Profile.Info.GroupId = "DEDICATED";
+			}
+			else
 			{
 				Profile.Info.GroupId = "Fika";
 			}
@@ -840,24 +1008,21 @@ namespace Fika.Core.Coop.Players
 				FikaPlugin.Instance.FikaLogger.LogInfo("Setting up DogTag");
 				if (Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
 				{
-					GStruct414<GClass2801> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false, true);
+					GStruct446<GClass3131> result = InteractionsHandlerClass.Remove(Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem, _inventoryController, false);
 					if (result.Error != null)
 					{
 						FikaPlugin.Instance.FikaLogger.LogWarning("CoopPlayer::SetupMainPlayer: Error removing dog tag!");
 					}
 				}
 
-				string templateId = GetDogTagTemplateId();
+				string templateId = GetDogtagTemplateId();
 
 				if (!string.IsNullOrEmpty(templateId))
 				{
-					Item item = Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), templateId, null);
+					Item item = Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), templateId, null);
 
 					Slot dogtagSlot = Equipment.GetSlot(EquipmentSlot.Dogtag);
-					ItemFilter[] filters = dogtagSlot.Filters; // We need to temporarily remove and then re-add these as BSG did not include the new dog tags in their ItemFilter[]
-					dogtagSlot.Filters = null;
-					GStruct416<int> addResult = dogtagSlot.Add(item, false);
-					dogtagSlot.Filters = filters;
+					GStruct446<GClass3135> addResult = dogtagSlot.AddWithoutRestrictions(item);
 
 					if (addResult.Error != null)
 					{
@@ -880,29 +1045,9 @@ namespace Fika.Core.Coop.Players
 					FikaPlugin.Instance.FikaLogger.LogError("Could not get templateId for DogTag!");
 				}
 			}
-
-			if (!string.IsNullOrEmpty(Location))
-			{
-				// Delete labs card on labs
-				if (Location.ToLower() == "laboratory")
-				{
-					foreach (Item item in Inventory.AllRealPlayerItems)
-					{
-						if (item.TemplateId == "5c94bbff86f7747ee735c08f")
-						{
-							InteractionsHandlerClass.Remove(item, _inventoryController, false, true);
-							break;
-						}
-					}
-				}
-			}
-			else
-			{
-				FikaPlugin.Instance.FikaLogger.LogError("CoopPlayer::SetupMainPlayer: Location was null!");
-			}
 		}
 
-		private string GetDogTagTemplateId()
+		private string GetDogtagTemplateId()
 		{
 			if (Side is EPlayerSide.Usec)
 			{
@@ -932,339 +1077,143 @@ namespace Fika.Core.Coop.Players
 			return string.Empty;
 		}
 
-		public virtual void HandleCommonPacket(in CommonPlayerPacket packet)
+		public void HandleHeadLightsPacket(ref HeadLightsPacket packet)
 		{
-			if (packet.Phrase != EPhraseTrigger.PhraseNone)
+			try
 			{
-				ReceiveSay(packet.Phrase, packet.PhraseIndex);
-			}
-
-			if (packet.HasWorldInteractionPacket)
-			{
-				HandleInteractPacket(packet.WorldInteractionPacket);
-			}
-
-			if (packet.HasContainerInteractionPacket)
-			{
-				WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(packet.ContainerInteractionPacket.InteractiveId);
-				if (lootableContainer != null)
+				if (_helmetLightControllers != null)
 				{
-					if (lootableContainer.isActiveAndEnabled)
+					for (int i = 0; i < _helmetLightControllers.Count(); i++)
 					{
-						string methodName = string.Empty;
-						switch (packet.ContainerInteractionPacket.InteractionType)
-						{
-							case EInteractionType.Open:
-								methodName = "Open";
-								break;
-							case EInteractionType.Close:
-								methodName = "Close";
-								break;
-							case EInteractionType.Unlock:
-								methodName = "Unlock";
-								break;
-							case EInteractionType.Breach:
-								break;
-							case EInteractionType.Lock:
-								methodName = "Lock";
-								break;
-						}
-
-						if (!string.IsNullOrEmpty(methodName))
-						{
-							void Interact() => lootableContainer.Invoke(methodName, 0);
-
-							if (packet.ContainerInteractionPacket.InteractionType == EInteractionType.Unlock)
-							{
-								Interact();
-							}
-							else
-							{
-								lootableContainer.StartBehaviourTimer(EFTHardSettings.Instance.DelayToOpenContainer, Interact);
-							}
-						}
+						_helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.LightStates[i]);
+					}
+					if (!packet.IsSilent)
+					{
+						SwitchHeadLightsAnimation();
 					}
 				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError("CommonPlayerPacket::ContainerInteractionPacket: LootableContainer was null!");
-				}
 			}
-
-			if (packet.HasProceedPacket)
+			catch (Exception)
 			{
-				if (this is ObservedCoopPlayer observedCoopPlayer)
-				{
-					observedCoopPlayer.HandleProceedPacket(packet.ProceedPacket);
-				}
-			}
-
-			if (packet.HasHeadLightsPacket)
-			{
-				try
-				{
-					if (_helmetLightControllers != null)
-					{
-						for (int i = 0; i < _helmetLightControllers.Count(); i++)
-						{
-							_helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.HeadLightsPacket.LightStates[i]);
-						}
-						if (!packet.HeadLightsPacket.IsSilent)
-						{
-							SwitchHeadLightsAnimation();
-						}
-					}
-				}
-				catch (Exception)
-				{
-					// Do nothing
-				}
-			}
-
-			if (packet.HasInventoryChanged)
-			{
-				base.SetInventoryOpened(packet.SetInventoryOpen);
-			}
-
-			if (packet.HasDrop)
-			{
-				if (packet.DropPacket.HasItemId)
-				{
-					Item item = FindItem(packet.ProceedPacket.ItemId);
-					base.DropCurrentController(null, packet.DropPacket.FastDrop, item ?? null);
-				}
-				else
-				{
-					base.DropCurrentController(null, packet.DropPacket.FastDrop, null);
-				}
-			}
-
-			if (packet.HasStationaryPacket)
-			{
-				StationaryWeapon stationaryWeapon = (packet.StationaryPacket.Command == StationaryPacket.EStationaryCommand.Occupy) ? Singleton<GameWorld>.Instance.FindStationaryWeapon(packet.StationaryPacket.Id) : null;
-				base.OperateStationaryWeapon(stationaryWeapon, (GStruct170.EStationaryCommand)packet.StationaryPacket.Command);
-			}
-
-			if (packet.Pickup)
-			{
-				MovementContext.SetInteractInHands(packet.Pickup, packet.PickupAnimation);
-			}
-
-			if (packet.HasVaultPacket)
-			{
-				DoObservedVault(packet.VaultPacket);
+				// Do nothing
 			}
 		}
 
-		public virtual void DoObservedVault(VaultPacket vaultPacket)
+		public void HandleInventoryOpenedPacket(bool opened)
+		{
+			base.SetInventoryOpened(opened);
+		}
+
+		public void HandleDropPacket(bool fastDrop)
+		{
+			DropHandler handler = new(this);
+			base.DropCurrentController(handler.HandleResult, fastDrop, null);
+		}
+
+		public void HandleUsableItemPacket(UsableItemPacket packet)
+		{
+			if (HandsController is UsableItemController usableItemController)
+			{
+				if (packet.ExamineWeapon)
+				{
+					usableItemController.ExamineWeapon();
+				}
+
+				if (packet.HasCompassState)
+				{
+					usableItemController.CompassState.Value = packet.CompassState;
+				}
+
+				if (packet.HasAim)
+				{
+					usableItemController.IsAiming = packet.AimState;
+				}
+			}
+		}
+
+		public void ObservedStationaryInteract(StationaryWeapon stationaryWeapon, GStruct177.EStationaryCommand command)
+		{
+			if (command == GStruct177.EStationaryCommand.Occupy)
+			{
+				stationaryWeapon.SetOperator(ProfileId, false);
+				MovementContext.StationaryWeapon = stationaryWeapon;
+				MovementContext.InteractionParameters = stationaryWeapon.GetInteractionParameters();
+				MovementContext.PlayerAnimatorSetApproached(false);
+				MovementContext.PlayerAnimatorSetStationary(true);
+				MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
+				return;
+			}
+			if (command == GStruct177.EStationaryCommand.Leave)
+			{
+				return;
+			}
+			MovementContext.PlayerAnimatorSetStationary(false);
+			if (MovementContext.StationaryWeapon != null)
+			{
+				MovementContext.StationaryWeapon.Unlock(ProfileId);
+			}
+		}
+
+		public virtual void DoObservedVault(ref VaultPacket vaultPacket)
 		{
 
 		}
 
-		public void HandleCallbackFromServer(in OperationCallbackPacket operationCallbackPacket)
+		public override void PauseAllEffectsOnPlayer()
 		{
-			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Callback<EOperationStatus> callback))
+			ActiveHealthController.PauseAllEffects();
+		}
+
+		public override void UnpauseAllEffectsOnPlayer()
+		{
+			ActiveHealthController.UnpauseAllEffects();
+		}
+
+		public void HandleCallbackFromServer(OperationCallbackPacket operationCallbackPacket)
+		{
+			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Action<ServerOperationStatus> callback))
 			{
 				if (operationCallbackPacket.OperationStatus != EOperationStatus.Started)
 				{
 					OperationCallbacks.Remove(operationCallbackPacket.CallbackId);
 				}
-				if (operationCallbackPacket.OperationStatus != EOperationStatus.Failed)
-				{
-					callback(new Result<EOperationStatus>(operationCallbackPacket.OperationStatus));
-				}
-				else
-				{
-					callback(new Result<EOperationStatus>(EOperationStatus.Failed)
-					{
-						Error = operationCallbackPacket.Error
-					});
-				}
+				ServerOperationStatus status = new(operationCallbackPacket.OperationStatus, operationCallbackPacket.Error);
+				callback(status);
 			}
 			else
 			{
-				FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId {operationCallbackPacket.CallbackId}!");
+				FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId: {operationCallbackPacket.CallbackId}!");
 			}
 		}
 
-		public virtual void HandleInventoryPacket(in InventoryPacket packet)
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfoStruct damageInfo)
 		{
-			if (packet.HasItemControllerExecutePacket)
+			if (IsYourPlayer)
 			{
-				if (_inventoryController != null)
+				_preAllocatedArmorComponents.Clear();
+				Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
+				List<ArmorComponent> armorComponents = [];
+				foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
 				{
-					using MemoryStream memoryStream = new(packet.ItemControllerExecutePacket.OperationBytes);
-					using BinaryReader binaryReader = new(memoryStream);
-					try
+					float num = 0f;
+					foreach (KeyValuePair<GStruct209, float> keyValuePair in armorDamage)
 					{
-						GStruct411 result = ToInventoryOperation(binaryReader.ReadPolymorph<GClass1543>());
-						if (!result.Succeeded)
+						if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
 						{
-							FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Unable to process descriptor from netid {NetId}, error: {result.Error}");
-							return;
-						}
-
-						InventoryOperationHandler opHandler = new(result);
-
-						opHandler.opResult.Value.vmethod_0(new Callback(opHandler.HandleResult), false);
-					}
-					catch (Exception exception)
-					{
-						FikaPlugin.Instance.FikaLogger.LogError($"HandleInventoryPacket::Exception thrown on netId {NetId}, {Profile.Info.MainProfileNickname}: {exception}");
-						if (FikaBackendUtils.IsServer)
-						{
-							OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-							Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+							num += keyValuePair.Value;
+							armorComponents.Add(armorComponent);
 						}
 					}
-				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError("HandleInventoryPacket: inventory was null!");
-					if (FikaBackendUtils.IsServer)
+					if (num > 0f)
 					{
-						OperationCallbackPacket callbackPacket = new(NetId, packet.ItemControllerExecutePacket.CallbackId, EOperationStatus.Failed);
-						Singleton<FikaServer>.Instance.SendDataToAll(ref callbackPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+						num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
+						method_99(num, armorComponent);
 					}
 				}
-			}
 
-			// Currently unused
-			/*if (packet.HasSearchPacket)
-            {
-                if (!packet.SearchPacket.IsStop)
-                {
-                    if (FindItem(packet.SearchPacket.ItemId) is SearchableItemClass item)
-                    {
-                        GClass2869 operation = new((ushort)packet.SearchPacket.OperationId, _inventoryController, item);
-                        _inventoryController.Execute(operation, null);
-                    }
-                }
-                else if (packet.SearchPacket.IsStop)
-                {
-                    if (FindItem(packet.SearchPacket.ItemId) is SearchableItemClass item)
-                    {
-                        GClass2869 operation = new((ushort)packet.SearchPacket.OperationId, _inventoryController, item);
-                        _inventoryController.ExecuteStop(operation);
-                    }
-                }
-            }*/
-		}
-
-		public virtual void HandleWeaponPacket(in WeaponPacket packet)
-		{
-			if (HandsController is CoopObservedFirearmController firearmController)
-			{
-				firearmController.HandleFirearmPacket(packet, _inventoryController);
-			}
-
-			if (packet.Gesture != EGesture.None)
-			{
-				vmethod_3(packet.Gesture);
-			}
-
-			if (packet.Loot)
-			{
-				HandsController.Loot(packet.Loot);
-			}
-
-			if (packet.HasGrenadePacket)
-			{
-				if (HandsController is CoopObservedGrenadeController grenadeController)
+				if (armorComponents.Count > 0)
 				{
-					switch (packet.GrenadePacket.PacketType)
-					{
-						case GrenadePacket.GrenadePacketType.ExamineWeapon:
-							{
-								grenadeController.ExamineWeapon();
-								break;
-							}
-						case GrenadePacket.GrenadePacketType.HighThrow:
-							{
-								grenadeController.HighThrow();
-								break;
-							}
-						case GrenadePacket.GrenadePacketType.LowThrow:
-							{
-								grenadeController.LowThrow();
-								break;
-							}
-						case GrenadePacket.GrenadePacketType.PullRingForHighThrow:
-							{
-								grenadeController.PullRingForHighThrow();
-								break;
-							}
-						case GrenadePacket.GrenadePacketType.PullRingForLowThrow:
-							{
-								grenadeController.PullRingForLowThrow();
-								break;
-							}
-					}
-					if (packet.GrenadePacket.HasGrenade)
-					{
-						grenadeController.SpawnGrenade(0f, packet.GrenadePacket.GrenadePosition, packet.GrenadePacket.GrenadeRotation, packet.GrenadePacket.ThrowForce, packet.GrenadePacket.LowThrow);
-					}
-				}
-				else if (HandsController is CoopObservedQuickGrenadeController quickGrenadeController)
-				{
-					if (packet.GrenadePacket.HasGrenade)
-					{
-						quickGrenadeController.SpawnGrenade(0f, packet.GrenadePacket.GrenadePosition, packet.GrenadePacket.GrenadeRotation, packet.GrenadePacket.ThrowForce, packet.GrenadePacket.LowThrow);
-					}
-				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"HandleFirearmPacket::GrenadePacket: HandsController was not of type CoopObservedGrenadeController! Was {HandsController.GetType().Name}");
-				}
-			}
-
-			if (packet.CancelGrenade)
-			{
-				if (HandsController is CoopObservedGrenadeController grenadeController)
-				{
-					grenadeController.vmethod_3();
-				}
-			}
-
-			if (packet.HasCompassChange)
-			{
-				if (HandsController is ItemHandsController handsController)
-				{
-					handsController.ApplyCompassPacket(new()
-					{
-						Toggle = true,
-						Status = packet.CompassState
-					});
-				}
-			}
-
-			if (packet.HasKnifePacket)
-			{
-				if (HandsController is CoopObservedKnifeController knifeController)
-				{
-					if (packet.KnifePacket.Examine)
-					{
-						knifeController.ExamineWeapon();
-					}
-
-					if (packet.KnifePacket.Kick)
-					{
-						knifeController.MakeKnifeKick();
-					}
-
-					if (packet.KnifePacket.AltKick)
-					{
-						knifeController.MakeAlternativeKick();
-					}
-
-					if (packet.KnifePacket.BreakCombo)
-					{
-						knifeController.BrakeCombo();
-					}
-				}
-				else
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"HandleFirearmPacket::KnifePacket: HandsController was not of type CoopObservedKnifeController! Was {HandsController.GetType().Name}");
+					QueueArmorDamagePackets([.. armorComponents]);
 				}
 			}
 		}
@@ -1293,7 +1242,7 @@ namespace Fika.Core.Coop.Players
 
 		public virtual void HandleDamagePacket(ref DamagePacket packet)
 		{
-			DamageInfo damageInfo = new()
+			DamageInfoStruct damageInfo = new()
 			{
 				Damage = packet.Damage,
 				DamageType = packet.DamageType,
@@ -1317,24 +1266,24 @@ namespace Fika.Core.Coop.Players
 					damageInfo.Player = player;
 					if (IsYourPlayer)
 					{
-						if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer is ObservedCoopPlayer observedCoopPlayer && !observedCoopPlayer.IsObservedAI)
+						if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
 						{
 							return;
 						}
 					}
 				}
 
-				// TODO: Fix this and consistently get the correct data...
+				/*// TODO: Fix this and consistently get the correct data...
 				if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
 				{
 					damageInfo.Weapon = weapon;
-				}
+				}*/
+				lastWeaponId = packet.WeaponId;
 			}
 
 			ShotReactions(damageInfo, packet.BodyPartType);
 			ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
-			ClientApplyDamageInfo(damageInfo, packet.BodyPartType, packet.ColliderType, packet.Absorbed);
-			//ClientApplyShot(damageInfo, packet.BodyPartType, packet.ColliderType, packet.ArmorPlateCollider);
+			base.ApplyDamageInfo(damageInfo, packet.BodyPartType, packet.ColliderType, packet.Absorbed);
 		}
 
 		public void HandleArmorDamagePacket(ref ArmorDamagePacket packet)
@@ -1353,7 +1302,7 @@ namespace Fika.Core.Coop.Players
 						return;
 					}
 				}
-				GStruct416<Item> gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemIds[i]);
+				GStruct448<Item> gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemIds[i]);
 				if (gstruct.Failed)
 				{
 					FikaPlugin.Instance.FikaLogger.LogError("HandleArmorDamagePacket: " + gstruct.Error);
@@ -1369,34 +1318,6 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public virtual void SetupDogTag()
-		{
-			if (LastAggressor != null)
-			{
-				Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-				if (item != null)
-				{
-					DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
-					if (dogtagComponent != null)
-					{
-						dogtagComponent.Item.SpawnedInSession = true;
-						dogtagComponent.AccountId = AccountId;
-						dogtagComponent.ProfileId = ProfileId;
-						dogtagComponent.Nickname = Profile.Nickname;
-						dogtagComponent.KillerAccountId = KillerAccountId;
-						dogtagComponent.KillerProfileId = KillerId;
-						dogtagComponent.KillerName = LastAggressor.Profile.Nickname;
-						dogtagComponent.Side = Side;
-						dogtagComponent.Level = Profile.Info.Experience > 0 ? Profile.Info.Level : 1;
-						dogtagComponent.Time = DateTime.Now;
-						dogtagComponent.Status = "Killed by ";
-						dogtagComponent.WeaponName = LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.Name : "Unknown";
-						dogtagComponent.GroupId = GroupId;
-					}
-				}
-			}
-		}
-
 		public void CheckAndResetControllers(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
 		{
 			_questController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
@@ -1404,16 +1325,6 @@ namespace Fika.Core.Coop.Players
 
 			_achievementsController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
 			_achievementsController?.ResetCurrentNullableCounters();
-		}
-
-		public virtual void SetInventory(EquipmentClass equipmentClass)
-		{
-			// Do nothing
-		}
-
-		public override void OnDestroy()
-		{
-			base.OnDestroy();
 		}
 
 		public override void Dispose()
@@ -1425,25 +1336,12 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void SendHandsInteractionStateChanged(bool value, int animationId)
-		{
-			base.SendHandsInteractionStateChanged(value, animationId);
-			if (value)
-			{
-				PacketSender.CommonPlayerPackets.Enqueue(new()
-				{
-					Pickup = value,
-					PickupAnimation = animationId
-				});
-			}
-		}
-
 		public override void OnVaulting()
 		{
 			PacketSender.CommonPlayerPackets.Enqueue(new()
 			{
-				HasVaultPacket = true,
-				VaultPacket = new()
+				Type = ECommonSubPacketType.Vault,
+				SubPacket = new VaultPacket()
 				{
 					VaultingStrategy = VaultingParameters.GetVaultingStrategy(),
 					VaultingPoint = VaultingParameters.MaxWeightPointPosition,
@@ -1456,61 +1354,73 @@ namespace Fika.Core.Coop.Players
 			});
 		}
 
-		public Item FindItem(string itemId, bool questItem = false)
+		public void ReceiveTraderServicesData(List<TraderServicesClass> services)
 		{
-			if (questItem)
+			if (!IsYourPlayer)
 			{
-				//List<LootItemPositionClass> itemPositions = Traverse.Create(Singleton<GameWorld>.Instance).Field<List<LootItemPositionClass>>("list_1").Value;
-				foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
+				return;
+			}
+
+			Dictionary<ETraderServiceType, BackendConfigSettingsClass.ServiceData> servicesData = Singleton<BackendConfigSettingsClass>.Instance.ServicesData;
+
+			foreach (TraderServicesClass service in services)
+			{
+				BackendConfigSettingsClass.ServiceData serviceData = new(service, null);
+				if (servicesData.ContainsKey(serviceData.ServiceType))
 				{
-					if (lootItem is LootItem observedLootItem)
+					servicesData[serviceData.ServiceType] = serviceData;
+				}
+				else
+				{
+					servicesData.Add(serviceData.ServiceType, serviceData);
+				}
+				if (!Profile.TradersInfo.TryGetValue(serviceData.TraderId, out Profile.TraderInfo traderInfo))
+				{
+					FikaPlugin.Instance.FikaLogger.LogWarning($"Can't find trader with id: {serviceData.TraderId}!");
+				}
+				else
+				{
+					traderInfo.SetServiceAvailability(serviceData.ServiceType, service.CanAfford, service.WasPurchasedInThisRaid);
+				}
+			}
+		}
+
+		public override void OnGameSessionEnd(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
+		{
+			if (AbstractQuestControllerClass is CoopClientSharedQuestController sharedController)
+			{
+				sharedController.ManageQuestStatusesForPveOfflineGameEnd();
+			}
+			base.OnGameSessionEnd(exitStatus, pastTime, locationId, exitName);
+		}
+
+		public Item FindQuestItem(string itemId)
+		{
+			foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
+			{
+				if (lootItem is LootItem observedLootItem)
+				{
+					if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
 					{
-						if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
-						{
-							return observedLootItem.Item;
-						}
+						return observedLootItem.Item;
 					}
 				}
-				FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
-				return null;
 			}
-
-			Item item = Inventory.Equipment.FindItem(itemId);
-			if (item != null)
-			{
-				return item;
-			}
-
-			GStruct416<Item> itemResult = FindItemById(itemId);
-			if (itemResult.Error != null)
-			{
-				FikaPlugin.Instance.FikaLogger.LogError($"CoopPlayer::FindItem: Could not find item with id '{itemId}' in the world at all.");
-			}
-			return itemResult.Value;
+#if DEBUG
+			FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
+#endif
+			return null;
 		}
 
 		#region handlers
-		private class KeyHandler(CoopPlayer player)
+		public class KeyHandler(CoopPlayer player)
 		{
 			private readonly CoopPlayer player = player;
-			public GStruct416<KeyInteractionResultClass> unlockResult;
+			public GStruct448<GClass3344> unlockResult;
 
 			internal void HandleKeyEvent()
 			{
 				unlockResult.Value.RaiseEvents(player._inventoryController, CommandStatus.Succeed);
-			}
-		}
-
-		private class InventoryOperationHandler(GStruct411 opResult)
-		{
-			public readonly GStruct411 opResult = opResult;
-
-			internal void HandleResult(IResult result)
-			{
-				if (!result.Succeed || !string.IsNullOrEmpty(result.Error))
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error}");
-				}
 			}
 		}
 
@@ -1523,8 +1433,8 @@ namespace Fika.Core.Coop.Players
 			{
 				player.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasContainerInteractionPacket = true,
-					ContainerInteractionPacket = new()
+					Type = ECommonSubPacketType.ContainerInteraction,
+					SubPacket = new ContainerInteractionPacket()
 					{
 						InteractiveId = container.Id,
 						InteractionType = EInteractionType.Close
@@ -1554,19 +1464,47 @@ namespace Fika.Core.Coop.Players
 
 			internal void SendPacket()
 			{
-				if (weapon.IsStationaryWeapon)
-				{
-					return;
-				}
-
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
-						ProceedType = EProceedType.Weapon,
-						ItemId = weapon.Id,
-						ItemTemplateId = weapon.TemplateId
+						ProceedType = weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon,
+						ItemId = weapon.Id
+					}
+				});
+			}
+
+			internal void HandleResult(IResult result)
+			{
+				if (result.Succeed)
+				{
+					confirmCallback();
+				}
+			}
+		}
+
+		private class UsableItemControllerHandler(CoopPlayer coopPlayer, Item item)
+		{
+			private readonly CoopPlayer coopPlayer = coopPlayer;
+			private readonly Item item = item;
+			public Process<UsableItemController, GInterface164> process;
+			public Action confirmCallback;
+
+			internal CoopClientUsableItemController ReturnController()
+			{
+				return CoopClientUsableItemController.Create(coopPlayer, item);
+			}
+
+			internal void SendPacket()
+			{
+				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+				{
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
+					{
+						ProceedType = EProceedType.UsableItem,
+						ItemId = item.Id
 					}
 				});
 			}
@@ -1589,19 +1527,18 @@ namespace Fika.Core.Coop.Players
 
 			internal QuickUseItemController ReturnController()
 			{
-				return QuickUseItemController.smethod_5<QuickUseItemController>(coopPlayer, item);
+				return QuickUseItemController.smethod_6<QuickUseItemController>(coopPlayer, item);
 			}
 
 			internal void SendPacket()
 			{
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = EProceedType.QuickUse,
-						ItemId = item.Id,
-						ItemTemplateId = item.TemplateId
+						ItemId = item.Id
 					}
 				});
 			}
@@ -1615,30 +1552,29 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class MedsControllerHandler(CoopPlayer coopPlayer, MedsClass meds, EBodyPart bodyPart, int animationVariant)
+		private class MedsControllerHandler(CoopPlayer coopPlayer, MedsItemClass meds, EBodyPart bodyPart, int animationVariant)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly MedsClass meds = meds;
+			private readonly MedsItemClass meds = meds;
 			private readonly EBodyPart bodyPart = bodyPart;
 			private readonly int animationVariant = animationVariant;
-			public Process<MedsController, GInterface142> process;
+			public Process<MedsController, GInterface165> process;
 			public Action confirmCallback;
 
 			internal MedsController ReturnController()
 			{
-				return MedsController.smethod_5<MedsController>(coopPlayer, meds, bodyPart, 1f, animationVariant);
+				return MedsController.smethod_6<MedsController>(coopPlayer, meds, bodyPart, 1f, animationVariant);
 			}
 
 			internal void SendPacket()
 			{
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = EProceedType.MedsClass,
 						ItemId = meds.Id,
-						ItemTemplateId = meds.TemplateId,
 						AnimationVariant = animationVariant,
 						BodyPart = bodyPart
 					}
@@ -1654,32 +1590,31 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class FoodControllerHandler(CoopPlayer coopPlayer, FoodClass foodDrink, float amount, EBodyPart bodyPart, int animationVariant)
+		private class FoodControllerHandler(CoopPlayer coopPlayer, FoodDrinkItemClass foodDrink, float amount, EBodyPart bodyPart, int animationVariant)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly FoodClass foodDrink = foodDrink;
+			private readonly FoodDrinkItemClass foodDrink = foodDrink;
 			private readonly float amount = amount;
 			private readonly EBodyPart bodyPart = bodyPart;
 			private readonly int animationVariant = animationVariant;
-			public Process<MedsController, GInterface142> process;
+			public Process<MedsController, GInterface165> process;
 			public Action confirmCallback;
 
 			internal MedsController ReturnController()
 			{
-				return MedsController.smethod_5<MedsController>(coopPlayer, foodDrink, EBodyPart.Head, amount, animationVariant);
+				return MedsController.smethod_6<MedsController>(coopPlayer, foodDrink, EBodyPart.Head, amount, animationVariant);
 			}
 
 			internal void SendPacket()
 			{
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = EProceedType.MedsClass,
 						ItemId = foodDrink.Id,
 						Amount = amount,
-						ItemTemplateId = foodDrink.TemplateId,
 						AnimationVariant = animationVariant,
 						BodyPart = bodyPart
 					}
@@ -1711,12 +1646,11 @@ namespace Fika.Core.Coop.Players
 			{
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = EProceedType.Knife,
-						ItemId = knife.Item.Id,
-						ItemTemplateId = knife.Item.TemplateId
+						ItemId = knife.Item.Id
 					}
 				});
 			}
@@ -1734,24 +1668,23 @@ namespace Fika.Core.Coop.Players
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
 			public readonly KnifeComponent knife = knife;
-			public Process<QuickKnifeKickController, GInterface146> process;
+			public Process<QuickKnifeKickController, GInterface169> process;
 			public Action confirmCallback;
 
 			internal QuickKnifeKickController ReturnController()
 			{
-				return QuickKnifeKickController.smethod_8<QuickKnifeKickController>(coopPlayer, knife);
+				return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(coopPlayer, knife);
 			}
 
 			internal void SendPacket()
 			{
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = EProceedType.QuickKnifeKick,
-						ItemId = knife.Item.Id,
-						ItemTemplateId = knife.Item.TemplateId
+						ItemId = knife.Item.Id
 					}
 				});
 			}
@@ -1765,11 +1698,11 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class GrenadeControllerHandler(CoopPlayer coopPlayer, GrenadeClass throwWeap)
+		private class GrenadeControllerHandler(CoopPlayer coopPlayer, ThrowWeapItemClass throwWeap)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly GrenadeClass throwWeap = throwWeap;
-			public Process<GrenadeController, IHandsThrowController> process;
+			private readonly ThrowWeapItemClass throwWeap = throwWeap;
+			public Process<GrenadeHandsController, IHandsThrowController> process;
 			public Action confirmCallback;
 
 			internal CoopClientGrenadeController ReturnController()
@@ -1781,12 +1714,11 @@ namespace Fika.Core.Coop.Players
 			{
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = EProceedType.GrenadeClass,
-						ItemId = throwWeap.Id,
-						ItemTemplateId = throwWeap.TemplateId
+						ItemId = throwWeap.Id
 					}
 				});
 			}
@@ -1800,11 +1732,11 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class QuickGrenadeControllerHandler(CoopPlayer coopPlayer, GrenadeClass throwWeap)
+		private class QuickGrenadeControllerHandler(CoopPlayer coopPlayer, ThrowWeapItemClass throwWeap)
 		{
 			private readonly CoopPlayer coopPlayer = coopPlayer;
-			private readonly GrenadeClass throwWeap = throwWeap;
-			public Process<QuickGrenadeThrowController, GInterface145> process;
+			private readonly ThrowWeapItemClass throwWeap = throwWeap;
+			public Process<QuickGrenadeThrowHandsController, GInterface168> process;
 			public Action confirmCallback;
 
 			internal CoopClientQuickGrenadeController ReturnController()
@@ -1816,12 +1748,11 @@ namespace Fika.Core.Coop.Players
 			{
 				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
 				{
-					HasProceedPacket = true,
-					ProceedPacket = new()
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
 					{
 						ProceedType = EProceedType.QuickGrenadeThrow,
-						ItemId = throwWeap.Id,
-						ItemTemplateId = throwWeap.TemplateId
+						ItemId = throwWeap.Id
 					}
 				});
 			}
@@ -1835,6 +1766,15 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
+		private class DropHandler(CoopPlayer coopPlayer)
+		{
+			private readonly CoopPlayer coopPlayer = coopPlayer;
+
+			internal void HandleResult()
+			{
+
+			}
+		}
 	}
 	#endregion
 }

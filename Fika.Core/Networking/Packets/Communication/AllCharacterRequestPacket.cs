@@ -2,7 +2,7 @@
 
 using LiteNetLib.Utils;
 using UnityEngine;
-using static Fika.Core.Networking.FikaSerialization;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {
@@ -11,8 +11,8 @@ namespace Fika.Core.Networking
 		public bool IsRequest = true;
 		public string ProfileId = profileId;
 		public bool HasCharacters = false;
-		public string[] Characters;
-		public PlayerInfoPacket PlayerInfo;
+		public int[] Characters;
+		public PlayerInfoPacket PlayerInfoPacket;
 		public bool IsAlive = true;
 		public bool IsAI = false;
 		public Vector3 Position;
@@ -25,11 +25,11 @@ namespace Fika.Core.Networking
 			HasCharacters = reader.GetBool();
 			if (HasCharacters)
 			{
-				Characters = reader.GetStringArray();
+				Characters = reader.GetIntArray();
 			}
 			if (!IsRequest)
 			{
-				PlayerInfo = PlayerInfoPacket.Deserialize(reader);
+				PlayerInfoPacket = reader.GetPlayerInfoPacket();
 			}
 			IsAlive = reader.GetBool();
 			IsAI = reader.GetBool();
@@ -48,7 +48,7 @@ namespace Fika.Core.Networking
 			}
 			if (!IsRequest)
 			{
-				PlayerInfoPacket.Serialize(writer, PlayerInfo);
+				writer.PutPlayerInfoPacket(PlayerInfoPacket);
 			}
 			writer.Put(IsAlive);
 			writer.Put(IsAI);

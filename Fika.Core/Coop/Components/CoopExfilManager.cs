@@ -9,6 +9,8 @@ using LiteNetLib;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.Components
 {
@@ -42,7 +44,7 @@ namespace Fika.Core.Coop.Components
 				if (playerHandler.startTime + playerHandler.point.Settings.ExfiltrationTime - game.PastTime <= 0)
 				{
 					playerHandlers.Remove(playerHandler);
-					game.MyExitLocation = playerHandler.point.Settings.Name;
+					game.ExitLocation = playerHandler.point.Settings.Name;
 					game.Extract(playerHandler.player, playerHandler.point);
 				}
 			}
@@ -71,7 +73,7 @@ namespace Fika.Core.Coop.Components
 
 						if (!exfiltrationPoint.UnmetRequirements(player).Any())
 						{
-							game.MyExitLocation = exfiltrationPoint.Settings.Name;
+							game.ExitLocation = exfiltrationPoint.Settings.Name;
 							game.Extract((CoopPlayer)player, exfiltrationPoint);
 						}
 					}
@@ -193,11 +195,15 @@ namespace Fika.Core.Coop.Components
 					point.ExfiltrationStartTime = game.PastTime;
 
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-					GenericPacket packet = new(EPackageType.ExfilCountdown)
+					GenericPacket packet = new()
 					{
 						NetId = mainPlayer.NetId,
-						ExfilName = point.Settings.Name,
-						ExfilStartTime = point.ExfiltrationStartTime
+						Type = EGenericSubPacketType.ExfilCountdown,
+						SubPacket = new ExfilCountdown()
+						{
+							ExfilName = point.Settings.Name,
+							ExfilStartTime = point.ExfiltrationStartTime
+						}
 					};
 
 					if (FikaBackendUtils.IsServer)

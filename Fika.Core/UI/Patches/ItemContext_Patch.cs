@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
@@ -28,7 +29,7 @@ namespace Fika.Core.UI.Patches
 		[PatchPrefix]
 		private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
 		{
-			if (contextInteractions is not GClass3042 gclass)
+			if (contextInteractions is not GClass3402 gclass)
 			{
 				return;
 			}
@@ -51,12 +52,12 @@ namespace Fika.Core.UI.Patches
 				}
 
 				IEnumerable<Item> parentItems = item.GetAllParentItems();
-				if (parentItems.Any(x => x is EquipmentClass))
+				if (parentItems.Any(x => x is InventoryEquipment))
 				{
 					return;
 				}
 
-				if (item.Parent.Item.TemplateId == "55d7217a4bdc2d86028b456d") // Fix for UI Fixes
+				if (item.Parent.Container.ParentItem.TemplateId == "55d7217a4bdc2d86028b456d") // Fix for UI Fixes
 				{
 					return;
 				}
@@ -77,7 +78,7 @@ namespace Fika.Core.UI.Patches
 						{
 							if (attachedItem.TemplateId == itemId)
 							{
-								string itemText = ColorUtils.ColorizeText(Colors.BLUE, item.ShortName.Localized());
+								string itemText = ColorizeText(EColor.BLUE, item.ShortName.Localized());
 								if (attachedItem == item)
 								{
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_BLACKLISTED.Localized(), itemText),
@@ -86,7 +87,7 @@ namespace Fika.Core.UI.Patches
 								else
 								{
 									string itemName = attachedItem.ShortName.Localized();
-									string attachedItemText = ColorUtils.ColorizeText(Colors.BLUE, itemName);
+									string attachedItemText = FikaUIGlobals.ColorizeText(EColor.BLUE, itemName);
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
 										[itemText, attachedItemText]),
 										iconType: EFT.Communications.ENotificationIconType.Alert);
@@ -120,7 +121,7 @@ namespace Fika.Core.UI.Patches
 					GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("senditemmenu").LoadAsset<GameObject>("SendItemMenu");
 					GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
 					uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
-					InventoryScreen.GClass3142 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3142>("ScreenController").Value;
+					InventoryScreen.GClass3511 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3511>("ScreenController").Value;
 					screenController.OnClose += () => { Object.Destroy(uiGameObj); };
 					SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
 					sendItemUI.PlayersDropdown.ClearOptions();

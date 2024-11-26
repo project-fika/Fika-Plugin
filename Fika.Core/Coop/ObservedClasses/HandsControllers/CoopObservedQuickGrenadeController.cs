@@ -1,7 +1,7 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -9,18 +9,11 @@ namespace Fika.Core.Coop.ObservedClasses
 	/// <summary>
 	/// This is only used by AI
 	/// </summary>
-	internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowController
+	internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 	{
-		public CoopPlayer coopPlayer;
-
-		private void Awake()
+		public static CoopObservedQuickGrenadeController Create(CoopPlayer player, ThrowWeapItemClass item)
 		{
-			coopPlayer = GetComponent<CoopPlayer>();
-		}
-
-		public static CoopObservedQuickGrenadeController Create(CoopPlayer player, GrenadeClass item)
-		{
-			return smethod_8<CoopObservedQuickGrenadeController>(player, item);
+			return smethod_9<CoopObservedQuickGrenadeController>(player, item);
 		}
 
 		public override bool CanChangeCompassState(bool newState)
@@ -57,7 +50,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		}
 
 		/// <summary>
-		/// Spawns a grenade, uses data from <see cref="FikaSerialization.GrenadePacket"/>
+		/// Spawns a grenade, uses data from <see cref="SubPackets.GrenadePacket"/>
 		/// </summary>
 		/// <param name="timeSinceSafetyLevelRemoved">The time since the safety was removed, use 0f</param>
 		/// <param name="position">The <see cref="Vector3"/> position to start from</param>

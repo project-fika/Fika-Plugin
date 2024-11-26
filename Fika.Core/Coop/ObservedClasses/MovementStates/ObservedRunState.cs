@@ -2,13 +2,13 @@
 
 using EFT;
 
-namespace Fika.Core.Coop.ObservedClasses.MovementStates
+namespace Fika.Core.Coop.ObservedClasses
 {
-	internal class ObservedRunState : GClass1717
+	public class ObservedRunState : RunState
 	{
 		public ObservedRunState(MovementContext movementContext) : base(movementContext)
 		{
-			MovementContext = (ObservedMovementContext)movementContext;
+			MovementContext = movementContext;
 		}
 
 		public override void UpdatePosition(float deltaTime)

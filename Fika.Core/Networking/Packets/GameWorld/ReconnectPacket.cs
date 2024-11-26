@@ -5,7 +5,7 @@ using LiteNetLib.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Fika.Core.Networking.Packets.GameWorld
+namespace Fika.Core.Networking
 {
 	public struct ReconnectPacket(bool isRequest) : INetSerializable
 	{
@@ -17,9 +17,10 @@ namespace Fika.Core.Networking.Packets.GameWorld
 		public Profile Profile;
 		public Profile.ProfileHealthClass ProfileHealthClass;
 		public Vector3 PlayerPosition;
+		public double TimeOffset;
 
 		public List<GStruct35> ThrowableData;
-		public List<WorldInteractiveObject.GStruct384> InteractivesData;
+		public List<WorldInteractiveObject.GStruct415> InteractivesData;
 		public Dictionary<int, byte> LampStates;
 		public Dictionary<int, Vector3> WindowBreakerStates;
 
@@ -49,6 +50,7 @@ namespace Fika.Core.Networking.Packets.GameWorld
 						Profile = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile>();
 						ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.ProfileHealthClass>();
 						PlayerPosition = reader.GetVector3();
+						TimeOffset = reader.GetDouble();
 						break;
 					case EReconnectDataType.Finished:
 					default:
@@ -83,6 +85,7 @@ namespace Fika.Core.Networking.Packets.GameWorld
 						writer.PutByteArray(SimpleZlib.CompressToBytes(Profile.ToJson(), 4));
 						writer.PutByteArray(SimpleZlib.CompressToBytes(ProfileHealthClass.ToJson(), 4));
 						writer.Put(PlayerPosition);
+						writer.Put(TimeOffset);
 						break;
 					case EReconnectDataType.Finished:
 					default:
