@@ -9,6 +9,7 @@ using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.Coop.Patches.Lighthouse;
+using Fika.Core.Coop.Patches.Overrides;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
@@ -729,6 +730,7 @@ namespace Fika.Core
 			new ScavExfilPatch().Disable();
 			new OverrideMaxAiAliveInRaidValuePatch().Disable();
 			new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
+			new FixAirdropCrashPatch().Disable();
 		}
 
 		private void EnableOverridePatches()
@@ -737,6 +739,7 @@ namespace Fika.Core
 			new OfflineRaidSettingsMenuPatch_Override().Enable();
 			new GetProfileAtEndOfRaidPatch_Override().Enable();
 			new FixSavageInventoryScreenPatch_Override().Enable();
+			new FixAirdropCrashPatch_Override().Enable();
 		}
 
 		public enum EDynamicAIRates
