@@ -381,15 +381,15 @@ namespace Fika.Core.Coop.ClientClasses
 			CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
 		}
 
-		public override void ReloadMag(MagazineItemClass magazine, ItemAddress gridItemAddress, Callback callback)
+		public override void ReloadMag(MagazineItemClass magazine, ItemAddress itemAddress, Callback callback)
 		{
 			if (!CanStartReload() || Blindfire)
 			{
 				return;
 			}
 
-			ReloadMagHandler handler = new(player, gridItemAddress, magazine);
-			CurrentOperation.ReloadMag(magazine, gridItemAddress, callback, handler.Process);
+			ReloadMagHandler handler = new(player, itemAddress, magazine);
+			CurrentOperation.ReloadMag(magazine, itemAddress, callback, handler.Process);
 		}
 
 		public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
