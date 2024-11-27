@@ -161,6 +161,11 @@ namespace Fika.Core.Coop.Utils
 
 		public static void AddPartyMembers(Dictionary<Profile, bool> profiles)
 		{
+			if (IsDedicated)
+			{
+				return;
+			}
+
 			if (Profile == null)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("AddPartyMembers: Own profile was null!");
