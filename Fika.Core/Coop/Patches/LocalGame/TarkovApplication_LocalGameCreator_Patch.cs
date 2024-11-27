@@ -133,7 +133,7 @@ namespace Fika.Core.Coop.Patches
 			}
 
 			// This gets incorrectly reset by the server, update it manually here during transit
-			if (isTransit && MainMenuUIScript.Exist)
+			if (!FikaBackendUtils.IsDedicated && isTransit && MainMenuUIScript.Exist)
 			{
 				MainMenuUIScript.Instance.UpdatePresence(UI.FikaUIGlobals.EFikaPlayerPresence.IN_RAID);
 			}
