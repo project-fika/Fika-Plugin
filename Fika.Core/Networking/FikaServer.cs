@@ -124,13 +124,16 @@ namespace Fika.Core.Networking
 		public async Task Init()
 		{
 			visualProfiles = [];
-			if (FikaBackendUtils.Profile != null)
+			if (!FikaBackendUtils.IsDedicated)
 			{
-				visualProfiles.Add(FikaBackendUtils.Profile, true);
-			}
-			else
-			{
-				logger.LogError("Init: Own profile was null!");
+				if (FikaBackendUtils.Profile != null)
+				{
+					visualProfiles.Add(FikaBackendUtils.Profile, true);
+				}
+				else
+				{
+					logger.LogError("Init: Own profile was null!");
+				} 
 			}
 
 			sendRate = FikaPlugin.SendRate.Value switch
