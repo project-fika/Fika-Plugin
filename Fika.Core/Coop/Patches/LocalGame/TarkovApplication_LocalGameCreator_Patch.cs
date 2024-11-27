@@ -8,6 +8,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
+using Fika.Core.UI.Custom;
 using HarmonyLib;
 using JsonType;
 using SPT.Reflection.Patching;
@@ -129,6 +130,12 @@ namespace Fika.Core.Coop.Patches
 			else
 			{
 				instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Creating coop game...");
+			}
+
+			// This gets incorrectly reset by the server, update it manually here during transit
+			if (isTransit && MainMenuUIScript.Exist)
+			{
+				MainMenuUIScript.Instance.UpdatePresence(UI.FikaUIGlobals.EFikaPlayerPresence.IN_RAID);
 			}
 
 			StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation);
