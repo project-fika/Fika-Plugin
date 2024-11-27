@@ -51,7 +51,7 @@ namespace Fika.Core
 	[BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 	public class FikaPlugin : BaseUnityPlugin
 	{
-		public const string FikaVersion = "1.0.1";
+		public const string FikaVersion = "1.0.2";
 		public static FikaPlugin Instance;
 		public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
 		public static string EFTVersionMajor { get; internal set; }
@@ -114,6 +114,7 @@ namespace Fika.Core
 		public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
 		public static ConfigEntry<bool> EnableChat { get; set; }
 		public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
+		public static ConfigEntry<bool> EnableOnlinePlayers { get; set; }
 		public static ConfigEntry<float> OnlinePlayersScale { get; set; }
 
 		// Coop | Name Plates
@@ -437,23 +438,26 @@ namespace Fika.Core
 			// Coop
 
 			ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true,
-				new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+				new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
 
 			AutoExtract = Config.Bind("Coop", "Auto Extract", false,
 				new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.",
-				tags: new ConfigurationManagerAttributes() { Order = 5 }));
+				tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
 			ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true,
-				new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+				new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
 			ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8),
-				new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+				new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
 			EnableChat = Config.Bind("Coop", "Enable Chat", false,
-				new ConfigDescription("Toggle to enable chat in game. Cannot be change mid raid", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+				new ConfigDescription("Toggle to enable chat in game. Cannot be change mid raid", tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
 			ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.RightControl),
-				new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+				new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+
+			EnableOnlinePlayers = Config.Bind("Coop", "Enable Online Players", true,
+				new ConfigDescription("If the online players menu should be shown in the menu.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
 			OnlinePlayersScale = Config.Bind("Coop", "Online Players Scale", 1f,
 				new ConfigDescription("The scale of the window that displays online players. Only change if it looks out of proportion.\n\nRequires a refresh of the main menu to take effect.",

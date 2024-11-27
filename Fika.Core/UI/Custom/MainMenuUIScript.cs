@@ -14,6 +14,14 @@ namespace Fika.Core.UI.Custom
 {
 	public class MainMenuUIScript : MonoBehaviour
 	{
+		public static bool Exist
+		{
+			get
+			{
+				return instance != null;
+			}
+		}
+
 		public static MainMenuUIScript Instance
 		{
 			get
@@ -27,6 +35,7 @@ namespace Fika.Core.UI.Custom
 		private Coroutine queryRoutine;
 		private MainMenuUI mainMenuUI;
 		private GameObject playerTemplate;
+		private GameObject userInterface;
 		private List<GameObject> players;
 		private DateTime lastRefresh;
 		private DateTime lastSet;
@@ -45,6 +54,20 @@ namespace Fika.Core.UI.Custom
 
 		private void OnEnable()
 		{
+			if (!FikaPlugin.EnableOnlinePlayers.Value)
+			{
+				if (userInterface != null)
+				{
+					userInterface.SetActive(false); 
+				}
+				return;
+			}
+
+			if (userInterface != null)
+			{
+				userInterface.SetActive(true);
+			}
+
 			if (transformToScale != null)
 			{
 				float scale = FikaPlugin.OnlinePlayersScale.Value;
@@ -74,6 +97,7 @@ namespace Fika.Core.UI.Custom
 
 			Transform mainMenuUITransform = this.mainMenuUI.gameObject.transform;
 			GameObject objectToAttach = mainMenuUITransform.GetChild(0).GetChild(0).gameObject;
+			userInterface = objectToAttach;
 			transformToScale = objectToAttach.RectTransform();
 			float scale = FikaPlugin.OnlinePlayersScale.Value;
 			transformToScale.localScale = new(scale, scale, scale);

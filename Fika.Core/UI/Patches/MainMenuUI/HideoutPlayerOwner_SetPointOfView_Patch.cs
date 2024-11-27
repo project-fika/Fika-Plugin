@@ -15,7 +15,7 @@ namespace Fika.Core.UI.Patches
 		[PatchPostfix]
 		public static void Postfix(HideoutPlayerOwner __instance)
 		{
-			if (__instance.FirstPersonMode && MainMenuUIScript.Instance != null)
+			if (__instance.FirstPersonMode && MainMenuUIScript.Exist)
 			{
 				MainMenuUIScript.Instance.UpdatePresence(FikaUIGlobals.EFikaPlayerPresence.IN_HIDEOUT);
 			}

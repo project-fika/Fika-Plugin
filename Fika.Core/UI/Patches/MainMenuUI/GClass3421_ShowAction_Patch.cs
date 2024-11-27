@@ -18,7 +18,10 @@ namespace Fika.Core.UI.Patches
 		{
 			if (!__instance.InRaid)
 			{
-				MainMenuUIScript.Instance.UpdatePresence(EFikaPlayerPresence.IN_STASH);
+				if (MainMenuUIScript.Exist)
+				{
+					MainMenuUIScript.Instance.UpdatePresence(EFikaPlayerPresence.IN_STASH); 
+				}
 			}
 		}
 	}
