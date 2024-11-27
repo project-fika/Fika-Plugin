@@ -48,6 +48,7 @@ namespace Fika.Core.Utils
 				if (pluginInfo.Metadata.GUID == "com.SPT.core")
 				{
 					SPTCoreVersion = pluginInfo.Metadata.Version;
+					FikaPlugin.Instance.FixSPTBugPatches();
 				}
 
 				CheckSpecialMods(pluginInfo.Metadata.GUID);

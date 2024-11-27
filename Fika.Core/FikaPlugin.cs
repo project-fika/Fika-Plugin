@@ -237,7 +237,6 @@ namespace Fika.Core
 
 			DisableSPTPatches();
 			EnableOverridePatches();
-			FixSPTBugPatches();
 
 			GetClientConfig();
 
@@ -737,9 +736,9 @@ namespace Fika.Core
 			new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
 		}
 
-		private void FixSPTBugPatches()
+		public void FixSPTBugPatches()
 		{
-			if(ModHandler.SPTCoreVersion == Version.Parse("3.10.0"))
+			if (ModHandler.SPTCoreVersion.ToString() == "3.10.0")
 			{
 				new FixAirdropCrashPatch().Disable();
 				new FixAirdropCrashPatch_Override().Enable();
