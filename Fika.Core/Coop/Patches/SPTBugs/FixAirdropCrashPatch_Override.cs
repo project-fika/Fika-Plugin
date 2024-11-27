@@ -6,8 +6,10 @@ using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Fika.Core.Coop.Patches.Overrides
+namespace Fika.Core.Coop.Patches.SPTBugs
 {
+	// This patch fixes a bug in SPT 3.10.0 where ServerAirdropManager being disposed, and this is null for any clients.
+	// It will be fixed in SPT 3.10.1, but to keep backwards compatibility keep this patch in until 3.11 for players that refuse to update their SPT version.
 	internal class FixAirdropCrashPatch_Override : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()

@@ -9,6 +9,7 @@ using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
 using SPT.Custom.Utils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -27,6 +28,8 @@ namespace Fika.Core.Utils
 		public bool QuestingBotsLoaded = false;
 		public bool SAINLoaded = false;
 
+		public Version SPTCoreVersion { get; private set; }
+
 		public void VerifyMods()
 		{
 			PluginInfo[] pluginInfos = [.. Chainloader.PluginInfos.Values];
@@ -41,6 +44,12 @@ namespace Fika.Core.Utils
 				uint crc32 = CRC32C.Compute(fileBytes, 0, fileBytes.Length);
 				loadedMods.Add(pluginInfo.Metadata.GUID, crc32);
 				logger.LogInfo($"Loaded plugin: [{pluginInfo.Metadata.Name}] with GUID [{pluginInfo.Metadata.GUID}] and crc32 [{crc32}]");
+
+				if (pluginInfo.Metadata.GUID == "com.SPT.core")
+				{
+					SPTCoreVersion = pluginInfo.Metadata.Version;
+				}
+
 				CheckSpecialMods(pluginInfo.Metadata.GUID);
 			}
 
