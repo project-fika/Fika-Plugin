@@ -15,7 +15,7 @@ namespace Fika.Core.UI.Patches
 		[PatchPostfix]
 		public static void Postfix()
 		{
-			if (MainMenuUIScript.Instance != null)
+			if (MainMenuUIScript.Exist)
 			{
 				MainMenuUIScript.Instance.UpdatePresence(FikaUIGlobals.EFikaPlayerPresence.IN_FLEA);
 			}
