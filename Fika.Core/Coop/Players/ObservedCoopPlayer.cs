@@ -1021,7 +1021,7 @@ namespace Fika.Core.Coop.Players
 
 		private IEnumerator DestroyNetworkedComponents()
 		{
-			yield return new WaitForSeconds(2);
+			yield return new WaitForSeconds(10);
 
 			if (Speaker != null)
 			{
