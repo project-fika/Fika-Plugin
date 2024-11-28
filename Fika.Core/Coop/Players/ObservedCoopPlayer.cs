@@ -796,8 +796,6 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnDead(EDamageType damageType)
 		{
-			StartCoroutine(DestroyNetworkedComponents());
-
 			if (HealthBar != null)
 			{
 				Destroy(HealthBar);
@@ -1017,27 +1015,6 @@ namespace Fika.Core.Coop.Players
 			MovementContext.PlayerAnimator.SetAbsoluteForwardVelocity(packet.AbsoluteForwardVelocity);
 
 			MovementContext.PlayerAnimator.SetIsGrounded(true);
-		}
-
-		private IEnumerator DestroyNetworkedComponents()
-		{
-			yield return new WaitForSeconds(2);
-
-			if (Speaker != null)
-			{
-				Speaker.Shut();
-				Speaker.OnPhraseTold -= OnPhraseTold;
-				Speaker.OnDestroy();
-			}
-
-			// Try to mitigate infinite firing loop further
-			if (HandsController is CoopObservedFirearmController firearmController)
-			{
-				if (firearmController.WeaponSoundPlayer != null && firearmController.WeaponSoundPlayer.enabled)
-				{
-					firearmController.WeaponSoundPlayer.enabled = false;
-				}
-			}
 		}
 
 		public void InitObservedPlayer(bool isDedicatedHost)
