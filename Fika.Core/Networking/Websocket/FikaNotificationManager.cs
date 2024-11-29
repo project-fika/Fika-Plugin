@@ -17,6 +17,14 @@ namespace Fika.Core.Networking.Websocket
 	public class FikaNotificationManager : MonoBehaviour
 	{
 		private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaNotificationManager");
+		public static FikaNotificationManager Instance;
+		public static bool Exists
+		{
+			get
+			{
+				return Instance != null;
+			}
+		}
 
 		public string Host { get; set; }
 		public string Url { get; set; }
@@ -36,6 +44,7 @@ namespace Fika.Core.Networking.Websocket
 
 		public void Awake()
 		{
+			Instance = this;
 			Host = RequestHandler.Host.Replace("http", "ws");
 			SessionId = RequestHandler.SessionId;
 			Url = $"{Host}/fika/notification/";

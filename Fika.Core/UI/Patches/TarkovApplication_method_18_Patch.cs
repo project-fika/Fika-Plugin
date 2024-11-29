@@ -20,7 +20,10 @@ namespace Fika.Core.UI.Patches
 		[PatchPostfix]
 		internal static void Postfix()
 		{
-			Singleton<PreloaderUI>.Instance.gameObject.AddComponent<FikaNotificationManager>();
+			if (!FikaNotificationManager.Exists)
+			{
+				Singleton<PreloaderUI>.Instance.gameObject.AddComponent<FikaNotificationManager>(); 
+			}
 		}
 	}
 }
