@@ -146,8 +146,9 @@ namespace Fika.Core.Coop.Custom
 			bot.AIData.BotOwner.Memory.GoalEnemy = null;
 			bot.AIData.BotOwner.PatrollingData.Pause();
 			bot.AIData.BotOwner.ShootData.EndShoot();
+			bot.AIData.BotOwner.ShootData.CanShootByState = false;
 			bot.ActiveHealthController.PauseAllEffects();
-			bot.AIData.BotOwner.StandBy.method_1();
+			bot.AIData.BotOwner.StandBy.StandByType = BotStandByType.paused;
 			bot.AIData.BotOwner.StandBy.CanDoStandBy = false;
 			bot.gameObject.SetActive(false);
 
@@ -191,6 +192,8 @@ namespace Fika.Core.Coop.Custom
 			bot.ActiveHealthController.UnpauseAllEffects();
 			bot.AIData.BotOwner.StandBy.Activate();
 			bot.AIData.BotOwner.StandBy.CanDoStandBy = true;
+			bot.AIData.BotOwner.ShootData.CanShootByState = true;
+			bot.AIData.BotOwner.ShootData.BlockFor(1f);
 			disabledBots.Remove(bot);
 		}
 
