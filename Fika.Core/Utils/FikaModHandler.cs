@@ -30,6 +30,12 @@ namespace Fika.Core.Utils
 
 		public Version SPTCoreVersion { get; private set; }
 
+		public FikaModHandler()
+		{
+			Chainloader.PluginInfos.TryGetValue("com.SPT.core", out PluginInfo pluginInfo);
+			SPTCoreVersion = pluginInfo.Metadata.Version;
+		}
+
 		public void VerifyMods()
 		{
 			PluginInfo[] pluginInfos = [.. Chainloader.PluginInfos.Values];
@@ -44,12 +50,6 @@ namespace Fika.Core.Utils
 				uint crc32 = CRC32C.Compute(fileBytes, 0, fileBytes.Length);
 				loadedMods.Add(pluginInfo.Metadata.GUID, crc32);
 				logger.LogInfo($"Loaded plugin: [{pluginInfo.Metadata.Name}] with GUID [{pluginInfo.Metadata.GUID}] and crc32 [{crc32}]");
-
-				if (pluginInfo.Metadata.GUID == "com.SPT.core")
-				{
-					SPTCoreVersion = pluginInfo.Metadata.Version;
-					FikaPlugin.Instance.FixSPTBugPatches();
-				}
 
 				CheckSpecialMods(pluginInfo.Metadata.GUID);
 			}
