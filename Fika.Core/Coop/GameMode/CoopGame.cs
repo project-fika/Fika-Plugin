@@ -731,6 +731,7 @@ namespace Fika.Core.Coop.GameMode
 				NetworkTimeSync.Start();
 			}
 			SyncTransitControllers();
+			FikaEventDispatcher.DispatchEvent(new FikaRaidStartedEvent(FikaBackendUtils.IsServer));
 		}
 
 		private void SyncTransitControllers()
