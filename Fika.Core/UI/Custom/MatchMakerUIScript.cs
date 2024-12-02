@@ -66,6 +66,7 @@ namespace Fika.Core.UI.Custom
 				StopCoroutine(serverQueryRoutine);
 				serverQueryRoutine = null;
 			}
+			DestroyThis();
 		}
 
 		protected void Start()
@@ -78,11 +79,6 @@ namespace Fika.Core.UI.Custom
 
 		protected void Update()
 		{
-			if (Input.GetKeyDown(KeyCode.Escape))
-			{
-				DestroyThis();
-			}
-
 			if (stopQuery)
 			{
 				if (serverQueryRoutine != null)
@@ -273,7 +269,6 @@ namespace Fika.Core.UI.Custom
 					FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
 					await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, raidSettings);
 					acceptButton.OnClick.Invoke();
-					DestroyThis();
 				}
 				else
 				{
@@ -331,7 +326,6 @@ namespace Fika.Core.UI.Custom
 			UnityEngine.Events.UnityEvent newEvent = new();
 			newEvent.AddListener(() =>
 			{
-				DestroyThis();
 				backButton.OnClick.Invoke();
 			});
 			DefaultUIButton newButtonComponent = newBackButton.GetComponent<DefaultUIButton>();
@@ -360,11 +354,10 @@ namespace Fika.Core.UI.Custom
 					StopCoroutine(serverQueryRoutine);
 					serverQueryRoutine = null;
 				}
+				return;
 			}
-			else if (!enabled)
-			{
-				serverQueryRoutine = StartCoroutine(ServerQuery());
-			}
+
+			serverQueryRoutine = StartCoroutine(ServerQuery());
 		}
 
 		private void AutoRefresh()
@@ -554,7 +547,6 @@ namespace Fika.Core.UI.Custom
 					{
 						if (success)
 						{
-							DestroyThis();
 							acceptButton.OnClick.Invoke();
 							return;
 						}
