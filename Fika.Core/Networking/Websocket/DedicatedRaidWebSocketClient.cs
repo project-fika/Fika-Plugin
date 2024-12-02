@@ -104,20 +104,15 @@ namespace Fika.Core.Networking.Websocket
 				case "fikaDedicatedJoinMatch":
 					string matchId = jsonObject.Value<string>("matchId");
 
-					GameObject matchmakerObject = MatchmakerAcceptScreen_Show_Patch.MatchmakerObject;
 					MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;
 
 					if (!string.IsNullOrEmpty(matchId))
 					{
 						TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-
 						tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, (bool success) =>
 						{
 							if (success)
 							{
-								// Hide matchmaker UI
-								matchmakerObject.SetActive(false);
-
 								// Matchmaker next screen (accept)
 								matchMakerAcceptScreen.method_19().HandleExceptions();
 							}
@@ -126,7 +121,6 @@ namespace Fika.Core.Networking.Websocket
 					else
 					{
 						PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", "Received fikaJoinMatch WS event but there was no matchId");
-						matchmakerObject.SetActive(true);
 					}
 
 					FikaPlugin.DedicatedRaidWebSocket.Close();
