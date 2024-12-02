@@ -119,7 +119,6 @@ namespace Fika.Core.UI.Custom
 				serverQueryRoutine = null;
 			}
 
-			Destroy(gameObject);
 			Destroy(fikaMatchMakerUi);
 			Destroy(this);
 		}
