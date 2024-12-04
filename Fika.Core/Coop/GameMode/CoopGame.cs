@@ -2283,14 +2283,15 @@ namespace Fika.Core.Coop.GameMode
 
 			GClass1924 parameters = new()
 			{
-				profile = Profile_0.ToUnparsedData([]),
+				profile = new GClass1962(this.Profile_0, GClass1971.Instance).ToUnparsedData(),
 				result = exitStatus,
 				killerId = gparam_0.Player.KillerId,
 				killerAid = gparam_0.Player.KillerAccountId,
 				exitName = exitName,
 				inSession = true,
 				favorite = (Profile_0.Info.Side == EPlayerSide.Savage),
-				playTime = (int)playTimeDuration.Duration().TotalSeconds
+				playTime = (int)playTimeDuration.Duration().TotalSeconds,
+				ProfileId = Profile_0.Id
 			};
 
 			try
@@ -2301,6 +2302,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("Exception caught when saving: " + ex.Message);
 			}
+
 			hasSaved = true;
 		}
 
