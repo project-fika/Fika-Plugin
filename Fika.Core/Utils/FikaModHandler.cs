@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
+using Fika.Core.Coop.Patches;
 using Fika.Core.Networking.Http;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
@@ -27,6 +28,7 @@ namespace Fika.Core.Utils
 
 		public bool QuestingBotsLoaded = false;
 		public bool SAINLoaded = false;
+		public bool UIFixesLoaded = false;
 
 		public Version SPTCoreVersion { get; private set; }
 
@@ -94,6 +96,18 @@ namespace Fika.Core.Utils
 			{
 				StaticManager.BeginCoroutine(InformInstallationError());
 			}
+
+			HandleModSpecificPatches();
+		}
+
+		private void HandleModSpecificPatches()
+		{
+			// We only want to load this if UI Fixes is not loaded
+			if (!UIFixesLoaded)
+			{
+				logger.LogInfo("UI Fixes is not loaded, enabling PartyInfoPanel fix");
+				new PartyInfoPanel_method_3_Patch().Enable();
+			}
 		}
 
 		private IEnumerator InformInstallationError()
@@ -117,13 +131,16 @@ namespace Fika.Core.Utils
 				case "com.DanW.QuestingBots":
 					{
 						QuestingBotsLoaded = true;
-
 						break;
 					}
 				case "me.sol.sain":
 					{
 						SAINLoaded = true;
-
+						break;
+					}
+				case "Tyfon.UIFixes":
+					{
+						UIFixesLoaded = true;
 						break;
 					}
 			}
