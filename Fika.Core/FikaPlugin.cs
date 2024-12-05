@@ -521,7 +521,7 @@ namespace Fika.Core
 				new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for your quests as long as all conditions are met.\nThis can be inconsistent and does not always work.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
 			SharedKillExperience = Config.Bind("Coop | Quest Sharing", "Shared Kill Experience", false,
-				new ConfigDescription("If enabled you will receive ½ of the experience when a friendly player kills an enemy", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+				new ConfigDescription("If enabled you will receive ½ of the experience when a friendly player kills an enemy (not bosses)", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
 			SharedBossExperience = Config.Bind("Coop | Quest Sharing", "Shared Boss Experience", false,
 				new ConfigDescription("If enabled you will receive ½ of the experience when a friendly player kills a boss", tags: new ConfigurationManagerAttributes() { Order = 0 }));
