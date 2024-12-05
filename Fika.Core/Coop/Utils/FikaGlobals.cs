@@ -29,17 +29,17 @@ namespace Fika.Core.Coop.Utils
 			EInteraction.BipodForwardOff, EInteraction.BipodBackwardOn, EInteraction.BipodBackwardOff
 		];
 
-		public static float GetOtherPlayerSensitivity()
+		internal static float GetOtherPlayerSensitivity()
 		{
 			return 1f;
 		}
 
-		public static float GetLocalPlayerSensitivity()
+		internal static float GetLocalPlayerSensitivity()
 		{
 			return Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity;
 		}
 
-		public static float GetLocalPlayerAimingSensitivity()
+		internal static float GetLocalPlayerAimingSensitivity()
 		{
 			return Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity;
 		}
@@ -49,32 +49,32 @@ namespace Fika.Core.Coop.Utils
 			return Time.time;
 		}
 
-		public static bool LampControllerNetIdNot0(LampController controller)
+		internal static bool LampControllerNetIdNot0(LampController controller)
 		{
 			return controller.NetId != 0;
 		}
 
-		public static int LampControllerGetNetId(LampController controller)
+		internal static int LampControllerGetNetId(LampController controller)
 		{
 			return controller.NetId;
 		}
 
-		public static bool WindowBreakerAvailableToSync(WindowBreaker breaker)
+		internal static bool WindowBreakerAvailableToSync(WindowBreaker breaker)
 		{
 			return breaker.AvailableToSync;
 		}
 
-		public static Item GetLootItemPositionItem(LootItemPositionClass positionClass)
+		internal static Item GetLootItemPositionItem(LootItemPositionClass positionClass)
 		{
 			return positionClass.Item;
 		}
 
-		public static EBodyPart GetBodyPartFromCollider(BodyPartCollider collider)
+		internal static EBodyPart GetBodyPartFromCollider(BodyPartCollider collider)
 		{
 			return collider.BodyPartType;
 		}
 
-		public static string FormatFileSize(long bytes)
+		internal static string FormatFileSize(long bytes)
 		{
 			int unit = 1024;
 			if (bytes < unit) { return $"{bytes} B"; }
@@ -83,7 +83,7 @@ namespace Fika.Core.Coop.Utils
 			return $"{bytes / Math.Pow(unit, exp):F2} {("KMGTPE")[exp - 1]}B";
 		}
 
-		public static void SpawnItemInWorld(Item item, CoopPlayer player)
+		internal static void SpawnItemInWorld(Item item, CoopPlayer player)
 		{
 			StaticManager.BeginCoroutine(SpawnItemRoutine(item, player));
 		}

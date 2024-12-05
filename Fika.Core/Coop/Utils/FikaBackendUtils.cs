@@ -23,26 +23,32 @@ namespace Fika.Core.Coop.Utils
 
 	public static class FikaBackendUtils
 	{
-		public static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
+		internal static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
+		/// <summary>
+		/// The local player's <see cref="EFT.Profile"/>
+		/// </summary>
 		public static Profile Profile;
+		/// <summary>
+		/// The name of the local player's PMC
+		/// </summary>
 		public static string PMCName;
-		public static EMatchmakerType MatchingType = EMatchmakerType.Single;
+		internal static EMatchmakerType MatchingType = EMatchmakerType.Single;
 		public static bool IsDedicated = false;
 		public static bool IsReconnect = false;
 		public static bool IsDedicatedGame = false;
 		public static bool IsTransit = false;
 		public static bool IsSpectator = false;
 		public static bool IsHostNatPunch = false;
-		public static PlayersRaidReadyPanel PlayersRaidReadyPanel;
-		public static MatchMakerGroupPreview MatchMakerGroupPreview;
-		public static int HostExpectedNumberOfPlayers = 1;
+		internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
+		internal static MatchMakerGroupPreview MatchMakerGroupPreview;
+		internal static int HostExpectedNumberOfPlayers = 1;
 		public static string RemoteIp;
 		public static int RemotePort;
 		public static int LocalPort = 0;
 		public static string HostLocationId;
-		public static bool RequestFikaWorld = false;
-		public static Vector3 ReconnectPosition = Vector3.zero;
-		public static RaidSettings CachedRaidSettings;
+		internal static bool RequestFikaWorld = false;
+		internal static Vector3 ReconnectPosition = Vector3.zero;
+		internal static RaidSettings CachedRaidSettings;
 
 		public static bool IsServer
 		{
@@ -66,8 +72,8 @@ namespace Fika.Core.Coop.Utils
 					&& Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0;
 			}
 		}
-		public static string GroupId { get; set; }
-		public static string RaidCode { get; set; }
+		public static string GroupId { get; internal set; }
+		public static string RaidCode { get; internal set; }
 		public static GClass1348 TransitData
 		{
 			get
@@ -85,7 +91,7 @@ namespace Fika.Core.Coop.Utils
 
 				return transitData;
 			}
-			set
+			internal set
 			{
 				transitData = value;
 			}
@@ -93,7 +99,7 @@ namespace Fika.Core.Coop.Utils
 
 		private static GClass1348 transitData;
 
-		public static void ResetTransitData()
+		internal static void ResetTransitData()
 		{
 			TransitData = null;
 		}
@@ -145,7 +151,7 @@ namespace Fika.Core.Coop.Utils
 			RaidCode = raidCode;
 		}
 
-		public static string GenerateRaidCode(int length)
+		internal static string GenerateRaidCode(int length)
 		{
 			System.Random random = new();
 			char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
@@ -159,7 +165,7 @@ namespace Fika.Core.Coop.Utils
 			return raidCode;
 		}
 
-		public static void AddPartyMembers(Dictionary<Profile, bool> profiles)
+		internal static void AddPartyMembers(Dictionary<Profile, bool> profiles)
 		{
 			if (IsDedicated)
 			{
