@@ -308,7 +308,7 @@ namespace Fika.Core.Coop.GameMode
 			InvokeMatchingStatusChanged(status, progress);
 		}
 
-		#region Bot
+		#region Bots
 		/// <summary>
 		/// Returns all human players
 		/// </summary>
@@ -453,9 +453,6 @@ namespace Fika.Core.Coop.GameMode
 			bool isSpecial = false;
 			if (role is not WildSpawnType.pmcUSEC and not WildSpawnType.pmcBEAR and not WildSpawnType.assault)
 			{
-#if DEBUG
-				Logger.LogWarning($"Bot {profile.Info.Settings.Role} is a special bot.");
-#endif
 				isSpecial = true;
 			}
 
@@ -514,9 +511,6 @@ namespace Fika.Core.Coop.GameMode
 				FikaGlobals.GetOtherPlayerSensitivity, GClass1599.Default, mongoId, nextOperationId);
 
 			coopBot.Location = Location_0.Id;
-#if DEBUG
-			Logger.LogInfo($"Bot {profile.Info.Settings.Role} created at {position} SUCCESSFULLY!");
-#endif
 			Bots.Add(coopBot.ProfileId, coopBot);
 
 			if (profile.Info.Side is not EPlayerSide.Savage)
@@ -1645,10 +1639,6 @@ namespace Fika.Core.Coop.GameMode
 					await GetWeather();
 					WeatherController.Instance.method_0(WeatherClasses);
 				}
-			}
-			else
-			{
-				Logger.LogError("WeatherController was null!");
 			}
 
 			gameWorld.TriggersModule = gameObject.AddComponent<LocalClientTriggersModule>();
