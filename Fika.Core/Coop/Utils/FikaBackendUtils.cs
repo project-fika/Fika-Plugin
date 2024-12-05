@@ -25,30 +25,30 @@ namespace Fika.Core.Coop.Utils
 	{
 		internal static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
 		/// <summary>
-		/// The local player's <see cref="EFT.Profile"/>
+		/// The local player <see cref="EFT.Profile"/>
 		/// </summary>
-		public static Profile Profile;
+		public static Profile Profile { get; internal set; }
 		/// <summary>
-		/// The name of the local player's PMC
+		/// The name of the local player PMC
 		/// </summary>
-		public static string PMCName;
-		internal static EMatchmakerType MatchingType = EMatchmakerType.Single;
+		public static string PMCName { get; internal set; }
+		public static EMatchmakerType MatchingType { get; internal set; } = EMatchmakerType.Single;
 		public static bool IsDedicated = false;
-		public static bool IsReconnect = false;
-		public static bool IsDedicatedGame = false;
-		public static bool IsTransit = false;
-		public static bool IsSpectator = false;
-		public static bool IsHostNatPunch = false;
-		internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
-		internal static MatchMakerGroupPreview MatchMakerGroupPreview;
-		internal static int HostExpectedNumberOfPlayers = 1;
-		public static string RemoteIp;
-		public static int RemotePort;
-		public static int LocalPort = 0;
-		public static string HostLocationId;
+		public static bool IsReconnect { get; internal set; } = false;
+		public static bool IsDedicatedGame { get; set; } = false;
+		public static bool IsTransit { get; internal set; } = false;
+		public static bool IsSpectator { get; internal set; } = false;
+		public static bool IsHostNatPunch { get; internal set; } = false;		
+		public static int HostExpectedNumberOfPlayers { get; set; } = 1;
+		public static string RemoteIp { get; internal set; }
+		public static int RemotePort { get; internal set; }
+		public static int LocalPort { get; internal set; } = 0;
+		public static string HostLocationId { get; internal set; }
 		internal static bool RequestFikaWorld = false;
 		internal static Vector3 ReconnectPosition = Vector3.zero;
 		internal static RaidSettings CachedRaidSettings;
+		internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
+		internal static MatchMakerGroupPreview MatchMakerGroupPreview;
 
 		public static bool IsServer
 		{
