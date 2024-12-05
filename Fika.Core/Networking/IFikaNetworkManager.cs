@@ -9,6 +9,6 @@ namespace Fika.Core.Networking
 		public CoopHandler CoopHandler { get; set; }
 		public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new();
 		public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new();
-		public void PrintStatistics();
+		internal void PrintStatistics();
 	}
 }
