@@ -489,9 +489,24 @@ namespace Fika.Core.Coop.Players
                     killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
 			}
 
-			if (FikaPlugin.SharedBossExperience.Value && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR) && role.CountAsBossForStatistics())
+			bool countAsBoss = role.CountAsBossForStatistics() && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
+
+			if (FikaPlugin.SharedKillExperience.Value && !countAsBoss)
 			{
 				int toReceive = experience / 2;
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive} from {killer.Profile.Nickname}"); 
+#endif
+				Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.Kills);
+				return;
+			}
+
+			if (FikaPlugin.SharedBossExperience.Value && countAsBoss)
+			{
+				int toReceive = experience / 2;
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive} from {killer.Profile.Nickname}");
+#endif
 				Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
 			}
 		}
