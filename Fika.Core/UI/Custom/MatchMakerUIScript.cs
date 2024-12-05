@@ -41,6 +41,7 @@ namespace Fika.Core.UI.Custom
 		private bool _started;
 		private Coroutine serverQueryRoutine;
 		private float loadingTextTick = 0f;
+		private GameObject mmGameObject;
 
 		internal RaidSettings raidSettings;
 		internal DefaultUIButton backButton;
@@ -121,6 +122,7 @@ namespace Fika.Core.UI.Custom
 
 			Destroy(fikaMatchMakerUi);
 			Destroy(this);
+			Destroy(mmGameObject);
 		}
 
 		protected void OnDestroy()
@@ -138,6 +140,7 @@ namespace Fika.Core.UI.Custom
 
 			GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("newmatchmakerui").LoadAsset<GameObject>("NewMatchMakerUI");
 			GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
+			mmGameObject = uiGameObj;
 			fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
 			fikaMatchMakerUi.transform.parent = transform;
 			fikaMatchMakerUi.GetComponent<Canvas>().sortingOrder = 100; // Might wanna do this directly in the SDK later
