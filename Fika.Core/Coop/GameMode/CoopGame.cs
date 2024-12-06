@@ -310,114 +310,6 @@ namespace Fika.Core.Coop.GameMode
 
 		#region Bots
 		/// <summary>
-		/// Returns all human players
-		/// </summary>
-		/// <param name="coopHandler"><see cref="CoopHandler"/> used to fetch players</param>
-		/// <returns></returns>
-		private List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
-		{
-			List<CoopPlayer> humanPlayers = [];
-
-			// Grab all players
-			foreach (CoopPlayer player in coopHandler.Players.Values)
-			{
-				if ((player.IsYourPlayer || player is ObservedCoopPlayer) && player.HealthController.IsAlive)
-				{
-					humanPlayers.Add(player);
-				}
-			}
-			return humanPlayers;
-		}
-
-		/// <summary>
-		/// Calculates the distance from all players
-		/// </summary>
-		/// <param name="position">The <see cref="Vector3"/> position</param>
-		/// <param name="humanPlayers"><see cref="List{T}"/> of all human <see cref="CoopPlayer"/>s</param>
-		/// <returns></returns>
-		private float GetDistanceFromPlayers(Vector3 position, List<CoopPlayer> humanPlayers)
-		{
-			float distance = float.PositiveInfinity;
-
-			foreach (Player player in humanPlayers)
-			{
-				float tempDistance = Vector3.SqrMagnitude(position - player.Position);
-
-				if (tempDistance < distance) // Get the closest distance to any player. so we dont despawn bots in a players face.
-				{
-					distance = tempDistance;
-				}
-			}
-			return distance;
-		}
-
-		/// <summary>
-		/// Grabs the bot furthest away from all players and returns its distance
-		/// </summary>
-		/// <param name="humanPlayers">List of all human <see cref="CoopPlayer"/>s</param>
-		/// <param name="furthestDistance">The furthest <see cref="float"/> distance</param>
-		/// <returns></returns>
-		private string GetFurthestBot(List<CoopPlayer> humanPlayers, out float furthestDistance)
-		{
-			string furthestBot = string.Empty;
-			furthestDistance = 0f;
-
-			foreach (KeyValuePair<string, Player> botKeyValuePair in Bots)
-			{
-				if (IsInvalidBotForDespawning(botKeyValuePair))
-				{
-					continue;
-				}
-
-				float tempDistance = GetDistanceFromPlayers(botKeyValuePair.Value.Position, humanPlayers);
-
-				if (tempDistance > furthestDistance) // We still want the furthest bot.
-				{
-					furthestDistance = tempDistance;
-					furthestBot = botKeyValuePair.Key;
-				}
-			}
-
-			return furthestBot;
-		}
-
-		/// <summary>
-		/// Checks whether this bot is valid for despawning
-		/// </summary>
-		/// <param name="kvp"><see cref="KeyValuePair{TKey, TValue}"/> of <see cref="string"/> profileId and <see cref="Player"/> player</param>
-		/// <returns></returns>
-		private bool IsInvalidBotForDespawning(KeyValuePair<string, Player> kvp)
-		{
-			if (kvp.Value == null || kvp.Value == null || kvp.Value.Position == null)
-			{
-#if DEBUG
-				Logger.LogWarning("Bot is null, skipping");
-#endif
-				return true;
-			}
-
-			CoopBot coopBot = (CoopBot)kvp.Value;
-
-			if (coopBot != null)
-			{
-#if DEBUG
-				Logger.LogWarning("Bot is not started, skipping");
-#endif
-				return true;
-			}
-
-			WildSpawnType role = kvp.Value.Profile.Info.Settings.Role;
-
-			if (role is not WildSpawnType.pmcUSEC and not WildSpawnType.pmcBEAR and not WildSpawnType.assault)
-			{
-				// We skip all the bots that are not pmcUSEC, pmcBEAR or assault. That means we never remove bosses, bossfollowers, and raiders
-				return true;
-			}
-
-			return false;
-		}
-
-		/// <summary>
 		/// Used to spawn a bot for the host
 		/// </summary>
 		/// <param name="profile"><see cref="Profile"/> to spawn</param>
@@ -439,16 +331,6 @@ namespace Fika.Core.Coop.GameMode
 				return null;
 			}
 
-			while (!Status.IsRunned())
-			{
-				if (Status == GameStatus.Stopped)
-				{
-					return null;
-				}
-
-				await Task.Yield();
-			}
-
 			WildSpawnType role = profile.Info.Settings.Role;
 			bool isSpecial = false;
 			if (role is not WildSpawnType.pmcUSEC and not WildSpawnType.pmcBEAR and not WildSpawnType.assault)
@@ -459,7 +341,6 @@ namespace Fika.Core.Coop.GameMode
 			if (FikaPlugin.EnforcedSpawnLimits.Value && Bots.Count >= botsController_0.BotSpawner.MaxBots)
 			{
 				bool despawned = false;
-
 				if (FikaPlugin.DespawnFurthest.Value)
 				{
 					despawned = TryDespawnFurthestBot(profile, position, coopHandler);
@@ -604,9 +485,9 @@ namespace Fika.Core.Coop.GameMode
 		/// <returns></returns>
 		private bool TryDespawnFurthestBot(Profile profile, Vector3 position, CoopHandler coopHandler)
 		{
-			List<CoopPlayer> humanPlayers = GetPlayers(coopHandler);
+			List<CoopPlayer> humanPlayers = BotExtensions.GetPlayers(coopHandler);
 
-			string botKey = GetFurthestBot(humanPlayers, out float furthestDistance);
+			string botKey = BotExtensions.GetFurthestBot(humanPlayers, Bots, out float furthestDistance);
 
 			if (botKey == string.Empty)
 			{
@@ -616,7 +497,7 @@ namespace Fika.Core.Coop.GameMode
 				return false;
 			}
 
-			if (furthestDistance > GetDistanceFromPlayers(position, humanPlayers))
+			if (furthestDistance > BotExtensions.GetDistanceFromPlayers(position, humanPlayers))
 			{
 #if DEBUG
 				Logger.LogWarning($"We're not despawning anything. The furthest bot is closer than the one we wanted to spawn.");
