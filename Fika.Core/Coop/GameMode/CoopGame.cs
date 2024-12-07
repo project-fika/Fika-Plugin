@@ -1522,6 +1522,8 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
+			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+
 			gameWorld.TriggersModule = gameObject.AddComponent<LocalClientTriggersModule>();
 			gameWorld.FillLampControllers();
 
