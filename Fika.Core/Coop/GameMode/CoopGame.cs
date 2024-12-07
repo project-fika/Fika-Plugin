@@ -843,9 +843,7 @@ namespace Fika.Core.Coop.GameMode
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
 			Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, ISession session,
 			ELocalMode localMode)
-		{
-			gameWorld.LocationId = Location_0.Id;
-
+		{	
 			bool spawnedInSession = profile.Side == EPlayerSide.Savage || TransitControllerAbstractClass.IsTransit(profile.Id, out int _);
 			profile.SetSpawnedInSession(spawnedInSession);
 
@@ -1003,7 +1001,74 @@ namespace Fika.Core.Coop.GameMode
 				throw new NullReferenceException("CoopHandler was missing!");
 			}
 
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			gameWorld.LocationId = Location_0.Id;
+
 			ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, !isServer, Location_0.DisabledScavExits);
+
+			Logger.LogInfo($"Location: {Location_0.Name}");
+			BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+
+			if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
+				instance.ArtilleryShelling.ArtilleryMapsConfigs.Keys.Contains(Location_0.Id))
+			{
+				if (isServer)
+				{
+					gameWorld.ServerShellingController = new GClass607();
+				}
+				gameWorld.ClientShellingController = new GClass1381(isServer);
+			}
+
+			if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
+			{
+#if DEBUG
+				Logger.LogWarning("Spawning halloween prefabs");
+#endif
+				gameWorld.HalloweenEventController = new HalloweenEventControllerClass();
+				GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
+				if (gameObject != null)
+				{
+					transform.InstantiatePrefab(gameObject);
+				}
+				else
+				{
+					Logger.LogError("CoopGame::vmethod_1: Error loading Halloween assets!");
+				}
+
+				if (isServer)
+				{
+					halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
+				}
+			}
+
+			if (FikaPlugin.Instance.UseBTR && instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
+			{
+#if DEBUG
+				Logger.LogWarning("Spawning BTR controller");
+#endif
+				gameWorld.BtrController = new BTRControllerClass(gameWorld);
+			}
+
+			bool transitActive;
+			if (instance == null)
+			{
+				transitActive = false;
+			}
+			else
+			{
+				BackendConfigSettingsClass.GClass1529 transitSettings = instance.transitSettings;
+				transitActive = transitSettings != null && transitSettings.active;
+			}
+			if (transitActive)
+			{
+				Singleton<GameWorld>.Instance.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
+					Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
+					Profile_0, localRaidSettings_0);
+			}
+			else
+			{
+				TransitControllerAbstractClass.DisableTransitPoints();
+			}
 
 			ApplicationConfigClass config = BackendConfigAbstractClass.Config;
 			if (config.FixedFrameRate > 0f)
@@ -1437,106 +1502,6 @@ namespace Fika.Core.Coop.GameMode
 				DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
 			}
 
-			Logger.LogInfo($"Location: {Location_0.Name}");
-			BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
-
-			if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
-				instance.ArtilleryShelling.ArtilleryMapsConfigs.Keys.Contains(Location_0.Id))
-			{
-				if (isServer)
-				{
-					Singleton<GameWorld>.Instance.ServerShellingController = new GClass607();
-				}
-				Singleton<GameWorld>.Instance.ClientShellingController = new GClass1381(isServer);
-			}
-
-			if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
-			{
-#if DEBUG
-				Logger.LogWarning("Spawning halloween prefabs");
-#endif
-				gameWorld.HalloweenEventController = new HalloweenEventControllerClass();
-				GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
-				if (gameObject != null)
-				{
-					transform.InstantiatePrefab(gameObject);
-				}
-				else
-				{
-					Logger.LogError("CoopGame::vmethod_1: Error loading Halloween assets!");
-				}
-
-				if (isServer)
-				{
-					halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
-				}
-			}
-
-			if (FikaPlugin.Instance.UseBTR && instance != null && instance.BTRSettings.LocationsWithBTR.Contains(Location_0.Id))
-			{
-#if DEBUG
-				Logger.LogWarning("Spawning BTR controller");
-#endif
-				gameWorld.BtrController = new BTRControllerClass(gameWorld);
-			}
-
-			bool transitActive;
-			if (instance == null)
-			{
-				transitActive = false;
-			}
-			else
-			{
-				BackendConfigSettingsClass.GClass1529 transitSettings = instance.transitSettings;
-				transitActive = transitSettings != null && transitSettings.active;
-			}
-			if (transitActive)
-			{
-				Singleton<GameWorld>.Instance.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
-					Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
-					Profile_0, localRaidSettings_0);
-			}
-			else
-			{
-				TransitControllerAbstractClass.DisableTransitPoints();
-			}
-
-			if (WeatherController.Instance != null)
-			{
-				SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
-				if (isServer)
-				{
-					GClass1310 weather = await iSession.WeatherRequest();
-					Season = weather.Season;
-					SeasonsSettings = weather.SeasonsSettings;
-					if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
-					{
-						WeatherClasses = weather.Weathers;
-						WeatherController.Instance.method_0(WeatherClasses);
-					}
-				}
-				else if (!isServer)
-				{
-					await GetWeather();
-					WeatherController.Instance.method_0(WeatherClasses);
-				}
-			}
-
-			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
-
-			gameWorld.TriggersModule = gameObject.AddComponent<LocalClientTriggersModule>();
-			gameWorld.FillLampControllers();
-
-			WeatherReady = true;
-			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
-
-			Class442 seasonController = new();
-			gameWorld.GInterface29_0 = seasonController;
-
-#if DEBUG
-			Logger.LogWarning("Running season handler");
-#endif
-			await seasonController.Run(Season, SeasonsSettings);
 			await WaitForOtherPlayers();
 
 			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
@@ -1591,6 +1556,60 @@ namespace Fika.Core.Coop.GameMode
 
 			Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
 			GameWorld_0.RegisterBorderZones();
+		}
+
+		public override IEnumerator vmethod_5(Action runCallback)
+		{
+			if (WeatherController.Instance != null)
+			{
+				SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
+				if (isServer)
+				{
+					Task<GClass1310> weatherTask = iSession.WeatherRequest();
+					while (!weatherTask.IsCompleted)
+					{
+						yield return new WaitForEndOfFrame();
+					}
+					GClass1310 weather = weatherTask.Result;
+					Season = weather.Season;
+					SeasonsSettings = weather.SeasonsSettings;
+					if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
+					{
+						WeatherClasses = weather.Weathers;
+						WeatherController.Instance.method_0(WeatherClasses);
+					}
+				}
+				else if (!isServer)
+				{
+					Task getWeather = GetWeather();
+					while (!getWeather.IsCompleted)
+					{
+						yield return new WaitForEndOfFrame();
+					}
+					WeatherController.Instance.method_0(WeatherClasses);
+				}
+			}
+
+			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+
+			GameWorld_0.TriggersModule = gameObject.AddComponent<LocalClientTriggersModule>();
+			GameWorld_0.FillLampControllers();
+
+			WeatherReady = true;
+			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+
+			Class442 seasonController = new();
+			GameWorld_0.GInterface29_0 = seasonController;
+
+#if DEBUG
+			Logger.LogWarning("Running season handler");
+#endif
+			Task runSeason = seasonController.Run(Season, SeasonsSettings);
+			while (!runSeason.IsCompleted)
+			{
+				yield return new WaitForEndOfFrame();
+			}
+			yield return base.vmethod_5(runCallback);
 		}
 
 		private async Task GetWeather()
