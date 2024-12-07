@@ -195,9 +195,6 @@ namespace Fika.Core
 		public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
 
 		// Gameplay
-		public static ConfigEntry<float> HeadDamageMultiplier { get; set; }
-		public static ConfigEntry<float> ArmpitDamageMultiplier { get; set; }
-		public static ConfigEntry<float> StomachDamageMultiplier { get; set; }
 		public static ConfigEntry<bool> DisableBotMetabolism { get; set; }
 		#endregion
 
@@ -644,7 +641,7 @@ namespace Fika.Core
 			ForceIP = Config.Bind("Network", "Force IP", "",
 				new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-			ForceBindIP = Config.Bind("Network", "Force Bind IP", "",
+			ForceBindIP = Config.Bind("Network", "Force Bind IP", "0.0.0.0",
 				new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 7 }));
 
 			AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f,
@@ -669,16 +666,6 @@ namespace Fika.Core
 				new ConfigDescription("Local simulation is behind by Send Rate * Smoothing Rate. This guarantees that we always have enough snapshots in the buffer to mitigate lags & jitter during interpolation.\n\nLow = 1.5\nMedium = 2\nHigh = 2.5\n\nSet this to 'High' if movement isn't smooth. Cannot be changed during a raid.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Gameplay
-
-			HeadDamageMultiplier = Config.Bind("Gameplay", "Head Damage Multiplier", 1f,
-				new ConfigDescription("X multiplier to damage taken on the head collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
-
-			ArmpitDamageMultiplier = Config.Bind("Gameplay", "Armpit Damage Multiplier", 1f,
-				new ConfigDescription("X multiplier to damage taken on the armpits collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 3 }));
-
-			StomachDamageMultiplier = Config.Bind("Gameplay", "Stomach Damage Multiplier", 1f,
-				new ConfigDescription("X multiplier to damage taken on the stomach collider. 0.2 = 20%", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
-
 			DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false,
 				new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
 		}

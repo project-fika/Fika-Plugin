@@ -212,20 +212,6 @@ namespace Fika.Core.Coop.Players
 						return;
 					}
 				}
-				if (colliderType == EBodyPartColliderType.HeadCommon)
-				{
-					damageInfo.Damage *= FikaPlugin.HeadDamageMultiplier.Value;
-				}
-
-				if (colliderType is EBodyPartColliderType.RightSideChestUp or EBodyPartColliderType.LeftSideChestUp)
-				{
-					damageInfo.Damage *= FikaPlugin.ArmpitDamageMultiplier.Value;
-				}
-
-				if (bodyPartType is EBodyPart.Stomach)
-				{
-					damageInfo.Damage *= FikaPlugin.StomachDamageMultiplier.Value;
-				}
 			}
 
 			if (damageInfo.Weapon != null)
