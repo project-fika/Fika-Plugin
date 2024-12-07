@@ -1061,7 +1061,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 			if (transitActive)
 			{
-				Singleton<GameWorld>.Instance.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
+				gameWorld.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
 					Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
 					Profile_0, localRaidSettings_0);
 			}
@@ -1089,6 +1089,11 @@ namespace Fika.Core.Coop.GameMode
 				PlayerCameraController.Create(gparam_0.Player);
 				CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
 				CameraClass.Instance.IsActive = false;
+
+				if (FikaBackendUtils.IsDedicated && gameWorld.TransitController is FikaHostTransitController hostController)
+				{
+					hostController.SetupDedicatedPlayerTransitStash(player);
+				}
 			}
 
 			await WaitForPlayersToConnect();

@@ -30,13 +30,12 @@ namespace Fika.Core.Coop.HostClasses
 			playersInTransitZone = [];
 			dediTransit = false;
 			transittedPlayers = [];
+		}
 
-			if (FikaBackendUtils.IsDedicated)
-			{
-				CoopPlayer dediPlayer = (CoopPlayer)GamePlayerOwner.MyPlayer;
-				TransferItemsController.InitPlayerStash(dediPlayer);
-				dediPlayer.UpdateBtrTraderServiceData().HandleExceptions();
-			}
+		public void SetupDedicatedPlayerTransitStash(LocalPlayer player)
+		{
+			TransferItemsController.InitPlayerStash(player);
+			player.UpdateBtrTraderServiceData().HandleExceptions();
 		}
 
 		private readonly LocalRaidSettings localRaidSettings;
