@@ -1400,15 +1400,6 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void OnGameSessionEnd(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
-		{
-			if (AbstractQuestControllerClass is CoopClientSharedQuestController sharedController)
-			{
-				sharedController.ManageQuestStatusesForPveOfflineGameEnd();
-			}
-			base.OnGameSessionEnd(exitStatus, pastTime, locationId, exitName);
-		}
-
 		public Item FindQuestItem(string itemId)
 		{
 			foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
