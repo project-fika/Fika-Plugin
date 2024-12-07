@@ -432,6 +432,10 @@ namespace Fika.Core.Coop.Players
 				return;
 			}
 
+#if DEBUG
+			FikaPlugin.Instance.FikaLogger.LogWarning($"HandleTeammateKill: Weapon {(damage.Weapon != null ? damage.Weapon.Name.Localized() : "None")}"); 
+#endif
+
 			if (role != WildSpawnType.pmcBEAR)
 			{
 				if (role == WildSpawnType.pmcUSEC)
@@ -813,37 +817,13 @@ namespace Fika.Core.Coop.Players
 			{
 				StartCoroutine(LocalPlayerDied());
 			}
-		}
-
-		private void FindKillerWeapon()
-		{
-			GStruct448<Item> itemResult = FindItemById(lastWeaponId, false, false);
-			if (!itemResult.Succeeded)
-			{
-				foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
-				{
-					if (grenadeClass.Id == lastWeaponId)
-					{
-						LastDamageInfo.Weapon = grenadeClass;
-						break;
-					}
-				}
-				return;
-			}
-
-			LastDamageInfo.Weapon = itemResult.Value;
-		}
+		}		
 
 		/// <summary>
 		/// TODO: Refactor... BSG code makes this difficult
 		/// </summary>
 		private void GenerateDogtagDetails()
 		{
-			if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(lastWeaponId))
-			{
-				FindKillerWeapon();
-			}
-
 			string accountId = AccountId;
 			string profileId = ProfileId;
 			string nickname = Profile.Nickname;

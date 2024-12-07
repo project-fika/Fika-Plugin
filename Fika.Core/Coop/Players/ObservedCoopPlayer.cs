@@ -1548,6 +1548,30 @@ namespace Fika.Core.Coop.Players
 			}
 			LastBodyPart = bodyPart;
 			lastWeaponId = weaponId;
+
+			if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(lastWeaponId))
+			{
+				FindKillerWeapon();
+			}
+		}
+
+		private void FindKillerWeapon()
+		{
+			GStruct448<Item> itemResult = FindItemById(lastWeaponId, false, false);
+			if (!itemResult.Succeeded)
+			{
+				foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
+				{
+					if (grenadeClass.Id == lastWeaponId)
+					{
+						LastDamageInfo.Weapon = grenadeClass;
+						break;
+					}
+				}
+				return;
+			}
+
+			LastDamageInfo.Weapon = itemResult.Value;
 		}
 
 		private class RemoveHandsControllerHandler(ObservedCoopPlayer coopPlayer, Callback callback)
