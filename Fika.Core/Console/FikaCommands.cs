@@ -1,8 +1,17 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Console.Core;
+using EFT.InventoryLogic;
 using EFT.UI;
+using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
+using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Fika.Core.Console
 {
