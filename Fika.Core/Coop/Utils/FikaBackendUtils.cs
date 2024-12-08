@@ -38,7 +38,7 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsDedicatedGame { get; set; } = false;
 		public static bool IsTransit { get; internal set; } = false;
 		public static bool IsSpectator { get; internal set; } = false;
-		public static bool IsHostNatPunch { get; internal set; } = false;		
+		public static bool IsHostNatPunch { get; internal set; } = false;
 		public static int HostExpectedNumberOfPlayers { get; set; } = 1;
 		public static string RemoteIp { get; internal set; }
 		public static int RemotePort { get; internal set; }

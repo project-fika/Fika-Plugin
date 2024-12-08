@@ -22,7 +22,7 @@ namespace Fika.Core.UI.Patches
 		{
 			if (!FikaNotificationManager.Exists)
 			{
-				Singleton<PreloaderUI>.Instance.gameObject.AddComponent<FikaNotificationManager>(); 
+				Singleton<PreloaderUI>.Instance.gameObject.AddComponent<FikaNotificationManager>();
 			}
 		}
 	}

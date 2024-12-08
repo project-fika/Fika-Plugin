@@ -5,11 +5,9 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Fika.Core.UI.Custom;
-using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System;
-using UnityEngine;
 using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket

@@ -41,7 +41,7 @@ namespace Fika.Core.Networking
 	/// </summary>
 	public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
 	{
-		public CoopPlayer MyPlayer;		
+		public CoopPlayer MyPlayer;
 		public int Ping = 0;
 		public int ServerFPS = 0;
 		public int ConnectedClients = 0;

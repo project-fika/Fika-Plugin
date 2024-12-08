@@ -58,7 +58,7 @@ namespace Fika.Core.UI.Custom
 			{
 				if (userInterface != null)
 				{
-					userInterface.SetActive(false); 
+					userInterface.SetActive(false);
 				}
 				return;
 			}

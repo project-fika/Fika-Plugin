@@ -843,7 +843,7 @@ namespace Fika.Core.Coop.GameMode
 			CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
 			Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, ISession session,
 			ELocalMode localMode)
-		{	
+		{
 			bool spawnedInSession = profile.Side == EPlayerSide.Savage || TransitControllerAbstractClass.IsTransit(profile.Id, out int _);
 			profile.SetSpawnedInSession(spawnedInSession);
 

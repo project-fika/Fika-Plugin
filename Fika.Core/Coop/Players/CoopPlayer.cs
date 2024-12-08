@@ -8,7 +8,6 @@ using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
@@ -817,7 +816,7 @@ namespace Fika.Core.Coop.Players
 			{
 				StartCoroutine(LocalPlayerDied());
 			}
-		}		
+		}
 
 		/// <summary>
 		/// TODO: Refactor... BSG code makes this difficult

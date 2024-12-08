@@ -133,7 +133,7 @@ namespace Fika.Core.Networking
 				else
 				{
 					logger.LogError("Init: Own profile was null!");
-				} 
+				}
 			}
 
 			sendRate = FikaPlugin.SendRate.Value switch

@@ -20,7 +20,7 @@ namespace Fika.Core.UI.Patches
 			{
 				if (MainMenuUIScript.Exist)
 				{
-					MainMenuUIScript.Instance.UpdatePresence(EFikaPlayerPresence.IN_STASH); 
+					MainMenuUIScript.Instance.UpdatePresence(EFikaPlayerPresence.IN_STASH);
 				}
 			}
 		}

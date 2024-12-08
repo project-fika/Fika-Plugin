@@ -1,6 +1,6 @@
-﻿using SPT.Reflection.Patching;
+﻿using SPT.Common.Utils;
+using SPT.Reflection.Patching;
 using System.Reflection;
-using SPT.Common.Utils;
 
 namespace Fika.Core.Coop.Patches.SPTBugs
 {
