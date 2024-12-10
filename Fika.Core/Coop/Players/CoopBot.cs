@@ -145,7 +145,7 @@ namespace Fika.Core.Coop.Players
 				{
 					int toReceive = experience / 2;
 #if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive} from {killer.Profile.Nickname}"); 
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive} from {aggressor.Profile.Nickname}"); 
 #endif
 
 					Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
@@ -155,7 +155,7 @@ namespace Fika.Core.Coop.Players
 				{
 					int toReceive = experience / 2;
 #if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive} from {killer.Profile.Nickname}");
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive} from {aggressor.Profile.Nickname}");
 #endif
 					Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
 				}
