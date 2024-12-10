@@ -131,17 +131,47 @@ namespace Fika.Core.Coop.Players
 		{
 			base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
-			if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
+			if (aggressor.GroupId == "Fika" && !aggressor.IsYourPlayer)
 			{
-				if (aggressor.Profile.Info.GroupId == "Fika" && !aggressor.IsYourPlayer)
+				WildSpawnType role = Profile.Info.Settings.Role;
+				bool countAsBoss = role.CountAsBossForStatistics() && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
+				int experience = Profile.Info.Settings.Experience;
+				if (experience < 0)
 				{
+					experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
+				}
+
+				if (FikaPlugin.SharedKillExperience.Value && !countAsBoss)
+				{
+					int toReceive = experience / 2;
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive} from {killer.Profile.Nickname}"); 
+#endif
+
+					Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
+				}
+
+				if (FikaPlugin.SharedBossExperience.Value && countAsBoss)
+				{
+					int toReceive = experience / 2;
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive} from {killer.Profile.Nickname}");
+#endif
+					Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
+				}
+
+				if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
+				{
+#if DEBUG
+					FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
+#endif
 					CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 					if (mainPlayer != null)
 					{
 						float distance = Vector3.Distance(aggressor.Position, Position);
-						mainPlayer.HandleTeammateKill(ref damageInfo, bodyPart, Side, Profile.Info.Settings.Role, ProfileId,
+						mainPlayer.HandleTeammateKill(ref damageInfo, bodyPart, Side, role, ProfileId,
 							distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
-							(CoopPlayer)aggressor, Profile.Info.Settings.Experience);
+							(CoopPlayer)aggressor);
 					}
 				}
 			}

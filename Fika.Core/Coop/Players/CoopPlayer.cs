@@ -8,7 +8,6 @@ using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
@@ -425,7 +424,7 @@ namespace Fika.Core.Coop.Players
 		public void HandleTeammateKill(ref DamageInfoStruct damage, EBodyPart bodyPart,
 			EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
 			float distance, List<string> targetEquipment,
-			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer, int experience)
+			HealthEffects enemyEffects, List<string> zoneIds, CoopPlayer killer)
 		{
 			if (!HealthController.IsAlive)
 			{
@@ -477,27 +476,6 @@ namespace Fika.Core.Coop.Players
 				/*AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                     bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
                     killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
-			}
-
-			bool countAsBoss = role.CountAsBossForStatistics() && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
-
-			if (FikaPlugin.SharedKillExperience.Value && !countAsBoss)
-			{
-				int toReceive = experience / 2;
-#if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive} from {killer.Profile.Nickname}"); 
-#endif
-				Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.Kills);
-				return;
-			}
-
-			if (FikaPlugin.SharedBossExperience.Value && countAsBoss)
-			{
-				int toReceive = experience / 2;
-#if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive} from {killer.Profile.Nickname}");
-#endif
-				Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
 			}
 		}
 
