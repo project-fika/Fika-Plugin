@@ -13,12 +13,12 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 			new GClass422_Activate_Patch().Enable();
 
 #if DEBUG
-			new zryachiydebugpatch1().Enable();
+			/*new zryachiydebugpatch1().Enable();
 			new zryachiydebugpatch2().Enable();
-			//new zryachiydebugpatch3().Enable();
+			new zryachiydebugpatch3().Enable();
 			new zryachiydebugpatch4().Enable();
 			new zryachiydebugpatch5().Enable();
-			new zryachiydebugpatch6().Enable();
+			new zryachiydebugpatch6().Enable();*/
 #endif
 		}
 
