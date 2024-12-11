@@ -5,3 +5,4 @@
 ## Checklist before requesting a review
 - [ ] I have performed a self-review of my code
 - [ ] I have thoroughly tested the code changes
+- [ ] I have thoroughly tested the code changes on a dedicated session
