@@ -666,6 +666,7 @@ namespace Fika.Core.Coop.GameMode
 
 				float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
 				SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized());
+				Logger.LogInfo("Waiting for other players to finish loading...");
 
 				if (isServer)
 				{
@@ -1510,6 +1511,7 @@ namespace Fika.Core.Coop.GameMode
 			await WaitForOtherPlayers();
 
 			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+			Logger.LogInfo("All players are loaded, continuing...");
 
 			if (isServer)
 			{
@@ -1568,6 +1570,7 @@ namespace Fika.Core.Coop.GameMode
 			if (WeatherController.Instance != null)
 			{
 				SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
+				Logger.LogInfo("Generating and initializing weather...");
 				if (isServer)
 				{
 					Task<GClass1310> weatherTask = iSession.WeatherRequest();
