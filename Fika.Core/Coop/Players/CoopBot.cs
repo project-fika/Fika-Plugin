@@ -170,7 +170,7 @@ namespace Fika.Core.Coop.Players
 					FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive} from {aggressor.Profile.Nickname}");
 #endif
 					mainPlayer.Profile.EftStats.SessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-					mainPlayer.Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.KilledBoss);
+					mainPlayer.Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
 				}
 
 				if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
