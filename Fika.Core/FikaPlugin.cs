@@ -185,7 +185,6 @@ namespace Fika.Core
 		public static ConfigEntry<bool> NativeSockets { get; set; }
 		public static ConfigEntry<string> ForceIP { get; set; }
 		public static ConfigEntry<string> ForceBindIP { get; set; }
-		public static ConfigEntry<float> AutoRefreshRate { get; set; }
 		public static ConfigEntry<int> UDPPort { get; set; }
 		public static ConfigEntry<bool> UseUPnP { get; set; }
 		public static ConfigEntry<bool> UseNatPunching { get; set; }
@@ -223,14 +222,13 @@ namespace Fika.Core
 			Instance = this;
 
 			GetNatPunchServerConfig();
-			SetupConfig();
+			//SetupConfig();
 			EnableFikaPatches();
 			gameObject.AddComponent<MainThreadDispatcher>();
 
 #if GOLDMASTER
             new TOS_Patch().Enable();
 #endif
-			SetupConfigEventHandlers();
 
 			DisableSPTPatches();
 			FixSPTBugPatches();
@@ -339,7 +337,7 @@ namespace Fika.Core
 			new RaidSettingsWindow_Show_Patch().Enable();
 			new TransitControllerAbstractClass_Exist_Patch().Enable();
 			new BotReload_method_1_Patch().Enable();
-
+			new Class1374_ReloadBackendLocale_Patch().Enable();
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
 			new GClass1640_method_0_Patch().Enable();
@@ -421,6 +419,27 @@ namespace Fika.Core
 			natPunchServerConfig.LogValues();
 		}
 
+		/// <summary>
+		/// This is required for the locales to be properly loaded, for some reason they are still unavailable for a few seconds after getting populated
+		/// </summary>
+		/// <param name="__result">The <see cref="Task"/> that populates the locales</param>
+		/// <returns></returns>
+		public IEnumerator WaitForLocales(Task __result)
+		{
+			Logger.LogInfo("Waiting for locales to be ready...");
+			while (!__result.IsCompleted)
+			{
+				yield return null;
+			}
+			while (LocaleUtils.BEPINEX_H_ADVANCED.Localized() == "F_BepInEx_H_Advanced")
+			{
+				yield return new WaitForSeconds(1);
+			}
+			Logger.LogInfo("Locales are ready!");
+			SetupConfig();
+			FikaVersionLabel_Patch.UpdateVersionLabel();
+		}
+
 		private void SetupConfig()
 		{
 			// Hidden
@@ -430,243 +449,261 @@ namespace Fika.Core
 
 			// Advanced
 
-			OfficialVersion = Config.Bind("Advanced", "Official Version", false,
-				new ConfigDescription("Show official version instead of Fika version.", tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
+			OfficialVersion = Config.Bind(LocaleUtils.BEPINEX_H_ADVANCED.Localized(), LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_OFFICIAL_VERSION_D.Localized(), tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
 
 			// Coop
 
-			ShowNotifications = Instance.Config.Bind("Coop", "Show Feed", true,
-				new ConfigDescription("Enable custom notifications when a player dies, extracts, kills a boss, etc.", tags: new ConfigurationManagerAttributes() { Order = 7 }));
+			string coopHeader = LocaleUtils.BEPINEX_H_COOP.Localized();
 
-			AutoExtract = Config.Bind("Coop", "Auto Extract", false,
-				new ConfigDescription("Automatically extracts after the extraction countdown. As a host, this will only work if there are no clients connected.",
+			ShowNotifications = Instance.Config.Bind(coopHeader, LocaleUtils.BEPINEX_SHOW_FEED_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_SHOW_FEED_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 7 }));
+
+			AutoExtract = Config.Bind(coopHeader, LocaleUtils.BEPINEX_AUTO_EXTRACT_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_AUTO_EXTRACT_D.Localized(),
 				tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-			ShowExtractMessage = Config.Bind("Coop", "Show Extract Message", true,
-				new ConfigDescription("Whether to show the extract message after dying/extracting.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+			ShowExtractMessage = Config.Bind(coopHeader, LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-			ExtractKey = Config.Bind("Coop", "Extract Key", new KeyboardShortcut(KeyCode.F8),
-				new ConfigDescription("The key used to extract from the raid.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+			ExtractKey = Config.Bind(coopHeader, LocaleUtils.BEPINEX_EXTRACT_KEY_T.Localized(), new KeyboardShortcut(KeyCode.F8),
+				new ConfigDescription(LocaleUtils.BEPINEX_EXTRACT_KEY_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-			EnableChat = Config.Bind("Coop", "Enable Chat", false,
-				new ConfigDescription("Toggle to enable chat in game. Cannot be change mid raid", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+			EnableChat = Config.Bind(coopHeader, LocaleUtils.BEPINEX_ENABLE_CHAT_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_ENABLE_CHAT_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-			ChatKey = Config.Bind("Coop", "Chat Key", new KeyboardShortcut(KeyCode.RightControl),
-				new ConfigDescription("The key used to open the chat window.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+			ChatKey = Config.Bind(coopHeader, LocaleUtils.BEPINEX_CHAT_KEY_T.Localized(), new KeyboardShortcut(KeyCode.RightControl),
+				new ConfigDescription(LocaleUtils.BEPINEX_CHAT_KEY_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
-			EnableOnlinePlayers = Config.Bind("Coop", "Enable Online Players", true,
-				new ConfigDescription("If the online players menu should be shown in the menu.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+			EnableOnlinePlayers = Config.Bind(coopHeader, LocaleUtils.BEPINEX_ENABLE_ONLINE_PLAYER_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_ENABLE_ONLINE_PLAYER_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
-			OnlinePlayersScale = Config.Bind("Coop", "Online Players Scale", 1f,
-				new ConfigDescription("The scale of the window that displays online players. Only change if it looks out of proportion.\n\nRequires a refresh of the main menu to take effect.",
+			OnlinePlayersScale = Config.Bind(coopHeader, LocaleUtils.BEPINEX_ONLINE_PLAYERS_SCALE_T.Localized(), 1f,
+				new ConfigDescription(LocaleUtils.BEPINEX_ONLINE_PLAYERS_SCALE_D.Localized(),
 				new AcceptableValueRange<float>(0.5f, 1.5f), new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Name Plates
 
-			UseNamePlates = Config.Bind("Coop | Name Plates", "Show Player Name Plates", false,
-				new ConfigDescription("Toggle Health-Bars & Names.", tags: new ConfigurationManagerAttributes() { Order = 13 }));
+			string coopNameplatesHeader = LocaleUtils.BEPINEX_H_COOP_NAME_PLATES.Localized();
 
-			HideHealthBar = Config.Bind("Coop | Name Plates", "Hide Health Bar", false,
-				new ConfigDescription("Completely hides the health bar.", tags: new ConfigurationManagerAttributes() { Order = 12 }));
+			UseNamePlates = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_USE_NAME_PLATES_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 13 }));
 
-			UseHealthNumber = Config.Bind("Coop | Name Plates", "Show HP% instead of bar", false,
-				new ConfigDescription("Shows health in % amount instead of using the bar.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
+			HideHealthBar = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_HIDE_HEALTH_BAR_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_HIDE_HEALTH_BAR_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 12 }));
 
-			ShowEffects = Config.Bind("Coop | Name Plates", "Show Effects", true,
-				new ConfigDescription("If status effects should be displayed below the health bar.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+			UseHealthNumber = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_USE_PERCENT_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_USE_PERCENT_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 11 }));
 
-			UsePlateFactionSide = Config.Bind("Coop | Name Plates", "Show Player Faction Icon", true,
-				new ConfigDescription("Shows the player faction icon next to the HP bar.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+			ShowEffects = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_SHOW_EFFECTS_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_SHOW_EFFECTS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-			HideNamePlateInOptic = Config.Bind("Coop | Name Plates", "Hide Name Plate in Optic", true,
-				new ConfigDescription("Hides the name plate when viewing through PiP scopes.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+			UsePlateFactionSide = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_SHOW_FACTION_ICON_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_SHOW_FACTION_ICON_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-			NamePlateUseOpticZoom = Config.Bind("Coop | Name Plates", "Name Plates Use Optic Zoom", true,
-				new ConfigDescription("If name plate location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 7, IsAdvanced = true }));
+			HideNamePlateInOptic = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_HIDE_IN_OPTIC_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_HIDE_IN_OPTIC_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-			DecreaseOpacityNotLookingAt = Config.Bind("Coop | Name Plates", "Decrease Opacity In Peripheral", true,
-				new ConfigDescription("Decreases the opacity of the name plates when not looking at a player.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+			NamePlateUseOpticZoom = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_OPTIC_USE_ZOOM_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_OPTIC_USE_ZOOM_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 7, IsAdvanced = true }));
 
-			NamePlateScale = Config.Bind("Coop | Name Plates", "Name Plate Scale", 0.22f,
-				new ConfigDescription("Size of the name plates", new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 5 }));
+			DecreaseOpacityNotLookingAt = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_DEC_OPAC_PERI_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_DEC_OPAC_PERI_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-			OpacityInADS = Config.Bind("Coop | Name Plates", "Opacity in ADS", 0.75f,
-				new ConfigDescription("The opacity of the name plates when aiming down sights.", new AcceptableValueRange<float>(0.1f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
+			NamePlateScale = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_NAME_PLATE_SCALE_T.Localized(), 0.22f,
+				new ConfigDescription(LocaleUtils.BEPINEX_NAME_PLATE_SCALE_D.Localized(), new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes() { Order = 5 }));
 
-			MaxDistanceToShow = Config.Bind("Coop | Name Plates", "Max Distance to Show", 500f,
-				new ConfigDescription("The maximum distance at which name plates will become invisible, starts to fade at half the input value.", new AcceptableValueRange<float>(10f, 1000f), new ConfigurationManagerAttributes() { Order = 3 }));
+			OpacityInADS = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_ADS_OPAC_T.Localized(), 0.75f,
+				new ConfigDescription(LocaleUtils.BEPINEX_ADS_OPAC_D.Localized(), new AcceptableValueRange<float>(0.1f, 1f), new ConfigurationManagerAttributes() { Order = 4 }));
 
-			MinimumOpacity = Config.Bind("Coop | Name Plates", "Minimum Opacity", 0.1f,
-				new ConfigDescription("The minimum opacity of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
+			MaxDistanceToShow = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_MAX_DISTANCE_T.Localized(), 500f,
+				new ConfigDescription(LocaleUtils.BEPINEX_MAX_DISTANCE_D.Localized(), new AcceptableValueRange<float>(10f, 1000f), new ConfigurationManagerAttributes() { Order = 3 }));
 
-			MinimumNamePlateScale = Config.Bind("Coop | Name Plates", "Minimum Name Plate Scale", 0.01f,
-				new ConfigDescription("The minimum scale of the name plates.", new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+			MinimumOpacity = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_MIN_OPAC_T.Localized(), 0.1f,
+				new ConfigDescription(LocaleUtils.BEPINEX_MIN_OPAC_D.Localized(), new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 2 }));
 
-			UseOcclusion = Config.Bind("Coop | Name Plates", "Use Occlusion", false,
-				new ConfigDescription("Use occlusion to hide the name plate when the player is out of sight.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+			MinimumNamePlateScale = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_MIN_PLATE_SCALE_T.Localized(), 0.01f,
+				new ConfigDescription(LocaleUtils.BEPINEX_MIN_PLATE_SCALE_D.Localized(), new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes() { Order = 1 }));
+
+			UseOcclusion = Config.Bind(coopNameplatesHeader, LocaleUtils.BEPINEX_USE_OCCLUSION_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_USE_OCCLUSION_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Quest Sharing
 
-			QuestTypesToShareAndReceive = Config.Bind("Coop | Quest Sharing", "Quest Types", EQuestSharingTypes.All,
-				new ConfigDescription("Which quest types to receive and send. PlaceBeacon is both markers and items.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+			string coopQuestSharingHeader = LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized();
 
-			QuestSharingNotifications = Config.Bind("Coop | Quest Sharing", "Show Notifications", true,
-				new ConfigDescription("If a notification should be shown when quest progress is shared with out.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+			QuestTypesToShareAndReceive = Config.Bind(coopQuestSharingHeader, LocaleUtils.BEPINEX_QUEST_TYPES_T.Localized(), EQuestSharingTypes.All,
+				new ConfigDescription(LocaleUtils.BEPINEX_QUEST_TYPES_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-			EasyKillConditions = Config.Bind("Coop | Quest Sharing", "Easy Kill Conditions", false,
-				new ConfigDescription("Enables easy kill conditions. When this is used, any time a friendly player kills something, it treats it as if you killed it for your quests as long as all conditions are met.\nThis can be inconsistent and does not always work.", tags: new ConfigurationManagerAttributes() { Order = 2 }));
+			QuestSharingNotifications = Config.Bind(coopQuestSharingHeader, LocaleUtils.BEPINEX_QS_NOTIFICATIONS_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_QS_NOTIFICATIONS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-			SharedKillExperience = Config.Bind("Coop | Quest Sharing", "Shared Kill Experience", false,
-				new ConfigDescription("If enabled you will receive ½ of the experience when a friendly player kills an enemy (not bosses)", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+			EasyKillConditions = Config.Bind(coopQuestSharingHeader, LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 2 }));
 
-			SharedBossExperience = Config.Bind("Coop | Quest Sharing", "Shared Boss Experience", false,
-				new ConfigDescription("If enabled you will receive ½ of the experience when a friendly player kills a boss", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+			SharedKillExperience = Config.Bind(coopQuestSharingHeader, LocaleUtils.BEPINEX_SHARED_KILL_XP_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_SHARED_KILL_XP_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
-			// Coop | Pinginging
+			SharedBossExperience = Config.Bind(coopQuestSharingHeader, LocaleUtils.BEPINEX_SHARED_BOSS_XP_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_SHARED_BOSS_XP_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
-			UsePingSystem = Config.Bind("Coop | Pinging", "Ping System", false,
-				new ConfigDescription("Toggle Ping System. If enabled you can receive and send pings by pressing the ping key.", tags: new ConfigurationManagerAttributes() { Order = 11 }));
+			// Coop | Pinging
 
-			PingButton = Config.Bind("Coop | Pinging", "Ping Button", new KeyboardShortcut(KeyCode.U),
-				new ConfigDescription("Button used to send pings.", tags: new ConfigurationManagerAttributes() { Order = 10 }));
+			string coopPingingHeader = LocaleUtils.BEPINEX_H_COOP_PINGING.Localized();
 
-			PingColor = Config.Bind("Coop | Pinging", "Ping Color", Color.white,
-				new ConfigDescription("The color of your pings when displayed for other players.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+			UsePingSystem = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_SYSTEM_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_SYSTEM_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 11 }));
 
-			PingSize = Config.Bind("Coop | Pinging", "Ping Size", 1f,
-				new ConfigDescription("The multiplier of the ping size.", new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 8 }));
+			PingButton = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_BUTTON_T.Localized(), new KeyboardShortcut(KeyCode.Semicolon),
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_BUTTON_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 10 }));
 
-			PingTime = Config.Bind("Coop | Pinging", "Ping Time", 3,
-				new ConfigDescription("How long pings should be displayed.", new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 7 }));
+			PingColor = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_COLOR_T.Localized(), Color.white,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_COLOR_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-			PlayPingAnimation = Config.Bind("Coop | Pinging", "Play Ping Animation", false,
-				new ConfigDescription("Plays the pointing animation automatically when pinging. Can interfere with gameplay.", tags: new ConfigurationManagerAttributes() { Order = 6 }));
+			PingSize = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_SIZE_T.Localized(), 1f,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_SIZE_D.Localized(), new AcceptableValueRange<float>(0.1f, 2f), new ConfigurationManagerAttributes() { Order = 8 }));
 
-			ShowPingDuringOptics = Config.Bind("Coop | Pinging", "Show Ping During Optics", false,
-				new ConfigDescription("If pings should be displayed while aiming down an optics scope.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+			PingTime = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_TIME_T.Localized(), 3,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_TIME_D.Localized(), new AcceptableValueRange<int>(2, 10), new ConfigurationManagerAttributes() { Order = 7 }));
 
-			PingUseOpticZoom = Config.Bind("Coop | Pinging", "Ping Use Optic Zoom", true,
-				new ConfigDescription("If ping location should be displayed using the PiP optic camera.", tags: new ConfigurationManagerAttributes() { Order = 4, IsAdvanced = true }));
+			PlayPingAnimation = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_ANIMATION_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_ANIMATION_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 6 }));
 
-			PingScaleWithDistance = Config.Bind("Coop | Pinging", "Ping Scale With Distance", true,
-				new ConfigDescription("If ping size should scale with distance from player.", tags: new ConfigurationManagerAttributes() { Order = 3, IsAdvanced = true }));
+			ShowPingDuringOptics = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_OPTICS_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_OPTICS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-			PingMinimumOpacity = Config.Bind("Coop | Pinging", "Ping Minimum Opacity", 0.05f,
-				new ConfigDescription("The minimum opacity of pings when looking straight at them.", new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
+			PingUseOpticZoom = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_OPTIC_ZOOM_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_OPTIC_ZOOM_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 4, IsAdvanced = true }));
 
-			ShowPingRange = Config.Bind("Coop | Pinging", "Show Ping Range", false,
-				new ConfigDescription("Shows the range from your player to the ping if enabled.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+			PingScaleWithDistance = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_SCALE_DISTANCE_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_SCALE_DISTANCE_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 3, IsAdvanced = true }));
 
-			PingSound = Config.Bind("Coop | Pinging", "Ping Sound", EPingSound.SubQuestComplete,
-				new ConfigDescription("The audio that plays on ping", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+			PingMinimumOpacity = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_MIN_OPAC_T.Localized(), 0.05f,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_MIN_OPAC_D.Localized(), new AcceptableValueRange<float>(0f, 0.5f), new ConfigurationManagerAttributes() { Order = 2, IsAdvanced = true }));
+
+			ShowPingRange = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_RANGE_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_RANGE_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+			PingSound = Config.Bind(coopPingingHeader, LocaleUtils.BEPINEX_PING_SOUND_T.Localized(), EPingSound.SubQuestComplete,
+				new ConfigDescription(LocaleUtils.BEPINEX_PING_SOUND_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Debug
 
-			FreeCamButton = Config.Bind("Coop | Debug", "Free Camera Button", new KeyboardShortcut(KeyCode.F9),
-				"Button used to toggle free camera.");
+			string coopDebugHeader = LocaleUtils.BEPINEX_H_COOP_DEBUG.Localized();
 
-			AllowSpectateBots = Config.Bind("Coop | Debug", "Allow Spectating Bots", true,
-				"If we should allow spectating bots if all players are dead/extracted");
+			FreeCamButton = Config.Bind(coopDebugHeader, LocaleUtils.BEPINEX_FREE_CAM_BUTTON_T.Localized(), new KeyboardShortcut(KeyCode.F9),
+				LocaleUtils.BEPINEX_FREE_CAM_BUTTON_D.Localized());
 
-			AZERTYMode = Config.Bind("Coop | Debug", "AZERTY Mode", false,
-				"If free camera should use AZERTY keys for input.");
+			AllowSpectateBots = Config.Bind(coopDebugHeader, LocaleUtils.BEPINEX_SPECTATE_BOTS_T.Localized(), true,
+				LocaleUtils.BEPINEX_SPECTATE_BOTS_D.Localized());
 
-			DroneMode = Config.Bind("Coop | Debug", "Drone Mode", false,
-				"If the free camera should move only along the vertical axis like a drone");
+			AZERTYMode = Config.Bind(coopDebugHeader, LocaleUtils.BEPINEX_AZERTY_MODE_T.Localized(), false,
+				LocaleUtils.BEPINEX_AZERTY_MODE_D.Localized());
 
-			KeybindOverlay = Config.Bind("Coop | Debug", "Keybind Overlay", true,
-				"If an overlay with all free cam keybinds should show.");
+			DroneMode = Config.Bind(coopDebugHeader, LocaleUtils.BEPINEX_DRONE_MODE_T.Localized(), false,
+				LocaleUtils.BEPINEX_DRONE_MODE_D.Localized());
+
+			KeybindOverlay = Config.Bind(coopDebugHeader, LocaleUtils.BEPINEX_KEYBIND_OVERLAY_T.Localized(), true,
+				LocaleUtils.BEPINEX_KEYBIND_OVERLAY_T.Localized());
 
 			// Performance
 
-			DynamicAI = Config.Bind("Performance", "Dynamic AI", false,
-				new ConfigDescription("Use the dynamic AI system, disabling AI when they are outside of any player's range.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+			string performanceHeader = LocaleUtils.BEPINEX_H_PERFORMANCE.Localized();
 
-			DynamicAIRange = Config.Bind("Performance", "Dynamic AI Range", 100f,
-				new ConfigDescription("The range at which AI will be disabled dynamically.", new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
+			DynamicAI = Config.Bind(performanceHeader, LocaleUtils.BEPINEX_DYNAMIC_AI_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_T.Localized(), tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-			DynamicAIRate = Config.Bind("Performance", "Dynamic AI Rate", EDynamicAIRates.Medium,
-				new ConfigDescription("How often DynamicAI should scan for the range from all players.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+			DynamicAIRange = Config.Bind(performanceHeader, LocaleUtils.BEPINEX_DYNAMIC_AI_RANGE_T.Localized(), 100f,
+				new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_RANGE_D.Localized(), new AcceptableValueRange<float>(150f, 1000f), new ConfigurationManagerAttributes() { Order = 2 }));
 
-			DynamicAIIgnoreSnipers = Config.Bind("Performance", "Dynamic AI - Ignore Snipers", true,
-				new ConfigDescription("Whether Dynamic AI should ignore sniper scavs.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+			DynamicAIRate = Config.Bind(performanceHeader, LocaleUtils.BEPINEX_DYNAMIC_AI_RATE_T.Localized(), EDynamicAIRates.Medium,
+				new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_RATE_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+			DynamicAIIgnoreSnipers = Config.Bind(performanceHeader, LocaleUtils.BEPINEX_DYNAMIC_AI_NO_SNIPERS_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_NO_SNIPERS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Performance | Max Bots
 
-			EnforcedSpawnLimits = Config.Bind("Performance | Max Bots", "Enforced Spawn Limits", false,
-				new ConfigDescription("Enforces spawn limits when spawning bots, making sure to not go over the vanilla limits. This mainly takes affect when using spawn mods or anything that modifies the bot limits. Will not block spawns of special bots like bosses.", tags: new ConfigurationManagerAttributes() { Order = 14 }));
+			string performanceBotsHeader = LocaleUtils.BEPINEX_H_PERFORMANCE_BOTS.Localized();
 
-			DespawnFurthest = Config.Bind("Performance | Max Bots", "Despawn Furthest", false,
-				new ConfigDescription("When enforcing spawn limits, should the furthest bot be de-spawned instead of blocking the spawn. This will make for a much more active raid on a lower Max Bots count. Helpful for weaker PCs. Will only despawn pmcs and scavs. If you don't run a dynamic spawn mod, this will however quickly exhaust the spawns on the map, making the raid very dead instead.", tags: new ConfigurationManagerAttributes() { Order = 13 }));
+			EnforcedSpawnLimits = Config.Bind(performanceBotsHeader, LocaleUtils.BEPINEX_ENFORCED_SPAWN_LIMITS_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_ENFORCED_SPAWN_LIMITS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 14 }));
 
-			DespawnMinimumDistance = Config.Bind("Performance | Max Bots", "Despawn Minimum Distance", 200.0f,
-				new ConfigDescription("Don't despawn bots within this distance.", new AcceptableValueRange<float>(50f, 3000f), new ConfigurationManagerAttributes() { Order = 12 }));
+			DespawnFurthest = Config.Bind(performanceBotsHeader, LocaleUtils.BEPINEX_DESPAWN_FURTHEST_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_DESPAWN_FURTHEST_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 13 }));
 
-			MaxBotsFactory = Config.Bind("Performance | Max Bots", "Max Bots Factory", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Factory. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 11 }));
+			DespawnMinimumDistance = Config.Bind(performanceBotsHeader, LocaleUtils.BEPINEX_DESPAWN_MIN_DISTANCE_T.Localized(), 200.0f,
+				new ConfigDescription(LocaleUtils.BEPINEX_DESPAWN_MIN_DISTANCE_D.Localized(), new AcceptableValueRange<float>(50f, 3000f), new ConfigurationManagerAttributes() { Order = 12 }));
 
-			MaxBotsCustoms = Config.Bind("Performance | Max Bots", "Max Bots Customs", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Customs. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 10 }));
+			string maxBotsHeader = LocaleUtils.BEPINEX_MAX_BOTS_T.Localized();
+			string maxBotsDescription = LocaleUtils.BEPINEX_MAX_BOTS_D.Localized();
 
-			MaxBotsInterchange = Config.Bind("Performance | Max Bots", "Max Bots Interchange", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Interchange. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 8 }));
+			MaxBotsFactory = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Factory"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Factory"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 11 }));
 
-			MaxBotsReserve = Config.Bind("Performance | Max Bots", "Max Bots Reserve", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Reserve. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 7 }));
+			MaxBotsCustoms = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Customs"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Customs"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 10 }));
 
-			MaxBotsWoods = Config.Bind("Performance | Max Bots", "Max Bots Woods", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Woods. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 6 }));
+			MaxBotsInterchange = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Interchange"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Interchange"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 8 }));
 
-			MaxBotsShoreline = Config.Bind("Performance | Max Bots", "Max Bots Shoreline", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Shoreline. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 5 }));
+			MaxBotsReserve = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Reserve"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Reserve"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 7 }));
 
-			MaxBotsStreets = Config.Bind("Performance | Max Bots", "Max Bots Streets", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Streets of Tarkov. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 4 }));
+			MaxBotsWoods = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Woods"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Woods"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 6 }));
 
-			MaxBotsGroundZero = Config.Bind("Performance | Max Bots", "Max Bots Ground Zero", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Ground Zero. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 3 }));
+			MaxBotsShoreline = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Shoreline"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Shoreline"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 5 }));
 
-			MaxBotsLabs = Config.Bind("Performance | Max Bots", "Max Bots Labs", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Labs. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 2 }));
+			MaxBotsStreets = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Streets"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Streets"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 4 }));
 
-			MaxBotsLighthouse = Config.Bind("Performance | Max Bots", "Max Bots Lighthouse", 0,
-				new ConfigDescription("Max amount of bots that can be active at the same time on Lighthouse. Useful if you have a weaker PC. Set to 0 to use vanilla limits. Cannot be changed during a raid.", new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 1 }));
+			MaxBotsGroundZero = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Ground Zero"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Ground Zero"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 3 }));
+
+			MaxBotsLabs = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Labs"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Labs"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 2 }));
+
+			MaxBotsLighthouse = Config.Bind(performanceBotsHeader, string.Format(maxBotsHeader, "Lighthouse"), 0,
+				new ConfigDescription(string.Format(maxBotsDescription, "Lighthouse"), new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes() { Order = 1 }));
 
 			// Network
 
-			NativeSockets = Config.Bind(section: "Network", "Native Sockets", true,
-				new ConfigDescription("Use NativeSockets for gameplay traffic. This uses direct socket calls for send/receive to drastically increase speed and reduce GC pressure. Only for Windows/Linux and might not always work.", tags: new ConfigurationManagerAttributes() { Order = 9 }));
+			string networkHeader = LocaleUtils.BEPINEX_H_NETWORK.Localized();
 
-			ForceIP = Config.Bind("Network", "Force IP", "",
-				new ConfigDescription("Forces the server when hosting to use this IP when broadcasting to the backend instead of automatically trying to fetch it. Leave empty to disable.", tags: new ConfigurationManagerAttributes() { Order = 8 }));
+			NativeSockets = Config.Bind(networkHeader, LocaleUtils.BEPINEX_NATIVE_SOCKETS_T.Localized(), true,
+				new ConfigDescription(LocaleUtils.BEPINEX_NATIVE_SOCKETS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 9 }));
 
-			ForceBindIP = Config.Bind("Network", "Force Bind IP", "0.0.0.0",
-				new ConfigDescription("Forces the server when hosting to use this local IP when starting the server. Useful if you are hosting on a VPN.", new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 7 }));
+			ForceIP = Config.Bind(networkHeader, LocaleUtils.BEPINEX_FORCE_IP_T.Localized(), "",
+				new ConfigDescription(LocaleUtils.BEPINEX_FORCE_IP_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 8 }));
 
-			AutoRefreshRate = Config.Bind("Network", "Auto Server Refresh Rate", 10f,
-				new ConfigDescription("Every X seconds the client will ask the server for the list of matches while at the lobby screen.", new AcceptableValueRange<float>(3f, 60f), new ConfigurationManagerAttributes() { Order = 6 }));
+			ForceBindIP = Config.Bind(networkHeader, LocaleUtils.BEPINEX_FORCE_BIND_IP_T.Localized(), "0.0.0.0",
+				new ConfigDescription(LocaleUtils.BEPINEX_FORCE_BIND_IP_D.Localized(), new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes() { Order = 7 }));
 
-			UDPPort = Config.Bind("Network", "UDP Port", 25565,
-				new ConfigDescription("Port to use for UDP gameplay packets.", tags: new ConfigurationManagerAttributes() { Order = 5 }));
+			UDPPort = Config.Bind(networkHeader, LocaleUtils.BEPINEX_UDP_PORT_T.Localized(), 25565,
+				new ConfigDescription(LocaleUtils.BEPINEX_UDP_PORT_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 5 }));
 
-			UseUPnP = Config.Bind("Network", "Use UPnP", false,
-				new ConfigDescription("Attempt to open ports using UPnP. Useful if you cannot open ports yourself but the router supports UPnP.", tags: new ConfigurationManagerAttributes() { Order = 4 }));
+			UseUPnP = Config.Bind(networkHeader, LocaleUtils.BEPINEX_USE_UPNP_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_USE_UPNP_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 4 }));
 
-			UseNatPunching = Config.Bind("Network", "Use NAT Punching", false,
-				new ConfigDescription("Use NAT punching when hosting a raid. Only works with fullcone NAT type routers and requires NatPunchServer to be running on the SPT server. UPnP, Force IP and Force Bind IP are disabled with this mode.", tags: new ConfigurationManagerAttributes() { Order = 3 }));
+			UseNatPunching = Config.Bind(networkHeader, LocaleUtils.BEPINEX_USE_NAT_PUNCH_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_USE_NAT_PUNCH_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 3 }));
 
-			ConnectionTimeout = Config.Bind("Network", "Connection Timeout", 15,
-				new ConfigDescription("How long it takes for a connection to be considered dropped if no packets are received.", new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 2 }));
+			ConnectionTimeout = Config.Bind(networkHeader, LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_T.Localized(), 15,
+				new ConfigDescription(LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_D.Localized(), new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes() { Order = 2 }));
 
-			SendRate = Config.Bind("Network", "Send Rate", ESendRate.Medium,
-				new ConfigDescription("How often per second movement packets should be sent (lower = less bandwidth used, slight more delay during interpolation)\nThis only affects the host and will be synchronized to all clients.\nAmount is per second:\n\nVery Low = 10\nLow = 15\nMedium = 20\nHigh = 30\n\nRecommended to leave at no higher than Medium as the gains are insignificant after.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+			SendRate = Config.Bind(networkHeader, LocaleUtils.BEPINEX_SEND_RATE_T.Localized(), ESendRate.Medium,
+				new ConfigDescription(LocaleUtils.BEPINEX_SEND_RATE_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 1 }));
 
-			SmoothingRate = Config.Bind("Network", "Smoothing Rate", ESmoothingRate.Medium,
-				new ConfigDescription("Local simulation is behind by Send Rate * Smoothing Rate. This guarantees that we always have enough snapshots in the buffer to mitigate lags & jitter during interpolation.\n\nLow = 1.5\nMedium = 2\nHigh = 2.5\n\nSet this to 'High' if movement isn't smooth. Cannot be changed during a raid.", tags: new ConfigurationManagerAttributes() { Order = 0 }));
+			SmoothingRate = Config.Bind(networkHeader, LocaleUtils.BEPINEX_SMOOTHING_RATE_T.Localized(), ESmoothingRate.Medium,
+				new ConfigDescription(LocaleUtils.BEPINEX_SMOOTHING_RATE_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Gameplay
-			DisableBotMetabolism = Config.Bind("Gameplay", "Disable Bot Metabolism", false,
-				new ConfigDescription("Disables metabolism on bots, preventing them from dying from loss of energy/hydration during long raids.", tags: new ConfigurationManagerAttributes() { Order = 1 }));
+			DisableBotMetabolism = Config.Bind(LocaleUtils.BEPINEX_H_GAMEPLAY.Localized(), LocaleUtils.BEPINEX_DISABLE_BOT_METABOLISM_T.Localized(), false,
+				new ConfigDescription(LocaleUtils.BEPINEX_DISABLE_BOT_METABOLISM_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 1 }));
+
+			SetupConfigEventHandlers();
 		}
 
 		private void OfficialVersion_SettingChanged(object sender, EventArgs e)

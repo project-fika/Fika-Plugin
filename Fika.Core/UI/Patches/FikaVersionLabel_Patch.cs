@@ -52,7 +52,7 @@ namespace Fika.Core.EssentialPatches
 		public static void UpdateVersionLabel()
 		{
 			Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
-			if (FikaPlugin.OfficialVersion.Value)
+			if (FikaPlugin.OfficialVersion != null && FikaPlugin.OfficialVersion.Value)
 			{
 				preloaderUiTraverse.Field("string_2").SetValue($"{officialVersion} Beta version");
 				versionNumberTraverse.Field("Major").SetValue(officialVersion);

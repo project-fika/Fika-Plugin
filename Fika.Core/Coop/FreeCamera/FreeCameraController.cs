@@ -7,6 +7,7 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.UI;
+using Fika.Core.Utils;
 using HarmonyLib;
 using Koenigz.PerfectCulling;
 using Koenigz.PerfectCulling.EFT;
@@ -345,7 +346,7 @@ namespace Fika.Core.Coop.FreeCamera
 					string modifiers = string.Join(" + ", FikaPlugin.ExtractKey.Value.Modifiers);
 					text = modifiers + " + " + text;
 				}
-				extractText = FikaUIGlobals.CreateOverlayText($"Press '{text}' to extract");
+				extractText = FikaUIGlobals.CreateOverlayText(string.Format(LocaleUtils.UI_EXTRACT_MESSAGE.Localized(), text));
 			}
 		}
 

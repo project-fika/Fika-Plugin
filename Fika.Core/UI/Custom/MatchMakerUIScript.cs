@@ -682,7 +682,7 @@ namespace Fika.Core.UI.Custom
 			{
 				AutoRefresh();
 
-				while (Time.time < lastRefreshed + FikaPlugin.AutoRefreshRate.Value)
+				while (Time.time < lastRefreshed + 5)
 				{
 					yield return null;
 				}

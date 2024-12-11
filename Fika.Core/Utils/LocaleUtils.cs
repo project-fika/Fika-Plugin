@@ -205,5 +205,155 @@ namespace Fika.Core.Utils
 		public const string UI_NOTIFICATION_STARTED_RAID = "F_Notification_RaidStarted";
 		public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
 		public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
+		public const string UI_EXTRACT_MESSAGE = "F_UI_ExtractMessage";
+
+		// BepInEx
+
+		public const string BEPINEX_H_ADVANCED = "F_BepInEx_H_Advanced";
+		public const string BEPINEX_H_COOP = "F_BepInEx_H_Coop";
+		public const string BEPINEX_H_COOP_NAME_PLATES = "F_BepInEx_H_Coop_NamePlates";
+		public const string BEPINEX_H_COOP_QUEST_SHARING = "F_BepInEx_H_Coop_QuestSharing";
+		public const string BEPINEX_H_COOP_PINGING = "F_BepInEx_H_Coop_Pinging";
+		public const string BEPINEX_H_COOP_DEBUG = "F_BepInEx_H_Coop_Debug";
+		public const string BEPINEX_H_PERFORMANCE = "F_BepInEx_H_Performance";
+		public const string BEPINEX_H_PERFORMANCE_BOTS = "F_BepInEx_H_PerformanceBots";
+		public const string BEPINEX_H_NETWORK = "F_BepInEx_H_Network";
+		public const string BEPINEX_H_GAMEPLAY = "F_BepInEx_H_Gameplay";
+
+		public const string BEPINEX_OFFICIAL_VERSION_T = "F_BepInEx_OfficialVersion_T";
+		public const string BEPINEX_OFFICIAL_VERSION_D = "F_BepInEx_OfficialVersion_D";
+
+		public const string BEPINEX_SHOW_FEED_T = "F_BepInEx_ShowFeed_T";
+		public const string BEPINEX_SHOW_FEED_D = "F_BepInEx_ShowFeed_D";
+		public const string BEPINEX_AUTO_EXTRACT_T = "F_BepInEx_AutoExtract_T";
+		public const string BEPINEX_AUTO_EXTRACT_D = "F_BepInEx_AutoExtract_D";
+		public const string BEPINEX_SHOW_EXTRACT_MESSAGE_T = "F_BepInEx_ShowExtractMessage_T";
+		public const string BEPINEX_SHOW_EXTRACT_MESSAGE_D = "F_BepInEx_ShowExtractMessage_D";
+		public const string BEPINEX_EXTRACT_KEY_T = "F_BepInEx_ExtractKey_T";
+		public const string BEPINEX_EXTRACT_KEY_D = "F_BepInEx_ExtractKey_D";
+		public const string BEPINEX_ENABLE_CHAT_T = "F_BepInEx_EnableChat_T";
+		public const string BEPINEX_ENABLE_CHAT_D = "F_BepInEx_EnableChat_D";
+		public const string BEPINEX_CHAT_KEY_T = "F_BepInEx_ChatKey_T";
+		public const string BEPINEX_CHAT_KEY_D = "F_BepInEx_ChatKey_D";
+		public const string BEPINEX_ENABLE_ONLINE_PLAYER_T = "F_BepInEx_EnableOnlinePlayers_T";
+		public const string BEPINEX_ENABLE_ONLINE_PLAYER_D = "F_BepInEx_EnableOnlinePlayers_D";
+		public const string BEPINEX_ONLINE_PLAYERS_SCALE_T = "F_BepInEx_OnlinePlayersScale_T";
+		public const string BEPINEX_ONLINE_PLAYERS_SCALE_D = "F_BepInEx_OnlinePlayersScale_D";
+
+		public const string BEPINEX_USE_NAME_PLATES_T = "F_BepInEx_UseNamePlates_T";
+		public const string BEPINEX_USE_NAME_PLATES_D = "F_BepInEx_UseNamePlates_D";
+		public const string BEPINEX_HIDE_HEALTH_BAR_T = "F_BepInEx_HideHealthBar_T";
+		public const string BEPINEX_HIDE_HEALTH_BAR_D = "F_BepInEx_HideHealthBar_D";
+		public const string BEPINEX_USE_PERCENT_T = "F_BepInEx_UsePercent_T";
+		public const string BEPINEX_USE_PERCENT_D = "F_BepInEx_UsePercent_D";
+		public const string BEPINEX_SHOW_EFFECTS_T = "F_BepInEx_ShowEffects_T";
+		public const string BEPINEX_SHOW_EFFECTS_D = "F_BepInEx_ShowEffects_D";
+		public const string BEPINEX_SHOW_FACTION_ICON_T = "F_BepInEx_ShowFactionIcon_T";
+		public const string BEPINEX_SHOW_FACTION_ICON_D = "F_BepInEx_ShowFactionIcon_D";
+		public const string BEPINEX_HIDE_IN_OPTIC_T = "F_BepInEx_HideInOptic_T";
+		public const string BEPINEX_HIDE_IN_OPTIC_D = "F_BepInEx_HideInOptic_D";
+		public const string BEPINEX_OPTIC_USE_ZOOM_T = "F_BepInEx_OpticUseZoom_T";
+		public const string BEPINEX_OPTIC_USE_ZOOM_D = "F_BepInEx_OpticUseZoom_D";
+		public const string BEPINEX_DEC_OPAC_PERI_T = "F_BepInEx_DecOpacPeri_T";
+		public const string BEPINEX_DEC_OPAC_PERI_D = "F_BepInEx_DecOpacPeri_D";
+		public const string BEPINEX_NAME_PLATE_SCALE_T = "F_BepInEx_NamePlateScale_T";
+		public const string BEPINEX_NAME_PLATE_SCALE_D = "F_BepInEx_NamePlateScale_D";
+		public const string BEPINEX_ADS_OPAC_T = "F_BepInEx_AdsOpac_T";
+		public const string BEPINEX_ADS_OPAC_D = "F_BepInEx_AdsOpac_D";
+		public const string BEPINEX_MAX_DISTANCE_T = "F_BepInEx_MaxDistance_T";
+		public const string BEPINEX_MAX_DISTANCE_D = "F_BepInEx_MaxDistance_D";
+		public const string BEPINEX_MIN_OPAC_T = "F_BepInEx_MinOpac_T";
+		public const string BEPINEX_MIN_OPAC_D = "F_BepInEx_MinOpac_D";
+		public const string BEPINEX_MIN_PLATE_SCALE_T = "F_BepInEx_MinPlateScale_T";
+		public const string BEPINEX_MIN_PLATE_SCALE_D = "F_BepInEx_MinPlateScale_D";
+		public const string BEPINEX_USE_OCCLUSION_T = "F_BepInEx_UseOcclusion_T";
+		public const string BEPINEX_USE_OCCLUSION_D = "F_BepInEx_UseOcclusion_D";
+
+		public const string BEPINEX_QUEST_TYPES_T = "F_BepInEx_QuestTypes_T";
+		public const string BEPINEX_QUEST_TYPES_D = "F_BepInEx_QuestTypes_D";
+		public const string BEPINEX_QS_NOTIFICATIONS_T = "F_BepInEx_QSNotifications_T";
+		public const string BEPINEX_QS_NOTIFICATIONS_D = "F_BepInEx_QSNotifications_D";
+		public const string BEPINEX_EASY_KILL_CONDITIONS_T = "F_BepInEx_EasyKillConditions_T";
+		public const string BEPINEX_EASY_KILL_CONDITIONS_D = "F_BepInEx_EasyKillConditions_D";
+		public const string BEPINEX_SHARED_KILL_XP_T = "F_BepInEx_SharedKillXP_T";
+		public const string BEPINEX_SHARED_KILL_XP_D = "F_BepInEx_SharedKillXP_D";
+		public const string BEPINEX_SHARED_BOSS_XP_T = "F_BepInEx_SharedBossXP_T";
+		public const string BEPINEX_SHARED_BOSS_XP_D = "F_BepInEx_SharedBossXP_D";
+
+		public const string BEPINEX_PING_SYSTEM_T = "F_BepInEx_PingSystem_T";
+		public const string BEPINEX_PING_SYSTEM_D = "F_BepInEx_PingSystem_D";
+		public const string BEPINEX_PING_BUTTON_T = "F_BepInEx_PingButton_T";
+		public const string BEPINEX_PING_BUTTON_D = "F_BepInEx_PingButton_D";
+		public const string BEPINEX_PING_COLOR_T = "F_BepInEx_PingColor_T";
+		public const string BEPINEX_PING_COLOR_D = "F_BepInEx_PingColor_D";
+		public const string BEPINEX_PING_SIZE_T = "F_BepInEx_PingSize_T";
+		public const string BEPINEX_PING_SIZE_D = "F_BepInEx_PingSize_D";
+		public const string BEPINEX_PING_TIME_T = "F_BepInEx_PingTime_T";
+		public const string BEPINEX_PING_TIME_D = "F_BepInEx_PingTime_D";
+		public const string BEPINEX_PING_ANIMATION_T = "F_BepInEx_PingAnimation_T";
+		public const string BEPINEX_PING_ANIMATION_D = "F_BepInEx_PingAnimation_D";
+		public const string BEPINEX_PING_OPTICS_T = "F_BepInEx_PingOptics_T";
+		public const string BEPINEX_PING_OPTICS_D = "F_BepInEx_PingOptics_D";
+		public const string BEPINEX_PING_OPTIC_ZOOM_T = "F_BepInEx_PingOpticZoom_T";
+		public const string BEPINEX_PING_OPTIC_ZOOM_D = "F_BepInEx_PingOpticZoom_D";
+		public const string BEPINEX_PING_SCALE_DISTANCE_T = "F_BepInEx_PingScaleDistance_T";
+		public const string BEPINEX_PING_SCALE_DISTANCE_D = "F_BepInEx_PingScaleDistance_D";
+		public const string BEPINEX_PING_MIN_OPAC_T = "F_BepInEx_PingMinOpac_T";
+		public const string BEPINEX_PING_MIN_OPAC_D = "F_BepInEx_PingMinOpac_D";
+		public const string BEPINEX_PING_RANGE_T = "F_BepInEx_PingRange_T";
+		public const string BEPINEX_PING_RANGE_D = "F_BepInEx_PingRange_D";
+		public const string BEPINEX_PING_SOUND_T = "F_BepInEx_PingSound_T";
+		public const string BEPINEX_PING_SOUND_D = "F_BepInEx_PingSound_D";
+
+		public const string BEPINEX_FREE_CAM_BUTTON_T = "F_BepInEx_FreeCamButton_T";
+		public const string BEPINEX_FREE_CAM_BUTTON_D = "F_BepInEx_FreeCamButton_D";
+		public const string BEPINEX_SPECTATE_BOTS_T = "F_BepInEx_SpectateBots_T";
+		public const string BEPINEX_SPECTATE_BOTS_D = "F_BepInEx_SpectateBots_D";
+		public const string BEPINEX_AZERTY_MODE_T = "F_BepInEx_AZERTYMode_T";
+		public const string BEPINEX_AZERTY_MODE_D = "F_BepInEx_AZERTYMode_D";
+		public const string BEPINEX_DRONE_MODE_T = "F_BepInEx_DroneMode_T";
+		public const string BEPINEX_DRONE_MODE_D = "F_BepInEx_DroneMode_D";
+		public const string BEPINEX_KEYBIND_OVERLAY_T = "F_BepInEx_KeybindOverlay_T";
+		public const string BEPINEX_KEYBIND_OVERLAY_D = "F_BepInEx_KeybindOverlay_D";
+
+		public const string BEPINEX_DYNAMIC_AI_T = "F_BepInEx_DynamicAI_T";
+		public const string BEPINEX_DYNAMIC_AI_D = "F_BepInEx_DynamicAI_D";
+		public const string BEPINEX_DYNAMIC_AI_RANGE_T = "F_BepInEx_DynamicAIRange_T";
+		public const string BEPINEX_DYNAMIC_AI_RANGE_D = "F_BepInEx_DynamicAIRange_D";
+		public const string BEPINEX_DYNAMIC_AI_RATE_T = "F_BepInEx_DynamicAIRate_T";
+		public const string BEPINEX_DYNAMIC_AI_RATE_D = "F_BepInEx_DynamicAIRate_D";
+		public const string BEPINEX_DYNAMIC_AI_NO_SNIPERS_T = "F_BepInEx_DynamicAINoSnipers_T";
+		public const string BEPINEX_DYNAMIC_AI_NO_SNIPERS_D = "F_BepInEx_DynamicAINoSnipers_D";
+
+		public const string BEPINEX_ENFORCED_SPAWN_LIMITS_T = "F_BepInEx_EnforcedSpawnLimits_T";
+		public const string BEPINEX_ENFORCED_SPAWN_LIMITS_D = "F_BepInEx_EnforcedSpawnLimits_D";
+		public const string BEPINEX_DESPAWN_FURTHEST_T = "F_BepInEx_DespawnFurthest_T";
+		public const string BEPINEX_DESPAWN_FURTHEST_D = "F_BepInEx_DespawnFurthest_D";
+		public const string BEPINEX_DESPAWN_MIN_DISTANCE_T = "F_BepInEx_DespawnMinDistance_T";
+		public const string BEPINEX_DESPAWN_MIN_DISTANCE_D = "F_BepInEx_DespawnMinDistance_D";
+		public const string BEPINEX_MAX_BOTS_T = "F_BepInEx_MaxBots_T";
+		public const string BEPINEX_MAX_BOTS_D = "F_BepInEx_MaxBots_D";
+
+		public const string BEPINEX_NATIVE_SOCKETS_T = "F_BepInEx_NativeSockets_T";
+		public const string BEPINEX_NATIVE_SOCKETS_D = "F_BepInEx_NativeSockets_D";
+		public const string BEPINEX_FORCE_IP_T = "F_BepInEx_ForceIP_T";
+		public const string BEPINEX_FORCE_IP_D = "F_BepInEx_ForceIP_D";
+		public const string BEPINEX_FORCE_BIND_IP_T = "F_BepInEx_ForceBindIP_T";
+		public const string BEPINEX_FORCE_BIND_IP_D = "F_BepInEx_ForceBindIP_D";
+		public const string BEPINEX_UDP_PORT_T = "F_BepInEx_UDPPort_T";
+		public const string BEPINEX_UDP_PORT_D = "F_BepInEx_UDPPort_D";
+		public const string BEPINEX_USE_UPNP_T = "F_BepInEx_UseUPnP_T";
+		public const string BEPINEX_USE_UPNP_D = "F_BepInEx_UseUPnP_D";
+		public const string BEPINEX_USE_NAT_PUNCH_T = "F_BepInEx_UseNatPunch_T";
+		public const string BEPINEX_USE_NAT_PUNCH_D = "F_BepInEx_UseNatPunch_D";
+		public const string BEPINEX_CONNECTION_TIMEOUT_T = "F_BepInEx_ConnectionTimeout_T";
+		public const string BEPINEX_CONNECTION_TIMEOUT_D = "F_BepInEx_ConnectionTimeout_D";
+		public const string BEPINEX_SEND_RATE_T = "F_BepInEx_SendRate_T";
+		public const string BEPINEX_SEND_RATE_D = "F_BepInEx_SendRate_D";
+		public const string BEPINEX_SMOOTHING_RATE_T = "F_BepInEx_SmoothingRate_T";
+		public const string BEPINEX_SMOOTHING_RATE_D = "F_BepInEx_SmoothingRate_D";
+
+		public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
+		public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";
 	}
 }
