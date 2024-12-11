@@ -312,6 +312,17 @@ namespace Fika.Core.Coop.Players
 
 		public override void Proceed<T>(Item item, Callback<GInterface164> callback, bool scheduled = true)
 		{
+			if (item is PortableRangeFinderItemClass)
+			{
+				PortableRangeFinderControllerHandler rangeFinderHandler = new(this, item);
+
+				Func<PortableRangeFinderController> rangeFinderFunc = new(rangeFinderHandler.ReturnController);
+				rangeFinderHandler.process = new(this, rangeFinderFunc, item, false);
+				rangeFinderHandler.confirmCallback = new(rangeFinderHandler.SendPacket);
+				rangeFinderHandler.process.method_0(new(rangeFinderHandler.HandleResult), callback, scheduled);
+				return;
+			}
+
 			UsableItemControllerHandler handler = new(this, item);
 
 			Func<UsableItemController> func = new(handler.ReturnController);
@@ -1445,6 +1456,40 @@ namespace Fika.Core.Coop.Players
 			internal CoopClientUsableItemController ReturnController()
 			{
 				return CoopClientUsableItemController.Create(coopPlayer, item);
+			}
+
+			internal void SendPacket()
+			{
+				coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+				{
+					Type = ECommonSubPacketType.Proceed,
+					SubPacket = new ProceedPacket()
+					{
+						ProceedType = EProceedType.UsableItem,
+						ItemId = item.Id
+					}
+				});
+			}
+
+			internal void HandleResult(IResult result)
+			{
+				if (result.Succeed)
+				{
+					confirmCallback();
+				}
+			}
+		}
+
+		private class PortableRangeFinderControllerHandler(CoopPlayer coopPlayer, Item item)
+		{
+			private readonly CoopPlayer coopPlayer = coopPlayer;
+			private readonly Item item = item;
+			public Process<PortableRangeFinderController, GInterface164> process;
+			public Action confirmCallback;
+
+			internal CoopClientPortableRangeFinderController ReturnController()
+			{
+				return CoopClientPortableRangeFinderController.Create(coopPlayer, item);
 			}
 
 			internal void SendPacket()
