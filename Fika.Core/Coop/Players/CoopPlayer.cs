@@ -410,7 +410,7 @@ namespace Fika.Core.Coop.Players
 		}
 
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
-		{
+		{			
 			base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
 			// Handle 'Help Scav' rep gains
@@ -431,6 +431,28 @@ namespace Fika.Core.Coop.Players
 					coopPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
 				}
 			}
+		}
+
+		protected void FindKillerWeapon()
+		{
+#if DEBUG
+			FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{lastWeaponId}'!"); 
+#endif
+			GStruct448<Item> itemResult = FindItemById(lastWeaponId, false, false);
+			if (!itemResult.Succeeded)
+			{
+				foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
+				{
+					if (grenadeClass.Id == lastWeaponId)
+					{
+						LastDamageInfo.Weapon = grenadeClass;
+						break;
+					}
+				}
+				return;
+			}
+
+			LastDamageInfo.Weapon = itemResult.Value;
 		}
 
 		public void HandleTeammateKill(ref DamageInfoStruct damage, EBodyPart bodyPart,
@@ -488,6 +510,34 @@ namespace Fika.Core.Coop.Players
 				/*AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                     bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
                     killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
+			}
+		}
+
+		protected void HandleSharedExperience(bool countAsBoss, int experience, SessionCountersClass sessionCounters)
+		{
+			if (experience <= 0)
+			{
+				experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
+			}
+
+			if (FikaPlugin.SharedKillExperience.Value && !countAsBoss)
+			{
+				int toReceive = experience / 2;
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive}");
+#endif
+				sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
+				sessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
+			}
+
+			if (FikaPlugin.SharedBossExperience.Value && countAsBoss)
+			{
+				int toReceive = experience / 2;
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive}");
+#endif
+				sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
+				sessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
 			}
 		}
 
@@ -801,6 +851,16 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnDead(EDamageType damageType)
 		{
+			if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(lastWeaponId))
+			{
+				FindKillerWeapon();
+#if DEBUG
+				if (LastDamageInfo.Weapon != null)
+				{
+					FikaPlugin.Instance.FikaLogger.LogWarning($"Found weapon '{LastDamageInfo.Weapon.Name.Localized()}'!");
+				}
+#endif
+			}
 			base.OnDead(damageType);
 			PacketSender.Enabled = false;
 			if (IsYourPlayer)
@@ -1243,12 +1303,6 @@ namespace Fika.Core.Coop.Players
 						}
 					}
 				}
-
-				/*// TODO: Fix this and consistently get the correct data...
-				if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
-				{
-					damageInfo.Weapon = weapon;
-				}*/
 				lastWeaponId = packet.WeaponId;
 			}
 
