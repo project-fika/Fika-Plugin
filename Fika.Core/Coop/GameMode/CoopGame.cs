@@ -614,7 +614,10 @@ namespace Fika.Core.Coop.GameMode
 			TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController == null)
 			{
-				Logger.LogError("SyncTransitControllers: TransitController was null!");
+				if (FikaPlugin.Instance.EnableTransits)
+				{
+					Logger.LogError("SyncTransitControllers: TransitController was null!"); 
+				}
 				return;
 			}
 
@@ -1060,7 +1063,7 @@ namespace Fika.Core.Coop.GameMode
 				BackendConfigSettingsClass.GClass1529 transitSettings = instance.transitSettings;
 				transitActive = transitSettings != null && transitSettings.active;
 			}
-			if (transitActive)
+			if (transitActive && FikaPlugin.Instance.EnableTransits)
 			{
 				gameWorld.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
 					Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
@@ -1068,6 +1071,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 			else
 			{
+				Logger.LogInfo("Transits are disabled");
 				TransitControllerAbstractClass.DisableTransitPoints();
 			}
 

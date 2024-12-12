@@ -11,6 +11,7 @@ using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.SPTBugs;
 using Fika.Core.EssentialPatches;
+using Fika.Core.Models;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
 using Fika.Core.UI;
@@ -208,6 +209,7 @@ namespace Fika.Core
 		public bool UseInertia;
 		public bool SharedQuestProgression;
 		public bool CanEditRaidSettings;
+		public bool EnableTransits;
 		#endregion
 
 		#region natpunch config
@@ -403,6 +405,7 @@ namespace Fika.Core
 			UseInertia = clientConfig.UseInertia;
 			SharedQuestProgression = clientConfig.SharedQuestProgression;
 			CanEditRaidSettings = clientConfig.CanEditRaidSettings;
+			EnableTransits = clientConfig.EnableTransits;
 
 			clientConfig.LogValues();
 		}
