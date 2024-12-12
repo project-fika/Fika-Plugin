@@ -147,31 +147,8 @@ namespace Fika.Core.Coop.Players
 				WildSpawnType role = Profile.Info.Settings.Role;
 				bool countAsBoss = role.CountAsBossForStatistics() && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
 				int experience = Profile.Info.Settings.Experience;
-
-				if (experience < 0)
-				{
-					experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
-				}
-
-				if (FikaPlugin.SharedKillExperience.Value && !countAsBoss)
-				{
-					int toReceive = experience / 2;
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive} from {aggressor.Profile.Nickname}");
-#endif
-					mainPlayer.Profile.EftStats.SessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-					mainPlayer.Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
-				}
-
-				if (FikaPlugin.SharedBossExperience.Value && countAsBoss)
-				{
-					int toReceive = experience / 2;
-#if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive} from {aggressor.Profile.Nickname}");
-#endif
-					mainPlayer.Profile.EftStats.SessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-					mainPlayer.Profile.EftStats.SessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
-				}
+				SessionCountersClass sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
+				HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
 				if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
 				{

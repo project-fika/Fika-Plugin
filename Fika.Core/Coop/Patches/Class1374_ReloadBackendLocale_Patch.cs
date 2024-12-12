@@ -15,7 +15,7 @@ namespace Fika.Core.Coop.Patches
 
 		[PatchPostfix]
 		public static void Postfix(Task __result)
-		{			
+		{
 			if (!HasBeenSet)
 			{
 				FikaPlugin.Instance.StartCoroutine(FikaPlugin.Instance.WaitForLocales(__result));

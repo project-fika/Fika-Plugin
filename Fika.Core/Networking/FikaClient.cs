@@ -214,7 +214,7 @@ namespace Fika.Core.Networking
 			if (packet.Profiles != null)
 			{
 #if DEBUG
-				logger.LogWarning($"OnLoadingProfilePacketReceived: Received {packet.Profiles.Count} profiles"); 
+				logger.LogWarning($"OnLoadingProfilePacketReceived: Received {packet.Profiles.Count} profiles");
 #endif
 				FikaBackendUtils.AddPartyMembers(packet.Profiles);
 				return;
