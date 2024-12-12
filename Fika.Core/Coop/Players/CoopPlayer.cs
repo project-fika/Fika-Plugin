@@ -869,11 +869,19 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		/// <summary>
-		/// TODO: Refactor... BSG code makes this difficult
-		/// </summary>
 		private void GenerateDogtagDetails()
 		{
+			if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(lastWeaponId))
+			{
+				FindKillerWeapon();
+#if DEBUG
+				if (LastDamageInfo.Weapon != null)
+				{
+					FikaPlugin.Instance.FikaLogger.LogWarning($"Found weapon '{LastDamageInfo.Weapon.Name.Localized()}'!");
+				}
+#endif
+			}
+
 			string accountId = AccountId;
 			string profileId = ProfileId;
 			string nickname = Profile.Nickname;
