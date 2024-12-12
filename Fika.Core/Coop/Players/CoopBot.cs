@@ -162,7 +162,7 @@ namespace Fika.Core.Coop.Players
 						(CoopPlayer)aggressor);
 				}
 			}
-		}		
+		}
 
 		public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
 		{

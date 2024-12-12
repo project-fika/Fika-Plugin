@@ -410,7 +410,7 @@ namespace Fika.Core.Coop.Players
 		}
 
 		public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
-		{			
+		{
 			base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
 			// Handle 'Help Scav' rep gains
@@ -436,7 +436,7 @@ namespace Fika.Core.Coop.Players
 		protected void FindKillerWeapon()
 		{
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{lastWeaponId}'!"); 
+			FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{lastWeaponId}'!");
 #endif
 			GStruct448<Item> itemResult = FindItemById(lastWeaponId, false, false);
 			if (!itemResult.Succeeded)
@@ -466,7 +466,7 @@ namespace Fika.Core.Coop.Players
 			}
 
 #if DEBUG
-			FikaPlugin.Instance.FikaLogger.LogWarning($"HandleTeammateKill: Weapon {(damage.Weapon != null ? damage.Weapon.Name.Localized() : "None")}"); 
+			FikaPlugin.Instance.FikaLogger.LogWarning($"HandleTeammateKill: Weapon {(damage.Weapon != null ? damage.Weapon.Name.Localized() : "None")}");
 #endif
 
 			if (role != WildSpawnType.pmcBEAR)

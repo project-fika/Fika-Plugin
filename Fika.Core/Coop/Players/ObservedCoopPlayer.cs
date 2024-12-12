@@ -1567,7 +1567,7 @@ namespace Fika.Core.Coop.Players
 			{
 				FindKillerWeapon();
 			}
-		}		
+		}
 
 		private class RemoveHandsControllerHandler(ObservedCoopPlayer coopPlayer, Callback callback)
 		{
