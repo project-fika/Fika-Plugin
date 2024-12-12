@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.UI.Models
+namespace Fika.Core.Models
 {
 	[DataContract]
 	public struct ClientConfigModel
@@ -40,8 +40,11 @@ namespace Fika.Core.UI.Models
 		[DataMember(Name = "canEditRaidSettings")]
 		public bool CanEditRaidSettings;
 
+		[DataMember(Name = "enableTransits")]
+		public bool EnableTransits;
+
 		public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowSpectateFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
-			bool sharedQuestProgression, bool canEditRaidSettings)
+			bool sharedQuestProgression, bool canEditRaidSettings, bool enableTransits)
 		{
 			UseBTR = useBTR;
 			FriendlyFire = friendlyFire;
@@ -54,6 +57,7 @@ namespace Fika.Core.UI.Models
 			UseInertia = useInertia;
 			SharedQuestProgression = sharedQuestProgression;
 			CanEditRaidSettings = canEditRaidSettings;
+			EnableTransits = enableTransits;
 		}
 
 		public void LogValues()

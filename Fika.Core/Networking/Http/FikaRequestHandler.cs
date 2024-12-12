@@ -1,5 +1,6 @@
 using EFT;
 using Fika.Core.Coop.Custom;
+using Fika.Core.Models;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
 using Fuyu.Platform.Common.Http;
