@@ -84,7 +84,6 @@ namespace Fika.Core.Coop.ObservedClasses
 		private class ObservedMedsOperation(Player.MedsController controller) : Class1158(controller)
 		{
 			private readonly CoopObservedMedsController observedMedsController = (CoopObservedMedsController)controller;
-			//private Action hiddenCallback;
 
 			public void ObservedStart(Action callback)
 			{
