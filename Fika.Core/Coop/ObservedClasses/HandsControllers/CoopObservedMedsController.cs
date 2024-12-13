@@ -1,7 +1,6 @@
 ﻿// © 2024 Lacyway All Rights Reserved
 
 using EFT;
-using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using System;
@@ -10,10 +9,11 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-	internal class CoopObservedMedsController : EFT.Player.MedsController
+	internal class CoopObservedMedsController : Player.MedsController
 	{
 		private CoopPlayer coopPlayer;
-		private ObservedMedsOperation observedObsOperation
+
+		private ObservedMedsOperation ObservedObsOperation
 		{
 			get
 			{
@@ -31,22 +31,34 @@ namespace Fika.Core.Coop.ObservedClasses
 		public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
 		{
 			return new Dictionary<Type, OperationFactoryDelegate> {
-			{
-				typeof(Class1158),
-				new OperationFactoryDelegate(GetObservedMedsOperation)
-			}};
+				{
+					typeof(Class1158),
+					new OperationFactoryDelegate(GetObservedMedsOperation)
+				},
+				{
+					typeof(ObservedMedsOperation),
+					new OperationFactoryDelegate(GetObservedMedsOperation)
+				}
+			};
+		}
+
+		public override void Spawn(float animationSpeed, Action callback)
+		{
+			FirearmsAnimator.SetAnimationSpeed(animationSpeed);
+			FirearmsAnimator.SetPointOfViewOnSpawn(EPointOfView.ThirdPerson);
+			InitiateOperation<ObservedMedsOperation>().ObservedStart(callback);
 		}
 
 		public override void Drop(float animationSpeed, Action callback, bool fastDrop = false, Item nextControllerItem = null)
 		{
-			DropController(callback).HandleExceptions();
+			DropController().HandleExceptions();
 		}
 
-		private async Task DropController(Action callback)
+		private async Task DropController()
 		{
 			await Task.Delay(600);
 			Destroyed = true;
-			observedObsOperation.HideObservedWeapon(callback);
+			ObservedObsOperation.HideObservedWeapon();
 		}
 
 		private Player.BaseAnimationOperation GetObservedMedsOperation()
@@ -72,24 +84,21 @@ namespace Fika.Core.Coop.ObservedClasses
 		private class ObservedMedsOperation(Player.MedsController controller) : Class1158(controller)
 		{
 			private readonly CoopObservedMedsController observedMedsController = (CoopObservedMedsController)controller;
-			private Action hiddenCallback;
 
-			public void HideObservedWeapon(Action onHiddenCallback)
+			public void ObservedStart(Action callback)
 			{
-				ActiveHealthController activeHealthController = observedMedsController._player.ActiveHealthController;
-				if (activeHealthController != null)
-				{
-					activeHealthController.RemoveMedEffect();
-				}
-				observedMedsController._player.HealthController.EffectRemovedEvent -= method_2;
-				hiddenCallback = onHiddenCallback;
-				if (observedMedsController.FirearmsAnimator != null)
+				State = Player.EOperationState.Executing;
+				SetLeftStanceAnimOnStartOperation();
+				callback();
+				observedMedsController.coopPlayer.HealthController.EffectRemovedEvent += method_2;
+				observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
+			}
+
+			public void HideObservedWeapon()
+			{
+				if (observedMedsController != null && observedMedsController.FirearmsAnimator != null)
 				{
 					observedMedsController.FirearmsAnimator.SetActiveParam(false, false);
-				}
-				if (State == Player.EOperationState.Finished)
-				{
-					hiddenCallback();
 				}
 			}
 		}
