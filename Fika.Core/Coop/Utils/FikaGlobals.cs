@@ -150,7 +150,7 @@ namespace Fika.Core.Coop.Utils
 		/// <returns>True if the profile belongs to a player, false if it belongs to an AI</returns>
 		public static bool IsPlayerProfile(this Profile profile)
 		{
-			return profile.QuestsData != null || !string.IsNullOrEmpty(profile.PetId);
+			return !string.IsNullOrEmpty(profile.PetId) || profile.Info.RegistrationDate > 0 || !string.IsNullOrEmpty(profile.Info.MainProfileNickname);
 		}
 	}
 }
