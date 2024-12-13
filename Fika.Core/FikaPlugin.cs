@@ -340,6 +340,7 @@ namespace Fika.Core
 			new TransitControllerAbstractClass_Exist_Patch().Enable();
 			new BotReload_method_1_Patch().Enable();
 			new Class1374_ReloadBackendLocale_Patch().Enable();
+			new GClass2013_method_0_Patch().Enable();
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
 			new GClass1640_method_0_Patch().Enable();
