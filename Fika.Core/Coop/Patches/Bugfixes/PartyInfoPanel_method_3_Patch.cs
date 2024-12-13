@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
 		public static bool Prefix(GClass1323 raidPlayer)
 		{
 			InventoryEquipment equipment = raidPlayer.PlayerVisualRepresentation.Equipment;
-			if (equipment.CurrentAddress.GetOwnerOrNull() is Player.SinglePlayerInventoryController)
+			if (equipment.CurrentAddress.GetOwnerOrNull() is Player.PlayerOwnerInventoryController)
 			{
 				return false;
 			}
