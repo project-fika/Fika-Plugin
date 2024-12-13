@@ -154,6 +154,7 @@ namespace Fika.Core.Utils
 		public const string UI_MM_START_BUTTON = "F_MMUI_StartButton";
 		public const string UI_MM_LOADING_HEADER = "F_MMUI_LoadingScreenHeader";
 		public const string UI_MM_LOADING_DESCRIPTION = "F_MMUI_LoadingScreenDescription";
+		public const string UI_MM_JOIN_AS_SPECTATOR = "F_MMUI_JoinAsSpectator";
 		public const string UI_CANNOT_JOIN_RAID_OTHER_MAP = "F_UI_CannotJoinRaidOtherMap";
 		public const string UI_CANNOT_JOIN_RAID_OTHER_TIME = "F_UI_CannotJoinRaidOtherTime";
 		public const string UI_CANNOT_JOIN_RAID_SCAV_AS_PMC = "F_UI_CannotJoinRaidScavAsPMC";

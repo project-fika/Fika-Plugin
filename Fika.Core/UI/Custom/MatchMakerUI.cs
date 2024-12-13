@@ -20,8 +20,6 @@ public class MatchMakerUI : MonoBehaviour
 	[SerializeField]
 	public Button CloseButton;
 	[SerializeField]
-	public TextMeshProUGUI PlayerAmountText;
-	[SerializeField]
 	public Toggle DedicatedToggle;
 	[SerializeField]
 	public GameObject LoadingScreen;
@@ -30,6 +28,8 @@ public class MatchMakerUI : MonoBehaviour
 	[SerializeField]
 	public Toggle SpectatorToggle;
 
+	[SerializeField]
+	public TextMeshProUGUI PlayerAmountText;
 	[SerializeField]
 	public TextMeshProUGUI RaidsText;
 	[SerializeField]
@@ -50,6 +50,8 @@ public class MatchMakerUI : MonoBehaviour
 	public TextMeshProUGUI LoadingScreenHeaderText;
 	[SerializeField]
 	public TextMeshProUGUI LoadingScreenInfoText;
+	[SerializeField]
+	public TextMeshProUGUI JoinAsSpectatorText;
 
 	protected void Awake()
 	{
@@ -62,5 +64,6 @@ public class MatchMakerUI : MonoBehaviour
 		StartText.text = LocaleUtils.UI_MM_START_BUTTON.Localized();
 		LoadingScreenHeaderText.text = LocaleUtils.UI_MM_LOADING_HEADER.Localized();
 		LoadingScreenInfoText.text = LocaleUtils.UI_MM_LOADING_DESCRIPTION.Localized();
+		JoinAsSpectatorText.text = LocaleUtils.UI_MM_JOIN_AS_SPECTATOR.Localized().ToUpper();
 	}
 }
