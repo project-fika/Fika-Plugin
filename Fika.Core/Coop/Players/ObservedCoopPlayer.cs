@@ -162,7 +162,10 @@ namespace Fika.Core.Coop.Players
 			observedTraverse.Field<GClass886>("gclass886_0").Value = new();
 			player.cullingHandler = observedTraverse.Field<GClass886>("gclass886_0").Value;
 			player.cullingHandler.Initialize(player, player.PlayerBones);
-			player.cullingHandler.Disable();
+			if (FikaBackendUtils.IsDedicated || profile.IsPlayerProfile())
+			{
+				player.cullingHandler.Disable(); 
+			}
 
 			if (!aiControl)
 			{
