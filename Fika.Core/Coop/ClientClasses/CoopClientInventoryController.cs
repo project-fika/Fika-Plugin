@@ -253,7 +253,7 @@ namespace Fika.Core.Coop.ClientClasses
 						InventoryController.logger.LogError($"{InventoryController.ID} - Operation critical failure - status mismatch: {Operation.Id} server status: {serverStatus} client status: {localStatus} - {Operation}");
 					}
 				}
-				Callback(OperationResult);
+				Callback?.Invoke(OperationResult);
 			}
 		}
 
