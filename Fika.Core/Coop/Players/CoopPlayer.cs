@@ -1208,7 +1208,7 @@ namespace Fika.Core.Coop.Players
 			ActiveHealthController.UnpauseAllEffects();
 		}
 
-		public void HandleCallbackFromServer(OperationCallbackPacket operationCallbackPacket)
+		public void HandleCallbackFromServer(ref OperationCallbackPacket operationCallbackPacket)
 		{
 			if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Action<ServerOperationStatus> callback))
 			{

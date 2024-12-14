@@ -797,7 +797,7 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player) && player.IsYourPlayer)
 			{
-				player.HandleCallbackFromServer(packet);
+				player.HandleCallbackFromServer(ref packet);
 			}
 		}
 
