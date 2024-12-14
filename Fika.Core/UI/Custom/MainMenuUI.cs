@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using Fika.Core.Utils;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,6 @@ public class MainMenuUI : MonoBehaviour
 
 	public void UpdateLabel(int amount)
 	{
-		Label.text = $"ONLINE PLAYERS: {amount}";
+		Label.text = string.Format(LocaleUtils.UI_MMUI_ONLINE_PLAYERS.Localized(), amount);
 	}
 }

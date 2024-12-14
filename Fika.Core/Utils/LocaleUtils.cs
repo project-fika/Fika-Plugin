@@ -208,6 +208,15 @@ namespace Fika.Core.Utils
 		public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
 		public const string UI_EXTRACT_MESSAGE = "F_UI_ExtractMessage";
 
+		// Main Menu UI
+		public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";
+		public const string UI_MMUI_IN_MENU = "F_MMUI_InMenu";
+		public const string UI_MMUI_IN_RAID = "F_MMUI_InRaid";
+		public const string UI_MMUI_IN_STASH = "F_MMUI_InStash";
+		public const string UI_MMUI_IN_HIDEOUT = "F_MMUI_InHideout";
+		public const string UI_MMUI_IN_FLEA = "F_MMUI_InFlea";
+		public const string UI_MMUI_RAID_DETAILS = "F_MMUI_RaidDetails";
+
 		// BepInEx
 
 		public const string BEPINEX_H_ADVANCED = "F_BepInEx_H_Advanced";

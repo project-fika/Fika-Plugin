@@ -149,9 +149,22 @@ namespace Fika.Core.UI
 		/// <summary>
 		/// Utility used to color text within a <see cref="CustomTextMeshProUGUI"/>
 		/// </summary>
+		/// <param name="color">The color to return the text in</param>
+		/// <param name="text">The original text</param>
+		/// <returns>Text in color</returns>
 		public static string ColorizeText(EColor color, string text)
 		{
 			return $"<color=#{GetHexByColor(color)}>{text}</color>";
+		}
+
+		/// <summary>
+		/// Utility used to color text within a <see cref="CustomTextMeshProUGUI"/>
+		/// </summary>
+		/// <param name="text">The original text</param>
+		/// <returns>Text in bold</returns>
+		public static string BoldText(string text)
+		{
+			return $"<b>{text}</b>";
 		}
 
 		public enum EFikaPlayerPresence
