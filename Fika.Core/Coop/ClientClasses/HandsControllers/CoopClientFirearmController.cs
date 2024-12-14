@@ -67,7 +67,7 @@ namespace Fika.Core.Coop.ClientClasses
 			return base.CanStartReload();
 		}
 
-		public override bool CanPressTrigger()
+		/*public override bool CanPressTrigger()
 		{
 			if (isClient)
 			{
@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 
 			return base.CanPressTrigger();
-		}
+		}*/
 
 		public Player.BaseAnimationOperation Weapon1()
 		{

@@ -45,16 +45,6 @@ namespace Fika.Core.Coop.ClientClasses
 			}
 		}
 
-		/*public override void RollBack()
-		{
-			base.RollBack();
-			ResyncInventoryIdPacket packet = new(coopPlayer.NetId)
-			{
-				MongoId = mongoID_0
-			};
-			coopPlayer.PacketSender.SendPacket(ref packet, false);
-		}*/
-
 		public override void GetTraderServicesDataFromServer(string traderId)
 		{
 			if (FikaBackendUtils.IsClient)
@@ -272,37 +262,5 @@ namespace Fika.Core.Coop.ClientClasses
 			public readonly EOperationStatus Status = status;
 			public readonly string Error = error;
 		}
-
-		/*private class ClientInventoryCallbackManager
-		{
-			public Result<EOperationStatus> result;
-			public ClientInventoryOperationHandler clientOperationManager;
-
-			public void HandleResult(IResult executeResult)
-			{
-				if (!executeResult.Succeed && (executeResult.Error is not "skipped skippable" or "skipped _completed"))
-				{
-					FikaPlugin.Instance.FikaLogger.LogError($"{clientOperationManager.inventoryController.ID} - Client operation critical failure: {clientOperationManager.inventoryController.ID} - {clientOperationManager.operation}\r\nError: {executeResult.Error}");
-				}
-
-				clientOperationManager.localOperationStatus = EOperationStatus.Succeeded;
-
-				if (clientOperationManager.localOperationStatus == clientOperationManager.serverOperationStatus)
-				{
-					clientOperationManager.operation.Dispose();
-					clientOperationManager.callback.Invoke(result);
-					return;
-				}
-
-				if (clientOperationManager.serverOperationStatus != null)
-				{
-					if (clientOperationManager.serverOperationStatus == EOperationStatus.Failed)
-					{
-						clientOperationManager.operation.Dispose();
-						clientOperationManager.callback.Invoke(result);
-					}
-				}
-			}
-		}*/
 	}
 }
