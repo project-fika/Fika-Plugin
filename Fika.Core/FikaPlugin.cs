@@ -67,6 +67,7 @@ namespace Fika.Core
 		public FikaModHandler ModHandler = new();
 		public string[] LocalIPs;
 		public IPAddress WanIP;
+		public bool LocalesLoaded;
 
 		private static readonly Version RequiredServerVersion = new("2.3.1");
 
@@ -224,7 +225,6 @@ namespace Fika.Core
 			Instance = this;
 
 			GetNatPunchServerConfig();
-			//SetupConfig();
 			EnableFikaPatches();
 			gameObject.AddComponent<MainThreadDispatcher>();
 
@@ -439,6 +439,7 @@ namespace Fika.Core
 			{
 				yield return new WaitForSeconds(1);
 			}
+			LocalesLoaded = true;
 			Logger.LogInfo("Locales are ready!");
 			SetupConfig();
 			FikaVersionLabel_Patch.UpdateVersionLabel();
