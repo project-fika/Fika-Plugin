@@ -5,6 +5,7 @@
 ![Size](https://img.shields.io/github/languages/code-size/project-fika/Fika-Plugin?style=plastic&logo=github)
 ![Issues](https://img.shields.io/github/issues/project-fika/Fika-Plugin?style=plastic&logo=github)
 [![License](https://img.shields.io/badge/CC--BY--NC--SA--4.0-blue?style=plastic&logo=creativecommons&logoColor=FFFFFF&label=License)](https://github.com/project-fika/Fika-Plugin/blob/main/LICENSE.md)
+[![Crowdin](https://badges.crowdin.net/project-fika/localized.svg)](https://crowdin.com/project/project-fika)
 
 Client-side changes to make multiplayer work.
 
@@ -62,3 +63,5 @@ SIT         | [NCSA](./LICENSE-SIT.md) (`Forked from SIT.Client master:9de30d8`)
 Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE) (for UPnP implementation)
 LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt) (for P2P UDP implementation)
 Mirror Networking  | [MIT](https://github.com/MirrorNetworking/Mirror/blob/master/LICENSE) (for Snapshot Interpolation implementation)
+
+<a href="https://crowdin.com/?utm_term=click-badge-add-on" rel="nofollow"><img style="width:140;height:40px" src="https://badges.crowdin.net/badge/light/crowdin-on-dark.png" srcset="https://badges.crowdin.net/badge/light/crowdin-on-dark.png 1x,https://badges.crowdin.net/badge/light/crowdin-on-dark@2x.png 2x" alt="Crowdin | Agile localization for tech companies" /></a>
