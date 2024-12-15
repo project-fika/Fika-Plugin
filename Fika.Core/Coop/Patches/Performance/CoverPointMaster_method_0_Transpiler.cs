@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Fika.Core.Coop.Patches.Performance
+namespace Fika.Core.Coop.Patches
 {
 	internal class CoverPointMaster_method_0_Transpiler : ModulePatch
 	{
