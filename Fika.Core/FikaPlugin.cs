@@ -343,7 +343,6 @@ namespace Fika.Core
 			new BotReload_method_1_Patch().Enable();
 			new Class1374_ReloadBackendLocale_Patch().Enable();
 			new GClass2013_method_0_Patch().Enable();
-			new MedkidHidePatch().Enable();
 #if DEBUG
 			TasksExtensions_HandleFinishedTask_Patches.Enable();
 			new GClass1640_method_0_Patch().Enable();
