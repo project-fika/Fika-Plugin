@@ -368,7 +368,7 @@ namespace Fika.Core.Coop.GameMode
 			FikaServer server = Singleton<FikaServer>.Instance;
 			netId = server.PopNetId();
 
-			MongoID mongoId = new(profile);
+			MongoID mongoId = MongoID.Generate(true);
 			ushort nextOperationId = 0;
 			SendCharacterPacket packet = new(new()
 			{
