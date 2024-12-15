@@ -8,7 +8,6 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
-using Fika.Core.Coop.Patches.Debug;
 using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.SPTBugs;
 using Fika.Core.EssentialPatches;
