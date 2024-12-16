@@ -12,6 +12,7 @@ using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
+using Fika.Core.Coop.Components;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
@@ -624,6 +625,18 @@ namespace Fika.Core.Coop.Players
 					}
 				});
 			}
+		}
+
+		public override Corpse CreateCorpse()
+		{
+			if (FikaBackendUtils.IsServer)
+			{
+				Corpse corpse = base.CreateCorpse();
+				CorpsePositionSyncer.Create(corpse.gameObject, corpse);
+				return corpse; 
+			}
+
+			return CreateCorpse<ObservedCorpse>(Velocity);
 		}
 
 		public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct177.EStationaryCommand command)

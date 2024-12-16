@@ -22,7 +22,9 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Utils;
+using FlyingWormConsole3;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -158,6 +160,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<PingPacket>(OnPingPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
+			packetProcessor.SubscribeNetSerializable<CorpsePositionPacket>(OnCorpsePositionPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -207,6 +210,19 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
+		}
+
+		private void OnCorpsePositionPacketReceived(CorpsePositionPacket packet)
+		{
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			if (gameWorld != null)
+			{
+				if (gameWorld.ObservedPlayersCorpses.TryGetValue(packet.Data.Id, out ObservedCorpse corpse))
+				{
+					corpse.ApplyNetPacket(packet.Data);
+					return;
+				}
+			}
 		}
 
 		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet)
