@@ -304,7 +304,7 @@ namespace Fika.Core.Networking
 			}
 
 			KeyValuePair<Profile, bool> kvp = packet.Profiles.First();
-			visualProfiles.Add(kvp.Key, kvp.Value);
+			visualProfiles.Add(kvp.Key, visualProfiles.Count == 0 || kvp.Value);
 			FikaBackendUtils.AddPartyMembers(visualProfiles);
 			packet.Profiles = visualProfiles;
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
