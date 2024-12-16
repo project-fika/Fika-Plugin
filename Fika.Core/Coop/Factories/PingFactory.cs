@@ -215,7 +215,7 @@ public static class PingFactory
 			float distance = Mathf.Clamp(Vector3.Distance(CameraClass.Instance.Camera.transform.position, transform.position) / 100, 0.4f, 0.6f);
 			float pingSize = FikaPlugin.PingSize.Value;
 			Vector3 scaledSize = new(pingSize, pingSize, pingSize);
-			if (FikaPlugin.PingScaleWithDistance.Value == true)
+			if (FikaPlugin.PingScaleWithDistance.Value)
 			{
 				scaledSize *= distance;
 			}
