@@ -7,6 +7,7 @@ using EFT.Ballistics;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
+using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
@@ -794,7 +795,16 @@ namespace Fika.Core.Coop.Players
 			{
 				SetInventory(CorpseSyncPacket.InventoryDescriptor);
 			}
-			return CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
+			if (FikaBackendUtils.IsClient)
+			{
+				ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+				Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
+				return observedCorpse; 
+			}
+
+			Corpse corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
+			CorpsePositionSyncer.Create(corpse.gameObject, corpse);
+			return corpse;
 		}
 
 		public override void OnDead(EDamageType damageType)
