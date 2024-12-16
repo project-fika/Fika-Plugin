@@ -57,6 +57,14 @@ namespace Fika.Core.UI.Custom
 			}
 		}
 
+		private DateTime StaticTime
+		{
+			get
+			{
+				return new DateTime(2016, 8, 4, 15, 28, 0);
+			}
+		}
+
 		protected void Start()
 		{
 			instance = this;
@@ -163,14 +171,25 @@ namespace Fika.Core.UI.Custom
 			SetupPlayers(ref response);
 		}
 
-		private string ConvertToTime(EDateTime dateTime)
+		private string ConvertToTime(EDateTime dateTime, bool staticTime)
 		{
+			if (staticTime)
+			{
+				DateTime staticDate = StaticTime;
+				return dateTime == EDateTime.CURR ? staticDate.ToString("HH:mm:ss") : staticDate.AddHours(-12).ToString("HH:mm:ss");
+			}
+
 			DateTime backendTime = BackendTime;
 			if (backendTime == DateTime.MinValue)
 			{
 				return "ERROR";
 			}
 			return dateTime == EDateTime.CURR ? backendTime.ToString("HH:mm:ss") : backendTime.AddHours(-12).ToString("HH:mm:ss");
+		}
+
+		private bool IsStaticTimeLocation(string location)
+		{
+			return location is "factory4_day" or "factory4_night" or "laboratory";
 		}
 
 		private void SetupPlayers(ref FikaPlayerPresence[] responses)
@@ -184,7 +203,7 @@ namespace Fika.Core.UI.Custom
 				{
 					RaidInformation information = presence.RaidInformation.Value;
 					string side = information.Side == ESideType.Pmc ? "RaidSidePmc".Localized() : "RaidSideScav".Localized();
-					string time = ConvertToTime(information.Time);
+					string time = ConvertToTime(information.Time, IsStaticTimeLocation(information.Location));
 					HoverTooltipArea tooltip = newPlayer.AddComponent<HoverTooltipArea>();
 					tooltip.enabled = true;
 					tooltip.SetMessageText(string.Format(LocaleUtils.UI_MMUI_RAID_DETAILS.Localized(), side,
