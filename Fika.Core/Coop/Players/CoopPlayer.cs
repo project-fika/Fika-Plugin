@@ -629,9 +629,14 @@ namespace Fika.Core.Coop.Players
 
 		public override Corpse CreateCorpse()
 		{
-			Corpse corpse = base.CreateCorpse();
-			CorpsePositionSyncer.Create(corpse.gameObject, corpse);
-			return corpse;
+			if (FikaBackendUtils.IsServer)
+			{
+				Corpse corpse = base.CreateCorpse();
+				CorpsePositionSyncer.Create(corpse.gameObject, corpse);
+				return corpse; 
+			}
+
+			return CreateCorpse<ObservedCorpse>(Velocity);
 		}
 
 		public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct177.EStationaryCommand command)
