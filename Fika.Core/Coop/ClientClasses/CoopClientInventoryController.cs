@@ -32,7 +32,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			this.player = player;
 			coopPlayer = (CoopPlayer)player;
-			mongoID_0 = new(profile);
+			mongoID_0 = MongoID.Generate(true);
 			searchController = new PlayerSearchControllerClass(profile, this);
 			logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
 		}

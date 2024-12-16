@@ -23,6 +23,7 @@ using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
 using SPT.SinglePlayer.Patches.MainMenu;
+using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
@@ -226,6 +227,7 @@ namespace Fika.Core
 
 			GetNatPunchServerConfig();
 			EnableFikaPatches();
+			EnableTranspilers();
 			gameObject.AddComponent<MainThreadDispatcher>();
 
 #if GOLDMASTER
@@ -346,6 +348,12 @@ namespace Fika.Core
 			new GClass1640_method_0_Patch().Enable();
 			new TestHalloweenPatch().Enable();
 #endif
+		}
+
+		private void EnableTranspilers()
+		{
+			new BotOwner_UpdateManual_Transpiler().Enable();
+			new CoverPointMaster_method_0_Transpiler().Enable();
 		}
 
 		private void VerifyServerVersion()
@@ -766,6 +774,7 @@ namespace Fika.Core
 			new GetProfileAtEndOfRaidPatch().Disable();
 			new ScavExfilPatch().Disable();
 			new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
+			new BotOwnerManualUpdatePatch().Disable();
 		}
 
 		public void FixSPTBugPatches()

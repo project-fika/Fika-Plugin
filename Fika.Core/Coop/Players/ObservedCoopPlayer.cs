@@ -1376,7 +1376,7 @@ namespace Fika.Core.Coop.Players
 					CreateFirearmController(itemId, isStationary, true);
 					break;
 				case EHandsControllerType.Meds:
-					CreateMedsController(itemId, EBodyPart.Head, 1f, 1);
+					CreateMedsController(itemId, EBodyPart.Head, 0f, 1);
 					break;
 				case EHandsControllerType.Grenade:
 					CreateGrenadeController(itemId);

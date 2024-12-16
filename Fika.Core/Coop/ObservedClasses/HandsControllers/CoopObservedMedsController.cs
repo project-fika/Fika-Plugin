@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		private Player.BaseAnimationOperation GetObservedMedsOperation()
 		{
 			return new ObservedMedsOperation(this);
-		}
+		}		
 
 		public override bool CanChangeCompassState(bool newState)
 		{
@@ -100,7 +100,6 @@ namespace Fika.Core.Coop.ObservedClasses
 				State = Player.EOperationState.Executing;
 				SetLeftStanceAnimOnStartOperation();
 				callback();
-				observedMedsController.coopPlayer.HealthController.EffectRemovedEvent += method_2;
 				observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
 			}
 
