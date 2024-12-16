@@ -346,7 +346,7 @@ namespace Fika.Core.Coop.FreeCamera
 					string modifiers = string.Join(" + ", FikaPlugin.ExtractKey.Value.Modifiers);
 					text = modifiers + " + " + text;
 				}
-				extractText = FikaUIGlobals.CreateOverlayText(string.Format(LocaleUtils.UI_EXTRACT_MESSAGE.Localized(), text));
+				extractText = FikaUIGlobals.CreateOverlayText(string.Format(LocaleUtils.UI_EXTRACT_MESSAGE.Localized(), $"'{text}'"));
 			}
 		}
 
