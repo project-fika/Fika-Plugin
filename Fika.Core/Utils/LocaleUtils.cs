@@ -209,6 +209,7 @@ namespace Fika.Core.Utils
 		public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
 		public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
 		public const string UI_EXTRACT_MESSAGE = "F_UI_ExtractMessage";
+		public const string UI_DOWNLOAD_PROFILE = "F_UI_DownloadProfile";
 
 		// Main Menu UI
 		public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";
