@@ -455,12 +455,14 @@ namespace Fika.Core
 
 		private string CleanConfigString(string header)
 		{
+			string original = string.Copy(header);
 			string[] forbiddenChars = ["\n", "\t", "\\", "\"", "'", "[", "]"];
-			foreach (string item in forbiddenChars)
+			foreach (string character in forbiddenChars)
 			{
-				if (header.Contains(item))
+				if (header.Contains(character))
 				{
-					header.Replace(item, "");
+					FikaLogger.LogWarning($"Header {original} contains an illegal character: {character}\nReport this to the developers!");
+					header.Replace(character, "");
 				}
 			}
 
