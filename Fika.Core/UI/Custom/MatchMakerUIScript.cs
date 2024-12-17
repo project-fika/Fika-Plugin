@@ -300,16 +300,18 @@ namespace Fika.Core.UI.Custom
 					};
 
 					StartDedicatedResponse response = await FikaRequestHandler.StartDedicated(request);
+					FikaBackendUtils.IsDedicatedRequester = true;
 
 					if (!string.IsNullOrEmpty(response.Error))
 					{
 						PreloaderUI.Instance.ShowErrorScreen(LocaleUtils.UI_DEDICATED_ERROR.Localized(), response.Error);
-
 						ToggleLoading(false);
+						FikaBackendUtils.IsDedicatedRequester = false;
 					}
 					else
 					{
 						NotificationManagerClass.DisplaySingletonWarningNotification(LocaleUtils.STARTING_RAID_ON_DEDICATED.Localized());
+						FikaBackendUtils.IsDedicatedRequester = false;
 					}
 				}
 			});

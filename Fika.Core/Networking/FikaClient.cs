@@ -46,7 +46,6 @@ namespace Fika.Core.Networking
 		public CoopPlayer MyPlayer;
 		public int Ping = 0;
 		public int ServerFPS = 0;
-		public int ConnectedClients = 0;
 		public int ReadyClients = 0;
 		public bool HostReady = false;
 		public bool HostLoaded = false;
@@ -1060,18 +1059,18 @@ namespace Fika.Core.Networking
 
 		private void OnInformationPacketReceived(InformationPacket packet)
 		{
-			if (!packet.IsRequest)
+			CoopGame coopGame = CoopHandler.LocalGameInstance;
+			if (coopGame != null)
 			{
-				ConnectedClients = packet.NumberOfPlayers;
-				ReadyClients = packet.ReadyPlayers;
-				HostReady = packet.HostReady;
-				HostLoaded = packet.HostLoaded;
+				coopGame.RaidStarted = packet.RaidStarted; 
+			}
+			ReadyClients = packet.ReadyPlayers;
+			HostReady = packet.HostReady;
+			HostLoaded = packet.HostLoaded;
 
-				if (packet.HostReady)
-				{
-					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-					coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
-				}
+			if (packet.HostReady)
+			{
+				coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
 			}
 		}
 

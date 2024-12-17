@@ -5,20 +5,20 @@ using System;
 
 namespace Fika.Core.Networking
 {
-	public struct InformationPacket(bool isRequest) : INetSerializable
+	public struct InformationPacket : INetSerializable
 	{
-		public bool IsRequest = isRequest;
-		public int NumberOfPlayers = 0;
-		public int ReadyPlayers = 0;
-		public bool HostReady = false;
-		public bool HostLoaded = false;
+		public bool RaidStarted;
+		public bool RequestStart;
+		public int ReadyPlayers;
+		public bool HostReady;
+		public bool HostLoaded;
 		public DateTime GameTime;
 		public TimeSpan SessionTime;
 
 		public void Deserialize(NetDataReader reader)
 		{
-			IsRequest = reader.GetBool();
-			NumberOfPlayers = reader.GetInt();
+			RaidStarted = reader.GetBool();
+			RequestStart = reader.GetBool();
 			ReadyPlayers = reader.GetInt();
 			HostReady = reader.GetBool();
 			if (HostReady)
@@ -31,8 +31,8 @@ namespace Fika.Core.Networking
 
 		public void Serialize(NetDataWriter writer)
 		{
-			writer.Put(IsRequest);
-			writer.Put(NumberOfPlayers);
+			writer.Put(RaidStarted);
+			writer.Put(RequestStart);
 			writer.Put(ReadyPlayers);
 			writer.Put(HostReady);
 			if (HostReady)
