@@ -22,9 +22,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-using Fika.Core.Networking.Packets;
 using Fika.Core.Utils;
-using FlyingWormConsole3;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -1062,7 +1060,8 @@ namespace Fika.Core.Networking
 			CoopGame coopGame = CoopHandler.LocalGameInstance;
 			if (coopGame != null)
 			{
-				coopGame.RaidStarted = packet.RaidStarted; 
+				coopGame.RaidStarted = packet.RaidStarted;
+				FikaBackendUtils.HostExpectedNumberOfPlayers = packet.ReadyPlayers;
 			}
 			ReadyClients = packet.ReadyPlayers;
 			HostReady = packet.HostReady;

@@ -947,14 +947,15 @@ namespace Fika.Core.Coop.GameMode
 				//customButton.gameObject.transform.position = new(customButton.transform.position.x, customButton.transform.position.y - 20, customButton.transform.position.z);
 				customButton.gameObject.SetActive(true);
 				DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
-				backButtonComponent.SetHeaderText("Start", 32);
-				backButtonComponent.SetEnabledTooltip("Starts the raid.");
+				backButtonComponent.SetHeaderText(LocaleUtils.UI_MM_START_BUTTON.Localized(), 32);
+				backButtonComponent.SetEnabledTooltip(LocaleUtils.UI_START_DESCRIPTION.Localized());
 				UnityEngine.Events.UnityEvent newEvent = new();
 				newEvent.AddListener(() =>
 				{
 					if (isServer)
 					{
 						RaidStarted = true;
+						FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
 						return;
 					}
 
@@ -1406,13 +1407,16 @@ namespace Fika.Core.Coop.GameMode
 
 				while (!RaidStarted)
 				{
-					await Task.Delay(100);
+					await Task.Yield();
 				}
 
 				if (startButton != null)
 				{
 					Destroy(startButton); 
 				}
+
+				SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
+				await FikaRequestHandler.UpdateSetStatus(status);
 				return;
 			}
 
@@ -1425,7 +1429,7 @@ namespace Fika.Core.Coop.GameMode
 			client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 			while (!RaidStarted)
 			{
-				await Task.Delay(100);
+				await Task.Delay(250);
 				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 			}
 
@@ -1557,11 +1561,7 @@ namespace Fika.Core.Coop.GameMode
 				botsController_0.EventsController.SpawnAction();
 
 				FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
-				FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
-
-				SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
-
-				await FikaRequestHandler.UpdateSetStatus(status);
+				FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;				
 			}
 
 			// Add FreeCamController to GameWorld GameObject
