@@ -996,6 +996,11 @@ namespace Fika.Core.Networking
 				HostLoaded = RaidInitialized
 			};
 
+			if (gameExists && packet.RequestStart)
+			{
+				coopHandler.LocalGameInstance.RaidStarted = true;
+			}
+
 			if (hostReady)
 			{
 				respondPackage.GameTime = gameStartTime.Value;
