@@ -947,7 +947,7 @@ namespace Fika.Core.Coop.GameMode
 				//customButton.gameObject.transform.position = new(customButton.transform.position.x, customButton.transform.position.y - 20, customButton.transform.position.z);
 				customButton.gameObject.SetActive(true);
 				DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
-				backButtonComponent.SetHeaderText(LocaleUtils.UI_MM_START_BUTTON.Localized(), 32);
+				backButtonComponent.SetHeaderText(LocaleUtils.UI_START_RAID.Localized(), 32);
 				backButtonComponent.SetEnabledTooltip(LocaleUtils.UI_START_RAID_DESCRIPTION.Localized());
 				UnityEngine.Events.UnityEvent newEvent = new();
 				newEvent.AddListener(() =>

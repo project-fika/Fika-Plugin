@@ -155,6 +155,7 @@ namespace Fika.Core.Utils
 		public const string UI_MM_LOADING_HEADER = "F_MMUI_LoadingScreenHeader";
 		public const string UI_MM_LOADING_DESCRIPTION = "F_MMUI_LoadingScreenDescription";
 		public const string UI_MM_JOIN_AS_SPECTATOR = "F_MMUI_JoinAsSpectator";
+		public const string UI_START_RAID = "F_UI_StartRaid";
 		public const string UI_START_RAID_DESCRIPTION = "F_UI_StartRaidDescription";
 		public const string UI_CANNOT_JOIN_RAID_OTHER_MAP = "F_UI_CannotJoinRaidOtherMap";
 		public const string UI_CANNOT_JOIN_RAID_OTHER_TIME = "F_UI_CannotJoinRaidOtherTime";
