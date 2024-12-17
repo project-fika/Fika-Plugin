@@ -8,6 +8,7 @@ using EFT.AssetsManager;
 using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
@@ -158,6 +159,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
 			packetProcessor.SubscribeNetSerializable<CorpsePositionPacket>(OnCorpsePositionPacketReceived);
+			packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -207,6 +209,29 @@ namespace Fika.Core.Networking
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
+		}
+
+		private void OnSideEffectPacketReceived(SideEffectPacket packet)
+		{
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			if (gameWorld == null)
+			{
+				logger.LogError("OnSideEffectPacketReceived: GameWorld was null!");
+				return;
+			}
+
+			GStruct448<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+			if (gstruct2.Failed)
+			{
+				logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
+				return;
+			}
+			Item item = gstruct2.Value;
+			if (item.TryGetItemComponent(out SideEffectComponent sideEffectComponent))
+			{
+				sideEffectComponent.Value = packet.Value;
+				item.RaiseRefreshEvent(false, false);
+			}
 		}
 
 		private void OnCorpsePositionPacketReceived(CorpsePositionPacket packet)
