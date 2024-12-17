@@ -8,6 +8,7 @@ using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,7 +24,8 @@ namespace Fika.Core.UI.Patches
 		}
 
 		[PatchPostfix]
-		public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType, HoverTooltipArea> ____hoverTooltipAreas)
+		public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
+			HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
 		{
 			GameObject watchlistGameobject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/Watchlist");
 			if (watchlistGameobject != null)
@@ -109,11 +111,15 @@ namespace Fika.Core.UI.Patches
 							}
 						});
 
-						HoverTooltipArea surveryButton = ____hoverTooltipAreas[EMenuType.NewsHub];
-						GameObject.Destroy(surveryButton.gameObject);
+						HoverTooltipArea surveyButton = ____hoverTooltipAreas[EMenuType.NewsHub];						
 
 						____toggleButtons.Remove(EMenuType.NewsHub);
 						____hoverTooltipAreas.Remove(EMenuType.NewsHub);
+						GameObject.Destroy(surveyButton.gameObject);
+						List<GameObject> newList = new(____newInformation);
+						newList.Remove(newList.Last());
+						____newInformation = [.. newList];
+
 						____toggleButtons.Add(EMenuType.NewsHub, animatedToggle);
 						____hoverTooltipAreas.Add(EMenuType.NewsHub, downloadProfileGameObject.GetComponent<HoverTooltipArea>());
 					}
