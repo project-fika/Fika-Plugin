@@ -959,12 +959,7 @@ namespace Fika.Core.Coop.GameMode
 						return;
 					}
 
-					FikaClient fikaClient = Singleton<FikaClient>.Instance;
-					if (fikaClient == null)
-					{
-						throw new NullReferenceException("CreateStartButton::FikaClient was null!");
-					}
-
+					FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
 					InformationPacket packet = new()
 					{
 						RequestStart = true
