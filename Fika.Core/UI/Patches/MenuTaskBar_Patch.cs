@@ -6,6 +6,7 @@ using Fika.Core.Utils;
 using Newtonsoft.Json.Linq;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace Fika.Core.UI.Patches
 		}
 
 		[PatchPostfix]
-		public static void Postfix(MenuTaskBar __instance)
+		public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType, HoverTooltipArea> ____hoverTooltipAreas)
 		{
 			GameObject watchlistGameobject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/Watchlist");
 			if (watchlistGameobject != null)
@@ -91,6 +92,8 @@ namespace Fika.Core.UI.Patches
 										NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
 											[ColorizeText(EColor.BLUE, profileId), fikaDir]));
 
+										____toggleButtons.Remove(EMenuType.NewsHub);
+										____hoverTooltipAreas.Remove(EMenuType.NewsHub);
 										GameObject.Destroy(downloadProfileGameObject);
 									}
 								}
@@ -105,6 +108,14 @@ namespace Fika.Core.UI.Patches
 								FikaPlugin.Instance.FikaLogger.LogError(ex.Message);
 							}
 						});
+
+						HoverTooltipArea surveryButton = ____hoverTooltipAreas[EMenuType.NewsHub];
+						GameObject.Destroy(surveryButton.gameObject);
+
+						____toggleButtons.Remove(EMenuType.NewsHub);
+						____hoverTooltipAreas.Remove(EMenuType.NewsHub);
+						____toggleButtons.Add(EMenuType.NewsHub, animatedToggle);
+						____hoverTooltipAreas.Add(EMenuType.NewsHub, downloadProfileGameObject.GetComponent<HoverTooltipArea>());
 					}
 				}
 			}
