@@ -188,6 +188,7 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<PingPacket, NetPeer>(OnPingPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
+			packetProcessor.SubscribeNetSerializable<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -293,6 +294,31 @@ namespace Fika.Core.Networking
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
 			FikaRequestHandler.UpdateSetHost(body);
 			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
+		}
+
+		private void OnSideEffectPacketReceived(SideEffectPacket packet, NetPeer peer)
+		{
+			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			if (gameWorld == null)
+			{
+				logger.LogError("OnSideEffectPacketReceived: GameWorld was null!");
+				return;
+			}
+
+			GStruct448<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+			if (gstruct2.Failed)
+			{
+				logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
+				return;
+			}
+			Item item = gstruct2.Value;
+			if (item.TryGetItemComponent(out SideEffectComponent sideEffectComponent))
+			{
+				sideEffectComponent.Value = packet.Value;
+				item.RaiseRefreshEvent(false, false);
+			}
 		}
 
 		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet, NetPeer peer)
