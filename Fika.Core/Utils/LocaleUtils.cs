@@ -155,6 +155,8 @@ namespace Fika.Core.Utils
 		public const string UI_MM_LOADING_HEADER = "F_MMUI_LoadingScreenHeader";
 		public const string UI_MM_LOADING_DESCRIPTION = "F_MMUI_LoadingScreenDescription";
 		public const string UI_MM_JOIN_AS_SPECTATOR = "F_MMUI_JoinAsSpectator";
+		public const string UI_START_RAID = "F_UI_StartRaid";
+		public const string UI_START_RAID_DESCRIPTION = "F_UI_StartRaidDescription";
 		public const string UI_CANNOT_JOIN_RAID_OTHER_MAP = "F_UI_CannotJoinRaidOtherMap";
 		public const string UI_CANNOT_JOIN_RAID_OTHER_TIME = "F_UI_CannotJoinRaidOtherTime";
 		public const string UI_CANNOT_JOIN_RAID_SCAV_AS_PMC = "F_UI_CannotJoinRaidScavAsPMC";
@@ -207,6 +209,7 @@ namespace Fika.Core.Utils
 		public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
 		public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
 		public const string UI_EXTRACT_MESSAGE = "F_UI_ExtractMessage";
+		public const string UI_DOWNLOAD_PROFILE = "F_UI_DownloadProfile";
 
 		// Main Menu UI
 		public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";

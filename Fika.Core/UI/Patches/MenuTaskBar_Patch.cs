@@ -6,7 +6,9 @@ using Fika.Core.Utils;
 using Newtonsoft.Json.Linq;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,7 +24,8 @@ namespace Fika.Core.UI.Patches
 		}
 
 		[PatchPostfix]
-		public static void Postfix(MenuTaskBar __instance)
+		public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
+			HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
 		{
 			GameObject watchlistGameobject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/Watchlist");
 			if (watchlistGameobject != null)
@@ -42,7 +45,7 @@ namespace Fika.Core.UI.Patches
 					LocalizedText text = downloadProfileGameObject.GetComponentInChildren<LocalizedText>();
 					if (text != null)
 					{
-						text.method_2("DOWNLOAD PROFILE");
+						text.method_2(LocaleUtils.UI_DOWNLOAD_PROFILE.Localized());
 						text.LocalizationKey = "";
 					}
 
@@ -71,7 +74,7 @@ namespace Fika.Core.UI.Patches
 								{
 									Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
 									string installDir = Environment.CurrentDirectory;
-									string fikaDir = installDir + @"\user\fika";
+									string fikaDir = Path.Combine(installDir, @"\user\fika");
 
 									if (!string.IsNullOrEmpty(installDir))
 									{
@@ -91,6 +94,8 @@ namespace Fika.Core.UI.Patches
 										NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
 											[ColorizeText(EColor.BLUE, profileId), fikaDir]));
 
+										____toggleButtons.Remove(EMenuType.NewsHub);
+										____hoverTooltipAreas.Remove(EMenuType.NewsHub);
 										GameObject.Destroy(downloadProfileGameObject);
 									}
 								}
@@ -105,6 +110,18 @@ namespace Fika.Core.UI.Patches
 								FikaPlugin.Instance.FikaLogger.LogError(ex.Message);
 							}
 						});
+
+						HoverTooltipArea surveyButton = ____hoverTooltipAreas[EMenuType.NewsHub];						
+
+						____toggleButtons.Remove(EMenuType.NewsHub);
+						____hoverTooltipAreas.Remove(EMenuType.NewsHub);
+						GameObject.Destroy(surveyButton.gameObject);
+						List<GameObject> newList = new(____newInformation);
+						newList.Remove(newList.Last());
+						____newInformation = [.. newList];
+
+						____toggleButtons.Add(EMenuType.NewsHub, animatedToggle);
+						____hoverTooltipAreas.Add(EMenuType.NewsHub, downloadProfileGameObject.GetComponent<HoverTooltipArea>());
 					}
 				}
 			}

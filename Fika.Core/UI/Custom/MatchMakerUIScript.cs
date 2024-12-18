@@ -136,6 +136,8 @@ namespace Fika.Core.UI.Custom
 
 		private void CreateMatchMakerUI()
 		{
+			FikaBackendUtils.IsDedicatedRequester = false;
+
 			GetDedicatedStatusResponse response = FikaRequestHandler.GetDedicatedStatus();
 
 			GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("newmatchmakerui").LoadAsset<GameObject>("NewMatchMakerUI");
@@ -300,12 +302,13 @@ namespace Fika.Core.UI.Custom
 					};
 
 					StartDedicatedResponse response = await FikaRequestHandler.StartDedicated(request);
+					FikaBackendUtils.IsDedicatedRequester = true;
 
 					if (!string.IsNullOrEmpty(response.Error))
 					{
 						PreloaderUI.Instance.ShowErrorScreen(LocaleUtils.UI_DEDICATED_ERROR.Localized(), response.Error);
-
 						ToggleLoading(false);
+						FikaBackendUtils.IsDedicatedRequester = false;
 					}
 					else
 					{

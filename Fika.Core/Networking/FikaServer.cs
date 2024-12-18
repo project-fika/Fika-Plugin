@@ -985,15 +985,21 @@ namespace Fika.Core.Networking
 		{
 			ReadyClients += packet.ReadyPlayers;
 
-			bool hostReady = coopHandler != null && coopHandler.LocalGameInstance != null && coopHandler.LocalGameInstance.Status == GameStatus.Started;
+			bool gameExists = coopHandler != null && coopHandler.LocalGameInstance != null;
+			bool hostReady = gameExists && coopHandler.LocalGameInstance.Status == GameStatus.Started;			
 
-			InformationPacket respondPackage = new(false)
+			InformationPacket respondPackage = new()
 			{
-				NumberOfPlayers = netServer.ConnectedPeersCount,
+				RaidStarted = gameExists && coopHandler.LocalGameInstance.RaidStarted,
 				ReadyPlayers = ReadyClients,
 				HostReady = hostReady,
 				HostLoaded = RaidInitialized
 			};
+
+			if (gameExists && packet.RequestStart)
+			{
+				coopHandler.LocalGameInstance.RaidStarted = true;
+			}
 
 			if (hostReady)
 			{
