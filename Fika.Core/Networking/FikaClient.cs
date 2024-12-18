@@ -213,6 +213,9 @@ namespace Fika.Core.Networking
 
 		private void OnSideEffectPacketReceived(SideEffectPacket packet)
 		{
+#if DEBUG
+			logger.LogWarning("OnSideEffectPacketReceived: Received"); 
+#endif
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			if (gameWorld == null)
 			{
@@ -231,7 +234,9 @@ namespace Fika.Core.Networking
 			{
 				sideEffectComponent.Value = packet.Value;
 				item.RaiseRefreshEvent(false, false);
+				return;
 			}
+			logger.LogError("OnSideEffectPacketReceived: SideEffectComponent was not found!");
 		}
 
 		private void OnCorpsePositionPacketReceived(CorpsePositionPacket packet)

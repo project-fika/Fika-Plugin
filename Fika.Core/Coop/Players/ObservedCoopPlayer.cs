@@ -1112,11 +1112,6 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void OnSideEffectApplied(SideEffectComponent sideEffect)
-		{
-			// Do nothing
-		}
-
 		private IEnumerator CreateHealthBar()
 		{
 			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;

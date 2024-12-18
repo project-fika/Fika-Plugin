@@ -61,6 +61,7 @@ namespace Fika.Core.Coop.Players
 		}
 
 		protected string lastWeaponId;
+		private bool shouldSendSideEffect;
 
 		public ClientMovementContext ClientMovementContext
 		{
@@ -1344,6 +1345,10 @@ namespace Fika.Core.Coop.Players
 				if (item != null)
 				{
 					damageInfo.Weapon = item;
+					(damageInfo.Player.iPlayer as CoopPlayer).shouldSendSideEffect = true;
+#if DEBUG
+					FikaPlugin.Instance.FikaLogger.LogWarning("Found weapon for knife damage: " + item.Name.Localized()); 
+#endif
 				}
 			}
 
@@ -1354,13 +1359,19 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnSideEffectApplied(SideEffectComponent sideEffect)
 		{
+			if (!shouldSendSideEffect)
+			{
+				return;
+			}
+
 			SideEffectPacket packet = new()
 			{
 				ItemId = sideEffect.Item.Id,
 				Value = sideEffect.Value
 			};
 
-			PacketSender.SendPacket(ref packet);
+			PacketSender.SendPacket(ref packet, true);
+			shouldSendSideEffect = false;
 		}
 
 		public void HandleArmorDamagePacket(ref ArmorDamagePacket packet)

@@ -298,6 +298,9 @@ namespace Fika.Core.Networking
 
 		private void OnSideEffectPacketReceived(SideEffectPacket packet, NetPeer peer)
 		{
+#if DEBUG
+			logger.LogWarning("OnSideEffectPacketReceived: Received"); 
+#endif
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
@@ -316,9 +319,14 @@ namespace Fika.Core.Networking
 			Item item = gstruct2.Value;
 			if (item.TryGetItemComponent(out SideEffectComponent sideEffectComponent))
 			{
+#if DEBUG
+				logger.LogInfo("Setting value to: " + packet.Value + ", original: " + sideEffectComponent.Value); 
+#endif
 				sideEffectComponent.Value = packet.Value;
-				item.RaiseRefreshEvent(true, false);
+				item.RaiseRefreshEvent(false, false);
+				return;
 			}
+			logger.LogError("OnSideEffectPacketReceived: SideEffectComponent was not found!");
 		}
 
 		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet, NetPeer peer)
