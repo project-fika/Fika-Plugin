@@ -1086,11 +1086,14 @@ namespace Fika.Core.Networking
 			if (coopGame != null)
 			{
 				coopGame.RaidStarted = packet.RaidStarted;
-				FikaBackendUtils.HostExpectedNumberOfPlayers = packet.ReadyPlayers;
 			}
 			ReadyClients = packet.ReadyPlayers;
 			HostReady = packet.HostReady;
 			HostLoaded = packet.HostLoaded;
+			if (packet.AmountOfPeers > 0)
+			{
+				FikaBackendUtils.HostExpectedNumberOfPlayers = packet.AmountOfPeers;
+			}
 
 			if (packet.HostReady)
 			{

@@ -317,7 +317,7 @@ namespace Fika.Core.Networking
 			if (item.TryGetItemComponent(out SideEffectComponent sideEffectComponent))
 			{
 				sideEffectComponent.Value = packet.Value;
-				item.RaiseRefreshEvent(false, false);
+				item.RaiseRefreshEvent(true, false);
 			}
 		}
 
