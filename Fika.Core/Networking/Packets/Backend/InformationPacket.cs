@@ -10,6 +10,7 @@ namespace Fika.Core.Networking
 		public bool RaidStarted;
 		public bool RequestStart;
 		public int ReadyPlayers;
+		public int AmountOfPeers;
 		public bool HostReady;
 		public bool HostLoaded;
 		public DateTime GameTime;
@@ -20,6 +21,7 @@ namespace Fika.Core.Networking
 			RaidStarted = reader.GetBool();
 			RequestStart = reader.GetBool();
 			ReadyPlayers = reader.GetInt();
+			AmountOfPeers = reader.GetInt();
 			HostReady = reader.GetBool();
 			if (HostReady)
 			{
@@ -34,6 +36,7 @@ namespace Fika.Core.Networking
 			writer.Put(RaidStarted);
 			writer.Put(RequestStart);
 			writer.Put(ReadyPlayers);
+			writer.Put(AmountOfPeers);
 			writer.Put(HostReady);
 			if (HostReady)
 			{

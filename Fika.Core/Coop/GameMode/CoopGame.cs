@@ -650,10 +650,10 @@ namespace Fika.Core.Coop.GameMode
 		/// This task ensures that all players are joined and loaded before continuing
 		/// </summary>
 		/// <returns></returns>
-		private async Task WaitForOtherPlayers()
+		private async Task WaitForOtherPlayersToLoad()
 		{
 #if DEBUG
-			Logger.LogWarning("Starting " + nameof(WaitForOtherPlayers));
+			Logger.LogWarning("Starting " + nameof(WaitForOtherPlayersToLoad));
 #endif
 			if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
 			{
@@ -955,7 +955,7 @@ namespace Fika.Core.Coop.GameMode
 					if (isServer)
 					{
 						RaidStarted = true;
-						FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
+						FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount + 1;
 						return;
 					}
 
@@ -1410,6 +1410,11 @@ namespace Fika.Core.Coop.GameMode
 					Destroy(startButton); 
 				}
 
+				InformationPacket continuePacket = new()
+				{
+					AmountOfPeers = server.NetServer.ConnectedPeersCount + 1
+				};
+				server.SendDataToAll(ref continuePacket, DeliveryMethod.ReliableOrdered);
 				SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
 				await FikaRequestHandler.UpdateSetStatus(status);
 				return;
@@ -1523,7 +1528,7 @@ namespace Fika.Core.Coop.GameMode
 				DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
 			}
 
-			await WaitForOtherPlayers();
+			await WaitForOtherPlayersToLoad();
 
 			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 			Logger.LogInfo("All players are loaded, continuing...");
