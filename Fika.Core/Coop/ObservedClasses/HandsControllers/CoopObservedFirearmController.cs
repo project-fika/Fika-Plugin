@@ -246,12 +246,13 @@ namespace Fika.Core.Coop.ObservedClasses
 
 		private IEnumerator BreakFiringLoop()
 		{
+			WeaponSoundPlayer.Release();
 			Traverse<bool> isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
 			int attempts = 0;
 			while (isFiring.Value && attempts < 10)
 			{
 				yield return new WaitForEndOfFrame();
-				WeaponSoundPlayer.OnBreakLoop();
+				WeaponSoundPlayer.StopFiringLoop();
 				attempts++;
 			}
 		}
