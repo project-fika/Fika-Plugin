@@ -1,6 +1,9 @@
 ﻿using EFT;
+using HarmonyLib;
 using SPT.Reflection.Patching;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Fika.Core.Coop.Patches
 {
@@ -15,10 +18,16 @@ namespace Fika.Core.Coop.Patches
 			return typeof(LocalPlayer).GetMethod(nameof(LocalPlayer.method_144));
 		}
 
-		[PatchPrefix]
-		public static bool Prefix()
+		[PatchTranspiler]
+		public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
 		{
-			return false;
+			// Create a new set of instructions
+			List<CodeInstruction> instructionsList =
+			[
+				new CodeInstruction(OpCodes.Ret) // Return immediately
+            ];
+
+			return instructionsList;
 		}
 	}
 }
