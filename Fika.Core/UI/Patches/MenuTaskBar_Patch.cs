@@ -74,7 +74,7 @@ namespace Fika.Core.UI.Patches
 								{
 									Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
 									string installDir = Environment.CurrentDirectory;
-									string fikaDir = Path.Combine(installDir, @"\user\fika");
+									string fikaDir = installDir + @"\user\fika";
 
 									if (!string.IsNullOrEmpty(installDir))
 									{
