@@ -138,7 +138,6 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
 			packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
 			packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
-			packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnThrowablePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
@@ -151,15 +150,14 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
 			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
-			packetProcessor.SubscribeNetSerializable<ArtilleryPacket>(OnArtilleryPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TransitEventPacket>(OnTransitEventPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BotStatePacket>(OnBotStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<PingPacket>(OnPingPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
-			packetProcessor.SubscribeNetSerializable<CorpsePositionPacket>(OnCorpsePositionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
+			packetProcessor.SubscribeReusable<WorldPacket>(OnWorldPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -211,6 +209,45 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
 		}
 
+		private void OnWorldPacketReceived(WorldPacket packet)
+		{
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			if (gameWorld == null)
+			{
+				logger.LogError("OnWorldPacketReceived: GameWorld was null!");
+			}
+
+			foreach (CorpsePositionPacket ragdollPacket in packet.RagdollPackets)
+			{
+				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Data.Id, out ObservedCorpse corpse))
+				{
+					corpse.ApplyNetPacket(ragdollPacket.Data);
+					continue;
+				}
+
+				logger.LogWarning("OnWorldPacketReceived::CorpsePositionPacket: Could not find body with Id: " + ragdollPacket.Data.Id);
+			}
+
+			int artilleryPackets = packet.ArtilleryPackets.Count;
+			for (int i = 0; i < artilleryPackets; i++)
+			{
+				ArtilleryPacket artilleryPacket = packet.ArtilleryPackets[i];
+				gameWorld.ClientShellingController.SyncProjectilesStates(ref artilleryPacket.Data);
+			}
+
+			foreach (ThrowablePacket throwablePacket in packet.ThrowablePackets)
+			{
+				GClass786<int, Throwable> grenades = gameWorld.Grenades;
+				foreach (GStruct131 grenadeData in throwablePacket.Data)
+				{
+					if (grenades.TryGetByKey(grenadeData.Id, out Throwable throwable))
+					{
+						throwable.ApplyNetPacket(grenadeData);
+					}
+				}
+			}
+		}
+
 		private void OnSideEffectPacketReceived(SideEffectPacket packet)
 		{
 #if DEBUG
@@ -237,19 +274,6 @@ namespace Fika.Core.Networking
 				return;
 			}
 			logger.LogError("OnSideEffectPacketReceived: SideEffectComponent was not found!");
-		}
-
-		private void OnCorpsePositionPacketReceived(CorpsePositionPacket packet)
-		{
-			GameWorld gameWorld = Singleton<GameWorld>.Instance;
-			if (gameWorld != null)
-			{
-				if (gameWorld.ObservedPlayersCorpses.TryGetValue(packet.Data.Id, out ObservedCorpse corpse))
-				{
-					corpse.ApplyNetPacket(packet.Data);
-					return;
-				}
-			}
 		}
 
 		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet)
@@ -395,10 +419,6 @@ namespace Fika.Core.Networking
 			{
 				FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
 			}
-		}
-		private void OnArtilleryPacketReceived(ArtilleryPacket packet)
-		{
-			Singleton<GameWorld>.Instance.ClientShellingController.SyncProjectilesStates(ref packet.Data);
 		}
 
 		private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)
@@ -731,18 +751,6 @@ namespace Fika.Core.Networking
 				}
 				coopGame.LootItems = lootItems;
 				coopGame.HasReceivedLoot = true;
-			}
-		}
-
-		private void OnThrowablePacketReceived(ThrowablePacket packet)
-		{
-			GClass786<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
-			foreach (GStruct131 grenadeData in packet.Data)
-			{
-				if (grenades.TryGetByKey(grenadeData.Id, out Throwable throwable))
-				{
-					throwable.ApplyNetPacket(grenadeData);
-				}
 			}
 		}
 

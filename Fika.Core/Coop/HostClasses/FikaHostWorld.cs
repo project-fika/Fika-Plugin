@@ -2,6 +2,7 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib;
 using System.Collections.Generic;
 
@@ -13,6 +14,7 @@ namespace Fika.Core.Coop.HostClasses
 	public class FikaHostWorld : World
 	{
 		public List<LootSyncStruct> LootSyncPackets;
+		public WorldPacket WorldPacket;
 
 		private FikaServer server;
 		private GameWorld gameWorld;
@@ -24,6 +26,7 @@ namespace Fika.Core.Coop.HostClasses
 			hostWorld.server.FikaHostWorld = hostWorld;
 			hostWorld.gameWorld = gameWorld;
 			hostWorld.LootSyncPackets = new List<LootSyncStruct>(8);
+			hostWorld.WorldPacket = new();
 			return hostWorld;
 		}
 
@@ -53,7 +56,8 @@ namespace Fika.Core.Coop.HostClasses
 					Data = gameWorld.GrenadesCriticalStates
 				};
 
-				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+				//server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+				WorldPacket.ThrowablePackets.Add(packet);
 			}
 
 			int artilleryPacketsCount = gameWorld.ArtilleryProjectilesStates.Count;
@@ -65,11 +69,14 @@ namespace Fika.Core.Coop.HostClasses
 					Data = gameWorld.ArtilleryProjectilesStates
 				};
 
-				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+				//server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+				WorldPacket.ArtilleryPackets.Add(packet);
 			}
 
 			gameWorld.GrenadesCriticalStates.Clear();
 			gameWorld.ArtilleryProjectilesStates.Clear();
+
+			server.SendDataToAll(ref WorldPacket, DeliveryMethod.ReliableOrdered);
 		}
 
 		public void UpdateLootItems(GClass786<int, LootItem> lootItems)

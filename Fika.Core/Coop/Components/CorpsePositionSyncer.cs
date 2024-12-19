@@ -1,9 +1,9 @@
 ﻿using Comfort.Common;
+using EFT;
 using EFT.Interactive;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using HarmonyLib;
-using LiteNetLib;
 using System.Reflection;
 using UnityEngine;
 
@@ -11,17 +11,17 @@ namespace Fika.Core.Coop.Components
 {
 	internal class CorpsePositionSyncer : MonoBehaviour
 	{
-		private FieldInfo ragdollDoneField = AccessTools.Field(typeof(RagdollClass), "bool_2");
+		private readonly FieldInfo ragdollDoneField = AccessTools.Field(typeof(RagdollClass), "bool_2");
 
-		private FikaServer server;
 		private Corpse corpse;
 		private GStruct129 data;
+		private FikaHostWorld world;
 
 		public static void Create(GameObject gameObject, Corpse corpse)
 		{
 			CorpsePositionSyncer corpsePositionSyncer = gameObject.AddComponent<CorpsePositionSyncer>();
 			corpsePositionSyncer.corpse = corpse;
-			corpsePositionSyncer.server = Singleton<FikaServer>.Instance;
+			corpsePositionSyncer.world = (FikaHostWorld)Singleton<GameWorld>.Instance.World_0;
 			corpsePositionSyncer.data = new()
 			{
 				Id = corpse.GetNetId()
@@ -45,27 +45,24 @@ namespace Fika.Core.Coop.Components
 
 		public void FixedUpdate()
 		{
+			CorpsePositionPacket packet = new();
 			if ((bool)ragdollDoneField.GetValue(corpse.Ragdoll))
 			{
 				data.Position = corpse.TrackableTransform.position;
 				data.TransformSyncs = corpse.TransformSyncs;
 				data.Done = true;
-				CorpsePositionPacket endPacket = new()
-				{
-					Data = data
-				};
-				server.SendDataToAll(ref endPacket, DeliveryMethod.ReliableOrdered);
+				packet.Data = data;
+				world.WorldPacket.RagdollPackets.Add(packet);
+				//server.SendDataToAll(ref endPacket, DeliveryMethod.ReliableOrdered);
 				Destroy(this);
 				return;
 			}
 
 			data.Position = corpse.TrackableTransform.position;
-			CorpsePositionPacket packet = new()
-			{
-				Data = data
-			};
+			packet.Data = data;
 
-			server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
+			world.WorldPacket.RagdollPackets.Add(packet);
+			//server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
 		}
 	}
 }

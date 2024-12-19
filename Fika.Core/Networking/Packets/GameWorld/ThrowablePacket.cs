@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking
 {
-	internal struct ThrowablePacket : INetSerializable
+	public struct ThrowablePacket : INetSerializable
 	{
 		public int Count;
 		public List<GStruct131> Data;
