@@ -215,6 +215,7 @@ namespace Fika.Core.Networking
 			if (gameWorld == null)
 			{
 				logger.LogError("OnWorldPacketReceived: GameWorld was null!");
+				return;
 			}
 
 			foreach (CorpsePositionPacket ragdollPacket in packet.RagdollPackets)
