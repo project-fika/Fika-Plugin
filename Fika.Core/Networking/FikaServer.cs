@@ -48,8 +48,9 @@ namespace Fika.Core.Networking
 	{
 		public int ReadyClients = 0;
 		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
-		public bool HasHadPeer = false;
-		public bool RaidInitialized = false;
+		public bool HasHadPeer;
+		public bool RaidInitialized;
+		public bool RaidStarted;
 		public FikaHostWorld FikaHostWorld { get; set; }
 		public bool Started
 		{
@@ -1019,14 +1020,13 @@ namespace Fika.Core.Networking
 		{
 			ReadyClients += packet.ReadyPlayers;
 
-			bool gameExists = coopHandler != null && coopHandler.LocalGameInstance != null;
-			bool hostReady = gameExists && coopHandler.LocalGameInstance.Status == GameStatus.Started;			
+			bool gameExists = coopHandler != null && coopHandler.LocalGameInstance != null;	
 
 			InformationPacket respondPackage = new()
 			{
 				RaidStarted = gameExists && coopHandler.LocalGameInstance.RaidStarted,
 				ReadyPlayers = ReadyClients,
-				HostReady = hostReady,
+				HostReady = RaidStarted,
 				HostLoaded = RaidInitialized
 			};
 
@@ -1035,7 +1035,7 @@ namespace Fika.Core.Networking
 				coopHandler.LocalGameInstance.RaidStarted = true;
 			}
 
-			if (hostReady)
+			if (RaidStarted)
 			{
 				respondPackage.GameTime = gameStartTime.Value;
 				GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;

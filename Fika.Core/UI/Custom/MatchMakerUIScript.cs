@@ -270,7 +270,6 @@ namespace Fika.Core.UI.Custom
 						}
 					}
 
-					FikaBackendUtils.HostExpectedNumberOfPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text);
 					await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, raidSettings);
 					acceptButton.OnClick.Invoke();
 				}
@@ -289,7 +288,6 @@ namespace Fika.Core.UI.Custom
 
 					StartDedicatedRequest request = new()
 					{
-						ExpectedNumPlayers = int.Parse(fikaMatchMakerUi.PlayerAmountText.text),
 						Time = raidSettings.SelectedDateTime,
 						LocationId = raidSettings.SelectedLocation._Id,
 						SpawnPlace = raidSettings.PlayersSpawnPlace,
@@ -448,7 +446,6 @@ namespace Fika.Core.UI.Custom
 			{
 				FikaBackendUtils.GroupId = result.ServerId;
 				FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
-				FikaBackendUtils.HostExpectedNumberOfPlayers = result.ExpectedNumberOfPlayers;
 
 				AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
 				FikaRequestHandler.UpdateAddPlayer(data);

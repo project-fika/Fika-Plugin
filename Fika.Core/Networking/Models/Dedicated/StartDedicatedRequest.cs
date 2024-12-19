@@ -8,9 +8,6 @@ namespace Fika.Core.Networking.Http
 	[DataContract]
 	public struct StartDedicatedRequest
 	{
-		[DataMember(Name = "expectedNumberOfPlayers")]
-		public int ExpectedNumPlayers { get; set; }
-
 		[DataMember(Name = "time")]
 		public EDateTime Time { get; set; }
 

@@ -573,6 +573,7 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				FikaServer server = Singleton<FikaServer>.Instance;
+				server.RaidStarted = true;
 
 				DateTime startTime = EFTDateTimeClass.UtcNow.AddSeconds((double)timeBeforeDeployLocal);
 				gameTime = startTime;
@@ -583,7 +584,7 @@ namespace Fika.Core.Coop.GameMode
 				{
 					RaidStarted = RaidStarted,
 					ReadyPlayers = server.ReadyClients,
-					HostReady = true,
+					HostReady = server.RaidStarted,
 					GameTime = gameTime.Value,
 					SessionTime = sessionTime.Value
 				};

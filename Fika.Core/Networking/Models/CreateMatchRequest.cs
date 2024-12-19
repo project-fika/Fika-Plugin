@@ -24,9 +24,6 @@ namespace Fika.Core.Networking.Http
 		[DataMember(Name = "settings")]
 		public RaidSettings Settings;
 
-		[DataMember(Name = "expectedNumberOfPlayers")]
-		public int ExpectedNumberOfPlayers;
-
 		[DataMember(Name = "gameVersion")]
 		public string GameVersion;
 
@@ -49,7 +46,6 @@ namespace Fika.Core.Networking.Http
 			HostUsername = hostUsername;
 			Timestamp = timestamp;
 			Settings = settings;
-			ExpectedNumberOfPlayers = expectedNumberOfPlayers;
 			GameVersion = FikaPlugin.EFTVersionMajor;
 			FikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
 			Side = side;
