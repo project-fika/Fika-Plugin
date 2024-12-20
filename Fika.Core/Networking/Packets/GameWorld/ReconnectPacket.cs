@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-	public struct ReconnectPacket(bool isRequest) : INetSerializable
+	public class ReconnectPacket : INetSerializable
 	{
-		public bool IsRequest = isRequest;
-		public bool InitialRequest = false;
+		public bool IsRequest;
+		public bool InitialRequest;
 		public EReconnectDataType Type;
 
 		public string ProfileId;
@@ -47,7 +47,7 @@ namespace Fika.Core.Networking
 						WindowBreakerStates = reader.GetWindowBreakerStates();
 						break;
 					case EReconnectDataType.OwnCharacter:
-						Profile = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile>();
+						Profile = reader.GetProfile();
 						ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.ProfileHealthClass>();
 						PlayerPosition = reader.GetVector3();
 						TimeOffset = reader.GetDouble();
@@ -82,7 +82,7 @@ namespace Fika.Core.Networking
 						writer.PutWindowBreakerStates(WindowBreakerStates);
 						break;
 					case EReconnectDataType.OwnCharacter:
-						writer.PutByteArray(SimpleZlib.CompressToBytes(Profile.ToJson(), 4));
+						writer.PutProfile(Profile);
 						writer.PutByteArray(SimpleZlib.CompressToBytes(ProfileHealthClass.ToJson(), 4));
 						writer.Put(PlayerPosition);
 						writer.Put(TimeOffset);

@@ -1,5 +1,6 @@
 ﻿using EFT;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
@@ -20,7 +21,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static void PatchPrefix(CoopGame __instance)
 		{
-			ProfileDescriptor = new GClass1962(__instance.Profile_0, GClass1971.Instance);
+			ProfileDescriptor = new GClass1962(__instance.Profile_0, FikaGlobals.SearchControllerSerializer);
 		}
 	}
 	/// <summary>
