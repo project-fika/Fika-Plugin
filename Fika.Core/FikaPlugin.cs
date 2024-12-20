@@ -307,7 +307,8 @@ namespace Fika.Core
 			new TripwireSynchronizableObject_method_6_Patch().Enable();
 			new TripwireSynchronizableObject_method_11_Patch().Enable();
 			new BaseLocalGame_method_13_Patch().Enable();
-			new Player_method_144_Patch().Enable();
+			new Player_OnDead_Patch().Enable();
+			new Player_ManageAggressor_Patch().Enable();
 			new Player_SetDogtagInfo_Patch().Enable();
 			new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
 			new WeaponManagerClass_method_12_Patch().Enable();
