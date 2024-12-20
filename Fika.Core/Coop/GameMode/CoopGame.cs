@@ -850,8 +850,10 @@ namespace Fika.Core.Coop.GameMode
 			Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, ISession session,
 			ELocalMode localMode)
 		{
-			bool spawnedInSession = profile.Side == EPlayerSide.Savage || TransitControllerAbstractClass.IsTransit(profile.Id, out int _);
-			profile.SetSpawnedInSession(spawnedInSession);
+			if (!TransitControllerAbstractClass.IsTransit(profile.Id, out int _))
+			{
+				profile.SetSpawnedInSession(false);
+			}
 
 			statisticsManager = FikaBackendUtils.IsDedicated ? new ObservedStatisticsManager() : new GClass1999();
 
