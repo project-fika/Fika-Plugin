@@ -836,7 +836,7 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
-			GClass1659 inventoryDescriptor = GClass1685.SerializeItem(Inventory.Equipment, GClass1971.Instance);
+			GClass1659 inventoryDescriptor = GClass1685.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
 			HealthSyncPacket syncPacket = new(NetId)
 			{

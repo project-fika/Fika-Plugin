@@ -1153,7 +1153,11 @@ namespace Fika.Core.Coop.GameMode
 			LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
 			if (isServer)
 			{
-				HostLootItems = SimpleZlib.CompressToBytes(location.Loot.ToJson([]), 6);
+				GClass1684 lootDescriptor = GClass1685.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
+				GClass1198 eftWriter = new();
+				eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
+				HostLootItems = eftWriter.ToArray();
+
 				await method_11(location);
 			}
 			else
@@ -1224,8 +1228,9 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Profile_0 = null;
 
-			ReconnectPacket reconnectPacket = new(true)
+			ReconnectPacket reconnectPacket = new()
 			{
+				IsRequest = true,
 				InitialRequest = true,
 				ProfileId = profileId
 			};
@@ -1245,8 +1250,9 @@ namespace Fika.Core.Coop.GameMode
 		{
 			SetMatchmakerStatus(LocaleUtils.UI_RECONNECTING.Localized());
 
-			ReconnectPacket reconnectPacket = new(true)
+			ReconnectPacket reconnectPacket = new()
 			{
+				IsRequest = true,
 				ProfileId = ProfileId
 			};
 			FikaClient client = Singleton<FikaClient>.Instance;
@@ -1261,7 +1267,10 @@ namespace Fika.Core.Coop.GameMode
 		private async Task RetrieveLootFromServer(bool register)
 		{
 			FikaClient client = Singleton<FikaClient>.Instance;
-			WorldLootPacket packet = new(true);
+			WorldLootPacket packet = new()
+			{
+				Data = []
+			};
 			do
 			{
 				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
@@ -2200,7 +2209,7 @@ namespace Fika.Core.Coop.GameMode
 
 			GClass1924 parameters = new()
 			{
-				profile = new GClass1962(this.Profile_0, GClass1971.Instance).ToUnparsedData(),
+				profile = new GClass1962(Profile_0, FikaGlobals.SearchControllerSerializer).ToUnparsedData(),
 				result = exitStatus,
 				killerId = gparam_0.Player.KillerId,
 				killerAid = gparam_0.Player.KillerAccountId,
@@ -2597,7 +2606,10 @@ namespace Fika.Core.Coop.GameMode
 				}
 				list.Sort(LootCompare);
 
-				return SimpleZlib.CompressToBytes(list.ToJson([]), 6);
+				GClass1684 lootDescriptor = GClass1685.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
+				GClass1198 eftWriter = new();
+				eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
+				return eftWriter.ToArray();
 			}
 
 			return HostLootItems;
@@ -2646,6 +2658,7 @@ namespace Fika.Core.Coop.GameMode
 			lootItemPositionClass.IsContainer = lootItem.StaticId != null;
 			lootItemPositionClass.Shift = lootItem.Shift;
 			lootItemPositionClass.PlatformId = num;
+
 			return lootItemPositionClass;
 		}
 

@@ -194,7 +194,7 @@ namespace Fika.Core.Networking
 		public static void PutItem(this NetDataWriter writer, Item item)
 		{
 			GClass1198 eftWriter = new();
-			GClass1659 descriptor = GClass1685.SerializeItem(item, GClass1971.Instance);
+			GClass1659 descriptor = GClass1685.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
 			eftWriter.WriteEFTItemDescriptor(descriptor);
 			writer.PutByteArray(eftWriter.ToArray());
 		}
@@ -282,7 +282,7 @@ namespace Fika.Core.Networking
 		public static void PutProfile(this NetDataWriter writer, Profile profile)
 		{
 			GClass1198 eftWriter = new();
-			eftWriter.WriteEFTProfileDescriptor(new(profile, GClass1971.Instance));
+			eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
 			writer.PutByteArray(eftWriter.ToArray());
 		}
 

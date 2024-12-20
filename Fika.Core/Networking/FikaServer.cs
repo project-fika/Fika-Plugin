@@ -36,6 +36,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Bindings;
 using UnityEngine.Networking.Match;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
@@ -344,7 +345,10 @@ namespace Fika.Core.Networking
 			}
 
 			KeyValuePair<Profile, bool> kvp = packet.Profiles.First();
-			visualProfiles.Add(kvp.Key, visualProfiles.Count == 0 || kvp.Value);
+			if (!visualProfiles.Any(x => x.Key.ProfileId == kvp.Key.ProfileId))
+			{
+				visualProfiles.Add(kvp.Key, visualProfiles.Count == 0 || kvp.Value); 
+			}
 			FikaBackendUtils.AddPartyMembers(visualProfiles);
 			packet.Profiles = visualProfiles;
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
@@ -566,7 +570,7 @@ namespace Fika.Core.Networking
 					{
 						if (player.ProfileId == packet.ProfileId && player is ObservedCoopPlayer observedCoopPlayer)
 						{
-							ReconnectPacket ownCharacterPacket = new(false)
+							ReconnectPacket ownCharacterPacket = new()
 							{
 								Type = EReconnectDataType.OwnCharacter,
 								Profile = observedCoopPlayer.Profile,
@@ -606,7 +610,7 @@ namespace Fika.Core.Networking
 
 				if (smokeData.Count > 0)
 				{
-					ReconnectPacket throwablePacket = new(false)
+					ReconnectPacket throwablePacket = new()
 					{
 						Type = EReconnectDataType.Throwable,
 						ThrowableData = smokeData
@@ -628,7 +632,7 @@ namespace Fika.Core.Networking
 
 				if (interactivesData.Count > 0)
 				{
-					ReconnectPacket interactivePacket = new(false)
+					ReconnectPacket interactivePacket = new()
 					{
 						Type = EReconnectDataType.Interactives,
 						InteractivesData = interactivesData
@@ -646,7 +650,7 @@ namespace Fika.Core.Networking
 
 				if (lampStates.Count > 0)
 				{
-					ReconnectPacket lampPacket = new(false)
+					ReconnectPacket lampPacket = new()
 					{
 						Type = EReconnectDataType.LampControllers,
 						LampStates = lampStates
@@ -667,7 +671,7 @@ namespace Fika.Core.Networking
 
 				if (windowData.Count > 0)
 				{
-					ReconnectPacket windowPacket = new(false)
+					ReconnectPacket windowPacket = new()
 					{
 						Type = EReconnectDataType.Windows,
 						WindowBreakerStates = windowData
@@ -718,7 +722,7 @@ namespace Fika.Core.Networking
 					}
 				}
 
-				ReconnectPacket finishPacket = new(false)
+				ReconnectPacket finishPacket = new()
 				{
 					Type = EReconnectDataType.Finished
 				};
@@ -731,7 +735,7 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
-				WorldLootPacket response = new(false)
+				WorldLootPacket response = new()
 				{
 					Data = coopGame.GetHostLootItems()
 				};
@@ -1032,7 +1036,8 @@ namespace Fika.Core.Networking
 				RaidStarted = gameExists && coopHandler.LocalGameInstance.RaidStarted,
 				ReadyPlayers = ReadyClients,
 				HostReady = HostReady,
-				HostLoaded = RaidInitialized
+				HostLoaded = RaidInitialized,
+				AmountOfPeers = netServer.ConnectedPeersCount + 1
 			};
 
 			if (gameExists && packet.RequestStart)
@@ -1081,7 +1086,7 @@ namespace Fika.Core.Networking
 							FirstOperationId = pair.Value.InventoryController.NextOperationId
 						},
 						IsAlive = pair.Value.HealthController.IsAlive,
-						IsAI = pair.Value is CoopBot,
+						IsAI = pair.Value.IsAI,
 						Position = pair.Value.Transform.position,
 						NetId = pair.Value.NetId
 					};
@@ -1101,6 +1106,7 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
 				}
 			}
+
 			if (!coopHandler.Players.ContainsKey(packet.NetId) && !playersMissing.Contains(packet.ProfileId) && !coopHandler.ExtractedPlayers.Contains(packet.NetId))
 			{
 				playersMissing.Add(packet.ProfileId);
@@ -1108,6 +1114,7 @@ namespace Fika.Core.Networking
 				AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
 				SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
 			}
+
 			if (!packet.IsRequest && playersMissing.Contains(packet.ProfileId))
 			{
 				logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}");
@@ -1382,12 +1389,18 @@ namespace Fika.Core.Networking
 		{
 			if (coopHandler != null && coopHandler.LocalGameInstance != null && coopHandler.LocalGameInstance.RaidStarted)
 			{
+				if (request.Data.GetString() == "fika.reconnect")
+				{
+					request.Accept();
+					return;
+				}
 				dataWriter.Reset();
 				dataWriter.Put("Raid already started");
 				request.Reject(dataWriter);
 
 				return;
 			}
+
 			request.AcceptIfKey("fika.core");
 		}
 

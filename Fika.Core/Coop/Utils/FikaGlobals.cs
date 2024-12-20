@@ -29,6 +29,14 @@ namespace Fika.Core.Coop.Utils
 			EInteraction.BipodForwardOff, EInteraction.BipodBackwardOn, EInteraction.BipodBackwardOff
 		];
 
+		public static ISearchController SearchControllerSerializer
+		{
+			get
+			{
+				return GClass1971.Instance;
+			}
+		}
+
 		internal static float GetOtherPlayerSensitivity()
 		{
 			return 1f;

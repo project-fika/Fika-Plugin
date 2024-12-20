@@ -191,6 +191,7 @@ namespace Fika.Core.Networking
 
 			string ip = FikaBackendUtils.RemoteIp;
 			int port = FikaBackendUtils.RemotePort;
+			string connectString = FikaBackendUtils.IsReconnect ? "fika.reconnect" : "fika.core";
 
 			if (string.IsNullOrEmpty(ip))
 			{
@@ -198,13 +199,13 @@ namespace Fika.Core.Networking
 			}
 			else
 			{
-				ServerConnection = netClient.Connect(ip, port, "fika.core");
+				ServerConnection = netClient.Connect(ip, port, connectString);
 			};
 
 			while (ServerConnection.ConnectionState != ConnectionState.Connected)
 			{
 				await Task.Delay(1 * 6000);
-				ServerConnection = netClient.Connect(ip, port, "fika.core");
+				ServerConnection = netClient.Connect(ip, port, connectString);
 			}
 
 			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
@@ -744,7 +745,9 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
-				GClass1315 lootItems = SimpleZlib.Decompress(packet.Data).ParseJsonTo<GClass1315>();
+				GClass1193 eftReader = new(packet.Data);
+				GClass1684 lootData = eftReader.ReadEFTLootDataDescriptor();
+				GClass1315 lootItems = GClass1685.DeserializeLootData(lootData);
 				if (lootItems.Count < 1)
 				{
 					throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
@@ -1095,10 +1098,17 @@ namespace Fika.Core.Networking
 
 		private void OnInformationPacketReceived(InformationPacket packet)
 		{
-			CoopGame coopGame = CoopHandler.LocalGameInstance;
-			if (coopGame != null)
+			if (coopHandler != null)
 			{
-				coopGame.RaidStarted = packet.RaidStarted;
+				CoopGame coopGame = coopHandler.LocalGameInstance;
+				if (coopGame != null)
+				{
+					coopGame.RaidStarted = packet.RaidStarted;
+					if (packet.HostReady)
+					{
+						coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
+					}
+				} 
 			}
 			ReadyClients = packet.ReadyPlayers;
 			HostReady = packet.HostReady;
@@ -1106,11 +1116,6 @@ namespace Fika.Core.Networking
 			if (packet.AmountOfPeers > 0)
 			{
 				FikaBackendUtils.HostExpectedNumberOfPlayers = packet.AmountOfPeers;
-			}
-
-			if (packet.HostReady)
-			{
-				coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
 			}
 		}
 

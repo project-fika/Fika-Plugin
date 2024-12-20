@@ -2,27 +2,18 @@
 
 namespace Fika.Core.Networking
 {
-	public struct WorldLootPacket(bool isRequest) : INetSerializable
+	public class WorldLootPacket : INetSerializable
 	{
-		public bool IsRequest = isRequest;
 		public byte[] Data;
 
 		public void Deserialize(NetDataReader reader)
 		{
-			IsRequest = reader.GetBool();
-			if (!IsRequest)
-			{
-				Data = reader.GetByteArray();
-			}
+			Data = reader.GetByteArray();
 		}
 
 		public void Serialize(NetDataWriter writer)
 		{
-			writer.Put(IsRequest);
-			if (!IsRequest)
-			{
-				writer.PutByteArray(Data);
-			}
+			writer.PutByteArray(Data);
 		}
 	}
 }
