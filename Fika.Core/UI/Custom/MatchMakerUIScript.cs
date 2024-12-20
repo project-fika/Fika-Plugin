@@ -401,6 +401,7 @@ namespace Fika.Core.UI.Custom
 			{
 				int attempts = 0;
 				bool success;
+				bool rejected;
 
 				FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
 
@@ -411,9 +412,10 @@ namespace Fika.Core.UI.Custom
 					pingingClient.PingEndPoint("fika.hello");
 					pingingClient.NetClient.PollEvents();
 					success = pingingClient.Received;
+					rejected = pingingClient.Rejected;
 
 					yield return new WaitForSeconds(0.1f);
-				} while (!success && attempts < 50);
+				} while (!rejected && !success && attempts < 50);
 
 				if (!success)
 				{
@@ -422,7 +424,12 @@ namespace Fika.Core.UI.Custom
 					LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
 					ErrorScreen.EButtonType.OkButton, 10f, null, null);
 
-					FikaPlugin.Instance.FikaLogger.LogError("Unable to connect to the session!");
+					string logError = "Unable to connect to the session!";
+					if (rejected)
+					{
+						logError += " Connection was rejected!";
+					}
+					FikaPlugin.Instance.FikaLogger.LogError(logError);
 
 					if (button != null)
 					{

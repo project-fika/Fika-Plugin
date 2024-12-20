@@ -203,9 +203,6 @@ namespace Fika.Core.Networking
 
 			while (ServerConnection.ConnectionState != ConnectionState.Connected)
 			{
-#if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogWarning("FikaClient was not able to connect in time!");
-#endif
 				await Task.Delay(1 * 6000);
 				ServerConnection = netClient.Connect(ip, port, "fika.core");
 			}
@@ -1337,6 +1334,18 @@ namespace Fika.Core.Networking
 				MyPlayer.PacketSender.DestroyThis();
 				Destroy(this);
 				Singleton<FikaClient>.Release(this);
+			}
+
+			if (disconnectInfo.Reason is DisconnectReason.ConnectionRejected)
+			{
+				string reason = disconnectInfo.AdditionalData.GetString();
+				if (!string.IsNullOrEmpty(reason))
+				{
+					NotificationManagerClass.DisplayWarningNotification(reason);
+					return;
+				}
+
+				logger.LogError("OnPeerDisconnected: Rejected connection but no reason");
 			}
 		}
 

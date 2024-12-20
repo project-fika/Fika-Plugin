@@ -51,7 +51,6 @@ namespace Fika.Core.Coop.Components
 				data.TransformSyncs = corpse.TransformSyncs;
 				data.Done = true;
 				world.WorldPacket.RagdollPackets.Add(data);
-				//server.SendDataToAll(ref endPacket, DeliveryMethod.ReliableOrdered);
 				Destroy(this);
 				return;
 			}
@@ -59,7 +58,6 @@ namespace Fika.Core.Coop.Components
 			data.Position = corpse.TrackableTransform.position;
 
 			world.WorldPacket.RagdollPackets.Add(data);
-			//server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
 		}
 	}
 }
