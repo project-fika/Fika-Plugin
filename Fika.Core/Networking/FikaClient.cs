@@ -224,10 +224,7 @@ namespace Fika.Core.Networking
 				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse))
 				{
 					corpse.ApplyNetPacket(ragdollPacket);
-					continue;
 				}
-
-				logger.LogWarning("OnWorldPacketReceived::CorpsePositionPacket: Could not find body with Id: " + ragdollPacket.Id);
 			}
 
 			if (packet.ArtilleryPackets.Count > 0)
