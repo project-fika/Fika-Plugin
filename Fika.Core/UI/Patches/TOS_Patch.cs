@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using UnityEngine;
 
 namespace Fika.Core.UI.Patches

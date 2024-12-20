@@ -36,8 +36,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Bindings;
-using UnityEngine.Networking.Match;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
 
@@ -306,7 +304,7 @@ namespace Fika.Core.Networking
 		private void OnSideEffectPacketReceived(SideEffectPacket packet, NetPeer peer)
 		{
 #if DEBUG
-			logger.LogWarning("OnSideEffectPacketReceived: Received"); 
+			logger.LogWarning("OnSideEffectPacketReceived: Received");
 #endif
 			SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
@@ -327,7 +325,7 @@ namespace Fika.Core.Networking
 			if (item.TryGetItemComponent(out SideEffectComponent sideEffectComponent))
 			{
 #if DEBUG
-				logger.LogInfo("Setting value to: " + packet.Value + ", original: " + sideEffectComponent.Value); 
+				logger.LogInfo("Setting value to: " + packet.Value + ", original: " + sideEffectComponent.Value);
 #endif
 				sideEffectComponent.Value = packet.Value;
 				item.RaiseRefreshEvent(false, false);
@@ -347,7 +345,7 @@ namespace Fika.Core.Networking
 			KeyValuePair<Profile, bool> kvp = packet.Profiles.First();
 			if (!visualProfiles.Any(x => x.Key.ProfileId == kvp.Key.ProfileId))
 			{
-				visualProfiles.Add(kvp.Key, visualProfiles.Count == 0 || kvp.Value); 
+				visualProfiles.Add(kvp.Key, visualProfiles.Count == 0 || kvp.Value);
 			}
 			FikaBackendUtils.AddPartyMembers(visualProfiles);
 			packet.Profiles = visualProfiles;
@@ -1029,7 +1027,7 @@ namespace Fika.Core.Networking
 		{
 			ReadyClients += packet.ReadyPlayers;
 
-			bool gameExists = coopHandler != null && coopHandler.LocalGameInstance != null;	
+			bool gameExists = coopHandler != null && coopHandler.LocalGameInstance != null;
 
 			InformationPacket respondPackage = new()
 			{
@@ -1336,7 +1334,7 @@ namespace Fika.Core.Networking
 				NetDataWriter resp = new();
 				resp.Put(1);
 				netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-				
+
 				return;
 			}
 

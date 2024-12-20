@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.ObservedClasses
 		private Player.BaseAnimationOperation GetObservedMedsOperation()
 		{
 			return new ObservedMedsOperation(this);
-		}		
+		}
 
 		public override bool CanChangeCompassState(bool newState)
 		{

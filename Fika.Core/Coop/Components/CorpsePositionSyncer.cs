@@ -2,7 +2,6 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.HostClasses;
-using Fika.Core.Networking;
 using HarmonyLib;
 using System.Reflection;
 using UnityEngine;

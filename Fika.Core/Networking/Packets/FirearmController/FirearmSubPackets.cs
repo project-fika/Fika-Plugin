@@ -359,7 +359,7 @@ namespace Fika.Core.Networking
 				}
 
 				if (player.HandsController is CoopObservedFirearmController controller)
-				{					
+				{
 					controller.HandleShotInfoPacket(ref this, player.InventoryController);
 				}
 			}

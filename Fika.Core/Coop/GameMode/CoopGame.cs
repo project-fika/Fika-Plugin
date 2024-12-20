@@ -1,7 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
-using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
@@ -618,7 +617,7 @@ namespace Fika.Core.Coop.GameMode
 			{
 				if (FikaPlugin.Instance.EnableTransits)
 				{
-					Logger.LogError("SyncTransitControllers: TransitController was null!"); 
+					Logger.LogError("SyncTransitControllers: TransitController was null!");
 				}
 				return;
 			}
@@ -1419,7 +1418,7 @@ namespace Fika.Core.Coop.GameMode
 
 				if (startButton != null)
 				{
-					Destroy(startButton); 
+					Destroy(startButton);
 				}
 
 				InformationPacket continuePacket = new()
@@ -1573,7 +1572,7 @@ namespace Fika.Core.Coop.GameMode
 				botsController_0.EventsController.SpawnAction();
 
 				FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
-				FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;				
+				FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
 			}
 
 			// Add FreeCamController to GameWorld GameObject
@@ -2483,7 +2482,7 @@ namespace Fika.Core.Coop.GameMode
 
 			FikaBackendUtils.RequestFikaWorld = false;
 			FikaBackendUtils.IsReconnect = false;
-			FikaBackendUtils.ReconnectPosition = Vector3.zero;			
+			FikaBackendUtils.ReconnectPosition = Vector3.zero;
 		}
 
 		private class ExitManager : Class1491

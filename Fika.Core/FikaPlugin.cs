@@ -630,7 +630,7 @@ namespace Fika.Core
 			AZERTYMode = Config.Bind(coopDebugHeader, CleanConfigString(LocaleUtils.BEPINEX_AZERTY_MODE_T.Localized()), false,
 				CleanConfigString(LocaleUtils.BEPINEX_AZERTY_MODE_D.Localized()));
 
-			DroneMode = Config.Bind(coopDebugHeader,	CleanConfigString(LocaleUtils.BEPINEX_DRONE_MODE_T.Localized()), false,
+			DroneMode = Config.Bind(coopDebugHeader, CleanConfigString(LocaleUtils.BEPINEX_DRONE_MODE_T.Localized()), false,
 				LocaleUtils.BEPINEX_DRONE_MODE_D.Localized());
 
 			KeybindOverlay = Config.Bind(coopDebugHeader, CleanConfigString(LocaleUtils.BEPINEX_KEYBIND_OVERLAY_T.Localized()), true,

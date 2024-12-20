@@ -111,7 +111,7 @@ namespace Fika.Core.UI.Patches
 							}
 						});
 
-						HoverTooltipArea surveyButton = ____hoverTooltipAreas[EMenuType.NewsHub];						
+						HoverTooltipArea surveyButton = ____hoverTooltipAreas[EMenuType.NewsHub];
 
 						____toggleButtons.Remove(EMenuType.NewsHub);
 						____hoverTooltipAreas.Remove(EMenuType.NewsHub);

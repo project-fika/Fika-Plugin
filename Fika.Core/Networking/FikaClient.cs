@@ -2,7 +2,6 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
-using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Communications;
@@ -1108,7 +1107,7 @@ namespace Fika.Core.Networking
 					{
 						coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
 					}
-				} 
+				}
 			}
 			ReadyClients = packet.ReadyPlayers;
 			HostReady = packet.HostReady;
