@@ -36,6 +36,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking.Match;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
 
@@ -50,7 +51,7 @@ namespace Fika.Core.Networking
 		public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
 		public bool HasHadPeer;
 		public bool RaidInitialized;
-		public bool RaidStarted;
+		public bool HostReady;
 		public FikaHostWorld FikaHostWorld { get; set; }
 		public bool Started
 		{
@@ -153,6 +154,10 @@ namespace Fika.Core.Networking
 
 			// Start at 1 to avoid having 0 and making us think it's working when it's not
 			currentNetId = 1;
+
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
 
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
@@ -1026,7 +1031,7 @@ namespace Fika.Core.Networking
 			{
 				RaidStarted = gameExists && coopHandler.LocalGameInstance.RaidStarted,
 				ReadyPlayers = ReadyClients,
-				HostReady = RaidStarted,
+				HostReady = HostReady,
 				HostLoaded = RaidInitialized
 			};
 
@@ -1035,7 +1040,7 @@ namespace Fika.Core.Networking
 				coopHandler.LocalGameInstance.RaidStarted = true;
 			}
 
-			if (RaidStarted)
+			if (HostReady)
 			{
 				respondPackage.GameTime = gameStartTime.Value;
 				GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
@@ -1278,6 +1283,14 @@ namespace Fika.Core.Networking
 			netServer.SendToAll(dataWriter, deliveryMethod);
 		}
 
+		public void SendReusableToAll<T>(ref T packet, DeliveryMethod deliveryMethod) where T : class, new()
+		{
+			dataWriter.Reset();
+
+			packetProcessor.Write(dataWriter, packet);
+			netServer.SendToAll(dataWriter, deliveryMethod);
+		}
+
 		public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
 		{
 			dataWriter.Reset();
@@ -1304,47 +1317,59 @@ namespace Fika.Core.Networking
 
 		public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
 		{
+			bool started = false;
+			if (coopHandler != null && coopHandler.LocalGameInstance != null && coopHandler.LocalGameInstance.RaidStarted)
+			{
+				started = true;
+			}
+
 			if (messageType == UnconnectedMessageType.Broadcast)
 			{
 				logger.LogInfo("[SERVER] Received discovery request. Send discovery response");
 				NetDataWriter resp = new();
 				resp.Put(1);
 				netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+				
+				return;
+			}
+
+			if (reader.TryGetString(out string data))
+			{
+				NetDataWriter resp;
+
+				switch (data)
+				{
+					case "fika.hello":
+						resp = new();
+						resp.Put(started ? "fika.reject" : data);
+						netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+						break;
+
+					case "fika.keepalive":
+						resp = new();
+						resp.Put(data);
+						netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+
+						if (!natIntroduceRoutineCts.IsCancellationRequested)
+						{
+							natIntroduceRoutineCts.Cancel();
+						}
+						break;
+
+					case "fika.reconnect":
+						resp = new();
+						resp.Put("fika.hello");
+						netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+						break;
+
+					default:
+						logger.LogError("PingingRequest: Data was not as expected");
+						break;
+				}
 			}
 			else
 			{
-				if (reader.TryGetString(out string data))
-				{
-					NetDataWriter resp;
-
-					switch (data)
-					{
-						case "fika.hello":
-							resp = new();
-							resp.Put(data);
-							netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-							break;
-
-						case "fika.keepalive":
-							resp = new();
-							resp.Put(data);
-							netServer.SendUnconnectedMessage(resp, remoteEndPoint);
-
-							if (!natIntroduceRoutineCts.IsCancellationRequested)
-							{
-								natIntroduceRoutineCts.Cancel();
-							}
-							break;
-
-						default:
-							logger.LogError("PingingRequest: Data was not as expected");
-							break;
-					}
-				}
-				else
-				{
-					logger.LogError("PingingRequest: Could not parse string");
-				}
+				logger.LogError("PingingRequest: Could not parse string");
 			}
 		}
 
@@ -1355,6 +1380,14 @@ namespace Fika.Core.Networking
 
 		public void OnConnectionRequest(ConnectionRequest request)
 		{
+			if (coopHandler != null && coopHandler.LocalGameInstance != null && coopHandler.LocalGameInstance.RaidStarted)
+			{
+				dataWriter.Reset();
+				dataWriter.Put("Raid already started");
+				request.Reject(dataWriter);
+
+				return;
+			}
 			request.AcceptIfKey("fika.core");
 		}
 
@@ -1478,21 +1511,6 @@ namespace Fika.Core.Networking
 
 					return;
 				}
-
-				/*InventoryPacket packet = new(netId)
-				{
-					HasItemControllerExecutePacket = true
-				};
-
-				GClass1198 writer = new();
-				writer.WritePolymorph(OperationResult.Value.ToDescriptor());
-				packet.ItemControllerExecutePacket = new()
-				{
-					CallbackId = operationId,
-					OperationBytes = writer.ToArray()
-				};
-
-				server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);*/
 
 				operationCallbackPacket = new(netId, operationId, EOperationStatus.Succeeded);
 				server.SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);

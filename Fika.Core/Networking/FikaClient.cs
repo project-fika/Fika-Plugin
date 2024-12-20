@@ -112,6 +112,10 @@ namespace Fika.Core.Networking
 
 			myProfileId = FikaBackendUtils.Profile.ProfileId;
 
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
+
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnWeaponPacketReceived);
 			packetProcessor.SubscribeNetSerializable<DamagePacket>(OnDamagePacketReceived);
@@ -138,7 +142,6 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
 			packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
 			packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
-			packetProcessor.SubscribeNetSerializable<ThrowablePacket>(OnThrowablePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
 			packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
@@ -151,15 +154,14 @@ namespace Fika.Core.Networking
 			packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
 			packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
 			packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
-			packetProcessor.SubscribeNetSerializable<ArtilleryPacket>(OnArtilleryPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
 			packetProcessor.SubscribeNetSerializable<TransitEventPacket>(OnTransitEventPacketReceived);
 			packetProcessor.SubscribeNetSerializable<BotStatePacket>(OnBotStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<PingPacket>(OnPingPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
 			packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
-			packetProcessor.SubscribeNetSerializable<CorpsePositionPacket>(OnCorpsePositionPacketReceived);
 			packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
+			packetProcessor.SubscribeReusable<WorldPacket>(OnWorldPacketReceived);
 
 #if DEBUG
 			AddDebugPackets();
@@ -201,9 +203,6 @@ namespace Fika.Core.Networking
 
 			while (ServerConnection.ConnectionState != ConnectionState.Connected)
 			{
-#if DEBUG
-				FikaPlugin.Instance.FikaLogger.LogWarning("FikaClient was not able to connect in time!");
-#endif
 				await Task.Delay(1 * 6000);
 				ServerConnection = netClient.Connect(ip, port, "fika.core");
 			}
@@ -211,10 +210,48 @@ namespace Fika.Core.Networking
 			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
 		}
 
+		private void OnWorldPacketReceived(WorldPacket packet)
+		{
+			GameWorld gameWorld = Singleton<GameWorld>.Instance;
+			if (gameWorld == null)
+			{
+				logger.LogError("OnWorldPacketReceived: GameWorld was null!");
+				return;
+			}
+
+			foreach (GStruct129 ragdollPacket in packet.RagdollPackets)
+			{
+				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse))
+				{
+					corpse.ApplyNetPacket(ragdollPacket);
+					continue;
+				}
+
+				logger.LogWarning("OnWorldPacketReceived::CorpsePositionPacket: Could not find body with Id: " + ragdollPacket.Id);
+			}
+
+			if (packet.ArtilleryPackets.Count > 0)
+			{
+				List<GStruct130> packets = packet.ArtilleryPackets;
+				gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
+			}
+
+			foreach (GStruct131 throwablePacket in packet.ThrowablePackets)
+			{
+				GClass786<int, Throwable> grenades = gameWorld.Grenades;
+				if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
+				{
+					throwable.ApplyNetPacket(throwablePacket);
+				}
+			}
+
+			packet.Flush();
+		}
+
 		private void OnSideEffectPacketReceived(SideEffectPacket packet)
 		{
 #if DEBUG
-			logger.LogWarning("OnSideEffectPacketReceived: Received"); 
+			logger.LogWarning("OnSideEffectPacketReceived: Received");
 #endif
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			if (gameWorld == null)
@@ -237,19 +274,6 @@ namespace Fika.Core.Networking
 				return;
 			}
 			logger.LogError("OnSideEffectPacketReceived: SideEffectComponent was not found!");
-		}
-
-		private void OnCorpsePositionPacketReceived(CorpsePositionPacket packet)
-		{
-			GameWorld gameWorld = Singleton<GameWorld>.Instance;
-			if (gameWorld != null)
-			{
-				if (gameWorld.ObservedPlayersCorpses.TryGetValue(packet.Data.Id, out ObservedCorpse corpse))
-				{
-					corpse.ApplyNetPacket(packet.Data);
-					return;
-				}
-			}
 		}
 
 		private void OnLoadingProfilePacketReceived(LoadingProfilePacket packet)
@@ -395,10 +419,6 @@ namespace Fika.Core.Networking
 			{
 				FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
 			}
-		}
-		private void OnArtilleryPacketReceived(ArtilleryPacket packet)
-		{
-			Singleton<GameWorld>.Instance.ClientShellingController.SyncProjectilesStates(ref packet.Data);
 		}
 
 		private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)
@@ -731,18 +751,6 @@ namespace Fika.Core.Networking
 				}
 				coopGame.LootItems = lootItems;
 				coopGame.HasReceivedLoot = true;
-			}
-		}
-
-		private void OnThrowablePacketReceived(ThrowablePacket packet)
-		{
-			GClass786<int, Throwable> grenades = Singleton<GameWorld>.Instance.Grenades;
-			foreach (GStruct131 grenadeData in packet.Data)
-			{
-				if (grenades.TryGetByKey(grenadeData.Id, out Throwable throwable))
-				{
-					throwable.ApplyNetPacket(grenadeData);
-				}
 			}
 		}
 
@@ -1326,6 +1334,18 @@ namespace Fika.Core.Networking
 				MyPlayer.PacketSender.DestroyThis();
 				Destroy(this);
 				Singleton<FikaClient>.Release(this);
+			}
+
+			if (disconnectInfo.Reason is DisconnectReason.ConnectionRejected)
+			{
+				string reason = disconnectInfo.AdditionalData.GetString();
+				if (!string.IsNullOrEmpty(reason))
+				{
+					NotificationManagerClass.DisplayWarningNotification(reason);
+					return;
+				}
+
+				logger.LogError("OnPeerDisconnected: Rejected connection but no reason");
 			}
 		}
 

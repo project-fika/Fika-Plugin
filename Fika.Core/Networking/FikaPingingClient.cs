@@ -18,7 +18,8 @@ namespace Fika.Core.Networking
 	public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
 	{
 		public NetManager NetClient;
-		public bool Received = false;
+		public bool Received;
+		public bool Rejected;
 
 		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
 		private IPEndPoint remoteEndPoint;
@@ -159,6 +160,9 @@ namespace Fika.Core.Networking
 						break;
 					case "fika.keepalive":
 						// Do nothing
+						break;
+					case "fika.reject":
+						Rejected = true;
 						break;
 					default:
 						logger.LogError("Data was not as expected");
