@@ -1356,6 +1356,12 @@ namespace Fika.Core.Networking
 						}
 						break;
 
+					case "fika.reconnect":
+						resp = new();
+						resp.Put("fika.hello");
+						netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+						break;
+
 					default:
 						logger.LogError("PingingRequest: Data was not as expected");
 						break;

@@ -404,12 +404,13 @@ namespace Fika.Core.UI.Custom
 				bool rejected;
 
 				FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
+				string knockMessage = reconnect ? "fika.reconnect" : "fika.hello";
 
 				do
 				{
 					attempts++;
 
-					pingingClient.PingEndPoint("fika.hello");
+					pingingClient.PingEndPoint(knockMessage);
 					pingingClient.NetClient.PollEvents();
 					success = pingingClient.Received;
 					rejected = pingingClient.Rejected;
