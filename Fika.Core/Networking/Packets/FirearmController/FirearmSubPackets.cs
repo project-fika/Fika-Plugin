@@ -352,8 +352,14 @@ namespace Fika.Core.Networking
 
 			public void Execute(CoopPlayer player)
 			{
-				if (player.HandsController is CoopObservedFirearmController controller)
+				if (!player.HealthController.IsAlive)
 				{
+					FikaPlugin.Instance.FikaLogger.LogError("ShotInfoPacket::Execute: Player was not alive, can not process!");
+					return;
+				}
+
+				if (player.HandsController is CoopObservedFirearmController controller)
+				{					
 					controller.HandleShotInfoPacket(ref this, player.InventoryController);
 				}
 			}
