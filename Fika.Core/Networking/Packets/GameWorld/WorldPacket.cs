@@ -23,54 +23,5 @@ namespace Fika.Core.Networking
 			ArtilleryPackets.Clear();
 			ThrowablePackets.Clear();
 		}
-
-		/*public void Deserialize(NetDataReader reader)
-		{
-			Flush();
-
-			int ragdollPackets = reader.GetInt();
-			for (int i = 0; i < ragdollPackets; i++)
-			{
-				RagdollPackets.Add(reader.GetRagdollStruct());
-			}
-
-			int artilleryPackets = reader.GetInt();
-			for (int i = 0; i < artilleryPackets; i++)
-			{
-				ArtilleryPackets.Add(reader.GetArtilleryStruct());
-			}
-
-			int throwablePackets = reader.GetInt();
-			for (int i = 0; i < throwablePackets; i++)
-			{
-				ThrowablePackets.Add(reader.GetGrenadeStruct());
-			}
-		}
-
-		public void Serialize(NetDataWriter writer)
-		{
-			int ragdollPackets = RagdollPackets.Count;
-			writer.Put(ragdollPackets);
-			for (int i = 0; i < ragdollPackets; i++)
-			{
-				writer.PutRagdollStruct(RagdollPackets[i]);
-			}
-
-			int artilleryPackets = ArtilleryPackets.Count;
-			writer.Put(artilleryPackets);
-			for (int i = 0; i < artilleryPackets; i++)
-			{
-				writer.PutArtilleryStruct(ArtilleryPackets[i]);
-			}
-
-			int throwablePackets = ThrowablePackets.Count;
-			writer.Put(throwablePackets);
-			for (int i = 0; i < throwablePackets; i++)
-			{
-				writer.PutGrenadeStruct(ThrowablePackets[i]);
-			}
-
-			Flush();
-		}*/
 	}
 }
