@@ -14,7 +14,7 @@ public class MatchMakerUI : MonoBehaviour
 	[SerializeField]
 	public GameObject RaidGroupDefaultToClone;
 	[SerializeField]
-	public GameObject PlayerAmountSelection;
+	public GameObject DediSelection;
 	[SerializeField]
 	public Button StartButton;
 	[SerializeField]
@@ -29,8 +29,6 @@ public class MatchMakerUI : MonoBehaviour
 	public Toggle SpectatorToggle;
 
 	[SerializeField]
-	public TextMeshProUGUI PlayerAmountText;
-	[SerializeField]
 	public TextMeshProUGUI RaidsText;
 	[SerializeField]
 	public TextMeshProUGUI JoinText;
@@ -38,8 +36,6 @@ public class MatchMakerUI : MonoBehaviour
 	public TextMeshProUGUI HostRaidText;
 	[SerializeField]
 	public TextMeshProUGUI SelectAmountText;
-	[SerializeField]
-	public TextMeshProUGUI HowManyPeopleText;
 	[SerializeField]
 	public TextMeshProUGUI UseDedicatedHostText;
 	[SerializeField]
@@ -59,7 +55,6 @@ public class MatchMakerUI : MonoBehaviour
 		JoinText.text = LocaleUtils.UI_MM_JOIN_BUTTON.Localized();
 		HostRaidText.text = LocaleUtils.UI_MM_HOST_BUTTON.Localized();
 		SelectAmountText.text = LocaleUtils.UI_MM_SELECT_AMOUNT_HEADER.Localized();
-		HowManyPeopleText.text = LocaleUtils.UI_MM_SELECT_AMOUNT_DESCRIPTION.Localized();
 		UseDedicatedHostText.text = LocaleUtils.UI_MM_USE_DEDICATED_HOST.Localized();
 		StartText.text = LocaleUtils.UI_MM_START_BUTTON.Localized();
 		LoadingScreenHeaderText.text = LocaleUtils.UI_MM_LOADING_HEADER.Localized();

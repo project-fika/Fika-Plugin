@@ -152,9 +152,9 @@ namespace Fika.Core.UI.Custom
 				fikaMatchMakerUi.RaidGroupDefaultToClone.SetActive(false);
 			}
 
-			if (fikaMatchMakerUi.PlayerAmountSelection.active)
+			if (fikaMatchMakerUi.DediSelection.active)
 			{
-				fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+				fikaMatchMakerUi.DediSelection.SetActive(false);
 			}
 
 			// Ensure the IsSpectator field is reset every time the matchmaker UI is created
@@ -193,22 +193,22 @@ namespace Fika.Core.UI.Custom
 			fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
 			{
 				Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-				if (!fikaMatchMakerUi.PlayerAmountSelection.active)
+				if (!fikaMatchMakerUi.DediSelection.active)
 				{
-					fikaMatchMakerUi.PlayerAmountSelection.SetActive(true);
+					fikaMatchMakerUi.DediSelection.SetActive(true);
 				}
 				else
 				{
-					fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+					fikaMatchMakerUi.DediSelection.SetActive(false);
 				}
 			});
 
 			fikaMatchMakerUi.CloseButton.onClick.AddListener(() =>
 			{
 				Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-				if (fikaMatchMakerUi.PlayerAmountSelection.active)
+				if (fikaMatchMakerUi.DediSelection.active)
 				{
-					fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+					fikaMatchMakerUi.DediSelection.SetActive(false);
 				}
 			});
 
@@ -545,9 +545,9 @@ namespace Fika.Core.UI.Custom
 				Button button = joinButton.GetComponent<Button>();
 				button.onClick.AddListener(() =>
 				{
-					if (fikaMatchMakerUi.PlayerAmountSelection.active)
+					if (fikaMatchMakerUi.DediSelection.active)
 					{
-						fikaMatchMakerUi.PlayerAmountSelection.SetActive(false);
+						fikaMatchMakerUi.DediSelection.SetActive(false);
 					}
 
 					Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
