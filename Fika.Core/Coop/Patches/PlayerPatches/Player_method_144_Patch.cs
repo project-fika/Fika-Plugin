@@ -18,16 +18,10 @@ namespace Fika.Core.Coop.Patches
 			return typeof(LocalPlayer).GetMethod(nameof(LocalPlayer.method_144));
 		}
 
-		[PatchTranspiler]
-		public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
+		[PatchPrefix]
+		public static bool Prefix()
 		{
-			// Create a new set of instructions
-			List<CodeInstruction> instructionsList =
-			[
-				new CodeInstruction(OpCodes.Ret) // Return immediately
-            ];
-
-			return instructionsList;
+			return false;
 		}
 	}
 }
