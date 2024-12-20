@@ -165,7 +165,7 @@ namespace Fika.Core.Coop.Players
 			player.cullingHandler.Initialize(player, player.PlayerBones);
 			if (FikaBackendUtils.IsDedicated || profile.IsPlayerProfile())
 			{
-				player.cullingHandler.Disable(); 
+				player.cullingHandler.Disable();
 			}
 
 			if (!aiControl)
@@ -799,7 +799,7 @@ namespace Fika.Core.Coop.Players
 			{
 				ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
 				Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
-				return observedCorpse; 
+				return observedCorpse;
 			}
 
 			Corpse corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);

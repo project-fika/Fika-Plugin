@@ -645,10 +645,12 @@ namespace Fika.Core.Coop.Players
 			{
 				Corpse corpse = base.CreateCorpse();
 				CorpsePositionSyncer.Create(corpse.gameObject, corpse);
-				return corpse; 
+				return corpse;
 			}
 
-			return CreateCorpse<ObservedCorpse>(Velocity);
+			ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+			Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
+			return observedCorpse;
 		}
 
 		public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct177.EStationaryCommand command)
@@ -1347,7 +1349,7 @@ namespace Fika.Core.Coop.Players
 					damageInfo.Weapon = item;
 					(damageInfo.Player.iPlayer as CoopPlayer).shouldSendSideEffect = true;
 #if DEBUG
-					FikaPlugin.Instance.FikaLogger.LogWarning("Found weapon for knife damage: " + item.Name.Localized()); 
+					FikaPlugin.Instance.FikaLogger.LogWarning("Found weapon for knife damage: " + item.Name.Localized());
 #endif
 				}
 			}
