@@ -13,7 +13,9 @@ namespace Fika.Core.Networking
 		{
 			get
 			{
-				return RagdollPackets.Count > 0 || ArtilleryPackets.Count > 0 || ThrowablePackets.Count > 0;
+				return RagdollPackets.Count > 0
+					|| ArtilleryPackets.Count > 0
+					|| ThrowablePackets.Count > 0;
 			}
 		}
 
