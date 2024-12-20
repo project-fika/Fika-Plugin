@@ -3,11 +3,19 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking
 {
-	public class WorldPacket : INetSerializable
+	public class WorldPacket
 	{
-		public List<CorpsePositionPacket> RagdollPackets = [];
-		public List<ArtilleryPacket> ArtilleryPackets = [];
-		public List<ThrowablePacket> ThrowablePackets = [];
+		public List<GStruct129> RagdollPackets { get; set; } = [];
+		public List<GStruct130> ArtilleryPackets { get; set; } = [];
+		public List<GStruct131> ThrowablePackets { get; set; } = [];
+
+		public bool HasData
+		{
+			get
+			{
+				return RagdollPackets.Count > 0 || ArtilleryPackets.Count > 0 || ThrowablePackets.Count > 0;
+			}
+		}
 
 		public void Flush()
 		{
@@ -16,26 +24,26 @@ namespace Fika.Core.Networking
 			ThrowablePackets.Clear();
 		}
 
-		public void Deserialize(NetDataReader reader)
+		/*public void Deserialize(NetDataReader reader)
 		{
 			Flush();
 
 			int ragdollPackets = reader.GetInt();
 			for (int i = 0; i < ragdollPackets; i++)
 			{
-				RagdollPackets.Add(reader.Get<CorpsePositionPacket>());
+				RagdollPackets.Add(reader.GetRagdollStruct());
 			}
 
 			int artilleryPackets = reader.GetInt();
 			for (int i = 0; i < artilleryPackets; i++)
 			{
-				ArtilleryPackets.Add(reader.Get<ArtilleryPacket>());
+				ArtilleryPackets.Add(reader.GetArtilleryStruct());
 			}
 
 			int throwablePackets = reader.GetInt();
 			for (int i = 0; i < throwablePackets; i++)
 			{
-				ThrowablePackets.Add(reader.Get<ThrowablePacket>());
+				ThrowablePackets.Add(reader.GetGrenadeStruct());
 			}
 		}
 
@@ -45,22 +53,24 @@ namespace Fika.Core.Networking
 			writer.Put(ragdollPackets);
 			for (int i = 0; i < ragdollPackets; i++)
 			{
-				writer.Put(RagdollPackets[i]);
+				writer.PutRagdollStruct(RagdollPackets[i]);
 			}
 
 			int artilleryPackets = ArtilleryPackets.Count;
+			writer.Put(artilleryPackets);
 			for (int i = 0; i < artilleryPackets; i++)
 			{
-				writer.Put(ArtilleryPackets[i]);
+				writer.PutArtilleryStruct(ArtilleryPackets[i]);
 			}
 
 			int throwablePackets = ThrowablePackets.Count;
+			writer.Put(throwablePackets);
 			for (int i = 0; i < throwablePackets; i++)
 			{
-				writer.Put(ThrowablePackets[i]);
+				writer.PutGrenadeStruct(ThrowablePackets[i]);
 			}
 
 			Flush();
-		}
+		}*/
 	}
 }

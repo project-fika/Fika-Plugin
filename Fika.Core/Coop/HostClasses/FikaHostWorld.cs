@@ -2,7 +2,6 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.GameWorld;
 using LiteNetLib;
 using System.Collections.Generic;
 
@@ -47,36 +46,24 @@ namespace Fika.Core.Coop.HostClasses
 				}
 			}
 
-			int grenadePacketsCount = gameWorld.GrenadesCriticalStates.Count;
-			if (grenadePacketsCount > 0)
+			foreach (GStruct131 grenadeStruct in gameWorld.GrenadesCriticalStates)
 			{
-				ThrowablePacket packet = new()
-				{
-					Count = grenadePacketsCount,
-					Data = gameWorld.GrenadesCriticalStates
-				};
-
-				//server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-				WorldPacket.ThrowablePackets.Add(packet);
+				WorldPacket.ThrowablePackets.Add(grenadeStruct);
 			}
 
-			int artilleryPacketsCount = gameWorld.ArtilleryProjectilesStates.Count;
-			if (artilleryPacketsCount > 0)
+			foreach (GStruct130 artilleryStruct in gameWorld.ArtilleryProjectilesStates)
 			{
-				ArtilleryPacket packet = new()
-				{
-					Count = artilleryPacketsCount,
-					Data = gameWorld.ArtilleryProjectilesStates
-				};
-
-				//server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-				WorldPacket.ArtilleryPackets.Add(packet);
+				WorldPacket.ArtilleryPackets.Add(artilleryStruct);
 			}
 
 			gameWorld.GrenadesCriticalStates.Clear();
 			gameWorld.ArtilleryProjectilesStates.Clear();
 
-			server.SendDataToAll(ref WorldPacket, DeliveryMethod.ReliableOrdered);
+			if (WorldPacket.HasData)
+			{
+				server.SendReusableToAll(ref WorldPacket, DeliveryMethod.ReliableOrdered);
+				WorldPacket.Flush();
+			}
 		}
 
 		public void UpdateLootItems(GClass786<int, LootItem> lootItems)

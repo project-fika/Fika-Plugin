@@ -112,6 +112,10 @@ namespace Fika.Core.Networking
 
 			myProfileId = FikaBackendUtils.Profile.ProfileId;
 
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
+
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnWeaponPacketReceived);
 			packetProcessor.SubscribeNetSerializable<DamagePacket>(OnDamagePacketReceived);
@@ -218,41 +222,39 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			foreach (CorpsePositionPacket ragdollPacket in packet.RagdollPackets)
+			foreach (GStruct129 ragdollPacket in packet.RagdollPackets)
 			{
-				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Data.Id, out ObservedCorpse corpse))
+				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse))
 				{
-					corpse.ApplyNetPacket(ragdollPacket.Data);
+					corpse.ApplyNetPacket(ragdollPacket);
 					continue;
 				}
 
-				logger.LogWarning("OnWorldPacketReceived::CorpsePositionPacket: Could not find body with Id: " + ragdollPacket.Data.Id);
+				logger.LogWarning("OnWorldPacketReceived::CorpsePositionPacket: Could not find body with Id: " + ragdollPacket.Id);
 			}
 
-			int artilleryPackets = packet.ArtilleryPackets.Count;
-			for (int i = 0; i < artilleryPackets; i++)
+			if (packet.ArtilleryPackets.Count > 0)
 			{
-				ArtilleryPacket artilleryPacket = packet.ArtilleryPackets[i];
-				gameWorld.ClientShellingController.SyncProjectilesStates(ref artilleryPacket.Data);
+				List<GStruct130> packets = packet.ArtilleryPackets;
+				gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
 			}
 
-			foreach (ThrowablePacket throwablePacket in packet.ThrowablePackets)
+			foreach (GStruct131 throwablePacket in packet.ThrowablePackets)
 			{
 				GClass786<int, Throwable> grenades = gameWorld.Grenades;
-				foreach (GStruct131 grenadeData in throwablePacket.Data)
+				if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
 				{
-					if (grenades.TryGetByKey(grenadeData.Id, out Throwable throwable))
-					{
-						throwable.ApplyNetPacket(grenadeData);
-					}
+					throwable.ApplyNetPacket(throwablePacket);
 				}
 			}
+
+			packet.Flush();
 		}
 
 		private void OnSideEffectPacketReceived(SideEffectPacket packet)
 		{
 #if DEBUG
-			logger.LogWarning("OnSideEffectPacketReceived: Received"); 
+			logger.LogWarning("OnSideEffectPacketReceived: Received");
 #endif
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
 			if (gameWorld == null)

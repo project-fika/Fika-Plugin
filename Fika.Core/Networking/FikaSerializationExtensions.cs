@@ -591,7 +591,7 @@ namespace Fika.Core.Networking
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="artilleryStruct"></param>
-		public static void PutArtilleryStruct(this NetDataWriter writer, in GStruct130 artilleryStruct)
+		public static void PutArtilleryStruct(this NetDataWriter writer, GStruct130 artilleryStruct)
 		{
 			writer.Put(artilleryStruct.id);
 			writer.Put(artilleryStruct.position);
@@ -618,7 +618,7 @@ namespace Fika.Core.Networking
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="grenadeStruct"></param>
-		public static void PutGrenadeStruct(this NetDataWriter writer, in GStruct131 grenadeStruct)
+		public static void PutGrenadeStruct(this NetDataWriter writer, GStruct131 grenadeStruct)
 		{
 			writer.Put(grenadeStruct.Id);
 			writer.Put(grenadeStruct.Position);
@@ -837,6 +837,48 @@ namespace Fika.Core.Networking
 				WeaponName = reader.GetString(),
 				GroupId = reader.GetString()
 			};
+		}
+
+		public static void PutRagdollStruct(this NetDataWriter writer, GStruct129 packet)
+		{
+			writer.Put(packet.Id);
+			writer.Put(packet.Position);
+			writer.Put(packet.Done);
+
+			if (packet.Done && packet.TransformSyncs != null)
+			{
+				GStruct107[] transforms = packet.TransformSyncs;
+				for (int i = 0; i < 12; i++)
+				{
+					writer.Put(transforms[i].Position);
+					writer.Put(transforms[i].Rotation);
+				}
+			}
+		}
+
+		public static GStruct129 GetRagdollStruct(this NetDataReader reader)
+		{
+			GStruct129 packet = new()
+			{
+				Id = reader.GetInt(),
+				Position = reader.GetVector3(),
+				Done = reader.GetBool()
+			};
+
+			if (packet.Done)
+			{
+				packet.TransformSyncs = new GStruct107[12];
+				for (int i = 0; i < 12; i++)
+				{
+					packet.TransformSyncs[i] = new()
+					{
+						Position = reader.GetVector3(),
+						Rotation = reader.GetQuaternion()
+					};
+				}
+			}
+
+			return packet;
 		}
 
 		public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)

@@ -45,23 +45,20 @@ namespace Fika.Core.Coop.Components
 
 		public void FixedUpdate()
 		{
-			CorpsePositionPacket packet = new();
 			if ((bool)ragdollDoneField.GetValue(corpse.Ragdoll))
 			{
 				data.Position = corpse.TrackableTransform.position;
 				data.TransformSyncs = corpse.TransformSyncs;
 				data.Done = true;
-				packet.Data = data;
-				world.WorldPacket.RagdollPackets.Add(packet);
+				world.WorldPacket.RagdollPackets.Add(data);
 				//server.SendDataToAll(ref endPacket, DeliveryMethod.ReliableOrdered);
 				Destroy(this);
 				return;
 			}
 
 			data.Position = corpse.TrackableTransform.position;
-			packet.Data = data;
 
-			world.WorldPacket.RagdollPackets.Add(packet);
+			world.WorldPacket.RagdollPackets.Add(data);
 			//server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
 		}
 	}

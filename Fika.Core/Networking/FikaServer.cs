@@ -154,6 +154,10 @@ namespace Fika.Core.Networking
 			// Start at 1 to avoid having 0 and making us think it's working when it's not
 			currentNetId = 1;
 
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
+			packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
+
 			packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
 			packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
 			packetProcessor.SubscribeNetSerializable<DamagePacket, NetPeer>(OnDamagePacketReceived);
@@ -1275,6 +1279,14 @@ namespace Fika.Core.Networking
 			}
 
 			packetProcessor.WriteNetSerializable(dataWriter, ref packet);
+			netServer.SendToAll(dataWriter, deliveryMethod);
+		}
+
+		public void SendReusableToAll<T>(ref T packet, DeliveryMethod deliveryMethod) where T : class, new()
+		{
+			dataWriter.Reset();
+
+			packetProcessor.Write(dataWriter, packet);
 			netServer.SendToAll(dataWriter, deliveryMethod);
 		}
 
