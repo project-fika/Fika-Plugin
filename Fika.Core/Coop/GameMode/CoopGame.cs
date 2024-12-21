@@ -946,7 +946,6 @@ namespace Fika.Core.Coop.GameMode
 				DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
 				GameObject customButton = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
 				customButton.gameObject.name = "FikaStartButton";
-				//customButton.gameObject.transform.position = new(customButton.transform.position.x, customButton.transform.position.y - 20, customButton.transform.position.z);
 				customButton.gameObject.SetActive(true);
 				DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
 				backButtonComponent.SetHeaderText(LocaleUtils.UI_START_RAID.Localized(), 32);
@@ -996,7 +995,6 @@ namespace Fika.Core.Coop.GameMode
 				DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
 				customButton = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
 				customButton.gameObject.name = "FikaBackButton";
-				customButton.gameObject.transform.position = new(customButton.transform.position.x, customButton.transform.position.y - 20, customButton.transform.position.z);
 				customButton.gameObject.SetActive(true);
 				DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
 				backButtonComponent.SetHeaderText("Cancel", 32);
