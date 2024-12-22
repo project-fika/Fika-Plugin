@@ -195,7 +195,7 @@ namespace Fika.Core.Coop.Utils
 						Level = info.Level,
 						MemberCategory = info.MemberCategory,
 						SelectedMemberCategory = info.SelectedMemberCategory,
-						Nickname = info.Side == EPlayerSide.Savage ? info.MainProfileNickname : profile.GetCorrectedNickname(),
+						Nickname = profile.GetCorrectedNickname(),
 						Side = info.Side,
 						GameVersion = info.GameVersion,
 						HasCoopExtension = info.HasCoopExtension
