@@ -1,10 +1,12 @@
-﻿using Comfort.Common;
+﻿using BepInEx.Logging;
+using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
+using Fika.Core.UI.Models;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -21,6 +23,8 @@ namespace Fika.Core.Coop.Utils
 		public const string DefaultTransitId = "66f5750951530ca5ae09876d";
 
 		public const int PingRange = 1000;
+
+		private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaGlobals");
 
 		public static readonly List<EInteraction> BlockedInteractions =
 		[
@@ -159,6 +163,43 @@ namespace Fika.Core.Coop.Utils
 		public static bool IsPlayerProfile(this Profile profile)
 		{
 			return !string.IsNullOrEmpty(profile.PetId) || profile.Info.RegistrationDate > 0 || !string.IsNullOrEmpty(profile.Info.MainProfileNickname);
+		}
+
+		/// <summary>
+		/// Gets the current <see cref="ISession"/>
+		/// </summary>
+		/// <returns><see cref="ISession"/> of the application</returns>
+		public static ISession GetSession()
+		{
+			if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+			{
+				return tarkovApplication.Session;
+			}
+
+			logger.LogError("GetSession: Could not find TarkovApplication!");
+			return null;
+		}
+
+		/// <summary>
+		/// Gets the current PMC or scav profile
+		/// </summary>
+		/// <param name="scav">If the scav profile should be returned</param>
+		/// <returns><see cref="Profile"/> of chosen side</returns>
+		public static Profile GetProfile(bool scav)
+		{
+			ISession session = GetSession();
+			if (session == null)
+			{
+				logger.LogError("GetProfile: Session was null!");
+				return null;
+			}
+
+			if (!scav)
+			{
+				return session.Profile;
+			}
+
+			return session.ProfileOfPet;
 		}
 	}
 }

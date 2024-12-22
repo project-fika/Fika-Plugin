@@ -32,6 +32,7 @@ namespace Fika.Core.Coop.Utils
 		/// The name of the local player PMC
 		/// </summary>
 		public static string PMCName { get; internal set; }
+		public static bool IsScav { get; internal set; }
 		public static EMatchmakerType MatchingType { get; internal set; } = EMatchmakerType.Single;
 		public static bool IsDedicated = false;
 		public static bool IsReconnect { get; internal set; }
