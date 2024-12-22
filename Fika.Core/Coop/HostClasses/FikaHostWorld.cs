@@ -37,13 +37,10 @@ namespace Fika.Core.Coop.HostClasses
 		protected void FixedUpdate()
 		{
 			int grenadesCount = gameWorld.Grenades.Count;
-			if (grenadesCount > 0)
+			for (int i = 0; i < grenadesCount; i++)
 			{
-				for (int i = 0; i < grenadesCount; i++)
-				{
-					Throwable throwable = gameWorld.Grenades.GetByIndex(i);
-					gameWorld.method_2(throwable);
-				}
+				Throwable throwable = gameWorld.Grenades.GetByIndex(i);
+				gameWorld.method_2(throwable);
 			}
 
 			foreach (GStruct131 grenadeStruct in gameWorld.GrenadesCriticalStates)
