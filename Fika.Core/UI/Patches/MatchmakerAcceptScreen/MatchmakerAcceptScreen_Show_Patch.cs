@@ -18,12 +18,14 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 		}
 
 		[PatchPrefix]
-		private static void Prefix(MatchMakerAcceptScreen __instance, ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
+		public static void Prefix(MatchMakerAcceptScreen __instance, ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
 		{
 			if (raidSettings.Side == ESideType.Savage)
 			{
 				raidSettings.RaidMode = ERaidMode.Local;
 			}
+
+			FikaBackendUtils.IsScav = raidSettings.IsScav;
 
 			MatchMakerUIScript newMatchMaker = __instance.gameObject.GetOrAddComponent<MatchMakerUIScript>();
 			newMatchMaker.raidSettings = raidSettings;
@@ -32,7 +34,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 		}
 
 		[PatchPostfix]
-		private static void Postfix(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
+		public static void Postfix(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
 		{
 			FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
 			FikaBackendUtils.Profile = session.Profile;

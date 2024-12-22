@@ -1279,14 +1279,15 @@ namespace Fika.Core.Networking
 			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
 				ENotificationDurationType.Default, ENotificationIconType.Friend);
 
-			if (FikaBackendUtils.Profile == null)
+			Profile ownProfile = FikaGlobals.GetProfile(FikaBackendUtils.IsScav);
+			if (ownProfile == null)
 			{
 				logger.LogError("OnPeerConnected: Own profile was null!");
 				return;
 			}
 
 			Dictionary<Profile, bool> profiles = [];
-			profiles.Add(FikaBackendUtils.Profile, false);
+			profiles.Add(ownProfile, false);
 			LoadingProfilePacket profilePacket = new()
 			{
 				Profiles = profiles
