@@ -1307,6 +1307,8 @@ namespace Fika.Core.Coop.GameMode
 			GStruct390 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
 			SpawnSystem = GClass3304.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
 
+			exfilManager = gameObject.AddComponent<CoopExfilManager>();
+
 			if (isServer)
 			{
 				spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
@@ -1360,7 +1362,10 @@ namespace Fika.Core.Coop.GameMode
 		{
 			SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_EXFIL_DATA.Localized());
 			FikaClient client = Singleton<FikaClient>.Instance;
-			ExfiltrationPacket exfilPacket = new(true);
+			ExfiltrationPacket exfilPacket = new()
+			{
+				IsRequest = true
+			};
 
 			do
 			{
@@ -1754,7 +1759,7 @@ namespace Fika.Core.Coop.GameMode
 			for (int i = 0; i < skills.Length; i++)
 			{
 				skills[i].SetPointsEarnedInSession(0f, false);
-			}
+			}			
 
 			InfiltrationPoint = spawnPoint.Infiltration;
 			Profile_0.Info.EntryPoint = InfiltrationPoint;
@@ -1802,8 +1807,7 @@ namespace Fika.Core.Coop.GameMode
 					gclass.Init();
 				}
 			}
-
-			exfilManager = gameObject.AddComponent<CoopExfilManager>();
+			
 			exfilManager.Run(exfilPoints);
 
 			dateTime_0 = EFTDateTimeClass.Now;
@@ -1824,7 +1828,13 @@ namespace Fika.Core.Coop.GameMode
 		/// <param name="enable"></param>
 		public void UpdateExfilPointFromServer(ExfiltrationPoint point, bool enable)
 		{
-			exfilManager.UpdateExfilPointFromServer(point, enable);
+			if (exfilManager != null)
+			{
+				exfilManager.UpdateExfilPointFromServer(point, enable);
+				return;
+			}
+
+			Logger.LogError("CoopGame::UpdateExfilPointFromServer: ExfilManager was null!");
 		}
 
 		/// <summary>
