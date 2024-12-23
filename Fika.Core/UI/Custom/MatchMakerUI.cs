@@ -54,7 +54,7 @@ public class MatchMakerUI : MonoBehaviour
 		RaidsText.text = LocaleUtils.UI_MM_RAIDSHEADER.Localized();
 		JoinText.text = LocaleUtils.UI_MM_JOIN_BUTTON.Localized();
 		HostRaidText.text = LocaleUtils.UI_MM_HOST_BUTTON.Localized();
-		SelectAmountText.text = LocaleUtils.UI_MM_SELECT_AMOUNT_HEADER.Localized();
+		SelectAmountText.text = LocaleUtils.UI_MM_SESSION_SETTINGS_HEADER.Localized();
 		UseDedicatedHostText.text = LocaleUtils.UI_MM_USE_DEDICATED_HOST.Localized();
 		StartText.text = LocaleUtils.UI_MM_START_BUTTON.Localized();
 		LoadingScreenHeaderText.text = LocaleUtils.UI_MM_LOADING_HEADER.Localized();

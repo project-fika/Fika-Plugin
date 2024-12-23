@@ -149,6 +149,7 @@ namespace Fika.Core.Utils
 		public const string UI_MM_HOST_BUTTON = "F_MMUI_HostRaidButton";
 		public const string UI_MM_JOIN_BUTTON = "F_MMUI_JoinButton";
 		public const string UI_MM_SELECT_AMOUNT_HEADER = "F_MMUI_SelectAmountHeader";
+		public const string UI_MM_SESSION_SETTINGS_HEADER = "F_MMUI_SessionSettingsHeader";
 		public const string UI_MM_SELECT_AMOUNT_DESCRIPTION = "F_MMUI_SelectAmountDescription";
 		public const string UI_MM_USE_DEDICATED_HOST = "F_MMUI_UseDedicatedHost";
 		public const string UI_MM_START_BUTTON = "F_MMUI_StartButton";
