@@ -983,99 +983,103 @@ namespace Fika.Core.Networking
 
 		private void OnExfiltrationPacketReceived(ExfiltrationPacket packet)
 		{
-			if (!packet.IsRequest)
+			if (ExfiltrationControllerClass.Instance != null)
 			{
-				if (ExfiltrationControllerClass.Instance != null)
+				ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+
+				if (exfilController.ExfiltrationPoints == null)
 				{
-					ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+					return;
+				}
 
-					if (exfilController.ExfiltrationPoints == null)
-					{
-						return;
-					}
-
-					CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-					if (coopGame == null)
-					{
+				CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+				if (coopGame == null)
+				{
 #if DEBUG
 						logger.LogError("OnExfiltrationPacketReceived: coopGame was null!");
 #endif
-						return;
-					}
+					return;
+				}
 
-					CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
+				CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
 
-					int index = 0;
-					foreach (KeyValuePair<string, EExfiltrationStatus> exfilPoint in packet.ExfiltrationPoints)
+				int index = 0;
+				foreach (KeyValuePair<string, EExfiltrationStatus> exfilPoint in packet.ExfiltrationPoints)
+				{
+					ExfiltrationPoint point = exfilController.ExfiltrationPoints.Where(x => x.Settings.Name == exfilPoint.Key).FirstOrDefault();
+					if (point != null || point != default)
 					{
-						ExfiltrationPoint point = exfilController.ExfiltrationPoints.Where(x => x.Settings.Name == exfilPoint.Key).FirstOrDefault();
-						if (point != null || point != default)
+						point.Settings.StartTime = packet.StartTimes[index];
+						index++;
+						if (point.Status != exfilPoint.Value && (exfilPoint.Value == EExfiltrationStatus.RegularMode || exfilPoint.Value == EExfiltrationStatus.UncompleteRequirements))
 						{
-							point.Settings.StartTime = packet.StartTimes[index];
-							index++;
-							if (point.Status != exfilPoint.Value && (exfilPoint.Value == EExfiltrationStatus.RegularMode || exfilPoint.Value == EExfiltrationStatus.UncompleteRequirements))
-							{
-								point.Enable();
-								point.Status = exfilPoint.Value;
-							}
-							else if (point.Status != exfilPoint.Value && exfilPoint.Value == EExfiltrationStatus.NotPresent || exfilPoint.Value == EExfiltrationStatus.Pending)
-							{
-								point.Disable();
-								point.Status = exfilPoint.Value;
+							point.Enable();
+							point.Status = exfilPoint.Value;
+						}
+						else if (point.Status != exfilPoint.Value && exfilPoint.Value == EExfiltrationStatus.NotPresent || exfilPoint.Value == EExfiltrationStatus.Pending)
+						{
+							point.Disable();
+							point.Status = exfilPoint.Value;
 
-								if (carExtraction != null)
+							if (carExtraction != null)
+							{
+								if (carExtraction.Subscribee == point)
 								{
-									if (carExtraction.Subscribee == point)
-									{
-										carExtraction.Play(true);
-									}
+									carExtraction.Play(true);
 								}
+							}
+						}
+					}
+					else
+					{
+						logger.LogWarning($"ExfiltrationPacketPacketReceived::ExfiltrationPoints: Could not find exfil point with name '{exfilPoint.Key}'");
+					}
+				}
+
+				if (coopGame.RaidSettings.IsScav && exfilController.ScavExfiltrationPoints != null && packet.HasScavExfils)
+				{
+					string scavProfile = FikaGlobals.GetProfile(true).ProfileId;
+					int scavIndex = 0;
+					foreach (KeyValuePair<string, EExfiltrationStatus> scavExfilPoint in packet.ScavExfiltrationPoints)
+					{
+						ScavExfiltrationPoint scavPoint = exfilController.ScavExfiltrationPoints.Where(x => x.Settings.Name == scavExfilPoint.Key).FirstOrDefault();
+						if (scavPoint != null || scavPoint != default)
+						{
+							scavPoint.Settings.StartTime = packet.ScavStartTimes[scavIndex];
+							scavIndex++;
+							if (scavPoint.Status != scavExfilPoint.Value && scavExfilPoint.Value == EExfiltrationStatus.RegularMode)
+							{
+								scavPoint.Enable();
+								if (!string.IsNullOrEmpty(scavProfile))
+								{
+									scavPoint.EligibleIds.Add(scavProfile); 
+								}
+								scavPoint.Status = scavExfilPoint.Value;
+								coopGame.UpdateExfilPointFromServer(scavPoint, true);
+							}
+							else if (scavPoint.Status != scavExfilPoint.Value && (scavExfilPoint.Value == EExfiltrationStatus.NotPresent || scavExfilPoint.Value == EExfiltrationStatus.Pending))
+							{
+								scavPoint.Disable();
+								if (!string.IsNullOrEmpty(scavProfile))
+								{
+									scavPoint.EligibleIds.Remove(scavProfile);
+								}
+								scavPoint.Status = scavExfilPoint.Value;
+								coopGame.UpdateExfilPointFromServer(scavPoint, false);
 							}
 						}
 						else
 						{
-							logger.LogWarning($"ExfiltrationPacketPacketReceived::ExfiltrationPoints: Could not find exfil point with name '{exfilPoint.Key}'");
+							logger.LogWarning($"ExfiltrationPacketPacketReceived::ScavExfiltrationPoints: Could not find exfil point with name '{scavExfilPoint.Key}'");
 						}
 					}
-
-					if (coopGame.RaidSettings.Side == ESideType.Savage && exfilController.ScavExfiltrationPoints != null && packet.HasScavExfils)
-					{
-						int scavIndex = 0;
-						foreach (KeyValuePair<string, EExfiltrationStatus> scavExfilPoint in packet.ScavExfiltrationPoints)
-						{
-							ScavExfiltrationPoint scavPoint = exfilController.ScavExfiltrationPoints.Where(x => x.Settings.Name == scavExfilPoint.Key).FirstOrDefault();
-							if (scavPoint != null || scavPoint != default)
-							{
-								scavPoint.Settings.StartTime = packet.ScavStartTimes[scavIndex];
-								scavIndex++;
-								if (scavPoint.Status != scavExfilPoint.Value && scavExfilPoint.Value == EExfiltrationStatus.RegularMode)
-								{
-									scavPoint.Enable();
-									scavPoint.EligibleIds.Add(MyPlayer.ProfileId);
-									scavPoint.Status = scavExfilPoint.Value;
-									coopGame.UpdateExfilPointFromServer(scavPoint, true);
-								}
-								else if (scavPoint.Status != scavExfilPoint.Value && (scavExfilPoint.Value == EExfiltrationStatus.NotPresent || scavExfilPoint.Value == EExfiltrationStatus.Pending))
-								{
-									scavPoint.Disable();
-									scavPoint.EligibleIds.Remove(MyPlayer.ProfileId);
-									scavPoint.Status = scavExfilPoint.Value;
-									coopGame.UpdateExfilPointFromServer(scavPoint, false);
-								}
-							}
-							else
-							{
-								logger.LogWarning($"ExfiltrationPacketPacketReceived::ScavExfiltrationPoints: Could not find exfil point with name '{scavExfilPoint.Key}'");
-							}
-						}
-					}
-
-					ExfilPointsReceived = true;
 				}
-				else
-				{
-					logger.LogWarning($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
-				}
+
+				ExfilPointsReceived = true;
+			}
+			else
+			{
+				logger.LogWarning($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
 			}
 		}
 

@@ -962,50 +962,47 @@ namespace Fika.Core.Networking
 
 		private void OnExfiltrationPacketReceived(ExfiltrationPacket packet, NetPeer peer)
 		{
-			if (packet.IsRequest)
+			if (ExfiltrationControllerClass.Instance != null)
 			{
-				if (ExfiltrationControllerClass.Instance != null)
+				ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+
+				if (exfilController.ExfiltrationPoints == null)
 				{
-					ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
-					if (exfilController.ExfiltrationPoints == null)
-					{
-						return;
-					}
-
-					ExfiltrationPacket exfilPacket = new(false)
-					{
-						ExfiltrationAmount = exfilController.ExfiltrationPoints.Length,
-						ExfiltrationPoints = [],
-						StartTimes = []
-					};
-
-					foreach (ExfiltrationPoint exfilPoint in exfilController.ExfiltrationPoints)
-					{
-						exfilPacket.ExfiltrationPoints.Add(exfilPoint.Settings.Name, exfilPoint.Status);
-						exfilPacket.StartTimes.Add(exfilPoint.Settings.StartTime);
-					}
-
-					if (MyPlayer.Side == EPlayerSide.Savage && exfilController.ScavExfiltrationPoints != null)
-					{
-						exfilPacket.HasScavExfils = true;
-						exfilPacket.ScavExfiltrationAmount = exfilController.ScavExfiltrationPoints.Length;
-						exfilPacket.ScavExfiltrationPoints = [];
-						exfilPacket.ScavStartTimes = [];
-
-						foreach (ScavExfiltrationPoint scavExfilPoint in exfilController.ScavExfiltrationPoints)
-						{
-							exfilPacket.ScavExfiltrationPoints.Add(scavExfilPoint.Settings.Name, scavExfilPoint.Status);
-							exfilPacket.ScavStartTimes.Add(scavExfilPoint.Settings.StartTime);
-						}
-					}
-
-					SendDataToPeer(peer, ref exfilPacket, DeliveryMethod.ReliableOrdered);
+					return;
 				}
-				else
+
+				ExfiltrationPacket exfilPacket = new()
 				{
-					logger.LogError($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
+					ExfiltrationAmount = exfilController.ExfiltrationPoints.Length,
+					ExfiltrationPoints = [],
+					StartTimes = []
+				};
+
+				foreach (ExfiltrationPoint exfilPoint in exfilController.ExfiltrationPoints)
+				{
+					exfilPacket.ExfiltrationPoints.Add(exfilPoint.Settings.Name, exfilPoint.Status);
+					exfilPacket.StartTimes.Add(exfilPoint.Settings.StartTime);
 				}
+
+				if (MyPlayer.Side == EPlayerSide.Savage && exfilController.ScavExfiltrationPoints != null)
+				{
+					exfilPacket.HasScavExfils = true;
+					exfilPacket.ScavExfiltrationAmount = exfilController.ScavExfiltrationPoints.Length;
+					exfilPacket.ScavExfiltrationPoints = [];
+					exfilPacket.ScavStartTimes = [];
+
+					foreach (ScavExfiltrationPoint scavExfilPoint in exfilController.ScavExfiltrationPoints)
+					{
+						exfilPacket.ScavExfiltrationPoints.Add(scavExfilPoint.Settings.Name, scavExfilPoint.Status);
+						exfilPacket.ScavStartTimes.Add(scavExfilPoint.Settings.StartTime);
+					}
+				}
+
+				SendDataToPeer(peer, ref exfilPacket, DeliveryMethod.ReliableOrdered);
+			}
+			else
+			{
+				logger.LogError($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
 			}
 		}
 

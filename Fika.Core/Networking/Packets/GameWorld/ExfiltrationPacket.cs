@@ -7,13 +7,13 @@ using System.Linq;
 
 namespace Fika.Core.Networking
 {
-	public struct ExfiltrationPacket(bool isRequest) : INetSerializable
+	public class ExfiltrationPacket : INetSerializable
 	{
-		public bool IsRequest = isRequest;
+		public bool IsRequest;
 		public int ExfiltrationAmount;
 		public Dictionary<string, EExfiltrationStatus> ExfiltrationPoints;
 		public List<int> StartTimes;
-		public bool HasScavExfils = false;
+		public bool HasScavExfils;
 		public int ScavExfiltrationAmount;
 		public Dictionary<string, EExfiltrationStatus> ScavExfiltrationPoints;
 		public List<int> ScavStartTimes;
@@ -43,6 +43,10 @@ namespace Fika.Core.Networking
 						ScavStartTimes.Add(reader.GetInt());
 					}
 				}
+
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogWarning($"ExfiltrationPacket: Received {ExfiltrationAmount} exfils, {ScavExfiltrationAmount} scav exfils.");
+#endif
 			}
 		}
 
@@ -69,6 +73,9 @@ namespace Fika.Core.Networking
 						writer.Put(ScavStartTimes[i]);
 					}
 				}
+#if DEBUG
+				FikaPlugin.Instance.FikaLogger.LogWarning($"ExfiltrationPacket: Sent {ExfiltrationAmount} exfils, {ScavExfiltrationAmount} scav exfils.");
+#endif
 			}
 		}
 	}
