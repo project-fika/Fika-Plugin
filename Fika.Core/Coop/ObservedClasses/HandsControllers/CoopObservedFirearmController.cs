@@ -140,7 +140,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			if (hasFired)
 			{
 				lastFireTime += deltaTime;
-				if (lastFireTime > 0.15f)
+				if (lastFireTime > 0.1f)
 				{
 					FirearmsAnimator.SetFire(false);
 					hasFired = false;
