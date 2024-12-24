@@ -459,13 +459,13 @@ namespace Fika.Core
 		{
 			string original = string.Copy(header);
 			bool foundForbidden = false;
-			string[] forbiddenChars = ["\n", "\t", "\\", "\"", "'", "[", "]"];
-			foreach (string character in forbiddenChars)
+			char[] forbiddenChars = ['\n', '\t', '\\', '\"', '\'', '[', ']'];
+			foreach (char character in forbiddenChars)
 			{
 				if (header.Contains(character))
 				{
 					FikaLogger.LogWarning($"Header '{original}' contains an illegal character: {character}\nReport this to the developers!");
-					header = header.Replace(character, "");
+					header = header.Replace(character, char.MinValue);
 					foundForbidden = true;
 				}
 			}
