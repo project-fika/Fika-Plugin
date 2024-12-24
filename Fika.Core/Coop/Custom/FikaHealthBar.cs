@@ -284,7 +284,7 @@ namespace Fika.Core.Coop.Custom
 				if (currentEffect.EffectType == effect.Type)
 				{
 					currentEffect.DecreaseAmount();
-					if (currentEffect.GetAmount() == 0)
+					if (currentEffect.Amount == 0)
 					{
 						currentEffect.Remove();
 						effects.Remove(currentEffect);
@@ -498,10 +498,11 @@ namespace Fika.Core.Coop.Custom
 
 		private class HealthBarEffect
 		{
+			public int Amount { get; private set; }
+
 			public Type EffectType;
 			public Image EffectImage;
 
-			private int amount;
 			private GameObject effectObject;
 			private TextMeshProUGUI tmpText;
 
@@ -512,8 +513,8 @@ namespace Fika.Core.Coop.Custom
 				EffectImage = effectObject.transform.GetChild(0).GetComponent<Image>();
 				EffectImage.sprite = effectSprite;
 				tmpText = effectObject.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-				amount = 1;
-				tmpText.text = amount.ToString();
+				Amount = 1;
+				tmpText.text = Amount.ToString();
 				tmpText.enabled = false;
 				EffectType = effect.Type;
 			}
@@ -525,17 +526,12 @@ namespace Fika.Core.Coop.Custom
 				Destroy(effectObject);
 			}
 
-			public int GetAmount()
-			{
-				return amount;
-			}
-
 			public void IncreaseAmount()
 			{
-				amount++;
-				tmpText.text = amount.ToString();
+				Amount++;
+				tmpText.text = Amount.ToString();
 
-				if (amount > 1)
+				if (Amount > 1)
 				{
 					tmpText.enabled = true;
 				}
@@ -543,21 +539,21 @@ namespace Fika.Core.Coop.Custom
 
 			public void DecreaseAmount()
 			{
-				amount = Math.Max(0, amount - 1);
+				Amount = Math.Max(0, Amount - 1);
 
-				if (amount == 1)
+				if (Amount == 1)
 				{
 					tmpText.enabled = false;
 				}
 
-				if (amount == 0)
+				if (Amount == 0)
 				{
 					Remove();
 					return;
 				}
 				else
 				{
-					tmpText.text = amount.ToString();
+					tmpText.text = Amount.ToString();
 				}
 			}
 		}
