@@ -539,22 +539,21 @@ namespace Fika.Core.Coop.Custom
 
 			public void DecreaseAmount()
 			{
-				Amount = Math.Max(0, Amount - 1);
-
-				if (Amount == 1)
-				{
-					tmpText.enabled = false;
-				}
+				int newValue = Amount - 1;
+				Amount = Math.Max(0, newValue);
 
 				if (Amount == 0)
 				{
 					Remove();
 					return;
 				}
-				else
+
+				if (Amount == 1)
 				{
-					tmpText.text = Amount.ToString();
-				}
+					tmpText.enabled = false;
+				}				
+
+				tmpText.text = Amount.ToString();
 			}
 		}
 	}
