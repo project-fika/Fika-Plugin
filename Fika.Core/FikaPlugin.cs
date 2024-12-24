@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
@@ -464,7 +465,7 @@ namespace Fika.Core
 				if (header.Contains(character))
 				{
 					FikaLogger.LogWarning($"Header '{original}' contains an illegal character: {character}\nReport this to the developers!");
-					header.Replace(character, "");
+					header = header.Replace(character, "");
 					foundForbidden = true;
 				}
 			}
