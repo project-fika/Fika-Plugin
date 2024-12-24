@@ -149,6 +149,10 @@ namespace Fika.Core.Coop.Custom
 			{
 				UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, 0);
 				UpdateColorImage(playerPlate.healthBarScreen, 0);
+				foreach (HealthBarEffect effect in effects)
+				{
+					UpdateColorImage(effect.EffectImage, 0);
+				}
 				UpdateColorTextMeshProUGUI(playerPlate.healthNumberScreen, 0);
 				UpdateColorImage(playerPlate.healthBarBackgroundScreen, 0);
 				UpdateColorImage(playerPlate.healthNumberBackgroundScreen, 0);
@@ -199,6 +203,10 @@ namespace Fika.Core.Coop.Custom
 
 			UpdateColorTextMeshProUGUI(playerPlate.playerNameScreen, alpha);
 			UpdateColorImage(playerPlate.healthBarScreen, alpha * healthAlphaMultiplier);
+			foreach (HealthBarEffect effect in effects)
+			{
+				UpdateColorImage(effect.EffectImage, alpha * healthAlphaMultiplier);
+			}
 			UpdateColorTextMeshProUGUI(playerPlate.healthNumberScreen, alpha * healthAlphaMultiplier);
 			UpdateColorImage(playerPlate.healthBarBackgroundScreen, backgroundOpacity * healthAlphaMultiplier);
 			UpdateColorImage(playerPlate.healthNumberBackgroundScreen, backgroundOpacity * healthAlphaMultiplier);
@@ -273,7 +281,7 @@ namespace Fika.Core.Coop.Custom
 			for (int i = 0; i < effects.Count; i++)
 			{
 				HealthBarEffect currentEffect = effects[i];
-				if (currentEffect.effectType == effect.Type)
+				if (currentEffect.EffectType == effect.Type)
 				{
 					currentEffect.DecreaseAmount();
 					if (currentEffect.GetAmount() == 0)
@@ -301,7 +309,7 @@ namespace Fika.Core.Coop.Custom
 			bool found = false;
 			foreach (HealthBarEffect currentEffect in effects)
 			{
-				if (currentEffect.effectType == effect.Type)
+				if (currentEffect.EffectType == effect.Type)
 				{
 					currentEffect.IncreaseAmount();
 					found = true;
@@ -490,28 +498,29 @@ namespace Fika.Core.Coop.Custom
 
 		private class HealthBarEffect
 		{
-			public Type effectType;
+			public Type EffectType;
+			public Image EffectImage;
+
 			private int amount;
 			private GameObject effectObject;
-			private Image effectImage;
 			private TextMeshProUGUI tmpText;
 
 			public void Init(GameObject initObject, IEffect effect, Sprite effectSprite)
 			{
 				effectObject = initObject;
 				effectObject.SetActive(true);
-				effectImage = effectObject.transform.GetChild(0).GetComponent<Image>();
-				effectImage.sprite = effectSprite;
+				EffectImage = effectObject.transform.GetChild(0).GetComponent<Image>();
+				EffectImage.sprite = effectSprite;
 				tmpText = effectObject.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
 				amount = 1;
 				tmpText.text = amount.ToString();
 				tmpText.enabled = false;
-				effectType = effect.Type;
+				EffectType = effect.Type;
 			}
 
 			public void Remove()
 			{
-				Destroy(effectImage);
+				Destroy(EffectImage);
 				Destroy(tmpText);
 				Destroy(effectObject);
 			}
