@@ -479,10 +479,14 @@ namespace Fika.Core
 
 			// Advanced
 
+			FikaLogger.LogInfo("Setting up Advanced section");
+
 			OfficialVersion = Config.Bind(CleanConfigString(LocaleUtils.BEPINEX_H_ADVANCED.Localized()), LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized(), false,
 				new ConfigDescription(LocaleUtils.BEPINEX_OFFICIAL_VERSION_D.Localized(), tags: new ConfigurationManagerAttributes() { IsAdvanced = true }));
 
 			// Coop
+
+			FikaLogger.LogInfo("Setting up Coop section");
 
 			string coopHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP.Localized());
 
@@ -513,6 +517,8 @@ namespace Fika.Core
 				new AcceptableValueRange<float>(0.5f, 1.5f), new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Name Plates
+
+			FikaLogger.LogInfo("Setting up Name plates section");
 
 			string coopNameplatesHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_NAME_PLATES.Localized());
 
@@ -560,6 +566,8 @@ namespace Fika.Core
 
 			// Coop | Quest Sharing
 
+			FikaLogger.LogInfo("Setting up Quest sharing section");
+
 			string coopQuestSharingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized());
 
 			QuestTypesToShareAndReceive = Config.Bind(coopQuestSharingHeader, CleanConfigString(LocaleUtils.BEPINEX_QUEST_TYPES_T.Localized()), EQuestSharingTypes.All,
@@ -578,6 +586,8 @@ namespace Fika.Core
 				new ConfigDescription(LocaleUtils.BEPINEX_SHARED_BOSS_XP_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Coop | Pinging
+
+			FikaLogger.LogInfo("Setting up Pinging section");
 
 			string coopPingingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_PINGING.Localized());
 
@@ -619,6 +629,8 @@ namespace Fika.Core
 
 			// Coop | Debug
 
+			FikaLogger.LogInfo("Setting up Debug section");
+
 			string coopDebugHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_DEBUG.Localized());
 
 			FreeCamButton = Config.Bind(coopDebugHeader, CleanConfigString(LocaleUtils.BEPINEX_FREE_CAM_BUTTON_T.Localized()), new KeyboardShortcut(KeyCode.F9),
@@ -638,6 +650,8 @@ namespace Fika.Core
 
 			// Performance
 
+			FikaLogger.LogInfo("Setting up Performance section");
+
 			string performanceHeader = CleanConfigString(LocaleUtils.BEPINEX_H_PERFORMANCE.Localized());
 
 			DynamicAI = Config.Bind(performanceHeader, CleanConfigString(LocaleUtils.BEPINEX_DYNAMIC_AI_T.Localized()), false,
@@ -653,6 +667,8 @@ namespace Fika.Core
 				new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_NO_SNIPERS_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Performance | Max Bots
+
+			FikaLogger.LogInfo("Setting up Max bots section");
 
 			string performanceBotsHeader = CleanConfigString(LocaleUtils.BEPINEX_H_PERFORMANCE_BOTS.Localized());
 
@@ -710,6 +726,8 @@ namespace Fika.Core
 
 			// Network
 
+			FikaLogger.LogInfo("Setting up Network section");
+
 			string networkHeader = CleanConfigString(LocaleUtils.BEPINEX_H_NETWORK.Localized());
 
 			NativeSockets = Config.Bind(networkHeader, CleanConfigString(LocaleUtils.BEPINEX_NATIVE_SOCKETS_T.Localized()), true,
@@ -740,6 +758,9 @@ namespace Fika.Core
 				new ConfigDescription(LocaleUtils.BEPINEX_SMOOTHING_RATE_D.Localized(), tags: new ConfigurationManagerAttributes() { Order = 0 }));
 
 			// Gameplay
+
+			FikaLogger.LogInfo("Setting up Gameplay section");
+
 			DisableBotMetabolism = Config.Bind(CleanConfigString(LocaleUtils.BEPINEX_H_GAMEPLAY.Localized()), CleanConfigString(LocaleUtils.BEPINEX_DISABLE_BOT_METABOLISM_T.Localized()),
 				false, new ConfigDescription(LocaleUtils.BEPINEX_DISABLE_BOT_METABOLISM_D.Localized(),
 				tags: new ConfigurationManagerAttributes() { Order = 1 }));
