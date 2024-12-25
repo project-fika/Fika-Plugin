@@ -996,7 +996,7 @@ namespace Fika.Core.Networking
 				if (coopGame == null)
 				{
 #if DEBUG
-						logger.LogError("OnExfiltrationPacketReceived: coopGame was null!");
+					logger.LogError("OnExfiltrationPacketReceived: coopGame was null!");
 #endif
 					return;
 				}
@@ -1052,7 +1052,7 @@ namespace Fika.Core.Networking
 								scavPoint.Enable();
 								if (!string.IsNullOrEmpty(scavProfile))
 								{
-									scavPoint.EligibleIds.Add(scavProfile); 
+									scavPoint.EligibleIds.Add(scavProfile);
 								}
 								scavPoint.Status = scavExfilPoint.Value;
 								coopGame.UpdateExfilPointFromServer(scavPoint, true);

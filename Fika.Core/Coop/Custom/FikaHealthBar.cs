@@ -551,7 +551,7 @@ namespace Fika.Core.Coop.Custom
 				if (Amount == 1)
 				{
 					tmpText.enabled = false;
-				}				
+				}
 
 				tmpText.text = Amount.ToString();
 			}

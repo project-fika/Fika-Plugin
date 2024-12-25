@@ -42,9 +42,9 @@ namespace Fika.Core.Coop.HostClasses
 				Throwable throwable = gameWorld.Grenades.GetByIndex(i);
 				gameWorld.method_2(throwable);
 			}
-			
+
 			WorldPacket.ThrowablePackets.AddRange(gameWorld.GrenadesCriticalStates);
-			WorldPacket.ArtilleryPackets.AddRange(gameWorld.ArtilleryProjectilesStates);			
+			WorldPacket.ArtilleryPackets.AddRange(gameWorld.ArtilleryProjectilesStates);
 
 			if (WorldPacket.HasData)
 			{

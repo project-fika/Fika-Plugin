@@ -1759,7 +1759,7 @@ namespace Fika.Core.Coop.GameMode
 			for (int i = 0; i < skills.Length; i++)
 			{
 				skills[i].SetPointsEarnedInSession(0f, false);
-			}			
+			}
 
 			InfiltrationPoint = spawnPoint.Infiltration;
 			Profile_0.Info.EntryPoint = InfiltrationPoint;
@@ -1807,7 +1807,7 @@ namespace Fika.Core.Coop.GameMode
 					gclass.Init();
 				}
 			}
-			
+
 			exfilManager.Run(exfilPoints);
 
 			dateTime_0 = EFTDateTimeClass.Now;
