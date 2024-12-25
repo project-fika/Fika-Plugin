@@ -211,6 +211,8 @@ namespace Fika.Core.Utils
 		public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
 		public const string UI_EXTRACT_MESSAGE = "F_UI_ExtractMessage";
 		public const string UI_DOWNLOAD_PROFILE = "F_UI_DownloadProfile";
+		public const string UI_LOCALE_ERROR_HEADER = "F_UI_LocaleError_H";
+		public const string UI_LOCALE_ERROR_DESCRIPTION = "F_UI_LocaleError_D";
 
 		// Main Menu UI
 		public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";
