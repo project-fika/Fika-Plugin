@@ -71,7 +71,7 @@ namespace Fika.Core
 		public IPAddress WanIP;
 		public bool LocalesLoaded;
 
-		private static readonly Version RequiredServerVersion = new("2.3.2");
+		private static readonly Version RequiredServerVersion = new("2.3.5");
 
 		public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
