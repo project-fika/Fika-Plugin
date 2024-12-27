@@ -6,8 +6,6 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using LiteNetLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -31,12 +29,13 @@ namespace Fika.Core.Coop.Components
 			playerHandlers = [];
 			countdownPoints = [];
 			exfiltrationPoints = [];
+			secretExfiltrationPoints = [];
 			carExfil = FindObjectOfType<CarExtraction>();
 		}
 
 		protected void Update()
 		{
-			if (exfiltrationPoints == null)
+			if (exfiltrationPoints == null || secretExfiltrationPoints == null)
 			{
 				return;
 			}
@@ -143,29 +142,30 @@ namespace Fika.Core.Coop.Components
 			playerHandlers.Clear();
 			countdownPoints.Clear();
 
-			if (exfiltrationPoints == null)
+			if (exfiltrationPoints != null)
 			{
-				return;
+				foreach (ExfiltrationPoint exfiltrationPoint in exfiltrationPoints)
+				{
+					exfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
+					exfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
+					exfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
+					exfiltrationPoint.OnStatusChanged -= game.method_9;
+					exfiltrationPoint.Disable();
+				}
 			}
 
-			foreach (ExfiltrationPoint exfiltrationPoint in exfiltrationPoints)
+			if (secretExfiltrationPoints != null)
 			{
-				exfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
-				exfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
-				exfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
-				exfiltrationPoint.OnStatusChanged -= game.method_9;
-				exfiltrationPoint.Disable();
-			}
-
-			foreach (SecretExfiltrationPoint secretExfiltrationPoint in secretExfiltrationPoints)
-			{
-				secretExfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
-				secretExfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
-				secretExfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
-				secretExfiltrationPoint.OnStatusChanged -= game.method_9;
-				secretExfiltrationPoint.OnStatusChanged -= game.ShowNewSecretExit;
-				secretExfiltrationPoint.OnPointFoundEvent -= SecretExfiltrationPoint_OnPointFoundEvent;
-				secretExfiltrationPoint.Disable();
+				foreach (SecretExfiltrationPoint secretExfiltrationPoint in secretExfiltrationPoints)
+				{
+					secretExfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
+					secretExfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
+					secretExfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
+					secretExfiltrationPoint.OnStatusChanged -= game.method_9;
+					secretExfiltrationPoint.OnStatusChanged -= game.ShowNewSecretExit;
+					secretExfiltrationPoint.OnPointFoundEvent -= SecretExfiltrationPoint_OnPointFoundEvent;
+					secretExfiltrationPoint.Disable();
+				}
 			}
 		}
 
