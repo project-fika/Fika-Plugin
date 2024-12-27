@@ -1,5 +1,7 @@
-﻿using BepInEx.Logging;
+﻿using Audio.AmbientSubsystem;
+using BepInEx.Logging;
 using Comfort.Common;
+using CommonAssets.Scripts.Audio.RadioSystem;
 using CommonAssets.Scripts.Game;
 using EFT;
 using EFT.AssetsManager;
@@ -43,6 +45,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.Packets.SubPacket;
@@ -598,7 +601,12 @@ namespace Fika.Core.Coop.GameMode
 
 			DateTime dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
 			new MatchmakerFinalCountdown.FinalCountdownScreenClass(Profile_0, dateTime).ShowScreen(EScreenState.Root);
+			if (MonoBehaviourSingleton<AmbientAudioSystem>.Instantiated)
+			{
+				MonoBehaviourSingleton<AmbientAudioSystem>.Instance.Initialize();
+			}
 			MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeployLocal);
+			Singleton<GUISounds>.Instance.method_9(false);
 			Singleton<GUISounds>.Instance.StopMenuBackgroundMusicWithDelay(timeBeforeDeployLocal);
 			GameUi.gameObject.SetActive(true);
 			GameUi.TimerPanel.ProfileId = ProfileId;
@@ -1023,7 +1031,7 @@ namespace Fika.Core.Coop.GameMode
 		}
 
 		/// <summary>
-		/// Initializes the local player
+		/// Initializes the local player, replaces <see cref="BaseLocalGame{TPlayerOwner}.method_4(BotControllerSettings, string, InventoryController)"/>
 		/// </summary>
 		/// <param name="botsSettings"></param>
 		/// <param name="backendUrl"></param>
@@ -1506,7 +1514,7 @@ namespace Fika.Core.Coop.GameMode
 
 				int numberOfBots = controllerSettings.BotAmount switch
 				{
-					EBotAmount.AsOnline => 20,
+					EBotAmount.AsOnline => iSession.BackEndConfig.Config.MaxBotsAliveOnMap,
 					EBotAmount.NoBots => 0,
 					EBotAmount.Low => 15,
 					EBotAmount.Medium => 20,
@@ -1636,9 +1644,19 @@ namespace Fika.Core.Coop.GameMode
 
 			SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
+			Task musicTask = Singleton<GUISounds>.Instance.method_10(false, CancellationToken.None);
+			while (!musicTask.IsCompleted)
+			{
+				yield return new WaitForEndOfFrame();
+			}
+			GClass2072.ResetAudioBuffer();
+
 			GameWorld_0.TriggersModule = gameObject.AddComponent<LocalClientTriggersModule>();
 			GameWorld_0.FillLampControllers();
-
+			if (Location_0.Id == "laboratory")
+			{
+				Season = ESeason.Summer;
+			}
 			WeatherReady = true;
 			OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
@@ -1652,6 +1670,10 @@ namespace Fika.Core.Coop.GameMode
 			while (!runSeason.IsCompleted)
 			{
 				yield return new WaitForEndOfFrame();
+			}
+			if (MonoBehaviourSingleton<RadioBroadcastController>.Instantiated)
+			{
+				MonoBehaviourSingleton<RadioBroadcastController>.Instance.StartBroadcast();
 			}
 			yield return base.vmethod_5(runCallback);
 		}
@@ -1762,7 +1784,8 @@ namespace Fika.Core.Coop.GameMode
 			Spawn();
 
 			SkillClass[] skills = Profile_0.Skills.Skills;
-			for (int i = 0; i < skills.Length; i++)
+			int skillsLength = skills.Length;
+			for (int i = 0; i < skillsLength; i++)
 			{
 				skills[i].SetPointsEarnedInSession(0f, false);
 			}
