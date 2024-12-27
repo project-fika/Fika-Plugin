@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using EFT.AssetsManager;
 using EFT.Interactive;
+using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
@@ -171,6 +172,35 @@ namespace Fika.Core.Networking.Packets.GameWorld
 			public void Serialize(NetDataWriter writer)
 			{
 				writer.Put(ExpectedPlayers);
+			}
+		}
+
+		public class SecretExfilFound : ISubPacket
+		{
+			public string GroupId;
+			public string ExitName;
+
+			public SecretExfilFound(string groupId, string exitName)
+			{
+				GroupId = groupId;
+				ExitName = exitName;
+			}
+
+			public SecretExfilFound(NetDataReader reader)
+			{
+				GroupId = reader.GetString();
+				ExitName = reader.GetString();
+			}
+
+			public void Execute(CoopPlayer player)
+			{
+				GlobalEventHandlerClass.Instance.CreateCommonEvent<SecretExfiltrationPointFoundShareEvent>().Invoke(GroupId, GroupId, ExitName);
+			}
+
+			public void Serialize(NetDataWriter writer)
+			{
+				writer.Put(GroupId);
+				writer.Put(ExitName);
 			}
 		}
 	}

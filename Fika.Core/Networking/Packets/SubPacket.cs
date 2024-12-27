@@ -105,7 +105,8 @@ namespace Fika.Core.Networking.Packets
 			ClientExtract,
 			ExfilCountdown,
 			ClearEffects,
-			UpdateBackendData
+			UpdateBackendData,
+			SecretExfilFound
 			//TrainSync,
 			//TraderServiceNotification,
 		}

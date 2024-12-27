@@ -1841,7 +1841,7 @@ namespace Fika.Core.Coop.GameMode
 				}
 			}
 
-			exfilManager.Run(exfilPoints);
+			exfilManager.Run(exfilPoints, secretExfilPoints);
 
 			dateTime_0 = EFTDateTimeClass.Now;
 			Status = GameStatus.Started;

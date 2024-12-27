@@ -1086,6 +1086,7 @@ namespace Fika.Core.Coop.Players
 				if (!isDedicatedHost)
 				{
 					Profile.Info.GroupId = "Fika";
+					Profile.Info.TeamId = "Fika";
 					waitForStartRoutine = StartCoroutine(CreateHealthBar());
 				}
 

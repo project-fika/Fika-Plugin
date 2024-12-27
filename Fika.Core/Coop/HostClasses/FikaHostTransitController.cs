@@ -435,11 +435,9 @@ namespace Fika.Core.Coop.HostClasses
 
 		public void Init()
 		{
-			foreach (TransitPoint transitPoint in dictionary_0.Values)
-			{
-				transitPoint.Enabled = true;
-			}
+			EnablePoints(true);
 			method_6(dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
+			method_2(dictionary_0.Values, GamePlayerOwner.MyPlayer);
 
 			/*TransitEventPacket packet = new()
 			{

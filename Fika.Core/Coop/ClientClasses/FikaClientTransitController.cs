@@ -46,6 +46,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public void Init()
 		{
+			EnablePoints(true);
 			method_6(dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
 		}
 
