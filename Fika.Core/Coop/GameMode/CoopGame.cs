@@ -1938,10 +1938,7 @@ namespace Fika.Core.Coop.GameMode
 					{
 						NetId = player.NetId,
 						Type = EGenericSubPacketType.UpdateBackendData,
-						SubPacket = new GenericSubPackets.UpdateBackendData()
-						{
-							ExpectedPlayers = hostController.AliveTransitPlayers
-						}
+						SubPacket = new GenericSubPackets.UpdateBackendData(hostController.AliveTransitPlayers)
 					};
 					Singleton<FikaServer>.Instance.SendDataToAll(ref backendPacket, DeliveryMethod.ReliableOrdered);
 				}

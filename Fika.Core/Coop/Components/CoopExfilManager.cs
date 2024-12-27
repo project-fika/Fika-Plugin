@@ -240,11 +240,7 @@ namespace Fika.Core.Coop.Components
 					{
 						NetId = mainPlayer.NetId,
 						Type = EGenericSubPacketType.ExfilCountdown,
-						SubPacket = new ExfilCountdown()
-						{
-							ExfilName = point.Settings.Name,
-							ExfilStartTime = point.ExfiltrationStartTime
-						}
+						SubPacket = new ExfilCountdown(point.Settings.Name, point.ExfiltrationStartTime)
 					};
 
 					mainPlayer.PacketSender.SendPacket(ref packet);

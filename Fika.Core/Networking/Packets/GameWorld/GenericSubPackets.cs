@@ -15,7 +15,7 @@ namespace Fika.Core.Networking.Packets.GameWorld
 {
 	public class GenericSubPackets
 	{
-		public struct ClientExtract : ISubPacket
+		public class ClientExtract : ISubPacket
 		{
 			public int NetId;
 
@@ -67,10 +67,16 @@ namespace Fika.Core.Networking.Packets.GameWorld
 			}
 		}
 
-		public struct ExfilCountdown : ISubPacket
+		public class ExfilCountdown : ISubPacket
 		{
 			public string ExfilName;
 			public float ExfilStartTime;
+
+			public ExfilCountdown(string exfilName, float exfilStartTime)
+			{
+				ExfilName = exfilName;
+				ExfilStartTime = exfilStartTime;
+			}
 
 			public ExfilCountdown(NetDataReader reader)
 			{
@@ -117,7 +123,7 @@ namespace Fika.Core.Networking.Packets.GameWorld
 			}
 		}
 
-		public struct ClearEffects : ISubPacket
+		public class ClearEffects : ISubPacket
 		{
 			public int NetId;
 
@@ -155,9 +161,14 @@ namespace Fika.Core.Networking.Packets.GameWorld
 			}
 		}
 
-		public struct UpdateBackendData : ISubPacket
+		public class UpdateBackendData : ISubPacket
 		{
 			public int ExpectedPlayers;
+
+			public UpdateBackendData(int expectedPlayers)
+			{
+				ExpectedPlayers = expectedPlayers;
+			}
 
 			public UpdateBackendData(NetDataReader reader)
 			{
