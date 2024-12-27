@@ -265,7 +265,7 @@ namespace Fika.Core.Coop.Components
 			}
 
 			FikaClient client = Singleton<FikaClient>.Instance;
-			if (client.NetClient.FirstPeer != null)
+			if (client != null && client.NetClient?.FirstPeer != null)
 			{
 				client.SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
 			}

@@ -160,7 +160,7 @@ namespace Fika.Core.Coop.Players
 			player.AIData = new GClass563(null, player);
 
 			Traverse observedTraverse = Traverse.Create(player);
-			observedTraverse.Field<GClass886>("gclass893_0").Value = new();
+			observedTraverse.Field<GClass893>("gclass893_0").Value = new();
 			player.cullingHandler = observedTraverse.Field<GClass893>("gclass893_0").Value;
 			player.cullingHandler.Initialize(player, player.PlayerBones);
 			if (FikaBackendUtils.IsDedicated || profile.IsPlayerProfile())
