@@ -5,11 +5,11 @@ using System.Reflection;
 
 namespace Fika.Core.UI.Patches
 {
-	public class MenuScreen_method_8_Patch : ModulePatch
+	public class MenuScreen_method_9_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(MenuScreen).GetMethod(nameof(MenuScreen.method_8));
+			return typeof(MenuScreen).GetMethod(nameof(MenuScreen.method_9));
 		}
 
 		[PatchPostfix]

@@ -333,7 +333,7 @@ namespace Fika.Core
 			new PlayEndGameSound_Patch().Enable();
 			new MenuScreen_Awake_Patch().Enable();
 			new GClass3574_ShowAction_Patch().Enable();
-			new MenuScreen_method_8_Patch().Enable();
+			new MenuScreen_method_9_Patch().Enable();
 			new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
 			new RagfairScreen_Show_Patch().Enable();
 			new MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch().Enable();
