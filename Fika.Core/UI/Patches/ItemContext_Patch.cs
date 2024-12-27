@@ -17,167 +17,162 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
-    public class ItemContext_Patch : ModulePatch
-    {
-        private static int lastIndex = 0;
+	public class ItemContext_Patch : ModulePatch
+	{
+		private static int lastIndex = 0;
 
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(SimpleContextMenu).GetMethod(nameof(SimpleContextMenu.method_0)).MakeGenericMethod(typeof(EItemInfoButton));
-        }
+		protected override MethodBase GetTargetMethod()
+		{
+			return typeof(SimpleContextMenu).GetMethod(nameof(SimpleContextMenu.method_0)).MakeGenericMethod(typeof(EItemInfoButton));
+		}
 
-        [PatchPrefix]
-        private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
-        {
-            if (contextInteractions is not GClass3402 gclass)
-            {
-                return;
-            }
+		[PatchPrefix]
+		private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
+		{
+			if (contextInteractions is not GClass3461 gclass)
+			{
+				return;
+			}
 
-            // Check for GClass increments
-            ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("itemContextAbstractClass").Value;
-            if (itemContext.ViewType == EItemViewType.Inventory)
-            {
-                if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld)
-                {
-                    return;
-                }
+			// Check for GClass increments
+			ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("itemContextAbstractClass").Value;
+			if (itemContext.ViewType == EItemViewType.Inventory)
+			{
+				if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld)
+				{
+					return;
+				}
 
-                // Save as variable in case we need to add more checks later...
-                MenuUI menuUI = Singleton<MenuUI>.Instance;
+				// Save as variable in case we need to add more checks later...
+				MenuUI menuUI = Singleton<MenuUI>.Instance;
 
-                if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled)
-                {
-                    return;
-                }
+				if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled)
+				{
+					return;
+				}
 
-                IEnumerable<Item> parentItems = item.GetAllParentItems();
-                if (parentItems.Any(x => x is InventoryEquipment))
-                {
-                    return;
-                }
+				IEnumerable<Item> parentItems = item.GetAllParentItems();
+				if (parentItems.Any(x => x is InventoryEquipment))
+				{
+					return;
+				}
 
-                if (item.Parent.Container.ParentItem.TemplateId == "55d7217a4bdc2d86028b456d") // Fix for UI Fixes
-                {
-                    return;
-                }
+				if (item.Parent.Container.ParentItem.TemplateId == "55d7217a4bdc2d86028b456d") // Fix for UI Fixes
+				{
+					return;
+				}
 
-                if (item.PinLockState is EItemPinLockState.Pinned or EItemPinLockState.Locked) // Don't send pinned or locked items (who even does this?)
-                {
-                    return;
-                }
+				// Check for GClass increments
+				Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions)
+					.Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
+				if (dynamicInteractions == null)
+				{
+					dynamicInteractions = [];
+				}
 
-                // Check for GClass increments
-                Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions)
-                    .Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
-                if (dynamicInteractions == null)
-                {
-                    dynamicInteractions = [];
-                }
+				dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
+				{
+					foreach (string itemId in FikaPlugin.Instance.BlacklistedItems)
+					{
+						foreach (Item attachedItem in item.GetAllItems())
+						{
+							if (attachedItem.TemplateId == itemId)
+							{
+								string itemText = ColorizeText(EColor.BLUE, item.ShortName.Localized());
+								if (attachedItem == item)
+								{
+									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_BLACKLISTED.Localized(), itemText),
+										iconType: EFT.Communications.ENotificationIconType.Alert);
+								}
+								else
+								{
+									string itemName = attachedItem.ShortName.Localized();
+									string attachedItemText = FikaUIGlobals.ColorizeText(EColor.BLUE, itemName);
+									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
+										[itemText, attachedItemText]),
+										iconType: EFT.Communications.ENotificationIconType.Alert);
+								}
+								return;
+							}
+						}
+					}
 
-                dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
-                {
-                    foreach (string itemId in FikaPlugin.Instance.BlacklistedItems)
-                    {
-                        foreach (Item attachedItem in item.GetAllItems())
-                        {
-                            if (attachedItem.TemplateId == itemId)
-                            {
-                                string itemText = ColorizeText(EColor.BLUE, item.ShortName.Localized());
-                                if (attachedItem == item)
-                                {
-                                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_BLACKLISTED.Localized(), itemText),
-                                        iconType: EFT.Communications.ENotificationIconType.Alert);
-                                }
-                                else
-                                {
-                                    string itemName = attachedItem.ShortName.Localized();
-                                    string attachedItemText = ColorizeText(EColor.BLUE, itemName);
-                                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
-                                        [itemText, attachedItemText]),
-                                        iconType: EFT.Communications.ENotificationIconType.Alert);
-                                }
-                                return;
-                            }
-                        }
-                    }
+					AvailableReceiversRequest body = new(itemContext.Item.Id);
+					Dictionary<string, string> availableUsers = FikaRequestHandler.AvailableReceivers(body);
 
-                    AvailableReceiversRequest body = new(itemContext.Item.Id);
-                    Dictionary<string, string> availableUsers = FikaRequestHandler.AvailableReceivers(body);
+					// convert availableUsers.Keys
+					List<TMP_Dropdown.OptionData> optionDatas = [];
+					foreach (string user in availableUsers.Keys)
+					{
+						optionDatas.Add(new()
+						{
+							text = user
+						});
+					}
 
-                    // convert availableUsers.Keys
-                    List<TMP_Dropdown.OptionData> optionDatas = [];
-                    foreach (string user in availableUsers.Keys)
-                    {
-                        optionDatas.Add(new()
-                        {
-                            text = user
-                        });
-                    }
+					// Get menu item
+					GameObject currentUI = GameObject.Find("SendItemMenu(Clone)");
+					if (currentUI != null)
+					{
+						Object.Destroy(currentUI);
+					}
 
-                    // Get menu item
-                    GameObject currentUI = GameObject.Find("SendItemMenu(Clone)");
-                    if (currentUI != null)
-                    {
-                        Object.Destroy(currentUI);
-                    }
+					// Create the window
+					GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("senditemmenu").LoadAsset<GameObject>("SendItemMenu");
+					GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
+					uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
+					InventoryScreen.GClass3574 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3574>("ScreenController").Value;
+					screenController.OnClose += () => { Object.Destroy(uiGameObj); };
+					SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
+					sendItemUI.PlayersDropdown.ClearOptions();
+					sendItemUI.PlayersDropdown.AddOptions(optionDatas);
 
-                    // Create the window
-                    GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("senditemmenu").LoadAsset<GameObject>("SendItemMenu");
-                    GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
-                    uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
-                    InventoryScreen.GClass3511 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3511>("ScreenController").Value;
-                    screenController.OnClose += () => { Object.Destroy(uiGameObj); };
-                    SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
-                    sendItemUI.PlayersDropdown.ClearOptions();
-                    sendItemUI.PlayersDropdown.AddOptions(optionDatas);
+					if (sendItemUI.PlayersDropdown.options.Count >= lastIndex)
+					{
+						sendItemUI.PlayersDropdown.value = lastIndex;
+					}
 
-                    if (sendItemUI.PlayersDropdown.options.Count >= lastIndex)
-                    {
-                        sendItemUI.PlayersDropdown.value = lastIndex;
-                    }
+					sendItemUI.PlayersDropdown.onValueChanged.AddListener((value) =>
+					{
+						Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
+					});
 
-                    sendItemUI.PlayersDropdown.onValueChanged.AddListener((value) =>
-                    {
-                        Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
-                    });
+					sendItemUI.CloseButton.onClick.AddListener(() =>
+					{
+						Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+					});
 
-                    sendItemUI.CloseButton.onClick.AddListener(() =>
-                    {
-                        Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                    });
+					sendItemUI.CloseButton.onClick.AddListener(() =>
+					{
+						Object.Destroy(uiGameObj);
+					});
 
-                    sendItemUI.CloseButton.onClick.AddListener(() =>
-                    {
-                        Object.Destroy(uiGameObj);
-                    });
-
-                    sendItemUI.SendButton.onClick.AddListener(() =>
-                    {
-                        if (sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text != null)
-                        {
-                            string player = sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text;
-                            lastIndex = sendItemUI.PlayersDropdown.value;
-                            if (Singleton<ClientApplication<ISession>>.Instantiated)
-                            {
-                                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);
-                                Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession().SendOperationRightNow(new { Action = "SendToPlayer", id = itemContext.Item.Id, target = availableUsers[player] }, ar =>
-                                {
-                                    if (ar.Failed)
-                                    {
-                                        PreloaderUI.Instance.ShowErrorScreen("Fika.Core.ItemContextPatch", ar.Error ?? "An unknown error has occurred");
-                                    }
-                                });
-                            }
-                            else
-                            {
-                                PreloaderUI.Instance.ShowErrorScreen("Fika.Core.ItemContextPatch", "!Singleton<ISession>.Instantiated");
-                            }
-                        }
-                        Object.Destroy(uiGameObj);
-                    });
-                }, CacheResourcesPopAbstractClass.Pop<Sprite>("Characteristics/Icons/UnloadAmmo"));
-            }
-        }
-    }
+					sendItemUI.SendButton.onClick.AddListener(() =>
+					{
+						if (sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text != null)
+						{
+							string player = sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text;
+							lastIndex = sendItemUI.PlayersDropdown.value;
+							if (Singleton<ClientApplication<ISession>>.Instantiated)
+							{
+								Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);
+								Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession().SendOperationRightNow(new { Action = "SendToPlayer", id = itemContext.Item.Id, target = availableUsers[player] }, ar =>
+								{
+									if (ar.Failed)
+									{
+										PreloaderUI.Instance.ShowErrorScreen("Fika.Core.ItemContextPatch", ar.Error ?? "An unknown error has occurred");
+									}
+								});
+							}
+							else
+							{
+								PreloaderUI.Instance.ShowErrorScreen("Fika.Core.ItemContextPatch", "!Singleton<ISession>.Instantiated");
+							}
+						}
+						Object.Destroy(uiGameObj);
+					});
+				}, CacheResourcesPopAbstractClass.Pop<Sprite>("Characteristics/Icons/UnloadAmmo"));
+			}
+		}
+	}
 }

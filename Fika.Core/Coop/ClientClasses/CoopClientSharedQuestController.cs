@@ -12,15 +12,15 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public sealed class CoopClientSharedQuestController(Profile profile, InventoryController inventoryController,
-        IQuestActions session, CoopPlayer player, bool fromServer = true) : GClass3608(profile, inventoryController, session, fromServer)
-    {
-        private readonly CoopPlayer player = player;
-        private readonly List<string> lastFromNetwork = [];
-        private readonly HashSet<string> acceptedTypes = [];
-        private readonly HashSet<string> lootedTemplateIds = [];
-        private bool canSendAndReceive = true;
-        private bool isItemBeingDropped = false;
+	public sealed class CoopClientSharedQuestController(Profile profile, InventoryController inventoryController,
+		IQuestActions session, CoopPlayer player) : GClass3695(profile, inventoryController, session)
+	{
+		private readonly CoopPlayer player = player;
+		private readonly List<string> lastFromNetwork = [];
+		private readonly HashSet<string> acceptedTypes = [];
+		private readonly HashSet<string> lootedTemplateIds = [];
+		private bool canSendAndReceive = true;
+		private bool isItemBeingDropped = false;
 
         public override void Init()
         {
@@ -85,13 +85,13 @@ namespace Fika.Core.Coop.ClientClasses
             player.PacketSender.SendPacket(ref packet);
         }
 
-        public override void OnConditionValueChanged(IConditionCounter conditional, EQuestStatus status, Condition condition, bool notify = true)
-        {
-            base.OnConditionValueChanged(conditional, status, condition, notify);
-            if (!canSendAndReceive)
-            {
-                return;
-            }
+		public override void OnConditionValueChanged(QuestClass conditional, EQuestStatus status, Condition condition, bool notify = true)
+		{
+			base.OnConditionValueChanged(conditional, status, condition, notify);
+			if (!canSendAndReceive)
+			{
+				return;
+			}
 
             if (lastFromNetwork.Contains(condition.id))
             {
@@ -132,12 +132,12 @@ namespace Fika.Core.Coop.ClientClasses
             canSendAndReceive = state;
         }
 
-        private void SendQuestPacket(IConditionCounter conditional, Condition condition)
-        {
-            if (!canSendAndReceive)
-            {
-                return;
-            }
+		private void SendQuestPacket(IConditional conditional, Condition condition)
+		{
+			if (!canSendAndReceive)
+			{
+				return;
+			}
 
             if (conditional is QuestClass quest)
             {
@@ -202,15 +202,15 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            if (!string.IsNullOrEmpty(packet.ItemId))
-            {
-                Item item = player.FindQuestItem(packet.ItemId);
-                if (item != null)
-                {
-                    InventoryController playerInventory = player.InventoryController;
-                    GStruct446<GInterface385> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
-                        playerInventory.Inventory.Equipment.ToEnumerable(),
-                        InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
+			if (!string.IsNullOrEmpty(packet.ItemId))
+			{
+				Item item = player.FindQuestItem(packet.ItemId);
+				if (item != null)
+				{
+					InventoryController playerInventory = player.InventoryController;
+					GStruct452<GInterface397> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
+						playerInventory.Inventory.Equipment.ToEnumerable(),
+						InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
 
                     if (pickupResult.Succeeded && playerInventory.CanExecute(pickupResult.Value))
                     {
@@ -255,23 +255,23 @@ namespace Fika.Core.Coop.ClientClasses
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
-            foreach (Item questItem in player.Inventory.QuestRaidItems.GetAllItems())
-            {
-                if (questItem.TemplateId == itemId && questItem.QuestItem)
-                {
-                    GStruct446<GClass3131> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
-                    player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
-                    {
-                        if (!result.Succeed)
-                        {
-                            FikaPlugin.Instance.FikaLogger.LogError("ReceiveQuestDropItemPacket: Discard failed: " + result.Error);
-                        }
-                    });
-                }
-            }
-            player.Profile.ItemDroppedAtPlace(itemId, zoneId);
-            isItemBeingDropped = false;
-        }
+			foreach (Item questItem in player.Inventory.QuestRaidItems.GetAllItems())
+			{
+				if (questItem.TemplateId == itemId && questItem.QuestItem)
+				{
+					GStruct452<GClass3195> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
+					player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
+					{
+						if (!result.Succeed)
+						{
+							FikaPlugin.Instance.FikaLogger.LogError("ReceiveQuestDropItemPacket: Discard failed: " + result.Error);
+						}
+					});
+				}
+			}
+			player.Profile.ItemDroppedAtPlace(itemId, zoneId);
+			isItemBeingDropped = false;
+		}
 
         private bool HasQuestForItem(string itemId, string zoneId, out string questName)
         {

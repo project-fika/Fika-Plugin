@@ -24,13 +24,13 @@ namespace Fika.Core.Coop.BotClasses
         private readonly CoopBot coopBot;
         private readonly IPlayerSearchController searchController;
 
-        public CoopBotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
-        {
-            coopBot = (CoopBot)player;
-            mongoID_0 = currentId;
-            ushort_0 = nextOperationId;
-            searchController = new GClass1973(profile);
-        }
+		public CoopBotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
+		{
+			coopBot = (CoopBot)player;
+			mongoID_0 = currentId;
+			ushort_0 = nextOperationId;
+			searchController = new GClass2002(profile);
+		}
 
         public override IPlayerSearchController PlayerSearchController
         {
@@ -45,22 +45,22 @@ namespace Fika.Core.Coop.BotClasses
             // Do nothing
         }
 
-        public override void vmethod_1(BaseInventoryOperationClass operation, [CanBeNull] Callback callback)
-        {
-            // Check for GClass increments
-            // Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-            if (operation is not GClass3210)
-            {
+		public override void vmethod_1(BaseInventoryOperationClass operation, [CanBeNull] Callback callback)
+		{
+			// Check for GClass increments
+			// Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
+			if (operation is not GClass3274)
+			{
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
-                GClass1198 writer = new();
-                writer.WritePolymorph(operation.ToDescriptor());
-                InventoryPacket packet = new()
-                {
-                    CallbackId = operation.Id,
-                    OperationBytes = writer.ToArray()
-                };
+				GClass1211 writer = new();
+				writer.WritePolymorph(operation.ToDescriptor());
+				InventoryPacket packet = new()
+				{
+					CallbackId = operation.Id,
+					OperationBytes = writer.ToArray()
+				};
 
                 coopBot.PacketSender.InventoryPackets.Enqueue(packet);
             }
@@ -88,10 +88,10 @@ namespace Fika.Core.Coop.BotClasses
             handler.Callback?.Fail($"Can't execute {handler.Operation}", 1);
         }
 
-        public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
-        {
-            return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
-        }
+		public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+		{
+			return new GClass3296(method_12(), this, PlayerSearchController, Profile, item);
+		}
 
         private class BotInventoryOperationHandler(CoopBotInventoryController controller, BaseInventoryOperationClass operation, Callback callback)
         {

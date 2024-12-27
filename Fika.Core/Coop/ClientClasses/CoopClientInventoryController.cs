@@ -92,17 +92,17 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            // Do not replicate picking up quest items, throws an error on the other clients            
-            if (operation is GClass3195 moveOperation)
-            {
-                Item lootedItem = moveOperation.Item;
-                if (lootedItem.QuestItem)
-                {
-                    if (coopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
-                    {
-                        if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
-                        {
-                            sharedQuestController.AddLootedTemplateId(lootedItem.TemplateId);
+			// Do not replicate picking up quest items, throws an error on the other clients            
+			if (operation is GClass3259 moveOperation)
+			{
+				Item lootedItem = moveOperation.Item;
+				if (lootedItem.QuestItem)
+				{
+					if (coopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+					{
+						if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
+						{
+							sharedQuestController.AddLootedTemplateId(lootedItem.TemplateId);
 
                             // We use templateId because each client gets a unique itemId
                             QuestItemPacket questPacket = new()
@@ -128,21 +128,21 @@ namespace Fika.Core.Coop.ClientClasses
                 }
             }
 
-            // Do not replicate quest operations / search operations
-            // Check for GClass increments, ReadPolymorph
-            if (operation is GClass3232 or GClass3236 or GClass3237 or GClass3238)
-            {
-                base.vmethod_1(operation, callback);
-                return;
-            }
+			// Do not replicate quest operations / search operations
+			// Check for GClass increments, ReadPolymorph
+			if (operation is GClass3296 or GClass3300 or GClass3301 or GClass3302)
+			{
+				base.vmethod_1(operation, callback);
+				return;
+			}
 
-            GClass1198 writer = new();
-            ClientInventoryOperationHandler handler = new()
-            {
-                Operation = operation,
-                Callback = callback,
-                InventoryController = this
-            };
+			GClass1211 writer = new();
+			ClientInventoryOperationHandler handler = new()
+			{
+				Operation = operation,
+				Callback = callback,
+				InventoryController = this
+			};
 
             uint operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
             writer.WritePolymorph(operation.ToDescriptor());
@@ -181,10 +181,10 @@ namespace Fika.Core.Coop.ClientClasses
             return id;
         }
 
-        public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
-        {
-            return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
-        }
+		public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+		{
+			return new GClass3296(method_12(), this, PlayerSearchController, Profile, item);
+		}
 
         private class ClientInventoryOperationHandler
         {
@@ -224,38 +224,38 @@ namespace Fika.Core.Coop.ClientClasses
                 HandleFinalResult(executeResult);
             }
 
-            private void HandleFinalResult(IResult result)
-            {
-                IResult result2 = OperationResult;
-                if (result2 == null || !result2.Failed)
-                {
-                    OperationResult = result;
-                }
-                EOperationStatus serverStatus = ServerStatus.Status;
-                if (!serverStatus.Finished())
-                {
-                    return;
-                }
-                EOperationStatus localStatus = Operation.Status;
-                if (localStatus.InProgress())
-                {
-                    if (Operation is GInterface403 ginterface)
-                    {
-                        ginterface.Terminate();
-                    }
-                    return;
-                }
-                Operation.Dispose();
-                if (serverStatus != localStatus)
-                {
-                    if (localStatus.Finished())
-                    {
-                        InventoryController.logger.LogError($"{InventoryController.ID} - Operation critical failure - status mismatch: {Operation.Id} server status: {serverStatus} client status: {localStatus} - {Operation}");
-                    }
-                }
-                Callback?.Invoke(OperationResult);
-            }
-        }
+			private void HandleFinalResult(IResult result)
+			{
+				IResult result2 = OperationResult;
+				if (result2 == null || !result2.Failed)
+				{
+					OperationResult = result;
+				}
+				EOperationStatus serverStatus = ServerStatus.Status;
+				if (!serverStatus.Finished())
+				{
+					return;
+				}
+				EOperationStatus localStatus = Operation.Status;
+				if (localStatus.InProgress())
+				{
+					if (Operation is GInterface414 ginterface)
+					{
+						ginterface.Terminate();
+					}
+					return;
+				}
+				Operation.Dispose();
+				if (serverStatus != localStatus)
+				{
+					if (localStatus.Finished())
+					{
+						InventoryController.logger.LogError($"{InventoryController.ID} - Operation critical failure - status mismatch: {Operation.Id} server status: {serverStatus} client status: {localStatus} - {Operation}");
+					}
+				}
+				Callback?.Invoke(OperationResult);
+			}
+		}
 
         public readonly struct ServerOperationStatus(EOperationStatus status, string error)
         {
