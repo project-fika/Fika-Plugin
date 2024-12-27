@@ -1070,10 +1070,12 @@ namespace Fika.Core.Coop.Players
 			if (FikaBackendUtils.IsDedicated)
 			{
 				Profile.Info.GroupId = "DEDICATED";
+				Profile.Info.GroupId = "DEDICATED";
 			}
 			else
 			{
 				Profile.Info.GroupId = "Fika";
+				Profile.Info.TeamId = "Fika";
 			}
 
 			// Setup own dog tag
