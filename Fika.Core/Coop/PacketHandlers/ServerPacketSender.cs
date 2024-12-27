@@ -287,7 +287,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
 				if (FikaPlugin.PlayPingAnimation.Value && player.HealthController.IsAlive)
 				{
-					player.vmethod_6(EInteraction.ThereGesture);
+					player.vmethod_7(EInteraction.ThereGesture);
 				}
 			}
 		}

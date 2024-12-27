@@ -157,9 +157,9 @@ namespace Fika.Core.Coop.PacketHandlers
 				{
 					if (controller is Interface16 networkController)
 					{
-						GClass1193 reader = new(packet.OperationBytes);
+						GClass1207 reader = new(packet.OperationBytes);
 						BaseDescriptorClass descriptor = reader.ReadPolymorph<BaseDescriptorClass>();
-						GStruct443 result = networkController.CreateOperationFromDescriptor(descriptor);
+						GStruct449 result = networkController.CreateOperationFromDescriptor(descriptor);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");

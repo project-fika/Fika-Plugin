@@ -1,9 +1,11 @@
-﻿using Comfort.Common;
+﻿using Audio.Vehicles.BTR;
+using Comfort.Common;
 using EFT;
 using EFT.Vehicle;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using HarmonyLib;
 using LiteNetLib;
 using SPT.Reflection.Patching;
 using System;
@@ -61,6 +63,11 @@ namespace Fika.Core.Coop.Patches
 			{
 				CancellationToken cancellationToken = view.method_11(observedPlayer);
 				observedPlayer.BtrState = EPlayerBtrState.GoOut;
+				BtrSoundController soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+				if (soundController != null)
+				{
+					soundController.UpdateBtrAudioRoom(EnvironmentType.Outdoor, observedPlayer);
+				}
 				await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, false, cancellationToken);
 				ValueTuple<Vector3, Vector3> valueTuple = side.GoOutPoints();
 				side.ApplyPlayerRotation(observedPlayer.MovementContext, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.9f);

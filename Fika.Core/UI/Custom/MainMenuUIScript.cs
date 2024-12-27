@@ -43,7 +43,7 @@ namespace Fika.Core.UI.Custom
 		private DateTime lastSet;
 		private int minSecondsToWait;
 		private RectTransform transformToScale;
-		private GInterface186<RaidSettings> backendSession;
+		private GInterface197<RaidSettings> backendSession;
 
 		private DateTime BackendTime
 		{

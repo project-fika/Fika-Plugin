@@ -1,9 +1,11 @@
-﻿using Comfort.Common;
+﻿using Audio.Vehicles.BTR;
+using Comfort.Common;
 using EFT;
 using EFT.Vehicle;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using HarmonyLib;
 using LiteNetLib;
 using SPT.Reflection.Patching;
 using System;
@@ -84,12 +86,17 @@ namespace Fika.Core.Coop.Patches
 				observedPlayer.CharacterController.isEnabled = false;
 				observedPlayer.BtrState = EPlayerBtrState.GoIn;
 				side.AddPassenger(observedPlayer, placeId);
+				BtrSoundController soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+				if (soundController != null)
+				{
+					soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);
+				}
 				await view.method_14(observedPlayer.MovementContext.PlayerAnimator, fast, false, cancellationToken);
 				if (!cancellationToken.IsCancellationRequested)
 				{
 					if (view.method_19() == 1)
 					{
-						GlobalEventHandlerClass.CreateEvent<GClass3260>().Invoke(observedPlayer.Side);
+						GlobalEventHandlerClass.CreateEvent<GClass3324>().Invoke(observedPlayer.Side);
 					}
 					observedPlayer.BtrState = EPlayerBtrState.Inside;
 				}

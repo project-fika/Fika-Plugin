@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.HostClasses
 		private void RunHostOperation(BaseInventoryOperationClass operation, Callback callback)
 		{
 			// Do not replicate picking up quest items, throws an error on the other clients            
-			if (operation is GClass3195 moveOperation)
+			if (operation is GClass3259 moveOperation)
 			{
 				Item lootedItem = moveOperation.Item;
 				if (lootedItem.QuestItem)
@@ -135,7 +135,7 @@ namespace Fika.Core.Coop.HostClasses
 
 			// Do not replicate quest operations / search operations
 			// Check for GClass increments, ReadPolymorph
-			if (operation is GClass3232 or GClass3236 or GClass3237 or GClass3238)
+			if (operation is GClass3296 or GClass3300 or GClass3301 or GClass3302)
 			{
 				base.vmethod_1(operation, callback);
 				return;
@@ -156,7 +156,7 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				handler.operation.method_1(handler.HandleResult);
 
-				GClass1198 writer = new();
+				GClass1211 writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());
 				InventoryPacket packet = new()
 				{
@@ -195,7 +195,7 @@ namespace Fika.Core.Coop.HostClasses
 
 		public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
 		{
-			return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
+			return new GClass3296(method_12(), this, PlayerSearchController, Profile, item);
 		}
 
 		private class HostInventoryOperationHandler(CoopHostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)

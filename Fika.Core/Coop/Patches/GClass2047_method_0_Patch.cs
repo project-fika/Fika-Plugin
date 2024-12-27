@@ -4,15 +4,15 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-	internal class GClass2013_method_0_Patch : ModulePatch
+	internal class GClass2047_method_0_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass2013).GetMethod(nameof(GClass2013.method_0));
+			return typeof(GClass2047).GetMethod(nameof(GClass2047.method_0));
 		}
 
 		[PatchPrefix]
-		public static void Prefix(ref GStruct238 preset)
+		public static void Prefix(ref GStruct242 preset)
 		{
 			if (FikaBackendUtils.IsClient)
 			{

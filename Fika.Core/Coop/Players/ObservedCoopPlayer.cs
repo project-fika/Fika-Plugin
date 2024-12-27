@@ -117,7 +117,7 @@ namespace Fika.Core.Coop.Players
 				return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
 			}
 		}
-		private GClass886 cullingHandler;
+		private GClass893 cullingHandler;
 		#endregion
 
 		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -146,22 +146,22 @@ namespace Fika.Core.Coop.Players
 			ObservedQuestController observedQuestController = null;
 			if (!aiControl)
 			{
-				observedQuestController = new(profile, inventoryController, null, false);
+				observedQuestController = new(profile, inventoryController, null);
 				observedQuestController.Init();
 				observedQuestController.Run();
 			}
 
 			await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-				statisticsManager, observedQuestController, null, filter, EVoipState.NotAvailable, aiControl, false);
+				statisticsManager, observedQuestController, null, null, filter, EVoipState.NotAvailable, aiControl, false);
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new GClass551(null, player);
+			player.AIData = new GClass563(null, player);
 
 			Traverse observedTraverse = Traverse.Create(player);
-			observedTraverse.Field<GClass886>("gclass886_0").Value = new();
-			player.cullingHandler = observedTraverse.Field<GClass886>("gclass886_0").Value;
+			observedTraverse.Field<GClass886>("gclass893_0").Value = new();
+			player.cullingHandler = observedTraverse.Field<GClass893>("gclass893_0").Value;
 			player.cullingHandler.Initialize(player, player.PlayerBones);
 			if (FikaBackendUtils.IsDedicated || profile.IsPlayerProfile())
 			{
@@ -206,8 +206,8 @@ namespace Fika.Core.Coop.Players
 
 		public override void PlayGroundedSound(float fallHeight, float jumpHeight)
 		{
-			(bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_64();
-			method_65(hit, surfaceSound);
+			(bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_73();
+			method_74(hit, surfaceSound);
 			base.PlayGroundedSound(fallHeight, jumpHeight);
 		}
 
@@ -278,7 +278,7 @@ namespace Fika.Core.Coop.Players
 			if (player.IsYourPlayer)
 			{
 				// Check for GClass increment
-				bool flag = DamageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface303>(bodyPart) != null;
+				bool flag = DamageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface314>(bodyPart) != null;
 				player.StatisticsManager.OnEnemyDamage(DamageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
 					GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
 					Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
@@ -448,7 +448,7 @@ namespace Fika.Core.Coop.Players
 			return hitInfo;
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfoStruct DamageInfo)
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct214, float> armorDamage, DamageInfoStruct DamageInfo)
 		{
 			if (isServer)
 			{
@@ -458,7 +458,7 @@ namespace Fika.Core.Coop.Players
 				foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
 				{
 					float num = 0f;
-					foreach (KeyValuePair<GStruct209, float> keyValuePair in armorDamage)
+					foreach (KeyValuePair<GStruct214, float> keyValuePair in armorDamage)
 					{
 						if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
 						{
@@ -469,7 +469,7 @@ namespace Fika.Core.Coop.Players
 					if (num > 0f)
 					{
 						num = armorComponent.ApplyExplosionDurabilityDamage(num, DamageInfo, _preAllocatedArmorComponents);
-						method_99(num, armorComponent);
+						method_92(num, armorComponent);
 					}
 				}
 
@@ -543,7 +543,7 @@ namespace Fika.Core.Coop.Players
 			return hitInfo;
 		}
 
-		public override void OnMounting(GStruct179.EMountingCommand command)
+		public override void OnMounting(GStruct184.EMountingCommand command)
 		{
 			// Do nothing
 		}
@@ -566,7 +566,7 @@ namespace Fika.Core.Coop.Players
 		public override void OnHealthEffectAdded(IEffect effect)
 		{
 			// Check for GClass increments
-			if (effect is GInterface304 fracture && !fracture.WasPaused && FractureSound != null && Singleton<BetterAudio>.Instantiated)
+			if (effect is GInterface315 fracture && !fracture.WasPaused && FractureSound != null && Singleton<BetterAudio>.Instantiated)
 			{
 				Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraClass.Instance.Distance(Position),
 					BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);
@@ -588,7 +588,7 @@ namespace Fika.Core.Coop.Players
 		{
 			HandsControllerFactory factory = new(this, knifeComponent: knife);
 			Func<KnifeController> func = new(factory.CreateObservedKnifeController);
-			new Process<KnifeController, IKnifeController>(this, func, factory.knifeComponent.Item)
+			new Process<KnifeController, IKnifeController>(this, func, factory.KnifeComponent.Item)
 				.method_0(null, callback, scheduled);
 		}
 
@@ -600,11 +600,11 @@ namespace Fika.Core.Coop.Players
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface168> callback, bool scheduled = true)
+		public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface178> callback, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this, throwWeap);
 			Func<QuickGrenadeThrowHandsController> func = new(factory.CreateObservedQuickGrenadeController);
-			new Process<QuickGrenadeThrowHandsController, GInterface168>(this, func, throwWeap, false)
+			new Process<QuickGrenadeThrowHandsController, GInterface178>(this, func, throwWeap, false)
 				.method_0(null, callback, scheduled);
 		}
 
@@ -612,33 +612,33 @@ namespace Fika.Core.Coop.Players
 		{
 			HandsControllerFactory factory = new(this, weapon);
 			Func<FirearmController> func = new(factory.CreateObservedFirearmController);
-			new Process<FirearmController, IFirearmHandsController>(this, func, factory.item, true)
+			new Process<FirearmController, IFirearmHandsController>(this, func, factory.Item, true)
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(MedsItemClass meds, EBodyPart bodyPart, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(MedsItemClass meds, GStruct350<EBodyPart> bodyParts, Callback<GInterface175> callback, int animationVariant, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this)
 			{
-				meds = meds,
-				bodyPart = bodyPart,
-				animationVariant = animationVariant
+				MedsItem = meds,
+				BodyParts = bodyParts,
+				AnimationVariant = animationVariant
 			};
 			Func<MedsController> func = new(factory.CreateObservedMedsController);
-			new Process<MedsController, GInterface165>(this, func, meds, false)
+			new Process<MedsController, GInterface175>(this, func, meds, false)
 				.method_0(null, callback, scheduled);
 		}
 
-		public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface165> callback, int animationVariant, bool scheduled = true)
+		public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface175> callback, int animationVariant, bool scheduled = true)
 		{
 			HandsControllerFactory factory = new(this)
 			{
-				food = foodDrink,
-				amount = amount,
-				animationVariant = animationVariant
+				FoodItem = foodDrink,
+				Amount = amount,
+				AnimationVariant = animationVariant
 			};
 			Func<MedsController> func = new(factory.CreateObservedMedsController);
-			new Process<MedsController, GInterface165>(this, func, foodDrink, false)
+			new Process<MedsController, GInterface175>(this, func, foodDrink, false)
 				.method_0(null, callback, scheduled);
 		}
 		#endregion
@@ -660,7 +660,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
 		{
-			method_32(clip);
+			method_33(clip);
 		}
 
 		public override void MouseLook(bool forceApplyToOriginalRibcage = false)
@@ -676,7 +676,7 @@ namespace Fika.Core.Coop.Players
 			float interpolateRatio = (float)ratio;
 			bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
 
-			method_65(to.HasGround, to.SurfaceSound);
+			method_74(to.HasGround, to.SurfaceSound);
 
 			Rotation = new Vector2(Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, interpolateRatio),
 				Mathf.LerpUnclamped(from.Rotation.y, to.Rotation.y, interpolateRatio));
@@ -963,14 +963,14 @@ namespace Fika.Core.Coop.Players
 
 		// TODO: This code needs refactoring and hopefully removing
 		// The reason it was added was due to a lot of bots inventories desyncing because of their unnatural inventory operations
-		public void SetInventory(GClass1659 inventoryDescriptor)
+		public void SetInventory(GClass1686 inventoryDescriptor)
 		{
 			if (HandsController != null)
 			{
 				HandsController.FastForwardCurrentState();
 			}
 
-			Inventory inventory = new GClass1651()
+			Inventory inventory = new GClass1678()
 			{
 				Equipment = inventoryDescriptor,
 			}.ToInventory();
@@ -989,9 +989,9 @@ namespace Fika.Core.Coop.Players
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-				PlayerBody.GClass2076 slowView = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
+				PlayerBody.GClass2112 slotView = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass2076 oldSlotView = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, slowView);
+				PlayerBody.GClass2112 oldSlotView = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, slotView);
 				if (oldSlotView != null)
 				{
 					oldSlotView.Dispose();
@@ -1003,9 +1003,9 @@ namespace Fika.Core.Coop.Players
 			{
 				Transform slotBone = PlayerBody.GetSlotBone(EquipmentSlot.Holster);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(EquipmentSlot.Holster);
-				PlayerBody.GClass2076 slotView = new(PlayerBody, Inventory.Equipment.GetSlot(EquipmentSlot.Holster), slotBone, EquipmentSlot.Holster,
+				PlayerBody.GClass2112 slotView = new(PlayerBody, Inventory.Equipment.GetSlot(EquipmentSlot.Holster), slotBone, EquipmentSlot.Holster,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass2076 oldSlotView = PlayerBody.SlotViews.AddOrReplace(EquipmentSlot.Holster, slotView);
+				PlayerBody.GClass2112 oldSlotView = PlayerBody.SlotViews.AddOrReplace(EquipmentSlot.Holster, slotView);
 				if (oldSlotView != null)
 				{
 					oldSlotView.Dispose();
@@ -1155,7 +1155,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void UpdateOcclusion()
+		public override void UpdateMuffledState()
 		{
 			if (OcclusionDirty && MonoBehaviourSingleton<BetterAudio>.Instantiated)
 			{
@@ -1242,7 +1242,7 @@ namespace Fika.Core.Coop.Players
 
 		private void UpdateSoundRolloff()
 		{
-			UpdateStepSoundRolloff();
+			method_64(CommonAssets.Scripts.Audio.EAudioMovementState.Run);
 			UpdateVoiceSoundRolloff();
 		}
 
@@ -1303,7 +1303,7 @@ namespace Fika.Core.Coop.Players
 				case EProceedType.FoodClass:
 				case EProceedType.MedsClass:
 					{
-						CreateMedsController(packet.ItemId, packet.BodyPart, packet.Amount, packet.AnimationVariant);
+						CreateMedsController(packet.ItemId, packet.BodyParts, packet.Amount, packet.AnimationVariant);
 						break;
 					}
 				case EProceedType.GrenadeClass:
@@ -1352,7 +1352,7 @@ namespace Fika.Core.Coop.Players
 		#region handControllers
 		private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
 		{
-			CreateHandsControllerHandler handler = new((item != null) ? method_83(item) : null);
+			CreateHandsControllerHandler handler = new((item != null) ? method_130(item) : null);
 
 			handler.setInHandsOperation?.Confirm(true);
 
@@ -1386,7 +1386,7 @@ namespace Fika.Core.Coop.Players
 					CreateFirearmController(itemId, isStationary, true);
 					break;
 				case EHandsControllerType.Meds:
-					CreateMedsController(itemId, EBodyPart.Head, 0f, 1);
+					CreateMedsController(itemId, new(EBodyPart.Head), 0f, 1);
 					break;
 				case EHandsControllerType.Grenade:
 					CreateGrenadeController(itemId);
@@ -1439,7 +1439,7 @@ namespace Fika.Core.Coop.Players
 				CreateHandsController(handler.ReturnController, handler.item);
 				return;
 			}
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1453,7 +1453,7 @@ namespace Fika.Core.Coop.Players
 		{
 			CreateGrenadeControllerHandler handler = new(this);
 
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1470,22 +1470,22 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private void CreateMedsController(string itemId, EBodyPart bodyPart, float amount, int animationVariant)
+		private void CreateMedsController(string itemId, GStruct350<EBodyPart> bodyParts, float amount, int animationVariant)
 		{
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
 				return;
 			}
-			CreateMedsControllerHandler handler = new(this, result.Value, bodyPart, amount, animationVariant);
+			CreateMedsControllerHandler handler = new(this, result.Value, bodyParts, amount, animationVariant);
 			CreateHandsController(handler.ReturnController, handler.item);
 		}
 
 		private void CreateKnifeController(string itemId)
 		{
 			CreateKnifeControllerHandler handler = new(this);
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1505,7 +1505,7 @@ namespace Fika.Core.Coop.Players
 		private void CreateQuickGrenadeController(string itemId)
 		{
 			CreateQuickGrenadeControllerHandler handler = new(this);
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1525,7 +1525,7 @@ namespace Fika.Core.Coop.Players
 		private void CreateQuickKnifeController(string itemId)
 		{
 			CreateQuickKnifeControllerHandler handler = new(this);
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1544,7 +1544,7 @@ namespace Fika.Core.Coop.Players
 
 		private void CreateUsableItemController(string itemId)
 		{
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1556,7 +1556,7 @@ namespace Fika.Core.Coop.Players
 
 		private void CreateQuickUseItemController(string itemId)
 		{
-			GStruct448<Item> result = FindItemById(itemId, false, false);
+			GStruct454<Item> result = FindItemById(itemId, false, false);
 			if (!result.Succeeded)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1597,13 +1597,13 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class CreateHandsControllerHandler(Class1176 setInHandsOperation)
+		private class CreateHandsControllerHandler(Class1196 setInHandsOperation)
 		{
-			public readonly Class1176 setInHandsOperation = setInHandsOperation;
+			public readonly Class1196 setInHandsOperation = setInHandsOperation;
 
 			internal void DisposeHandler()
 			{
-				Class1176 handler = setInHandsOperation;
+				Class1196 handler = setInHandsOperation;
 				if (handler == null)
 				{
 					return;
@@ -1634,17 +1634,17 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		private class CreateMedsControllerHandler(ObservedCoopPlayer coopPlayer, Item item, EBodyPart bodyPart, float amount, int animationVariant)
+		private class CreateMedsControllerHandler(ObservedCoopPlayer coopPlayer, Item item, GStruct350<EBodyPart> bodyParts, float amount, int animationVariant)
 		{
 			private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
 			public readonly Item item = item;
-			private readonly EBodyPart bodyPart = bodyPart;
+			private readonly GStruct350<EBodyPart> bodyParts = bodyParts;
 			private readonly float amount = amount;
 			private readonly int animationVariant = animationVariant;
 
 			internal AbstractHandsController ReturnController()
 			{
-				return CoopObservedMedsController.Create(coopPlayer, item, bodyPart, amount, animationVariant);
+				return CoopObservedMedsController.Create(coopPlayer, item, bodyParts, amount, animationVariant);
 			}
 		}
 

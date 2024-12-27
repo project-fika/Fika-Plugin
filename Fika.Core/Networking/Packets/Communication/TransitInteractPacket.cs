@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
 	public struct TransitInteractPacket : INetSerializable
 	{
 		public int NetId;
-		public GStruct176 Data;
+		public GStruct180 Data;
 
 		public void Deserialize(NetDataReader reader)
 		{

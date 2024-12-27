@@ -10,19 +10,20 @@ using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-	public class FikaClientTransitController : GClass1643
+	public class FikaClientTransitController : GClass1670
 	{
-		public FikaClientTransitController(BackendConfigSettingsClass.GClass1529 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+		public FikaClientTransitController(BackendConfigSettingsClass.GClass1504 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
 			: base(settings, parameters)
 		{
 			OnPlayerEnter += OnClientPlayerEnter;
 			OnPlayerExit += OnClientPlayerExit;
 			string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
-			summonedTransits[profile.Id] = new GClass1639(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
+			summonedTransits[profile.Id] = new GClass1666(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
+				localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
 			TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransiterTraderName);
 			this.localRaidSettings = localRaidSettings;
 		}
-		public GStruct176 InteractPacket { get; set; }
+		public GStruct180 InteractPacket { get; set; }
 
 		private readonly LocalRaidSettings localRaidSettings;
 
@@ -45,7 +46,7 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public void Init()
 		{
-			method_5(dictionary_0.Values);
+			method_6(dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
 		}
 
 		public override void Dispose()
@@ -73,7 +74,7 @@ namespace Fika.Core.Coop.ClientClasses
 			if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
 			{
 				eraidMode = ERaidMode.Local;
-				tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+				tarkovApplication.transitionStatus = new GStruct140(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
 			}
 			string profileId = myPlayer.ProfileId;
 			Dictionary<string, ProfileKey> profileKeys = [];
@@ -84,7 +85,7 @@ namespace Fika.Core.Coop.ClientClasses
 				isSolo = true
 			});
 
-			GClass1926 gclass = new()
+			GClass1954 gclass = new()
 			{
 				hash = Guid.NewGuid().ToString(),
 				playersCount = 1,

@@ -47,7 +47,8 @@ namespace Fika.Core.Coop.HostClasses
 			return new HostGrenadeFactory();
 		}
 
-		public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2011 config, bool loadBundlesAndCreatePools = true, List<ResourceKey> resources = null, IProgress<LoadingProgressStruct> progress = null, CancellationToken ct = default)
+		public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2038 config, bool loadBundlesAndCreatePools = true,
+			List<ResourceKey> resources = null, IProgress<LoadingProgressStruct> progress = null, CancellationToken ct = default)
 		{
 			await base.InitLevel(itemFactory, config, loadBundlesAndCreatePools, resources, progress, ct);
 			MineManager.OnExplosion += OnMineExplode;
@@ -94,7 +95,7 @@ namespace Fika.Core.Coop.HostClasses
 			ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
 		}
 
-		public override GClass2400 SyncObjectProcessorFactory()
+		public override GClass2448 SyncObjectProcessorFactory()
 		{
 			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
 			{
@@ -113,7 +114,7 @@ namespace Fika.Core.Coop.HostClasses
 			if (SynchronizableObjectLogicProcessor.TripwireManager == null)
 			{
 				FikaPlugin.Instance.FikaLogger.LogError("TripwireManager was null! Creating new...");
-				SynchronizableObjectLogicProcessor.TripwireManager = new GClass2402(this);
+				SynchronizableObjectLogicProcessor.TripwireManager = new GClass2450(this);
 			}
 
 			TripwireSynchronizableObject tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);

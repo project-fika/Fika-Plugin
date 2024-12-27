@@ -8,6 +8,7 @@ using EFT.InventoryLogic.Operations;
 using Fika.Core.Coop.Players;
 using HarmonyLib;
 using JetBrains.Annotations;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -56,13 +57,13 @@ namespace Fika.Core.Coop.ObservedClasses
 			return false;
 		}
 
-		public override GStruct448<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
+		public override GStruct454<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
 		{
 			ThrowItem(item, false, callback);
 			return true;
 		}
 
-		public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3750 error)
+		public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3839 error)
 		{
 			error = null;
 			return true;
@@ -114,7 +115,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			return null;
 		}
 
-		public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface400 operation, Callback callback)
+		public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface411 operation, Callback callback)
 		{
 			if (!succeed)
 			{
@@ -130,9 +131,9 @@ namespace Fika.Core.Coop.ObservedClasses
 			coopPlayer.StatisticsManager.OnGrabLoot(item);
 		}
 
-		private void HandleInProcess(Item item, ItemAddress to, GInterface400 operation, Callback callback)
+		private void HandleInProcess(Item item, ItemAddress to, GInterface411 operation, Callback callback)
 		{
-			Player.Class1212 handler = new()
+			Player.Class1234 handler = new()
 			{
 				player_0 = coopPlayer,
 				callback = callback
@@ -171,7 +172,12 @@ namespace Fika.Core.Coop.ObservedClasses
 			mongoID_0 = newId;
 		}
 
-		public GStruct443 CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+		/*public GStruct450<BaseInventoryOperationClass> CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+		{
+			
+		}*/
+
+		GStruct449 Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
 		{
 			method_13(descriptor);
 			return descriptor.ToInventoryOperation(coopPlayer);

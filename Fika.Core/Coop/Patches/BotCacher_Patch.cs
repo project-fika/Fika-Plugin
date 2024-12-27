@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Patches
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass583).GetMethod(nameof(GClass583.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+			return typeof(GClass595).GetMethod(nameof(GClass595.LoadInternal), BindingFlags.Static | BindingFlags.Public);
 		}
 
 		[PatchPrefix]
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
 			}
 			else
 			{
-				string text = GClass583.LoadCoreByString();
+				string text = GClass595.LoadCoreByString();
 				if (text == null)
 				{
 					core = null;
@@ -39,19 +39,19 @@ namespace Fika.Core.Coop.Patches
 					botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
 					if (botSettingsComponents != null)
 					{
-						if (!GClass583.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+						if (!GClass595.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 						{
-							GClass583.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+							GClass595.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 						}
 					}
 					else
 					{
-						botSettingsComponents = GClass583.smethod_1(GClass583.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
+						botSettingsComponents = GClass595.smethod_1(GClass595.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
 						if (botSettingsComponents != null)
 						{
-							if (!GClass583.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+							if (!GClass595.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
 							{
-								GClass583.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+								GClass595.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
 							}
 						}
 						else

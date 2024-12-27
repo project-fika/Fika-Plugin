@@ -27,11 +27,11 @@ namespace Fika.Core.Coop.Patches
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_46));
+			return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_44));
 		}
 
 		[PatchPrefix]
-		public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3563 timeHasComeScreenController,
+		public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
 			RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents,
 			MetricsConfigClass metricsConfig, GameWorld gameWorld)
 		{
@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.Patches
 			return false;
 		}
 
-		public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3563 timeHasComeScreenController,
+		public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
 			RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
 			GameWorld gameWorld)
 		{
@@ -99,7 +99,7 @@ namespace Fika.Core.Coop.Patches
 				timeVariant = raidSettings.SelectedDateTime,
 				mode = ELocalMode.PVE_OFFLINE,
 				playerSide = raidSettings.Side,
-				isLocationTransition = FikaBackendUtils.TransitData.visitedLocations.Length > 0
+				transitionType = FikaBackendUtils.TransitData.visitedLocations.Length > 0 ? ELocationTransition.Common : ELocationTransition.None
 			};
 			Traverse applicationTraverse = Traverse.Create(instance);
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
@@ -109,7 +109,7 @@ namespace Fika.Core.Coop.Patches
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
 			applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = FikaBackendUtils.TransitData;
 
-			GClass1307 profileInsurance = localSettings.profileInsurance;
+			GClass1320 profileInsurance = localSettings.profileInsurance;
 			if ((profileInsurance?.insuredItems) != null)
 			{
 				profile.InsuredItems = localSettings.profileInsurance.insuredItems;
@@ -140,13 +140,13 @@ namespace Fika.Core.Coop.Patches
 
 			StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation);
 
-			TimeSpan raidLimits = instance.method_47(raidSettings.SelectedLocation.EscapeTimeLimit);
+			TimeSpan raidLimits = instance.method_45(raidSettings.SelectedLocation.EscapeTimeLimit);
 
 			CoopGame coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
 				MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
 				timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
 				fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-				new GClass2385(metricsConfig, instance), localRaidSettings, raidSettings);
+				new GClass2433(metricsConfig, instance), localRaidSettings, raidSettings);
 
 			Singleton<AbstractGame>.Create(coopGame);
 			metricsEvents.SetGameCreated();
@@ -189,7 +189,7 @@ namespace Fika.Core.Coop.Patches
 
 			public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
 			{
-				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result);
+				tarkovApplication.method_47(pmcProfile.Id, scavProfile, location, result);
 			}
 		}
 

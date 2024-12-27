@@ -660,7 +660,7 @@ namespace Fika.Core.Networking
 					MagazineItemClass magazine = null;
 					try
 					{
-						GStruct448<Item> result = player.FindItemById(MagId);
+						GStruct454<Item> result = player.FindItemById(MagId);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -686,10 +686,10 @@ namespace Fika.Core.Networking
 					{
 						try
 						{
-							GClass1193 reader = new(LocationDescription);
+							GClass1207 reader = new(LocationDescription);
 							if (LocationDescription.Length != 0)
 							{
-								GClass1687 descriptor = reader.ReadPolymorph<GClass1687>();
+								GClass1714 descriptor = reader.ReadPolymorph<GClass1714>();
 								gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
 							}
 						}
@@ -740,7 +740,7 @@ namespace Fika.Core.Networking
 				{
 					try
 					{
-						GStruct448<Item> result = player.FindItemById(MagId);
+						GStruct454<Item> result = player.FindItemById(MagId);
 						if (!result.Succeeded)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -967,12 +967,12 @@ namespace Fika.Core.Networking
 					AmmoPackReloadingClass ammoPack = new(ammo);
 					ItemAddress gridItemAddress = null;
 
-					GClass1193 reader = new(LocationDescription);
+					GClass1207 reader = new(LocationDescription);
 					try
 					{
 						if (LocationDescription.Length > 0)
 						{
-							GClass1687 descriptor = reader.ReadPolymorph<GClass1687>();
+							GClass1714 descriptor = reader.ReadPolymorph<GClass1714>();
 							gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
 						}
 					}

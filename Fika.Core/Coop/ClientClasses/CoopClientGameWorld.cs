@@ -30,12 +30,12 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override GrenadeFactoryClass CreateGrenadeFactory()
 		{
-			return new GClass738();
+			return new GClass746();
 		}
 
 		public override void PlayerTick(float dt)
 		{
-			method_10(Class994.class994_0.method_5);
+			method_10(smethod_2);
 		}
 
 		public override void vmethod_1(float dt)
@@ -48,7 +48,7 @@ namespace Fika.Core.Coop.ClientClasses
 			// Do nothing
 		}
 
-		public override GClass2400 SyncObjectProcessorFactory()
+		public override GClass2448 SyncObjectProcessorFactory()
 		{
 			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
 			{

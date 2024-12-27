@@ -22,6 +22,7 @@ using UnityEngine;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.UI.FikaUIGlobals;
+using static LActionState;
 
 namespace Fika.Core.Coop.Players
 {
@@ -75,24 +76,24 @@ namespace Fika.Core.Coop.Players
 
 			await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
 				new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
-				new ObservedStatisticsManager(), null, null, filter,
+				new ObservedStatisticsManager(), null, null, null, filter,
 				EVoipState.NotAvailable, aiControl, false);
 
 			player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
 			player._handsController.Spawn(1f, delegate { });
 
-			player.AIData = new GClass551(null, player)
+			player.AIData = new GClass563(null, player)
 			{
 				IsAI = true
 			};
 
 			Traverse botTraverse = Traverse.Create(player);
-			botTraverse.Field<GClass886>("gclass886_0").Value = new();
-			botTraverse.Field<GClass886>("gclass886_0").Value.Initialize(player, player.PlayerBones);
+			botTraverse.Field<GClass893>("gclass893_0").Value = new();
+			botTraverse.Field<GClass893>("gclass893_0").Value.Initialize(player, player.PlayerBones);
 
 			if (FikaBackendUtils.IsDedicated)
 			{
-				botTraverse.Field<GClass886>("gclass886_0").Value.SetMode(GClass885.EMode.Disabled);
+				botTraverse.Field<GClass893>("gclass893_0").Value.SetMode(GClass892.EMode.Disabled);
 			}
 
 			player.AggressorFound = false;
@@ -206,7 +207,7 @@ namespace Fika.Core.Coop.Players
 			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct209, float> armorDamage, DamageInfoStruct damageInfo)
+		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct214, float> armorDamage, DamageInfoStruct damageInfo)
 		{
 			_preAllocatedArmorComponents.Clear();
 			Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
@@ -214,7 +215,7 @@ namespace Fika.Core.Coop.Players
 			foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
 			{
 				float num = 0f;
-				foreach (KeyValuePair<GStruct209, float> keyValuePair in armorDamage)
+				foreach (KeyValuePair<GStruct214, float> keyValuePair in armorDamage)
 				{
 					if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
 					{
@@ -225,7 +226,7 @@ namespace Fika.Core.Coop.Players
 				if (num > 0f)
 				{
 					num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
-					method_99(num, armorComponent);
+					method_92(num, armorComponent);
 				}
 			}
 

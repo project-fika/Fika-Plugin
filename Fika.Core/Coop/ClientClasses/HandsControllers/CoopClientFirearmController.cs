@@ -8,6 +8,7 @@ using Fika.Core.Coop.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static EFT.ClientFirearmController;
 using static Fika.Core.Networking.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -42,8 +43,8 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(GClass1752)] = new OperationFactoryDelegate(Weapon1);
-			operationFactoryDelegates[typeof(GClass1753)] = new OperationFactoryDelegate(Weapon2);
+			operationFactoryDelegates[typeof(GClass1779)] = new OperationFactoryDelegate(Weapon1);
+			operationFactoryDelegates[typeof(GClass1780)] = new OperationFactoryDelegate(Weapon2);
 			operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
 			return operationFactoryDelegates;
 		}
@@ -79,6 +80,10 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public Player.BaseAnimationOperation Weapon1()
 		{
+			if (Item.ReloadMode is Weapon.EReloadMode.InternalMagazine && Item.Chambers.Length == 0)
+			{
+				return new FirearmClass2(this);
+			}
 			if (Item.MustBoltBeOpennedForInternalReload)
 			{
 				return new FirearmClass3(this);
@@ -497,9 +502,9 @@ namespace Fika.Core.Coop.ClientClasses
 			base.ShotMisfired(ammo, malfunctionState, overheat);
 		}
 
-		public override bool ToggleLauncher()
+		public override bool ToggleLauncher(Action callback = null)
 		{
-			bool flag = base.ToggleLauncher();
+			bool flag = base.ToggleLauncher(callback);
 			if (flag)
 			{
 				player.PacketSender.FirearmPackets.Enqueue(new()
@@ -630,7 +635,7 @@ namespace Fika.Core.Coop.ClientClasses
 			});
 		}
 
-		private class FirearmClass1(Player.FirearmController controller) : GClass1753(controller)
+		private class FirearmClass1(Player.FirearmController controller) : GClass1780(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -652,7 +657,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass2(Player.FirearmController controller) : GClass1754(controller)
+		private class FirearmClass2(Player.FirearmController controller) : GClass1781(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -673,7 +678,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass3(Player.FirearmController controller) : GClass1755(controller)
+		private class FirearmClass3(Player.FirearmController controller) : GClass1782(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -695,7 +700,7 @@ namespace Fika.Core.Coop.ClientClasses
 		}
 
 		// Check for GClass increments
-		private class FirearmClass4(Player.FirearmController controller) : GClass1766(controller)
+		private class FirearmClass4(Player.FirearmController controller) : GClass1793(controller)
 		{
 			public override void Start()
 			{
@@ -761,8 +766,8 @@ namespace Fika.Core.Coop.ClientClasses
 			public void Process(IResult result)
 			{
 				ItemAddress itemAddress = gridItemAddress;
-				GClass1687 descriptor = itemAddress?.ToDescriptor();
-				GClass1198 writer = new();
+				GClass1714 descriptor = itemAddress?.ToDescriptor();
+				GClass1211 writer = new();
 
 				byte[] locationDescription;
 				if (descriptor != null)
@@ -830,8 +835,8 @@ namespace Fika.Core.Coop.ClientClasses
 			public void Process(IResult result)
 			{
 				ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
-				GClass1687 descriptor = itemAddress?.ToDescriptor();
-				GClass1198 writer = new();
+				GClass1714 descriptor = itemAddress?.ToDescriptor();
+				GClass1211 writer = new();
 				string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
 				byte[] locationDescription;

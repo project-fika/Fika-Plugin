@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.Utils
 		{
 			get
 			{
-				return GClass1971.Instance;
+				return GClass2000.Instance;
 			}
 		}
 
@@ -199,6 +199,21 @@ namespace Fika.Core.Coop.Utils
 			}
 
 			return session.ProfileOfPet;
+		}
+
+		/// <summary>
+		/// Gets the states from a <see cref="TacticalComboVisualController"/>
+		/// </summary>
+		/// <param name="controller"></param>
+		/// <returns><see cref="FirearmLightStateStruct"/></returns>
+		public static FirearmLightStateStruct GetFirearmLightStates(TacticalComboVisualController controller)
+		{
+			return controller.LightMod.GetLightState(false, false);
+		}
+
+		public static bool IsMineClose(MineDirectional mine, Vector3 minePosition)
+		{
+			return Vector3.Distance(mine.transform.position, minePosition) < Mathf.Epsilon;
 		}
 	}
 }

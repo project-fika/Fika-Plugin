@@ -219,7 +219,7 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			foreach (GStruct129 ragdollPacket in packet.RagdollPackets)
+			foreach (GStruct132 ragdollPacket in packet.RagdollPackets)
 			{
 				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse))
 				{
@@ -229,13 +229,13 @@ namespace Fika.Core.Networking
 
 			if (packet.ArtilleryPackets.Count > 0)
 			{
-				List<GStruct130> packets = packet.ArtilleryPackets;
+				List<GStruct133> packets = packet.ArtilleryPackets;
 				gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
 			}
 
-			foreach (GStruct131 throwablePacket in packet.ThrowablePackets)
+			foreach (GStruct134 throwablePacket in packet.ThrowablePackets)
 			{
-				GClass786<int, Throwable> grenades = gameWorld.Grenades;
+				GClass794<int, Throwable> grenades = gameWorld.Grenades;
 				if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
 				{
 					throwable.ApplyNetPacket(throwablePacket);
@@ -257,7 +257,7 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			GStruct448<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+			GStruct454<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
 			if (gstruct2.Failed)
 			{
 				logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
@@ -398,7 +398,7 @@ namespace Fika.Core.Networking
 			TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
 			if (transitController != null)
 			{
-				transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps);
+				transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps, false);
 				return;
 			}
 
@@ -488,7 +488,7 @@ namespace Fika.Core.Networking
 			{
 				if (!packet.Success)
 				{
-					NotificationManagerClass.DisplayNotification(new GClass2269("AirplaneDelayMessage".Localized(null),
+					NotificationManagerClass.DisplayNotification(new GClass2307("AirplaneDelayMessage".Localized(null),
 								ENotificationDurationType.Default, ENotificationIconType.Default, null));
 				}
 			}
@@ -504,7 +504,7 @@ namespace Fika.Core.Networking
 
 			if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
 			{
-				playerToApply.method_145(packet.Services);
+				playerToApply.method_160(packet.Services);
 			}
 		}
 
@@ -530,7 +530,7 @@ namespace Fika.Core.Networking
 
 		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet)
 		{
-			GClass2400 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+			GClass2448 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
 			if (processor == null)
 			{
 				return;
@@ -631,9 +631,9 @@ namespace Fika.Core.Networking
 #endif
 								string localizedString = LocaleUtils.UI_SYNC_INTERACTABLES.Localized();
 								WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
-								Dictionary<int, WorldInteractiveObject.GStruct415> netIdDictionary = [];
+								Dictionary<int, WorldInteractiveObject.GStruct421> netIdDictionary = [];
 								{
-									foreach (WorldInteractiveObject.GStruct415 data in packet.InteractivesData)
+									foreach (WorldInteractiveObject.GStruct421 data in packet.InteractivesData)
 									{
 										netIdDictionary.Add(data.NetId, data);
 									}
@@ -643,7 +643,7 @@ namespace Fika.Core.Networking
 								float progress = 0f;
 								foreach (WorldInteractiveObject item in worldInteractiveObjects)
 								{
-									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct415 value))
+									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct421 value))
 									{
 										progress++;
 										coopGame.SetMatchmakerStatus(localizedString, progress / total);
@@ -741,9 +741,9 @@ namespace Fika.Core.Networking
 		{
 			if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
 			{
-				GClass1193 eftReader = new(packet.Data);
-				GClass1684 lootData = eftReader.ReadEFTLootDataDescriptor();
-				GClass1315 lootItems = GClass1685.DeserializeLootData(lootData);
+				GClass1207 eftReader = new(packet.Data);
+				GClass1711 lootData = eftReader.ReadEFTLootDataDescriptor();
+				GClass1328 lootItems = GClass1712.DeserializeLootData(lootData);
 				if (lootItems.Count < 1)
 				{
 					throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
@@ -949,7 +949,7 @@ namespace Fika.Core.Networking
 
 		private void OnMinePacketReceived(MinePacket packet)
 		{
-			NetworkGame<EftGamePlayerOwner>.Class1513 mineSeeker = new()
+			NetworkGame<EftGamePlayerOwner>.Class1533 mineSeeker = new()
 			{
 				minePosition = packet.MinePositon
 			};
@@ -1165,7 +1165,7 @@ namespace Fika.Core.Networking
 
 				if (MyPlayer.HandsController != null)
 				{
-					requestPacket.PlayerInfoPacket.ControllerType = GClass1808.FromController(MyPlayer.HandsController);
+					requestPacket.PlayerInfoPacket.ControllerType = GClass1836.FromController(MyPlayer.HandsController);
 					requestPacket.PlayerInfoPacket.ItemId = MyPlayer.HandsController.Item.Id;
 					requestPacket.PlayerInfoPacket.IsStationary = MyPlayer.MovementContext.IsStationaryWeaponInHands;
 				}

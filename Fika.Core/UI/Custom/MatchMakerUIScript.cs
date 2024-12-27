@@ -250,7 +250,7 @@ namespace Fika.Core.UI.Custom
 						{
 							Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_FORCE_IP_HEADER.Localized(),
 								string.Format(LocaleUtils.UI_ERROR_FORCE_IP.Localized(), ip),
-								ErrorScreen.EButtonType.OkButton, 10f, null, null);
+								ErrorScreen.EButtonType.OkButton, 10f);
 
 							ToggleLoading(false);
 							return;
@@ -263,7 +263,7 @@ namespace Fika.Core.UI.Custom
 						{
 							Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_BIND_IP_HEADER.Localized(),
 								string.Format(LocaleUtils.UI_ERROR_BIND_IP.Localized(), FikaPlugin.ForceBindIP.Value),
-								ErrorScreen.EButtonType.OkButton, 10f, null, null);
+								ErrorScreen.EButtonType.OkButton, 10f);
 
 							ToggleLoading(false);
 							return;
@@ -423,7 +423,7 @@ namespace Fika.Core.UI.Custom
 					Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
 					LocaleUtils.UI_ERROR_CONNECTING.Localized(),
 					LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
-					ErrorScreen.EButtonType.OkButton, 10f, null, null);
+					ErrorScreen.EButtonType.OkButton, 10f);
 
 					string logError = "Unable to connect to the session!";
 					if (rejected)
@@ -445,7 +445,7 @@ namespace Fika.Core.UI.Custom
 				Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
 					LocaleUtils.UI_ERROR_CONNECTING.Localized(),
 					LocaleUtils.UI_PINGER_START_FAIL.Localized(),
-					ErrorScreen.EButtonType.OkButton, 10f, null, null);
+					ErrorScreen.EButtonType.OkButton, 10f);
 				callback.Invoke(false);
 				yield break;
 			}
@@ -474,7 +474,7 @@ namespace Fika.Core.UI.Custom
 				NetManagerUtils.DestroyPingingClient();
 
 				Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage,
-					ErrorScreen.EButtonType.OkButton, 15, null, null);
+					ErrorScreen.EButtonType.OkButton, 15);
 
 				callback?.Invoke(false);
 			}

@@ -114,11 +114,11 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="GStruct36"/> (Physical) struct
+		/// Serializes a <see cref="GStruct37"/> (Physical) struct
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="physical"></param>
-		public static void Put(this NetDataWriter writer, GStruct36 physical)
+		public static void Put(this NetDataWriter writer, GStruct37 physical)
 		{
 			writer.Put(physical.StaminaExhausted);
 			writer.Put(physical.OxygenExhausted);
@@ -126,13 +126,13 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Deserializes a <see cref="GStruct36"/> (Physical) struct
+		/// Deserializes a <see cref="GStruct37"/> (Physical) struct
 		/// </summary>
 		/// <param name="reader"></param>
-		/// <returns>A <see cref="GStruct36"/> (Physical)</returns>
-		public static GStruct36 GetPhysical(this NetDataReader reader)
+		/// <returns>A <see cref="GStruct37"/> (Physical)</returns>
+		public static GStruct37 GetPhysical(this NetDataReader reader)
 		{
-			return new GStruct36() { StaminaExhausted = reader.GetBool(), OxygenExhausted = reader.GetBool(), HandsExhausted = reader.GetBool() };
+			return new GStruct37() { StaminaExhausted = reader.GetBool(), OxygenExhausted = reader.GetBool(), HandsExhausted = reader.GetBool() };
 		}
 
 		/// <summary>
@@ -193,8 +193,8 @@ namespace Fika.Core.Networking
 		/// <param name="item">The <see cref="Item"/> to serialize</param>
 		public static void PutItem(this NetDataWriter writer, Item item)
 		{
-			GClass1198 eftWriter = new();
-			GClass1659 descriptor = GClass1685.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
+			GClass1211 eftWriter = new();
+			GClass1686 descriptor = GClass1712.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
 			eftWriter.WriteEFTItemDescriptor(descriptor);
 			writer.PutByteArray(eftWriter.ToArray());
 		}
@@ -206,8 +206,8 @@ namespace Fika.Core.Networking
 		/// <returns>An <see cref="Item"/> (cast to type inside packet)</returns>
 		public static Item GetItem(this NetDataReader reader)
 		{
-			GClass1193 eftReader = new(reader.GetByteArray());
-			return GClass1685.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+			GClass1207 eftReader = new(reader.GetByteArray());
+			return GClass1712.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 		}
 
 		/// <summary>
@@ -217,37 +217,37 @@ namespace Fika.Core.Networking
 		/// <returns>An <see cref="Inventory"/></returns>
 		public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
 		{
-			GClass1193 eftReader = new(reader.GetByteArray());
-			return new GClass1651()
+			GClass1207 eftReader = new(reader.GetByteArray());
+			return new GClass1678()
 			{
 				Equipment = eftReader.ReadEFTItemDescriptor()
 			}.ToInventory();
 		}
 
-		public static void PutItemDescriptor(this NetDataWriter writer, GClass1659 descriptor)
+		public static void PutItemDescriptor(this NetDataWriter writer, GClass1686 descriptor)
 		{
-			GClass1198 eftWriter = new();
+			GClass1211 eftWriter = new();
 			eftWriter.WriteEFTItemDescriptor(descriptor);
 			writer.PutByteArray(eftWriter.ToArray());
 		}
 
-		public static GClass1659 GetItemDescriptor(this NetDataReader reader)
+		public static GClass1686 GetItemDescriptor(this NetDataReader reader)
 		{
-			GClass1193 eftReader = new(reader.GetByteArray());
+			GClass1207 eftReader = new(reader.GetByteArray());
 			return eftReader.ReadEFTItemDescriptor();
 		}
 
 		public static Item GetAirdropItem(this NetDataReader reader)
 		{
-			GClass1193 eftReader = new(reader.GetByteArray());
-			Item item = GClass1685.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+			GClass1207 eftReader = new(reader.GetByteArray());
+			Item item = GClass1712.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
-			GClass1315 enumerable = [new LootItemPositionClass()];
+			GClass1328 enumerable = [new LootItemPositionClass()];
 			enumerable[0].Item = item;
 			Item[] array = enumerable.Select(FikaGlobals.GetLootItemPositionItem).ToArray();
-			ResourceKey[] resourceKeys = array.OfType<GClass2981>().GetAllItemsFromCollections()
-				.Concat(array.Where(AirdropSynchronizableObject.Class1967.class1967_0.method_1))
-				.SelectMany(AirdropSynchronizableObject.Class1967.class1967_0.method_2)
+			ResourceKey[] resourceKeys = array.OfType<GClass3043>().GetAllItemsFromCollections()
+				.Concat(array.Where(AirdropSynchronizableObject.Class2014.class2014_0.method_1))
+				.SelectMany(AirdropSynchronizableObject.Class2014.class2014_0.method_2)
 				.ToArray();
 			Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online,
 				resourceKeys, JobPriority.Immediate, null, default).HandleExceptions();
@@ -256,14 +256,14 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="List{T}"/> of <see cref="GStruct35"/>
+		/// Serializes a <see cref="List{T}"/> of <see cref="GStruct36"/>
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="throwables"></param>
-		public static void PutThrowableData(this NetDataWriter writer, List<GStruct35> throwables)
+		public static void PutThrowableData(this NetDataWriter writer, List<GStruct36> throwables)
 		{
 			writer.Put(throwables.Count);
-			foreach (GStruct35 data in throwables)
+			foreach (GStruct36 data in throwables)
 			{
 				writer.Put(data.Id);
 				writer.Put(data.Position);
@@ -281,7 +281,7 @@ namespace Fika.Core.Networking
 		/// <param name="profile"></param>
 		public static void PutProfile(this NetDataWriter writer, Profile profile)
 		{
-			GClass1198 eftWriter = new();
+			GClass1211 eftWriter = new();
 			eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
 			writer.PutByteArray(eftWriter.ToArray());
 		}
@@ -293,22 +293,22 @@ namespace Fika.Core.Networking
 		/// <returns>A <see cref="Profile"/></returns>
 		public static Profile GetProfile(this NetDataReader reader)
 		{
-			GClass1193 eftReader = new(reader.GetByteArray());
+			GClass1207 eftReader = new(reader.GetByteArray());
 			return new(eftReader.ReadEFTProfileDescriptor());
 		}
 
 		/// <summary>
-		/// Deserializes a <see cref="List{T}"/> of <see cref="GStruct35"/>
+		/// Deserializes a <see cref="List{T}"/> of <see cref="GStruct36"/>
 		/// </summary>
 		/// <param name="reader"></param>
-		/// <returns>A <see cref="List{T}"/> of <see cref="GStruct35"/></returns>
-		public static List<GStruct35> GetThrowableData(this NetDataReader reader)
+		/// <returns>A <see cref="List{T}"/> of <see cref="GStruct36"/></returns>
+		public static List<GStruct36> GetThrowableData(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
-			List<GStruct35> throwables = new(amount);
+			List<GStruct36> throwables = new(amount);
 			for (int i = 0; i < amount; i++)
 			{
-				GStruct35 data = new()
+				GStruct36 data = new()
 				{
 					Id = reader.GetString(),
 					Position = reader.GetVector3(),
@@ -324,11 +324,11 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="List{WorldInteractiveObject.GStruct415}"/> of <see cref="WorldInteractiveObject"/> data
+		/// Serializes a <see cref="List{WorldInteractiveObject.GStruct421}"/> of <see cref="WorldInteractiveObject"/> data
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="interactiveObjectsData"></param>
-		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct415> interactiveObjectsData)
+		public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.GStruct421> interactiveObjectsData)
 		{
 			writer.Put(interactiveObjectsData.Count);
 			for (int i = 0; i < interactiveObjectsData.Count; i++)
@@ -340,17 +340,17 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Deserializes a <see cref="List{WorldInteractiveObject.GStruct415}"/> of <see cref="WorldInteractiveObject"/> data
+		/// Deserializes a <see cref="List{WorldInteractiveObject.GStruct421}"/> of <see cref="WorldInteractiveObject"/> data
 		/// </summary>
 		/// <param name="reader"></param>
-		/// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.GStruct415"/></returns>
-		public static List<WorldInteractiveObject.GStruct415> GetInteractivesStates(this NetDataReader reader)
+		/// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.GStruct421"/></returns>
+		public static List<WorldInteractiveObject.GStruct421> GetInteractivesStates(this NetDataReader reader)
 		{
 			int amount = reader.GetInt();
-			List<WorldInteractiveObject.GStruct415> interactivesStates = new(amount);
+			List<WorldInteractiveObject.GStruct421> interactivesStates = new(amount);
 			for (int i = 0; i < amount; i++)
 			{
-				WorldInteractiveObject.GStruct415 data = new()
+				WorldInteractiveObject.GStruct421 data = new()
 				{
 					NetId = reader.GetInt(),
 					State = reader.GetByte(),
@@ -557,7 +557,7 @@ namespace Fika.Core.Networking
 			// Stamina Coeff
 			writer.Write(standard);
 
-			foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass1940> bodyPart in health.BodyParts)
+			foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass1968> bodyPart in health.BodyParts)
 			{
 				Profile.ProfileHealthClass.ValueInfo bodyPartInfo = bodyPart.Value.Health;
 				writer.Write(bodyPartInfo.Current <= bodyPartInfo.Minimum);
@@ -587,11 +587,11 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="GStruct130"/>
+		/// Serializes a <see cref="GStruct133"/>
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="artilleryStruct"></param>
-		public static void PutArtilleryStruct(this NetDataWriter writer, GStruct130 artilleryStruct)
+		public static void PutArtilleryStruct(this NetDataWriter writer, GStruct133 artilleryStruct)
 		{
 			writer.Put(artilleryStruct.id);
 			writer.Put(artilleryStruct.position);
@@ -599,11 +599,11 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Deserializes a <see cref="GStruct130"/>
+		/// Deserializes a <see cref="GStruct133"/>
 		/// </summary>
 		/// <param name="reader"></param>
-		/// <returns>A <see cref="GStruct130"/> with data</returns>
-		public static GStruct130 GetArtilleryStruct(this NetDataReader reader)
+		/// <returns>A <see cref="GStruct133"/> with data</returns>
+		public static GStruct133 GetArtilleryStruct(this NetDataReader reader)
 		{
 			return new()
 			{
@@ -614,11 +614,11 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Serializes a <see cref="GStruct131"/>
+		/// Serializes a <see cref="GStruct134"/>
 		/// </summary>
 		/// <param name="writer"></param>
 		/// <param name="grenadeStruct"></param>
-		public static void PutGrenadeStruct(this NetDataWriter writer, GStruct131 grenadeStruct)
+		public static void PutGrenadeStruct(this NetDataWriter writer, GStruct134 grenadeStruct)
 		{
 			writer.Put(grenadeStruct.Id);
 			writer.Put(grenadeStruct.Position);
@@ -633,13 +633,13 @@ namespace Fika.Core.Networking
 		}
 
 		/// <summary>
-		/// Deserializes a <see cref="GStruct131"/>
+		/// Deserializes a <see cref="GStruct134"/>
 		/// </summary>
 		/// <param name="reader"></param>
-		/// <returns>A <see cref="GStruct131"/> with data</returns>
-		public static GStruct131 GetGrenadeStruct(this NetDataReader reader)
+		/// <returns>A <see cref="GStruct134"/> with data</returns>
+		public static GStruct134 GetGrenadeStruct(this NetDataReader reader)
 		{
-			GStruct131 grenadeStruct = new()
+			GStruct134 grenadeStruct = new()
 			{
 				Id = reader.GetInt(),
 				Position = reader.GetVector3(),
@@ -839,7 +839,7 @@ namespace Fika.Core.Networking
 			};
 		}
 
-		public static void PutRagdollStruct(this NetDataWriter writer, GStruct129 packet)
+		public static void PutRagdollStruct(this NetDataWriter writer, GStruct132 packet)
 		{
 			writer.Put(packet.Id);
 			writer.Put(packet.Position);
@@ -847,7 +847,7 @@ namespace Fika.Core.Networking
 
 			if (packet.Done && packet.TransformSyncs != null)
 			{
-				GStruct107[] transforms = packet.TransformSyncs;
+				GStruct109[] transforms = packet.TransformSyncs;
 				for (int i = 0; i < 12; i++)
 				{
 					writer.Put(transforms[i].Position);
@@ -856,9 +856,9 @@ namespace Fika.Core.Networking
 			}
 		}
 
-		public static GStruct129 GetRagdollStruct(this NetDataReader reader)
+		public static GStruct132 GetRagdollStruct(this NetDataReader reader)
 		{
-			GStruct129 packet = new()
+			GStruct132 packet = new()
 			{
 				Id = reader.GetInt(),
 				Position = reader.GetVector3(),
@@ -867,7 +867,7 @@ namespace Fika.Core.Networking
 
 			if (packet.Done)
 			{
-				packet.TransformSyncs = new GStruct107[12];
+				packet.TransformSyncs = new GStruct109[12];
 				for (int i = 0; i < 12; i++)
 				{
 					packet.TransformSyncs[i] = new()

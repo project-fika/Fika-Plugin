@@ -13,21 +13,21 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Patches
 {
-	public class GClass607_method_0_Patch : ModulePatch
+	public class GClass619_method_0_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass607).GetMethod(nameof(GClass607.method_0));
+			return typeof(GClass619).GetMethod(nameof(GClass619.method_0));
 		}
 
 		[PatchPrefix]
-		public static bool Prefix(GClass607 __instance, ref Task __result, CancellationToken cancellationToken)
+		public static bool Prefix(GClass619 __instance, ref Task __result, CancellationToken cancellationToken)
 		{
 			__result = SetupServerArtilleryController(cancellationToken, __instance);
 			return false;
 		}
 
-		private static async Task SetupServerArtilleryController(CancellationToken token, GClass607 instance)
+		private static async Task SetupServerArtilleryController(CancellationToken token, GClass619 instance)
 		{
 			Traverse controllerTraverse = Traverse.Create(instance);
 			GameWorld gameWorld = Singleton<GameWorld>.Instance;
