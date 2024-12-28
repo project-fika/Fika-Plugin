@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3563 timeHasComeScreenController,
 			RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents,
-			MetricsConfigClass metricsConfig, GameWorld gameWorld)
+			MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuController ___mainMenuController, CompositeDisposableClass ___compositeDisposableClass, BundleLock ___BundleLock)
 		{
 #if DEBUG
 			Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
@@ -41,13 +41,13 @@ namespace Fika.Core.Coop.Patches
 #endif
 			__result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings,
 				____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl,
-				metricsEvents, metricsConfig, gameWorld);
+				metricsEvents, metricsConfig, gameWorld, ___mainMenuController, ___compositeDisposableClass, ___BundleLock);
 			return false;
 		}
 
 		public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.GClass3563 timeHasComeScreenController,
 			RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
-			GameWorld gameWorld)
+			GameWorld gameWorld, MainMenuController ___mainMenuController, CompositeDisposableClass compositeDisposableClass, BundleLock bundleLock)
 		{
 			bool isServer = FikaBackendUtils.IsServer;
 			bool isTransit = FikaBackendUtils.IsTransit;
@@ -148,12 +148,15 @@ namespace Fika.Core.Coop.Patches
 				fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
 				new GClass2385(metricsConfig, instance), localRaidSettings, raidSettings);
 
+			startHandler.CoopGame = coopGame;
+
 			Singleton<AbstractGame>.Create(coopGame);
+			compositeDisposableClass.AddDisposable(coopGame);
+			compositeDisposableClass.AddDisposable(startHandler.ReleaseSingleton);
 			metricsEvents.SetGameCreated();
 			FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
 
 			ScreenUpdater updater = new(instance.MatchmakerPlayerControllerClass, coopGame);
-
 			if (!isServer)
 			{
 				coopGame.SetMatchmakerStatus("Coop game joined");
@@ -167,11 +170,10 @@ namespace Fika.Core.Coop.Patches
 			using (CounterCreatorAbstractClass.StartWithToken("LoadingScreen.LoadComplete"))
 			{
 				GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
-				MainMenuController mmc = Traverse.Create(instance).Field<MainMenuController>("mainMenuController").Value;
-				mmc?.Unsubscribe();
+				___mainMenuController?.Unsubscribe();
 				gameWorld.OnGameStarted();
 				updater.Dispose();
-
+				
 				if (FikaBackendUtils.IsSpectator)
 				{
 					await HandleJoinAsSpectator();
@@ -186,10 +188,16 @@ namespace Fika.Core.Coop.Patches
 			private readonly Profile pmcProfile = pmcProfile;
 			private readonly Profile scavProfile = scavProfile;
 			private readonly LocationSettingsClass.Location location = location;
+			public CoopGame CoopGame;
 
 			public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
 			{
 				tarkovApplication.method_49(pmcProfile.Id, scavProfile, location, result);
+			}
+
+			public void ReleaseSingleton()
+			{
+				Singleton<AbstractGame>.Release(CoopGame);
 			}
 		}
 
