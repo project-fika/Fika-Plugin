@@ -37,7 +37,6 @@ namespace Fika.Core.Coop.Players
 				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			}
 		}
-		private bool firstEnabled;
 
 		public override bool IsVisible
 		{
@@ -282,12 +281,6 @@ namespace Fika.Core.Coop.Players
 
 		protected void OnEnable()
 		{
-			if (!firstEnabled)
-			{
-				firstEnabled = true;
-				return;
-			}
-
 			CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
 			if (coopGame != null && coopGame.Status == GameStatus.Started)
 			{
