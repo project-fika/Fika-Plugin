@@ -37,10 +37,6 @@ namespace Fika.Core.Coop.Players
 				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 			}
 		}
-		/// <summary>
-		/// The amount of players that have loaded this bot
-		/// </summary>
-		public int loadedPlayers = 0;
 		private bool firstEnabled;
 
 		public override bool IsVisible
