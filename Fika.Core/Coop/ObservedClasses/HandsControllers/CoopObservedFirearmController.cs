@@ -29,8 +29,8 @@ namespace Fika.Core.Coop.ObservedClasses
 		}
 
 		private CoopPlayer coopPlayer;
-		private bool triggerPressed = false;
-		private bool needsReset = false;
+		private bool triggerPressed;
+		private bool needsReset;
 		private float lastFireTime = 0f;
 		public override bool IsTriggerPressed
 		{
@@ -132,6 +132,11 @@ namespace Fika.Core.Coop.ObservedClasses
 			CoopObservedFirearmController controller = smethod_6<CoopObservedFirearmController>(player, weapon);
 			controller.coopPlayer = player;
 			return controller;
+		}
+
+		public override bool CanStartReload()
+		{
+			return true;
 		}
 
 		public override void ManualUpdate(float deltaTime)
