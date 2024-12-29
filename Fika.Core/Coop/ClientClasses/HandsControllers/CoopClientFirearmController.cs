@@ -311,33 +311,34 @@ namespace Fika.Core.Coop.ClientClasses
 
 		public override void QuickReloadMag(MagazineItemClass magazine, Callback callback)
 		{
-			if (!CanStartReload())
+			if (CanStartReload())
 			{
+				base.QuickReloadMag(magazine, callback);
+				player.PacketSender.FirearmPackets.Enqueue(new()
+				{
+					Type = EFirearmSubPacketType.QuickReloadMag,
+					SubPacket = new QuickReloadMagPacket()
+					{
+						Reload = true,
+						MagId = magazine.Id
+					}
+				});
 				return;
 			}
 
-			base.QuickReloadMag(magazine, callback);
-
-			player.PacketSender.FirearmPackets.Enqueue(new()
-			{
-				Type = EFirearmSubPacketType.QuickReloadMag,
-				SubPacket = new QuickReloadMagPacket()
-				{
-					Reload = true,
-					MagId = magazine.Id
-				}
-			});
+			callback?.Fail("Can't start QuickReloadMag");
 		}
 
 		public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
 		{
-			if (!CanStartReload() && ammoPack.AmmoCount < 1)
+			if (CanStartReload() && ammoPack.AmmoCount > 0)
 			{
+				ReloadBarrelsHandler handler = new(player, placeToPutContainedAmmoMagazine, ammoPack);
+				CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, handler.Process);
 				return;
 			}
 
-			ReloadBarrelsHandler handler = new(player, placeToPutContainedAmmoMagazine, ammoPack);
-			CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, handler.Process);
+			callback?.Fail("Can't start ReloadBarrels");
 		}
 
 		public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback callback, bool quickReload = false)
@@ -350,35 +351,38 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				return;
 			}
-			if (!CanStartReload())
+			if (CanStartReload())
 			{
+				ReloadCylinderMagazineHandler handler = new(player, this, quickReload, ammoPack.GetReloadingAmmoIds(),
+				[], (CylinderMagazineItemClass)Item.GetCurrentMagazine());
+				Weapon.GetShellsIndexes(handler.shellsIndexes);
+				CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.quickReload);
 				return;
 			}
 
-			ReloadCylinderMagazineHandler handler = new(player, this, quickReload, ammoPack.GetReloadingAmmoIds(), [], (CylinderMagazineItemClass)Item.GetCurrentMagazine());
-			Weapon.GetShellsIndexes(handler.shellsIndexes);
-			CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.quickReload);
+			callback?.Fail("Can't start ReloadCylinderMagazine");
 		}
 
 		public override void ReloadGrenadeLauncher(AmmoPackReloadingClass ammoPack, Callback callback)
 		{
-			if (!CanStartReload())
+			if (CanStartReload())
 			{
+				string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
+				player.PacketSender.FirearmPackets.Enqueue(new()
+				{
+					Type = EFirearmSubPacketType.ReloadLauncher,
+					SubPacket = new ReloadLauncherPacket()
+					{
+						Reload = true,
+						AmmoIds = reloadingAmmoIds
+					}
+				});
+
+				CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
 				return;
 			}
 
-			string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
-			player.PacketSender.FirearmPackets.Enqueue(new()
-			{
-				Type = EFirearmSubPacketType.ReloadLauncher,
-				SubPacket = new ReloadLauncherPacket()
-				{
-					Reload = true,
-					AmmoIds = reloadingAmmoIds
-				}
-			});
-
-			CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
+			callback?.Fail("Can't start ReloadGrenadeLauncher");
 		}
 
 		public override void ReloadMag(MagazineItemClass magazine, ItemAddress itemAddress, Callback callback)
@@ -405,13 +409,14 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				return;
 			}
-			if (!CanStartReload())
+			if (CanStartReload())
 			{
+				ReloadWithAmmoHandler handler = new(player, ammoPack.GetReloadingAmmoIds());
+				CurrentOperation.ReloadWithAmmo(ammoPack, callback, handler.Process);
 				return;
 			}
 
-			ReloadWithAmmoHandler handler = new(player, ammoPack.GetReloadingAmmoIds());
-			CurrentOperation.ReloadWithAmmo(ammoPack, callback, handler.Process);
+			callback?.Fail("Can't start ReloadWithAmmo");
 		}
 
 		public override bool SetLightsState(FirearmLightStateStruct[] lightsStates, bool force = false, bool animated = true)
