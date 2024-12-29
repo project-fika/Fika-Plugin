@@ -30,14 +30,6 @@ namespace Fika.Core.Coop.Players
 	/// </summary>
 	public class CoopBot : CoopPlayer
 	{
-		public CoopPlayer MainPlayer
-		{
-			get
-			{
-				return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-			}
-		}
-
 		public override bool IsVisible
 		{
 			get
