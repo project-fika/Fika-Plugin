@@ -388,8 +388,15 @@ namespace Fika.Core.Coop.ClientClasses
 				return;
 			}
 
-			ReloadMagHandler handler = new(player, itemAddress, magazine);
-			CurrentOperation.ReloadMag(magazine, itemAddress, callback, handler.Process);
+			_player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
+			if (!_player.MovementContext.PlayerAnimator.AnimatedInteractions.IsInteractionPlaying)
+			{
+				ReloadMagHandler handler = new(player, itemAddress, magazine);
+				CurrentOperation.ReloadMag(magazine, itemAddress, callback, handler.Process);
+				return;
+			}
+
+			callback?.Fail("Can't start ReloadMag");
 		}
 
 		public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
