@@ -1099,7 +1099,7 @@ namespace Fika.Core.Coop.GameMode
 				gameWorld.BtrController = new BTRControllerClass(gameWorld);
 			}
 
-			bool transitActive;
+			/*bool transitActive;
 			if (instance == null)
 			{
 				transitActive = false;
@@ -1119,7 +1119,10 @@ namespace Fika.Core.Coop.GameMode
 			{
 				Logger.LogInfo("Transits are disabled");
 				TransitControllerAbstractClass.DisableTransitPoints();
-			}
+			}*/
+
+			Logger.LogInfo("Transits are disabled");
+			TransitControllerAbstractClass.DisableTransitPoints();
 
 			ApplicationConfigClass config = BackendConfigAbstractClass.Config;
 			if (config.FixedFrameRate > 0f)
