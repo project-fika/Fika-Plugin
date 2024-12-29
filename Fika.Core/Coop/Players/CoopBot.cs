@@ -22,7 +22,6 @@ using UnityEngine;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.UI.FikaUIGlobals;
-using static LActionState;
 
 namespace Fika.Core.Coop.Players
 {
@@ -48,7 +47,7 @@ namespace Fika.Core.Coop.Players
 		{
 			get
 			{
-				return FikaBackendUtils.IsDedicated ? true : OnScreen;
+				return FikaBackendUtils.IsDedicated || OnScreen;
 			}
 			set
 			{
