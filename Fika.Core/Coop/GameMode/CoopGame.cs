@@ -1444,11 +1444,12 @@ namespace Fika.Core.Coop.GameMode
 			FikaClient client = Singleton<FikaClient>.Instance;
 			InformationPacket packet = new();
 			client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
-			while (!RaidStarted)
+			do
 			{
-				await Task.Delay(250);
 				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+				await Task.Delay(250);
 			}
+			while (!RaidStarted);
 
 			if (startButton != null)
 			{
