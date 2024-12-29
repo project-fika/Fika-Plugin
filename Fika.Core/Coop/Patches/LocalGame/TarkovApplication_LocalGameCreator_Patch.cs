@@ -176,6 +176,7 @@ namespace Fika.Core.Coop.Patches
 				
 				if (FikaBackendUtils.IsSpectator)
 				{
+					Logger.LogInfo("Starting game as spectator");
 					await HandleJoinAsSpectator();
 				}
 			}
