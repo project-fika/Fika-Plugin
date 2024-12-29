@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.Patches
 		[PatchPrefix]
 		public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
 			RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents,
-			MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuController ___mainMenuController, CompositeDisposableClass ___compositeDisposableClass, BundleLock ___BundleLock)
+			MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuController ____menuOperation, CompositeDisposableClass ___compositeDisposableClass, BundleLock ___BundleLock)
 		{
 #if DEBUG
 			Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
@@ -41,7 +41,7 @@ namespace Fika.Core.Coop.Patches
 #endif
 			__result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings,
 				____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl,
-				metricsEvents, metricsConfig, gameWorld, ___mainMenuController, ___compositeDisposableClass, ___BundleLock);
+				metricsEvents, metricsConfig, gameWorld, ____menuOperation, ___compositeDisposableClass, ___BundleLock);
 			return false;
 		}
 
