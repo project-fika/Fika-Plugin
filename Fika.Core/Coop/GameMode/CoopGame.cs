@@ -1408,7 +1408,7 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Logger.LogInfo("Starting task to wait for host to start the raid.");
 
-			SetMatchmakerStatus("Waiting for host to start the raid...");
+			SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_START_RAID.Localized());
 
 			GameObject startButton = null;
 			if (isServer)
