@@ -331,7 +331,7 @@ namespace Fika.Core.Networking
 			public int ChamberIndex;
 			public float Overheat;
 			public bool UnderbarrelShot;
-			public string AmmoTemplate;
+			public MongoID? AmmoTemplate;
 			public float LastShotOverheat;
 			public float LastShotTime;
 			public bool SlideOnOverheatReached;
@@ -344,7 +344,7 @@ namespace Fika.Core.Networking
 				ChamberIndex = reader.GetInt();
 				Overheat = reader.GetFloat();
 				UnderbarrelShot = reader.GetBool();
-				AmmoTemplate = reader.GetString();
+				AmmoTemplate = reader.GetMongoID();
 				LastShotOverheat = reader.GetFloat();
 				LastShotTime = reader.GetFloat();
 				SlideOnOverheatReached = reader.GetBool();
@@ -372,7 +372,7 @@ namespace Fika.Core.Networking
 				writer.Put(ChamberIndex);
 				writer.Put(Overheat);
 				writer.Put(UnderbarrelShot);
-				writer.Put(AmmoTemplate);
+				writer.PutMongoID(AmmoTemplate);
 				writer.Put(LastShotOverheat);
 				writer.Put(LastShotTime);
 				writer.Put(SlideOnOverheatReached);
