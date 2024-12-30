@@ -298,7 +298,7 @@ namespace Fika.Core
 			BTRSide_Patches.Enable();
 			new GClass2454_UpdateOfflineClientLogic_Patch().Enable();
 			new GClass2455_UpdateOfflineClientLogic_Patch().Enable();
-			new GClass2448_GetSyncObjectStrategyByType_Patch().Enable();
+			new SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch().Enable();
 			LighthouseTraderZone_Patches.Enable();
 			Zyriachy_Patches.Enable();
 			new BufferZoneControllerClass_method_1_Patch().Enable();

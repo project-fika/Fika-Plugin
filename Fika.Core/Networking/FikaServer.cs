@@ -598,7 +598,7 @@ namespace Fika.Core.Networking
 				Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
 				GClass794<int, Throwable>.GStruct45 grenades = gameWorld.Grenades.GetValuesEnumerator();
-				List<GStruct36> smokeData = [];
+				List<SmokeGrenadeDataPacketStruct> smokeData = [];
 				foreach (Throwable item in grenades)
 				{
 					if (item is SmokeGrenade smokeGrenade)
@@ -618,7 +618,7 @@ namespace Fika.Core.Networking
 					SendDataToPeer(peer, ref throwablePacket, DeliveryMethod.ReliableOrdered);
 				}
 
-				List<WorldInteractiveObject.GStruct421> interactivesData = [];
+				List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactivesData = [];
 				WorldInteractiveObject[] worldInteractiveObjects = worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
 				foreach (WorldInteractiveObject interactiveObject in worldInteractiveObjects)
 				{
@@ -700,7 +700,7 @@ namespace Fika.Core.Networking
 
 					if (player.HandsController != null)
 					{
-						characterPacket.PlayerInfoPacket.ControllerType = GClass1836.FromController(player.HandsController);
+						characterPacket.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(player.HandsController);
 						characterPacket.PlayerInfoPacket.ItemId = player.HandsController.Item.Id;
 						characterPacket.PlayerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
 					}
@@ -1094,7 +1094,7 @@ namespace Fika.Core.Networking
 
 					if (pair.Value.HandsController != null)
 					{
-						requestPacket.PlayerInfoPacket.ControllerType = GClass1836.FromController(pair.Value.HandsController);
+						requestPacket.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(pair.Value.HandsController);
 						requestPacket.PlayerInfoPacket.ItemId = pair.Value.HandsController.Item.Id;
 						requestPacket.PlayerInfoPacket.IsStationary = pair.Value.MovementContext.IsStationaryWeaponInHands;
 					}

@@ -95,7 +95,7 @@ namespace Fika.Core.Coop.HostClasses
 			ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
 		}
 
-		public override GClass2448 SyncObjectProcessorFactory()
+		public override SyncObjectProcessorClass SyncObjectProcessorFactory()
 		{
 			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
 			{

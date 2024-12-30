@@ -277,7 +277,7 @@ namespace Fika.Core.Coop.GameMode
 
 		public override void vmethod_0()
 		{
-			gclass697_0 = new(LoggerMode.None, dictionary_0, Bots);
+			localGameLoggerClass = new(LoggerMode.None, dictionary_0, Bots);
 		}
 
 		/// <summary>
@@ -632,7 +632,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 
 			string profileId = Profile_0.Id;
-			if (transitController.summonedTransits.TryGetValue(profileId, out GClass1666 transitData))
+			if (transitController.summonedTransits.TryGetValue(profileId, out TransitDataClass transitData))
 			{
 				SyncTransitControllersPacket packet = new()
 				{
@@ -915,7 +915,7 @@ namespace Fika.Core.Coop.GameMode
 
 				if (coopPlayer.HandsController != null)
 				{
-					packet.PlayerInfoPacket.ControllerType = GClass1836.FromController(coopPlayer.HandsController);
+					packet.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(coopPlayer.HandsController);
 					packet.PlayerInfoPacket.ItemId = coopPlayer.HandsController.Item.Id;
 					packet.PlayerInfoPacket.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
 				}
@@ -1120,7 +1120,7 @@ namespace Fika.Core.Coop.GameMode
 			}
 			else
 			{
-				BackendConfigSettingsClass.GClass1504 transitSettings = instance.transitSettings;
+				BackendConfigSettingsClass.TransitSettingsClass transitSettings = instance.transitSettings;
 				transitActive = transitSettings != null && transitSettings.active;
 			}
 			if (transitActive && FikaPlugin.Instance.EnableTransits)
@@ -1166,8 +1166,8 @@ namespace Fika.Core.Coop.GameMode
 			LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
 			if (isServer)
 			{
-				GClass1711 lootDescriptor = GClass1712.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
-				GClass1211 eftWriter = new();
+				GClass1711 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
+				EFTWriterClass eftWriter = new();
 				eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
 				HostLootItems = eftWriter.ToArray();
 
@@ -1318,8 +1318,8 @@ namespace Fika.Core.Coop.GameMode
 			spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
 				Location_0.SpawnPointParams);
 			int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-			GStruct396 settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-			SpawnSystem = GClass3369.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
+			SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+			SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
 
 			exfilManager = gameObject.AddComponent<CoopExfilManager>();
 
@@ -2646,8 +2646,8 @@ namespace Fika.Core.Coop.GameMode
 				}
 				list.Sort(LootCompare);
 
-				GClass1711 lootDescriptor = GClass1712.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
-				GClass1211 eftWriter = new();
+				GClass1711 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
+				EFTWriterClass eftWriter = new();
 				eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
 				return eftWriter.ToArray();
 			}

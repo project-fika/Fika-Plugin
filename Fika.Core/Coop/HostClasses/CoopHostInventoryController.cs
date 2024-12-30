@@ -156,7 +156,7 @@ namespace Fika.Core.Coop.HostClasses
 			{
 				handler.operation.method_1(handler.HandleResult);
 
-				GClass1211 writer = new();
+				EFTWriterClass writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());
 				InventoryPacket packet = new()
 				{

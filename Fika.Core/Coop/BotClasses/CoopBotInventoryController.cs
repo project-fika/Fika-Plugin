@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.BotClasses
 			coopBot = (CoopBot)player;
 			mongoID_0 = currentId;
 			ushort_0 = nextOperationId;
-			searchController = new GClass2002(profile);
+			searchController = new BotSearchControllerClass(profile);
 		}
 
         public override IPlayerSearchController PlayerSearchController
@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.BotClasses
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
-				GClass1211 writer = new();
+				EFTWriterClass writer = new();
 				writer.WritePolymorph(operation.ToDescriptor());
 				InventoryPacket packet = new()
 				{

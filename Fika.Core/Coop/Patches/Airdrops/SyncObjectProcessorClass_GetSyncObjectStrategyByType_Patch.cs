@@ -5,11 +5,11 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-	public class GClass2448_GetSyncObjectStrategyByType_Patch : ModulePatch
+	public class SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch : ModulePatch
 	{
 		protected override MethodBase GetTargetMethod()
 		{
-			return typeof(GClass2448).GetMethod(nameof(GClass2448.GetSyncObjectStrategyByType), BindingFlags.Static | BindingFlags.Public);
+			return typeof(SyncObjectProcessorClass).GetMethod(nameof(SyncObjectProcessorClass.GetSyncObjectStrategyByType), BindingFlags.Static | BindingFlags.Public);
 		}
 
 		[PatchPrefix]

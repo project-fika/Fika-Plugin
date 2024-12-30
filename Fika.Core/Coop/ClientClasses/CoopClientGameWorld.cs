@@ -48,7 +48,7 @@ namespace Fika.Core.Coop.ClientClasses
             // Do nothing
         }
 
-		public override GClass2448 SyncObjectProcessorFactory()
+		public override SyncObjectProcessorClass SyncObjectProcessorFactory()
 		{
 			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
 			{

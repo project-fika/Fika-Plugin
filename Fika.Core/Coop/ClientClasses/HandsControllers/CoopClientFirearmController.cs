@@ -43,7 +43,7 @@ namespace Fika.Core.Coop.ClientClasses
 		{
 			// Check for GClass increments..
 			Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-			operationFactoryDelegates[typeof(GClass1779)] = new OperationFactoryDelegate(Weapon1);
+			operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
 			operationFactoryDelegates[typeof(GClass1780)] = new OperationFactoryDelegate(Weapon2);
 			operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
 			return operationFactoryDelegates;
@@ -657,7 +657,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass2(Player.FirearmController controller) : GClass1781(controller)
+		private class FirearmClass2(Player.FirearmController controller) : AmmoPackReloadInternalOneChamberOperationClass(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -678,7 +678,7 @@ namespace Fika.Core.Coop.ClientClasses
 			private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
 		}
 
-		private class FirearmClass3(Player.FirearmController controller) : GClass1782(controller)
+		private class FirearmClass3(Player.FirearmController controller) : AmmoPackReloadInternalBoltOpenOperationClass(controller)
 		{
 			public override void SetTriggerPressed(bool pressed)
 			{
@@ -767,7 +767,7 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				ItemAddress itemAddress = gridItemAddress;
 				GClass1714 descriptor = itemAddress?.ToDescriptor();
-				GClass1211 writer = new();
+				EFTWriterClass writer = new();
 
 				byte[] locationDescription;
 				if (descriptor != null)
@@ -836,7 +836,7 @@ namespace Fika.Core.Coop.ClientClasses
 			{
 				ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
 				GClass1714 descriptor = itemAddress?.ToDescriptor();
-				GClass1211 writer = new();
+				EFTWriterClass writer = new();
 				string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
 				byte[] locationDescription;
