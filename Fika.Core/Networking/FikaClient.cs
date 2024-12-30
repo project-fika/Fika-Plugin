@@ -1297,6 +1297,8 @@ namespace Fika.Core.Networking
 				Profiles = profiles
 			};
 			SendData(ref profilePacket, DeliveryMethod.ReliableOrdered);
+
+			FikaEventDispatcher.DispatchEvent(new PeerConnectedEvent(peer, this));
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
