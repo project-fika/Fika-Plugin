@@ -661,7 +661,7 @@ namespace Fika.Core.Coop.Players
 			return observedCorpse;
 		}
 
-		public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, GStruct182.EStationaryCommand command)
+		public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
 		{
 			base.OperateStationaryWeapon(stationaryWeapon, command);
 			PacketSender.CommonPlayerPackets.Enqueue(new()
@@ -750,7 +750,7 @@ namespace Fika.Core.Coop.Players
 			_healthController.ManualUpdate(deltaTime);
 		}
 
-		public override void OnMounting(GStruct184.EMountingCommand command)
+		public override void OnMounting(MountingPacketStruct.EMountingCommand command)
 		{
 			MountingPacket packet = new()
 			{
@@ -761,7 +761,7 @@ namespace Fika.Core.Coop.Players
 				CurrentMountingPointVerticalOffset = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
 				MountingDirection = MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0
 			};
-			if (command == GStruct184.EMountingCommand.Enter)
+			if (command == MountingPacketStruct.EMountingCommand.Enter)
 			{
 				packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
 				packet.TargetPos = MovementContext.PlayerMountingPointData.PlayerTargetPos;
@@ -782,7 +782,7 @@ namespace Fika.Core.Coop.Players
 
 		public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
 		{
-			GStruct180 packet = controller.GetInteractPacket(transitPointId, keyId, time);
+			TransitInteractionPacketStruct packet = controller.GetInteractPacket(transitPointId, keyId, time);
 			if (FikaBackendUtils.IsServer)
 			{
 				controller.InteractWithTransit(this, packet);
@@ -846,7 +846,7 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
-			GClass1686 inventoryDescriptor = GClass1712.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
+			GClass1686 inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
 			HealthSyncPacket syncPacket = new(NetId)
 			{
@@ -1207,9 +1207,9 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public void ObservedStationaryInteract(StationaryWeapon stationaryWeapon, GStruct182.EStationaryCommand command)
+		public void ObservedStationaryInteract(StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
 		{
-			if (command == GStruct182.EStationaryCommand.Occupy)
+			if (command == StationaryPacketStruct.EStationaryCommand.Occupy)
 			{
 				stationaryWeapon.SetOperator(ProfileId, false);
 				MovementContext.StationaryWeapon = stationaryWeapon;
@@ -1219,7 +1219,7 @@ namespace Fika.Core.Coop.Players
 				MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
 				return;
 			}
-			if (command == GStruct182.EStationaryCommand.Leave)
+			if (command == StationaryPacketStruct.EStationaryCommand.Leave)
 			{
 				return;
 			}
@@ -1262,7 +1262,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct214, float> armorDamage, DamageInfoStruct damageInfo)
+		public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct damageInfo)
 		{
 			if (IsYourPlayer)
 			{
@@ -1272,7 +1272,7 @@ namespace Fika.Core.Coop.Players
 				foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
 				{
 					float num = 0f;
-					foreach (KeyValuePair<GStruct214, float> keyValuePair in armorDamage)
+					foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
 					{
 						if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
 						{

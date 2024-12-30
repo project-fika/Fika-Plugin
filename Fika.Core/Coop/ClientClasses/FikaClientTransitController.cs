@@ -12,18 +12,18 @@ namespace Fika.Core.Coop.ClientClasses
 {
 	public class FikaClientTransitController : GClass1670
 	{
-		public FikaClientTransitController(BackendConfigSettingsClass.GClass1504 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+		public FikaClientTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
 			: base(settings, parameters)
 		{
 			OnPlayerEnter += OnClientPlayerEnter;
 			OnPlayerExit += OnClientPlayerExit;
 			string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
-			summonedTransits[profile.Id] = new GClass1666(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
+			summonedTransits[profile.Id] = new TransitDataClass(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
 				localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
 			TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransiterTraderName);
 			this.localRaidSettings = localRaidSettings;
 		}
-		public GStruct180 InteractPacket { get; set; }
+		public TransitInteractionPacketStruct InteractPacket { get; set; }
 
 		private readonly LocalRaidSettings localRaidSettings;
 
@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.ClientClasses
 			if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
 			{
 				eraidMode = ERaidMode.Local;
-				tarkovApplication.transitionStatus = new GStruct140(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+				tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
 			}
 			string profileId = myPlayer.ProfileId;
 			Dictionary<string, ProfileKey> profileKeys = [];

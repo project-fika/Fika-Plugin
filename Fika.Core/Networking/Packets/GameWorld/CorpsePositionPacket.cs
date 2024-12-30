@@ -4,7 +4,7 @@ namespace Fika.Core.Networking
 {
 	public struct CorpsePositionPacket : INetSerializable
 	{
-		public GStruct132 Data;
+		public RagdollPacketStruct Data;
 
 		public void Deserialize(NetDataReader reader)
 		{

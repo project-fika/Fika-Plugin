@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
 	public struct ArtilleryPacket : INetSerializable
 	{
 		public int Count;
-		public List<GStruct133> Data;
+		public List<ArtilleryPacketStruct> Data;
 
 		public void Deserialize(NetDataReader reader)
 		{

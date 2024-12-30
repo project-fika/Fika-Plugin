@@ -136,7 +136,7 @@ namespace Fika.Core.Coop.ClientClasses
 				return;
 			}
 
-			GClass1211 writer = new();
+			EFTWriterClass writer = new();
 			ClientInventoryOperationHandler handler = new()
 			{
 				Operation = operation,

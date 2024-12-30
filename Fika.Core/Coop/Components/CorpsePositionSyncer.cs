@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.Components
 		private readonly FieldInfo ragdollDoneField = AccessTools.Field(typeof(RagdollClass), "bool_2");
 
 		private Corpse corpse;
-		private GStruct132 data;
+		private RagdollPacketStruct data;
 		private FikaHostWorld world;
 
 		public static void Create(GameObject gameObject, Corpse corpse)

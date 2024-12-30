@@ -219,7 +219,7 @@ namespace Fika.Core.Networking
 				return;
 			}
 
-			foreach (GStruct132 ragdollPacket in packet.RagdollPackets)
+			foreach (RagdollPacketStruct ragdollPacket in packet.RagdollPackets)
 			{
 				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse))
 				{
@@ -229,11 +229,11 @@ namespace Fika.Core.Networking
 
 			if (packet.ArtilleryPackets.Count > 0)
 			{
-				List<GStruct133> packets = packet.ArtilleryPackets;
+				List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
 				gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
 			}
 
-			foreach (GStruct134 throwablePacket in packet.ThrowablePackets)
+			foreach (GrenadeDataPacketStruct throwablePacket in packet.ThrowablePackets)
 			{
 				GClass794<int, Throwable> grenades = gameWorld.Grenades;
 				if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
@@ -530,7 +530,7 @@ namespace Fika.Core.Networking
 
 		private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet)
 		{
-			GClass2448 processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+			SyncObjectProcessorClass processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
 			if (processor == null)
 			{
 				return;
@@ -631,9 +631,9 @@ namespace Fika.Core.Networking
 #endif
 								string localizedString = LocaleUtils.UI_SYNC_INTERACTABLES.Localized();
 								WorldInteractiveObject[] worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World_0).Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
-								Dictionary<int, WorldInteractiveObject.GStruct421> netIdDictionary = [];
+								Dictionary<int, WorldInteractiveObject.WorldInteractiveDataPacketStruct> netIdDictionary = [];
 								{
-									foreach (WorldInteractiveObject.GStruct421 data in packet.InteractivesData)
+									foreach (WorldInteractiveObject.WorldInteractiveDataPacketStruct data in packet.InteractivesData)
 									{
 										netIdDictionary.Add(data.NetId, data);
 									}
@@ -643,7 +643,7 @@ namespace Fika.Core.Networking
 								float progress = 0f;
 								foreach (WorldInteractiveObject item in worldInteractiveObjects)
 								{
-									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.GStruct421 value))
+									if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.WorldInteractiveDataPacketStruct value))
 									{
 										progress++;
 										coopGame.SetMatchmakerStatus(localizedString, progress / total);
@@ -743,7 +743,7 @@ namespace Fika.Core.Networking
 			{
 				GClass1207 eftReader = new(packet.Data);
 				GClass1711 lootData = eftReader.ReadEFTLootDataDescriptor();
-				GClass1328 lootItems = GClass1712.DeserializeLootData(lootData);
+				GClass1328 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
 				if (lootItems.Count < 1)
 				{
 					throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
@@ -1165,7 +1165,7 @@ namespace Fika.Core.Networking
 
 				if (MyPlayer.HandsController != null)
 				{
-					requestPacket.PlayerInfoPacket.ControllerType = GClass1836.FromController(MyPlayer.HandsController);
+					requestPacket.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(MyPlayer.HandsController);
 					requestPacket.PlayerInfoPacket.ItemId = MyPlayer.HandsController.Item.Id;
 					requestPacket.PlayerInfoPacket.IsStationary = MyPlayer.MovementContext.IsStationaryWeaponInHands;
 				}

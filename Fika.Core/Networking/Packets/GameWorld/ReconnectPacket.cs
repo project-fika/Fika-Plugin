@@ -19,8 +19,8 @@ namespace Fika.Core.Networking
 		public Vector3 PlayerPosition;
 		public double TimeOffset;
 
-		public List<GStruct36> ThrowableData;
-		public List<WorldInteractiveObject.GStruct421> InteractivesData;
+		public List<SmokeGrenadeDataPacketStruct> ThrowableData;
+		public List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> InteractivesData;
 		public Dictionary<int, byte> LampStates;
 		public Dictionary<int, Vector3> WindowBreakerStates;
 

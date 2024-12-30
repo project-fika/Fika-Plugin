@@ -193,7 +193,7 @@ namespace Fika.Core.Coop.Players
 			base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
 		}
 
-		public override void ApplyExplosionDamageToArmor(Dictionary<GStruct214, float> armorDamage, DamageInfoStruct damageInfo)
+		public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct damageInfo)
 		{
 			_preAllocatedArmorComponents.Clear();
 			Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
@@ -201,7 +201,7 @@ namespace Fika.Core.Coop.Players
 			foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
 			{
 				float num = 0f;
-				foreach (KeyValuePair<GStruct214, float> keyValuePair in armorDamage)
+				foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
 				{
 					if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
 					{

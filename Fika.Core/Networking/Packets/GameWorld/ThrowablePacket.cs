@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
 	public struct ThrowablePacket : INetSerializable
 	{
 		public int Count;
-		public List<GStruct134> Data;
+		public List<GrenadeDataPacketStruct> Data;
 
 		public void Deserialize(NetDataReader reader)
 		{
