@@ -1311,6 +1311,8 @@ namespace Fika.Core.Networking
 
 			NetworkSettingsPacket packet = new(sendRate);
 			SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
+
+			FikaEventDispatcher.DispatchEvent(new PeerConnectedEvent(peer, this));
 		}
 
 		public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)

@@ -1113,7 +1113,7 @@ namespace Fika.Core.Coop.GameMode
 				gameWorld.BtrController = new BTRControllerClass(gameWorld);
 			}
 
-			bool transitActive;
+			/*bool transitActive;
 			if (instance == null)
 			{
 				transitActive = false;
@@ -1133,7 +1133,10 @@ namespace Fika.Core.Coop.GameMode
 			{
 				Logger.LogInfo("Transits are disabled");
 				TransitControllerAbstractClass.DisableTransitPoints();
-			}
+			}*/
+
+			Logger.LogInfo("Transits are disabled");
+			TransitControllerAbstractClass.DisableTransitPoints();
 
 			ApplicationConfigClass config = BackendConfigAbstractClass.Config;
 			if (config.FixedFrameRate > 0f)
@@ -1419,7 +1422,7 @@ namespace Fika.Core.Coop.GameMode
 		{
 			Logger.LogInfo("Starting task to wait for host to start the raid.");
 
-			SetMatchmakerStatus("Waiting for host to start the raid...");
+			SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_START_RAID.Localized());
 
 			GameObject startButton = null;
 			if (isServer)
@@ -1455,11 +1458,12 @@ namespace Fika.Core.Coop.GameMode
 			FikaClient client = Singleton<FikaClient>.Instance;
 			InformationPacket packet = new();
 			client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
-			while (!RaidStarted)
+			do
 			{
-				await Task.Delay(250);
 				client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+				await Task.Delay(250);
 			}
+			while (!RaidStarted);
 
 			if (startButton != null)
 			{
@@ -2091,6 +2095,8 @@ namespace Fika.Core.Coop.GameMode
 		/// <param name="delay"></param>
 		public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
 		{
+			FikaEventDispatcher.DispatchEvent(new FikaGameEndedEvent(isServer));
+
 			if (exitStatus < ExitStatus.Transit)
 			{
 				FikaBackendUtils.IsTransit = false;
