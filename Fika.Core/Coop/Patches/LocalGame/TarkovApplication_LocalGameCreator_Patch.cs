@@ -140,7 +140,7 @@ namespace Fika.Core.Coop.Patches
 
 			StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation);
 
-			TimeSpan raidLimits = instance.method_45(raidSettings.SelectedLocation.EscapeTimeLimit);
+			TimeSpan raidLimits = instance.method_46(raidSettings.SelectedLocation.EscapeTimeLimit);
 
 			CoopGame coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
 				MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
@@ -192,7 +192,7 @@ namespace Fika.Core.Coop.Patches
 
 			public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
 			{
-				tarkovApplication.method_47(pmcProfile.Id, scavProfile, location, result);
+				tarkovApplication.method_48(pmcProfile.Id, scavProfile, location, result);
 			}
 
 			public void ReleaseSingleton()
