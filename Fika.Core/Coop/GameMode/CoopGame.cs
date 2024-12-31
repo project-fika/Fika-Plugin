@@ -48,6 +48,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static BackendConfigSettingsClass;
 using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Coop.GameMode
@@ -1134,6 +1135,23 @@ namespace Fika.Core.Coop.GameMode
 				Logger.LogInfo("Transits are disabled");
 				TransitControllerAbstractClass.DisableTransitPoints();
 			}*/
+
+			bool runddansActive;
+			if (instance == null)
+			{
+				runddansActive = false;
+			}
+			else
+			{
+				GClass1505 runddansSettings = instance.runddansSettings;
+				runddansActive = runddansSettings != null && runddansSettings.active;
+			}
+			if (runddansActive)
+			{
+				gameWorld.RunddansController = new GClass2045(instance.runddansSettings, Location_0);
+			}
+
+			GClass2043.ToggleEventEnvironment(false);
 
 			Logger.LogInfo("Transits are disabled");
 			TransitControllerAbstractClass.DisableTransitPoints();
