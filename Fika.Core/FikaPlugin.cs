@@ -1302,7 +1302,6 @@ namespace Fika.Core
 			new GetProfileAtEndOfRaidPatch().Disable();
 			new ScavExfilPatch().Disable();
 			new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
-			new BotOwnerManualUpdatePatch().Disable();
 		}
 
 		public void FixSPTBugPatches()
