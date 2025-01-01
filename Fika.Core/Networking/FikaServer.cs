@@ -298,8 +298,7 @@ namespace Fika.Core.Networking
 			}
 
 			SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
-			FikaRequestHandler.UpdateSetHost(body);
-			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
+			FikaRequestHandler.UpdateSetHost(body);			
 		}
 
 		private void OnSideEffectPacketReceived(SideEffectPacket packet, NetPeer peer)

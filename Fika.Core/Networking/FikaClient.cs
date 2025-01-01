@@ -205,9 +205,7 @@ namespace Fika.Core.Networking
 			{
 				await Task.Delay(1 * 6000);
 				ServerConnection = netClient.Connect(ip, port, connectString);
-			}
-
-			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(this));
+			}			
 		}
 
 		private void OnWorldPacketReceived(WorldPacket packet)

@@ -2,6 +2,8 @@
 using Comfort.Common;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using Fika.Core.Modding.Events;
+using Fika.Core.Modding;
 using Fika.Core.Networking;
 using System;
 using System.Threading.Tasks;
@@ -34,14 +36,15 @@ namespace Fika.Core.Coop.Utils
 				Singleton<FikaServer>.Create(server);
 				logger.LogInfo("FikaServer has started!");
 				Singleton<IFikaNetworkManager>.Create(server);
+				FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(server));
+				return;
 			}
-			else
-			{
-				FikaClient client = FikaGameObject.AddComponent<FikaClient>();
-				Singleton<FikaClient>.Create(client);
-				logger.LogInfo("FikaClient has started!");
-				Singleton<IFikaNetworkManager>.Create(client);
-			}
+
+			FikaClient client = FikaGameObject.AddComponent<FikaClient>();
+			Singleton<FikaClient>.Create(client);
+			logger.LogInfo("FikaClient has started!");
+			Singleton<IFikaNetworkManager>.Create(client);
+			FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(client));
 		}
 
 		public static void CreatePingingClient()
