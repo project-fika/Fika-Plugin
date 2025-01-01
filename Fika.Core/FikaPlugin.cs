@@ -736,7 +736,7 @@ namespace Fika.Core
 			QuestTypesToShareAndReceive = SetupSetting(coopDefaultQuestSharingHeader, "Quest Types", EQuestSharingTypes.All,
 				new ConfigDescription(LocaleUtils.BEPINEX_QUEST_TYPES_D.Localized(), tags: new ConfigurationManagerAttributes()
 				{
-					Category = coopNameplatesHeader,
+					Category = coopQuestSharingHeader,
 					DispName = LocaleUtils.BEPINEX_QUEST_TYPES_T.Localized(),
 					Order = 4
 				}),
@@ -745,7 +745,7 @@ namespace Fika.Core
 			QuestSharingNotifications = SetupSetting(coopDefaultQuestSharingHeader, "Show Notifications", true,
 				new ConfigDescription(LocaleUtils.BEPINEX_QS_NOTIFICATIONS_D.Localized(), tags: new ConfigurationManagerAttributes()
 				{
-					Category = coopNameplatesHeader,
+					Category = coopQuestSharingHeader,
 					DispName = LocaleUtils.BEPINEX_QS_NOTIFICATIONS_T.Localized(),
 					Order = 3
 				}),
@@ -754,7 +754,7 @@ namespace Fika.Core
 			EasyKillConditions = SetupSetting(coopDefaultQuestSharingHeader, "Easy Kill Conditions", false,
 				new ConfigDescription(LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_D.Localized(), tags: new ConfigurationManagerAttributes()
 				{
-					Category = coopNameplatesHeader,
+					Category = coopQuestSharingHeader,
 					DispName = LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_T.Localized(),
 					Order = 2
 				}),
@@ -763,7 +763,7 @@ namespace Fika.Core
 			SharedKillExperience = SetupSetting(coopDefaultQuestSharingHeader, "Shared Kill Experience", false,
 				new ConfigDescription(LocaleUtils.BEPINEX_SHARED_KILL_XP_D.Localized(), tags: new ConfigurationManagerAttributes()
 				{
-					Category = coopNameplatesHeader,
+					Category = coopQuestSharingHeader,
 					DispName = LocaleUtils.BEPINEX_SHARED_KILL_XP_T.Localized(),
 					Order = 1
 				}),
@@ -772,7 +772,7 @@ namespace Fika.Core
 			SharedBossExperience = SetupSetting(coopDefaultQuestSharingHeader, "Shared Boss Experience", false,
 				new ConfigDescription(LocaleUtils.BEPINEX_SHARED_BOSS_XP_D.Localized(), tags: new ConfigurationManagerAttributes()
 				{
-					Category = coopNameplatesHeader,
+					Category = coopQuestSharingHeader,
 					DispName = LocaleUtils.BEPINEX_SHARED_BOSS_XP_T.Localized(),
 					Order = 0
 				}),
