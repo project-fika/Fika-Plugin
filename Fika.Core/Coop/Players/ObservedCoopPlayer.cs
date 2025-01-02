@@ -552,10 +552,13 @@ namespace Fika.Core.Coop.Players
 
 		public override void ApplyCorpseImpulse()
 		{
-			if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
-				&& PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
+			if (cullingHandler.IsVisible || isServer)
 			{
-				Corpse.Ragdoll.ApplyImpulse(bodyPartCollider.Collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
+				if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
+						&& PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
+				{
+					Corpse.Ragdoll.ApplyImpulse(bodyPartCollider.Collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
+				} 
 			}
 		}
 
@@ -802,12 +805,12 @@ namespace Fika.Core.Coop.Players
 				ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
 				observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
 				observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
-				Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
+				Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
 				return observedCorpse;
 			}
 
 			Corpse corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
-			CorpsePositionSyncer.Create(corpse.gameObject, corpse);
+			CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
 			return corpse;
 		}
 

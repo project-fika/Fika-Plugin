@@ -221,9 +221,13 @@ namespace Fika.Core.Networking
 
 			foreach (RagdollPacketStruct ragdollPacket in packet.RagdollPackets)
 			{
-				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse))
+				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
 				{
 					corpse.ApplyNetPacket(ragdollPacket);
+					if (ragdollPacket.Done)
+					{
+						corpse.ForceApplyTransformSync(ragdollPacket.TransformSyncs);
+					}
 				}
 			}
 

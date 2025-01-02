@@ -652,12 +652,12 @@ namespace Fika.Core.Coop.Players
 			if (FikaBackendUtils.IsServer)
 			{
 				Corpse corpse = base.CreateCorpse();
-				CorpsePositionSyncer.Create(corpse.gameObject, corpse);
+				CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
 				return corpse;
 			}
 
 			ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
-			Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
+			Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
 			return observedCorpse;
 		}
 

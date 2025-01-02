@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.Components
 		private FikaHostWorld world;
 		private int counter;
 
-		public static void Create(GameObject gameObject, Corpse corpse)
+		public static void Create(GameObject gameObject, Corpse corpse, int netId)
 		{
 			CorpsePositionSyncer corpsePositionSyncer = gameObject.AddComponent<CorpsePositionSyncer>();
 			corpsePositionSyncer.corpse = corpse;
@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.Components
 			corpsePositionSyncer.counter = 0;
 			corpsePositionSyncer.data = new()
 			{
-				Id = corpse.GetNetId()
+				Id = netId
 			};
 		}
 
