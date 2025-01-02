@@ -1136,7 +1136,7 @@ namespace Fika.Core.Coop.GameMode
 				TransitControllerAbstractClass.DisableTransitPoints();
 			}*/
 
-			bool runddansActive;
+			/*bool runddansActive;
 			if (instance == null)
 			{
 				runddansActive = false;
@@ -1153,10 +1153,11 @@ namespace Fika.Core.Coop.GameMode
 			else
 			{
 				GClass2043.ToggleEventEnvironment(false);
-			}			
+			}*/	
 
 			Logger.LogInfo("Transits are disabled");
 			TransitControllerAbstractClass.DisableTransitPoints();
+			GClass2043.ToggleEventEnvironment(false);
 			gameWorld.ClientBroadcastSyncController = new GClass1093();
 
 			ApplicationConfigClass config = BackendConfigAbstractClass.Config;

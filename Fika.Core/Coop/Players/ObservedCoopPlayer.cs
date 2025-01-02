@@ -7,6 +7,7 @@ using EFT.Ballistics;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
+using EFT.Visual;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
@@ -118,6 +119,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 		private GClass893 cullingHandler;
+		private readonly List<ObservedSlotViewHandler> observedSlotViewHandlers = [];
 		#endregion
 
 		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -987,7 +989,10 @@ namespace Fika.Core.Coop.Players
 
 			foreach (EquipmentSlot equipmentSlot in PlayerBody.SlotNames)
 			{
-				Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
+				Slot slot = Inventory.Equipment.GetSlot(equipmentSlot);
+				ObservedSlotViewHandler handler = new(slot, this, equipmentSlot);
+				observedSlotViewHandlers.Add(handler);
+				/*Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
 				PlayerBody.GClass2112 slotView = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
@@ -996,12 +1001,15 @@ namespace Fika.Core.Coop.Players
 				{
 					oldSlotView.Dispose();
 				}
-				PlayerBody.ValidateHoodedDress(equipmentSlot);
+				PlayerBody.ValidateHoodedDress(equipmentSlot);*/
 			}
 
 			if (PlayerBody.HaveHolster && PlayerBody.SlotViews.ContainsKey(EquipmentSlot.Holster))
 			{
-				Transform slotBone = PlayerBody.GetSlotBone(EquipmentSlot.Holster);
+				Slot slot = Inventory.Equipment.GetSlot(EquipmentSlot.Holster);
+				ObservedSlotViewHandler handler = new(slot, this, EquipmentSlot.Holster);
+				observedSlotViewHandlers.Add(handler);
+				/*Transform slotBone = PlayerBody.GetSlotBone(EquipmentSlot.Holster);
 				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(EquipmentSlot.Holster);
 				PlayerBody.GClass2112 slotView = new(PlayerBody, Inventory.Equipment.GetSlot(EquipmentSlot.Holster), slotBone, EquipmentSlot.Holster,
 					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
@@ -1009,7 +1017,7 @@ namespace Fika.Core.Coop.Players
 				if (oldSlotView != null)
 				{
 					oldSlotView.Dispose();
-				}
+				}*/
 			}
 		}
 
@@ -1281,6 +1289,11 @@ namespace Fika.Core.Coop.Players
 			{
 				Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateSoundRolloff;
 			}
+			foreach (ObservedSlotViewHandler slotViewHandler in observedSlotViewHandlers)
+			{
+				slotViewHandler.Dispose();
+			}
+			observedSlotViewHandlers.Clear();
 			base.OnDestroy();
 		}
 
@@ -1347,6 +1360,64 @@ namespace Fika.Core.Coop.Players
 						CreateFirearmController(packet.ItemId, true);
 						break;
 					}
+			}
+		}
+
+		private class ObservedSlotViewHandler : IDisposable
+		{
+			private readonly Slot slot;
+			private readonly ObservedCoopPlayer observedPlayer;
+			private readonly EquipmentSlot slotType;
+
+			public ObservedSlotViewHandler(Slot itemSlot, ObservedCoopPlayer player, EquipmentSlot equipmentType)
+			{
+				slot = itemSlot;
+				observedPlayer = player;
+				slotType = equipmentType;
+
+				itemSlot.OnAddOrRemoveItem += HandleItemMove;
+			}
+
+			public void Dispose()
+			{
+				slot.OnAddOrRemoveItem -= HandleItemMove;
+			}
+
+			private void HandleItemMove(Item item)
+			{
+				Transform slotBone = observedPlayer.PlayerBody.GetSlotBone(slotType);
+				Transform alternativeHolsterBone = observedPlayer.PlayerBody.GetAlternativeHolsterBone(slotType);
+				PlayerBody.GClass2112 newSlotView = new(observedPlayer.PlayerBody, slot, slotBone, slotType,
+						observedPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone, false);
+				PlayerBody.GClass2112 oldSlotView = observedPlayer.PlayerBody.SlotViews.AddOrReplace(slotType, newSlotView);
+				if (oldSlotView != null)
+				{
+					ClearSlotView(oldSlotView);
+					oldSlotView.Dispose();
+				}
+				observedPlayer.PlayerBody.ValidateHoodedDress(slotType);
+				GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3339>().Invoke(observedPlayer.ProfileId);
+				Dispose();
+			}
+
+			private void ClearSlotView(PlayerBody.GClass2112 oldSlotView)
+			{
+				for (int i = 0; i < oldSlotView.Renderers.Length; i++)
+				{
+					oldSlotView.Renderers[i].forceRenderingOff = false;
+				}
+				if (oldSlotView.Dresses != null)
+				{
+					Dress[] dresses = oldSlotView.Dresses;
+					for (int j = 0; j < dresses.Length; j++)
+					{
+						GStruct57 bodyRenderer = dresses[j].GetBodyRenderer();
+						for (int k = 0; k < bodyRenderer.Renderers.Length; k++)
+						{
+							bodyRenderer.Renderers[k].forceRenderingOff = false;
+						}
+					}
+				}
 			}
 		}
 
