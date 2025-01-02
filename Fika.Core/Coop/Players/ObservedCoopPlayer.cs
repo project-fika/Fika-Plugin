@@ -963,8 +963,6 @@ namespace Fika.Core.Coop.Players
 			// Do nothing
 		}
 
-		// TODO: This code needs refactoring and hopefully removing
-		// The reason it was added was due to a lot of bots inventories desyncing because of their unnatural inventory operations
 		public void SetInventory(GClass1659 inventoryDescriptor)
 		{
 			if (HandsController != null)
@@ -992,16 +990,6 @@ namespace Fika.Core.Coop.Players
 				Slot slot = Inventory.Equipment.GetSlot(equipmentSlot);
 				ObservedSlotViewHandler handler = new(slot, this, equipmentSlot);
 				observedSlotViewHandlers.Add(handler);
-				/*Transform slotBone = PlayerBody.GetSlotBone(equipmentSlot);
-				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(equipmentSlot);
-				PlayerBody.GClass2076 slowView = new(PlayerBody, Inventory.Equipment.GetSlot(equipmentSlot), slotBone, equipmentSlot,
-					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass2076 oldSlotView = PlayerBody.SlotViews.AddOrReplace(equipmentSlot, slowView);
-				if (oldSlotView != null)
-				{
-					oldSlotView.Dispose();
-				}
-				PlayerBody.ValidateHoodedDress(equipmentSlot);*/
 			}
 
 			if (PlayerBody.HaveHolster && PlayerBody.SlotViews.ContainsKey(EquipmentSlot.Holster))
@@ -1009,15 +997,6 @@ namespace Fika.Core.Coop.Players
 				Slot slot = Inventory.Equipment.GetSlot(EquipmentSlot.Holster);
 				ObservedSlotViewHandler handler = new(slot, this, EquipmentSlot.Holster);
 				observedSlotViewHandlers.Add(handler);
-				/*Transform slotBone = PlayerBody.GetSlotBone(EquipmentSlot.Holster);
-				Transform alternativeHolsterBone = PlayerBody.GetAlternativeHolsterBone(EquipmentSlot.Holster);
-				PlayerBody.GClass2076 slotView = new(PlayerBody, Inventory.Equipment.GetSlot(EquipmentSlot.Holster), slotBone, EquipmentSlot.Holster,
-					Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone);
-				PlayerBody.GClass2076 oldSlotView = PlayerBody.SlotViews.AddOrReplace(EquipmentSlot.Holster, slotView);
-				if (oldSlotView != null)
-				{
-					oldSlotView.Dispose();
-				}*/
 			}
 		}
 
