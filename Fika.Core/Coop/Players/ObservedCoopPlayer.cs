@@ -800,6 +800,8 @@ namespace Fika.Core.Coop.Players
 			if (FikaBackendUtils.IsClient)
 			{
 				ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+				observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
+				observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
 				Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
 				return observedCorpse;
 			}
