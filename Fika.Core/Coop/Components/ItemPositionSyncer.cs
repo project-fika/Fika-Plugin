@@ -13,6 +13,7 @@ namespace Fika.Core.Coop.Components
 		private bool isServer;
 		private ObservedLootItem lootItem;
 		private LootSyncStruct data;
+		private int counter;
 
 		private Rigidbody Rigidbody
 		{
@@ -35,6 +36,7 @@ namespace Fika.Core.Coop.Components
 				posSync.client = Singleton<FikaClient>.Instance;
 			}
 			posSync.lootItem = lootItem;
+			posSync.counter = 0;
 			posSync.data = new()
 			{
 				Id = lootItem.GetNetId()
@@ -81,21 +83,26 @@ namespace Fika.Core.Coop.Components
 				return;
 			}
 
-			data.Position = lootItem.transform.position;
-			data.Rotation = lootItem.transform.rotation;
-			data.Velocity = Rigidbody.velocity;
-			data.AngularVelocity = Rigidbody.angularVelocity;
-			LootSyncPacket packet = new()
+			counter++;
+			if (counter % 4 == 0)
 			{
-				Data = data
-			};
-			if (isServer)
-			{
-				server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
-				return;
-			}
+				counter = 0;
+				data.Position = lootItem.transform.position;
+				data.Rotation = lootItem.transform.rotation;
+				data.Velocity = Rigidbody.velocity;
+				data.AngularVelocity = Rigidbody.angularVelocity;
+				LootSyncPacket packet = new()
+				{
+					Data = data
+				};
+				if (isServer)
+				{
+					server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
+					return;
+				}
 
-			client.SendData(ref packet, DeliveryMethod.Unreliable);
+				client.SendData(ref packet, DeliveryMethod.Unreliable); 
+			}
 		}
 	}
 }
