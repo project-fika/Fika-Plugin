@@ -71,7 +71,7 @@ namespace Fika.Core
 		public IPAddress WanIP;
 		public bool LocalesLoaded;
 
-		private static readonly Version RequiredServerVersion = new("2.3.5");
+		private static readonly Version RequiredServerVersion = new("2.4.0");
 
 		public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
 
@@ -354,8 +354,8 @@ namespace Fika.Core
 
 		private void EnableTranspilers()
 		{
-			new BotOwner_UpdateManual_Transpiler().Enable();
-			new CoverPointMaster_method_0_Transpiler().Enable();
+			/*new BotOwner_UpdateManual_Transpiler().Enable();
+			new CoverPointMaster_method_0_Transpiler().Enable();*/
 		}
 
 		private void VerifyServerVersion()
