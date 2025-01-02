@@ -488,7 +488,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						GStruct452<GInterface397> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
 						if (removeOperation.Failed)
 						{
-							FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}");
+							FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}, error: {removeOperation.Error}");
 						}
 						coopPlayer.InventoryController.CheckChamber(Weapon, false);
 						FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
