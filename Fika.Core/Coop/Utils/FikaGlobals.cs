@@ -25,11 +25,16 @@ namespace Fika.Core.Coop.Utils
 
 		private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaGlobals");
 
-		public static readonly List<EInteraction> BlockedInteractions =
+		internal static readonly List<EInteraction> BlockedInteractions =
 		[
 			EInteraction.DropBackpack, EInteraction.NightVisionOffGear, EInteraction.NightVisionOnGear,
 			EInteraction.FaceshieldOffGear, EInteraction.FaceshieldOnGear, EInteraction.BipodForwardOn,
 			EInteraction.BipodForwardOff, EInteraction.BipodBackwardOn, EInteraction.BipodBackwardOff
+		];
+
+		internal static readonly List<EquipmentSlot> WeaponSlots =
+		[
+			EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster
 		];
 
 		public static ISearchController SearchControllerSerializer
@@ -199,6 +204,11 @@ namespace Fika.Core.Coop.Utils
 			}
 
 			return session.ProfileOfPet;
+		}
+
+		public static bool IsMineClose(MineDirectional mine, Vector3 minePosition)
+		{
+			return Vector3.Distance(mine.transform.position, minePosition) < Mathf.Epsilon;
 		}
 	}
 }

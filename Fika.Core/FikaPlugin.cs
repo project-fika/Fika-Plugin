@@ -354,8 +354,8 @@ namespace Fika.Core
 
 		private void EnableTranspilers()
 		{
-			new BotOwner_UpdateManual_Transpiler().Enable();
-			new CoverPointMaster_method_0_Transpiler().Enable();
+			/*new BotOwner_UpdateManual_Transpiler().Enable();
+			new CoverPointMaster_method_0_Transpiler().Enable();*/
 		}
 
 		private void VerifyServerVersion()
