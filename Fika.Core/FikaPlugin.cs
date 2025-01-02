@@ -1060,7 +1060,7 @@ namespace Fika.Core
 				"Max Bots Interchange", ref failed, ref headers);
 
 			string reserve = "rezervbase".Localized();
-			MaxBotsReserve = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Customs"), 0,
+			MaxBotsReserve = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Reserve"), 0,
 				new ConfigDescription(string.Format(maxBotsDescription, reserve),
 				new AcceptableValueRange<int>(0, 50), new ConfigurationManagerAttributes()
 				{
