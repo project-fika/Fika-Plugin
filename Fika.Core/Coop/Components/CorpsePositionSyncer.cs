@@ -15,12 +15,14 @@ namespace Fika.Core.Coop.Components
 		private Corpse corpse;
 		private RagdollPacketStruct data;
 		private FikaHostWorld world;
+		private int counter;
 
 		public static void Create(GameObject gameObject, Corpse corpse)
 		{
 			CorpsePositionSyncer corpsePositionSyncer = gameObject.AddComponent<CorpsePositionSyncer>();
 			corpsePositionSyncer.corpse = corpse;
 			corpsePositionSyncer.world = (FikaHostWorld)Singleton<GameWorld>.Instance.World_0;
+			corpsePositionSyncer.counter = 0;
 			corpsePositionSyncer.data = new()
 			{
 				Id = corpse.GetNetId()
@@ -54,9 +56,13 @@ namespace Fika.Core.Coop.Components
 				return;
 			}
 
-			data.Position = corpse.TrackableTransform.position;
-
-			world.WorldPacket.RagdollPackets.Add(data);
+			counter++;
+			if (counter % 4 == 0)
+			{
+				counter = 0;
+				data.Position = corpse.TrackableTransform.position;
+				world.WorldPacket.RagdollPackets.Add(data); 
+			}
 		}
 	}
 }
