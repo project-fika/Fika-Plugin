@@ -552,10 +552,13 @@ namespace Fika.Core.Coop.Players
 
 		public override void ApplyCorpseImpulse()
 		{
-			if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
-				&& PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
+			if (cullingHandler.IsVisible || isServer)
 			{
-				Corpse.Ragdoll.ApplyImpulse(bodyPartCollider.Collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
+				if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
+						&& PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
+				{
+					Corpse.Ragdoll.ApplyImpulse(bodyPartCollider.Collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
+				} 
 			}
 		}
 
@@ -800,6 +803,8 @@ namespace Fika.Core.Coop.Players
 			if (FikaBackendUtils.IsClient)
 			{
 				ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+				observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
+				observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
 				Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
 				return observedCorpse;
 			}
