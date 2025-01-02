@@ -119,6 +119,7 @@ namespace Fika.Core.Coop.Players
 			}
 		}
 		private GClass886 cullingHandler;
+		private List<ObservedSlotViewHandler> observedSlotViewHandlers = [];
 		#endregion
 
 		public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -1385,20 +1386,20 @@ namespace Fika.Core.Coop.Players
 			{
 				Transform slotBone = observedPlayer.PlayerBody.GetSlotBone(slotType);
 				Transform alternativeHolsterBone = observedPlayer.PlayerBody.GetAlternativeHolsterBone(slotType);
-				PlayerBody.GClass2112 newSlotView = new(observedPlayer.PlayerBody, slot, slotBone, slotType,
+				PlayerBody.GClass2076 newSlotView = new(observedPlayer.PlayerBody, slot, slotBone, slotType,
 						observedPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone, false);
-				PlayerBody.GClass2112 oldSlotView = observedPlayer.PlayerBody.SlotViews.AddOrReplace(slotType, newSlotView);
+				PlayerBody.GClass2076 oldSlotView = observedPlayer.PlayerBody.SlotViews.AddOrReplace(slotType, newSlotView);
 				if (oldSlotView != null)
 				{
 					ClearSlotView(oldSlotView);
 					oldSlotView.Dispose();
 				}
 				observedPlayer.PlayerBody.ValidateHoodedDress(slotType);
-				GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3339>().Invoke(observedPlayer.ProfileId);
+				GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3275>().Invoke(observedPlayer.ProfileId);
 				Dispose();
 			}
 
-			private void ClearSlotView(PlayerBody.GClass2112 oldSlotView)
+			private void ClearSlotView(PlayerBody.GClass2076 oldSlotView)
 			{
 				for (int i = 0; i < oldSlotView.Renderers.Length; i++)
 				{
@@ -1409,7 +1410,7 @@ namespace Fika.Core.Coop.Players
 					Dress[] dresses = oldSlotView.Dresses;
 					for (int j = 0; j < dresses.Length; j++)
 					{
-						GStruct57 bodyRenderer = dresses[j].GetBodyRenderer();
+						GStruct56 bodyRenderer = dresses[j].GetBodyRenderer();
 						for (int k = 0; k < bodyRenderer.Renderers.Length; k++)
 						{
 							bodyRenderer.Renderers[k].forceRenderingOff = false;
