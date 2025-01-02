@@ -290,15 +290,15 @@ namespace Fika.Core.Coop.Components
 
 			int playerId = LocalGameInstance.method_15();
 
-			IEnumerable<ResourceKey> allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths();
-			if (allPrefabPaths.Count() == 0)
+			ResourceKey[] allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths(!spawnObject.IsAI).ToArray();
+			if (allPrefabPaths.Length == 0)
 			{
 				logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::PrefabPaths are empty!");
 				return;
 			}
 
 			await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
-				PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.Low).ContinueWith(x =>
+				PoolManager.AssemblyType.Local, allPrefabPaths, JobPriority.Low).ContinueWith(x =>
 				{
 					if (x.IsFaulted)
 					{
