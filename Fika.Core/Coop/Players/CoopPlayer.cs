@@ -926,7 +926,7 @@ namespace Fika.Core.Coop.Players
 			string killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : string.Empty;
 			EPlayerSide side = Side;
 			int level = Profile.Info.Level;
-			DateTime time = EFTDateTimeClass.UtcNow;
+			DateTime time = EFTDateTimeClass.UtcNow.ToLocalTime();
 			string weaponName = LastAggressor != null ? (LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.ShortName : string.Empty) : "-";
 			string groupId = GroupId;
 
