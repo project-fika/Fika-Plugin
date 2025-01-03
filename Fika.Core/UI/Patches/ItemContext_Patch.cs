@@ -62,6 +62,11 @@ namespace Fika.Core.UI.Patches
 					return;
 				}
 
+				if (item.PinLockState is EItemPinLockState.Pinned or EItemPinLockState.Locked) // Don't send pinned or locked items (who even does this?)
+				{
+					return;
+				}
+
 				// Check for GClass increments
 				Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions)
 					.Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
@@ -87,7 +92,7 @@ namespace Fika.Core.UI.Patches
 								else
 								{
 									string itemName = attachedItem.ShortName.Localized();
-									string attachedItemText = FikaUIGlobals.ColorizeText(EColor.BLUE, itemName);
+									string attachedItemText = ColorizeText(EColor.BLUE, itemName);
 									NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
 										[itemText, attachedItemText]),
 										iconType: EFT.Communications.ENotificationIconType.Alert);
