@@ -403,6 +403,21 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			FirearmsAnimator.SetFire(true);
 
+			if (Weapon.MalfState.State == Weapon.EMalfunctionState.None)
+			{
+				if (Weapon is RevolverItemClass && Weapon.CylinderHammerClosed)
+				{
+					FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0.2f);
+					return;
+				}
+				if (Weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
+				{
+					FirearmsAnimator.Animator.Play(FirearmsAnimator.FullSemiFireStateName, 1, 0.2f);
+					return;
+				}
+				FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f);
+			}
+
 			if (packet.UnderbarrelShot)
 			{
 				if (UnderbarrelWeapon != null)
@@ -475,11 +490,10 @@ namespace Fika.Core.Coop.ObservedClasses
 			}
 
 			if (Weapon is RevolverItemClass)
-			{
-				Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
-
+			{				
 				if (magazine is CylinderMagazineItemClass cylinderMagazine)
 				{
+					FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
 					int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!Weapon.CylinderHammerClosed);
 					AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
 					if (cylinderAmmo != null)
@@ -490,8 +504,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						{
 							FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}");
 						}
-						coopPlayer.InventoryController.CheckChamber(Weapon, false);
-						FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
+						inventoryController.CheckChamber(Weapon, false);						
 						Weapon.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
 					}
 					if (Weapon.CylinderHammerClosed || Weapon.FireMode.FireMode != Weapon.EFireMode.doubleaction)
@@ -501,6 +514,17 @@ namespace Fika.Core.Coop.ObservedClasses
 					FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
 					FirearmsAnimator.SetDoubleAction(Convert.ToSingle(Weapon.CylinderHammerClosed));
 					FirearmsAnimator.SetHammerArmed(!Weapon.CylinderHammerClosed);
+					if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
+					{
+						weaponEffectsManager.MoveAmmoFromChamberToShellPort(cylinderAmmo.IsUsed, firstIndex);
+					}
+
+					FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
+
+					if (cylinderMagazine.Cartridges.Count > 0)
+					{
+						Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
+					}
 				}
 			}
 
@@ -578,10 +602,10 @@ namespace Fika.Core.Coop.ObservedClasses
 				FirearmsAnimator.SetBoltCatch(true);
 			}
 
-			if (Weapon is RevolverItemClass || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
+			/*if (Weapon is RevolverItemClass || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
 			{
 				return;
-			}
+			}*/
 
 			//weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
 		}
