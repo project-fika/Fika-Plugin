@@ -215,5 +215,10 @@ namespace Fika.Core.Coop.Utils
 		{
 			return controller.LightMod.GetLightState(false, false);
 		}
+		
+		public static bool IsMineClose(MineDirectional mine, Vector3 minePosition)
+		{
+			return Vector3.Distance(mine.transform.position, minePosition) < Mathf.Epsilon;
+		}
 	}
 }

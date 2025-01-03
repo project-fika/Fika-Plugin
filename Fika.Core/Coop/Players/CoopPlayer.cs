@@ -657,7 +657,9 @@ namespace Fika.Core.Coop.Players
 			}
 
 			ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
-			Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
+			observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
+			observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
+			Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(observedCorpse.GetNetId(), observedCorpse);
 			return observedCorpse;
 		}
 
