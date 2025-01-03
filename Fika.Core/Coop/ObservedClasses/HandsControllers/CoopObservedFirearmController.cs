@@ -493,13 +493,13 @@ namespace Fika.Core.Coop.ObservedClasses
 					AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
 					if (cylinderAmmo != null)
 					{
-						cylinderAmmo.IsUsed = true;
 						GStruct452<GInterface397> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
 						if (removeOperation.Failed)
 						{
 							FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}");
 						}
 						inventoryController.CheckChamber(Weapon, false);						
+						cylinderAmmo.IsUsed = true;
 						Weapon.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
 					}
 					if (Weapon.CylinderHammerClosed || Weapon.FireMode.FireMode != Weapon.EFireMode.doubleaction)
