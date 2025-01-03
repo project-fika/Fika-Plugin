@@ -498,7 +498,6 @@ namespace Fika.Core.Coop.ObservedClasses
 					AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
 					if (cylinderAmmo != null)
 					{
-						cylinderAmmo.IsUsed = true;
 						GStruct446<GInterface385> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
 						if (removeOperation.Failed)
 						{
