@@ -505,6 +505,7 @@ namespace Fika.Core.Coop.ObservedClasses
 							FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}");
 						}
 						inventoryController.CheckChamber(Weapon, false);						
+						cylinderAmmo.IsUsed = true;
 						Weapon.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
 					}
 					if (Weapon.CylinderHammerClosed || Weapon.FireMode.FireMode != Weapon.EFireMode.doubleaction)
