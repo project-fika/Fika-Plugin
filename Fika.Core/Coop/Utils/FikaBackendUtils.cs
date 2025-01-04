@@ -185,6 +185,7 @@ namespace Fika.Core.Coop.Utils
 			{
 				Profile profile = kvp.Key;
 				InfoClass info = profile.Info;
+				FikaPlugin.Instance.FikaLogger.LogError($"REceived profile: {profile.Encyclopedia}, {profile.InsuredItems}, {profile.TaskConditionCounters}");
 				GClass1322 infoSet = new()
 				{
 					AccountId = profile.AccountId,

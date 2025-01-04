@@ -127,7 +127,7 @@ namespace Fika.Core.Networking
 			visualProfiles = [];
 			if (!FikaBackendUtils.IsDedicated)
 			{
-				Profile ownProfile = FikaGlobals.GetProfile(FikaBackendUtils.IsScav);
+				Profile ownProfile = FikaGlobals.GetLiteProfile(FikaBackendUtils.IsScav);
 				if (ownProfile != null)
 				{
 					visualProfiles.Add(ownProfile, true);

@@ -206,9 +206,21 @@ namespace Fika.Core.Coop.Utils
 			return session.ProfileOfPet;
 		}
 
-		public static bool IsMineClose(MineDirectional mine, Vector3 minePosition)
+		/// <summary>
+		/// Gets the current PMC or scav profile with trimmed data
+		/// </summary>
+		/// <param name="scav">If the scav profile should be returned</param>
+		/// <returns>A trimmed <see cref="Profile"/> of chosen side</returns>
+		public static Profile GetLiteProfile(bool scav)
 		{
-			return Vector3.Distance(mine.transform.position, minePosition) < Mathf.Epsilon;
+			Profile profile = GetProfile(scav);
+			GClass1962 liteDescriptor = new(profile, SearchControllerSerializer)
+			{
+				Encyclopedia = [],
+				InsuredItems = [],
+				TaskConditionCounters = []
+			};
+			return new(liteDescriptor);
 		}
 	}
 }

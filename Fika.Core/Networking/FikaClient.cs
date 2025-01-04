@@ -1281,7 +1281,7 @@ namespace Fika.Core.Networking
 			NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
 				ENotificationDurationType.Default, ENotificationIconType.Friend);
 
-			Profile ownProfile = FikaGlobals.GetProfile(FikaBackendUtils.IsScav);
+			Profile ownProfile = FikaGlobals.GetLiteProfile(FikaBackendUtils.IsScav);
 			if (ownProfile == null)
 			{
 				logger.LogError("OnPeerConnected: Own profile was null!");
