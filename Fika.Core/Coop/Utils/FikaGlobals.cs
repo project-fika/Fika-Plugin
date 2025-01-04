@@ -207,6 +207,23 @@ namespace Fika.Core.Coop.Utils
 		}
 
 		/// <summary>
+		/// Gets the current PMC or scav profile with trimmed data
+		/// </summary>
+		/// <param name="scav">If the scav profile should be returned</param>
+		/// <returns>A trimmed <see cref="Profile"/> of chosen side</returns>
+		public static Profile GetLiteProfile(bool scav)
+		{
+			Profile profile = GetProfile(scav);
+			GClass1991 liteDescriptor = new(profile, SearchControllerSerializer)
+			{
+				Encyclopedia = [],
+				InsuredItems = [],
+				TaskConditionCounters = []
+			};
+			return new(liteDescriptor);
+		}
+
+		/// <summary>
 		/// Gets the states from a <see cref="TacticalComboVisualController"/>
 		/// </summary>
 		/// <param name="controller"></param>
