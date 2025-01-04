@@ -484,7 +484,7 @@ namespace Fika.Core.Coop.ObservedClasses
 					Weapon.Chambers[0].RemoveItem(false);
 					if (WeaponPrefab != null && WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
 					{
-						HandleShellEvent(weaponEffectsManager, ref packet, ammo, magazine);
+						HandleShellEvent(weaponEffectsManager, packet.ChamberIndex, ammo, magazine);
 					}
 				}
 			}
@@ -577,12 +577,12 @@ namespace Fika.Core.Coop.ObservedClasses
 		}
 
 
-		private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, ref ShotInfoPacket packet, AmmoItemClass ammo, MagazineItemClass magazine)
+		private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, int chamberIndex, AmmoItemClass ammo, MagazineItemClass magazine)
 		{
-			weaponEffectsManager.DestroyPatronInWeapon(packet.ChamberIndex);
+			weaponEffectsManager.DestroyPatronInWeapon(chamberIndex);
 			if (!ammo.AmmoTemplate.RemoveShellAfterFire)
 			{
-				weaponEffectsManager.CreatePatronInShellPort(ammo, packet.ChamberIndex);
+				weaponEffectsManager.CreatePatronInShellPort(ammo, chamberIndex);
 				FirearmsAnimator.SetShellsInWeapon(1);
 			}
 			else
@@ -600,14 +600,8 @@ namespace Fika.Core.Coop.ObservedClasses
 			if (Weapon.IsBoltCatch && Weapon.ChamberAmmoCount == 0 && Weapon.GetCurrentMagazine() != null && Weapon.GetCurrentMagazineCount() == 0 && !Weapon.ManualBoltCatch && !boltAction)
 			{
 				FirearmsAnimator.SetBoltCatch(true);
+				FirearmsAnimator.SetAmmoInChamber(0);
 			}
-
-			/*if (Weapon is RevolverItemClass || Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel || boltAction)
-			{
-				return;
-			}*/
-
-			//weaponEffectsManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
 		}
 
 		private class ObservedIdleOperation(FirearmController controller) : GClass1771(controller)
