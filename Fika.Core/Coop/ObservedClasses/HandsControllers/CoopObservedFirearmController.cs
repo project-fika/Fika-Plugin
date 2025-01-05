@@ -451,7 +451,8 @@ namespace Fika.Core.Coop.ObservedClasses
 				}
 			}
 
-			if (Weapon.HasChambers)
+			bool hasChambers = Weapon.HasChambers;
+			if (hasChambers)
 			{
 				if (Weapon.ReloadMode is Weapon.EReloadMode.OnlyBarrel)
 				{
@@ -475,7 +476,6 @@ namespace Fika.Core.Coop.ObservedClasses
 							{
 								Weapon.ShellsInChambers[i] = bClass.AmmoTemplate;
 							}
-							break;
 						}
 					}
 				}
@@ -487,6 +487,7 @@ namespace Fika.Core.Coop.ObservedClasses
 						HandleShellEvent(weaponEffectsManager, packet.ChamberIndex, ammo, magazine);
 					}
 				}
+				FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
 			}
 
 			if (Weapon is RevolverItemClass)
@@ -532,9 +533,10 @@ namespace Fika.Core.Coop.ObservedClasses
 
 			if (magazine != null && magazine is not CylinderMagazineItemClass && magazine.Count > 0 && !Weapon.BoltAction)
 			{
-				if (Item.HasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
+				if (hasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
 				{
 					magazine.Cartridges.PopTo(inventoryController, Item.Chambers[0].CreateItemAddress());
+					FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
 				}
 				else
 				{
