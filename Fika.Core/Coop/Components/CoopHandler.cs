@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.Components
 	{
 		#region Fields/Properties
 		public CoopGame LocalGameInstance { get; internal set; }
-		public string ServerId { get; set; } = null;
+		public string ServerId { get; internal set; } = null;
 		public CoopPlayer MyPlayer
 		{
 			get
@@ -36,13 +36,22 @@ namespace Fika.Core.Coop.Components
 		/// <summary>
 		/// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>
 		/// </summary>
-		public Dictionary<int, CoopPlayer> Players = [];
-		public List<CoopPlayer> HumanPlayers = [];
-		public int AmountOfHumans = 1;
-		public List<int> ExtractedPlayers = [];
-		public List<string> queuedProfileIds = [];
+		public Dictionary<int, CoopPlayer> Players { get; internal set; } = [];
+		/// <summary>
+		/// All human players in the form of <see cref="CoopPlayer"/> (excluding headless)
+		/// </summary>
+		public List<CoopPlayer> HumanPlayers { get; internal set; } = [];
+		/// <summary>
+		/// The amount of human players (including headless)
+		/// </summary>
+		public int AmountOfHumans { get; internal set; } = 1;
+		/// <summary>
+		/// List of <see cref="CoopPlayer.NetId"/>s that have extracted
+		/// </summary>
+		public List<int> ExtractedPlayers { get; internal set; } = [];
 
 		private ManualLogSource logger;
+		private readonly List<string> queuedProfileIds = [];
 		private readonly Queue<SpawnObject> spawnQueue = new(50);
 		private bool ready;
 		private bool isClient;
