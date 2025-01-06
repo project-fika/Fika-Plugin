@@ -547,11 +547,10 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
 				logger.LogInfo($"Verified that {playerToAdd.Profile.Nickname} was added to the enemy list.");
 #endif
+				yield break;
 			}
-			else
-			{
-				logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
-			}
+
+			logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
 		}
 
 		/// <summary>
