@@ -134,6 +134,10 @@ namespace Fika.Core.Coop.Utils
 			ConsoleScreen.Log($"{player.Profile.Info.Nickname} has spawned item: {item.ShortName.Localized()}");
 		}
 
+		/// <summary>
+		/// Checks whether the game client is in a raid
+		/// </summary>
+		/// <returns></returns>
 		public static bool IsInRaid()
 		{
 			return Singleton<AbstractGame>.Instance is CoopGame coopGame && coopGame.InRaid;
