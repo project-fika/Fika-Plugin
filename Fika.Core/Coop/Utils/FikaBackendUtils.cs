@@ -214,12 +214,10 @@ namespace Fika.Core.Coop.Utils
 				MatchmakerPlayerControllerClass controller = app.MatchmakerPlayerControllerClass;
 				if (controller != null)
 				{
-					//controller.GroupPlayers.Add(visualProfile);
 					MenuUI menuUi = Singleton<MenuUI>.Instance;
 					if (menuUi != null)
 					{
 						PartyInfoPanel panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
-						//PartyPlayerItem playerItem = Traverse.Create(panel).Field<PartyPlayerItem>("_playerItemTemplate").Value;
 						panel.Close();
 						panel.Show(playerList, Profile, false);
 						return;
