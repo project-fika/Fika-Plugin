@@ -1019,24 +1019,48 @@ namespace Fika.Core.Coop.Players
 						return;
 					}
 
-					GClass2981 containerCollection = controller.Item;
-					GClass2981 newContainerCollection = newWeapon;
-					if (containerCollection != null && newContainerCollection != null)
+					IEnumerable<Slot> newSlots = newWeapon.AllSlots;
+					if (newSlots != null)
 					{
-						controller.CCV.RemoveBones(containerCollection.Containers);
-						foreach (EFT.InventoryLogic.IContainer container in newContainerCollection.Containers)
+						Dictionary<string, GClass735.GClass736> currentViews = [];
+						foreach (KeyValuePair<EFT.InventoryLogic.IContainer, GClass735.GClass736> kvp in controller.CCV.ContainerBones)
+						{
+							if (kvp.Key is Slot slot && slot.ContainedItem != null)
+							{
+								if (currentViews.ContainsKey(slot.FullId))
+								{
+									FikaPlugin.Instance.FikaLogger.LogError("RefreshSlotViews::CRITICAL ERROR DICTIONARY: " + slot.FullId);
+									continue;
+								}
+								currentViews.Add(slot.FullId, kvp.Value);
+							}
+						}
+						controller.CCV.RemoveBones(controller.Weapon.AllSlots);
+						foreach (EFT.InventoryLogic.IContainer container in newSlots)
 						{
 							if (container is Slot slot)
 							{
-								Transform transform = GClass808.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
-								if (transform == null)
+								if (slot.ContainedItem == null)
 								{
-									FikaPlugin.Instance.FikaLogger.LogError("SetInventory::Could not find transform for slot " + slot.ID);
+									Transform transform = GClass808.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
+									if (transform == null)
+									{
+										FikaPlugin.Instance.FikaLogger.LogError("RefreshSlotViews::CRITICAL ERROR TRANSFORM: " + slot.ID);
+										continue;
+									}
+									controller.CCV.AddBone(slot, transform);
 									continue;
 								}
-								controller.CCV.AddBone(slot, transform);
+								foreach (KeyValuePair<string, GClass735.GClass736> kvp in currentViews)
+								{
+									if (kvp.Key == slot.FullId)
+									{
+										controller.CCV.ContainerBones[slot] = kvp.Value;
+										break;
+									}
+								}
 							}
-						}
+						} 
 					}
 				}
 			}
