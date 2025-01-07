@@ -454,6 +454,15 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
+			if (item == null)
+			{
+				StationaryWeapon stationaryWeapon = GameWorld.FindStationaryWeaponByItemId(lastWeaponId);
+				if (stationaryWeapon != null)
+				{
+					item = stationaryWeapon.Item;
+				}
+			}
+
 			return item;
 		}
 
