@@ -1044,10 +1044,7 @@ namespace Fika.Core.Networking
 						AmmoItemClass bulletClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
 						controller.InitiateFlare(bulletClass, ShotPosition, ShotForward);
 						bulletClass.IsUsed = true;
-						if (controller.WeaponPrefab.ObjectInHands is WeaponManagerClass weaponEffectsManager)
-						{
-							weaponEffectsManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);
-						}
+						controller.WeaponManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);
 						bulletClass = null;
 						controller.FirearmsAnimator.SetFire(false);
 					}
