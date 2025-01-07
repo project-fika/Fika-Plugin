@@ -558,7 +558,7 @@ namespace Fika.Core.Coop.Players
 						&& PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
 				{
 					Corpse.Ragdoll.ApplyImpulse(bodyPartCollider.Collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
-				} 
+				}
 			}
 		}
 
@@ -1039,6 +1039,7 @@ namespace Fika.Core.Coop.Players
 						}
 					}
 				}
+			}
 		}
 
 		public override void DoObservedVault(ref VaultPacket packet)
