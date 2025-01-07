@@ -1019,8 +1019,8 @@ namespace Fika.Core.Coop.Players
 						return;
 					}
 
-					GClass3043 containerCollection = controller.Item;
-					GClass3043 newContainerCollection = newWeapon;
+					GClass2981 containerCollection = controller.Item;
+					GClass2981 newContainerCollection = newWeapon;
 					if (containerCollection != null && newContainerCollection != null)
 					{
 						controller.CCV.RemoveBones(containerCollection.Containers);
@@ -1028,7 +1028,7 @@ namespace Fika.Core.Coop.Players
 						{
 							if (container is Slot slot)
 							{
-								Transform transform = GClass816.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
+								Transform transform = GClass808.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
 								if (transform == null)
 								{
 									FikaPlugin.Instance.FikaLogger.LogError("SetInventory::Could not find transform for slot " + slot.ID);
