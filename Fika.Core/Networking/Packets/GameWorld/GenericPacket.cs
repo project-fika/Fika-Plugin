@@ -1,4 +1,4 @@
-﻿// © 2024 Lacyway All Rights Reserved
+﻿// © 2025 Lacyway All Rights Reserved
 
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.Packets.SubPacket;

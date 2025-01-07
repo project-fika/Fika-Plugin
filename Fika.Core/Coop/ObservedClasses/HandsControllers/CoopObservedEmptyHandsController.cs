@@ -1,4 +1,4 @@
-﻿// © 2024 Lacyway All Rights Reserved
+﻿// © 2025 Lacyway All Rights Reserved
 
 using Fika.Core.Coop.Players;
 
