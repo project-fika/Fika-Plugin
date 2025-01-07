@@ -990,6 +990,11 @@ namespace Fika.Core.Coop.Players
 				}
 			}
 
+			RefreshSlotViews();
+		}
+
+		private void RefreshSlotViews()
+		{
 			foreach (EquipmentSlot equipmentSlot in PlayerBody.SlotNames)
 			{
 				Slot slot = Inventory.Equipment.GetSlot(equipmentSlot);
@@ -1003,6 +1008,37 @@ namespace Fika.Core.Coop.Players
 				ObservedSlotViewHandler handler = new(slot, this, EquipmentSlot.Holster);
 				observedSlotViewHandlers.Add(handler);
 			}
+
+			if (HandsController != null && HandsController is CoopObservedFirearmController controller)
+			{
+				if (Inventory.Equipment.TryFindItem(controller.Weapon.Id, out Item item))
+				{
+					if (item is not Weapon newWeapon)
+					{
+						FikaPlugin.Instance.FikaLogger.LogError("SetInventory::HandsController item was not Weapon");
+						return;
+					}
+
+					GClass3043 containerCollection = controller.Item;
+					GClass3043 newContainerCollection = newWeapon;
+					if (containerCollection != null && newContainerCollection != null)
+					{
+						controller.CCV.RemoveBones(containerCollection.Containers);
+						foreach (EFT.InventoryLogic.IContainer container in newContainerCollection.Containers)
+						{
+							if (container is Slot slot)
+							{
+								Transform transform = GClass816.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
+								if (transform == null)
+								{
+									FikaPlugin.Instance.FikaLogger.LogError("SetInventory::Could not find transform for slot " + slot.ID);
+									continue;
+								}
+								controller.CCV.AddBone(slot, transform);
+							}
+						}
+					}
+				}
 		}
 
 		public override void DoObservedVault(ref VaultPacket packet)
