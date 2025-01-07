@@ -41,7 +41,6 @@ namespace Fika.Core.Coop.ObservedClasses
 		private WeaponPrefab weaponPrefab;
 		private GClass1746 underBarrelManager;
 		private WeaponManagerClass weaponManager;
-		private GClass1773 underBarrelManager;
 		private bool boltActionReload;
 		private bool isThrowingPatron;
 
