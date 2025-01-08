@@ -20,9 +20,9 @@ namespace Fika.Core.Coop.Patches
         {
             List<CodeInstruction> codeList = instructions.ToList();
 
-            codeList[109] = new CodeInstruction(OpCodes.Nop);
-            codeList[108] = new CodeInstruction(OpCodes.Nop);
-            codeList[107].opcode = OpCodes.Nop;
+            codeList[112] = new CodeInstruction(OpCodes.Nop);
+            codeList[111] = new CodeInstruction(OpCodes.Nop);
+            codeList[110].opcode = OpCodes.Nop;
             codeList[18] = new CodeInstruction(OpCodes.Nop);
             codeList[14] = new CodeInstruction(OpCodes.Nop);
             codeList[13] = new CodeInstruction(OpCodes.Nop);

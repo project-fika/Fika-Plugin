@@ -28,15 +28,15 @@ namespace Fika.Core.Coop.ClientClasses
             return gameWorld;
         }
 
-		public override GrenadeFactoryClass CreateGrenadeFactory()
-		{
-			return new GClass746();
-		}
+        public override GrenadeFactoryClass CreateGrenadeFactory()
+        {
+            return new GClass746();
+        }
 
-		public override void PlayerTick(float dt)
-		{
-			method_10(smethod_2);
-		}
+        public override void PlayerTick(float dt)
+        {
+            method_10(smethod_2);
+        }
 
         public override void vmethod_1(float dt)
         {
@@ -48,14 +48,14 @@ namespace Fika.Core.Coop.ClientClasses
             // Do nothing
         }
 
-		public override SyncObjectProcessorClass SyncObjectProcessorFactory()
-		{
-			ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
-			{
-				TripwireManager = new(Singleton<GameWorld>.Instance)
-			};
-			return ClientSynchronizableObjectLogicProcessor;
-		}
+        public override SyncObjectProcessorClass SyncObjectProcessorFactory()
+        {
+            ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
+            {
+                TripwireManager = new(Singleton<GameWorld>.Instance)
+            };
+            return ClientSynchronizableObjectLogicProcessor;
+        }
 
         public override void Dispose()
         {

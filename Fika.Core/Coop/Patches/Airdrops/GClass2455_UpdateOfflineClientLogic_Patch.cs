@@ -6,23 +6,23 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-	public class GClass2455_UpdateOfflineClientLogic_Patch : ModulePatch
-	{
-		protected override MethodBase GetTargetMethod()
-		{
-			return typeof(GClass2455).GetMethod(nameof(GClass2455.UpdateOfflineClientLogic));
-		}
+    public class GClass2455_UpdateOfflineClientLogic_Patch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(GClass2455).GetMethod(nameof(GClass2455.UpdateOfflineClientLogic));
+        }
 
-		[PatchPostfix]
-		public static void Postfix(AirplaneDataPacketStruct ___airplaneDataPacketStruct)
-		{
-			SyncObjectPacket packet = new(___airplaneDataPacketStruct.ObjectId)
-			{
-				ObjectType = EFT.SynchronizableObjects.SynchronizableObjectType.AirPlane,
-				Data = ___airplaneDataPacketStruct
-			};
+        [PatchPostfix]
+        public static void Postfix(AirplaneDataPacketStruct ___airplaneDataPacketStruct)
+        {
+            SyncObjectPacket packet = new(___airplaneDataPacketStruct.ObjectId)
+            {
+                ObjectType = EFT.SynchronizableObjects.SynchronizableObjectType.AirPlane,
+                Data = ___airplaneDataPacketStruct
+            };
 
-			Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-		}
-	}
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+    }
 }
