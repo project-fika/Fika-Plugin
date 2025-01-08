@@ -2529,7 +2529,6 @@ namespace Fika.Core.Coop.GameMode
                 //Most of this is from method_14, minus the saving player part.
                 baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
                 baseLocalGame_0.CleanUp();
-                baseLocalGame_0.Dispose();
 
                 Class1492 exitCallback = new()
                 {
