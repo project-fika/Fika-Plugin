@@ -53,7 +53,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.1.4";
+        public const string FikaVersion = "1.1.5";
         public static FikaPlugin Instance;
         public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
         public static string EFTVersionMajor { get; internal set; }
