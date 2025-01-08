@@ -2116,7 +2116,7 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="delay"></param>
         public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
         {
-            FikaEventDispatcher.DispatchEvent(new FikaGameEndedEvent(isServer));
+            FikaEventDispatcher.DispatchEvent(new FikaGameEndedEvent(isServer, exitStatus, exitName));
 
             if (exitStatus < ExitStatus.Transit)
             {
