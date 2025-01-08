@@ -46,7 +46,7 @@ namespace Fika.Core.UI.Patches
                 // Save as variable in case we need to add more checks later...
                 MenuUI menuUI = Singleton<MenuUI>.Instance;
 
-                if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled)
+                if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled || menuUI.HideoutMannequinEquipmentScreen.isActiveAndEnabled)
                 {
                     return;
                 }
