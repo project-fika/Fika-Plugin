@@ -12,208 +12,208 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-	/// <summary>
-	/// Client used to verify that a P2P connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
-	/// </summary>
-	public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
-	{
-		public NetManager NetClient;
-		public bool Received;
-		public bool Rejected;
+    /// <summary>
+    /// Client used to verify that a P2P connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
+    /// </summary>
+    public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
+    {
+        public NetManager NetClient;
+        public bool Received;
+        public bool Rejected;
 
-		private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
-		private IPEndPoint remoteEndPoint;
-		private IPEndPoint localEndPoint;
-		private Coroutine _keepAliveRoutine;
+        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
+        private IPEndPoint remoteEndPoint;
+        private IPEndPoint localEndPoint;
+        private Coroutine _keepAliveRoutine;
 
-		public bool Init(string serverId)
-		{
-			NetClient = new(this)
-			{
-				UnconnectedMessagesEnabled = true,
-				NatPunchEnabled = true
-			};
+        public bool Init(string serverId)
+        {
+            NetClient = new(this)
+            {
+                UnconnectedMessagesEnabled = true,
+                NatPunchEnabled = true
+            };
 
-			GetHostRequest body = new(serverId);
-			GetHostResponse result = FikaRequestHandler.GetHost(body);
+            GetHostRequest body = new(serverId);
+            GetHostResponse result = FikaRequestHandler.GetHost(body);
 
-			FikaBackendUtils.IsHostNatPunch = result.NatPunch;
-			FikaBackendUtils.IsDedicatedGame = result.IsDedicated;
+            FikaBackendUtils.IsHostNatPunch = result.NatPunch;
+            FikaBackendUtils.IsDedicatedGame = result.IsDedicated;
 
-			NetClient.Start();
+            NetClient.Start();
 
-			if (FikaBackendUtils.IsHostNatPunch)
-			{
-				NetClient.NatPunchModule.Init(this);
+            if (FikaBackendUtils.IsHostNatPunch)
+            {
+                NetClient.NatPunchModule.Init(this);
 
-				string natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
-				int natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-				string token = $"client:{serverId}";
+                string natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
+                int natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
+                string token = $"client:{serverId}";
 
-				NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
+                NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
-				logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
-			}
-			else
-			{
-				string ip = result.Ips[0];
-				string localIp = null;
-				if (result.Ips.Length > 1)
-				{
-					localIp = result.Ips[1];
-				}
-				int port = result.Port;
+                logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+            }
+            else
+            {
+                string ip = result.Ips[0];
+                string localIp = null;
+                if (result.Ips.Length > 1)
+                {
+                    localIp = result.Ips[1];
+                }
+                int port = result.Port;
 
-				if (string.IsNullOrEmpty(ip))
-				{
-					logger.LogError("IP was empty when pinging!");
-					return false;
-				}
+                if (string.IsNullOrEmpty(ip))
+                {
+                    logger.LogError("IP was empty when pinging!");
+                    return false;
+                }
 
-				if (port == default)
-				{
-					logger.LogError("Port was empty when pinging!");
-					return false;
-				}
+                if (port == default)
+                {
+                    logger.LogError("Port was empty when pinging!");
+                    return false;
+                }
 
-				remoteEndPoint = new(IPAddress.Parse(ip), port);
-				if (!string.IsNullOrEmpty(localIp))
-				{
-					localEndPoint = new(IPAddress.Parse(localIp), port);
-				}
-			}
+                remoteEndPoint = new(IPAddress.Parse(ip), port);
+                if (!string.IsNullOrEmpty(localIp))
+                {
+                    localEndPoint = new(IPAddress.Parse(localIp), port);
+                }
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		public void PingEndPoint(string message)
-		{
-			NetDataWriter writer = new();
-			writer.Put(message);
+        public void PingEndPoint(string message)
+        {
+            NetDataWriter writer = new();
+            writer.Put(message);
 
-			if (remoteEndPoint != null)
-			{
-				NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
-			}
-			if (localEndPoint != null)
-			{
-				NetClient.SendUnconnectedMessage(writer, localEndPoint);
-			}
-		}
+            if (remoteEndPoint != null)
+            {
+                NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
+            }
+            if (localEndPoint != null)
+            {
+                NetClient.SendUnconnectedMessage(writer, localEndPoint);
+            }
+        }
 
-		public void StartKeepAliveRoutine()
-		{
-			_keepAliveRoutine = StartCoroutine(KeepAlive());
-		}
+        public void StartKeepAliveRoutine()
+        {
+            _keepAliveRoutine = StartCoroutine(KeepAlive());
+        }
 
-		public void StopKeepAliveRoutine()
-		{
-			if (_keepAliveRoutine != null)
-			{
-				StopCoroutine(_keepAliveRoutine);
-			}
-		}
+        public void StopKeepAliveRoutine()
+        {
+            if (_keepAliveRoutine != null)
+            {
+                StopCoroutine(_keepAliveRoutine);
+            }
+        }
 
-		public IEnumerator KeepAlive()
-		{
-			while (true)
-			{
-				PingEndPoint("fika.keepalive");
-				NetClient.PollEvents();
-				NetClient.NatPunchModule.PollEvents();
+        public IEnumerator KeepAlive()
+        {
+            while (true)
+            {
+                PingEndPoint("fika.keepalive");
+                NetClient.PollEvents();
+                NetClient.NatPunchModule.PollEvents();
 
-				yield return new WaitForSeconds(1.0f);
-			}
-		}
+                yield return new WaitForSeconds(1.0f);
+            }
+        }
 
-		public void OnConnectionRequest(ConnectionRequest request)
-		{
-			// Do nothing
-		}
+        public void OnConnectionRequest(ConnectionRequest request)
+        {
+            // Do nothing
+        }
 
-		public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
-		{
-			// Do nothing
-		}
+        public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
+        {
+            // Do nothing
+        }
 
-		public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
-		{
-			// Do nothing
-		}
+        public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
+        {
+            // Do nothing
+        }
 
-		public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
-		{
-			// Do nothing
-		}
+        public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
+        {
+            // Do nothing
+        }
 
-		public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
-		{
-			if (reader.TryGetString(out string result))
-			{
-				switch (result)
-				{
-					case "fika.hello":
-						Received = true;
-						FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
-						FikaBackendUtils.RemotePort = remoteEndPoint.Port;
-						FikaBackendUtils.LocalPort = NetClient.LocalPort;
-						break;
-					case "fika.keepalive":
-						// Do nothing
-						break;
-					case "fika.reject":
-						Rejected = true;
-						break;
-					default:
-						logger.LogError("Data was not as expected");
-						break;
-				}
-			}
-			else
-			{
-				logger.LogError("Could not parse string");
-			}
-		}
+        public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+        {
+            if (reader.TryGetString(out string result))
+            {
+                switch (result)
+                {
+                    case "fika.hello":
+                        Received = true;
+                        FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
+                        FikaBackendUtils.RemotePort = remoteEndPoint.Port;
+                        FikaBackendUtils.LocalPort = NetClient.LocalPort;
+                        break;
+                    case "fika.keepalive":
+                        // Do nothing
+                        break;
+                    case "fika.reject":
+                        Rejected = true;
+                        break;
+                    default:
+                        logger.LogError("Data was not as expected");
+                        break;
+                }
+            }
+            else
+            {
+                logger.LogError("Could not parse string");
+            }
+        }
 
-		public void OnPeerConnected(NetPeer peer)
-		{
-			// Do nothing
-		}
+        public void OnPeerConnected(NetPeer peer)
+        {
+            // Do nothing
+        }
 
-		public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
-		{
-			// Do nothing
-		}
+        public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
+        {
+            // Do nothing
+        }
 
-		public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-		{
-			// Do nothing
-		}
+        public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
+        {
+            // Do nothing
+        }
 
-		public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
-		{
-			// Do nothing
-		}
+        public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
+        {
+            // Do nothing
+        }
 
-		public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
-		{
-			logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+        public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
+        {
+            logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
 
-			localEndPoint = natLocalEndPoint;
-			remoteEndPoint = natRemoteEndPoint;
+            localEndPoint = natLocalEndPoint;
+            remoteEndPoint = natRemoteEndPoint;
 
-			Task.Run(async () =>
-			{
-				NetDataWriter data = new();
-				data.Put("fika.hello");
+            Task.Run(async () =>
+            {
+                NetDataWriter data = new();
+                data.Put("fika.hello");
 
-				for (int i = 0; i < 20; i++)
-				{
-					NetClient.SendUnconnectedMessage(data, localEndPoint);
-					NetClient.SendUnconnectedMessage(data, remoteEndPoint);
-					await Task.Delay(250);
-				}
-			});
-		}
-	}
+                for (int i = 0; i < 20; i++)
+                {
+                    NetClient.SendUnconnectedMessage(data, localEndPoint);
+                    NetClient.SendUnconnectedMessage(data, remoteEndPoint);
+                    await Task.Delay(250);
+                }
+            });
+        }
+    }
 }

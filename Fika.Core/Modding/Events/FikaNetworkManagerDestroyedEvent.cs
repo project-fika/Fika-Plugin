@@ -2,13 +2,13 @@
 
 namespace Fika.Core.Modding.Events
 {
-	public class FikaNetworkManagerDestroyedEvent : FikaEvent
-	{
-		public IFikaNetworkManager Manager { get; }
+    public class FikaNetworkManagerDestroyedEvent : FikaEvent
+    {
+        public IFikaNetworkManager Manager { get; }
 
-		public FikaNetworkManagerDestroyedEvent(IFikaNetworkManager server)
-		{
-			Manager = server;
-		}
-	}
+        public FikaNetworkManagerDestroyedEvent(IFikaNetworkManager server)
+        {
+            Manager = server;
+        }
+    }
 }

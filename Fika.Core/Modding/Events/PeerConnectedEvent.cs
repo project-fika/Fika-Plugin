@@ -3,15 +3,15 @@ using LiteNetLib;
 
 namespace Fika.Core.Modding.Events
 {
-	public class PeerConnectedEvent : FikaEvent
-	{
-		public NetPeer Peer { get; }
-		public IFikaNetworkManager NetworkManager { get; }
+    public class PeerConnectedEvent : FikaEvent
+    {
+        public NetPeer Peer { get; }
+        public IFikaNetworkManager NetworkManager { get; }
 
-		internal PeerConnectedEvent(NetPeer peer, IFikaNetworkManager networkManager)
-		{
-			Peer = peer;
-			NetworkManager = networkManager;
-		}
-	}
+        internal PeerConnectedEvent(NetPeer peer, IFikaNetworkManager networkManager)
+        {
+            Peer = peer;
+            NetworkManager = networkManager;
+        }
+    }
 }

@@ -2,13 +2,13 @@
 
 namespace Fika.Core.Networking.Http
 {
-	[DataContract]
-	public struct StartDedicatedResponse
-	{
-		[DataMember(Name = "matchId")]
-		public string MatchId { get; set; }
+    [DataContract]
+    public struct StartDedicatedResponse
+    {
+        [DataMember(Name = "matchId")]
+        public string MatchId { get; set; }
 
-		[DataMember(Name = "error")]
-		public string Error { get; set; }
-	}
+        [DataMember(Name = "error")]
+        public string Error { get; set; }
+    }
 }

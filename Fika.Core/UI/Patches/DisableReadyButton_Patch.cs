@@ -7,23 +7,23 @@ using System.Reflection;
 
 namespace Fika.Core.UI
 {
-	/// <summary>
-	/// Created by: Lacyway
-	/// </summary>
-	public class DisableReadyButton_Patch : ModulePatch
-	{
-		protected override MethodBase GetTargetMethod()
-		{
-			return typeof(MatchMakerSelectionLocationScreen).GetMethod(nameof(MatchMakerSelectionLocationScreen.Awake));
-		}
+    /// <summary>
+    /// Created by: Lacyway
+    /// </summary>
+    public class DisableReadyButton_Patch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(MatchMakerSelectionLocationScreen).GetMethod(nameof(MatchMakerSelectionLocationScreen.Awake));
+        }
 
-		[PatchPostfix]
-		static void Postfix(DefaultUIButton ____readyButton)
-		{
-			____readyButton.SetDisabledTooltip("Disabled with Fika");
-			____readyButton.SetEnabledTooltip("Disabled with Fika");
+        [PatchPostfix]
+        static void Postfix(DefaultUIButton ____readyButton)
+        {
+            ____readyButton.SetDisabledTooltip("Disabled with Fika");
+            ____readyButton.SetEnabledTooltip("Disabled with Fika");
 
-			____readyButton.Interactable = false;
-		}
-	}
+            ____readyButton.Interactable = false;
+        }
+    }
 }

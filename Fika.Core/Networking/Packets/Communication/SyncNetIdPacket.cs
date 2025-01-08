@@ -2,21 +2,21 @@
 
 namespace Fika.Core.Networking
 {
-	public struct SyncNetIdPacket(string profileId, int netId) : INetSerializable
-	{
-		public string ProfileId = profileId;
-		public int NetId = netId;
+    public struct SyncNetIdPacket(string profileId, int netId) : INetSerializable
+    {
+        public string ProfileId = profileId;
+        public int NetId = netId;
 
-		public void Deserialize(NetDataReader reader)
-		{
-			ProfileId = reader.GetString();
-			NetId = reader.GetInt();
-		}
+        public void Deserialize(NetDataReader reader)
+        {
+            ProfileId = reader.GetString();
+            NetId = reader.GetInt();
+        }
 
-		public void Serialize(NetDataWriter writer)
-		{
-			writer.Put(ProfileId);
-			writer.Put(NetId);
-		}
-	}
+        public void Serialize(NetDataWriter writer)
+        {
+            writer.Put(ProfileId);
+            writer.Put(NetId);
+        }
+    }
 }

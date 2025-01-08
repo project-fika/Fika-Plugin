@@ -2,14 +2,14 @@
 
 namespace Fika.Core.Coop.HostClasses
 {
-	public class CoopHostGrenade : Grenade
-	{
-		public override bool HasNetData
-		{
-			get
-			{
-				return true;
-			}
-		}
-	}
+    public class CoopHostGrenade : Grenade
+    {
+        public override bool HasNetData
+        {
+            get
+            {
+                return true;
+            }
+        }
+    }
 }

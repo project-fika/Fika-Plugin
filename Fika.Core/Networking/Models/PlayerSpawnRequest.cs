@@ -3,23 +3,23 @@ using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Http
 {
-	[DataContract]
-	public struct PlayerSpawnRequest
-	{
-		[DataMember(Name = "serverId")]
-		public string ServerId;
+    [DataContract]
+    public struct PlayerSpawnRequest
+    {
+        [DataMember(Name = "serverId")]
+        public string ServerId;
 
-		[DataMember(Name = "profileId")]
-		public string ProfileId;
+        [DataMember(Name = "profileId")]
+        public string ProfileId;
 
-		[DataMember(Name = "groupId")]
-		public string GroupId;
+        [DataMember(Name = "groupId")]
+        public string GroupId;
 
-		public PlayerSpawnRequest(string profileId, string groupId)
-		{
-			ServerId = CoopHandler.GetServerId();
-			ProfileId = profileId;
-			GroupId = groupId;
-		}
-	}
+        public PlayerSpawnRequest(string profileId, string groupId)
+        {
+            ServerId = CoopHandler.GetServerId();
+            ProfileId = profileId;
+            GroupId = groupId;
+        }
+    }
 }

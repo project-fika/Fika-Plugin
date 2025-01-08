@@ -2,18 +2,18 @@
 
 namespace Fika.Core.Networking
 {
-	public struct AssignNetIdPacket : INetSerializable
-	{
-		public int NetId;
+    public struct AssignNetIdPacket : INetSerializable
+    {
+        public int NetId;
 
-		public void Deserialize(NetDataReader reader)
-		{
-			NetId = reader.GetInt();
-		}
+        public void Deserialize(NetDataReader reader)
+        {
+            NetId = reader.GetInt();
+        }
 
-		public void Serialize(NetDataWriter writer)
-		{
-			writer.Put(NetId);
-		}
-	}
+        public void Serialize(NetDataWriter writer)
+        {
+            writer.Put(NetId);
+        }
+    }
 }
