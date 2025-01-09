@@ -53,18 +53,22 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
     {
-        public string InfiltrationPoint;
+        public string InfiltrationPoint { get; internal set; }
         public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
         public string ExitLocation { get; set; }
-        public ISpawnSystem SpawnSystem;
+        public ISpawnSystem SpawnSystem { get; internal set; }
         public Dictionary<string, Player> Bots = [];
         public List<int> ExtractedPlayers { get; } = [];
-        public string SpawnId;
-        public bool InteractablesInitialized { get; set; }
-        public bool HasReceivedLoot { get; set; }
-        public List<ThrowWeapItemClass> ThrownGrenades;
+        public string SpawnId { get; internal set; }
+        public bool InteractablesInitialized { get; internal set; }
+        public bool HasReceivedLoot { get; internal set; }
+        public List<ThrowWeapItemClass> ThrownGrenades { get; internal set; }
         public bool WeatherReady { get; internal set; }
-        public bool RaidStarted { get; set; }
+        public bool RaidStarted { get; internal set; }
+        public FikaDynamicAI DynamicAI { get; private set; }
+        public RaidSettings RaidSettings { get; private set; }
+        public byte[] HostLootItems { get; private set; }
+        public GClass1315 LootItems { get; internal set; } = [];
 
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
@@ -85,11 +89,7 @@ namespace Fika.Core.Coop.GameMode
         private TimeSpan? sessionTime;
         private BotStateManager botStateManager;
         private ESeason season;
-
-        public FikaDynamicAI DynamicAI { get; private set; }
-        public RaidSettings RaidSettings { get; private set; }
-        public byte[] HostLootItems { get; private set; }
-        public GClass1315 LootItems { get; internal set; } = [];
+        
         BossSpawnScenario IBotGame.BossSpawnScenario
         {
             get
@@ -131,6 +131,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 season = value;
                 Logger.LogInfo($"Setting Season to: {value}");
+                WeatherReady = true;
             }
         }
 
@@ -1606,8 +1607,7 @@ namespace Fika.Core.Coop.GameMode
             if (Location_0.Id == "laboratory")
             {
                 Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
-                Season = ESeason.Summer; 
-                WeatherReady = true;
+                Season = ESeason.Summer;
                 OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
                 return;
@@ -1635,7 +1635,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            WeatherReady = true;
             OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
         }
 
@@ -1671,10 +1670,13 @@ namespace Fika.Core.Coop.GameMode
             FikaClient client = Singleton<FikaClient>.Instance;
             client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 
-            while (WeatherClasses == null)
+            while (!WeatherReady)
             {
                 await Task.Delay(1000);
-                client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                if (!WeatherReady)
+                {
+                    client.SendData(ref packet, DeliveryMethod.ReliableUnordered); 
+                }
             }
         }
 
