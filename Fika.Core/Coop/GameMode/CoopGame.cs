@@ -1620,8 +1620,8 @@ namespace Fika.Core.Coop.GameMode
                 if (isServer)
                 {
                     GClass1310 weather = await iSession.WeatherRequest();
-                    Season = weather.Season;
-                    SeasonsSettings = weather.SeasonsSettings;
+                    Season = iSession.Season;
+                    SeasonsSettings = iSession.SeasonsSettings;
                     if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
                     {
                         WeatherClasses = weather.Weathers;
