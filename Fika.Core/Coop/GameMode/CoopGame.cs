@@ -72,7 +72,7 @@ namespace Fika.Core.Coop.GameMode
         public FikaDynamicAI DynamicAI { get; private set; }
         public RaidSettings RaidSettings { get; private set; }
         public byte[] HostLootItems { get; private set; }
-        public GClass1315 LootItems { get; internal set; } = [];
+        public GClass1328 LootItems { get; internal set; } = [];
 
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
@@ -93,11 +93,6 @@ namespace Fika.Core.Coop.GameMode
         private TimeSpan? sessionTime;
         private BotStateManager botStateManager;
         private ESeason season;
-
-        public FikaDynamicAI DynamicAI { get; private set; }
-        public RaidSettings RaidSettings { get; private set; }
-        public byte[] HostLootItems { get; private set; }
-        public GClass1328 LootItems { get; internal set; } = [];
         BossSpawnScenario IBotGame.BossSpawnScenario
         {
             get
@@ -1658,12 +1653,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogInfo("Generating and initializing weather...");
                 if (isServer)
                 {
-                    Task<GClass1323> weatherTask = iSession.WeatherRequest();
-                    while (!weatherTask.IsCompleted)
-                    {
-                        yield return new WaitForEndOfFrame();
-                    }
-                    GClass1323 weather = weatherTask.Result;
+                    GClass1323 weather = await iSession.WeatherRequest();
                     Season = weather.Season;
                     SeasonsSettings = weather.SeasonsSettings;
                     if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
@@ -1674,14 +1664,11 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
-                    Task getWeather = GetWeather();
-                    while (!getWeather.IsCompleted)
-                    {
-                        yield return new WaitForEndOfFrame();
-                    }
+                    await GetWeather();
                     WeatherController.Instance.method_0(WeatherClasses);
                 }
             }
+        }
 
         public override IEnumerator vmethod_5(Action runCallback)
         {
