@@ -55,15 +55,15 @@ namespace Fika.Core.Coop.GameMode
     {
         public string InfiltrationPoint;
         public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
-        public string ExitLocation { get; set; } = null;
+        public string ExitLocation { get; set; }
         public ISpawnSystem SpawnSystem;
         public Dictionary<string, Player> Bots = [];
         public List<int> ExtractedPlayers { get; } = [];
         public string SpawnId;
-        public bool InteractablesInitialized { get; set; } = false;
-        public bool HasReceivedLoot { get; set; } = false;
+        public bool InteractablesInitialized { get; set; }
+        public bool HasReceivedLoot { get; set; }
         public List<ThrowWeapItemClass> ThrownGrenades;
-        public bool WeatherReady;
+        public bool WeatherReady { get; internal set; }
         public bool RaidStarted { get; set; }
 
         private readonly Dictionary<int, int> botQueue = [];
@@ -1479,6 +1479,8 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override async Task vmethod_1(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem)
         {
+            await GenerateWeathers();
+
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             gameWorld.RegisterRestrictableZones();
 
@@ -1599,7 +1601,7 @@ namespace Fika.Core.Coop.GameMode
             GameWorld_0.RegisterBorderZones();
         }
 
-        public override IEnumerator vmethod_5(Action runCallback)
+        private async Task GenerateWeathers()
         {
             if (WeatherController.Instance != null)
             {
@@ -1607,12 +1609,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogInfo("Generating and initializing weather...");
                 if (isServer)
                 {
-                    Task<GClass1310> weatherTask = iSession.WeatherRequest();
-                    while (!weatherTask.IsCompleted)
-                    {
-                        yield return new WaitForEndOfFrame();
-                    }
-                    GClass1310 weather = weatherTask.Result;
+                    GClass1310 weather = await iSession.WeatherRequest();
                     Season = weather.Season;
                     SeasonsSettings = weather.SeasonsSettings;
                     if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
@@ -1623,28 +1620,27 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
-                    Task getWeather = GetWeather();
-                    while (!getWeather.IsCompleted)
-                    {
-                        yield return new WaitForEndOfFrame();
-                    }
+                    await GetWeather();
                     WeatherController.Instance.method_0(WeatherClasses);
                 }
             }
 
+            WeatherReady = true;
+            OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+        }
+
+        public override IEnumerator vmethod_5(Action runCallback)
+        {
             SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
             GameWorld_0.TriggersModule = gameObject.AddComponent<LocalClientTriggersModule>();
             GameWorld_0.FillLampControllers();
 
-            WeatherReady = true;
-            OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
-
             Class442 seasonController = new();
             GameWorld_0.GInterface29_0 = seasonController;
 
 #if DEBUG
-            Logger.LogWarning("Running season handler");
+            Logger.LogWarning($"Running season handler for season: {Season}");
 #endif
             Task runSeason = seasonController.Run(Season, SeasonsSettings);
             while (!runSeason.IsCompleted)
