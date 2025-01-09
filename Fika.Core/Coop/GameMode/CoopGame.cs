@@ -1656,7 +1656,7 @@ namespace Fika.Core.Coop.GameMode
                         WeatherController.Instance.method_0(WeatherClasses);
                     }
                 }
-                else if (!isServer)
+                else
                 {
                     Task getWeather = GetWeather();
                     while (!getWeather.IsCompleted)
