@@ -1603,6 +1603,16 @@ namespace Fika.Core.Coop.GameMode
 
         private async Task GenerateWeathers()
         {
+            if (Location_0.Id == "laboratory")
+            {
+                Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
+                Season = ESeason.Summer; 
+                WeatherReady = true;
+                OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+
+                return;
+            }
+
             if (WeatherController.Instance != null)
             {
                 SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
