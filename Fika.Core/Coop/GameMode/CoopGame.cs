@@ -57,18 +57,22 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
     {
-        public string InfiltrationPoint;
+        public string InfiltrationPoint { get; internal set; }
         public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
-        public string ExitLocation { get; set; } = null;
-        public ISpawnSystem SpawnSystem;
+        public string ExitLocation { get; set; }
+        public ISpawnSystem SpawnSystem { get; internal set; }
         public Dictionary<string, Player> Bots = [];
         public List<int> ExtractedPlayers { get; } = [];
-        public string SpawnId;
-        public bool InteractablesInitialized { get; set; } = false;
-        public bool HasReceivedLoot { get; set; } = false;
-        public List<ThrowWeapItemClass> ThrownGrenades;
-        public bool WeatherReady;
-        public bool RaidStarted { get; set; }
+        public string SpawnId { get; internal set; }
+        public bool InteractablesInitialized { get; internal set; }
+        public bool HasReceivedLoot { get; internal set; }
+        public List<ThrowWeapItemClass> ThrownGrenades { get; internal set; }
+        public bool WeatherReady { get; internal set; }
+        public bool RaidStarted { get; internal set; }
+        public FikaDynamicAI DynamicAI { get; private set; }
+        public RaidSettings RaidSettings { get; private set; }
+        public byte[] HostLootItems { get; private set; }
+        public GClass1315 LootItems { get; internal set; } = [];
 
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
@@ -135,6 +139,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 season = value;
                 Logger.LogInfo($"Setting Season to: {value}");
+                WeatherReady = true;
             }
         }
 
@@ -1514,6 +1519,8 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override async Task vmethod_1(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem)
         {
+            await GenerateWeathers();
+
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             gameWorld.RegisterRestrictableZones();
 
@@ -1634,8 +1641,17 @@ namespace Fika.Core.Coop.GameMode
             GameWorld_0.RegisterBorderZones();
         }
 
-        public override IEnumerator vmethod_5(Action runCallback)
+        private async Task GenerateWeathers()
         {
+            if (Location_0.Id == "laboratory")
+            {
+                Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
+                Season = ESeason.Summer;
+                OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+
+                return;
+            }
+
             if (WeatherController.Instance != null)
             {
                 SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
@@ -1667,6 +1683,8 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
+        public override IEnumerator vmethod_5(Action runCallback)
+        {
             SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
             Task musicTask = Singleton<GUISounds>.Instance.method_10(false, CancellationToken.None);
@@ -1689,7 +1707,7 @@ namespace Fika.Core.Coop.GameMode
             GameWorld_0.GInterface29_0 = seasonController;
 
 #if DEBUG
-            Logger.LogWarning("Running season handler");
+            Logger.LogWarning($"Running season handler for season: {Season}");
 #endif
             Task runSeason = seasonController.Run(Season, SeasonsSettings);
             while (!runSeason.IsCompleted)
@@ -1714,10 +1732,13 @@ namespace Fika.Core.Coop.GameMode
             FikaClient client = Singleton<FikaClient>.Instance;
             client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
 
-            while (WeatherClasses == null)
+            while (!WeatherReady)
             {
                 await Task.Delay(1000);
-                client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                if (!WeatherReady)
+                {
+                    client.SendData(ref packet, DeliveryMethod.ReliableUnordered); 
+                }
             }
         }
 
