@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace Fika.Core.Networking.Http
 {
     [DataContract]
-    public struct StartDedicatedRequest
+    public struct StartHeadlessRequest
     {
         [DataMember(Name = "time")]
         public EDateTime Time { get; set; }

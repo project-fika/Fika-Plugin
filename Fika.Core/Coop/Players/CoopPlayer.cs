@@ -115,9 +115,9 @@ namespace Fika.Core.Coop.Players
 
             if (FikaBackendUtils.IsServer)
             {
-                if (FikaBackendUtils.IsDedicated)
+                if (FikaBackendUtils.IsHeadless)
                 {
-                    player.PacketSender = player.gameObject.AddComponent<DedicatedPacketSender>();
+                    player.PacketSender = player.gameObject.AddComponent<HeadlessPacketSender>();
                 }
                 else
                 {
@@ -1077,11 +1077,11 @@ namespace Fika.Core.Coop.Players
 
         public void SetupMainPlayer()
         {
-            // Set own group id, ignore if dedicated
-            if (FikaBackendUtils.IsDedicated)
+            // Set own group id, set different group to headless client
+            if (FikaBackendUtils.IsHeadless)
             {
-                Profile.Info.GroupId = "DEDICATED";
-                Profile.Info.GroupId = "DEDICATED";
+                Profile.Info.GroupId = "HEADLESS";
+                Profile.Info.GroupId = "HEADLESS";
             }
             else
             {

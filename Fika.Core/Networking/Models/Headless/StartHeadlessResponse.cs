@@ -3,7 +3,7 @@
 namespace Fika.Core.Networking.Http
 {
     [DataContract]
-    public struct StartDedicatedResponse
+    public struct StartHeadlessResponse
     {
         [DataMember(Name = "matchId")]
         public string MatchId { get; set; }

@@ -165,7 +165,7 @@ namespace Fika.Core.Coop.Players
             observedTraverse.Field<GClass893>("gclass893_0").Value = new();
             player.cullingHandler = observedTraverse.Field<GClass893>("gclass893_0").Value;
             player.cullingHandler.Initialize(player, player.PlayerBones);
-            if (FikaBackendUtils.IsDedicated || profile.IsPlayerProfile())
+            if (FikaBackendUtils.IsHeadless || profile.IsPlayerProfile())
             {
                 player.cullingHandler.Disable();
             }
@@ -1097,7 +1097,7 @@ namespace Fika.Core.Coop.Players
             MovementContext.PlayerAnimator.SetIsGrounded(true);
         }
 
-        public void InitObservedPlayer(bool isDedicatedHost)
+        public void InitObservedPlayer(bool isHeadlessClient)
         {
             if (gameObject.name.StartsWith("Bot_"))
             {
@@ -1136,7 +1136,7 @@ namespace Fika.Core.Coop.Players
 
             if (!IsObservedAI)
             {
-                if (!isDedicatedHost)
+                if (!isHeadlessClient)
                 {
                     Profile.Info.GroupId = "Fika";
                     Profile.Info.TeamId = "Fika";
@@ -1155,7 +1155,7 @@ namespace Fika.Core.Coop.Players
 
                 InitVaultingAudioControllers(ObservedVaultingParameters);
 
-                if (FikaPlugin.ShowNotifications.Value && !isDedicatedHost)
+                if (FikaPlugin.ShowNotifications.Value && !isHeadlessClient)
                 {
                     NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
                         ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),

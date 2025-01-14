@@ -14,15 +14,15 @@ namespace Fika.Core.Networking.Http
         [DataMember(Name = "natPunch")]
         public bool NatPunch;
 
-        [DataMember(Name = "isDedicated")]
-        public bool IsDedicated;
+        [DataMember(Name = "isHeadless")]
+        public bool IsHeadless;
 
-        public GetHostResponse(string[] ips, int port, bool natPunch, bool isDedicated)
+        public GetHostResponse(string[] ips, int port, bool natPunch, bool isHeadless)
         {
             Ips = ips;
             Port = port;
             NatPunch = natPunch;
-            IsDedicated = isDedicated;
+            IsHeadless = isHeadless;
         }
     }
 }

@@ -34,10 +34,10 @@ namespace Fika.Core.Coop.Utils
         public static string PMCName { get; internal set; }
         public static bool IsScav { get; internal set; }
         public static EMatchmakerType MatchingType { get; internal set; } = EMatchmakerType.Single;
-        public static bool IsDedicated = false;
+        public static bool IsHeadless = false;
         public static bool IsReconnect { get; internal set; }
-        public static bool IsDedicatedGame { get; set; } = false;
-        public static bool IsDedicatedRequester { get; set; }
+        public static bool IsHeadlessGame { get; set; } = false;
+        public static bool IsHeadlessRequester { get; set; }
         public static bool IsTransit { get; internal set; }
         public static bool IsSpectator { get; internal set; }
         public static bool IsHostNatPunch { get; internal set; }
@@ -169,7 +169,7 @@ namespace Fika.Core.Coop.Utils
 
         internal static void AddPartyMembers(Dictionary<Profile, bool> profiles)
         {
-            if (IsDedicated)
+            if (IsHeadless)
             {
                 return;
             }

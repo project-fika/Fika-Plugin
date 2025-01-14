@@ -404,7 +404,7 @@ namespace Fika.Core.Coop.Components
             int netId = spawnObject.NetId;
             MongoID firstId = spawnObject.CurrentId;
             ushort firstOperationId = spawnObject.FirstOperationId;
-            bool isDedicatedProfile = !isAi && profile.IsDedicatedProfile();
+            bool isHeadlessProfile = !isAi && profile.IsHeadlessProfile();
             byte[] healthBytes = spawnObject.HealthBytes;
             bool isZombie = spawnObject.IsZombie;
 
@@ -444,7 +444,7 @@ namespace Fika.Core.Coop.Components
                 logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
             }
 
-            if (!isAi && !isDedicatedProfile && !HumanPlayers.Contains(otherPlayer))
+            if (!isAi && !isHeadlessProfile && !HumanPlayers.Contains(otherPlayer))
             {
                 HumanPlayers.Add(otherPlayer);
             }
@@ -487,7 +487,7 @@ namespace Fika.Core.Coop.Components
                 profile.SetSpawnedInSession(false);
             }
 
-            otherPlayer.InitObservedPlayer(isDedicatedProfile);
+            otherPlayer.InitObservedPlayer(isHeadlessProfile);
 
 #if DEBUG
             logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");

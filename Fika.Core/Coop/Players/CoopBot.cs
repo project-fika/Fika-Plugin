@@ -34,7 +34,7 @@ namespace Fika.Core.Coop.Players
         {
             get
             {
-                return FikaBackendUtils.IsDedicated || OnScreen;
+                return FikaBackendUtils.IsHeadless || OnScreen;
             }
             set
             {
@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.Players
             botTraverse.Field<GClass893>("gclass893_0").Value = new();
             botTraverse.Field<GClass893>("gclass893_0").Value.Initialize(player, player.PlayerBones);
 
-            if (FikaBackendUtils.IsDedicated)
+            if (FikaBackendUtils.IsHeadless)
             {
                 botTraverse.Field<GClass893>("gclass893_0").Value.SetMode(GClass892.EMode.Disabled);
             }

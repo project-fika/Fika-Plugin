@@ -136,9 +136,9 @@ namespace Fika.Core.UI.Custom
 
         private void CreateMatchMakerUI()
         {
-            FikaBackendUtils.IsDedicatedRequester = false;
+            FikaBackendUtils.IsHeadlessRequester = false;
 
-            GetDedicatedStatusResponse response = FikaRequestHandler.GetDedicatedStatus();
+            GetHeadlessStatusResponse response = FikaRequestHandler.GetHeadlessStatus();
 
             GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("newmatchmakerui").LoadAsset<GameObject>("NewMatchMakerUI");
             GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
@@ -277,16 +277,16 @@ namespace Fika.Core.UI.Custom
                 {
                     ToggleLoading(true);
 
-                    FikaPlugin.DedicatedRaidWebSocket ??= new DedicatedRaidWebSocketClient();
+                    FikaPlugin.HeadlessRaidWebSocket ??= new HeadlessRaidWebSocketClient();
 
-                    if (!FikaPlugin.DedicatedRaidWebSocket.Connected)
+                    if (!FikaPlugin.HeadlessRaidWebSocket.Connected)
                     {
-                        FikaPlugin.DedicatedRaidWebSocket.Connect();
+                        FikaPlugin.HeadlessRaidWebSocket.Connect();
                     }
 
                     RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
-                    StartDedicatedRequest request = new()
+                    StartHeadlessRequest request = new()
                     {
                         Time = raidSettings.SelectedDateTime,
                         LocationId = raidSettings.SelectedLocation._Id,
@@ -299,14 +299,14 @@ namespace Fika.Core.UI.Custom
                         CustomWeather = OfflineRaidSettingsMenuPatch_Override.UseCustomWeather
                     };
 
-                    StartDedicatedResponse response = await FikaRequestHandler.StartDedicated(request);
-                    FikaBackendUtils.IsDedicatedRequester = true;
+                    StartHeadlessResponse response = await FikaRequestHandler.StartHeadless(request);
+                    FikaBackendUtils.IsHeadlessRequester = true;
 
                     if (!string.IsNullOrEmpty(response.Error))
                     {
                         PreloaderUI.Instance.ShowErrorScreen(LocaleUtils.UI_DEDICATED_ERROR.Localized(), response.Error);
                         ToggleLoading(false);
-                        FikaBackendUtils.IsDedicatedRequester = false;
+                        FikaBackendUtils.IsHeadlessRequester = false;
                     }
                     else
                     {
@@ -525,18 +525,18 @@ namespace Fika.Core.UI.Custom
                     }
                 }
 
-                bool isDedicated = entry.HostUsername.StartsWith("dedicated_");
+                bool isHeadless = entry.HostUsername.StartsWith("headless_");
 
                 // player label
                 GameObject playerLabel = GameObject.Find("PlayerLabel");
                 playerLabel.name = "PlayerLabel" + i;
-                string sessionName = isDedicated ? "Dedicated" : entry.HostUsername;
+                string sessionName = isHeadless ? "Headless" : entry.HostUsername;
                 playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
 
                 // players count label
                 GameObject playerCountLabel = GameObject.Find("PlayerCountLabel");
                 playerCountLabel.name = "PlayerCountLabel" + i;
-                int playerCount = isDedicated ? entry.PlayerCount - 1 : entry.PlayerCount;
+                int playerCount = isHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
                 playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
 
                 // player join button

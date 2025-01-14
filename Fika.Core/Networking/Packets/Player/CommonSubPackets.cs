@@ -388,8 +388,8 @@ namespace Fika.Core.Networking
 
             public void Execute(CoopPlayer player)
             {
-                // Dedicated can get stuck in permanent high-velocity states due to vaulting, skip it
-                if (!FikaBackendUtils.IsDedicated)
+                // A headless client can get stuck in permanent high-velocity states due to vaulting, skip it
+                if (!FikaBackendUtils.IsHeadless)
                 {
                     player.DoObservedVault(ref this);
                 }

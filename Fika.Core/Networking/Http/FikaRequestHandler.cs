@@ -186,19 +186,19 @@ namespace Fika.Core.Networking.Http
             return await GetJsonAsync<JObject>("/fika/profile/download");
         }
 
-        public static async Task<StartDedicatedResponse> StartDedicated(StartDedicatedRequest request)
+        public static async Task<StartHeadlessResponse> StartHeadless(StartHeadlessRequest request)
         {
-            return await PostJsonAsync<StartDedicatedRequest, StartDedicatedResponse>("/fika/raid/dedicated/start", request);
+            return await PostJsonAsync<StartHeadlessRequest, StartHeadlessResponse>("/fika/raid/headless/start", request);
         }
 
-        public static async Task<SetDedicatedStatusResponse> SetDedicatedStatus(SetDedicatedStatusRequest request)
+        public static async Task<SetHeadlessStatusResponse> SetHeadlessStatus(SetHeadlessStatusRequest request)
         {
-            return await PostJsonAsync<SetDedicatedStatusRequest, SetDedicatedStatusResponse>("/fika/raid/dedicated/status", request);
+            return await PostJsonAsync<SetHeadlessStatusRequest, SetHeadlessStatusResponse>("/fika/raid/headless/status", request);
         }
 
-        public static GetDedicatedStatusResponse GetDedicatedStatus()
+        public static GetHeadlessStatusResponse GetHeadlessStatus()
         {
-            return GetJson<GetDedicatedStatusResponse>("/fika/raid/dedicated/getstatus");
+            return GetJson<GetHeadlessStatusResponse>("/fika/raid/headless/getstatus");
         }
 
         public static async Task RegisterPlayer(RegisterPlayerRequest request)

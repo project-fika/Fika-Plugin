@@ -12,9 +12,9 @@ using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket
 {
-    public class DedicatedRaidWebSocketClient
+    public class HeadlessRaidWebSocketClient
     {
-        private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.DedicatedWebSocket");
+        private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.HeadlessWebSocket");
 
         public string Host { get; set; }
         public string Url { get; set; }
@@ -29,11 +29,11 @@ namespace Fika.Core.Networking.Websocket
 
         private WebSocket webSocket;
 
-        public DedicatedRaidWebSocketClient()
+        public HeadlessRaidWebSocketClient()
         {
             Host = RequestHandler.Host.Replace("http", "ws");
             SessionId = RequestHandler.SessionId;
-            Url = $"{Host}/fika/dedicatedraidservice/";
+            Url = $"{Host}/fika/headlessraidservice/";
 
             webSocket = new WebSocket(Url)
             {
@@ -72,7 +72,7 @@ namespace Fika.Core.Networking.Websocket
 
         private void WebSocket_OnOpen(object sender, EventArgs e)
         {
-            logger.LogInfo("Connected to FikaDedicatedRaidWebSocket as client");
+            logger.LogInfo("Connected to FikaHeadlessRaidWebSocket as client");
         }
 
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
@@ -99,7 +99,7 @@ namespace Fika.Core.Networking.Websocket
 
             switch (type)
             {
-                case "fikaDedicatedJoinMatch":
+                case "fikaHeadlessJoinMatch":
                     string matchId = jsonObject.Value<string>("matchId");
 
                     MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;
@@ -118,10 +118,10 @@ namespace Fika.Core.Networking.Websocket
                     }
                     else
                     {
-                        PreloaderUI.Instance.ShowErrorScreen("Fika Dedicated Error", "Received fikaJoinMatch WS event but there was no matchId");
+                        PreloaderUI.Instance.ShowErrorScreen("Fika Headless Error", "Received fikaJoinMatch WS event but there was no matchId");
                     }
 
-                    FikaPlugin.DedicatedRaidWebSocket.Close();
+                    FikaPlugin.HeadlessRaidWebSocket.Close();
 
                     break;
             }

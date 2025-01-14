@@ -20,7 +20,7 @@ namespace Fika.Core.Networking.Websocket.Notifications
             get
             {
                 return string.Format(LocaleUtils.UI_NOTIFICATION_STARTED_RAID.Localized(),
-                    ColorizeText(EColor.GREEN, Nickname.StartsWith("dedicated_") ? "Dedicated Client" : Nickname),
+                    ColorizeText(EColor.GREEN, Nickname.StartsWith("headless_") ? "Headless Client" : Nickname),
                     ColorizeText(EColor.BLUE, Location.Localized()));
             }
         }

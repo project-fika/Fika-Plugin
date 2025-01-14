@@ -863,7 +863,7 @@ namespace Fika.Core.Coop.GameMode
                 profile.SetSpawnedInSession(false);
             }
 
-            statisticsManager = FikaBackendUtils.IsDedicated ? new ObservedStatisticsManager() : new GClass2028();
+            statisticsManager = FikaBackendUtils.IsHeadless ? new ObservedStatisticsManager() : new GClass2028();
 
             CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
@@ -1179,9 +1179,9 @@ namespace Fika.Core.Coop.GameMode
                 CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
                 CameraClass.Instance.IsActive = false;
 
-                if (FikaBackendUtils.IsDedicated && gameWorld.TransitController is FikaHostTransitController hostController)
+                if (FikaBackendUtils.IsHeadless && gameWorld.TransitController is FikaHostTransitController hostController)
                 {
-                    hostController.SetupDedicatedPlayerTransitStash(player);
+                    hostController.SetupHeadlessPlayerTransitStash(player);
                 }
             }
 
@@ -1472,7 +1472,7 @@ namespace Fika.Core.Coop.GameMode
                 return;
             }
 
-            if (FikaBackendUtils.IsDedicatedRequester)
+            if (FikaBackendUtils.IsHeadlessRequester)
             {
                 startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
             }
@@ -1551,7 +1551,7 @@ namespace Fika.Core.Coop.GameMode
                 };
 
                 botsController_0.SetSettings(numberOfBots, iSession.BackEndConfig.BotPresets, iSession.BackEndConfig.BotWeaponScatterings);
-                if (!FikaBackendUtils.IsDedicated)
+                if (!FikaBackendUtils.IsHeadless)
                 {
                     botsController_0.AddActivePLayer(PlayerOwner.Player);
                 }
@@ -2551,7 +2551,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
                 FikaBackendUtils.IsSpectator = false;
-                FikaBackendUtils.IsDedicatedRequester = false;
+                FikaBackendUtils.IsHeadlessRequester = false;
             }
 
             FikaBackendUtils.RequestFikaWorld = false;

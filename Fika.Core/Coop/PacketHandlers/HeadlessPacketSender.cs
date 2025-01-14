@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.PacketHandlers
 {
-    public class DedicatedPacketSender : MonoBehaviour, IPacketSender
+    public class HeadlessPacketSender : MonoBehaviour, IPacketSender
     {
         private CoopPlayer player;
 

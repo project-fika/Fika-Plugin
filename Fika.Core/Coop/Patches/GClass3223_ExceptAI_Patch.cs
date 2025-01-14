@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.Patches
         {
             if (persons != null)
             {
-                if (FikaBackendUtils.IsDedicated)
+                if (FikaBackendUtils.IsHeadless)
                 {
                     List<IPlayer> humanPlayers = new(Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers);
                     humanPlayers.Remove(Singleton<GameWorld>.Instance.MainPlayer);

@@ -535,7 +535,7 @@ namespace Fika.Core.Coop.FreeCamera
             }
         }
 
-        public void AttachDedicated(CoopPlayer player)
+        public void AttachHeadless(CoopPlayer player)
         {
             FikaPlugin.Instance.FikaLogger.LogInfo("Attaching camera to: " + player.Profile.Info.MainProfileNickname);
             transform.SetParent(player.Transform.Original);

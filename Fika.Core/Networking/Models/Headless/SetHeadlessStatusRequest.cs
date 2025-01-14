@@ -3,15 +3,15 @@
 namespace Fika.Core.Networking.Http
 {
     [DataContract]
-    public struct SetDedicatedStatusRequest
+    public struct SetHeadlessStatusRequest
     {
         [DataMember(Name = "sessionId")]
         public string SessionId { get; set; }
 
         [DataMember(Name = "status")]
-        public DedicatedStatus Status { get; set; }
+        public HeadlessStatus Status { get; set; }
 
-        public SetDedicatedStatusRequest(string sessionId, DedicatedStatus status)
+        public SetHeadlessStatusRequest(string sessionId, HeadlessStatus status)
         {
             SessionId = sessionId;
             Status = status;

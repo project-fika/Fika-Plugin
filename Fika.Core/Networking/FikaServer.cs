@@ -125,7 +125,7 @@ namespace Fika.Core.Networking
         public async Task Init()
         {
             visualProfiles = [];
-            if (!FikaBackendUtils.IsDedicated)
+            if (!FikaBackendUtils.IsHeadless)
             {
                 Profile ownProfile = FikaGlobals.GetProfile(FikaBackendUtils.IsScav);
                 if (ownProfile != null)
@@ -297,7 +297,7 @@ namespace Fika.Core.Networking
                     iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsDedicatedGame);
+            SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadlessGame);
             FikaRequestHandler.UpdateSetHost(body);
         }
 
@@ -1411,7 +1411,7 @@ namespace Fika.Core.Networking
                 TimeSinceLastPeerDisconnected = DateTime.Now;
             }
 
-            if (FikaBackendUtils.IsDedicated)
+            if (FikaBackendUtils.IsHeadless)
             {
                 if (netServer.ConnectedPeersCount == 0)
                 {

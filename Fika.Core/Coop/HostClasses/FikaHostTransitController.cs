@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.HostClasses
             transittedPlayers = [];
         }
 
-        public void SetupDedicatedPlayerTransitStash(LocalPlayer player)
+        public void SetupHeadlessPlayerTransitStash(LocalPlayer player)
         {
             TransferItemsController.InitPlayerStash(player);
             player.UpdateBtrTraderServiceData().HandleExceptions();
@@ -275,7 +275,7 @@ namespace Fika.Core.Coop.HostClasses
             {
                 if (coopPlayer.HealthController.IsAlive)
                 {
-                    if (coopPlayer.IsYourPlayer && FikaBackendUtils.IsDedicated)
+                    if (coopPlayer.IsYourPlayer && FikaBackendUtils.IsHeadless)
                     {
                         continue;
                     }
@@ -368,13 +368,13 @@ namespace Fika.Core.Coop.HostClasses
 
             server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
-            if (FikaBackendUtils.IsDedicated && !dediTransit)
+            if (FikaBackendUtils.IsHeadless && !dediTransit)
             {
-                ExtractDedicatedClient(point);
+                ExtractHeadlessClient(point);
             }
         }
 
-        private void ExtractDedicatedClient(TransitPoint point)
+        private void ExtractHeadlessClient(TransitPoint point)
         {
             Dictionary<string, ProfileKey> keys;
             dediTransit = true;

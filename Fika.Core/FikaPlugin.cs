@@ -72,7 +72,7 @@ namespace Fika.Core
 
         private static readonly Version RequiredServerVersion = new("2.4.0");
 
-        public static DedicatedRaidWebSocketClient DedicatedRaidWebSocket { get; set; }
+        public static HeadlessRaidWebSocketClient HeadlessRaidWebSocket { get; set; }
 
         public static Dictionary<string, string> RespectedPlayersList = new()
         {
@@ -98,7 +98,7 @@ namespace Fika.Core
             { "senko-san",    "creator of SPT, extremely talented dev, a blast to work with ~ TheSparta" },
             { "leaves",       "Super talented person who comes up with the coolest ideas ~ Lacyway"      },
             { "Archangel",    "The 'tbh' guy :pepeChad: ~ Lacyway"                                       },
-            { "trippy",       "One of the chads that made the dedicated client a reality ~ Archangel"    }
+            { "trippy",       "One of the chads that made the headless client a reality ~ Archangel"     }
         };
 
         #region config values
