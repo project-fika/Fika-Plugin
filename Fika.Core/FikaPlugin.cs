@@ -70,6 +70,7 @@ namespace Fika.Core
         public bool LocalesLoaded;
         
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
+        internal FikaNotificationManager NotificationManager { get; set; }
 
         private static readonly Version RequiredServerVersion = new("2.4.0");
 
