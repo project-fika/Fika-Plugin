@@ -2634,12 +2634,6 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public new void method_7(string backendUrl, string locationId, int variantId)
-        {
-            Logger.LogDebug("method_7");
-            return;
-        }
-
         public byte[] GetHostLootItems()
         {
             if (HostLootItems == null || HostLootItems.Length == 0)
