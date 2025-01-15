@@ -9,9 +9,9 @@ namespace Fika.Core.Networking.Http
         public string SessionId { get; set; }
 
         [DataMember(Name = "status")]
-        public HeadlessStatus Status { get; set; }
+        public EHeadlessStatus Status { get; set; }
 
-        public SetHeadlessStatusRequest(string sessionId, HeadlessStatus status)
+        public SetHeadlessStatusRequest(string sessionId, EHeadlessStatus status)
         {
             SessionId = sessionId;
             Status = status;
