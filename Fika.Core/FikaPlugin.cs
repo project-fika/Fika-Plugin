@@ -54,7 +54,6 @@ namespace Fika.Core
     {
         public const string FikaVersion = "1.2.0";
         public static FikaPlugin Instance;
-        public static InternalBundleLoader BundleLoaderPlugin { get; private set; }
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
         public ManualLogSource FikaLogger
@@ -69,6 +68,8 @@ namespace Fika.Core
         public string[] LocalIPs;
         public IPAddress WanIP;
         public bool LocalesLoaded;
+        
+        internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
 
         private static readonly Version RequiredServerVersion = new("2.4.0");
 
@@ -245,7 +246,6 @@ namespace Fika.Core
             Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
 
             BundleLoaderPlugin = new();
-            BundleLoaderPlugin.Create();
 
             BotSettingsRepoAbstractClass.Init();
 

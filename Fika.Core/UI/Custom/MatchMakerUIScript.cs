@@ -140,7 +140,7 @@ namespace Fika.Core.UI.Custom
 
             GetHeadlessStatusResponse response = FikaRequestHandler.GetHeadlessStatus();
 
-            GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("newmatchmakerui").LoadAsset<GameObject>("NewMatchMakerUI");
+            GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.MatchmakerUI);
             GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
             mmGameObject = uiGameObj;
             fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();

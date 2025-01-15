@@ -123,7 +123,7 @@ namespace Fika.Core.UI.Patches
                     }
 
                     // Create the window
-                    GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("senditemmenu").LoadAsset<GameObject>("SendItemMenu");
+                    GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.SendItemMenu);
                     GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
                     uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
                     InventoryScreen.GClass3574 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3574>("ScreenController").Value;

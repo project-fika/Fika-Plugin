@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.UI;
+using Fika.Core.Bundles;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.FreeCamera;
@@ -265,7 +266,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     userData = interactable;
                 }
 
-                GameObject basePingPrefab = PingFactory.AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
+                GameObject basePingPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.Ping);
                 GameObject basePing = GameObject.Instantiate(basePingPrefab);
                 Vector3 hitPoint = hit.point;
                 PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);

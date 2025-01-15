@@ -116,7 +116,7 @@ namespace Fika.Core.UI.Custom
 
         private void CreateMainMenuUI()
         {
-            GameObject mainMenuUIPrefab = InternalBundleLoader.Instance.GetAssetBundle("mainmenuui").LoadAsset<GameObject>("MainMenuUI");
+            GameObject mainMenuUIPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.MainMenuUI);
             GameObject mainMenuUI = GameObject.Instantiate(mainMenuUIPrefab);
             this.mainMenuUI = mainMenuUI.GetComponent<MainMenuUI>();
             playerTemplate = this.mainMenuUI.PlayerTemplate;

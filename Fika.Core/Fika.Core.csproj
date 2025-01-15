@@ -12,23 +12,11 @@
     <Configurations>Debug;Release;GoldMaster</Configurations>
     <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
   </PropertyGroup>
-
   <ItemGroup>
-    <!-- hide files in vs2022 -->
-    <None Remove="Bundles\Files\mainmenuui.bundle" />
-    <None Remove="Bundles\Files\newmatchmakerui.bundle" />
-    <None Remove="Bundles\Files\playerui.bundle" />
-    <None Remove="Bundles\Files\ping.bundle" />
-    <None Remove="Bundles\Files\senditemmenu.bundle" />
+    <None Remove="Bundles\Files\masterbundle.bundle" />
   </ItemGroup>
-
   <ItemGroup>
-    <!-- embedded resources -->
-    <EmbeddedResource Include="Bundles\Files\mainmenuui.bundle" />
-    <EmbeddedResource Include="Bundles\Files\newmatchmakerui.bundle" />
-    <EmbeddedResource Include="Bundles\Files\playerui.bundle" />
-    <EmbeddedResource Include="Bundles\Files\ping.bundle" />
-    <EmbeddedResource Include="Bundles\Files\senditemmenu.bundle" />
+    <EmbeddedResource Include="Bundles\Files\masterbundle.bundle" />
   </ItemGroup>
 
   <ItemGroup>

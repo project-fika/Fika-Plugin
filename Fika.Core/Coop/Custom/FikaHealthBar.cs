@@ -216,7 +216,7 @@ namespace Fika.Core.Coop.Custom
 
         private void CreateHealthBar()
         {
-            GameObject uiPrefab = InternalBundleLoader.Instance.GetAssetBundle("playerui").LoadAsset<GameObject>("PlayerFriendlyUI");
+            GameObject uiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.PlayerUI);
             GameObject uiGameObj = Instantiate(uiPrefab);
             playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
             playerPlate.SetNameText(currentPlayer.Profile.Info.MainProfileNickname);

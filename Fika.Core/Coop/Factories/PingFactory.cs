@@ -7,6 +7,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.UI;
 using Fika.Core.Utils;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,7 +30,7 @@ public static class PingFactory
 
     public static void ReceivePing(Vector3 location, EPingType pingType, Color pingColor, string nickname, string localeId)
     {
-        GameObject prefab = AbstractPing.pingBundle.LoadAsset<GameObject>("BasePingPrefab");
+        GameObject prefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.Ping);
         GameObject pingGameObject = UnityEngine.Object.Instantiate(prefab);
         AbstractPing abstractPing = FromPingType(pingType, pingGameObject);
         if (abstractPing != null)
@@ -90,7 +91,8 @@ public static class PingFactory
 
     public abstract class AbstractPing : MonoBehaviour
     {
-        internal static readonly AssetBundle pingBundle;
+        //internal static readonly AssetBundle pingBundle;
+        internal static readonly Dictionary<InternalBundleLoader.EFikaSprite, Sprite> sprites;
 
         protected Image image;
         protected Vector3 hitPoint;
@@ -103,7 +105,7 @@ public static class PingFactory
 
         static AbstractPing()
         {
-            pingBundle = InternalBundleLoader.Instance.GetAssetBundle("ping");
+            sprites = InternalBundleLoader.Instance.GetFikaSprites();
         }
 
         protected void Awake()
@@ -232,7 +234,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = pingBundle.LoadAsset<Sprite>("PingPoint");
+            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPoint];
         }
     }
 
@@ -241,8 +243,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            //Player player = (Player)userObject;
-            image.sprite = pingBundle.LoadAsset<Sprite>("PingPlayer");
+            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPlayer];
         }
     }
 
@@ -251,8 +252,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            //LootableContainer lootableContainer = userObject as LootableContainer;
-            image.sprite = pingBundle.LoadAsset<Sprite>("PingLootableContainer");
+            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingLootableContainer];
         }
     }
 
@@ -261,7 +261,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = pingBundle.LoadAsset<Sprite>("PingDoor");
+            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingDoor];
         }
     }
 
@@ -270,7 +270,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = pingBundle.LoadAsset<Sprite>("PingPoint");
+            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPoint];
         }
     }
 
@@ -280,7 +280,7 @@ public static class PingFactory
         {
             base.Initialize(ref point, userObject, Color.white); // White since this icon is already red...
             transform.localScale *= 0.5f;
-            image.sprite = pingBundle.LoadAsset<Sprite>("PingDeadBody");
+            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingDeadBody];
         }
     }
 
@@ -289,8 +289,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            //LootItem lootItem = userObject as LootItem;
-            image.sprite = pingBundle.LoadAsset<Sprite>("PingLootItem");
+            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingLootItem];
         }
     }
 }
