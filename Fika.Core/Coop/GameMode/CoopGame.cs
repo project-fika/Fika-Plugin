@@ -1039,6 +1039,12 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl)
         {
+            if (FikaBackendUtils.IsHeadless)
+            {
+                Logger.LogWarning("Unloading resources");
+                await Resources.UnloadUnusedAssets().Await();
+            }
+
             Status = GameStatus.Running;
             UnityEngine.Random.InitState((int)EFTDateTimeClass.Now.Ticks);
 
