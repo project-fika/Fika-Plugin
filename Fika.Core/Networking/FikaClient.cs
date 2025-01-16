@@ -1087,7 +1087,7 @@ namespace Fika.Core.Networking
 
         private void OnGenericPacketReceived(GenericPacket packet)
         {
-            packet.SubPacket.Execute(null);
+            packet.SubPacket.Execute();
         }
 
         private void OnHealthSyncPacketReceived(HealthSyncPacket packet)

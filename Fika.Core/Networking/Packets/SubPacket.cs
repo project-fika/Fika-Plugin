@@ -7,7 +7,7 @@ namespace Fika.Core.Networking.Packets
     {
         public interface ISubPacket
         {
-            public void Execute(CoopPlayer player);
+            public void Execute(CoopPlayer player = null);
             public void Serialize(NetDataWriter writer);
         }
 
@@ -103,6 +103,7 @@ namespace Fika.Core.Networking.Packets
         public enum EGenericSubPacketType
         {
             ClientExtract,
+            ClientJoined,
             ExfilCountdown,
             ClearEffects,
             UpdateBackendData,

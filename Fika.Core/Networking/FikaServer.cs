@@ -36,6 +36,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
 
@@ -350,6 +351,17 @@ namespace Fika.Core.Networking
             FikaBackendUtils.AddPartyMembers(visualProfiles);
             packet.Profiles = visualProfiles;
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            GenericPacket notifPacket = new()
+            {
+                NetId = 1,
+                Type = EGenericSubPacketType.ClientJoined,
+                SubPacket = new ClientJoined(kvp.Key.Nickname)
+            };
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                notifPacket.SubPacket.Execute(); 
+            }
+            SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnLootSyncPacketReceived(LootSyncPacket packet, NetPeer peer)
@@ -1008,7 +1020,7 @@ namespace Fika.Core.Networking
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-            packet.SubPacket.Execute(null);
+            packet.SubPacket.Execute();
         }
 
         private void OnHealthSyncPacketReceived(HealthSyncPacket packet, NetPeer peer)

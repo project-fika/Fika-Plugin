@@ -6,6 +6,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.UI;
 using Fika.Core.Utils;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.Packets.SubPacket;
@@ -64,6 +65,31 @@ namespace Fika.Core.Networking.Packets.GameWorld
             public void Serialize(NetDataWriter writer)
             {
 
+            }
+        }
+
+        public class ClientJoined : ISubPacket
+        {
+            public string Name;
+
+            public ClientJoined(string name)
+            {
+                Name = name;
+            }
+
+            public ClientJoined(NetDataReader reader)
+            {
+                Name = reader.GetString();
+            }
+
+            public void Execute(CoopPlayer player)
+            {
+                NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(EColor.BLUE, Name)} has connected");
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(Name);
             }
         }
 
