@@ -34,6 +34,7 @@ namespace Fika.Core.Coop.Patches
             {
                 __result = CoopClientGameWorld.Create(gameObject, objectsFactory, updateQueue, currentProfileId);
             }
+            FikaBackendUtils.RequestFikaWorld = false;
             return false;
         }
 
