@@ -732,49 +732,56 @@ namespace Fika.Core
 
             string coopQuestSharingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized());
             string coopDefaultQuestSharingHeader = "Coop | Quest Sharing";
+            bool questSharingEnabled = SharedQuestProgression;
+            string disabledMessage = LocaleUtils.UI_DISABLED_BY_HOST.Localized();
 
             QuestTypesToShareAndReceive = SetupSetting(coopDefaultQuestSharingHeader, "Quest Types", EQuestSharingTypes.All,
-                new ConfigDescription(LocaleUtils.BEPINEX_QUEST_TYPES_D.Localized(), tags: new ConfigurationManagerAttributes()
+                new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_QUEST_TYPES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
                 {
                     Category = coopQuestSharingHeader,
                     DispName = LocaleUtils.BEPINEX_QUEST_TYPES_T.Localized(),
-                    Order = 4
+                    Order = 4,
+                    ReadOnly = !questSharingEnabled
                 }),
                 "Quest Types", ref failed, ref headers);
 
             QuestSharingNotifications = SetupSetting(coopDefaultQuestSharingHeader, "Show Notifications", true,
-                new ConfigDescription(LocaleUtils.BEPINEX_QS_NOTIFICATIONS_D.Localized(), tags: new ConfigurationManagerAttributes()
+                new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_QS_NOTIFICATIONS_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
                 {
                     Category = coopQuestSharingHeader,
                     DispName = LocaleUtils.BEPINEX_QS_NOTIFICATIONS_T.Localized(),
-                    Order = 3
+                    Order = 3,
+                    ReadOnly = !questSharingEnabled
                 }),
                 "Show Notifications", ref failed, ref headers);
 
             EasyKillConditions = SetupSetting(coopDefaultQuestSharingHeader, "Easy Kill Conditions", false,
-                new ConfigDescription(LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_D.Localized(), tags: new ConfigurationManagerAttributes()
+                new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
                 {
                     Category = coopQuestSharingHeader,
                     DispName = LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_T.Localized(),
-                    Order = 2
+                    Order = 2,
+                    ReadOnly = !questSharingEnabled
                 }),
                 "Easy Kill Conditions", ref failed, ref headers);
 
             SharedKillExperience = SetupSetting(coopDefaultQuestSharingHeader, "Shared Kill Experience", false,
-                new ConfigDescription(LocaleUtils.BEPINEX_SHARED_KILL_XP_D.Localized(), tags: new ConfigurationManagerAttributes()
+                new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_SHARED_KILL_XP_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
                 {
                     Category = coopQuestSharingHeader,
                     DispName = LocaleUtils.BEPINEX_SHARED_KILL_XP_T.Localized(),
-                    Order = 1
+                    Order = 1,
+                    ReadOnly = !questSharingEnabled
                 }),
                 "Shared Kill Experience", ref failed, ref headers);
 
             SharedBossExperience = SetupSetting(coopDefaultQuestSharingHeader, "Shared Boss Experience", false,
-                new ConfigDescription(LocaleUtils.BEPINEX_SHARED_BOSS_XP_D.Localized(), tags: new ConfigurationManagerAttributes()
+                new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_SHARED_BOSS_XP_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
                 {
                     Category = coopQuestSharingHeader,
                     DispName = LocaleUtils.BEPINEX_SHARED_BOSS_XP_T.Localized(),
-                    Order = 0
+                    Order = 0,
+                    ReadOnly = !questSharingEnabled
                 }),
                 "Shared Boss Experience", ref failed, ref headers);
 
