@@ -188,6 +188,13 @@ namespace Fika.Core.UI.Custom
                 dediTooltipArea.enabled = true;
                 dediTooltipArea.SetMessageText(LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized());
             }
+            else
+            {
+                if (FikaPlugin.UseHeadlessIfAvailable.Value)
+                {
+                    fikaMatchMakerUi.DedicatedToggle.isOn = true;
+                }
+            }
 
             TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>

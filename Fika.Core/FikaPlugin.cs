@@ -112,6 +112,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> OfficialVersion { get; set; }
 
         // Coop
+        public static ConfigEntry<bool> UseHeadlessIfAvailable { get; set; }
         public static ConfigEntry<bool> ShowNotifications { get; set; }
         public static ConfigEntry<bool> AutoExtract { get; set; }
         public static ConfigEntry<bool> ShowExtractMessage { get; set; }
@@ -517,6 +518,14 @@ namespace Fika.Core
 
             string coopHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP.Localized());
             string coopDefaultHeader = "Coop";
+
+            UseHeadlessIfAvailable = SetupSetting(coopDefaultHeader, "Auto Use Headless", false,
+                new ConfigDescription(LocaleUtils.BEPINEX_USE_HEADLESS_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = coopHeader,
+                    DispName = LocaleUtils.BEPINEX_USE_HEADLESS_T.Localized(),
+                    Order = 8
+                }), "Auto Use Headless", ref failed, ref headers);
 
             ShowNotifications = SetupSetting(coopDefaultHeader, "Show Feed", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_SHOW_FEED_D.Localized(), tags: new ConfigurationManagerAttributes()

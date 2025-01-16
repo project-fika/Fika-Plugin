@@ -245,6 +245,8 @@ namespace Fika.Core.Utils
         public const string BEPINEX_OFFICIAL_VERSION_T = "F_BepInEx_OfficialVersion_T";
         public const string BEPINEX_OFFICIAL_VERSION_D = "F_BepInEx_OfficialVersion_D";
 
+        public const string BEPINEX_USE_HEADLESS_T = "F_BepInEx_UseHeadless_T";
+        public const string BEPINEX_USE_HEADLESS_D = "F_BepInEx_UseHeadless_D";
         public const string BEPINEX_SHOW_FEED_T = "F_BepInEx_ShowFeed_T";
         public const string BEPINEX_SHOW_FEED_D = "F_BepInEx_ShowFeed_D";
         public const string BEPINEX_AUTO_EXTRACT_T = "F_BepInEx_AutoExtract_T";
@@ -376,6 +378,6 @@ namespace Fika.Core.Utils
         public const string BEPINEX_SMOOTHING_RATE_D = "F_BepInEx_SmoothingRate_D";
 
         public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
-        public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";            
+        public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";
     }
 }
