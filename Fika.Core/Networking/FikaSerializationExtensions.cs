@@ -1036,8 +1036,10 @@ namespace Fika.Core.Networking
             {
                 case EGenericSubPacketType.ClientExtract:
                     return new ClientExtract(netId);
-                case EGenericSubPacketType.ClientJoined:
-                    return new ClientJoined(reader);
+                case EGenericSubPacketType.ClientConnected:
+                    return new ClientConnected(reader);
+                case EGenericSubPacketType.ClientDisconnected:
+                    return new ClientDisconnected(reader);
                 case EGenericSubPacketType.ExfilCountdown:
                     return new ExfilCountdown(reader);
                 case EGenericSubPacketType.ClearEffects:

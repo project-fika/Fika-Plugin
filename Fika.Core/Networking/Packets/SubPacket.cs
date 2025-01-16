@@ -103,7 +103,8 @@ namespace Fika.Core.Networking.Packets
         public enum EGenericSubPacketType
         {
             ClientExtract,
-            ClientJoined,
+            ClientConnected,
+            ClientDisconnected,
             ExfilCountdown,
             ClearEffects,
             UpdateBackendData,

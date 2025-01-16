@@ -217,6 +217,7 @@ namespace Fika.Core.Utils
         public const string UI_ERROR_HOST_EFT_MISMATCH = "F_UI_EFTVersionError";
         public const string UI_ERROR_HOST_FIKA_MISMATCH = "F_UI_FikaVersionError";
         public const string UI_PLAYER_CONNECTED = "F_UI_PlayerConnected";
+        public const string UI_PLAYER_DISCONNECTED = "F_UI_PlayerDisconnected";
 
         // Main Menu UI
         public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";

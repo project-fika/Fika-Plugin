@@ -354,14 +354,16 @@ namespace Fika.Core.Networking
             GenericPacket notifPacket = new()
             {
                 NetId = 1,
-                Type = EGenericSubPacketType.ClientJoined,
-                SubPacket = new ClientJoined(kvp.Key.Nickname)
+                Type = EGenericSubPacketType.ClientConnected,
+                SubPacket = new ClientConnected(kvp.Key.Nickname)
             };
             if (!FikaBackendUtils.IsHeadless)
             {
                 notifPacket.SubPacket.Execute(); 
             }
             SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered);
+
+            peer.Tag = kvp.Key.Nickname;
         }
 
         private void OnLootSyncPacketReceived(LootSyncPacket packet, NetPeer peer)
@@ -1416,8 +1418,25 @@ namespace Fika.Core.Networking
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
         {
             logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
-            NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
-                iconType: EFT.Communications.ENotificationIconType.Alert);
+            if (disconnectInfo.Reason != DisconnectReason.RemoteConnectionClose)
+            {
+                NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
+                        iconType: EFT.Communications.ENotificationIconType.Alert); 
+            }
+
+            if (peer.Tag is string nickname)
+            {
+                GenericPacket packet = new()
+                {
+                    NetId = 1,
+                    Type = EGenericSubPacketType.ClientDisconnected,
+                    SubPacket = new ClientDisconnected(nickname)
+                };
+
+                packet.SubPacket.Execute();
+                SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            }
+
             if (netServer.ConnectedPeersCount == 0)
             {
                 TimeSinceLastPeerDisconnected = DateTime.Now;

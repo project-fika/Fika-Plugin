@@ -68,16 +68,16 @@ namespace Fika.Core.Networking.Packets.GameWorld
             }
         }
 
-        public class ClientJoined : ISubPacket
+        public class ClientConnected : ISubPacket
         {
             public string Name;
 
-            public ClientJoined(string name)
+            public ClientConnected(string name)
             {
                 Name = name;
             }
 
-            public ClientJoined(NetDataReader reader)
+            public ClientConnected(NetDataReader reader)
             {
                 Name = reader.GetString();
             }
@@ -85,6 +85,32 @@ namespace Fika.Core.Networking.Packets.GameWorld
             public void Execute(CoopPlayer player)
             {
                 string message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
+                NotificationManagerClass.DisplayMessageNotification(message);
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(Name);
+            }
+        }
+
+        public class ClientDisconnected : ISubPacket
+        {
+            public string Name;
+
+            public ClientDisconnected(string name)
+            {
+                Name = name;
+            }
+
+            public ClientDisconnected(NetDataReader reader)
+            {
+                Name = reader.GetString();
+            }
+
+            public void Execute(CoopPlayer player)
+            {
+                string message = string.Format(LocaleUtils.UI_PLAYER_DISCONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
                 NotificationManagerClass.DisplayMessageNotification(message);
             }
 
