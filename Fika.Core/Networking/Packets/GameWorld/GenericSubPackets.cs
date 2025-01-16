@@ -84,7 +84,8 @@ namespace Fika.Core.Networking.Packets.GameWorld
 
             public void Execute(CoopPlayer player)
             {
-                NotificationManagerClass.DisplayMessageNotification($"{ColorizeText(EColor.BLUE, Name)} has connected");
+                string message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
+                NotificationManagerClass.DisplayMessageNotification(message);
             }
 
             public void Serialize(NetDataWriter writer)

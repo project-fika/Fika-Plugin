@@ -121,14 +121,14 @@ namespace Fika.Core.Coop.Utils
 
             if (result.GameVersion != FikaPlugin.EFTVersionMajor)
             {
-                errorMessage = string.Format(LocaleUtils.ERROR_HOST_EFT_MISMATCH.Localized(), FikaPlugin.EFTVersionMajor, result.GameVersion);
+                errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_EFT_MISMATCH.Localized(), FikaPlugin.EFTVersionMajor, result.GameVersion);
                 return false;
             }
 
             Version detectedFikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
             if (result.FikaVersion != detectedFikaVersion)
             {
-                errorMessage = string.Format(LocaleUtils.ERROR_HOST_FIKA_MISMATCH.Localized(), detectedFikaVersion, result.FikaVersion);
+                errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_FIKA_MISMATCH.Localized(), detectedFikaVersion, result.FikaVersion);
                 return false;
             }
 

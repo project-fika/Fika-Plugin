@@ -214,6 +214,9 @@ namespace Fika.Core.Utils
         public const string UI_DOWNLOAD_PROFILE = "F_UI_DownloadProfile";
         public const string UI_LOCALE_ERROR_HEADER = "F_UI_LocaleError_H";
         public const string UI_LOCALE_ERROR_DESCRIPTION = "F_UI_LocaleError_D";
+        public const string UI_ERROR_HOST_EFT_MISMATCH = "F_UI_EFTVersionError";
+        public const string UI_ERROR_HOST_FIKA_MISMATCH = "F_UI_FikaVersionError";
+        public const string UI_PLAYER_CONNECTED = "F_UI_PlayerConnected";
 
         // Main Menu UI
         public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";
@@ -371,9 +374,6 @@ namespace Fika.Core.Utils
         public const string BEPINEX_SMOOTHING_RATE_D = "F_BepInEx_SmoothingRate_D";
 
         public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
-        public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";
-
-        public const string ERROR_HOST_EFT_MISMATCH = "F_UI_EFTVersionError";
-        public const string ERROR_HOST_FIKA_MISMATCH = "F_UI_FikaVersionError";
+        public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";            
     }
 }
