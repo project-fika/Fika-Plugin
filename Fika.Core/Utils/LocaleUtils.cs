@@ -372,5 +372,8 @@ namespace Fika.Core.Utils
 
         public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
         public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";
+
+        public const string ERROR_HOST_EFT_MISMATCH = "F_UI_EFTVersionError";
+        public const string ERROR_HOST_FIKA_MISMATCH = "F_UI_FikaVersionError";
     }
 }

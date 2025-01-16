@@ -473,8 +473,7 @@ namespace Fika.Core.UI.Custom
             {
                 NetManagerUtils.DestroyPingingClient();
 
-                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage,
-                    ErrorScreen.EButtonType.OkButton, 15);
+                Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
 
                 callback?.Invoke(false);
             }

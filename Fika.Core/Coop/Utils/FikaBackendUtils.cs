@@ -121,14 +121,14 @@ namespace Fika.Core.Coop.Utils
 
             if (result.GameVersion != FikaPlugin.EFTVersionMajor)
             {
-                errorMessage = $"You are attempting to use a different version of EFT than what the server is running.\nClient: {FikaPlugin.EFTVersionMajor}\nServer: {result.GameVersion}";
+                errorMessage = string.Format(LocaleUtils.ERROR_HOST_EFT_MISMATCH.Localized(), FikaPlugin.EFTVersionMajor, result.GameVersion);
                 return false;
             }
 
             Version detectedFikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
             if (result.FikaVersion != detectedFikaVersion)
             {
-                errorMessage = $"You are attempting to use a different version of Fika than what the server is running.\nClient: {detectedFikaVersion}\nServer: {result.FikaVersion}";
+                errorMessage = string.Format(LocaleUtils.ERROR_HOST_FIKA_MISMATCH.Localized(), detectedFikaVersion, result.FikaVersion);
                 return false;
             }
 
@@ -142,7 +142,7 @@ namespace Fika.Core.Coop.Utils
             NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             string raidCode = GenerateRaidCode(6);
-            CreateMatch body = new(raidCode, profileId, hostUsername, FikaBackendUtils.IsSpectator, timestamp, raidSettings,
+            CreateMatch body = new(raidCode, profileId, hostUsername, IsSpectator, timestamp, raidSettings,
                 HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
             await FikaRequestHandler.RaidCreate(body);
