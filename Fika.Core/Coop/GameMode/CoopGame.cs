@@ -978,6 +978,8 @@ namespace Fika.Core.Coop.GameMode
                 });
                 Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
 
+                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestStarted);
+
                 return customButton;
             }
 
