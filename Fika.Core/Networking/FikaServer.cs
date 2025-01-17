@@ -361,7 +361,7 @@ namespace Fika.Core.Networking
             {
                 notifPacket.SubPacket.Execute(); 
             }
-            SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered);
+            SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
 
             peer.Tag = kvp.Key.Nickname;
         }
@@ -1434,7 +1434,7 @@ namespace Fika.Core.Networking
                 };
 
                 packet.SubPacket.Execute();
-                SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+                SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             }
 
             if (netServer.ConnectedPeersCount == 0)
