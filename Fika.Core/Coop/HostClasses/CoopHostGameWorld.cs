@@ -27,7 +27,7 @@ namespace Fika.Core.Coop.HostClasses
             }
         }
 
-        public static CoopHostGameWorld Create(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+        public static CoopHostGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {
             CoopHostGameWorld gameWorld = gameObject.AddComponent<CoopHostGameWorld>();
             gameWorld.ObjectsFactory = objectsFactory;

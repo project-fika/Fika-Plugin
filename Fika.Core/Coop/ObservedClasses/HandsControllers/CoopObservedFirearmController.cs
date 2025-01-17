@@ -88,27 +88,27 @@ namespace Fika.Core.Coop.ObservedClasses
             return operationFactoryDelegates;
         }
 
-        private BaseAnimationOperation ThrowPatron1()
+        private BaseAnimationOperationClass ThrowPatron1()
         {
             return new ObservedThrowPatronOperation1(this);
         }
 
-        private BaseAnimationOperation ThrowPatron2()
+        private BaseAnimationOperationClass ThrowPatron2()
         {
             return new ObservedThrowPatronOperation2(this);
         }
 
-        private BaseAnimationOperation ThrowPatron3()
+        private BaseAnimationOperationClass ThrowPatron3()
         {
             return new ObservedThrowPatronOperation3(this);
         }
 
-        private BaseAnimationOperation ThrowPatron4()
+        private BaseAnimationOperationClass ThrowPatron4()
         {
             return new ObservedThrowPatronOperation4(this);
         }
 
-        private BaseAnimationOperation Idle1()
+        private BaseAnimationOperationClass Idle1()
         {
             return new ObservedIdleOperation(this);
         }

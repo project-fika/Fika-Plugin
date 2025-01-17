@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.ObservedClasses
             ObservedObsOperation.HideObservedWeapon();
         }
 
-        private Player.BaseAnimationOperation GetObservedMedsOperation()
+        private Player.BaseAnimationOperationClass GetObservedMedsOperation()
         {
             return new ObservedMedsOperation(this);
         }

@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-    public class ObservedStationaryState(MovementContext movementContext) : StationaryState(movementContext)
+    public class ObservedStationaryState(MovementContext movementContext) : StationaryStateClass(movementContext)
     {
         public override bool OutOfOperationRange
         {
