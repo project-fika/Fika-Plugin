@@ -249,7 +249,7 @@ namespace Fika.Core
 
             BundleLoaderPlugin = new();
 
-            BotSettingsRepoAbstractClass.Init();
+            BotSettingsRepoClass.Init();
 
             BotDifficulties = FikaRequestHandler.GetBotDifficulties();
             ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();

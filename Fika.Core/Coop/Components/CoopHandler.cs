@@ -306,8 +306,8 @@ namespace Fika.Core.Coop.Components
                 return;
             }
 
-            await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
-                PoolManager.AssemblyType.Local, allPrefabPaths, JobPriority.Low).ContinueWith(x =>
+            await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
+                PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.Low).ContinueWith(x =>
                 {
                     if (x.IsFaulted)
                     {
