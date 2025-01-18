@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
@@ -9,6 +10,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
     {
         private static readonly Stopwatch stopwatch = new();
         private static double Offset = 0;
+
+        private static readonly object threadLock = new();
 
         /// <summary>
         /// Gets the current time in the game since start
@@ -26,8 +29,11 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// </summary>
         public static void Start(double serverOffset = 0)
         {
-            Offset = serverOffset;
-            stopwatch.Restart();
+            lock (threadLock)
+            {
+                Offset = serverOffset;
+                _ = Task.Run(StartInternal);
+            }
         }
 
         /// <summary>
@@ -35,8 +41,20 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// </summary>
         public static void Reset()
         {
-            stopwatch.Reset();
-            Offset = 0;
+            lock (threadLock)
+            {
+                stopwatch.Reset();
+                Offset = 0; 
+            }
+        }
+
+        private static Task StartInternal()
+        {
+            lock (threadLock)
+            {
+                stopwatch.Restart();
+            }
+            return Task.CompletedTask;
         }
     }
 }
