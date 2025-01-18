@@ -184,6 +184,12 @@ namespace Fika.Core.Coop.Players
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = FikaSnapshotter.Create(player);
 
+            if (player.POM != null)
+            {
+                GameObject.Destroy(player.POM);
+                player.POM = null;
+            }
+
             return player;
         }
 
