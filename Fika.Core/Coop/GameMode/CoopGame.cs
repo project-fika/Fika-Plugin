@@ -1287,8 +1287,8 @@ namespace Fika.Core.Coop.GameMode
                 await Task.Delay(250);
             } while (Profile_0 == null);
 
-            await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Local,
-                Profile_0.GetAllPrefabPaths(true).ToArray(), JobPriority.General);
+            await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Local,
+                Profile_0.GetAllPrefabPaths(true).ToArray(), JobPriorityClass.General);
         }
 
         private async Task Reconnect()
@@ -1531,7 +1531,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 BotsPresets botsPresets = new(iSession, wavesSpawnScenario_0.SpawnWaves,
                     bossSpawnScenario.BossSpawnWaves, nonWavesSpawnScenario_0.GClass1643_0, false);
-                List<WaveInfo> waveInfos = [];
+                List<WaveInfoClass> waveInfos = [];
                 LocationSettingsClass.Location.GClass1349 halloween = Location_0.Events.Halloween2024;
                 if (halloween != null && halloween.InfectionPercentage > 0)
                 {
@@ -2028,7 +2028,7 @@ namespace Fika.Core.Coop.GameMode
                 extractRoutine = StartCoroutine(ExtractRoutine(player));
 
                 // Prevents players from looting after extracting
-                CurrentScreenSingleton.Instance.CloseAllScreensForced();
+                CurrentScreenSingletonClass.Instance.CloseAllScreensForced();
 
                 // Detroys session timer
                 if (timeManager != null)
@@ -2580,7 +2580,7 @@ namespace Fika.Core.Coop.GameMode
                     baseLocalGame_0.gparam_0.vmethod_1();
                 }
 
-                CurrentScreenSingleton.Instance.CloseAllScreensForced();
+                CurrentScreenSingletonClass.Instance.CloseAllScreensForced();
 
                 //If we haven't saved, run the original method and stop running here.
                 if (!baseLocalGame_0.hasSaved)
@@ -2616,7 +2616,7 @@ namespace Fika.Core.Coop.GameMode
         {
             public void ExitOverride()
             {
-                CurrentScreenSingleton instance = CurrentScreenSingleton.Instance;
+                CurrentScreenSingletonClass instance = CurrentScreenSingletonClass.Instance;
                 if (instance != null && instance.CheckCurrentScreen(EEftScreenType.Reconnect))
                 {
                     instance.CloseAllScreensForced();

@@ -3,11 +3,11 @@
 namespace Fika.Core.Networking;
 public struct BTRPacket : INetSerializable
 {
-    public BTRDataPacket Data;
+    public BTRDataPacketStruct Data;
 
     public void Deserialize(NetDataReader reader)
     {
-        Data = new BTRDataPacket
+        Data = new BTRDataPacketStruct
         {
             position = reader.GetVector3(),
             BtrBotId = reader.GetInt(),

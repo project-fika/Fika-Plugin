@@ -27,7 +27,7 @@ namespace Fika.Core.Coop.Patches
                 return true;
             }
 
-            ____spawnedKey = Singleton<PoolManager>.Instance.CreateItem(item, Player.GetVisibleToCamera(__instance), __instance, true);
+            ____spawnedKey = Singleton<PoolManagerClass>.Instance.CreateItem(item, Player.GetVisibleToCamera(__instance), __instance, true);
             Transform transform = ____spawnedKey.transform.FindTransform("pivot");
             Transform transform2 = ____limbs[0].solver.bone3.transform.FindTransform(parentBone);
             ____spawnedKey.transform.SetParent(transform2, false);

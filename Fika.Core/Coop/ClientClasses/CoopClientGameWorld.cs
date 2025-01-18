@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class CoopClientGameWorld : ClientLocalGameWorld
     {
-        public static CoopClientGameWorld Create(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+        public static CoopClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {
             CoopClientGameWorld gameWorld = gameObject.AddComponent<CoopClientGameWorld>();
             gameWorld.ObjectsFactory = objectsFactory;
