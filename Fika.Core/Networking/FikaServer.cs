@@ -460,16 +460,18 @@ namespace Fika.Core.Networking
         {
             logger.LogInfo($"Sending airdrop details, type: {containerType}, id: {ObjectId}");
             int netId = 0;
+            SynchronizableObject containerObject = null;
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             IEnumerable<SynchronizableObject> syncObjects = gameWorld.SynchronizableObjectLogicProcessor.GetSynchronizableObjects();
-            foreach (SynchronizableObject obj in syncObjects)
+            foreach (SynchronizableObject syncObject in syncObjects)
             {
-                if (obj.ObjectId == ObjectId)
+                if (syncObject.ObjectId == ObjectId)
                 {
-                    LootableContainer container = obj.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
+                    LootableContainer container = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
                     if (container != null)
                     {
                         netId = container.NetId;
+                        containerObject = syncObject;
                         gameWorld.RegisterWorldInteractionObject(container);
                         break;
                     }
@@ -481,13 +483,20 @@ namespace Fika.Core.Networking
                 logger.LogError("SendAirdropContainerData: Could not find NetId!");
             }
 
-            SpawnSyncObjectPacket packet = new(ObjectId)
+            SpawnSyncObjectPacket packet = new()
             {
-                AirdropType = containerType,
-                AirdropItem = item,
-                ContainerId = item.Id,
-                NetId = netId,
-                IsStatic = false
+                ObjectType = SynchronizableObjectType.AirDrop,
+                SubPacket = new SpawnSyncObjectSubPackets.SpawnAirdrop()
+                {
+                    ObjectId = ObjectId,
+                    IsStatic = false,
+                    Position = containerObject != null ? containerObject.transform.position : Vector3.zero,
+                    Rotation = containerObject != null ? containerObject.transform.rotation : Quaternion.identity,
+                    AirdropType = containerType,
+                    AirdropItem = item,
+                    ContainerId = item.Id,
+                    NetId = netId
+                }
             };
 
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);

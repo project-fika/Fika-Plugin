@@ -532,66 +532,7 @@ namespace Fika.Core.Networking
 
         private void OnSpawnSyncObjectPacketReceived(SpawnSyncObjectPacket packet)
         {
-            SyncObjectProcessorClass processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
-            if (processor == null)
-            {
-                return;
-            }
-
-            switch (packet.ObjectType)
-            {
-                case SynchronizableObjectType.AirDrop:
-                    {
-                        AirdropSynchronizableObject syncObject = (AirdropSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirDrop);
-                        syncObject.ObjectId = packet.ObjectId;
-                        syncObject.AirdropType = packet.AirdropType;
-                        LootableContainer container = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
-                        container.enabled = true;
-                        container.Id = packet.ContainerId;
-                        if (packet.NetId > 0)
-                        {
-                            container.NetId = packet.NetId;
-                        }
-                        Singleton<GameWorld>.Instance.RegisterWorldInteractionObject(container);
-                        LootItem.CreateLootContainer(container, packet.AirdropItem, packet.AirdropItem.ShortName.Localized(null),
-                                Singleton<GameWorld>.Instance, null);
-                        if (!syncObject.IsStatic)
-                        {
-                            processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
-                            return;
-                        }
-                        processor.InitStaticObject(syncObject);
-                    }
-                    break;
-                case SynchronizableObjectType.AirPlane:
-                    {
-                        AirplaneSynchronizableObject syncObject = (AirplaneSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirPlane);
-                        syncObject.ObjectId = packet.ObjectId;
-                        syncObject.transform.SetPositionAndRotation(packet.Position, packet.Rotation);
-                        processor.InitSyncObject(syncObject, packet.Position, packet.Rotation.eulerAngles, packet.ObjectId);
-                    }
-                    break;
-                case SynchronizableObjectType.Tripwire:
-                    {
-                        if (Singleton<ItemFactoryClass>.Instance.CreateItem(packet.GrenadeId, packet.GrenadeTemplate, null) is not ThrowWeapItemClass grenadeClass)
-                        {
-                            logger.LogError("OnSpawnSyncObjectPacketReceived: Item with id " + packet.GrenadeId + " is not a grenade!");
-                            return;
-                        }
-
-                        TripwireSynchronizableObject syncObject = (TripwireSynchronizableObject)processor.TakeFromPool(packet.ObjectType);
-                        syncObject.ObjectId = packet.ObjectId;
-                        syncObject.IsStatic = packet.IsStatic;
-                        syncObject.transform.SetPositionAndRotation(packet.Position, packet.Rotation);
-                        processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
-
-                        syncObject.SetupGrenade(grenadeClass, packet.ProfileId, packet.Position, packet.ToPosition);
-                        //processor.TripwireManager.AddTripwire(syncObject);
-                    }
-                    break;
-                default:
-                    break;
-            }
+            packet.SubPacket.Execute();
         }
 
         private void OnSyncObjectPacketReceived(SyncObjectPacket packet)

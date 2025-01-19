@@ -125,16 +125,20 @@ namespace Fika.Core.Coop.HostClasses
             Vector3 vector = (fromPosition + toPosition) * 0.5f;
             Singleton<BotEventHandler>.Instance.PlantTripwire(tripwireSynchronizableObject, vector);
 
-            SpawnSyncObjectPacket packet = new(tripwireSynchronizableObject.ObjectId)
+            SpawnSyncObjectPacket packet = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
-                IsStatic = tripwireSynchronizableObject.IsStatic,
-                GrenadeTemplate = grenadeClass.TemplateId,
-                GrenadeId = grenadeClass.Id,
-                ProfileId = profileId,
-                Position = fromPosition,
-                ToPosition = toPosition,
-                Rotation = tripwireSynchronizableObject.transform.rotation
+                SubPacket = new SpawnSyncObjectSubPackets.SpawnTripwire()
+                {
+                    ObjectId = tripwireSynchronizableObject.ObjectId,
+                    IsStatic = tripwireSynchronizableObject.IsStatic,
+                    GrenadeTemplate = grenadeClass.TemplateId,
+                    GrenadeId = grenadeClass.Id,
+                    ProfileId = profileId,
+                    Position = fromPosition,
+                    ToPosition = toPosition,
+                    Rotation = tripwireSynchronizableObject.transform.rotation
+                }
             };
 
             Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
