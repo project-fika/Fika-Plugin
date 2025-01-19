@@ -157,6 +157,51 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
+        public override void ReloadMag(MagazineItemClass magazine, ItemAddress itemAddress, Callback callback)
+        {
+            _player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
+            CurrentOperation.ReloadMag(magazine, itemAddress, callback, null);
+        }
+
+        public override void QuickReloadMag(MagazineItemClass magazine, Callback callback)
+        {
+            CurrentOperation.QuickReloadMag(magazine, callback, null);
+        }
+
+        public override void ReloadGrenadeLauncher(AmmoPackReloadingClass foundItem, Callback callback)
+        {
+            CurrentOperation.ReloadGrenadeLauncher(foundItem, callback);
+        }
+
+        public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback callback, bool quickReload = false)
+        {
+            if (Item.GetCurrentMagazine() == null)
+            {
+                return;
+            }
+
+            CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, quickReload);
+        }
+
+        public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
+        {
+            if (Item is RevolverItemClass)
+            {
+                CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, false);
+                return;
+            }
+
+            CurrentOperation.ReloadWithAmmo(ammoPack, callback, null);
+        }
+
+        public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
+        {
+            if (ammoPack.AmmoCount > 0)
+            {
+                CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, null);
+            }
+        }
+
         public override void WeaponOverlapping()
         {
             SetWeaponOverlapValue(coopPlayer.ObservedOverlap);
