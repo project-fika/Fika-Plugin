@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.Patches
         [PatchPrefix]
         public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
             RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents,
-            MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuController ____menuOperation, CompositeDisposableClass ___compositeDisposableClass, BundleLock ___BundleLock)
+            MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuControllerClass ____menuOperation, CompositeDisposableClass ___compositeDisposableClass, BundleLockClass ___BundleLock)
         {
 #if DEBUG
             Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.Patches
 
         public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
             RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
-            GameWorld gameWorld, MainMenuController ___mainMenuController, CompositeDisposableClass compositeDisposableClass, BundleLock bundleLock)
+            GameWorld gameWorld, MainMenuControllerClass ___mainMenuController, CompositeDisposableClass compositeDisposableClass, BundleLockClass bundleLock)
         {
             bool isServer = FikaBackendUtils.IsServer;
             bool isTransit = FikaBackendUtils.IsTransit;

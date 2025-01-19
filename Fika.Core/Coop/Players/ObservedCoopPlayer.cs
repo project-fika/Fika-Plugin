@@ -1240,7 +1240,7 @@ namespace Fika.Core.Coop.Players
             bool compassInstantiated = Traverse.Create(this).Field<bool>("_compassInstantiated").Value;
             if (!compassInstantiated)
             {
-                Transform transform = Singleton<PoolManager>.Instance.CreateFromPool<Transform>(new ResourceKey
+                Transform transform = Singleton<PoolManagerClass>.Instance.CreateFromPool<Transform>(new ResourceKey
                 {
                     path = "assets/content/weapons/additional_hands/item_compass.bundle"
                 });

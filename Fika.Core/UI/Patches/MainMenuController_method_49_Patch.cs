@@ -10,7 +10,7 @@ namespace Fika.Core.UI.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(MainMenuController).GetMethod(nameof(MainMenuController.method_49));
+            return typeof(MainMenuControllerClass).GetMethod(nameof(MainMenuControllerClass.method_49));
         }
 
         [PatchPrefix]

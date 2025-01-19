@@ -115,8 +115,8 @@ namespace Fika.Core.Coop.Utils
                     collection.Add(resourceKey);
                 }
             }
-            Task loadTask = Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online,
-                [.. collection], JobPriority.Immediate, null, default);
+            Task loadTask = Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
+                [.. collection], JobPriorityClass.Immediate, null, default);
 
             while (!loadTask.IsCompleted)
             {

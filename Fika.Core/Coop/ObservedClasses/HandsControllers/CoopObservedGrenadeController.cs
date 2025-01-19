@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return operationFactoryDelegates;
         }
 
-        private Player.BaseAnimationOperation Grenade1()
+        private Player.BaseAnimationOperationClass Grenade1()
         {
             return new ObservedTripwireState(this, coopPlayer);
         }

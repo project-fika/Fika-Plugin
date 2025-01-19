@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static void Prefix(ref BTRDataPacket packet)
+        public static void Prefix(ref BTRDataPacketStruct packet)
         {
             if (FikaBackendUtils.IsClient)
             {

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-    public class ObservedJumpState(MovementContext movementContext) : JumpState(movementContext)
+    public class ObservedJumpState(MovementContext movementContext) : JumpStateClass(movementContext)
     {
         public override void ApplyMovementAndRotation(float deltaTime)
         {
