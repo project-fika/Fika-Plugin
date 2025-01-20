@@ -58,12 +58,14 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 if (_isAiming == value)
                 {
+                    method_64(); // Reset animator flags
                     return;
                 }
                 _isAiming = value;
                 _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
                 _player.MovementContext.SetAimingSlowdown(IsAiming, 0.33f + aimMovementSpeed);
                 _player.Physical.Aim((!_isAiming || !(_player.MovementContext.StationaryWeapon == null)) ? 0f : ErgonomicWeight);
+                method_63(_isAiming); // Set animator flags
                 coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
             }
         }
@@ -138,6 +140,29 @@ namespace Fika.Core.Coop.ObservedClasses
             return true;
         }
 
+        public override void SetAim(int scopeIndex)
+        {
+            Item.AimIndex.Value = Mathf.Max(0, scopeIndex);
+            SetObservedAim(scopeIndex >= 0);
+        }
+
+        private void SetObservedAim(bool isAiming)
+        {
+            IsAiming = isAiming;
+
+            // Lacyway: Unsure if this is needed, remove later if it is
+            /*if (Weapon is GClass3111 && coopPlayer.ProceduralWeaponAnimation.IsAiming != isAiming)
+            {
+                FirearmsAnimator.SetAiming(!isAiming);
+            }*/
+
+            _player.method_58(0.2f, false);
+            if (isAiming)
+            {
+                method_60();
+            }
+        }
+
         public override void ManualUpdate(float deltaTime)
         {
             base.ManualUpdate(deltaTime);
@@ -208,6 +233,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 return;
             }
+
             SetWeaponOverlapValue(coopPlayer.ObservedOverlap);
             ObservedOverlapView();
             if (overlapCounter <= 1f)
@@ -224,6 +250,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 coopPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
                 overlapCounter = 0f;
             }
+
             coopPlayer.ShouldOverlap = false;
         }
 
@@ -233,13 +260,14 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
                 _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = true;
+                coopPlayer.ShouldOverlap = false;
                 return;
             }
 
             Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
             _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
             _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
-            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
+            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;            
         }
 
         public override void OnPlayerDead()
