@@ -12,9 +12,9 @@ namespace Fika.Core.Coop.Factories
     /// </summary>
     /// <param name="player">The <see cref="CoopPlayer"/> to initiate the controller on.</param>
     /// <param name="item">The <see cref="EFT.InventoryLogic.Item"/> to add to the controller.</param>
-    internal class HandsControllerFactory(CoopPlayer player, Item item = null, KnifeComponent knifeComponent = null)
+    internal class HandsControllerFactory(ObservedCoopPlayer player, Item item = null, KnifeComponent knifeComponent = null)
     {
-        public CoopPlayer Player = player;
+        public ObservedCoopPlayer Player = player;
         public Item Item = item;
         public KnifeComponent KnifeComponent = knifeComponent;
         public MedsItemClass MedsItem;
@@ -33,11 +33,9 @@ namespace Fika.Core.Coop.Factories
             {
                 return CoopObservedFirearmController.Create(Player, weapon);
             }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedFirearmController: item was not of type Weapon, was: {Item.GetType()}");
-                return null;
-            }
+
+            FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedFirearmController: item was not of type Weapon, was: {Item.GetType()}");
+            return null;
         }
 
         /// <summary>
@@ -50,11 +48,9 @@ namespace Fika.Core.Coop.Factories
             {
                 return CoopObservedGrenadeController.Create(Player, grenade);
             }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
-                return null;
-            }
+
+            FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
+            return null;
         }
 
         /// <summary>
@@ -67,11 +63,9 @@ namespace Fika.Core.Coop.Factories
             {
                 return CoopObservedQuickGrenadeController.Create(Player, grenade);
             }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedQuickGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
-                return null;
-            }
+
+            FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedQuickGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
+            return null;
         }
 
         /// <summary>
@@ -84,11 +78,9 @@ namespace Fika.Core.Coop.Factories
             {
                 return CoopObservedKnifeController.Create(Player, KnifeComponent);
             }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedKnifeController: knifeComponent was null!");
-                return null;
-            }
+
+            FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedKnifeController: knifeComponent was null!");
+            return null;
         }
 
         /// <summary>
@@ -105,11 +97,9 @@ namespace Fika.Core.Coop.Factories
             {
                 return CoopObservedMedsController.Create(Player, MedsItem, BodyParts, 1f, AnimationVariant);
             }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedMedsController: meds or food was null!");
-                return null;
-            }
+
+            FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedMedsController: meds or food was null!");
+            return null;
         }
     }
 }

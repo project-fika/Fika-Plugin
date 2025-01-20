@@ -48,6 +48,24 @@ namespace Fika.Core.Coop.Players
                 return healthBar;
             }
         }
+        public bool ShouldOverlap { get; internal set; }
+        public override bool LeftStanceDisabled
+        {
+            get
+            {
+                return leftStancedDisabled;
+            }
+            internal set
+            {
+                if (leftStancedDisabled = value)
+                {
+                    return;
+                }
+                leftStancedDisabled = value;
+                ShouldOverlap = true;
+            }
+        }
+        private bool leftStancedDisabled;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
         private bool isServer;
@@ -772,7 +790,11 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetTilt(newTilt, true);
             }
 
-            ObservedOverlap = to.WeaponOverlap;
+            if (!ObservedOverlap.ApproxEquals(to.WeaponOverlap))
+            {
+                ObservedOverlap = to.WeaponOverlap;
+                ShouldOverlap = true;
+            }
             LeftStanceDisabled = to.LeftStanceDisabled;
         }
 

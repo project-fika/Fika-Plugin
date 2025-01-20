@@ -45,7 +45,6 @@ namespace Fika.Core.Coop.Players
         public IPacketSender PacketSender;
         public bool HasSkilledScav = false;
         public float ObservedOverlap = 0f;
-        public bool LeftStanceDisabled = false;
         public CorpseSyncPacket CorpseSyncPacket = default;
         public bool HasGround = false;
         public int NetId;
@@ -77,6 +76,8 @@ namespace Fika.Core.Coop.Players
                 return PlayerBones.LootRaycastOrigin;
             }
         }
+        public virtual bool LeftStanceDisabled { get; internal set; }
+
         #endregion
 
         public static async Task<CoopPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,

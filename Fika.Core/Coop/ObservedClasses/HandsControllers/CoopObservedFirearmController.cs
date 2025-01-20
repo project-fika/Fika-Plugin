@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private CoopPlayer coopPlayer;
+        private ObservedCoopPlayer coopPlayer;
         private bool triggerPressed;
         private bool needsReset;
         private float lastFireTime = 0f;
@@ -126,7 +126,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        public static CoopObservedFirearmController Create(CoopPlayer player, Weapon weapon)
+        public static CoopObservedFirearmController Create(ObservedCoopPlayer player, Weapon weapon)
         {
             CoopObservedFirearmController controller = smethod_6<CoopObservedFirearmController>(player, weapon);
             controller.coopPlayer = player;
@@ -204,6 +204,10 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void WeaponOverlapping()
         {
+            if (!coopPlayer.ShouldOverlap)
+            {
+                return;
+            }
             SetWeaponOverlapValue(coopPlayer.ObservedOverlap);
             ObservedOverlapView();
             if (overlapCounter <= 1f)
@@ -220,22 +224,22 @@ namespace Fika.Core.Coop.ObservedClasses
                 coopPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
                 overlapCounter = 0f;
             }
+            coopPlayer.ShouldOverlap = false;
         }
 
         private void ObservedOverlapView()
         {
-            Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
             if (coopPlayer.ObservedOverlap < 0.02f)
             {
                 _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
                 _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = true;
+                return;
             }
-            else
-            {
-                _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
-                _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
-                _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
-            }
+
+            Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
+            _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
+            _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
+            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
         }
 
         public override void OnPlayerDead()
