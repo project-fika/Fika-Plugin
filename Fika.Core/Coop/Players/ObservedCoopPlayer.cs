@@ -57,7 +57,7 @@ namespace Fika.Core.Coop.Players
             }
             internal set
             {
-                if (leftStancedDisabled = value)
+                if (leftStancedDisabled == value)
                 {
                     return;
                 }
