@@ -858,7 +858,7 @@ namespace Fika.Core.Coop.GameMode
             Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, ISession session,
             ELocalMode localMode)
         {
-            if (!TransitControllerAbstractClass.IsTransit(profile.Id, out int _))
+            if (!TransitControllerAbstractClass.IsTransit(profile.Id, out int _) && !FikaBackendUtils.IsReconnect)
             {
                 profile.SetSpawnedInSession(false);
             }
