@@ -5,6 +5,7 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -284,6 +285,58 @@ namespace Fika.Core.Console
             IBotGame botController = (IBotGame)Singleton<AbstractGame>.Instance;
             botController.BotsController.BotSpawner.ActivateBotsByWave(newBotData);
             ConsoleScreen.Log($"SpawnNPC completed. {amount} bots spawned.");
+        }
+
+        [ConsoleCommand("spawnAirdrop", "", null, "Spawns an airdrop")]
+        public static void SpawnAirdrop()
+        {
+            if (!CheckForGame())
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                ConsoleScreen.LogWarning("You cannot spawn an airdrop as a client!");
+                return;
+            }
+
+            CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
+            if (gameWorld == null)
+            {
+                ConsoleScreen.LogError("GameWorld does not exist or you are a client!");
+                return;
+            }
+
+            GClass2452 serverAirdropManager = gameWorld.ClientSynchronizableObjectLogicProcessor.ServerAirdropManager;
+            if (serverAirdropManager == null)
+            {
+                ConsoleScreen.LogError("ServerAirdropManager was null!");
+                return;
+            }
+
+            if (!serverAirdropManager.Boolean_0)
+            {
+                ConsoleScreen.LogError("Airdrops are disabled!");
+                return;
+            }
+
+            Traverse managerTraverse = Traverse.Create(serverAirdropManager);
+            List<Vector3> dropPoints = managerTraverse.Field<List<Vector3>>("list_2").Value;
+            if (dropPoints != null && dropPoints.Count > 0)
+            {
+                string templateId = managerTraverse.Field<string>("string_0").Value;
+                serverAirdropManager.method_5(serverAirdropManager.Single_0);
+                gameWorld.InitAirdrop(templateId, true, serverAirdropManager.method_6());
+                managerTraverse.Field<string>("string_0").Value = null;
+                dropPoints.Clear();
+                ConsoleScreen.Log("Started airdrop");
+                return;
+            }
+
+            serverAirdropManager.method_5(serverAirdropManager.Single_0);
+            gameWorld.InitAirdrop();
+            ConsoleScreen.Log("Started airdrop");
         }
 
 #endif
