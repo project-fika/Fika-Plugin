@@ -4,6 +4,8 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -61,6 +63,13 @@ namespace Fika.Core.Coop.ClientClasses
         {
             base.Dispose();
             NetManagerUtils.DestroyNetManager(false);
+            List<SynchronizableObject> syncObjects = SynchronizableObjectLogicProcessor.GetSynchronizableObjects().ToList();
+            foreach (SynchronizableObject syncObject in syncObjects)
+            {
+                syncObject.OnUpdateRequired -= SynchronizableObjectLogicProcessor.method_1;
+                syncObject.Logic.ReturnToPool();
+                syncObject.ReturnToPool();
+            }
         }
 
         public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
