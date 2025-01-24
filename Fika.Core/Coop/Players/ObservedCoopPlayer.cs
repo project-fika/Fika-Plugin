@@ -1736,13 +1736,13 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class CreateHandsControllerHandler(Class1196 setInHandsOperation)
+        private class CreateHandsControllerHandler(Class1193 setInHandsOperation)
         {
-            public readonly Class1196 setInHandsOperation = setInHandsOperation;
+            public readonly Class1193 setInHandsOperation = setInHandsOperation;
 
             internal void DisposeHandler()
             {
-                Class1196 handler = setInHandsOperation;
+                Class1193 handler = setInHandsOperation;
                 if (handler == null)
                 {
                     return;

@@ -246,8 +246,8 @@ namespace Fika.Core.Networking
             enumerable[0].Item = item;
             Item[] array = enumerable.Select(FikaGlobals.GetLootItemPositionItem).ToArray();
             ResourceKey[] resourceKeys = array.OfType<GClass3043>().GetAllItemsFromCollections()
-                .Concat(array.Where(AirdropSynchronizableObject.Class2013.class2013_0.method_1))
-                .SelectMany(AirdropSynchronizableObject.Class2013.class2013_0.method_2)
+                .Concat(array.Where(AirdropSynchronizableObject.Class2010.class2010_0.method_1))
+                .SelectMany(AirdropSynchronizableObject.Class2010.class2010_0.method_2)
                 .ToArray();
             Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
                 resourceKeys, JobPriorityClass.Immediate, null, default).HandleExceptions();

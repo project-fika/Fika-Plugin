@@ -892,7 +892,7 @@ namespace Fika.Core.Networking
 
         private void OnMinePacketReceived(MinePacket packet)
         {
-            NetworkGame<EftGamePlayerOwner>.Class1533 mineSeeker = new()
+            NetworkGame<EftGamePlayerOwner>.Class1530 mineSeeker = new()
             {
                 minePosition = packet.MinePositon
             };

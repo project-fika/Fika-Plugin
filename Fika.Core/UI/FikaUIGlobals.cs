@@ -55,7 +55,7 @@ namespace Fika.Core.UI
         {
             Traverse preloaderUiTraverse = Traverse.Create(preloaderUI);
 
-            PreloaderUI.Class2824 messageHandler = new()
+            PreloaderUI.Class2821 messageHandler = new()
             {
                 preloaderUI_0 = preloaderUI
             };
@@ -80,7 +80,7 @@ namespace Fika.Core.UI
         {
             Traverse errorScreenTraverse = Traverse.Create(errorScreen);
 
-            ErrorScreen.Class2586 errorScreenHandler = new()
+            ErrorScreen.Class2583 errorScreenHandler = new()
             {
                 errorScreen_0 = errorScreen
             };

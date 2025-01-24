@@ -59,7 +59,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public void HandleClientExtract(int transitId, int playerId)
         {
-            if (!smethod_0(playerId, out Player myPlayer))
+            if (smethod_2(playerId, out Player myPlayer))
             {
                 return;
             }

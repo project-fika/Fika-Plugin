@@ -1379,7 +1379,7 @@ namespace Fika.Core.Coop.GameMode
                 IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
                 if (items != null)
                 {
-                    Class1513 keyFinder = new()
+                    Class1510 keyFinder = new()
                     {
                         accessKeys = Location_0.AccessKeys
                     };
@@ -2567,7 +2567,7 @@ namespace Fika.Core.Coop.GameMode
             FikaBackendUtils.ReconnectPosition = Vector3.zero;
         }
 
-        private class ExitManager : Class1515
+        private class ExitManager : Class1512
         {
             public new CoopGame baseLocalGame_0;
 
@@ -2598,7 +2598,7 @@ namespace Fika.Core.Coop.GameMode
                 baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
                 baseLocalGame_0.CleanUp();
 
-                Class1516 exitCallback = new()
+                Class1513 exitCallback = new()
                 {
                     baseLocalGame_0 = baseLocalGame_0,
                     duration = EFTDateTimeClass.Now - baseLocalGame_0.dateTime_0,
@@ -2612,7 +2612,7 @@ namespace Fika.Core.Coop.GameMode
         /// <summary>
         /// Used to manage the stopping of the <see cref="CoopGame"/> gracefully when cancelling
         /// </summary>
-        private class CancelExitManager : Class1515
+        private class CancelExitManager : Class1512
         {
             public void ExitOverride()
             {

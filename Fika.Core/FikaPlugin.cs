@@ -344,7 +344,7 @@ namespace Fika.Core
             new RaidSettingsWindow_Show_Patch().Enable();
             new TransitControllerAbstractClass_Exist_Patch().Enable();
             new BotReload_method_1_Patch().Enable();
-            new Class1395_ReloadBackendLocale_Patch().Enable();
+            new Class1392_ReloadBackendLocale_Patch().Enable();
             new GClass2047_method_0_Patch().Enable();
 #if DEBUG
             TasksExtensions_HandleFinishedTask_Patches.Enable();

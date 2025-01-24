@@ -149,7 +149,7 @@ namespace Fika.Core.Coop.Players
             }
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, LocalPlayer.Class1658.class1658_0.method_0);
+            player._handsController.Spawn(1f, LocalPlayer.Class1655.class1655_0.method_0);
 
             player.AIData = new GClass563(null, player);
 
