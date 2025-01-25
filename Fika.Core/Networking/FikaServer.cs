@@ -107,16 +107,16 @@ namespace Fika.Core.Networking
         }
 
         private int sendRate;
-        private readonly NetPacketProcessor packetProcessor = new();
+        private NetPacketProcessor packetProcessor;
         private CoopPlayer MyPlayer;
-        private readonly List<string> playersMissing = [];
+        private List<string> playersMissing;
         private string externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
         private NetManager netServer;
         private DateTime? gameStartTime;
-        private readonly NetDataWriter dataWriter = new();
+        private NetDataWriter dataWriter ;
         private int port;
         private CoopHandler coopHandler;
-        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
+        private ManualLogSource logger;
         private int currentNetId;
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
@@ -125,6 +125,11 @@ namespace Fika.Core.Networking
 
         public async Task Init()
         {
+            packetProcessor = new();
+            dataWriter = new();
+            playersMissing = [];
+            logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
+
             visualProfiles = [];
             if (!FikaBackendUtils.IsHeadless)
             {

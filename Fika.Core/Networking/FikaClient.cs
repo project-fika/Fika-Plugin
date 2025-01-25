@@ -45,11 +45,11 @@ namespace Fika.Core.Networking
         public int Ping = 0;
         public int ServerFPS = 0;
         public int ReadyClients = 0;
-        public bool HostReady = false;
-        public bool HostLoaded = false;
-        public bool ReconnectDone = false;
+        public bool HostReady;
+        public bool HostLoaded;
+        public bool ReconnectDone;
         public NetPeer ServerConnection { get; private set; }
-        public bool ExfilPointsReceived { get; private set; } = false;
+        public bool ExfilPointsReceived { get; private set; }
         public NetManager NetClient
         {
             get
@@ -95,17 +95,21 @@ namespace Fika.Core.Networking
         }
         public FikaClientWorld FikaClientWorld { get; set; }
 
-        private NetPacketProcessor packetProcessor = new();
+        private NetPacketProcessor packetProcessor;
         private int sendRate;
         private NetManager netClient;
         private CoopHandler coopHandler;
-        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
-        private readonly NetDataWriter dataWriter = new();
+        private ManualLogSource logger;
+        private NetDataWriter dataWriter;
         private FikaChat fikaChat;
         private string myProfileId;
 
         public async void Init()
         {
+            packetProcessor = new();
+            dataWriter = new();
+            logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
+
             NetworkGameSession.Rtt = 0;
             NetworkGameSession.LossPercent = 0;
 
