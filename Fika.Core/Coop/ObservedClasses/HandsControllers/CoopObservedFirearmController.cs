@@ -267,7 +267,7 @@ namespace Fika.Core.Coop.ObservedClasses
             Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
             _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
             _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
-            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;            
+            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
         }
 
         public override void OnPlayerDead()
@@ -373,6 +373,15 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public void HandleShotInfoPacket(ref ShotInfoPacket packet, InventoryController inventoryController)
         {
+            if (packet.ShotType == EShotType.DryFire)
+            {
+                FirearmsAnimator.SetFire(true);
+                DryShot();
+                hasFired = true;
+                lastFireTime = 0f;
+                return;
+            }
+
             if (packet.ShotType >= EShotType.Misfire)
             {
                 switch (packet.ShotType)
@@ -403,33 +412,95 @@ namespace Fika.Core.Coop.ObservedClasses
                 AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate.Value, null);
                 Weapon.MalfState.MalfunctionedAmmo = ammo;
                 Weapon.MalfState.AmmoToFire = ammo;
-                if (Weapon.HasChambers && Weapon.Chambers[0].ContainedItem is AmmoItemClass)
-                {
-                    Weapon.Chambers[0].RemoveItemWithoutRestrictions();
-                }
+
+                FirearmsAnimator.MisfireSlideUnknown(false);
                 weaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
+                FirearmsAnimator.Malfunction((int)Weapon.MalfState.State);
+
+                switch (Weapon.MalfState.State)
+                {
+                    case Weapon.EMalfunctionState.Misfire:
+                        FirearmsAnimator.Animator.Play("MISFIRE", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.Jam:
+                        FirearmsAnimator.Animator.Play("JAM", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.HardSlide:
+                        FirearmsAnimator.Animator.Play("HARD_SLIDE", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.SoftSlide:
+                        FirearmsAnimator.Animator.Play("SOFT_SLIDE", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.Feed:
+                        FirearmsAnimator.Animator.Play("FEED", 1, 0f);
+                        break;
+                }
+
                 if (Weapon.MalfState.State == Weapon.EMalfunctionState.Misfire)
                 {
-                    weaponPrefab.RevertMalfunctionState(Weapon, true, true);
-                    coopPlayer.InventoryController.ExamineMalfunction(Weapon, true);
+                    if (Weapon.HasChambers)
+                    {
+                        Slot firstChamber = Weapon.Chambers[0];
+                        if (firstChamber.ContainedItem is AmmoItemClass)
+                        {
+                            firstChamber.RemoveItemWithoutRestrictions();
+                        }
+                    }
+
+                    FirearmsAnimator.SetFire(true);
+                    hasFired = true;
+                    lastFireTime = 0f;
+                    return;
                 }
-                return;
+
+                if (Weapon.HasChambers)
+                {
+                    Slot firstChamber = Weapon.Chambers[0];
+                    if (firstChamber.ContainedItem is AmmoItemClass)
+                    {
+                        firstChamber.RemoveItemWithoutRestrictions();
+                    }
+
+                    if (Weapon.MalfState.State == Weapon.EMalfunctionState.Feed)
+                    {
+                        MagazineItemClass currentMagazine = Weapon.GetCurrentMagazine();
+                        if (currentMagazine != null)
+                        {
+                            AmmoItemClass fedAmmo = GetFedAmmoFromMalfunction(currentMagazine);
+                            if (fedAmmo != null)
+                            {
+                                weaponManager.SetRoundIntoWeapon(fedAmmo, 0);
+                                weaponManager.MoveAmmoFromChamberToShellPort(false, 0);
+                            }
+                            else
+                            {
+                                FikaPlugin.Instance.FikaLogger.LogError("HandleShotInfoPacket: Could not find ammo when setting up feed malfunction!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        weaponManager.MoveAmmoFromChamberToShellPort(true, 0);
+                    }
+                }
             }
 
-            if (packet.ShotType == EShotType.DryFire)
+            HandleObservedShot(ref packet, inventoryController);
+        }
+
+        private AmmoItemClass GetFedAmmoFromMalfunction(MagazineItemClass currentMagazine)
+        {
+            if (!Weapon.HasChambers)
             {
-                FirearmsAnimator.SetFire(true);
-                DryShot();
-                hasFired = true;
-                lastFireTime = 0f;
-                return;
+                return (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(coopPlayer.InventoryController).Value.ResultItem;
             }
 
-            if (packet.ShotType == EShotType.RegularShot)
+            Slot chamberSlot = Weapon.Chambers[0];
+            if (chamberSlot.ContainedItem != null)
             {
-                HandleObservedShot(ref packet, inventoryController);
-                return;
+                chamberSlot.RemoveItemWithoutRestrictions();
             }
+            return (AmmoItemClass)currentMagazine.Cartridges.PopTo(coopPlayer.InventoryController, chamberSlot.CreateItemAddress()).Value.ResultItem;
         }
 
         private void HandleObservedShot(ref ShotInfoPacket packet, InventoryController inventoryController)
