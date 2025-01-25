@@ -1062,5 +1062,35 @@ namespace Fika.Core.Networking
                 }
             }
         }
+
+        public struct RocketShotPacket : ISubPacket
+        {
+            public Vector3 ShotPosition;
+            public Vector3 ShotForward;
+            public string AmmoTemplateId;
+
+            public RocketShotPacket(NetDataReader reader)
+            {
+                ShotPosition = reader.GetVector3();
+                ShotForward = reader.GetVector3();
+                AmmoTemplateId = reader.GetString();
+            }
+
+            public void Execute(CoopPlayer player)
+            {
+                if (player.HandsController is CoopObservedFirearmController controller)
+                {
+                    AmmoItemClass rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
+                    controller.CreateRocketShot(rocketClass, ShotPosition, ShotForward);
+                }
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(ShotPosition);
+                writer.Put(ShotForward);
+                writer.Put(AmmoTemplateId);
+            }
+        }
     }
 }

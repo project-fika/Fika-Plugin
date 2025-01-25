@@ -77,6 +77,7 @@ namespace Fika.Core.Networking.Packets
             CompassChange,
             Knife,
             FlareShot,
+            RocketShot,
             ReloadBoltAction,
             RollCylinder,
             UnderbarrelSightingRangeUp,

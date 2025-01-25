@@ -588,6 +588,21 @@ namespace Fika.Core.Coop.ClientClasses
             base.CreateFlareShot(flareItem, shotPosition, forward);
         }
 
+        public override void CreateRocketShot(AmmoItemClass rocketItem, Vector3 shotPosition, Vector3 forward)
+        {
+            player.PacketSender.FirearmPackets.Enqueue(new()
+            {
+                Type = EFirearmSubPacketType.RocketShot,
+                SubPacket = new RocketShotPacket()
+                {
+                    AmmoTemplateId = rocketItem.TemplateId,
+                    ShotPosition = shotPosition,
+                    ShotForward = forward
+                }
+            });
+            base.CreateRocketShot(rocketItem, shotPosition, forward);
+        }
+
         private void SendAbortReloadPacket(int amount)
         {
             player.PacketSender.FirearmPackets.Enqueue(new()

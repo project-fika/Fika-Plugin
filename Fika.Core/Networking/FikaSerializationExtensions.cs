@@ -974,6 +974,8 @@ namespace Fika.Core.Networking
                     return new KnifePacket(reader);
                 case EFirearmSubPacketType.FlareShot:
                     return new FlareShotPacket(reader);
+                case EFirearmSubPacketType.RocketShot:
+                    return new RocketShotPacket(reader);
                 case EFirearmSubPacketType.ReloadBoltAction:
                     return new ReloadBoltActionPacket();
                 case EFirearmSubPacketType.RollCylinder:
@@ -985,7 +987,7 @@ namespace Fika.Core.Networking
                 case EFirearmSubPacketType.ToggleBipod:
                     return new ToggleBipodPacket();
                 case EFirearmSubPacketType.LeftStanceChange:
-                    return new LeftStanceChangePacket(reader);
+                    return new LeftStanceChangePacket(reader);                
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetFirearmSubPacket: type was outside of bounds!");
                     return null;
