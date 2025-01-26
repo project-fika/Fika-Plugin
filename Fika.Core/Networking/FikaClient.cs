@@ -118,6 +118,7 @@ namespace Fika.Core.Networking
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
+            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnWeaponPacketReceived);
@@ -147,7 +148,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
             packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SyncObjectPacket>(OnSyncObjectPacketReceived);
             packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
@@ -164,7 +164,9 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
+
             packetProcessor.SubscribeReusable<WorldPacket>(OnWorldPacketReceived);
+            packetProcessor.SubscribeReusable<SyncObjectPacket>(OnSyncObjectPacketReceived);
 
 #if DEBUG
             AddDebugPackets();
@@ -542,8 +544,8 @@ namespace Fika.Core.Networking
         private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
         {
             CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
-            List<AirplaneDataPacketStruct> structs = [packet.Data];
-            gameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(structs);
+            gameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.Packets);
+            packet.Flush();
         }
 
         private void OnReconnectPacketReceived(ReconnectPacket packet)
@@ -1223,6 +1225,16 @@ namespace Fika.Core.Networking
             dataWriter.Reset();
             packetProcessor.WriteNetSerializable(dataWriter, ref packet);
             netClient.FirstPeer.Send(dataWriter, deliveryMethod);
+        }
+
+        public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
+        {
+            dataWriter.Reset();
+
+            packetProcessor.Write(dataWriter, packet);
+            netClient.FirstPeer.Send(dataWriter, deliveryMethod);
+
+            packet.Flush();
         }
 
         public void OnPeerConnected(NetPeer peer)

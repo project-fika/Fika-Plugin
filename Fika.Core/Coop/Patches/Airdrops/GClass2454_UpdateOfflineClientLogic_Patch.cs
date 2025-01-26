@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
-using Fika.Core.Networking;
-using LiteNetLib;
+using Fika.Core.Coop.HostClasses;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
@@ -16,13 +15,7 @@ namespace Fika.Core.Coop.Patches
         [PatchPostfix]
         public static void Postfix(AirplaneDataPacketStruct ___airplaneDataPacketStruct)
         {
-            SyncObjectPacket packet = new(___airplaneDataPacketStruct.ObjectId)
-            {
-                ObjectType = EFT.SynchronizableObjects.SynchronizableObjectType.AirDrop,
-                Data = ___airplaneDataPacketStruct
-            };
-
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            Singleton<CoopHostGameWorld>.Instance.FikaHostWorld.SyncObjectPacket.Packets.Add(___airplaneDataPacketStruct);
         }
     }
 }

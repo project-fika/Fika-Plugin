@@ -15,6 +15,8 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class CoopClientGameWorld : ClientLocalGameWorld
     {
+        public FikaClientWorld FikaClientWorld {  get; private set; }
+
         public static CoopClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {
             CoopClientGameWorld gameWorld = gameObject.AddComponent<CoopClientGameWorld>();
@@ -26,7 +28,8 @@ namespace Fika.Core.Coop.ClientClasses
             gameWorld.CurrentProfileId = currentProfileId;
             gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
             gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
-            FikaClientWorld.Create(gameWorld);
+            gameWorld.FikaClientWorld = FikaClientWorld.Create(gameWorld);
+            Singleton<CoopClientGameWorld>.Create(gameWorld);
             return gameWorld;
         }
 
@@ -62,6 +65,7 @@ namespace Fika.Core.Coop.ClientClasses
         public override void Dispose()
         {
             base.Dispose();
+            Singleton<CoopClientGameWorld>.Release(this);
             NetManagerUtils.DestroyNetManager(false);
             List<SynchronizableObject> syncObjects = SynchronizableObjectLogicProcessor.GetSynchronizableObjects().ToList();
             foreach (SynchronizableObject syncObject in syncObjects)

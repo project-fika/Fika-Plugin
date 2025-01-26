@@ -1,8 +1,7 @@
 ﻿using Comfort.Common;
 using EFT.SynchronizableObjects;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Utils;
-using Fika.Core.Networking;
-using LiteNetLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
@@ -20,24 +19,22 @@ namespace Fika.Core.Coop.Patches
         {
             if (FikaBackendUtils.IsServer)
             {
-                SyncObjectPacket packet = new(__instance.ObjectId)
+                AirplaneDataPacketStruct packet = new()
                 {
                     ObjectType = SynchronizableObjectType.Tripwire,
-                    Data = new()
+                    ObjectId = __instance.ObjectId,
+                    PacketData = new()
                     {
-                        PacketData = new()
+                        TripwireDataPacket = new()
                         {
-                            TripwireDataPacket = new()
-                            {
-                                State = ETripwireState.Exploded
-                            }
-                        },
-                        Position = __instance.transform.position,
-                        Rotation = __instance.transform.rotation.eulerAngles,
-                        IsActive = true
-                    }
+                            State = ETripwireState.Exploded
+                        }
+                    },
+                    Position = __instance.transform.position,
+                    Rotation = __instance.transform.rotation.eulerAngles,
+                    IsActive = true
                 };
-                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+                Singleton<CoopHostGameWorld>.Instance.FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
             }
         }
     }

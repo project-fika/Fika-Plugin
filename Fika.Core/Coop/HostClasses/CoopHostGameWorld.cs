@@ -27,6 +27,8 @@ namespace Fika.Core.Coop.HostClasses
             }
         }
 
+        public FikaHostWorld FikaHostWorld { get; private set; }
+
         public static CoopHostGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {
             CoopHostGameWorld gameWorld = gameObject.AddComponent<CoopHostGameWorld>();
@@ -38,7 +40,8 @@ namespace Fika.Core.Coop.HostClasses
             gameWorld.CurrentProfileId = currentProfileId;
             gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
             gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
-            FikaHostWorld.Create(gameWorld);
+            gameWorld.FikaHostWorld = FikaHostWorld.Create(gameWorld);
+            Singleton<CoopHostGameWorld>.Create(gameWorld);
             return gameWorld;
         }
 
@@ -75,6 +78,7 @@ namespace Fika.Core.Coop.HostClasses
         public override void Dispose()
         {
             base.Dispose();
+            Singleton<CoopHostGameWorld>.Release(this);
             MineManager.OnExplosion -= OnMineExplode;
             NetManagerUtils.DestroyNetManager(true);
         }
@@ -146,49 +150,45 @@ namespace Fika.Core.Coop.HostClasses
 
         public override void TriggerTripwire(TripwireSynchronizableObject tripwire)
         {
-            SyncObjectPacket packet = new(tripwire.ObjectId)
+            AirplaneDataPacketStruct packet = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
-                Data = new()
+                ObjectId = tripwire.ObjectId,
+                PacketData = new()
                 {
-                    PacketData = new()
+                    TripwireDataPacket = new()
                     {
-                        TripwireDataPacket = new()
-                        {
-                            State = ETripwireState.Active
-                        }
-                    },
-                    Position = tripwire.transform.position,
-                    Rotation = tripwire.transform.rotation.eulerAngles,
-                    IsActive = true
-                }
+                        State = ETripwireState.Active
+                    }
+                },
+                Position = tripwire.transform.position,
+                Rotation = tripwire.transform.rotation.eulerAngles,
+                IsActive = true
             };
-
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
+            
             base.TriggerTripwire(tripwire);
         }
 
         public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
         {
-            SyncObjectPacket packet = new(tripwire.ObjectId)
+            AirplaneDataPacketStruct packet = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
-                Data = new()
+                ObjectId = tripwire.ObjectId,
+                PacketData = new()
                 {
-                    PacketData = new()
+                    TripwireDataPacket = new()
                     {
-                        TripwireDataPacket = new()
-                        {
-                            State = ETripwireState.Inert
-                        }
-                    },
-                    Position = tripwire.transform.position,
-                    Rotation = tripwire.transform.rotation.eulerAngles,
-                    IsActive = true
-                }
+                        State = ETripwireState.Inert
+                    }
+                },
+                Position = tripwire.transform.position,
+                Rotation = tripwire.transform.rotation.eulerAngles,
+                IsActive = true
             };
+            FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
 
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
             base.DeActivateTripwire(tripwire);
         }
     }

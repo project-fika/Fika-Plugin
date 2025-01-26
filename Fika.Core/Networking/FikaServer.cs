@@ -164,6 +164,7 @@ namespace Fika.Core.Networking
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
+            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
 
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
@@ -188,7 +189,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
             packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
             packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket, NetPeer>(OnSpawnSyncObjectPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
             packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
@@ -201,6 +201,8 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializable<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
+
+            packetProcessor.SubscribeReusable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
 
 #if DEBUG
             AddDebugPackets();
@@ -554,19 +556,25 @@ namespace Fika.Core.Networking
 
         private void OnSyncObjectPacketReceived(SyncObjectPacket packet, NetPeer peer)
         {
-            if (packet.ObjectType == SynchronizableObjectType.Tripwire)
+            foreach (AirplaneDataPacketStruct syncPacket in packet.Packets)
             {
-                CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
-                TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(packet.ObjectId);
-                if (tripwire != null)
+                if (syncPacket.ObjectType == SynchronizableObjectType.Tripwire)
                 {
-                    gameWorld.DeActivateTripwire(tripwire);
+                    CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
+                    TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(syncPacket.ObjectId);
+                    if (tripwire != null)
+                    {
+                        gameWorld.DeActivateTripwire(tripwire);
+                        continue;
+                    }
+
+                    logger.LogError($"OnSyncObjectPacketReceived: Tripwire with id {syncPacket.ObjectId} could not be found!");
+                    continue;
                 }
-                else
-                {
-                    logger.LogError($"OnSyncObjectPacketReceived: Tripwire with id {packet.ObjectId} could not be found!");
-                }
+
+                logger.LogWarning($"OnSyncObjectPacketReceived: Received a packet we shouldn't receive: {syncPacket.ObjectType}");
             }
+            packet.Flush();
         }
 
         private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet, NetPeer peer)
@@ -1313,12 +1321,14 @@ namespace Fika.Core.Networking
             netServer.SendToAll(dataWriter, deliveryMethod);
         }
 
-        public void SendReusableToAll<T>(ref T packet, DeliveryMethod deliveryMethod) where T : class, new()
+        public void SendReusableToAll<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
         {
             dataWriter.Reset();
 
             packetProcessor.Write(dataWriter, packet);
             netServer.SendToAll(dataWriter, deliveryMethod);
+
+            packet.Flush();
         }
 
         public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable

@@ -818,25 +818,30 @@ namespace Fika.Core.Coop.Players
         public override void vmethod_4(TripwireSynchronizableObject tripwire)
         {
             base.vmethod_4(tripwire);
-            SyncObjectPacket packet = new(tripwire.ObjectId)
+            AirplaneDataPacketStruct packet = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
-                Data = new()
+                ObjectId = tripwire.ObjectId,
+                PacketData = new()
                 {
-                    PacketData = new()
+                    TripwireDataPacket = new()
                     {
-                        TripwireDataPacket = new()
-                        {
-                            State = ETripwireState.Inert
-                        }
-                    },
-                    Position = tripwire.transform.position,
-                    Rotation = tripwire.transform.rotation.eulerAngles,
-                    IsActive = true
-                }
-            };
-            PacketSender.SendPacket(ref packet);
+                        State = ETripwireState.Inert
+                    }
+                },
+                Position = tripwire.transform.position,
+                Rotation = tripwire.transform.rotation.eulerAngles,
+                IsActive = true
+            };            
             UpdateInteractionCast();
+
+            if (FikaBackendUtils.IsServer)
+            {
+                Singleton<CoopHostGameWorld>.Instance.FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
+                return;
+            }
+
+            Singleton<CoopClientGameWorld>.Instance.FikaClientWorld.SyncObjectPacket.Packets.Add(packet);
         }
 
         public override void ApplyCorpseImpulse()

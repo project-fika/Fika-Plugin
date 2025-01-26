@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Airdrop;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
@@ -633,6 +634,105 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
+        /// Serializes a <see cref="AirplaneDataPacketStruct"/>
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="airplaneDataPacketStruct"></param>
+        public static void PutAirplaneDataPacketStruct(this NetDataWriter writer, AirplaneDataPacketStruct airplaneDataPacketStruct)
+        {
+            writer.Put((byte)airplaneDataPacketStruct.ObjectType);
+            writer.Put(airplaneDataPacketStruct.ObjectId);
+
+            switch (airplaneDataPacketStruct.ObjectType)
+            {
+                case SynchronizableObjectType.AirDrop:
+                    writer.Put(airplaneDataPacketStruct.Position);
+                    writer.Put(airplaneDataPacketStruct.Rotation);
+                    writer.Put(airplaneDataPacketStruct.Outdated);
+                    writer.Put(airplaneDataPacketStruct.IsStatic);
+                    writer.Put((byte)airplaneDataPacketStruct.PacketData.AirdropDataPacket.AirdropType);
+                    writer.Put((byte)airplaneDataPacketStruct.PacketData.AirdropDataPacket.FallingStage);
+                    writer.Put(airplaneDataPacketStruct.PacketData.AirdropDataPacket.SignalFire);
+                    writer.Put(airplaneDataPacketStruct.PacketData.AirdropDataPacket.UniqueId);
+                    return;
+                case SynchronizableObjectType.AirPlane:
+                    writer.Put(airplaneDataPacketStruct.Position);
+                    writer.Put(airplaneDataPacketStruct.Rotation);
+                    writer.Put(airplaneDataPacketStruct.PacketData.AirplaneDataPacket.AirplanePercent);
+                    writer.Put(airplaneDataPacketStruct.Outdated);
+                    writer.Put(airplaneDataPacketStruct.IsStatic);
+                    return;
+                case SynchronizableObjectType.Tripwire:
+                    writer.Put((byte)airplaneDataPacketStruct.PacketData.TripwireDataPacket.State);
+                    writer.Put(airplaneDataPacketStruct.Position);
+                    writer.Put(airplaneDataPacketStruct.Rotation);
+                    writer.Put(airplaneDataPacketStruct.IsActive);
+                    return;
+            }
+        }
+
+        /// <summary>
+        /// Deserializes a <see cref="AirplaneDataPacketStruct"/>
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static AirplaneDataPacketStruct GetAirplaneDataPacketStruct(this NetDataReader reader)
+        {
+            AirplaneDataPacketStruct packet = new()
+            {
+                ObjectType = (SynchronizableObjectType)reader.GetByte(),
+                ObjectId = reader.GetInt()
+            };
+
+            switch (packet.ObjectType)
+            {
+                case SynchronizableObjectType.AirDrop:
+                    packet.Position = reader.GetVector3();
+                    packet.Rotation = reader.GetVector3();
+                    packet.Outdated = reader.GetBool();
+                    packet.IsStatic = reader.GetBool();
+                    packet.PacketData = new()
+                    {
+                        AirdropDataPacket = new()
+                        {
+                            AirdropType = (EAirdropType)reader.GetByte(),
+                            FallingStage = (EAirdropFallingStage)reader.GetByte(),
+                            SignalFire = reader.GetBool(),
+                            UniqueId = reader.GetInt()
+                        }
+                    };
+                    break;
+                case SynchronizableObjectType.AirPlane:
+                    packet.Position = reader.GetVector3();
+                    packet.Rotation = reader.GetVector3();
+                    packet.PacketData = new()
+                    {
+                        AirplaneDataPacket = new()
+                        {
+                            AirplanePercent = reader.GetInt()
+                        }
+                    };
+                    packet.Outdated = reader.GetBool();
+                    packet.IsStatic = reader.GetBool();
+                    break;
+                case SynchronizableObjectType.Tripwire:
+                    packet.PacketData = new()
+                    {
+                        TripwireDataPacket = new()
+                        {
+                            State = (ETripwireState)reader.GetByte()
+                        }
+                    };
+                    packet.Position = reader.GetVector3();
+                    packet.Rotation = reader.GetVector3();
+                    packet.IsActive = reader.GetBool();
+                    break;
+            }
+
+            return packet;
+        }
+
+        /// <summary>
         /// Deserializes a <see cref="GrenadeDataPacketStruct"/>
         /// </summary>
         /// <param name="reader"></param>
@@ -987,7 +1087,7 @@ namespace Fika.Core.Networking
                 case EFirearmSubPacketType.ToggleBipod:
                     return new ToggleBipodPacket();
                 case EFirearmSubPacketType.LeftStanceChange:
-                    return new LeftStanceChangePacket(reader);                
+                    return new LeftStanceChangePacket(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetFirearmSubPacket: type was outside of bounds!");
                     return null;
