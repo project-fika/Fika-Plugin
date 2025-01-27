@@ -557,6 +557,8 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override IEnumerator vmethod_2()
         {
+            FikaBackendUtils.GroupPlayers.Clear();
+
             int timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
 #if DEBUG
             timeBeforeDeployLocal = 3;
