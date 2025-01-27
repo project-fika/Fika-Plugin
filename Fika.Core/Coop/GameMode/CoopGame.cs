@@ -1178,19 +1178,16 @@ namespace Fika.Core.Coop.GameMode
                 await GetReconnectProfile(ProfileId);
             }
 
-            using (CounterCreatorAbstractClass.StartWithToken("player create"))
-            {
-                LocalPlayer player = await CreateLocalPlayer();
-                dictionary_0.Add(player.ProfileId, player);
-                gparam_0 = func_1(player);
-                PlayerCameraController.Create(gparam_0.Player);
-                CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
-                CameraClass.Instance.IsActive = false;
+            LocalPlayer player = await CreateLocalPlayer();
+            dictionary_0.Add(player.ProfileId, player);
+            gparam_0 = func_1(player);
+            PlayerCameraController.Create(gparam_0.Player);
+            CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
+            CameraClass.Instance.IsActive = false;
 
-                if (FikaBackendUtils.IsHeadless && gameWorld.TransitController is FikaHostTransitController hostController)
-                {
-                    hostController.SetupHeadlessPlayerTransitStash(player);
-                }
+            if (FikaBackendUtils.IsHeadless && gameWorld.TransitController is FikaHostTransitController hostController)
+            {
+                hostController.SetupHeadlessPlayerTransitStash(player);
             }
 
             await WaitForHostToStart();
@@ -2494,10 +2491,7 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
                 }
             }
-            using (CounterCreatorAbstractClass.StartWithToken("CollectMetrics"))
-            {
-                gclass2433_0.Stop();
-            }
+            gclass2433_0.Stop();
             return new();
         }
 

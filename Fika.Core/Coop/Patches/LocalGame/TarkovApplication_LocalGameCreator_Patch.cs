@@ -167,18 +167,15 @@ namespace Fika.Core.Coop.Patches
             }
 
             await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
-            using (CounterCreatorAbstractClass.StartWithToken("LoadingScreen.LoadComplete"))
-            {
-                GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
-                ___mainMenuController?.Unsubscribe();
-                gameWorld.OnGameStarted();
-                updater.Dispose();
+            GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
+            ___mainMenuController?.Unsubscribe();
+            gameWorld.OnGameStarted();
+            updater.Dispose();
 
-                if (FikaBackendUtils.IsSpectator)
-                {
-                    Logger.LogInfo("Starting game as spectator");
-                    await HandleJoinAsSpectator();
-                }
+            if (FikaBackendUtils.IsSpectator)
+            {
+                Logger.LogInfo("Starting game as spectator");
+                await HandleJoinAsSpectator();
             }
         }
 
