@@ -966,8 +966,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     if (isServer)
                     {
-                        RaidStarted = true;
-                        FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount + 1;
+                        RaidStarted = true;                        
                         return;
                     }
 
@@ -1463,6 +1462,8 @@ namespace Fika.Core.Coop.GameMode
                 {
                     await Task.Yield();
                 }
+
+                FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount + 1;
 
                 if (startButton != null)
                 {
