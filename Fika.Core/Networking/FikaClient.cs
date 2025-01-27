@@ -1326,6 +1326,16 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable(handle);
         }
 
+        public void RegisterReusablePacket<T>(Action<T> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
+        }
+
+        public void RegisterReusablePacket<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
+        }
+
         public void PrintStatistics()
         {
             logger.LogInfo("..:: Fika Client Session Statistics ::..");
@@ -1334,6 +1344,6 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Received packets: {netClient.Statistics.PacketsReceived}");
             logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(netClient.Statistics.BytesReceived)}");
             logger.LogInfo($"Packet loss: {netClient.Statistics.PacketLossPercent}%");
-        }
+        }        
     }
 }

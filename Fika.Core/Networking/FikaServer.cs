@@ -1543,6 +1543,16 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable(handle);
         }
 
+        public void RegisterReusablePacket<T>(Action<T> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
+        }
+
+        public void RegisterReusablePacket<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
+        }
+
         public void PrintStatistics()
         {
             logger.LogInfo("..:: Fika Server Session Statistics ::..");
