@@ -1019,7 +1019,7 @@ namespace Fika.Core.Networking
                 case EFirearmSubPacketType.Loot:
                     break;
                 default:
-                    FikaPlugin.Instance.FikaLogger.LogError("IFirearmSubPacket: type was outside of bounds!");
+                    FikaPlugin.Instance.FikaLogger.LogError("PutFirearmSubPacket: type was outside of bounds!");
                     break;
             }
         }
