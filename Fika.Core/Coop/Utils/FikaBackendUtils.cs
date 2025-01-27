@@ -46,11 +46,28 @@ namespace Fika.Core.Coop.Utils
         public static int RemotePort { get; internal set; }
         public static int LocalPort { get; internal set; } = 0;
         public static string HostLocationId { get; internal set; }
+
+        internal static GClass3860<GClass1336> GroupPlayers { get; set; } = [];
         internal static bool RequestFikaWorld;
         internal static Vector3 ReconnectPosition = Vector3.zero;
         internal static RaidSettings CachedRaidSettings;
         internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         internal static MatchMakerGroupPreview MatchMakerGroupPreview;
+
+        internal static void CleanUpVariables()
+        {
+            if (!IsTransit)
+            {
+                HostExpectedNumberOfPlayers = 1;
+                IsSpectator = false;
+                IsHeadlessRequester = false;
+            }
+
+            RequestFikaWorld = false;
+            IsReconnect = false;
+            ReconnectPosition = Vector3.zero;
+            GroupPlayers.Clear();
+        }
 
         public static bool IsServer
         {
@@ -180,7 +197,7 @@ namespace Fika.Core.Coop.Utils
                 return;
             }
 
-            GClass3860<GClass1336> playerList = [];
+            GroupPlayers.Clear();
             foreach (KeyValuePair<Profile, bool> kvp in profiles)
             {
                 Profile profile = kvp.Key;
@@ -206,7 +223,7 @@ namespace Fika.Core.Coop.Utils
                     PlayerVisualRepresentation = profile.GetVisualEquipmentState(false)
                 };
 
-                playerList.Add(visualProfile);
+                GroupPlayers.Add(visualProfile);
             }
 
             if (TarkovApplication.Exist(out TarkovApplication app))
@@ -219,7 +236,7 @@ namespace Fika.Core.Coop.Utils
                     {
                         PartyInfoPanel panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
                         panel.Close();
-                        panel.Show(playerList, Profile, false);
+                        panel.Show(GroupPlayers, Profile, false);
                         return;
                     }
                     FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MenuUI was null!");

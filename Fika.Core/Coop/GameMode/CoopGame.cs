@@ -2542,23 +2542,9 @@ namespace Fika.Core.Coop.GameMode
                 FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
             }
 
-            CleanUpFikaBackendUtils();
+            FikaBackendUtils.CleanUpVariables();
 
             BTRSide_Patches.Passengers.Clear();
-        }
-
-        private void CleanUpFikaBackendUtils()
-        {
-            if (!FikaBackendUtils.IsTransit)
-            {
-                FikaBackendUtils.HostExpectedNumberOfPlayers = 1;
-                FikaBackendUtils.IsSpectator = false;
-                FikaBackendUtils.IsHeadlessRequester = false;
-            }
-
-            FikaBackendUtils.RequestFikaWorld = false;
-            FikaBackendUtils.IsReconnect = false;
-            FikaBackendUtils.ReconnectPosition = Vector3.zero;
         }
 
         private class ExitManager : Class1512
