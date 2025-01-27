@@ -1094,11 +1094,6 @@ namespace Fika.Core.Networking
             }
         }
 
-        public static void PutCommonSubPacket(this NetDataWriter writer, ISubPacket packet)
-        {
-            packet.Serialize(writer);
-        }
-
         public static ISubPacket GetCommonSubPacket(this NetDataReader reader, ECommonSubPacketType type)
         {
             switch (type)

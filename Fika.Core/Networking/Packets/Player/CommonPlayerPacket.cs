@@ -20,7 +20,7 @@ namespace Fika.Core.Networking
         {
             writer.Put(NetId);
             writer.Put((byte)Type);
-            writer.PutCommonSubPacket(SubPacket);
+            SubPacket?.Serialize(writer);
         }
     }
 }
