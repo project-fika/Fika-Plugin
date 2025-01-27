@@ -11,6 +11,7 @@ namespace Fika.Core.Networking
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new();
         public void RegisterReusablePacket<T>(Action<T> handle) where T : class, IReusable, new();
         public void RegisterReusablePacket<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new();
+        public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate);
         internal void PrintStatistics();
     }
 }

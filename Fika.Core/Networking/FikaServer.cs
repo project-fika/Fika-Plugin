@@ -1553,6 +1553,11 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeReusable(handle);
         }
 
+        public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
+        {
+            packetProcessor.RegisterNestedType(writeDelegate, readDelegate);
+        }
+
         public void PrintStatistics()
         {
             logger.LogInfo("..:: Fika Server Session Statistics ::..");
