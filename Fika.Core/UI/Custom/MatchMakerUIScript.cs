@@ -196,7 +196,10 @@ namespace Fika.Core.UI.Custom
                 }
             }
 
-            TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
+            HoverTooltipArea hostTooltipArea = fikaMatchMakerUi.RaidGroupHostButton.GetOrAddComponent<HoverTooltipArea>();
+            hostTooltipArea.enabled = true;
+            hostTooltipArea.SetMessageText(LocaleUtils.UI_HOST_RAID_TOOLTIP.Localized());
+
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);

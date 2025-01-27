@@ -177,6 +177,7 @@ namespace Fika.Core.Utils
         public const string UI_ERROR_BIND_IP_HEADER = "F_UI_ErrorBindIPHeader";
         public const string UI_ERROR_BIND_IP = "F_UI_ErrorBindIP";
         public const string UI_NO_DEDICATED_CLIENTS = "F_UI_NoDedicatedClients";
+        public const string UI_HOST_RAID_TOOLTIP = "F_UI_HostRaidTooltip";
         public const string UI_WAIT_FOR_HOST_START_RAID = "F_UI_WaitForHostStartRaid";
         public const string UI_WAIT_FOR_HOST_FINISH_INIT = "F_UI_WaitForHostFinishInit";
         public const string UI_WAIT_FOR_OTHER_PLAYERS = "F_UI_WaitForOtherPlayers";
