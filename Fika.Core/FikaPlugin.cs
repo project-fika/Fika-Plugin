@@ -1188,7 +1188,8 @@ namespace Fika.Core
                 "Force Bind IP", ref failed, ref headers);
 
             UDPPort = SetupSetting(networkDefaultHeader, "UDP Port", 25565,
-                new ConfigDescription(LocaleUtils.BEPINEX_UDP_PORT_D.Localized(), tags: new ConfigurationManagerAttributes()
+                new ConfigDescription(LocaleUtils.BEPINEX_UDP_PORT_D.Localized(), new AcceptableValueRange<int>(0, 65535),
+                tags: new ConfigurationManagerAttributes()
                 {
                     Category = networkHeader,
                     DispName = LocaleUtils.BEPINEX_UDP_PORT_T.Localized(),
