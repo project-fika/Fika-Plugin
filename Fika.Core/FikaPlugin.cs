@@ -215,6 +215,7 @@ namespace Fika.Core
         public bool SharedQuestProgression;
         public bool CanEditRaidSettings;
         public bool EnableTransits;
+        public bool AnyoneCanStartRaid;
         #endregion
 
         #region natpunch config
@@ -418,6 +419,7 @@ namespace Fika.Core
             SharedQuestProgression = clientConfig.SharedQuestProgression;
             CanEditRaidSettings = clientConfig.CanEditRaidSettings;
             EnableTransits = clientConfig.EnableTransits;
+            AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
 
             clientConfig.LogValues();
         }

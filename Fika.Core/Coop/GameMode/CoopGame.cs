@@ -1480,7 +1480,7 @@ namespace Fika.Core.Coop.GameMode
                 return;
             }
 
-            if (FikaBackendUtils.IsHeadlessRequester)
+            if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.AnyoneCanStartRaid)
             {
                 startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
             }
