@@ -20,5 +20,11 @@ namespace Fika.Core.UI.Patches
                 groupPlayers = FikaBackendUtils.GroupPlayers;
             }
         }
+
+        [PatchPostfix]
+        public static void Postfix(PartyInfoPanel __instance)
+        {
+            __instance.SetEquipmentViewClicksAvailable(true);
+        }
     }
 }
