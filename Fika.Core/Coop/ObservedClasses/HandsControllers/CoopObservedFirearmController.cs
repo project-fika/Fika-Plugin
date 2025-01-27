@@ -466,11 +466,13 @@ namespace Fika.Core.Coop.ObservedClasses
                         MagazineItemClass currentMagazine = Weapon.GetCurrentMagazine();
                         if (currentMagazine != null)
                         {
-                            AmmoItemClass fedAmmo = GetFedAmmoFromMalfunction(currentMagazine);
+                            AmmoItemClass fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(coopPlayer.InventoryController).Value.ResultItem;
                             if (fedAmmo != null)
                             {
-                                weaponManager.SetRoundIntoWeapon(fedAmmo, 0);
-                                weaponManager.MoveAmmoFromChamberToShellPort(false, 0);
+                                Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
+                                // Leave here for now - Lacyway
+                                /*weaponManager.SetRoundIntoWeapon(fedAmmo, 0);
+                                weaponManager.MoveAmmoFromChamberToShellPort(false, 0);*/
                             }
                             else
                             {
@@ -488,7 +490,8 @@ namespace Fika.Core.Coop.ObservedClasses
             HandleObservedShot(ref packet, inventoryController);
         }
 
-        private AmmoItemClass GetFedAmmoFromMalfunction(MagazineItemClass currentMagazine)
+        // Leave here for now - Lacyway
+        /*private AmmoItemClass GetFedAmmoFromMalfunction(MagazineItemClass currentMagazine)
         {
             if (!Weapon.HasChambers)
             {
@@ -501,7 +504,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 chamberSlot.RemoveItemWithoutRestrictions();
             }
             return (AmmoItemClass)currentMagazine.Cartridges.PopTo(coopPlayer.InventoryController, chamberSlot.CreateItemAddress()).Value.ResultItem;
-        }
+        }*/
 
         private void HandleObservedShot(ref ShotInfoPacket packet, InventoryController inventoryController)
         {
