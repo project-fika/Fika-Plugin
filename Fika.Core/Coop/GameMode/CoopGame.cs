@@ -1850,7 +1850,7 @@ namespace Fika.Core.Coop.GameMode
                 exfilController.ScavExfiltrationClaim(player.Position, player.ProfileId, player.Profile.FenceInfo.AvailableExitsCount);
                 int mask = exfilController.GetScavExfiltrationMask(player.ProfileId);
                 exfilPoints = exfilController.ScavExfiltrationClaim(mask, player.ProfileId);
-                secretExfilPoints = ExfiltrationControllerClass.Instance.SecretEligiblePoints();
+                secretExfilPoints = ExfiltrationControllerClass.Instance.GetScavSecretExits();
             }
             else
             {
