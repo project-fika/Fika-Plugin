@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Management.Instrumentation;
-using System.Net;
 using System.Reflection;
 using UnityEngine;
 
@@ -55,7 +53,7 @@ namespace Fika.Core.Bundles
         /// <returns></returns>
         /// <exception cref="NullReferenceException">Master Bundle could not be found</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="EFikaAsset"/> was out of range</exception>
-        internal T GetFikaAsset<T>(EFikaAsset asset) where T: UnityEngine.Object
+        internal T GetFikaAsset<T>(EFikaAsset asset) where T : UnityEngine.Object
         {
             if (masterBundle == null)
             {
@@ -85,7 +83,7 @@ namespace Fika.Core.Bundles
         /// <returns>All sprites in a <see cref="Dictionary{TKey, TValue}"/></returns>
         internal Dictionary<EFikaSprite, Sprite> GetFikaSprites()
         {
-            Dictionary<EFikaSprite, Sprite > sprites = [];
+            Dictionary<EFikaSprite, Sprite> sprites = [];
 
             sprites.Add(EFikaSprite.PingPoint, masterBundle.LoadAsset<Sprite>("PingPoint"));
             sprites.Add(EFikaSprite.PingPlayer, masterBundle.LoadAsset<Sprite>("PingPlayer"));

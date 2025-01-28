@@ -128,7 +128,7 @@ namespace Fika.Core.Networking.Websocket
                     notification = e.Data.ParseJsonTo<PushNotification>([]);
                     HandleNotification(notification);
                     break;
-            }            
+            }
         }
 
         private void HandleNotification(NotificationAbstractClass notification)

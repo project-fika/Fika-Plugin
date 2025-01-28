@@ -1,6 +1,4 @@
-﻿using Comfort.Common;
-using EFT;
-using EFT.UI;
+﻿using EFT;
 using Fika.Core.Networking.Websocket;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -22,7 +20,7 @@ namespace Fika.Core.UI.Patches
         {
             if (!FikaNotificationManager.Exists)
             {
-                FikaPlugin.Instance.NotificationManager = new(); 
+                FikaPlugin.Instance.NotificationManager = new();
             }
         }
     }

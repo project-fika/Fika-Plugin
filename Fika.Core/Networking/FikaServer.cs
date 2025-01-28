@@ -38,8 +38,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.GenericSubPackets;
-using static Fika.Core.Networking.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -107,7 +107,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        public EPlayerSide RaidSide { get ; set; }
+        public EPlayerSide RaidSide { get; set; }
 
         private int sendRate;
         private NetPacketProcessor packetProcessor;

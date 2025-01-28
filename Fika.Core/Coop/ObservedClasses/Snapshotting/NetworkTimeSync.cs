@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             lock (threadLock)
             {
                 stopwatch.Reset();
-                Offset = 0; 
+                Offset = 0;
             }
         }
 

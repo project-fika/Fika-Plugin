@@ -15,7 +15,7 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class CoopClientGameWorld : ClientLocalGameWorld
     {
-        public FikaClientWorld FikaClientWorld {  get; private set; }
+        public FikaClientWorld FikaClientWorld { get; private set; }
 
         public static CoopClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {

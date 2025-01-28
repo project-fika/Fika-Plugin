@@ -166,7 +166,7 @@ namespace Fika.Core.Coop.HostClasses
                 IsActive = true
             };
             FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
-            
+
             base.TriggerTripwire(tripwire);
         }
 

@@ -8,43 +8,43 @@ namespace Fika.Core.Models
     public struct ClientConfigModel
     {
         [DataMember(Name = "useBtr")]
-        public bool UseBTR { get; set; }    
+        public bool UseBTR { get; set; }
 
         [DataMember(Name = "friendlyFire")]
-        public bool FriendlyFire { get; set; }    
+        public bool FriendlyFire { get; set; }
 
         [DataMember(Name = "dynamicVExfils")]
-        public bool DynamicVExfils { get; set; }    
+        public bool DynamicVExfils { get; set; }
 
         [DataMember(Name = "allowFreeCam")]
-        public bool AllowFreeCam { get; set; }    
+        public bool AllowFreeCam { get; set; }
 
         [DataMember(Name = "AllowSpectateFreeCam")]
-        public bool AllowSpectateFreeCam { get; set; }    
+        public bool AllowSpectateFreeCam { get; set; }
 
         [DataMember(Name = "allowItemSending")]
-        public bool AllowItemSending { get; set; }    
+        public bool AllowItemSending { get; set; }
 
         [DataMember(Name = "blacklistedItems")]
-        public string[] BlacklistedItems { get; set; }    
+        public string[] BlacklistedItems { get; set; }
 
         [DataMember(Name = "forceSaveOnDeath")]
-        public bool ForceSaveOnDeath { get; set; }    
+        public bool ForceSaveOnDeath { get; set; }
 
         [DataMember(Name = "useInertia")]
-        public bool UseInertia { get; set; }    
+        public bool UseInertia { get; set; }
 
         [DataMember(Name = "sharedQuestProgression")]
-        public bool SharedQuestProgression { get; set; }    
+        public bool SharedQuestProgression { get; set; }
 
         [DataMember(Name = "canEditRaidSettings")]
-        public bool CanEditRaidSettings { get; set; }    
+        public bool CanEditRaidSettings { get; set; }
 
         [DataMember(Name = "enableTransits")]
-        public bool EnableTransits { get; set; }    
+        public bool EnableTransits { get; set; }
 
         [DataMember(Name = "anyoneCanStartRaid")]
-        public bool AnyoneCanStartRaid { get; set; }    
+        public bool AnyoneCanStartRaid { get; set; }
 
         public void LogValues()
         {

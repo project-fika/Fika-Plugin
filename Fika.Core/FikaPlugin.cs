@@ -68,7 +68,7 @@ namespace Fika.Core
         public string[] LocalIPs;
         public IPAddress WanIP;
         public bool LocalesLoaded;
-        
+
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 

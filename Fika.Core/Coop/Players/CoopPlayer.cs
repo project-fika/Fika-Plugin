@@ -832,7 +832,7 @@ namespace Fika.Core.Coop.Players
                 Position = tripwire.transform.position,
                 Rotation = tripwire.transform.rotation.eulerAngles,
                 IsActive = true
-            };            
+            };
             UpdateInteractionCast();
 
             if (FikaBackendUtils.IsServer)
