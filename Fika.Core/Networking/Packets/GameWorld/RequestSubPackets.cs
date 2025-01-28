@@ -174,7 +174,7 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                using GClass1212 writer = EFTSerializationManager.GetWriter();
+                using EFTSerializationManager.FikaWriter writer = EFTSerializationManager.GetWriter();
                 {
                     writer.WriteInt(allExfils.Length);
                     foreach (ExfiltrationPoint exfilPoint in allExfils)
@@ -217,29 +217,27 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                using GClass1207 reader = EFTSerializationManager.GetReader(Data);
+                EFTSerializationManager.FikaReader eftReader = EFTSerializationManager.GetReader(Data);
+                int amount = eftReader.ReadInt();
+                for (int i = 0; i < amount; i++)
                 {
-                    int amount = reader.ReadInt();
-                    for (int i = 0; i < amount; i++)
+                    string name = eftReader.ReadString();
+                    EExfiltrationStatus status = (EExfiltrationStatus)eftReader.ReadByte();
+                    int startTime = eftReader.ReadInt();
+                    int exfilStartTime = -1;
+                    if (status == EExfiltrationStatus.Countdown)
                     {
-                        string name = reader.ReadString();
-                        EExfiltrationStatus status = (EExfiltrationStatus)reader.ReadByte();
-                        int startTime = reader.ReadInt();
-                        int exfilStartTime = -1;
-                        if (status == EExfiltrationStatus.Countdown)
-                        {
-                            exfilStartTime = reader.ReadInt();
-                        }
+                        exfilStartTime = eftReader.ReadInt();
+                    }
 
-                        ExfiltrationPoint exfilPoint = allExfils.FirstOrDefault(x => x.Settings.Name == name);
-                        if (exfilPoint != null)
+                    ExfiltrationPoint exfilPoint = allExfils.FirstOrDefault(x => x.Settings.Name == name);
+                    if (exfilPoint != null)
+                    {
+                        exfilPoint.Status = status;
+                        exfilPoint.Settings.StartTime = startTime;
+                        if (exfilStartTime > 0)
                         {
-                            exfilPoint.Status = status;
-                            exfilPoint.Settings.StartTime = startTime;
-                            if (exfilStartTime > 0)
-                            {
-                                exfilPoint.ExfiltrationStartTime = exfilStartTime;
-                            }
+                            exfilPoint.ExfiltrationStartTime = exfilStartTime;
                         }
                     }
                 }

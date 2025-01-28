@@ -1,26 +1,44 @@
-﻿namespace Fika.Core.Networking
+﻿using System;
+
+namespace Fika.Core.Networking
 {
     public static class EFTSerializationManager
     {
+        private static readonly FikaReader reader = new([]);
+        private static readonly FikaWriter writer = new();
+
         /// <summary>
-        /// Gets a <see cref="EFTReaderClass"/> from the reader pool (<see cref="System.IDisposable"/>) <br/>
-        /// Must call <see cref="GClass1207.Dispose"/> manually or wrap in a using statement
+        /// Gets a <see cref="FikaReader"/>
         /// </summary>
         /// <param name="data">The data to supply the reader with</param>
-        /// <returns>A free <see cref="GClass1207"/> from the reader pool</returns>
-        public static GClass1207 GetReader(byte[] data)
+        /// <returns>A <see cref="FikaReader"/></returns>
+        public static FikaReader GetReader(byte[] data)
         {
-            return GClass1210.Get(data);
+            reader.SetBuffer(new(data));
+            return reader;
         }
 
         /// <summary>
-        /// Gets a <see cref="EFTWriterClass"/> from the writer pool (<see cref="System.IDisposable"/>) <br/>
-        /// Must call <see cref="GClass1212.Dispose"/> manually or wrap in a using statement
+        /// Gets a <see cref="FikaWriter"/> (<see cref="IDisposable"/>) <br/>
+        /// Must call <see cref="FikaWriter.Dispose"/> manually or wrap in a using statement
         /// </summary>
-        /// <returns>A free <see cref="GClass1212"/> from the writer pool</returns>
-        public static GClass1212 GetWriter()
+        /// <returns>A <see cref="FikaWriter"/></returns>
+        public static FikaWriter GetWriter()
         {
-            return GClass1215.Get();
+            return writer;
+        }
+
+        public class FikaReader(ArraySegment<byte> segment) : EFTReaderClass(segment)
+        {
+
+        }
+
+        public class FikaWriter : EFTWriterClass, IDisposable
+        {
+            public void Dispose()
+            {
+                Reset();
+            }
         }
     }
 }

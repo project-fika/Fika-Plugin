@@ -1066,7 +1066,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                using GClass1207 eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
+                EFTSerializationManager.FikaReader eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
                 try
                 {
                     OperationCallbackPacket operationCallbackPacket;
