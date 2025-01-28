@@ -19,12 +19,12 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Gets a <see cref="FikaWriter"/> (<see cref="IDisposable"/>) <br/>
-        /// Must call <see cref="FikaWriter.Dispose"/> manually or wrap in a using statement
+        /// Gets a <see cref="FikaWriter"/>
         /// </summary>
         /// <returns>A <see cref="FikaWriter"/></returns>
         public static FikaWriter GetWriter()
         {
+            writer.Reset();
             return writer;
         }
 
@@ -33,12 +33,9 @@ namespace Fika.Core.Networking
 
         }
 
-        public class FikaWriter : EFTWriterClass, IDisposable
+        public class FikaWriter : EFTWriterClass
         {
-            public void Dispose()
-            {
-                Reset();
-            }
+
         }
     }
 }

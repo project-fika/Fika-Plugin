@@ -174,7 +174,7 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                using EFTSerializationManager.FikaWriter writer = EFTSerializationManager.GetWriter();
+                EFTSerializationManager.FikaWriter writer = EFTSerializationManager.GetWriter();
                 {
                     writer.WriteInt(allExfils.Length);
                     foreach (ExfiltrationPoint exfilPoint in allExfils)
