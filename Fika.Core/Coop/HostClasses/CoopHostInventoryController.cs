@@ -160,12 +160,12 @@ namespace Fika.Core.Coop.HostClasses
             {
                 handler.operation.method_1(handler.HandleResult);
 
-                EFTWriterClass writer = new();
-                writer.WritePolymorph(operation.ToDescriptor());
+                using GClass1212 eftWriter = EFTSerializationManager.GetWriter();
+                eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
                     CallbackId = operation.Id,
-                    OperationBytes = writer.ToArray()
+                    OperationBytes = eftWriter.ToArray()
                 };
 
                 coopPlayer.PacketSender.InventoryPackets.Enqueue(packet);

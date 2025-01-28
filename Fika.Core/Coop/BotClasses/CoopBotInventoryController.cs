@@ -54,12 +54,12 @@ namespace Fika.Core.Coop.BotClasses
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
-                EFTWriterClass writer = new();
-                writer.WritePolymorph(operation.ToDescriptor());
+                using GClass1212 eftWriter = EFTSerializationManager.GetWriter();
+                eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
                     CallbackId = operation.Id,
-                    OperationBytes = writer.ToArray()
+                    OperationBytes = eftWriter.ToArray()
                 };
 
                 coopBot.PacketSender.InventoryPackets.Enqueue(packet);

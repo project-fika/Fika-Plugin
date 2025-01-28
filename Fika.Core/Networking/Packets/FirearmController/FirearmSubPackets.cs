@@ -6,6 +6,7 @@ using Fika.Core.Coop.Players;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using UnityEngine;
 using static EFT.Player;
 using static Fika.Core.Networking.SubPacket;
@@ -686,10 +687,10 @@ namespace Fika.Core.Networking
                     {
                         try
                         {
-                            GClass1207 reader = new(LocationDescription);
+                            using GClass1207 eftReader = EFTSerializationManager.GetReader(LocationDescription);
                             if (LocationDescription.Length != 0)
                             {
-                                GClass1714 descriptor = reader.ReadPolymorph<GClass1714>();
+                                GClass1714 descriptor = eftReader.ReadPolymorph<GClass1714>();
                                 gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                             }
                         }
@@ -967,12 +968,12 @@ namespace Fika.Core.Networking
                     AmmoPackReloadingClass ammoPack = new(ammo);
                     ItemAddress gridItemAddress = null;
 
-                    GClass1207 reader = new(LocationDescription);
+                    using GClass1207 eftReader = EFTSerializationManager.GetReader(LocationDescription);
                     try
                     {
                         if (LocationDescription.Length > 0)
                         {
-                            GClass1714 descriptor = reader.ReadPolymorph<GClass1714>();
+                            GClass1714 descriptor = eftReader.ReadPolymorph<GClass1714>();
                             gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                         }
                     }

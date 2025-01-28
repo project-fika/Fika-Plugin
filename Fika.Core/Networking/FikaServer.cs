@@ -1066,13 +1066,13 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                GClass1207 reader = new(packet.OperationBytes);
+                using GClass1207 eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
                 try
                 {
                     OperationCallbackPacket operationCallbackPacket;
                     if (playerToApply.InventoryController is Interface16 inventoryController)
                     {
-                        BaseDescriptorClass descriptor = reader.ReadPolymorph<BaseDescriptorClass>();
+                        BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                         GStruct449 result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
                         ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");

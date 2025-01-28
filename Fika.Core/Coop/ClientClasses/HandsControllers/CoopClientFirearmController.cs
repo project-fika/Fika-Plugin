@@ -5,6 +5,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -793,13 +794,13 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 ItemAddress itemAddress = gridItemAddress;
                 GClass1714 descriptor = itemAddress?.ToDescriptor();
-                EFTWriterClass writer = new();
+                using GClass1212 eftWriter = EFTSerializationManager.GetWriter();
 
                 byte[] locationDescription;
                 if (descriptor != null)
                 {
-                    writer.WritePolymorph(descriptor);
-                    locationDescription = writer.ToArray();
+                    eftWriter.WritePolymorph(descriptor);
+                    locationDescription = eftWriter.ToArray();
                 }
                 else
                 {
@@ -862,14 +863,14 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
                 GClass1714 descriptor = itemAddress?.ToDescriptor();
-                EFTWriterClass writer = new();
+                using GClass1212 eftWriter = EFTSerializationManager.GetWriter();
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
                 byte[] locationDescription;
                 if (descriptor != null)
                 {
-                    writer.WritePolymorph(descriptor);
-                    locationDescription = writer.ToArray();
+                    eftWriter.WritePolymorph(descriptor);
+                    locationDescription = eftWriter.ToArray();
                 }
                 else
                 {

@@ -141,7 +141,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            EFTWriterClass writer = new();
+            using GClass1212 eftWriter = EFTSerializationManager.GetWriter();
             ClientInventoryOperationHandler handler = new()
             {
                 Operation = operation,
@@ -150,11 +150,11 @@ namespace Fika.Core.Coop.ClientClasses
             };
 
             uint operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
-            writer.WritePolymorph(operation.ToDescriptor());
+            eftWriter.WritePolymorph(operation.ToDescriptor());
             InventoryPacket packet = new()
             {
                 CallbackId = operationNum,
-                OperationBytes = writer.ToArray()
+                OperationBytes = eftWriter.ToArray()
             };
 
 #if DEBUG

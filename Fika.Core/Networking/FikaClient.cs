@@ -677,7 +677,7 @@ namespace Fika.Core.Networking
         {
             if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
             {
-                GClass1207 eftReader = new(packet.Data);
+                using GClass1207 eftReader = EFTSerializationManager.GetReader(packet.Data);
                 GClass1711 lootData = eftReader.ReadEFTLootDataDescriptor();
                 GClass1328 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
                 if (lootItems.Count < 1)
