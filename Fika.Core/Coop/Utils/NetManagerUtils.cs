@@ -102,27 +102,26 @@ namespace Fika.Core.Coop.Utils
                     Singleton<FikaServer>.TryRelease(server);
                     GameObject.Destroy(server);
                     logger.LogInfo("Destroyed FikaServer");
+                    return;
                 }
-                else
+
+                FikaClient client = Singleton<FikaClient>.Instance;
+                if (!Singleton<IFikaNetworkManager>.TryRelease(client))
                 {
-                    FikaClient client = Singleton<FikaClient>.Instance;
-                    if (!Singleton<IFikaNetworkManager>.TryRelease(client))
-                    {
-                        logger.LogError("Unable to release Client from Singleton!");
-                    }
-                    try
-                    {
-                        client.PrintStatistics();
-                        client.NetClient.Stop();
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError("DestroyNetManager: " + ex.Message);
-                    }
-                    Singleton<FikaClient>.TryRelease(client);
-                    GameObject.Destroy(client);
-                    logger.LogInfo("Destroyed FikaClient");
+                    logger.LogError("Unable to release Client from Singleton!");
                 }
+                try
+                {
+                    client.PrintStatistics();
+                    client.NetClient.Stop();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("DestroyNetManager: " + ex.Message);
+                }
+                Singleton<FikaClient>.TryRelease(client);
+                GameObject.Destroy(client);
+                logger.LogInfo("Destroyed FikaClient");
             }
         }
 
@@ -152,15 +151,13 @@ namespace Fika.Core.Coop.Utils
                     }
                     return Task.CompletedTask;
                 }
-                else
+
+                FikaClient client = Singleton<FikaClient>.Instance;
+                if (!client.Started)
                 {
-                    FikaClient client = Singleton<FikaClient>.Instance;
-                    if (!client.Started)
-                    {
-                        client.Init();
-                    }
-                    return Task.CompletedTask;
+                    client.Init();
                 }
+                return Task.CompletedTask;
             }
 
             logger.LogError("InitNetManager: FikaGameObject was null!");
@@ -172,12 +169,10 @@ namespace Fika.Core.Coop.Utils
             if (isServer)
             {
                 Singleton<FikaServer>.Instance.SetupGameVariables(coopPlayer);
-            }
-            else
-            {
-                Singleton<FikaClient>.Instance.SetupGameVariables(coopPlayer);
+                return Task.CompletedTask;
             }
 
+            Singleton<FikaClient>.Instance.SetupGameVariables(coopPlayer);
             return Task.CompletedTask;
         }
 
@@ -198,11 +193,10 @@ namespace Fika.Core.Coop.Utils
                 if (fikaPinger != null)
                 {
                     GameObject.Destroy(fikaPinger);
+                    return;
                 }
-                else
-                {
-                    logger.LogError("StopPinger: Could not find FikaPinger!");
-                }
+
+                logger.LogError("StopPinger: Could not find FikaPinger!");
             }
         }
 
