@@ -174,7 +174,7 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                EFTSerializationManager.FikaWriter writer = EFTSerializationManager.GetWriter();
+                FikaWriter writer = EFTSerializationManager.GetWriter();
                 {
                     writer.WriteInt(allExfils.Length);
                     foreach (ExfiltrationPoint exfilPoint in allExfils)
@@ -217,7 +217,7 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                EFTSerializationManager.FikaReader eftReader = EFTSerializationManager.GetReader(Data);
+                FikaReader eftReader = EFTSerializationManager.GetReader(Data);
                 int amount = eftReader.ReadInt();
                 for (int i = 0; i < amount; i++)
                 {

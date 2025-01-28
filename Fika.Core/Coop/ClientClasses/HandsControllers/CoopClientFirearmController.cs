@@ -794,7 +794,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 ItemAddress itemAddress = gridItemAddress;
                 GClass1714 descriptor = itemAddress?.ToDescriptor();
-                EFTSerializationManager.FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+                FikaWriter eftWriter = EFTSerializationManager.GetWriter();
 
                 byte[] locationDescription;
                 if (descriptor != null)
@@ -863,7 +863,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
                 GClass1714 descriptor = itemAddress?.ToDescriptor();
-                EFTSerializationManager.FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+                FikaWriter eftWriter = EFTSerializationManager.GetWriter();
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
                 byte[] locationDescription;

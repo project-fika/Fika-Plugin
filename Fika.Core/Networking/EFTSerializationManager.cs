@@ -26,16 +26,16 @@ namespace Fika.Core.Networking
         {
             writer.Reset();
             return writer;
-        }
+        }        
+    }
 
-        public class FikaReader(ArraySegment<byte> segment) : EFTReaderClass(segment)
-        {
+    public class FikaReader(ArraySegment<byte> segment) : EFTReaderClass(segment)
+    {
 
-        }
+    }
 
-        public class FikaWriter : EFTWriterClass
-        {
+    public class FikaWriter : EFTWriterClass
+    {
 
-        }
     }
 }

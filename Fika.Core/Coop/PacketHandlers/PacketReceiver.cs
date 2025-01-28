@@ -157,7 +157,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 {
                     if (controller is Interface16 networkController)
                     {
-                        EFTSerializationManager.FikaReader eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
+                        FikaReader eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                         GStruct449 result = networkController.CreateOperationFromDescriptor(descriptor);
                         if (!result.Succeeded)
