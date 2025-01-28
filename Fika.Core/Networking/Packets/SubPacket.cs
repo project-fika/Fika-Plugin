@@ -14,7 +14,7 @@ namespace Fika.Core.Networking
 
         public interface IRequestPacket
         {
-            public void HandleRequest(NetPeer peer);
+            public void HandleRequest(NetPeer peer, FikaServer server);
             public void HandleResponse();
             public void Serialize(NetDataWriter writer);
         }

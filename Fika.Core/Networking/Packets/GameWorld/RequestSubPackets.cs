@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
-using EFT;
 using EFT.Interactive;
+using EFT.UI;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -34,7 +34,7 @@ namespace Fika.Core.Networking
                 Name = reader.GetString();
             }
 
-            public void HandleRequest(NetPeer peer = null)
+            public void HandleRequest(NetPeer peer, FikaServer server)
             {
                 if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
                 {
@@ -46,7 +46,7 @@ namespace Fika.Core.Networking
                             RequestSubPacket = new SpawnPointRequest(coopGame.SpawnPointName)
                         };
 
-                        Singleton<FikaServer>.Instance.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
+                        server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
                         return;
                     }
                 }
@@ -99,7 +99,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void HandleRequest(NetPeer peer)
+            public void HandleRequest(NetPeer peer, FikaServer server)
             {
                 if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
                 {
@@ -114,7 +114,7 @@ namespace Fika.Core.Networking
                         }
                     };
 
-                    Singleton<FikaServer>.Instance.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                    server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
                     return;
                 }
 
@@ -152,10 +152,7 @@ namespace Fika.Core.Networking
 
         public class ExfiltrationRequest : IRequestPacket
         {
-            public Dictionary<string, EExfiltrationStatus> ExfiltrationPoints;
-            public List<int> StartTimes;
-            public Dictionary<string, EExfiltrationStatus> ScavExfiltrationPoints;
-            public List<int> ScavStartTimes;
+            public byte[] Data;
 
             public ExfiltrationRequest()
             {
@@ -164,193 +161,99 @@ namespace Fika.Core.Networking
 
             public ExfiltrationRequest(NetDataReader reader)
             {
-                int exfilAmount = reader.GetInt();
-                ExfiltrationPoints = [];
-                StartTimes = [];
-                for (int i = 0; i < exfilAmount; i++)
-                {
-                    ExfiltrationPoints.Add(reader.GetString(), (EExfiltrationStatus)reader.GetByte());
-                    StartTimes.Add(reader.GetInt());
-                }
-                if (reader.GetBool())
-                {
-                    int scavExfilAmount = reader.GetInt();
-                    ScavExfiltrationPoints = [];
-                    ScavStartTimes = [];
-                    for (int i = 0; i < scavExfilAmount; i++)
-                    {
-                        ScavExfiltrationPoints.Add(reader.GetString(), (EExfiltrationStatus)reader.GetByte());
-                        ScavStartTimes.Add(reader.GetInt());
-                    }
-                }
+                Data = reader.GetByteArray();
             }
 
-            public void HandleRequest(NetPeer peer)
+            public void HandleRequest(NetPeer peer, FikaServer server)
             {
-                if (ExfiltrationControllerClass.Instance != null)
+                if (ExfiltrationControllerClass.Instance == null)
                 {
-                    FikaServer server = Singleton<FikaServer>.Instance;
-                    ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+                    FikaPlugin.Instance.FikaLogger.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
+                    return;
+                }
 
-                    if (exfilController.ExfiltrationPoints == null)
+                ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+                ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
+
+                using GClass1212 writer = EFTSerializationManager.GetWriter();
+                {
+                    writer.WriteInt(allExfils.Length);
+                    foreach (ExfiltrationPoint exfilPoint in allExfils)
                     {
-                        return;
+                        writer.WriteString(exfilPoint.Settings.Name);
+                        writer.WriteByte((byte)exfilPoint.Status);
+                        writer.WriteInt(exfilPoint.Settings.StartTime);
+                        if (exfilPoint.Status == EExfiltrationStatus.Countdown)
+                        {
+                            writer.WriteFloat(exfilPoint.ExfiltrationStartTime);
+                        }
                     }
 
                     RequestPacket response = new()
                     {
-                        PacketType = ERequestSubPacketType.Exfiltration
-                    };
-
-                    ExfiltrationRequest exfiltrationRequest = new()
-                    {
-                        ExfiltrationPoints = [],
-                        StartTimes = []
-                    };
-
-                    foreach (ExfiltrationPoint exfilPoint in exfilController.ExfiltrationPoints)
-                    {
-                        exfiltrationRequest.ExfiltrationPoints.Add(exfilPoint.Settings.Name, exfilPoint.Status);
-                        exfiltrationRequest.StartTimes.Add(exfilPoint.Settings.StartTime);
-                    }
-
-                    if (server.RaidSide == EPlayerSide.Savage && exfilController.ScavExfiltrationPoints != null)
-                    {
-                        exfiltrationRequest.ScavExfiltrationPoints = [];
-                        exfiltrationRequest.ScavStartTimes = [];
-
-                        foreach (ScavExfiltrationPoint scavExfilPoint in exfilController.ScavExfiltrationPoints)
+                        PacketType = ERequestSubPacketType.Exfiltration,
+                        RequestSubPacket = new ExfiltrationRequest()
                         {
-                            exfiltrationRequest.ScavExfiltrationPoints.Add(scavExfilPoint.Settings.Name, scavExfilPoint.Status);
-                            exfiltrationRequest.ScavStartTimes.Add(scavExfilPoint.Settings.StartTime);
+                            Data = writer.ToArray()
                         }
-                    }
-
-                    response.RequestSubPacket = exfiltrationRequest;
-
+                    };
                     server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
-                    return;
                 }
-
-                FikaPlugin.Instance.FikaLogger.LogError($"ExfiltrationRequest::HandleRequest ExfiltrationController was null");
             }
 
             public void HandleResponse()
             {
-                if (ExfiltrationControllerClass.Instance != null)
+                if (Data == null || Data.Length == 0)
                 {
-                    ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
-                    if (exfilController.ExfiltrationPoints == null)
-                    {
-                        return;
-                    }
-
-                    CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-                    if (coopGame == null)
-                    {
-#if DEBUG
-                        FikaPlugin.Instance.FikaLogger.LogError("ExfiltrationRequest::HandleResponse coopGame was null!");
-#endif
-                        return;
-                    }
-
-                    int index = 0;
-                    foreach (KeyValuePair<string, EExfiltrationStatus> exfilPoint in ExfiltrationPoints)
-                    {
-                        ExfiltrationPoint point = exfilController.ExfiltrationPoints.Where(x => x.Settings.Name == exfilPoint.Key).FirstOrDefault();
-                        if (point != null || point != default)
-                        {
-                            point.Settings.StartTime = StartTimes[index];
-                            index++;
-                            if (point.Status != exfilPoint.Value && (exfilPoint.Value == EExfiltrationStatus.RegularMode || exfilPoint.Value == EExfiltrationStatus.UncompleteRequirements))
-                            {
-                                point.Enable();
-                                point.Status = exfilPoint.Value;
-                            }
-                            else if (point.Status != exfilPoint.Value && exfilPoint.Value == EExfiltrationStatus.NotPresent || exfilPoint.Value == EExfiltrationStatus.Pending)
-                            {
-                                point.Disable();
-                                point.Status = exfilPoint.Value;
-                            }
-                        }
-                        else
-                        {
-                            FikaPlugin.Instance.FikaLogger.LogWarning($"ExfiltrationRequest::HandleResponse: Could not find exfil point with name '{exfilPoint.Key}'");
-                        }
-                    }
-
-                    if (coopGame.RaidSettings.IsScav && exfilController.ScavExfiltrationPoints != null && ScavExfiltrationPoints != null)
-                    {
-                        string scavProfile = FikaGlobals.GetProfile(true).ProfileId;
-                        int scavIndex = 0;
-                        foreach (KeyValuePair<string, EExfiltrationStatus> scavExfilPoint in ScavExfiltrationPoints)
-                        {
-                            ScavExfiltrationPoint scavPoint = exfilController.ScavExfiltrationPoints.Where(x => x.Settings.Name == scavExfilPoint.Key).FirstOrDefault();
-                            if (scavPoint != null || scavPoint != default)
-                            {
-                                scavPoint.Settings.StartTime = ScavStartTimes[scavIndex];
-                                scavIndex++;
-                                if (scavPoint.Status != scavExfilPoint.Value && scavExfilPoint.Value == EExfiltrationStatus.RegularMode)
-                                {
-                                    scavPoint.Enable();
-                                    if (!string.IsNullOrEmpty(scavProfile))
-                                    {
-                                        scavPoint.EligibleIds.Add(scavProfile);
-                                    }
-                                    scavPoint.Status = scavExfilPoint.Value;
-                                    coopGame.UpdateExfilPointFromServer(scavPoint, true);
-                                }
-                                else if (scavPoint.Status != scavExfilPoint.Value && (scavExfilPoint.Value == EExfiltrationStatus.NotPresent || scavExfilPoint.Value == EExfiltrationStatus.Pending))
-                                {
-                                    scavPoint.Disable();
-                                    if (!string.IsNullOrEmpty(scavProfile))
-                                    {
-                                        scavPoint.EligibleIds.Remove(scavProfile);
-                                    }
-                                    scavPoint.Status = scavExfilPoint.Value;
-                                    coopGame.UpdateExfilPointFromServer(scavPoint, false);
-                                }
-                            }
-                            else
-                            {
-                                FikaPlugin.Instance.FikaLogger.LogWarning($"ExfiltrationRequest::HandleResponse: Could not find exfil point with name '{scavExfilPoint.Key}'");
-                            }
-                        }
-                    }
-
-                    coopGame.ExfiltrationReceived = true;
+                    FikaPlugin.Instance.FikaLogger.LogError("ExfiltrationRequest::HandleRequest: Data was null or empty!");
                     return;
                 }
 
-                FikaPlugin.Instance.FikaLogger.LogWarning($"ExfiltrationRequest::HandleResponse: ExfiltrationController was null");
+                if (ExfiltrationControllerClass.Instance == null)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
+                    return;
+                }
+
+                ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
+                ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
+
+                using GClass1207 reader = EFTSerializationManager.GetReader(Data);
+                {
+                    int amount = reader.ReadInt();
+                    for (int i = 0; i < amount; i++)
+                    {
+                        string name = reader.ReadString();
+                        EExfiltrationStatus status = (EExfiltrationStatus)reader.ReadByte();
+                        int startTime = reader.ReadInt();
+                        int exfilStartTime = -1;
+                        if (status == EExfiltrationStatus.Countdown)
+                        {
+                            exfilStartTime = reader.ReadInt();
+                        }
+
+                        ExfiltrationPoint exfilPoint = allExfils.FirstOrDefault(x => x.Settings.Name == name);
+                        if (exfilPoint != null)
+                        {
+                            exfilPoint.Status = status;
+                            exfilPoint.Settings.StartTime = startTime;
+                            if (exfilStartTime > 0)
+                            {
+                                exfilPoint.ExfiltrationStartTime = exfilStartTime;
+                            }
+                        }
+                    }
+                }
+
+                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                {
+                    coopGame.ExfiltrationReceived = true;
+                }
             }
 
             public void Serialize(NetDataWriter writer)
             {
-                int exfilAmount = ExfiltrationPoints.Count;
-                writer.Put(exfilAmount);
-                for (int i = 0; i < exfilAmount; i++)
-                {
-                    KeyValuePair<string, EExfiltrationStatus> kvp = ExfiltrationPoints.ElementAt(i);
-                    writer.Put(kvp.Key);
-                    writer.Put((byte)kvp.Value);
-                    writer.Put(StartTimes[i]);
-                }
-                bool hasScavExfils = ScavExfiltrationPoints != null;
-                writer.Put(hasScavExfils);
-                if (hasScavExfils)
-                {
-                    int scavExfilAmount = ScavExfiltrationPoints.Count;
-                    writer.Put(scavExfilAmount);
-                    for (int i = 0; i < scavExfilAmount; i++)
-                    {
-                        KeyValuePair<string, EExfiltrationStatus> kvp = ScavExfiltrationPoints.ElementAt(i);
-                        writer.Put(kvp.Key);
-                        writer.Put((byte)kvp.Value);
-                        writer.Put(ScavStartTimes[i]);
-                    }
-                }
+                writer.PutByteArray(Data);
             }
         }
 
@@ -386,7 +289,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void HandleRequest(NetPeer peer = null)
+            public void HandleRequest(NetPeer peer, FikaServer server)
             {
                 if (Singleton<IFikaNetworkManager>.Instance.CoopHandler.Players.TryGetValue(NetId, out CoopPlayer playerToApply))
                 {
@@ -401,7 +304,7 @@ namespace Fika.Core.Networking
                         }
                     };
 
-                    Singleton<FikaServer>.Instance.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                    server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
                 }
             }
 

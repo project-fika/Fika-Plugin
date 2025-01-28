@@ -319,7 +319,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            packet.RequestSubPacket.HandleRequest(peer);
+            packet.RequestSubPacket.HandleRequest(peer, this);
         }
 
         private void OnSideEffectPacketReceived(SideEffectPacket packet, NetPeer peer)

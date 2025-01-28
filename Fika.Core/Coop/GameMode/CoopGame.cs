@@ -1423,7 +1423,7 @@ namespace Fika.Core.Coop.GameMode
             do
             {
                 client.SendData(ref request, DeliveryMethod.ReliableUnordered);
-                await Task.Delay(250);
+                await Task.Delay(1000);
             } while (!ExfiltrationReceived);
         }
 
@@ -1837,15 +1837,6 @@ namespace Fika.Core.Coop.GameMode
             InfiltrationPoint = spawnPoint.Infiltration;
             Profile_0.Info.EntryPoint = InfiltrationPoint;
             Logger.LogInfo("SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint);
-
-            if (!isServer)
-            {
-                CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
-                if (carExtraction != null)
-                {
-                    carExtraction.Subscribee.OnStatusChanged -= carExtraction.OnStatusChangedHandler;
-                }
-            }
 
             ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
             Player player = gparam_0.Player;
