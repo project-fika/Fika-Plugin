@@ -557,7 +557,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 else
                 {
-                    FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f); 
+                    FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f);
                 }
             }
 
