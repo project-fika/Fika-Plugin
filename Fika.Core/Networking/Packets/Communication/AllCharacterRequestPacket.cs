@@ -2,7 +2,7 @@
 
 using LiteNetLib.Utils;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.SubPackets;
+using static Fika.Core.Networking.SubPackets;
 
 namespace Fika.Core.Networking
 {

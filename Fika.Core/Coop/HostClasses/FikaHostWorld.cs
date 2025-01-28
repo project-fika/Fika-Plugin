@@ -4,6 +4,7 @@ using EFT.Interactive;
 using Fika.Core.Networking;
 using LiteNetLib;
 using System.Collections.Generic;
+using static Fika.Core.Networking.GenericSubPackets;
 
 namespace Fika.Core.Coop.HostClasses
 {
@@ -98,10 +99,11 @@ namespace Fika.Core.Coop.HostClasses
         /// <param name="arg4"></param>
         private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
         {
-            BorderZonePacket packet = new()
+            GenericPacket packet = new()
             {
-                ProfileId = player.iPlayer.ProfileId,
-                ZoneId = zone.Id
+                NetId = player.iPlayer.Id,
+                Type = SubPacket.EGenericSubPacketType.BorderZone,
+                SubPacket = new BorderZoneEvent(player.iPlayer.ProfileId, zone.Id)
             };
 
             server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);

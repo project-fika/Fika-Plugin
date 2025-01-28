@@ -8,7 +8,6 @@ using EFT.Communications;
 using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.InventoryLogic;
-using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
@@ -22,7 +21,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -95,7 +93,7 @@ namespace Fika.Core.Networking
             }
         }
         public FikaClientWorld FikaClientWorld { get; set; }
-        public EPlayerSide RaidSide { get ; set; }
+        public EPlayerSide RaidSide { get; set; }
 
         private NetPacketProcessor packetProcessor;
         private int sendRate;
@@ -133,7 +131,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<HealthSyncPacket>(OnHealthSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<GenericPacket>(OnGenericPacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket>(OnMinePacketReceived);
-            packetProcessor.SubscribeNetSerializable<BorderZonePacket>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
@@ -860,32 +857,6 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnBorderZonePacketReceived(BorderZonePacket packet)
-        {
-            if (Singleton<GameWorld>.Instantiated)
-            {
-                BorderZone[] borderZones = Singleton<GameWorld>.Instance.BorderZones;
-                if (borderZones != null && borderZones.Length > 0)
-                {
-                    foreach (BorderZone borderZone in borderZones)
-                    {
-                        if (borderZone.Id == packet.ZoneId)
-                        {
-                            List<IPlayer> players = Singleton<GameWorld>.Instance.RegisteredPlayers;
-                            foreach (IPlayer player in players)
-                            {
-                                if (player.ProfileId == packet.ProfileId)
-                                {
-                                    IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(player.ProfileId);
-                                    borderZone.ProcessIncomingPacket(playerBridge, true);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         private void OnMinePacketReceived(MinePacket packet)
         {
             NetworkGame<EftGamePlayerOwner>.Class1530 mineSeeker = new()
@@ -1218,6 +1189,6 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Received packets: {netClient.Statistics.PacketsReceived}");
             logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(netClient.Statistics.BytesReceived)}");
             logger.LogInfo($"Packet loss: {netClient.Statistics.PacketLossPercent}%");
-        }        
+        }
     }
 }

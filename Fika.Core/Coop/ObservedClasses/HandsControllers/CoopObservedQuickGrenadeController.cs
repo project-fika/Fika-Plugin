@@ -1,7 +1,7 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets;
+using Fika.Core.Networking;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses

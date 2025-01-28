@@ -9,8 +9,8 @@ using Fika.Core.Networking;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.GenericSubPackets;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Coop.Components
 {

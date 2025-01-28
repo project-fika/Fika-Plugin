@@ -35,7 +35,6 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -48,7 +47,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Coop.GameMode
 {

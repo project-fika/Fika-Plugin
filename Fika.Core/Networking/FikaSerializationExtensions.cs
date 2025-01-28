@@ -14,10 +14,10 @@ using UnityEngine;
 using static BasePhysicalClass;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
-using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
-using static Fika.Core.Networking.Packets.GameWorld.RequestSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
-using static Fika.Core.Networking.Packets.SubPackets;
+using static Fika.Core.Networking.GenericSubPackets;
+using static Fika.Core.Networking.RequestSubPackets;
+using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.SubPackets;
 
 namespace Fika.Core.Networking
 {
@@ -1146,6 +1146,8 @@ namespace Fika.Core.Networking
                     return new UpdateBackendData(reader);
                 case EGenericSubPacketType.SecretExfilFound:
                     return new SecretExfilFound(reader);
+                case EGenericSubPacketType.BorderZone:
+                    return new BorderZoneEvent(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
                     break;

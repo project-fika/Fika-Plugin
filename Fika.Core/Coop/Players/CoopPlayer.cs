@@ -30,8 +30,8 @@ using UnityEngine;
 using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
-using static Fika.Core.Networking.Packets.SubPackets;
+using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.SubPackets;
 
 namespace Fika.Core.Coop.Players
 {

@@ -2,7 +2,7 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets
+namespace Fika.Core.Networking
 {
     public class SubPacket
     {
@@ -117,7 +117,8 @@ namespace Fika.Core.Networking.Packets
             ExfilCountdown,
             ClearEffects,
             UpdateBackendData,
-            SecretExfilFound
+            SecretExfilFound,
+            BorderZone
             //TrainSync,
             //TraderServiceNotification,
         }

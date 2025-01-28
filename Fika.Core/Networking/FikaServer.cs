@@ -22,7 +22,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -38,8 +37,8 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.GenericSubPackets;
+using static Fika.Core.Networking.SubPacket;
 using static Fika.Core.Networking.ReconnectPacket;
 
 namespace Fika.Core.Networking
@@ -185,7 +184,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<GenericPacket, NetPeer>(OnGenericPacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
-            packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
@@ -944,11 +942,6 @@ namespace Fika.Core.Networking
             };
 
             SendDataToPeer(peer, ref assignNetIdPacket, DeliveryMethod.ReliableUnordered);
-        }
-
-        private void OnBorderZonePacketReceived(BorderZonePacket packet, NetPeer peer)
-        {
-            // This shouldn't happen
         }
 
         private void OnMinePacketReceived(MinePacket packet, NetPeer peer)

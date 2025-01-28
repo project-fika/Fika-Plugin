@@ -27,8 +27,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
 using static Fika.Core.Networking.CommonSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
-using static Fika.Core.Networking.Packets.SubPackets;
+using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.SubPackets;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Coop.Players

@@ -1,7 +1,7 @@
 ﻿using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.SubPacket;
 
-namespace Fika.Core.Networking.Packets.GameWorld
+namespace Fika.Core.Networking
 {
     public class RequestPacket : INetSerializable
     {

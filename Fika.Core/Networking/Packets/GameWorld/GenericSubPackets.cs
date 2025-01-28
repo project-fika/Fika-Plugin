@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
@@ -8,10 +9,11 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPacket;
+using System.Collections.Generic;
+using static Fika.Core.Networking.SubPacket;
 using static Fika.Core.UI.FikaUIGlobals;
 
-namespace Fika.Core.Networking.Packets.GameWorld
+namespace Fika.Core.Networking
 {
     public class GenericSubPackets
     {
@@ -264,6 +266,56 @@ namespace Fika.Core.Networking.Packets.GameWorld
             {
                 writer.Put(GroupId);
                 writer.Put(ExitName);
+            }
+        }
+
+        public class BorderZoneEvent : ISubPacket
+        {
+            public string ProfileId;
+            public int ZoneId;
+
+            public BorderZoneEvent(string profileId, int zoneId)
+            {
+                ProfileId = profileId;
+                ZoneId = zoneId;
+            }
+
+            public BorderZoneEvent(NetDataReader reader)
+            {
+                ProfileId = reader.GetString();
+                ZoneId = reader.GetInt();
+            }
+
+            public void Execute(CoopPlayer player = null)
+            {
+                if (Singleton<GameWorld>.Instantiated)
+                {
+                    BorderZone[] borderZones = Singleton<GameWorld>.Instance.BorderZones;
+                    if (borderZones != null && borderZones.Length > 0)
+                    {
+                        foreach (BorderZone borderZone in borderZones)
+                        {
+                            if (borderZone.Id == ZoneId)
+                            {
+                                List<IPlayer> players = Singleton<GameWorld>.Instance.RegisteredPlayers;
+                                foreach (IPlayer iPlayer in players)
+                                {
+                                    if (player.ProfileId == ProfileId)
+                                    {
+                                        IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(iPlayer.ProfileId);
+                                        borderZone.ProcessIncomingPacket(playerBridge, true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(ProfileId);
+                writer.Put(ZoneId);
             }
         }
     }

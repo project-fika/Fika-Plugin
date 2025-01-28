@@ -11,7 +11,7 @@ using LiteNetLib.Utils;
 using System;
 using UnityEngine;
 using static Fika.Core.Coop.Players.CoopPlayer;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking
 {
