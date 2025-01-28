@@ -15,6 +15,7 @@ using static BasePhysicalClass;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
+using static Fika.Core.Networking.Packets.GameWorld.RequestSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 
@@ -1147,6 +1148,23 @@ namespace Fika.Core.Networking
                     return new SecretExfilFound(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
+                    break;
+            }
+            return null;
+        }
+
+        public static IRequestPacket GetRequestSubPacket(this NetDataReader reader, ERequestSubPacketType type)
+        {
+            switch (type)
+            {
+                case ERequestSubPacketType.SpawnPoint:
+                    return new SpawnPointRequest(reader);
+                case ERequestSubPacketType.Weather:
+                    return new WeatherRequest(reader);
+                case ERequestSubPacketType.Exfiltration:
+                    return new ExfiltrationRequest(reader);
+                default:
+                    FikaPlugin.Instance.FikaLogger.LogError("GetRequestSubPacket: type was outside of bounds!");
                     break;
             }
             return null;

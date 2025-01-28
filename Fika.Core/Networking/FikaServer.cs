@@ -22,6 +22,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -30,6 +31,7 @@ using Open.Nat;
 using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -43,12 +45,12 @@ using static Fika.Core.Networking.ReconnectPacket;
 namespace Fika.Core.Networking
 {
     /// <summary>
-    /// Server used in P2P connections
+    /// Server used to synchronize all <see cref="FikaClient"/>s
     /// </summary>
-    public class FikaServer : MonoBehaviour, INetEventListener, INetLogger, INatPunchListener, GInterface252, IFikaNetworkManager
+    public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface252, IFikaNetworkManager
     {
         public int ReadyClients = 0;
-        public DateTime TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
+        public DateTime TimeSinceLastPeerDisconnected;
         public bool HasHadPeer;
         public bool RaidInitialized;
         public bool HostReady;
@@ -106,21 +108,23 @@ namespace Fika.Core.Networking
             }
         }
 
+        public EPlayerSide RaidSide { get ; set; }
+
         private int sendRate;
         private NetPacketProcessor packetProcessor;
-        private CoopPlayer MyPlayer;
+        private CoopPlayer hostPlayer;
         private List<string> playersMissing;
-        private string externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
+        private string externalIp;
         private NetManager netServer;
         private DateTime? gameStartTime;
-        private NetDataWriter dataWriter ;
+        private NetDataWriter dataWriter;
         private int port;
         private CoopHandler coopHandler;
         private ManualLogSource logger;
         private int currentNetId;
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
-        private int statisticsCounter = 0;
+        private int statisticsCounter;
         private Dictionary<Profile, bool> visualProfiles;
 
         public async Task Init()
@@ -128,7 +132,11 @@ namespace Fika.Core.Networking
             packetProcessor = new();
             dataWriter = new();
             playersMissing = [];
+            externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
+            statisticsCounter = 0;
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
+
+            TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
 
             visualProfiles = [];
             if (!FikaBackendUtils.IsHeadless)
@@ -176,8 +184,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<InformationPacket, NetPeer>(OnInformationPacketReceived);
             packetProcessor.SubscribeNetSerializable<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<GenericPacket, NetPeer>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializable<ExfiltrationPacket, NetPeer>(OnExfiltrationPacketReceived);
-            packetProcessor.SubscribeNetSerializable<WeatherPacket, NetPeer>(OnWeatherPacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket, NetPeer>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
@@ -185,7 +191,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SpawnpointPacket, NetPeer>(OnSpawnPointPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
             packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
             packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
@@ -201,6 +206,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializable<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
+            packetProcessor.SubscribeNetSerializable<RequestPacket, NetPeer>(OnRequestPacketReceived);
 
             packetProcessor.SubscribeReusable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
 
@@ -309,6 +315,11 @@ namespace Fika.Core.Networking
             FikaRequestHandler.UpdateSetHost(body);
         }
 
+        private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
+        {
+            packet.RequestSubPacket.HandleRequest(peer);
+        }
+
         private void OnSideEffectPacketReceived(SideEffectPacket packet, NetPeer peer)
         {
 #if DEBUG
@@ -366,7 +377,7 @@ namespace Fika.Core.Networking
             };
             if (!FikaBackendUtils.IsHeadless)
             {
-                notifPacket.SubPacket.Execute(); 
+                notifPacket.SubPacket.Execute();
             }
             SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
 
@@ -440,6 +451,7 @@ namespace Fika.Core.Networking
             logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
         }
 
+        [Conditional("Debug")]
         private void AddDebugPackets()
         {
             packetProcessor.SubscribeNetSerializable<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
@@ -798,30 +810,13 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnSpawnPointPacketReceived(SpawnpointPacket packet, NetPeer peer)
-        {
-            if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
-            {
-                if (packet.IsRequest)
-                {
-                    SpawnpointPacket response = new(false)
-                    {
-                        Name = coopGame.GetSpawnpointName()
-                    };
-
-
-                    SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
-                }
-            }
-        }
-
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
 
-            if (MyPlayer.HealthController.IsAlive)
+            if (hostPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                if (hostPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
                 }
@@ -874,9 +869,9 @@ namespace Fika.Core.Networking
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
 
-            if (MyPlayer.HealthController.IsAlive)
+            if (hostPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                if (hostPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestItemPacket(ref packet);
                 }
@@ -887,9 +882,9 @@ namespace Fika.Core.Networking
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
 
-            if (MyPlayer.HealthController.IsAlive)
+            if (hostPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                if (hostPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestPacket(ref packet);
                 }
@@ -918,7 +913,7 @@ namespace Fika.Core.Networking
 
         public void SetupGameVariables(CoopPlayer coopPlayer)
         {
-            MyPlayer = coopPlayer;
+            hostPlayer = coopPlayer;
             if (FikaPlugin.EnableChat.Value)
             {
                 fikaChat = gameObject.AddComponent<FikaChat>();
@@ -934,7 +929,7 @@ namespace Fika.Core.Networking
 
             int netId = PopNetId();
             packet.NetId = netId;
-            if (packet.PlayerInfoPacket.Profile.ProfileId != MyPlayer.ProfileId)
+            if (packet.PlayerInfoPacket.Profile.ProfileId != hostPlayer.ProfileId)
             {
                 coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
                     packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
@@ -970,74 +965,6 @@ namespace Fika.Core.Networking
                     return;
                 }
                 mineDirectional.Explosion();
-            }
-        }
-
-        private void OnWeatherPacketReceived(WeatherPacket packet, NetPeer peer)
-        {
-            if (packet.IsRequest)
-            {
-                CoopGame coopGame = CoopHandler.LocalGameInstance;
-                if (coopGame != null && coopGame.WeatherReady)
-                {
-                    WeatherPacket response = new()
-                    {
-                        IsRequest = false,
-                        HasData = true,
-                        Season = coopGame.Season,
-                        SpringSnowFactor = coopGame.SeasonsSettings != null ? coopGame.SeasonsSettings.SpringSnowFactor : Vector3.zero, // Temp fix
-                        Amount = coopGame.WeatherClasses.Length,
-                        WeatherClasses = coopGame.WeatherClasses
-                    };
-
-                    SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
-                };
-            }
-        }
-
-        private void OnExfiltrationPacketReceived(ExfiltrationPacket packet, NetPeer peer)
-        {
-            if (ExfiltrationControllerClass.Instance != null)
-            {
-                ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
-                if (exfilController.ExfiltrationPoints == null)
-                {
-                    return;
-                }
-
-                ExfiltrationPacket exfilPacket = new()
-                {
-                    ExfiltrationAmount = exfilController.ExfiltrationPoints.Length,
-                    ExfiltrationPoints = [],
-                    StartTimes = []
-                };
-
-                foreach (ExfiltrationPoint exfilPoint in exfilController.ExfiltrationPoints)
-                {
-                    exfilPacket.ExfiltrationPoints.Add(exfilPoint.Settings.Name, exfilPoint.Status);
-                    exfilPacket.StartTimes.Add(exfilPoint.Settings.StartTime);
-                }
-
-                if (MyPlayer.Side == EPlayerSide.Savage && exfilController.ScavExfiltrationPoints != null)
-                {
-                    exfilPacket.HasScavExfils = true;
-                    exfilPacket.ScavExfiltrationAmount = exfilController.ScavExfiltrationPoints.Length;
-                    exfilPacket.ScavExfiltrationPoints = [];
-                    exfilPacket.ScavStartTimes = [];
-
-                    foreach (ScavExfiltrationPoint scavExfilPoint in exfilController.ScavExfiltrationPoints)
-                    {
-                        exfilPacket.ScavExfiltrationPoints.Add(scavExfilPoint.Settings.Name, scavExfilPoint.Status);
-                        exfilPacket.ScavStartTimes.Add(scavExfilPoint.Settings.StartTime);
-                    }
-                }
-
-                SendDataToPeer(peer, ref exfilPacket, DeliveryMethod.ReliableOrdered);
-            }
-            else
-            {
-                logger.LogError($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
             }
         }
 
@@ -1142,14 +1069,14 @@ namespace Fika.Core.Networking
             {
                 playersMissing.Add(packet.ProfileId);
                 logger.LogInfo($"Requesting missing player from server.");
-                AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
+                AllCharacterRequestPacket requestPacket = new(hostPlayer.ProfileId);
                 SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
             }
 
             if (!packet.IsRequest && playersMissing.Contains(packet.ProfileId))
             {
                 logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}");
-                if (packet.ProfileId != MyPlayer.ProfileId)
+                if (packet.ProfileId != hostPlayer.ProfileId)
                 {
                     coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
                         packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
@@ -1445,7 +1372,7 @@ namespace Fika.Core.Networking
             if (disconnectInfo.Reason != DisconnectReason.RemoteConnectionClose)
             {
                 NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
-                        iconType: EFT.Communications.ENotificationIconType.Alert); 
+                        iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
             if (peer.Tag is string nickname)
@@ -1493,11 +1420,6 @@ namespace Fika.Core.Networking
                             Singleton<IFikaGame>.Instance.ExitLocation, 0);
                 }
             }
-        }
-
-        public void WriteNet(NetLogLevel level, string str, params object[] args)
-        {
-            Debug.LogFormat(str, args);
         }
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)

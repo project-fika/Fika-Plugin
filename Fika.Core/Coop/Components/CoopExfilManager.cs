@@ -21,7 +21,6 @@ namespace Fika.Core.Coop.Components
         private List<ExfiltrationPoint> countdownPoints;
         private ExfiltrationPoint[] exfiltrationPoints;
         private SecretExfiltrationPoint[] secretExfiltrationPoints;
-        private CarExtraction carExfil = null;
 
         protected void Awake()
         {
@@ -30,7 +29,6 @@ namespace Fika.Core.Coop.Components
             countdownPoints = [];
             exfiltrationPoints = [];
             secretExfiltrationPoints = [];
-            carExfil = FindObjectOfType<CarExtraction>();
         }
 
         protected void Update()
@@ -77,14 +75,6 @@ namespace Fika.Core.Coop.Components
                         {
                             game.ExitLocation = exfiltrationPoint.Settings.Name;
                             game.Extract((CoopPlayer)player, exfiltrationPoint);
-                        }
-                    }
-
-                    if (carExfil != null)
-                    {
-                        if (carExfil.Subscribee == exfiltrationPoint)
-                        {
-                            carExfil.Play();
                         }
                     }
 
@@ -219,14 +209,6 @@ namespace Fika.Core.Coop.Components
             {
                 point.ExfiltrationStartTime = -100;
                 countdownPoints.Remove(point);
-
-                if (carExfil != null)
-                {
-                    if (carExfil.Subscribee == point)
-                    {
-                        carExfil.Play();
-                    }
-                }
             }
 
             if (!isCounting && point.Status == EExfiltrationStatus.Countdown)

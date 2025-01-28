@@ -1,4 +1,5 @@
 ﻿using Fika.Core.Coop.Players;
+using LiteNetLib;
 using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking.Packets
@@ -8,6 +9,13 @@ namespace Fika.Core.Networking.Packets
         public interface ISubPacket
         {
             public void Execute(CoopPlayer player = null);
+            public void Serialize(NetDataWriter writer);
+        }
+
+        public interface IRequestPacket
+        {
+            public void HandleRequest(NetPeer peer);
+            public void HandleResponse();
             public void Serialize(NetDataWriter writer);
         }
 
@@ -112,6 +120,13 @@ namespace Fika.Core.Networking.Packets
             SecretExfilFound
             //TrainSync,
             //TraderServiceNotification,
+        }
+
+        public enum ERequestSubPacketType
+        {
+            SpawnPoint,
+            Weather,
+            Exfiltration
         }
     }
 }

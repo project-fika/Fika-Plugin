@@ -138,6 +138,20 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        public string SpawnPointName
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(SpawnId))
+                {
+                    return SpawnId;
+                }
+                return string.Empty;
+            }
+        }
+
+        public bool ExfiltrationReceived { get; internal set; }
+
         public SeasonsSettingsClass SeasonsSettings { get; set; }
 
         private static ManualLogSource Logger;
@@ -170,6 +184,8 @@ namespace Fika.Core.Coop.GameMode
             GClass2433 metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
+
+            Singleton<IFikaNetworkManager>.Instance.RaidSide = profile.Side;
 
             GameDateTime gameTime = backendDateTime;
             if (timeAndWeather.HourOfDay != -1)
@@ -763,15 +779,6 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public string GetSpawnpointName()
-        {
-            if (!string.IsNullOrEmpty(SpawnId))
-            {
-                return SpawnId;
-            }
-            return string.Empty;
-        }
-
         /// <summary>
         /// Sends or receives the <see cref="ISpawnPoint"/> for the game
         /// </summary>
@@ -796,7 +803,11 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                SpawnpointPacket packet = new(true);
+                RequestPacket packet = new()
+                {
+                    PacketType = ERequestSubPacketType.SpawnPoint,
+                    Request = true
+                };
                 FikaClient client = Singleton<FikaClient>.Instance;
 
                 do
@@ -966,7 +977,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     if (isServer)
                     {
-                        RaidStarted = true;                        
+                        RaidStarted = true;
                         return;
                     }
 
@@ -1406,21 +1417,17 @@ namespace Fika.Core.Coop.GameMode
         {
             SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_EXFIL_DATA.Localized());
             FikaClient client = Singleton<FikaClient>.Instance;
-            ExfiltrationPacket exfilPacket = new()
+            RequestPacket request = new()
             {
-                IsRequest = true
+                PacketType = ERequestSubPacketType.Exfiltration,
+                Request = true
             };
 
             do
             {
-                client.SendData(ref exfilPacket, DeliveryMethod.ReliableUnordered);
-                await Task.Delay(1000);
-                if (!client.ExfilPointsReceived)
-                {
-                    await Task.Delay(2000);
-                }
-
-            } while (!client.ExfilPointsReceived);
+                client.SendData(ref request, DeliveryMethod.ReliableUnordered);
+                await Task.Delay(250);
+            } while (!ExfiltrationReceived);
         }
 
         private async Task InitInteractables()
@@ -1718,10 +1725,10 @@ namespace Fika.Core.Coop.GameMode
 
         private async Task GetWeather()
         {
-            WeatherPacket packet = new()
+            RequestPacket packet = new()
             {
-                IsRequest = true,
-                HasData = false
+                PacketType = ERequestSubPacketType.Weather,
+                Request = true
             };
 
             FikaClient client = Singleton<FikaClient>.Instance;
@@ -1732,7 +1739,7 @@ namespace Fika.Core.Coop.GameMode
                 await Task.Delay(1000);
                 if (!WeatherReady)
                 {
-                    client.SendData(ref packet, DeliveryMethod.ReliableUnordered); 
+                    client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
                 }
             }
         }

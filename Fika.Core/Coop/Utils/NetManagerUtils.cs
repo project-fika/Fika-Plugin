@@ -13,8 +13,9 @@ namespace Fika.Core.Coop.Utils
 {
     public static class NetManagerUtils
     {
-        private static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
         public static GameObject FikaGameObject;
+
+        private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
 
         public static void CreateFikaGameObject()
         {

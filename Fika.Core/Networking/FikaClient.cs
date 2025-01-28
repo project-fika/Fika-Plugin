@@ -22,12 +22,14 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Packets.GameWorld;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -37,7 +39,7 @@ using UnityEngine;
 namespace Fika.Core.Networking
 {
     /// <summary>
-    /// Client used in P2P connections
+    /// Client used to communicate with the <see cref="FikaServer"/>
     /// </summary>
     public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
     {
@@ -49,7 +51,6 @@ namespace Fika.Core.Networking
         public bool HostLoaded;
         public bool ReconnectDone;
         public NetPeer ServerConnection { get; private set; }
-        public bool ExfilPointsReceived { get; private set; }
         public NetManager NetClient
         {
             get
@@ -94,6 +95,7 @@ namespace Fika.Core.Networking
             }
         }
         public FikaClientWorld FikaClientWorld { get; set; }
+        public EPlayerSide RaidSide { get ; set; }
 
         private NetPacketProcessor packetProcessor;
         private int sendRate;
@@ -130,8 +132,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<InformationPacket>(OnInformationPacketReceived);
             packetProcessor.SubscribeNetSerializable<HealthSyncPacket>(OnHealthSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<GenericPacket>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializable<ExfiltrationPacket>(OnExfiltrationPacketReceived);
-            packetProcessor.SubscribeNetSerializable<WeatherPacket>(OnWeatherPacketReceived);
             packetProcessor.SubscribeNetSerializable<MinePacket>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<BorderZonePacket>(OnBorderZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
@@ -142,7 +142,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SpawnpointPacket>(OnSpawnPointPacketReceived);
             packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
             packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
             packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
@@ -164,6 +163,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
+            packetProcessor.SubscribeNetSerializable<RequestPacket>(OnRequestPacketReceived);
 
             packetProcessor.SubscribeReusable<WorldPacket>(OnWorldPacketReceived);
             packetProcessor.SubscribeReusable<SyncObjectPacket>(OnSyncObjectPacketReceived);
@@ -212,6 +212,11 @@ namespace Fika.Core.Networking
                 await Task.Delay(1 * 6000);
                 ServerConnection = netClient.Connect(ip, port, connectString);
             }
+        }
+
+        private void OnRequestPacketReceived(RequestPacket packet)
+        {
+            packet.RequestSubPacket.HandleResponse();
         }
 
         private void OnWorldPacketReceived(WorldPacket packet)
@@ -413,6 +418,7 @@ namespace Fika.Core.Networking
             logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
         }
 
+        [Conditional("Debug")]
         private void AddDebugPackets()
         {
             packetProcessor.SubscribeNetSerializable<SpawnItemPacket>(OnSpawnItemPacketReceived);
@@ -724,22 +730,6 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnSpawnPointPacketReceived(SpawnpointPacket packet)
-        {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-            if (coopGame != null)
-            {
-                if (!packet.IsRequest && !string.IsNullOrEmpty(packet.Name))
-                {
-                    coopGame.SpawnId = packet.Name;
-                }
-            }
-            else
-            {
-                logger.LogError("OnSpawnPointPacketReceived: CoopGame was null upon receiving packet!"); ;
-            }
-        }
-
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet)
         {
             if (MyPlayer.HealthController.IsAlive)
@@ -909,127 +899,6 @@ namespace Fika.Core.Networking
                 return;
             }
             mineDirectional.Explosion();
-        }
-
-        private void OnWeatherPacketReceived(WeatherPacket packet)
-        {
-            if (!packet.IsRequest)
-            {
-                if (CoopHandler.LocalGameInstance != null)
-                {
-                    CoopHandler.LocalGameInstance.WeatherClasses = packet.WeatherClasses;
-                    CoopHandler.LocalGameInstance.Season = packet.Season;
-                    CoopHandler.LocalGameInstance.SeasonsSettings = new()
-                    {
-                        SpringSnowFactor = packet.SpringSnowFactor
-                    };
-                    return;
-                }
-
-                logger.LogError("OnWeatherPacketReceived: LocalGameInstance was null!");
-            }
-        }
-
-        private void OnExfiltrationPacketReceived(ExfiltrationPacket packet)
-        {
-            if (ExfiltrationControllerClass.Instance != null)
-            {
-                ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
-                if (exfilController.ExfiltrationPoints == null)
-                {
-                    return;
-                }
-
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-                if (coopGame == null)
-                {
-#if DEBUG
-                    logger.LogError("OnExfiltrationPacketReceived: coopGame was null!");
-#endif
-                    return;
-                }
-
-                CarExtraction carExtraction = FindObjectOfType<CarExtraction>();
-
-                int index = 0;
-                foreach (KeyValuePair<string, EExfiltrationStatus> exfilPoint in packet.ExfiltrationPoints)
-                {
-                    ExfiltrationPoint point = exfilController.ExfiltrationPoints.Where(x => x.Settings.Name == exfilPoint.Key).FirstOrDefault();
-                    if (point != null || point != default)
-                    {
-                        point.Settings.StartTime = packet.StartTimes[index];
-                        index++;
-                        if (point.Status != exfilPoint.Value && (exfilPoint.Value == EExfiltrationStatus.RegularMode || exfilPoint.Value == EExfiltrationStatus.UncompleteRequirements))
-                        {
-                            point.Enable();
-                            point.Status = exfilPoint.Value;
-                        }
-                        else if (point.Status != exfilPoint.Value && exfilPoint.Value == EExfiltrationStatus.NotPresent || exfilPoint.Value == EExfiltrationStatus.Pending)
-                        {
-                            point.Disable();
-                            point.Status = exfilPoint.Value;
-
-                            if (carExtraction != null)
-                            {
-                                if (carExtraction.Subscribee == point)
-                                {
-                                    carExtraction.Play(true);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        logger.LogWarning($"ExfiltrationPacketPacketReceived::ExfiltrationPoints: Could not find exfil point with name '{exfilPoint.Key}'");
-                    }
-                }
-
-                if (coopGame.RaidSettings.IsScav && exfilController.ScavExfiltrationPoints != null && packet.HasScavExfils)
-                {
-                    string scavProfile = FikaGlobals.GetProfile(true).ProfileId;
-                    int scavIndex = 0;
-                    foreach (KeyValuePair<string, EExfiltrationStatus> scavExfilPoint in packet.ScavExfiltrationPoints)
-                    {
-                        ScavExfiltrationPoint scavPoint = exfilController.ScavExfiltrationPoints.Where(x => x.Settings.Name == scavExfilPoint.Key).FirstOrDefault();
-                        if (scavPoint != null || scavPoint != default)
-                        {
-                            scavPoint.Settings.StartTime = packet.ScavStartTimes[scavIndex];
-                            scavIndex++;
-                            if (scavPoint.Status != scavExfilPoint.Value && scavExfilPoint.Value == EExfiltrationStatus.RegularMode)
-                            {
-                                scavPoint.Enable();
-                                if (!string.IsNullOrEmpty(scavProfile))
-                                {
-                                    scavPoint.EligibleIds.Add(scavProfile);
-                                }
-                                scavPoint.Status = scavExfilPoint.Value;
-                                coopGame.UpdateExfilPointFromServer(scavPoint, true);
-                            }
-                            else if (scavPoint.Status != scavExfilPoint.Value && (scavExfilPoint.Value == EExfiltrationStatus.NotPresent || scavExfilPoint.Value == EExfiltrationStatus.Pending))
-                            {
-                                scavPoint.Disable();
-                                if (!string.IsNullOrEmpty(scavProfile))
-                                {
-                                    scavPoint.EligibleIds.Remove(scavProfile);
-                                }
-                                scavPoint.Status = scavExfilPoint.Value;
-                                coopGame.UpdateExfilPointFromServer(scavPoint, false);
-                            }
-                        }
-                        else
-                        {
-                            logger.LogWarning($"ExfiltrationPacketPacketReceived::ScavExfiltrationPoints: Could not find exfil point with name '{scavExfilPoint.Key}'");
-                        }
-                    }
-                }
-
-                ExfilPointsReceived = true;
-            }
-            else
-            {
-                logger.LogWarning($"ExfiltrationPacketPacketReceived: ExfiltrationController was null");
-            }
         }
 
         private void OnGenericPacketReceived(GenericPacket packet)
