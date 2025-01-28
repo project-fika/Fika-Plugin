@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Networking.GenericSubPackets;
 
 namespace Fika.Core.Coop.HostClasses
 {
@@ -68,10 +69,13 @@ namespace Fika.Core.Coop.HostClasses
                 return;
             }
 
-            MinePacket packet = new()
+            GenericPacket packet = new()
             {
-                MinePositon = directional.transform.position
+                NetId = 0,
+                Type = SubPacket.EGenericSubPacketType.Mine,
+                SubPacket = new MineEvent(directional.transform.position)
             };
+
             Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 

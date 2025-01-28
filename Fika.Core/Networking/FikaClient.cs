@@ -130,7 +130,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<InformationPacket>(OnInformationPacketReceived);
             packetProcessor.SubscribeNetSerializable<HealthSyncPacket>(OnHealthSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<GenericPacket>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializable<MinePacket>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
@@ -855,21 +854,6 @@ namespace Fika.Core.Networking
                              packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
                              packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
             }
-        }
-
-        private void OnMinePacketReceived(MinePacket packet)
-        {
-            NetworkGame<EftGamePlayerOwner>.Class1530 mineSeeker = new()
-            {
-                minePosition = packet.MinePositon
-            };
-            MineDirectional mineDirectional = MineDirectional.Mines.FirstOrDefault(mineSeeker.method_0);
-            if (mineDirectional == null)
-            {
-                logger.LogError($"OnMinePacketReceived: Could not find mine at position {packet.MinePositon}");
-                return;
-            }
-            mineDirectional.Explosion();
         }
 
         private void OnGenericPacketReceived(GenericPacket packet)

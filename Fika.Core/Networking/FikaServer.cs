@@ -183,7 +183,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<InformationPacket, NetPeer>(OnInformationPacketReceived);
             packetProcessor.SubscribeNetSerializable<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
             packetProcessor.SubscribeNetSerializable<GenericPacket, NetPeer>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializable<MinePacket, NetPeer>(OnMinePacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
@@ -942,23 +941,6 @@ namespace Fika.Core.Networking
             };
 
             SendDataToPeer(peer, ref assignNetIdPacket, DeliveryMethod.ReliableUnordered);
-        }
-
-        private void OnMinePacketReceived(MinePacket packet, NetPeer peer)
-        {
-            if (Singleton<GameWorld>.Instance.MineManager != null)
-            {
-                NetworkGame<EftGamePlayerOwner>.Class1530 mineSeeker = new()
-                {
-                    minePosition = packet.MinePositon
-                };
-                MineDirectional mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(mineSeeker.method_0);
-                if (mineDirectional == null)
-                {
-                    return;
-                }
-                mineDirectional.Explosion();
-            }
         }
 
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)

@@ -10,6 +10,9 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Sockets;
+using UnityEngine;
 using static Fika.Core.Networking.SubPacket;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -316,6 +319,43 @@ namespace Fika.Core.Networking
             {
                 writer.Put(ProfileId);
                 writer.Put(ZoneId);
+            }
+        }
+
+        public class MineEvent : ISubPacket
+        {
+            public Vector3 MinePosition;
+
+            public MineEvent(Vector3 minePosition)
+            {
+                MinePosition = minePosition;
+            }
+
+            public MineEvent(NetDataReader reader)
+            {
+                MinePosition = reader.GetVector3();
+            }
+
+            public void Execute(CoopPlayer player = null)
+            {
+                if (Singleton<GameWorld>.Instance.MineManager != null)
+                {
+                    NetworkGame<EftGamePlayerOwner>.Class1530 mineSeeker = new()
+                    {
+                        minePosition = MinePosition
+                    };
+                    MineDirectional mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(mineSeeker.method_0);
+                    if (mineDirectional == null)
+                    {
+                        return;
+                    }
+                    mineDirectional.Explosion();
+                }
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(MinePosition);
             }
         }
     }

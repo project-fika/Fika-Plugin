@@ -118,7 +118,8 @@ namespace Fika.Core.Networking
             ClearEffects,
             UpdateBackendData,
             SecretExfilFound,
-            BorderZone
+            BorderZone,
+            Mine
             //TrainSync,
             //TraderServiceNotification,
         }
