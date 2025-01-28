@@ -128,7 +128,8 @@ namespace Fika.Core.Networking
         {
             SpawnPoint,
             Weather,
-            Exfiltration
+            Exfiltration,
+            TraderServices
         }
     }
 }

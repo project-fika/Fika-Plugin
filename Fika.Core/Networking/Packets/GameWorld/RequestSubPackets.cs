@@ -2,6 +2,7 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -23,6 +24,11 @@ namespace Fika.Core.Networking
                 Name = name;
             }
 
+            public SpawnPointRequest()
+            {
+
+            }
+
             public SpawnPointRequest(NetDataReader reader)
             {
                 Name = reader.GetString();
@@ -37,7 +43,6 @@ namespace Fika.Core.Networking
                         RequestPacket response = new()
                         {
                             PacketType = ERequestSubPacketType.SpawnPoint,
-                            Request = false,
                             RequestSubPacket = new SpawnPointRequest(coopGame.SpawnPointName)
                         };
 
@@ -101,11 +106,10 @@ namespace Fika.Core.Networking
                     RequestPacket response = new()
                     {
                         PacketType = ERequestSubPacketType.Weather,
-                        Request = false,
                         RequestSubPacket = new WeatherRequest()
                         {
                             Season = coopGame.Season,
-                            SpringSnowFactor = coopGame.SeasonsSettings.SpringSnowFactor,
+                            SpringSnowFactor = coopGame.SeasonsSettings != null ? coopGame.SeasonsSettings.SpringSnowFactor : Vector3.zero,
                             WeatherClasses = coopGame.WeatherClasses
                         }
                     };
@@ -195,8 +199,7 @@ namespace Fika.Core.Networking
 
                     RequestPacket response = new()
                     {
-                        PacketType = ERequestSubPacketType.Exfiltration,
-                        Request = false
+                        PacketType = ERequestSubPacketType.Exfiltration
                     };
 
                     ExfiltrationRequest exfiltrationRequest = new()
@@ -346,6 +349,94 @@ namespace Fika.Core.Networking
                         writer.Put(kvp.Key);
                         writer.Put((byte)kvp.Value);
                         writer.Put(ScavStartTimes[i]);
+                    }
+                }
+            }
+        }
+
+        public class TraderServicesRequest : IRequestPacket
+        {
+            public int NetId;
+            public string TraderId;
+            public List<TraderServicesClass> Services;
+
+            public TraderServicesRequest()
+            {
+
+            }
+
+            public TraderServicesRequest(NetDataReader reader)
+            {
+                NetId = reader.GetInt();
+                bool isRequest = reader.GetBool();
+                if (isRequest)
+                {
+                    TraderId = reader.GetString();
+                    return;
+                }
+
+                Services = [];
+                int amount = reader.GetInt();
+                if (amount > 0)
+                {
+                    for (int i = 0; i < amount; i++)
+                    {
+                        Services.Add(reader.GetTraderService());
+                    }
+                }
+            }
+
+            public void HandleRequest(NetPeer peer = null)
+            {
+                if (Singleton<IFikaNetworkManager>.Instance.CoopHandler.Players.TryGetValue(NetId, out CoopPlayer playerToApply))
+                {
+                    List<TraderServicesClass> services = playerToApply.GetAvailableTraderServices(TraderId).ToList();
+                    RequestPacket response = new()
+                    {
+                        PacketType = ERequestSubPacketType.TraderServices,
+                        RequestSubPacket = new TraderServicesRequest()
+                        {
+                            NetId = NetId,
+                            Services = services
+                        }
+                    };
+
+                    Singleton<FikaServer>.Instance.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                }
+            }
+
+            public void HandleResponse()
+            {
+                if (Services == null || Services.Count < 1)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogWarning("OnTraderServicesPacketReceived: Services was 0, but might be intentional. Skipping...");
+                    return;
+                }
+
+                if (Singleton<IFikaNetworkManager>.Instance.CoopHandler.Players.TryGetValue(NetId, out CoopPlayer playerToApply))
+                {
+                    playerToApply.method_160(Services);
+                }
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(NetId);
+                bool isRequest = string.IsNullOrEmpty(TraderId);
+                writer.Put(isRequest);
+                if (isRequest)
+                {
+                    writer.Put(TraderId);
+                    return;
+                }
+
+                int amount = Services.Count;
+                writer.Put(amount);
+                if (amount > 0)
+                {
+                    for (int i = 0; i < Services.Count; i++)
+                    {
+                        writer.PutTraderService(Services[i]);
                     }
                 }
             }

@@ -539,23 +539,26 @@ namespace Fika.Core.Coop.ObservedClasses
                 needsReset = true;
             }
 
+            bool isRevolver = Weapon is RevolverItemClass;
+
             MagazineItemClass magazine = Weapon.GetCurrentMagazine();
 
             FirearmsAnimator.SetFire(true);
 
             if (Weapon.MalfState.State == Weapon.EMalfunctionState.None)
             {
-                if (Weapon is RevolverItemClass && Weapon.CylinderHammerClosed)
+                if (isRevolver && Weapon.CylinderHammerClosed)
                 {
                     FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0.2f);
-                    return;
                 }
-                if (Weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
+                else if (Weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
                 {
                     FirearmsAnimator.Animator.Play(FirearmsAnimator.FullSemiFireStateName, 1, 0.2f);
-                    return;
                 }
-                FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f);
+                else
+                {
+                    FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f); 
+                }
             }
 
             if (packet.UnderbarrelShot)
@@ -621,7 +624,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
             }
 
-            if (Weapon is RevolverItemClass)
+            if (isRevolver)
             {
                 if (magazine is CylinderMagazineItemClass cylinderMagazine)
                 {

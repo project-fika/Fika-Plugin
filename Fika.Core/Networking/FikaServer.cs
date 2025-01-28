@@ -193,7 +193,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
             packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket, NetPeer>(OnSpawnSyncObjectPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<TraderServicesPacket, NetPeer>(OnTraderServicesPacketReceived);
             packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
             packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
@@ -314,6 +313,12 @@ namespace Fika.Core.Networking
 
         private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
         {
+            if (packet.RequestSubPacket == null)
+            {
+                logger.LogError("OnRequestPacketReceived: RequestSubPacket was null!");
+                return;
+            }
+
             packet.RequestSubPacket.HandleRequest(peer);
         }
 
@@ -522,20 +527,6 @@ namespace Fika.Core.Networking
         {
             FlareSuccessPacket packet = new(profileId, canSendAirdrop);
             SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
-        }
-
-        private void OnTraderServicesPacketReceived(TraderServicesPacket packet, NetPeer peer)
-        {
-            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-            {
-                List<TraderServicesClass> services = playerToApply.GetAvailableTraderServices(packet.TraderId).ToList();
-                TraderServicesPacket response = new(playerToApply.NetId)
-                {
-                    Services = services
-                };
-
-                SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
-            }
         }
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)

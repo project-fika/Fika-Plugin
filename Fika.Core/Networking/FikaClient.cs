@@ -146,7 +146,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
             packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<TraderServicesPacket>(OnTraderServicesPacketReceived);
             packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
             packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
             packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
@@ -501,20 +500,6 @@ namespace Fika.Core.Networking
                     NotificationManagerClass.DisplayNotification(new GClass2307("AirplaneDelayMessage".Localized(null),
                                 ENotificationDurationType.Default, ENotificationIconType.Default, null));
                 }
-            }
-        }
-
-        private void OnTraderServicesPacketReceived(TraderServicesPacket packet)
-        {
-            if (packet.Services.Count < 1)
-            {
-                logger.LogWarning("OnTraderServicesPacketReceived: Services was 0, but might be intentional. Skipping...");
-                return;
-            }
-
-            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-            {
-                playerToApply.method_160(packet.Services);
             }
         }
 

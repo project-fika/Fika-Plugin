@@ -49,12 +49,17 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (FikaBackendUtils.IsClient)
             {
-                TraderServicesPacket packet = new(coopPlayer.NetId)
+                RequestPacket request = new()
                 {
-                    IsRequest = true,
-                    TraderId = traderId
+                    PacketType = SubPacket.ERequestSubPacketType.TraderServices,
+                    RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
+                    {
+                        NetId = coopPlayer.NetId,
+                        TraderId = traderId
+                    }
                 };
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+
+                Singleton<FikaClient>.Instance.SendData(ref request, DeliveryMethod.ReliableOrdered);
                 return;
             }
 
