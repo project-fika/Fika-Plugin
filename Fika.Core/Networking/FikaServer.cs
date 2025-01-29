@@ -48,7 +48,7 @@ namespace Fika.Core.Networking
     /// </summary>
     public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface252, IFikaNetworkManager
     {
-        public int ReadyClients = 0;
+        public int ReadyClients;
         public DateTime TimeSinceLastPeerDisconnected;
         public bool HasHadPeer;
         public bool RaidInitialized;
@@ -134,6 +134,8 @@ namespace Fika.Core.Networking
             externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
             statisticsCounter = 0;
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
+
+            ReadyClients = 0;
 
             TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
 

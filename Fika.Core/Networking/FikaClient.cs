@@ -42,9 +42,9 @@ namespace Fika.Core.Networking
     public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
     {
         public CoopPlayer MyPlayer;
-        public int Ping = 0;
-        public int ServerFPS = 0;
-        public int ReadyClients = 0;
+        public int Ping;
+        public int ServerFPS;
+        public int ReadyClients;
         public bool HostReady;
         public bool HostLoaded;
         public bool ReconnectDone;
@@ -109,6 +109,10 @@ namespace Fika.Core.Networking
             packetProcessor = new();
             dataWriter = new();
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
+
+            Ping = 0;
+            ServerFPS = 0;
+            ReadyClients = 0;
 
             NetworkGameSession.Rtt = 0;
             NetworkGameSession.LossPercent = 0;
