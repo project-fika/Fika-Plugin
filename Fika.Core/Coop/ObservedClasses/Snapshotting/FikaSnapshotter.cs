@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             }
         }
 
-        private void Awake()
+        protected void Awake()
         {
             double smoothingRate = FikaPlugin.SmoothingRate.Value switch
             {
@@ -45,21 +45,14 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 FikaPlugin.ESmoothingRate.High => 2.5,
                 _ => 2,
             };
+            sendRate = Singleton<IFikaNetworkManager>.Instance.SendRate;
             interpolationSettings = new(smoothingRate);
             driftEma = new(sendRate * interpolationSettings.driftEmaDuration);
             deliveryTimeEma = new(sendRate * interpolationSettings.deliveryTimeEmaDuration);
-            if (FikaBackendUtils.IsServer)
-            {
-                sendRate = Singleton<FikaServer>.Instance.SendRate;
-            }
-            else
-            {
-                sendRate = Singleton<FikaClient>.Instance.SendRate;
-            }
             sendInterval = 1f / sendRate;
         }
 
-        private void Update()
+        protected void Update()
         {
             if (buffer.Count > 0)
             {
