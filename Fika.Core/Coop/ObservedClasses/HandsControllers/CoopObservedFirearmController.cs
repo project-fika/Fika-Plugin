@@ -140,6 +140,11 @@ namespace Fika.Core.Coop.ObservedClasses
             return true;
         }
 
+        public override bool IsInInteractionStrictCheck()
+        {
+            return false;
+        }
+
         public override void SetAim(int scopeIndex)
         {
             Item.AimIndex.Value = Mathf.Max(0, scopeIndex);
