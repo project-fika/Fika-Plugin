@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.ObservedClasses
         }
     }
 
-    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1160(controller)
+    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1161(controller)
     {
         private readonly CoopPlayer coopPlayer = player;
 
@@ -114,7 +114,7 @@ namespace Fika.Core.Coop.ObservedClasses
             // Do nothing
         }
 
-        public override void Execute(GInterface411 operation, Callback callback)
+        public override void Execute(GInterface412 operation, Callback callback)
         {
             callback.Succeed();
         }

@@ -662,7 +662,7 @@ namespace Fika.Core.Coop.ClientClasses
             });
         }
 
-        private class FirearmClass1(Player.FirearmController controller) : GClass1780(controller)
+        private class FirearmClass1(Player.FirearmController controller) : GClass1782(controller)
         {
             public override void SetTriggerPressed(bool pressed)
             {
@@ -793,7 +793,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = gridItemAddress;
-                GClass1714 descriptor = itemAddress?.ToDescriptor();
+                GClass1716 descriptor = itemAddress?.ToDescriptor();
                 FikaWriter eftWriter = EFTSerializationManager.GetWriter();
 
                 byte[] locationDescription;
@@ -862,7 +862,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
-                GClass1714 descriptor = itemAddress?.ToDescriptor();
+                GClass1716 descriptor = itemAddress?.ToDescriptor();
                 FikaWriter eftWriter = EFTSerializationManager.GetWriter();
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 

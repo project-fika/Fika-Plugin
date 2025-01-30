@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace Fika.Core.Coop.HostClasses
 {
-    public class FikaHostTransitController : GClass1669
+    public class FikaHostTransitController : GClass1671
     {
         public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters, profile, localRaidSettings)
@@ -336,7 +336,7 @@ namespace Fika.Core.Coop.HostClasses
                     tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
                 }
                 string profileId = player.ProfileId;
-                GClass1954 gclass = new()
+                GClass1956 gclass = new()
                 {
                     hash = hash,
                     playersCount = playersCount,
@@ -397,7 +397,7 @@ namespace Fika.Core.Coop.HostClasses
                 _id = profileId,
             });
 
-            GClass1954 gclass = new()
+            GClass1956 gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,
@@ -414,7 +414,7 @@ namespace Fika.Core.Coop.HostClasses
             TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
             if (transitController != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
             {
-                if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1954 data))
+                if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1956 data))
                 {
                     coopGame.ExitStatus = ExitStatus.Transit;
                     coopGame.ExitLocation = point.parameters.name;

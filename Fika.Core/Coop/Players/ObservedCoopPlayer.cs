@@ -623,11 +623,11 @@ namespace Fika.Core.Coop.Players
                 .method_0(null, callback, scheduled);
         }
 
-        public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface178> callback, bool scheduled = true)
+        public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface179> callback, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this, throwWeap);
             Func<QuickGrenadeThrowHandsController> func = new(factory.CreateObservedQuickGrenadeController);
-            new Process<QuickGrenadeThrowHandsController, GInterface178>(this, func, throwWeap, false)
+            new Process<QuickGrenadeThrowHandsController, GInterface179>(this, func, throwWeap, false)
                 .method_0(null, callback, scheduled);
         }
 
@@ -639,7 +639,7 @@ namespace Fika.Core.Coop.Players
                 .method_0(null, callback, scheduled);
         }
 
-        public override void Proceed(MedsItemClass meds, GStruct350<EBodyPart> bodyParts, Callback<GInterface175> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(MedsItemClass meds, GStruct350<EBodyPart> bodyParts, Callback<GInterface176> callback, int animationVariant, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this)
             {
@@ -648,11 +648,11 @@ namespace Fika.Core.Coop.Players
                 AnimationVariant = animationVariant
             };
             Func<MedsController> func = new(factory.CreateObservedMedsController);
-            new Process<MedsController, GInterface175>(this, func, meds, false)
+            new Process<MedsController, GInterface176>(this, func, meds, false)
                 .method_0(null, callback, scheduled);
         }
 
-        public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface175> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface176> callback, int animationVariant, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this)
             {
@@ -661,7 +661,7 @@ namespace Fika.Core.Coop.Players
                 AnimationVariant = animationVariant
             };
             Func<MedsController> func = new(factory.CreateObservedMedsController);
-            new Process<MedsController, GInterface175>(this, func, foodDrink, false)
+            new Process<MedsController, GInterface176>(this, func, foodDrink, false)
                 .method_0(null, callback, scheduled);
         }
         #endregion
@@ -990,14 +990,14 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public void SetInventory(GClass1686 inventoryDescriptor)
+        public void SetInventory(GClass1688 inventoryDescriptor)
         {
             if (HandsController != null)
             {
                 HandsController.FastForwardCurrentState();
             }
 
-            Inventory inventory = new GClass1678()
+            Inventory inventory = new GClass1680()
             {
                 Equipment = inventoryDescriptor,
             }.ToInventory();
@@ -1454,20 +1454,20 @@ namespace Fika.Core.Coop.Players
             {
                 Transform slotBone = observedPlayer.PlayerBody.GetSlotBone(slotType);
                 Transform alternativeHolsterBone = observedPlayer.PlayerBody.GetAlternativeHolsterBone(slotType);
-                PlayerBody.GClass2112 newSlotView = new(observedPlayer.PlayerBody, slot, slotBone, slotType,
+                PlayerBody.GClass2114 newSlotView = new(observedPlayer.PlayerBody, slot, slotBone, slotType,
                         observedPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone, false);
-                PlayerBody.GClass2112 oldSlotView = observedPlayer.PlayerBody.SlotViews.AddOrReplace(slotType, newSlotView);
+                PlayerBody.GClass2114 oldSlotView = observedPlayer.PlayerBody.SlotViews.AddOrReplace(slotType, newSlotView);
                 if (oldSlotView != null)
                 {
                     ClearSlotView(oldSlotView);
                     oldSlotView.Dispose();
                 }
                 observedPlayer.PlayerBody.ValidateHoodedDress(slotType);
-                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3339>().Invoke(observedPlayer.ProfileId);
+                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3341>().Invoke(observedPlayer.ProfileId);
                 Dispose();
             }
 
-            private void ClearSlotView(PlayerBody.GClass2112 oldSlotView)
+            private void ClearSlotView(PlayerBody.GClass2114 oldSlotView)
             {
                 for (int i = 0; i < oldSlotView.Renderers.Length; i++)
                 {

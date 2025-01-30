@@ -53,7 +53,7 @@ namespace Fika.Core.Networking
             public Vector3 Point;
             public float Force;
             public Vector3 OverallVelocity;
-            public GClass1686 InventoryDescriptor;
+            public GClass1688 InventoryDescriptor;
             public EquipmentSlot ItemSlot;
             public Item ItemInHands;
         }

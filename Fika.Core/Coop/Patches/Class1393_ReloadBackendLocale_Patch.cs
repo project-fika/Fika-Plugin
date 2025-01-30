@@ -10,7 +10,7 @@ namespace Fika.Core.Coop.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(Class1392).GetMethod(nameof(Class1392.ReloadBackendLocale));
+            return typeof(Class1393).GetMethod(nameof(Class1393.ReloadBackendLocale));
         }
 
         [PatchPostfix]

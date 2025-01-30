@@ -689,7 +689,7 @@ namespace Fika.Core.Networking
                             FikaReader eftReader = EFTSerializationManager.GetReader(LocationDescription);
                             if (LocationDescription.Length != 0)
                             {
-                                GClass1714 descriptor = eftReader.ReadPolymorph<GClass1714>();
+                                GClass1716 descriptor = eftReader.ReadPolymorph<GClass1716>();
                                 gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                             }
                         }
@@ -972,7 +972,7 @@ namespace Fika.Core.Networking
                     {
                         if (LocationDescription.Length > 0)
                         {
-                            GClass1714 descriptor = eftReader.ReadPolymorph<GClass1714>();
+                            GClass1716 descriptor = eftReader.ReadPolymorph<GClass1716>();
                             gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                         }
                     }

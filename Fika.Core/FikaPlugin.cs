@@ -298,8 +298,8 @@ namespace Fika.Core
             new Player_Hide_Patch().Enable();
             new Player_UpdateBtrTraderServiceData_Patch().Enable();
             BTRSide_Patches.Enable();
-            new GClass2454_UpdateOfflineClientLogic_Patch().Enable();
-            new GClass2455_UpdateOfflineClientLogic_Patch().Enable();
+            new GClass2456_UpdateOfflineClientLogic_Patch().Enable();
+            new GClass2457_UpdateOfflineClientLogic_Patch().Enable();
             new SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch().Enable();
             LighthouseTraderZone_Patches.Enable();
             Zyriachy_Patches.Enable();
@@ -323,18 +323,18 @@ namespace Fika.Core
             new AIPlaceLogicPartisan_Dispose_Patch().Enable();
             new Player_SpawnInHands_Patch().Enable();
             new GClass619_method_0_Patch().Enable();
-            new GClass619_method_30_Patch().Enable();
-            new GClass1390_Constructor_Patch().Enable();
+            new GClass619_method_28_Patch().Enable();
+            new GClass1391_Constructor_Patch().Enable();
             new AchievementsScreen_Show_Patch().Enable();
             new AchievementView_Show_Patch().Enable();
-            new GClass3364_ExceptAI_Patch().Enable();
-            new GClass1668_method_9_Patch().Enable();
+            new GClass3367_ExceptAI_Patch().Enable();
+            new GClass1670_method_9_Patch().Enable();
             new GrenadeClass_Init_Patch().Enable();
             new SessionResultExitStatus_Show_Patch().Enable();
             new PlayUISound_Patch().Enable();
             new PlayEndGameSound_Patch().Enable();
             new MenuScreen_Awake_Patch().Enable();
-            new GClass3574_ShowAction_Patch().Enable();
+            new GClass3577_ShowAction_Patch().Enable();
             new MenuScreen_method_9_Patch().Enable();
             new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
             new RagfairScreen_Show_Patch().Enable();
@@ -346,7 +346,7 @@ namespace Fika.Core
             new TransitControllerAbstractClass_Exist_Patch().Enable();
             new BotReload_method_1_Patch().Enable();
             new Class1392_ReloadBackendLocale_Patch().Enable();
-            new GClass2047_method_0_Patch().Enable();
+            new GClass2049_method_0_Patch().Enable();
             new PartyInfoPanel_Show_Patch().Enable();
 #if DEBUG
             TasksExtensions_HandleFinishedTask_Patches.Enable();

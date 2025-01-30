@@ -501,7 +501,7 @@ namespace Fika.Core.Networking
             {
                 if (!packet.Success)
                 {
-                    NotificationManagerClass.DisplayNotification(new GClass2307("AirplaneDelayMessage".Localized(null),
+                    NotificationManagerClass.DisplayNotification(new GClass2309("AirplaneDelayMessage".Localized(null),
                                 ENotificationDurationType.Default, ENotificationIconType.Default, null));
                 }
             }
@@ -682,8 +682,8 @@ namespace Fika.Core.Networking
             if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
             {
                 FikaReader eftReader = EFTSerializationManager.GetReader(packet.Data);
-                GClass1711 lootData = eftReader.ReadEFTLootDataDescriptor();
-                GClass1328 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
+                GClass1713 lootData = eftReader.ReadEFTLootDataDescriptor();
+                GClass1329 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
                 if (lootItems.Count < 1)
                 {
                     throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");

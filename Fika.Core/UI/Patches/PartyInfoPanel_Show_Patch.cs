@@ -13,7 +13,7 @@ namespace Fika.Core.UI.Patches
         }
 
         [PatchPrefix]
-        public static void Prefix(ref GClass3860<GClass1336> groupPlayers)
+        public static void Prefix(ref GClass3863<GClass1337> groupPlayers)
         {
             if (groupPlayers != FikaBackendUtils.GroupPlayers && FikaBackendUtils.GroupPlayers.Count > 0)
             {

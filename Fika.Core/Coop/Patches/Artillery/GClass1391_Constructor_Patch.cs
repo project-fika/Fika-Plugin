@@ -6,15 +6,15 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass1390_Constructor_Patch : ModulePatch
+    public class GClass1391_Constructor_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass1390).GetConstructors().Single();
+            return typeof(GClass1391).GetConstructors().Single();
         }
 
         [PatchPrefix]
-        public static bool Prefix(GClass1390 __instance, ref GClass1389 ___gclass1389_0)
+        public static bool Prefix(GClass1391 __instance, ref GClass1390 ___gclass1390_0)
         {
             __instance.speed = 50f;
             __instance.arcHeight = -150f;
@@ -22,7 +22,7 @@ namespace Fika.Core.Coop.Patches
             __instance.zoneID = "";
             CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
             coopGame.UpdateByUnity += __instance.OnUpdate;
-            ___gclass1389_0 = new();
+            ___gclass1390_0 = new();
             return false;
         }
     }
