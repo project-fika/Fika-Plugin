@@ -4,6 +4,7 @@ using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking.Websocket.Headless;
 using Fika.Core.UI.Custom;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
@@ -12,7 +13,7 @@ using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket
 {
-    public class HeadlessRaidWebSocketClient
+    public class HeadlessRequesterWebSocket
     {
         private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.HeadlessWebSocket");
 
@@ -29,11 +30,11 @@ namespace Fika.Core.Networking.Websocket
 
         private WebSocket webSocket;
 
-        public HeadlessRaidWebSocketClient()
+        public HeadlessRequesterWebSocket()
         {
             Host = RequestHandler.Host.Replace("http", "ws");
             SessionId = RequestHandler.SessionId;
-            Url = $"{Host}/fika/headlessraidservice/";
+            Url = $"{Host}/fika/headless/requester";
 
             webSocket = new WebSocket(Url)
             {
@@ -72,7 +73,7 @@ namespace Fika.Core.Networking.Websocket
 
         private void WebSocket_OnOpen(object sender, EventArgs e)
         {
-            logger.LogInfo("Connected to FikaHeadlessRaidWebSocket as client");
+            logger.LogInfo("Connected to HeadlessRequesterWebSocket");
         }
 
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
@@ -94,20 +95,19 @@ namespace Fika.Core.Networking.Websocket
                 return;
             }
 
-            // TODO: Convert to bytes and use an enum...
-            string type = jsonObject.Value<string>("type");
+            EFikaHeadlessWSMessageTypes type = (EFikaHeadlessWSMessageTypes)Enum.Parse(typeof(EFikaHeadlessWSMessageTypes), jsonObject.Value<string>("type"));
 
             switch (type)
             {
-                case "fikaHeadlessJoinMatch":
-                    string matchId = jsonObject.Value<string>("matchId");
+                case EFikaHeadlessWSMessageTypes.RequesterJoinRaid:
+                    RequesterJoinRaid data = e.Data.ParseJsonTo<RequesterJoinRaid>();
 
                     MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;
 
-                    if (!string.IsNullOrEmpty(matchId))
+                    if (!string.IsNullOrEmpty(data.MatchId))
                     {
                         TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-                        tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, matchId, null, (bool success) =>
+                        tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, data.MatchId, null, (bool success) =>
                         {
                             if (success)
                             {
@@ -118,10 +118,10 @@ namespace Fika.Core.Networking.Websocket
                     }
                     else
                     {
-                        PreloaderUI.Instance.ShowErrorScreen("Fika Headless Error", "Received fikaJoinMatch WS event but there was no matchId");
+                        PreloaderUI.Instance.ShowErrorScreen("Fika Headless Error", "Received RequesterJoinRaid WS event but there was no matchId");
                     }
 
-                    FikaPlugin.HeadlessRaidWebSocket.Close();
+                    FikaPlugin.HeadlessRequesterWebSocket.Close();
 
                     break;
             }

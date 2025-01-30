@@ -191,11 +191,6 @@ namespace Fika.Core.Networking.Http
             return await PostJsonAsync<StartHeadlessRequest, StartHeadlessResponse>("/fika/raid/headless/start", request);
         }
 
-        public static async Task<SetHeadlessStatusResponse> SetHeadlessStatus(SetHeadlessStatusRequest request)
-        {
-            return await PostJsonAsync<SetHeadlessStatusRequest, SetHeadlessStatusResponse>("/fika/raid/headless/status", request);
-        }
-
         public static GetHeadlessStatusResponse GetHeadlessStatus()
         {
             return GetJson<GetHeadlessStatusResponse>("/fika/raid/headless/getstatus");

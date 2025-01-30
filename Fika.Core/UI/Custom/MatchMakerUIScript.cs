@@ -287,11 +287,11 @@ namespace Fika.Core.UI.Custom
                 {
                     ToggleLoading(true);
 
-                    FikaPlugin.HeadlessRaidWebSocket ??= new HeadlessRaidWebSocketClient();
+                    FikaPlugin.HeadlessRequesterWebSocket ??= new HeadlessRequesterWebSocket();
 
-                    if (!FikaPlugin.HeadlessRaidWebSocket.Connected)
+                    if (!FikaPlugin.HeadlessRequesterWebSocket.Connected)
                     {
-                        FikaPlugin.HeadlessRaidWebSocket.Connect();
+                        FikaPlugin.HeadlessRequesterWebSocket.Connect();
                     }
 
                     RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;

@@ -74,7 +74,7 @@ namespace Fika.Core
 
         private static readonly Version RequiredServerVersion = new("2.4.0");
 
-        public static HeadlessRaidWebSocketClient HeadlessRaidWebSocket { get; set; }
+        public static HeadlessRequesterWebSocket HeadlessRequesterWebSocket { get; set; }
 
         public static Dictionary<string, string> RespectedPlayersList = new()
         {
