@@ -26,16 +26,6 @@ namespace Fika.Core.Coop.FreeCamera
 
     public class FreeCameraController : MonoBehaviour
     {
-        private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
-
-        private FreeCamera freeCamScript;
-
-        private EftBattleUIScreen playerUi;
-        private bool uiHidden;
-
-        private bool effectsCleared = false;
-
-        private GamePlayerOwner gamePlayerOwner;
         private CoopPlayer Player
         {
             get
@@ -43,12 +33,6 @@ namespace Fika.Core.Coop.FreeCamera
                 return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             }
         }
-
-        private Vector3 LastKnownPosition;
-        private CoopHandler coopHandler;
-
-        public GameObject CameraParent;
-        public Camera CameraMain { get; private set; }
         public bool IsScriptActive
         {
             get
@@ -60,20 +44,31 @@ namespace Fika.Core.Coop.FreeCamera
                 return false;
             }
         }
+        public Camera CameraMain { get; private set; }
 
-        private TextMeshProUGUI extractText = null;
-        private bool extracted = false;
+        private GameObject cameraParent;
+        private bool isSpectator;
+        private FreeCamera freeCamScript;
+        private EftBattleUIScreen playerUi;
+        private bool uiHidden;
+        private bool effectsCleared;
+        private GamePlayerOwner gamePlayerOwner;
+        private Vector3 LastKnownPosition;
+        private CoopHandler coopHandler;
+        private TextMeshProUGUI extractText;
+        private bool extracted;
         private DeathFade deathFade;
         private bool deathFadeEnabled;
         private DisablerCullingObjectBase[] allCullingObjects;
         private List<PerfectCullingBakeGroup> previouslyActiveBakeGroups;
-        private bool hasEnabledCulling = false;
+        private bool hasEnabledCulling;
 
         protected void Awake()
         {
-            CameraParent = new GameObject("CameraParent");
-            Camera FCamera = CameraParent.GetOrAddComponent<Camera>();
+            cameraParent = new GameObject("CameraParent");
+            Camera FCamera = cameraParent.GetOrAddComponent<Camera>();
             FCamera.enabled = false;
+            isSpectator = FikaBackendUtils.IsSpectator;
         }
 
         protected void Start()
@@ -513,11 +508,10 @@ namespace Fika.Core.Coop.FreeCamera
                             if (!bakeGroup.IsEnabled)
                             {
                                 bakeGroup.IsEnabled = true;
+                                continue;
                             }
-                            else
-                            {
-                                previouslyActiveBakeGroups.Add(bakeGroup);
-                            }
+
+                            previouslyActiveBakeGroups.Add(bakeGroup);
                         }
 
                         sceneGroup.enabled = false;
@@ -558,11 +552,10 @@ namespace Fika.Core.Coop.FreeCamera
                             if (bakeGroup.IsEnabled && !previouslyActiveBakeGroups.Contains(bakeGroup))
                             {
                                 bakeGroup.IsEnabled = false;
+                                continue;
                             }
-                            else
-                            {
-                                previouslyActiveBakeGroups.Remove(bakeGroup);
-                            }
+
+                            previouslyActiveBakeGroups.Remove(bakeGroup);
                         }
 
                         previouslyActiveBakeGroups.Clear();
@@ -596,7 +589,7 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 FikaPlugin.Instance.FikaLogger.LogWarning("Unable to release FreeCameraController singleton");
             }
-            Destroy(CameraParent);
+            Destroy(cameraParent);
 
             // Destroy FreeCamScript before FreeCamController if exists
             Destroy(freeCamScript);
