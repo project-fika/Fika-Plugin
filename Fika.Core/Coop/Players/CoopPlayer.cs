@@ -105,14 +105,14 @@ namespace Fika.Core.Coop.Players
             }
             else
             {
-                questController = new GClass3695(profile, inventoryController, session);
+                questController = new GClass3698(profile, inventoryController, session);
             }
             questController.Init();
-            GClass3699 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
+            GClass3702 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
             achievementsController.Init();
             achievementsController.Run();
             questController.Run();
-            GClass3690 prestigeController = new(profile, inventoryController, questController.Quests, session);
+            GClass3693 prestigeController = new(profile, inventoryController, questController.Quests, session);
 
             if (FikaBackendUtils.IsServer)
             {
@@ -149,7 +149,7 @@ namespace Fika.Core.Coop.Players
             }
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, LocalPlayer.Class1655.class1655_0.method_0);
+            player._handsController.Spawn(1f, LocalPlayer.Class1656.class1656_0.method_0);
 
             player.AIData = new GClass563(null, player);
 
@@ -195,7 +195,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnSkillLevelChanged(AbstractSkillClass skill)
         {
-            NotificationManagerClass.DisplayNotification(new GClass2305(skill));
+            NotificationManagerClass.DisplayNotification(new GClass2307(skill));
         }
 
         public override bool CheckSurface(float range)
@@ -286,7 +286,7 @@ namespace Fika.Core.Coop.Players
         }
 
         #region Proceed
-        public override void Proceed(bool withNetwork, Callback<GInterface170> callback, bool scheduled = true)
+        public override void Proceed(bool withNetwork, Callback<GInterface171> callback, bool scheduled = true)
         {
             base.Proceed(withNetwork, callback, scheduled);
             PacketSender.CommonPlayerPackets.Enqueue(new()
@@ -300,7 +300,7 @@ namespace Fika.Core.Coop.Players
             });
         }
 
-        public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface175> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface176> callback, int animationVariant, bool scheduled = true)
         {
             GStruct350<EBodyPart> bodyparts = new(EBodyPart.Head);
             FoodControllerHandler handler = new(this, foodDrink, amount, bodyparts, animationVariant);
@@ -311,7 +311,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(MedsItemClass meds, GStruct350<EBodyPart> bodyParts, Callback<GInterface175> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(MedsItemClass meds, GStruct350<EBodyPart> bodyParts, Callback<GInterface176> callback, int animationVariant, bool scheduled = true)
         {
             MedsControllerHandler handler = new(this, meds, bodyParts, animationVariant);
 
@@ -321,7 +321,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed<T>(Item item, Callback<GInterface174> callback, bool scheduled = true)
+        public override void Proceed<T>(Item item, Callback<GInterface175> callback, bool scheduled = true)
         {
             if (item is PortableRangeFinderItemClass)
             {
@@ -362,7 +362,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(KnifeComponent knife, Callback<GInterface179> callback, bool scheduled = true)
+        public override void Proceed(KnifeComponent knife, Callback<GInterface180> callback, bool scheduled = true)
         {
             QuickKnifeControllerHandler handler = new(this, knife);
 
@@ -372,7 +372,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface178> callback, bool scheduled = true)
+        public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface179> callback, bool scheduled = true)
         {
             QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
@@ -706,7 +706,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass3417 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass3420 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -733,7 +733,7 @@ namespace Fika.Core.Coop.Players
                         InteractiveId = door.Id,
                         InteractionType = interactionResult.InteractionType,
                         InteractionStage = EInteractionStage.Execute,
-                        ItemId = (interactionResult is GClass3417 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                        ItemId = (interactionResult is GClass3420 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                     }
                 };
                 PacketSender.CommonPlayerPackets.Enqueue(packet);
@@ -863,7 +863,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            GClass1686 inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
+            GClass1688 inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
             HealthSyncPacket syncPacket = new(NetId)
             {
@@ -1450,7 +1450,7 @@ namespace Fika.Core.Coop.Players
         public class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct454<GClass3417> unlockResult;
+            public GStruct454<GClass3420> unlockResult;
 
             internal void HandleKeyEvent()
             {
@@ -1522,7 +1522,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly Item item = item;
-            public Process<UsableItemController, GInterface174> process;
+            public Process<UsableItemController, GInterface175> process;
             public Action confirmCallback;
 
             internal CoopClientUsableItemController ReturnController()
@@ -1556,7 +1556,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly Item item = item;
-            public Process<PortableRangeFinderController, GInterface174> process;
+            public Process<PortableRangeFinderController, GInterface175> process;
             public Action confirmCallback;
 
             internal CoopClientPortableRangeFinderController ReturnController()
@@ -1626,7 +1626,7 @@ namespace Fika.Core.Coop.Players
             private readonly MedsItemClass meds = meds;
             private readonly GStruct350<EBodyPart> bodyParts = bodyParts;
             private readonly int animationVariant = animationVariant;
-            public Process<MedsController, GInterface175> process;
+            public Process<MedsController, GInterface176> process;
             public Action confirmCallback;
 
             internal MedsController ReturnController()
@@ -1665,7 +1665,7 @@ namespace Fika.Core.Coop.Players
             private readonly float amount = amount;
             private readonly GStruct350<EBodyPart> bodyParts = bodyParts;
             private readonly int animationVariant = animationVariant;
-            public Process<MedsController, GInterface175> process;
+            public Process<MedsController, GInterface176> process;
             public Action confirmCallback;
 
             internal MedsController ReturnController()
@@ -1736,7 +1736,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             public readonly KnifeComponent knife = knife;
-            public Process<QuickKnifeKickController, GInterface179> process;
+            public Process<QuickKnifeKickController, GInterface180> process;
             public Action confirmCallback;
 
             internal QuickKnifeKickController ReturnController()
@@ -1804,7 +1804,7 @@ namespace Fika.Core.Coop.Players
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly ThrowWeapItemClass throwWeap = throwWeap;
-            public Process<QuickGrenadeThrowHandsController, GInterface178> process;
+            public Process<QuickGrenadeThrowHandsController, GInterface179> process;
             public Action confirmCallback;
 
             internal CoopClientQuickGrenadeController ReturnController()

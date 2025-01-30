@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(BaseLocalGame<EftGamePlayerOwner> __instance, ref Dictionary<string, GClass1314[]> __result)
+        public static bool Prefix(BaseLocalGame<EftGamePlayerOwner> __instance, ref Dictionary<string, GClass1315[]> __result)
         {
             if (__instance is CoopGame coopGame)
             {

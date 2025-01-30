@@ -308,7 +308,7 @@ namespace Fika.Core.Console
                 return;
             }
 
-            GClass2452 serverAirdropManager = gameWorld.ClientSynchronizableObjectLogicProcessor.ServerAirdropManager;
+            GClass2454 serverAirdropManager = gameWorld.ClientSynchronizableObjectLogicProcessor.ServerAirdropManager;
             if (serverAirdropManager == null)
             {
                 ConsoleScreen.LogError("ServerAirdropManager was null!");

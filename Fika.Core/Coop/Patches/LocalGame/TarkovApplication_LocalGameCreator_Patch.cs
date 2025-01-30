@@ -109,7 +109,7 @@ namespace Fika.Core.Coop.Patches
             applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
             applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = FikaBackendUtils.TransitData;
 
-            GClass1320 profileInsurance = localSettings.profileInsurance;
+            GClass1321 profileInsurance = localSettings.profileInsurance;
             if ((profileInsurance?.insuredItems) != null)
             {
                 profile.InsuredItems = localSettings.profileInsurance.insuredItems;
@@ -146,7 +146,7 @@ namespace Fika.Core.Coop.Patches
                 MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
                 timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
                 fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-                new GClass2433(metricsConfig, instance), localRaidSettings, raidSettings);
+                new GClass2435(metricsConfig, instance), localRaidSettings, raidSettings);
 
             startHandler.CoopGame = coopGame;
 

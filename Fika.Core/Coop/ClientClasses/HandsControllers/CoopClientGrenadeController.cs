@@ -139,12 +139,12 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             // Check for GClass increments
-            Class1154 currentOperation = CurrentOperation;
+            Class1155 currentOperation = CurrentOperation;
             if (currentOperation != null)
             {
-                if (currentOperation is not Class1159)
+                if (currentOperation is not Class1160)
                 {
-                    if (currentOperation is Class1160)
+                    if (currentOperation is Class1161)
                     {
                         player.PacketSender.FirearmPackets.Enqueue(new()
                         {

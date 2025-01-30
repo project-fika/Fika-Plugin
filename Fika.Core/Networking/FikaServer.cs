@@ -46,7 +46,7 @@ namespace Fika.Core.Networking
     /// <summary>
     /// Server used to synchronize all <see cref="FikaClient"/>s
     /// </summary>
-    public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface252, IFikaNetworkManager
+    public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface253, IFikaNetworkManager
     {
         public int ReadyClients;
         public DateTime TimeSinceLastPeerDisconnected;
@@ -1374,7 +1374,7 @@ namespace Fika.Core.Networking
 
                         if (profile.ProfileId == RequestHandler.SessionId)
                         {
-                            foreach (Profile.ProfileHealthClass.GClass1968 bodyPartHealth in profile.Health.BodyParts.Values)
+                            foreach (Profile.ProfileHealthClass.GClass1970 bodyPartHealth in profile.Health.BodyParts.Values)
                             {
                                 bodyPartHealth.Effects.Clear();
                                 bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;

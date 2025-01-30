@@ -59,7 +59,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 Profile.ProfileHealthClass profileHealthClass2 = new()
                 {
-                    BodyParts = GClass842<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass1968>(),
+                    BodyParts = GClass842<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass1970>(),
                     Energy = new Profile.ProfileHealthClass.ValueInfo
                     {
                         Current = healthValue_0.Current,
@@ -93,9 +93,9 @@ namespace Fika.Core.Coop.ObservedClasses
                 keyValuePair.Deconstruct(out EBodyPart ebodyPart, out BodyPartState bodyPartState);
                 EBodyPart ebodyPart2 = ebodyPart;
                 BodyPartState bodyPartState2 = bodyPartState;
-                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass1968 gclass))
+                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass1970 gclass))
                 {
-                    gclass = new Profile.ProfileHealthClass.GClass1968();
+                    gclass = new Profile.ProfileHealthClass.GClass1970();
                     health.BodyParts.Add(ebodyPart2, gclass);
                 }
                 gclass.Health = new Profile.ProfileHealthClass.ValueInfo
@@ -110,7 +110,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 if (gclass is GInterface306 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments
                 {
-                    Profile.ProfileHealthClass.GClass1968 gclass2 = health.BodyParts[gclass.BodyPart];
+                    Profile.ProfileHealthClass.GClass1970 gclass2 = health.BodyParts[gclass.BodyPart];
                     gclass2.Effects ??= [];
                     gclass2.Effects.Add(gclass.GetType().Name, new()
                     {

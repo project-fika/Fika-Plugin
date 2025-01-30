@@ -196,7 +196,7 @@ namespace Fika.Core.Networking
         public static void PutItem(this NetDataWriter writer, Item item)
         {
             FikaWriter eftWriter = EFTSerializationManager.GetWriter();
-            GClass1686 descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
+            GClass1688 descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
         }
@@ -220,20 +220,20 @@ namespace Fika.Core.Networking
         public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
         {
             FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
-            return new GClass1678()
+            return new GClass1680()
             {
                 Equipment = eftReader.ReadEFTItemDescriptor()
             }.ToInventory();
         }
 
-        public static void PutItemDescriptor(this NetDataWriter writer, GClass1686 descriptor)
+        public static void PutItemDescriptor(this NetDataWriter writer, GClass1688 descriptor)
         {
             FikaWriter eftWriter = EFTSerializationManager.GetWriter();
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
         }
 
-        public static GClass1686 GetItemDescriptor(this NetDataReader reader)
+        public static GClass1688 GetItemDescriptor(this NetDataReader reader)
         {
             FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
             return eftReader.ReadEFTItemDescriptor();
@@ -244,12 +244,12 @@ namespace Fika.Core.Networking
             FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
             Item item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
-            GClass1328 enumerable = [new LootItemPositionClass()];
+            GClass1329 enumerable = [new LootItemPositionClass()];
             enumerable[0].Item = item;
             Item[] array = enumerable.Select(FikaGlobals.GetLootItemPositionItem).ToArray();
-            ResourceKey[] resourceKeys = array.OfType<GClass3043>().GetAllItemsFromCollections()
-                .Concat(array.Where(AirdropSynchronizableObject.Class2010.class2010_0.method_1))
-                .SelectMany(AirdropSynchronizableObject.Class2010.class2010_0.method_2)
+            ResourceKey[] resourceKeys = array.OfType<GClass3045>().GetAllItemsFromCollections()
+                .Concat(array.Where(AirdropSynchronizableObject.Class2011.class2011_0.method_1))
+                .SelectMany(AirdropSynchronizableObject.Class2011.class2011_0.method_2)
                 .ToArray();
             Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
                 resourceKeys, JobPriorityClass.Immediate, null, default).HandleExceptions();
@@ -559,7 +559,7 @@ namespace Fika.Core.Networking
             // Stamina Coeff
             writer.Write(standard);
 
-            foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass1968> bodyPart in health.BodyParts)
+            foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass1970> bodyPart in health.BodyParts)
             {
                 Profile.ProfileHealthClass.ValueInfo bodyPartInfo = bodyPart.Value.Health;
                 writer.Write(bodyPartInfo.Current <= bodyPartInfo.Minimum);

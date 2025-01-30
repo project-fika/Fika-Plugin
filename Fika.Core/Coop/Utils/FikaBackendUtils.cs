@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.Utils
         public static int LocalPort { get; internal set; } = 0;
         public static string HostLocationId { get; internal set; }
 
-        internal static GClass3860<GClass1336> GroupPlayers { get; set; } = [];
+        internal static GClass3863<GClass1337> GroupPlayers { get; set; } = [];
         internal static bool RequestFikaWorld;
         internal static Vector3 ReconnectPosition = Vector3.zero;
         internal static RaidSettings CachedRaidSettings;
@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.Utils
         }
         public static string GroupId { get; internal set; }
         public static string RaidCode { get; internal set; }
-        public static GClass1363 TransitData
+        public static GClass1364 TransitData
         {
             get
             {
@@ -116,7 +116,7 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
-        private static GClass1363 transitData;
+        private static GClass1364 transitData;
 
         internal static void ResetTransitData()
         {
@@ -202,7 +202,7 @@ namespace Fika.Core.Coop.Utils
             {
                 Profile profile = kvp.Key;
                 InfoClass info = profile.Info;
-                GClass1335 infoSet = new()
+                GClass1336 infoSet = new()
                 {
                     AccountId = profile.AccountId,
                     Id = profile.Id,
@@ -218,7 +218,7 @@ namespace Fika.Core.Coop.Utils
                         HasCoopExtension = info.HasCoopExtension
                     }
                 };
-                GClass1336 visualProfile = new(infoSet)
+                GClass1337 visualProfile = new(infoSet)
                 {
                     PlayerVisualRepresentation = profile.GetVisualEquipmentState(false)
                 };
