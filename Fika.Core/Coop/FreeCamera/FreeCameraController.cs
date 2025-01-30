@@ -45,11 +45,37 @@ namespace Fika.Core.Coop.FreeCamera
             }
         }
         public Camera CameraMain { get; private set; }
+        private EftBattleUIScreen BattleUI
+        {
+            get
+            {
+                if (playerUI == null)
+                {
+                    GameObject gameObject = GameObject.Find("BattleUIScreen");
+                    if (gameObject == null)
+                    {
+                        return null;
+                    }
 
+                    playerUI = gameObject.GetComponent<EftBattleUIScreen>();
+                    if (playerUI == null)
+                    {
+                        return null;
+                    } 
+                }
+
+                return playerUI;
+            }
+            set
+            {
+                playerUI = value;
+            }
+        }
+
+        private EftBattleUIScreen playerUI;
         private GameObject cameraParent;
         private bool isSpectator;
         private FreeCamera freeCamScript;
-        private EftBattleUIScreen playerUi;
         private bool uiHidden;
         private bool effectsCleared;
         private GamePlayerOwner gamePlayerOwner;
@@ -69,6 +95,10 @@ namespace Fika.Core.Coop.FreeCamera
             Camera FCamera = cameraParent.GetOrAddComponent<Camera>();
             FCamera.enabled = false;
             isSpectator = FikaBackendUtils.IsSpectator;
+            if (BattleUI == null)
+            {
+                FikaPlugin.Instance.FikaLogger.LogWarning("FreeCameraController::Awake: Failed to cache BattleUI");
+            }
         }
 
         protected void Start()
@@ -414,30 +444,12 @@ namespace Fika.Core.Coop.FreeCamera
                 return;
             }
 
-            // If we don't have the UI Component cached, go look for it in the scene
-            if (playerUi == null)
-            {
-                GameObject gameObject = GameObject.Find("BattleUIScreen");
-                if (gameObject == null)
-                {
-                    return;
-                }
-
-                playerUi = gameObject.GetComponent<EftBattleUIScreen>();
-
-                if (playerUi == null)
-                {
-                    //FreecamPlugin.Logger.LogError("Failed to locate player UI");
-                    return;
-                }
-            }
-
-            if (playerUi == null || playerUi.gameObject == null)
+            if (BattleUI == null || BattleUI.gameObject == null)
             {
                 return;
             }
 
-            playerUi.gameObject.SetActive(uiHidden);
+            BattleUI.gameObject.SetActive(uiHidden);
             uiHidden = !uiHidden;
         }
 
