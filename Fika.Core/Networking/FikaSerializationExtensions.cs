@@ -682,7 +682,8 @@ namespace Fika.Core.Networking
             AirplaneDataPacketStruct packet = new()
             {
                 ObjectType = (SynchronizableObjectType)reader.GetByte(),
-                ObjectId = reader.GetInt()
+                ObjectId = reader.GetInt(),
+                PacketData = new()
             };
 
             switch (packet.ObjectType)
@@ -692,37 +693,28 @@ namespace Fika.Core.Networking
                     packet.Rotation = reader.GetVector3();
                     packet.Outdated = reader.GetBool();
                     packet.IsStatic = reader.GetBool();
-                    packet.PacketData = new()
+                    packet.PacketData.AirdropDataPacket = new()
                     {
-                        AirdropDataPacket = new()
-                        {
-                            AirdropType = (EAirdropType)reader.GetByte(),
-                            FallingStage = (EAirdropFallingStage)reader.GetByte(),
-                            SignalFire = reader.GetBool(),
-                            UniqueId = reader.GetInt()
-                        }
+                        AirdropType = (EAirdropType)reader.GetByte(),
+                        FallingStage = (EAirdropFallingStage)reader.GetByte(),
+                        SignalFire = reader.GetBool(),
+                        UniqueId = reader.GetInt()
                     };
                     break;
                 case SynchronizableObjectType.AirPlane:
                     packet.Position = reader.GetVector3();
                     packet.Rotation = reader.GetVector3();
-                    packet.PacketData = new()
+                    packet.PacketData.AirplaneDataPacket = new()
                     {
-                        AirplaneDataPacket = new()
-                        {
-                            AirplanePercent = reader.GetInt()
-                        }
+                        AirplanePercent = reader.GetInt()
                     };
                     packet.Outdated = reader.GetBool();
                     packet.IsStatic = reader.GetBool();
                     break;
                 case SynchronizableObjectType.Tripwire:
-                    packet.PacketData = new()
+                    packet.PacketData.TripwireDataPacket = new()
                     {
-                        TripwireDataPacket = new()
-                        {
-                            State = (ETripwireState)reader.GetByte()
-                        }
+                        State = (ETripwireState)reader.GetByte()
                     };
                     packet.Position = reader.GetVector3();
                     packet.Rotation = reader.GetVector3();
