@@ -84,7 +84,7 @@ namespace Fika.Core.Console
         [ConsoleCommand("extract", "", null, "Extract from raid", [])]
         public static void Extract()
         {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            CoopGame coopGame = CoopGame.Instance;
 
             if (coopGame == null)
             {
@@ -106,7 +106,8 @@ namespace Fika.Core.Console
         [ConsoleCommand("despawnallai", "", null, "Despawns all AI bots", [])]
         public static void DespawnAllAI()
         {
-            if (Singleton<IFikaGame>.Instance is CoopGame game)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame != null)
             {
                 if (!FikaBackendUtils.IsServer)
                 {
@@ -116,7 +117,7 @@ namespace Fika.Core.Console
 
                 CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler);
 
-                List<IPlayer> Bots = new(game.BotsController.Players);
+                List<IPlayer> Bots = new(coopGame.BotsController.Players);
 
                 foreach (Player bot in Bots)
                 {
@@ -127,7 +128,7 @@ namespace Fika.Core.Console
 
                     ConsoleScreen.Log($"Despawning: {bot.Profile.Nickname}");
 
-                    game.DespawnBot(coopHandler, bot);
+                    coopGame.DespawnBot(coopHandler, bot);
                 }
             }
         }
@@ -135,17 +136,18 @@ namespace Fika.Core.Console
         [ConsoleCommand("stoptimer", "", null, "Stops the game timer", [])]
         public static void StopTimer()
         {
-            if (Singleton<IFikaGame>.Instance is CoopGame game)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame != null)
             {
-                if (game.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
+                if (coopGame.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
                 {
-                    ConsoleScreen.LogError("GameTimer is already stopped at: " + game.GameTimer.PastTime.ToString());
+                    ConsoleScreen.LogError("GameTimer is already stopped at: " + coopGame.GameTimer.PastTime.ToString());
                     return;
                 }
-                game.GameTimer.TryStop();
-                if (game.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
+                coopGame.GameTimer.TryStop();
+                if (coopGame.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
                 {
-                    ConsoleScreen.Log("GameTimer stopped at: " + game.GameTimer.PastTime.ToString());
+                    ConsoleScreen.Log("GameTimer stopped at: " + coopGame.GameTimer.PastTime.ToString());
                 }
             }
         }
@@ -153,9 +155,10 @@ namespace Fika.Core.Console
         [ConsoleCommand("goToBTR", "", null, "Teleports you to the BTR if active", [])]
         public static void GoToBTR()
         {
-            if (Singleton<IFikaGame>.Instance is CoopGame game)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame != null)
             {
-                GameWorld gameWorld = game.GameWorld_0;
+                GameWorld gameWorld = coopGame.GameWorld_0;
                 if (gameWorld != null)
                 {
                     if (gameWorld.BtrController != null)
@@ -344,8 +347,7 @@ namespace Fika.Core.Console
         [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
         public static void Debug(bool state)
         {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
+            CoopGame coopGame = CoopGame.Instance;
             if (coopGame == null)
             {
                 ConsoleScreen.LogWarning("You are not in a game.");
@@ -369,8 +371,7 @@ namespace Fika.Core.Console
 
         private static bool CheckForGame()
         {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
+            CoopGame coopGame = CoopGame.Instance;
             if (coopGame == null)
             {
                 ConsoleScreen.LogWarning("You are not in a game.");

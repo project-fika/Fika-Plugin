@@ -33,14 +33,13 @@ namespace Fika.Core.Coop.Patches
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             controllerTraverse.Field<GameWorld>("gameWorld_0").Value = gameWorld;
 
-            CoopGame localGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
-            if (localGame == null)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame == null)
             {
-                throw new NullReferenceException("GClass607_method_0_Patch: CoopGame was null!");
+                throw new NullReferenceException("GClass619_method_0_Patch: CoopGame was null!");
             }
 
-            while (localGame.Status != GameStatus.Started)
+            while (coopGame.Status != GameStatus.Started)
             {
                 await Task.Yield();
             }
@@ -58,7 +57,7 @@ namespace Fika.Core.Coop.Patches
             instance.method_1();
 
             controllerTraverse.Field<bool>("bool_3").Value = true;
-            localGame.UpdateByUnity += instance.OnUpdate;
+            coopGame.UpdateByUnity += instance.OnUpdate;
 
             ArtilleryShellingMapConfiguration mapConfiguration = controllerTraverse.Field<ArtilleryShellingMapConfiguration>("artilleryShellingMapConfiguration_0").Value;
             if (mapConfiguration.PlanedShellingOn)

@@ -215,7 +215,7 @@ namespace Fika.Core.Coop.Components
                 logger.LogInfo($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
 
                 requestQuitGame = true;
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                CoopGame coopGame = CoopGame.Instance;
 
                 // If you are the server / host
                 if (!isClient)

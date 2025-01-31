@@ -543,7 +543,7 @@ namespace Fika.Core.Networking
         {
             if (!packet.IsRequest)
             {
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                CoopGame coopGame = CoopGame.Instance;
                 if (coopGame == null)
                 {
                     return;
@@ -679,7 +679,8 @@ namespace Fika.Core.Networking
 
         private void OnWorldLootPacketReceived(WorldLootPacket packet)
         {
-            if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame != null)
             {
                 FikaReader eftReader = EFTSerializationManager.GetReader(packet.Data);
                 GClass1713 lootData = eftReader.ReadEFTLootDataDescriptor();
@@ -706,7 +707,7 @@ namespace Fika.Core.Networking
                 if (world.Interactables == null)
                 {
                     world.method_0(packet.Interactables);
-                    CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                    CoopGame coopGame = CoopGame.Instance;
                     if (coopGame != null)
                     {
                         coopGame.InteractablesInitialized = true;

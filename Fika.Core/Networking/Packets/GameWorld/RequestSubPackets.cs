@@ -35,7 +35,8 @@ namespace Fika.Core.Networking
 
             public void HandleRequest(NetPeer peer, FikaServer server)
             {
-                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                CoopGame coopGame = CoopGame.Instance;
+                if (coopGame != null)
                 {
                     if (FikaBackendUtils.IsServer)
                     {
@@ -55,7 +56,8 @@ namespace Fika.Core.Networking
 
             public void HandleResponse()
             {
-                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                CoopGame coopGame = CoopGame.Instance;
+                if (coopGame != null)
                 {
                     if (!string.IsNullOrEmpty(Name))
                     {
@@ -100,7 +102,8 @@ namespace Fika.Core.Networking
 
             public void HandleRequest(NetPeer peer, FikaServer server)
             {
-                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                CoopGame coopGame = CoopGame.Instance;
+                if (coopGame != null)
                 {
                     RequestPacket response = new()
                     {
@@ -122,7 +125,8 @@ namespace Fika.Core.Networking
 
             public void HandleResponse()
             {
-                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                CoopGame coopGame = CoopGame.Instance;
+                if (coopGame != null)
                 {
                     coopGame.Season = Season;
                     coopGame.SeasonsSettings = new()
@@ -242,7 +246,8 @@ namespace Fika.Core.Networking
                     }
                 }
 
-                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                CoopGame coopGame = CoopGame.Instance;
+                if (coopGame != null)
                 {
                     coopGame.ExfiltrationReceived = true;
                 }

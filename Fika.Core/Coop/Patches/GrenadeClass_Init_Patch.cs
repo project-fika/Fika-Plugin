@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Patches
         [PatchPostfix]
         public static void Postfix(ThrowWeapItemClass item)
         {
-            CoopGame coopGame = Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance;
+            CoopGame coopGame = CoopGame.Instance;
             if (coopGame != null)
             {
                 coopGame.ThrownGrenades.Add(item);

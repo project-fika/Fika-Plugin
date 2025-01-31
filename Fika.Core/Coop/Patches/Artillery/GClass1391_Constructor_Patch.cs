@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.Patches
             __instance.arcHeight = -150f;
             __instance.explosionDistnaceRange = new(3f, 5f);
             __instance.zoneID = "";
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            CoopGame coopGame = CoopGame.Instance;
             coopGame.UpdateByUnity += __instance.OnUpdate;
             ___gclass1390_0 = new();
             return false;

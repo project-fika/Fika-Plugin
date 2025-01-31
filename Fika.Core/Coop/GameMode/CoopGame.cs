@@ -56,6 +56,30 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
     {
+        public static CoopGame Instance
+        {
+            get
+            {
+                if (localInstance != null)
+                {
+                    return localInstance;
+                }
+
+                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                {
+                    localInstance = coopGame;
+                    return coopGame;
+                }
+
+                return null;
+            }
+            internal set
+            {
+                localInstance = value;
+            }
+        }
+        private static CoopGame localInstance;
+
         public string InfiltrationPoint { get; internal set; }
         public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
         public string ExitLocation { get; set; }
@@ -201,6 +225,7 @@ namespace Fika.Core.Coop.GameMode
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
                 new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
+            localInstance = coopGame;
             coopGame.isServer = FikaBackendUtils.IsServer;
 
             if (timeAndWeather.TimeFlowType != ETimeFlowType.x1)
@@ -257,8 +282,8 @@ namespace Fika.Core.Coop.GameMode
 
             coopGame.timeManager = CoopTimeManager.Create(coopGame);
             coopGame.RaidSettings = raidSettings;
-
             coopGame.ThrownGrenades = [];
+
 
             return coopGame;
         }
@@ -2510,7 +2535,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogException(ex);
+                    Logger.LogError(ex);
                 }
             }
             dictionary_0.Clear();

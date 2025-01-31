@@ -100,7 +100,8 @@ namespace Fika.Core.Coop.ClientClasses
             };
 
             alreadyTransits.Add(profileId, gclass);
-            if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame != null)
             {
                 coopGame.Extract((CoopPlayer)myPlayer, null, transitPoint);
             }

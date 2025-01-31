@@ -769,7 +769,8 @@ namespace Fika.Core.Networking
 
         private void OnWorldLootPacketReceived(WorldLootPacket packet, NetPeer peer)
         {
-            if (Singleton<IFikaGame>.Instance != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame != null)
             {
                 WorldLootPacket response = new()
                 {
@@ -1383,9 +1384,8 @@ namespace Fika.Core.Networking
                     }
 
                     // End the raid
-                    Singleton<IFikaGame>.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId,
-                            Singleton<IFikaGame>.Instance.ExitStatus,
-                            Singleton<IFikaGame>.Instance.ExitLocation, 0);
+                    CoopGame coopGame = CoopGame.Instance;
+                    coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, coopGame.ExitLocation, 0);
                 }
             }
         }

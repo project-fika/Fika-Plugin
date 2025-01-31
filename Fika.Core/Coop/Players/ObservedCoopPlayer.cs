@@ -1190,8 +1190,7 @@ namespace Fika.Core.Coop.Players
 
         private IEnumerator CreateHealthBar()
         {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-
+            CoopGame coopGame = CoopGame.Instance;
             if (coopGame == null)
             {
                 yield break;

@@ -260,8 +260,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
-            coopGame.Bots.Remove(ProfileId);
+            CoopGame.Instance.Bots.Remove(ProfileId);
 
             base.OnDead(damageType);
         }
@@ -273,7 +272,7 @@ namespace Fika.Core.Coop.Players
 
         protected void OnEnable()
         {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            CoopGame coopGame = CoopGame.Instance;
             if (coopGame != null && coopGame.Status == GameStatus.Started)
             {
                 BotStatePacket packet = new()
@@ -290,7 +289,7 @@ namespace Fika.Core.Coop.Players
 
         protected void OnDisable()
         {
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            CoopGame coopGame = CoopGame.Instance;
             if (coopGame != null && coopGame.Status == GameStatus.Started)
             {
                 BotStatePacket packet = new()
@@ -312,7 +311,7 @@ namespace Fika.Core.Coop.Players
 #endif
             if (Singleton<FikaServer>.Instantiated)
             {
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                CoopGame coopGame = CoopGame.Instance;
                 if (coopGame != null && coopGame.Status == GameStatus.Started)
                 {
                     FikaServer server = Singleton<FikaServer>.Instance;

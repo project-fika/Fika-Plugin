@@ -196,6 +196,7 @@ namespace Fika.Core.Coop.Patches
             public void ReleaseSingleton()
             {
                 Singleton<AbstractGame>.Release(CoopGame);
+                CoopGame.Instance = null;
             }
         }
 
