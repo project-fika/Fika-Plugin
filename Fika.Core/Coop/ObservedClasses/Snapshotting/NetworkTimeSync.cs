@@ -32,7 +32,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             lock (threadLock)
             {
                 Offset = serverOffset;
-                _ = Task.Run(StartInternal);
+                stopwatch.Restart(); 
             }
         }
 
@@ -44,17 +44,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             lock (threadLock)
             {
                 stopwatch.Reset();
-                Offset = 0;
+                Offset = 0; 
             }
-        }
-
-        private static Task StartInternal()
-        {
-            lock (threadLock)
-            {
-                stopwatch.Restart();
-            }
-            return Task.CompletedTask;
         }
     }
 }
