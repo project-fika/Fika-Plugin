@@ -1,5 +1,5 @@
-﻿using Fika.Core;
-using System;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace LiteNetLib.Utils
@@ -24,9 +24,12 @@ namespace LiteNetLib.Utils
             }
         }
 
-        protected delegate void SubscribeDelegate(NetDataReader reader, object userData);
+        public delegate void SubscribeDelegate(NetDataReader reader, object userData);
         private readonly NetSerializer _netSerializer;
-        private readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new Dictionary<ulong, SubscribeDelegate>();
+        private readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new();
+
+        // FIKA
+        private readonly ConcurrentQueue<Action> _actions = new();
 
         public NetPacketProcessor()
         {
@@ -38,12 +41,24 @@ namespace LiteNetLib.Utils
             _netSerializer = new NetSerializer(maxStringLength);
         }
 
+        // Fika
+        /// <summary>
+        /// Clears all <see cref="Action"/>s in the processor, ran from the main thread of Unity
+        /// </summary>
+        public void RunActions()
+        {
+            while (_actions.TryDequeue(out Action action))
+            {
+                action();
+            }
+        }
+
         protected virtual ulong GetHash<T>()
         {
             return HashCache<T>.Id;
         }
 
-        protected virtual SubscribeDelegate GetCallbackFromData(NetDataReader reader)
+        public virtual SubscribeDelegate GetCallbackFromData(NetDataReader reader)
         {
             ulong hash = reader.GetULong();
             if (!_callbacks.TryGetValue(hash, out var action))
@@ -193,6 +208,30 @@ namespace LiteNetLib.Utils
         /// </summary>
         /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
         /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        public void SubscribeReusableMT<
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
+#endif
+        T>(Action<T> onReceive) where T : class, new()
+        {
+            _netSerializer.Register<T>();
+            var reference = new T();
+            _callbacks[GetHash<T>()] = (reader, userData) =>
+            {
+                _netSerializer.Deserialize(reader, reference);
+                _actions.Enqueue(() =>
+                {
+                    onReceive(reference);
+                });
+            };
+        }
+
+        /// <summary>
+        /// Register and subscribe to packet receive event
+        /// This method will overwrite last received packet class on receive (less garbage)
+        /// </summary>
+        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
         public void SubscribeReusable<
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
@@ -205,6 +244,30 @@ namespace LiteNetLib.Utils
             {
                 _netSerializer.Deserialize(reader, reference);
                 onReceive(reference);
+            };
+        }
+
+        /// <summary>
+        /// Register and subscribe to packet receive event
+        /// This method will overwrite last received packet class on receive (less garbage)
+        /// </summary>
+        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        public void SubscribeReusableMT<
+#if NET5_0_OR_GREATER
+            [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
+#endif
+        T, TUserData>(Action<T, TUserData> onReceive) where T : class, new()
+        {
+            _netSerializer.Register<T>();
+            var reference = new T();
+            _callbacks[GetHash<T>()] = (reader, userData) =>
+            {
+                _netSerializer.Deserialize(reader, reference);
+                _actions.Enqueue(() =>
+                {
+                    onReceive(reference, (TUserData)userData);
+                });                
             };
         }
 
@@ -251,6 +314,21 @@ namespace LiteNetLib.Utils
                 pkt.Deserialize(reader);
                 onReceive(pkt);
             };
+        }        
+
+        public void SubscribeNetSerializableMT<T, TUserData>(
+            Action<T, TUserData> onReceive) where T : INetSerializable, new()
+        {
+
+            var reference = new T();
+            _callbacks[GetHash<T>()] = (reader, userData) =>
+            {
+                reference.Deserialize(reader);
+                _actions.Enqueue(() =>
+                {
+                    onReceive(reference, (TUserData)userData);
+                });
+            };
         }
 
         public void SubscribeNetSerializable<T, TUserData>(
@@ -259,8 +337,22 @@ namespace LiteNetLib.Utils
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-				reference.Deserialize(reader);
-				onReceive(reference, (TUserData)userData);
+                reference.Deserialize(reader);
+                onReceive(reference, (TUserData)userData);
+            };
+        }
+
+        public void SubscribeNetSerializableMT<T>(
+            Action<T> onReceive) where T : INetSerializable, new()
+        {
+            var reference = new T();
+            _callbacks[GetHash<T>()] = (reader, userData) =>
+            {
+                reference.Deserialize(reader);
+                _actions.Enqueue(() =>
+                {
+                    onReceive(reference);
+                });
             };
         }
 
@@ -270,8 +362,8 @@ namespace LiteNetLib.Utils
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-				reference.Deserialize(reader);
-				onReceive(reference);
+                reference.Deserialize(reader);
+                onReceive(reference);
             };
         }
 
