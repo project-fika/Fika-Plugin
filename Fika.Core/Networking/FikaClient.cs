@@ -2,6 +2,7 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Communications;
@@ -31,6 +32,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -92,6 +94,15 @@ namespace Fika.Core.Networking
                 coopHandler = value;
             }
         }
+
+        public bool MultiThreaded
+        {
+            get
+            {
+                return netClient != null && netClient.UnsyncedEvents;
+            }
+        }
+
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
 
@@ -106,6 +117,20 @@ namespace Fika.Core.Networking
 
         public async void Init()
         {
+            netClient = new(this)
+            {
+                UnconnectedMessagesEnabled = true,
+                UpdateTime = 50,
+                NatPunchEnabled = false,
+                IPv6Enabled = false,
+                DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
+                UseNativeSockets = FikaPlugin.NativeSockets.Value,
+                EnableStatistics = true,
+                MaxConnectAttempts = 5,
+                ReconnectDelay = 1 * 1000,
+                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
+            };
+
             packetProcessor = new();
             dataWriter = new();
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
@@ -124,6 +149,90 @@ namespace Fika.Core.Networking
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
 
+            if (MultiThreaded)
+            {
+                RegisterMultiThreadedPackets(); 
+            }
+            else
+            {
+                RegisterPackets();
+            }
+
+#if DEBUG
+            AddDebugPackets();
+#endif            
+
+            await NetManagerUtils.CreateCoopHandler();
+
+            if (FikaBackendUtils.IsHostNatPunch)
+            {
+                NetManagerUtils.DestroyPingingClient();
+            }
+
+            netClient.Start(FikaBackendUtils.LocalPort);
+
+            string ip = FikaBackendUtils.RemoteIp;
+            int port = FikaBackendUtils.RemotePort;
+            string connectString = FikaBackendUtils.IsReconnect ? "fika.reconnect" : "fika.core";
+
+            if (string.IsNullOrEmpty(ip))
+            {
+                Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
+            }
+            else
+            {
+                ServerConnection = netClient.Connect(ip, port, connectString);
+            };
+        }
+
+        private void RegisterMultiThreadedPackets()
+        {
+            packetProcessor.SubscribeNetSerializableMT<PlayerStatePacket>(OnPlayerStatePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<WeaponPacket>(OnWeaponPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<DamagePacket>(OnDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<ArmorDamagePacket>(OnArmorDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<InventoryPacket>(OnInventoryPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<AllCharacterRequestPacket>(OnAllCharacterRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<InformationPacket>(OnInformationPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<HealthSyncPacket>(OnHealthSyncPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<GenericPacket>(OnGenericPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SendCharacterPacket>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<TextMessagePacket>(OnTextMessagePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<QuestConditionPacket>(OnQuestConditionPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<QuestItemPacket>(OnQuestItemPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<InteractableInitPacket>(OnInteractableInitPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<StatisticsPacket>(OnStatisticsPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<WorldLootPacket>(OnWorldLootPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<ReconnectPacket>(OnReconnectPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<BTRPacket>(OnBTRPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<BufferZonePacket>(OnBufferZonePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<UsableItemPacket>(OnUsableItemPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<TransitEventPacket>(OnTransitEventPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<BotStatePacket>(OnBotStatePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<PingPacket>(OnPingPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<LootSyncPacket>(OnLootSyncPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SideEffectPacket>(OnSideEffectPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<RequestPacket>(OnRequestPacketReceived);
+
+            packetProcessor.SubscribeReusableMT<WorldPacket>(OnWorldPacketReceived);
+            packetProcessor.SubscribeReusableMT<SyncObjectPacket>(OnSyncObjectPacketReceived);
+        }
+
+        private void RegisterPackets()
+        {
             packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
             packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnWeaponPacketReceived);
             packetProcessor.SubscribeNetSerializable<DamagePacket>(OnDamagePacketReceived);
@@ -166,51 +275,6 @@ namespace Fika.Core.Networking
 
             packetProcessor.SubscribeReusable<WorldPacket>(OnWorldPacketReceived);
             packetProcessor.SubscribeReusable<SyncObjectPacket>(OnSyncObjectPacketReceived);
-
-#if DEBUG
-            AddDebugPackets();
-#endif
-
-            netClient = new(this)
-            {
-                UnconnectedMessagesEnabled = true,
-                UpdateTime = 15,
-                NatPunchEnabled = false,
-                IPv6Enabled = false,
-                DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
-                UseNativeSockets = FikaPlugin.NativeSockets.Value,
-                EnableStatistics = true,
-                MaxConnectAttempts = 5,
-                ReconnectDelay = 1 * 1000
-            };
-
-            await NetManagerUtils.CreateCoopHandler();
-
-            if (FikaBackendUtils.IsHostNatPunch)
-            {
-                NetManagerUtils.DestroyPingingClient();
-            }
-
-            netClient.Start(FikaBackendUtils.LocalPort);
-
-            string ip = FikaBackendUtils.RemoteIp;
-            int port = FikaBackendUtils.RemotePort;
-            string connectString = FikaBackendUtils.IsReconnect ? "fika.reconnect" : "fika.core";
-
-            if (string.IsNullOrEmpty(ip))
-            {
-                Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
-            }
-            else
-            {
-                ServerConnection = netClient.Connect(ip, port, connectString);
-            };
-
-            while (ServerConnection.ConnectionState != ConnectionState.Connected)
-            {
-                await Task.Delay(1 * 6000);
-                ServerConnection = netClient.Connect(ip, port, connectString);
-            }
         }
 
         private void OnRequestPacketReceived(RequestPacket packet)
@@ -420,7 +484,7 @@ namespace Fika.Core.Networking
         [Conditional("Debug")]
         private void AddDebugPackets()
         {
-            packetProcessor.SubscribeNetSerializable<SpawnItemPacket>(OnSpawnItemPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SpawnItemPacket>(OnSpawnItemPacketReceived);
         }
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet)
@@ -1019,7 +1083,17 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            netClient?.PollEvents();
+            if (netClient != null)
+            {
+                if (netClient.UnsyncedEvents)
+                {
+                    packetProcessor.RunActions();
+                }
+                else
+                {
+                    netClient.PollEvents();
+                } 
+            }
         }
 
         protected void OnDestroy()
@@ -1053,8 +1127,8 @@ namespace Fika.Core.Networking
 
         public void OnPeerConnected(NetPeer peer)
         {
-            NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
-                ENotificationDurationType.Default, ENotificationIconType.Friend);
+            AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
+                ENotificationDurationType.Default, ENotificationIconType.Friend));
 
             Profile ownProfile = FikaGlobals.GetProfile(FikaBackendUtils.IsScav);
             if (ownProfile == null)
@@ -1110,7 +1184,7 @@ namespace Fika.Core.Networking
             logger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
             if (disconnectInfo.Reason is DisconnectReason.Timeout)
             {
-                NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized());
+                AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized()));
                 Destroy(MyPlayer.PacketReceiver);
                 MyPlayer.PacketSender.DestroyThis();
                 Destroy(this);
@@ -1122,7 +1196,7 @@ namespace Fika.Core.Networking
                 string reason = disconnectInfo.AdditionalData.GetString();
                 if (!string.IsNullOrEmpty(reason))
                 {
-                    NotificationManagerClass.DisplayWarningNotification(reason);
+                    AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayWarningNotification(reason));
                     return;
                 }
 
@@ -1132,22 +1206,50 @@ namespace Fika.Core.Networking
 
         public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
         {
-            packetProcessor.SubscribeNetSerializable(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeNetSerializableMT(handle);
+            }
+            else
+            {
+                packetProcessor.SubscribeNetSerializable(handle);
+            }            
         }
 
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
         {
-            packetProcessor.SubscribeNetSerializable(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeNetSerializableMT(handle);
+            }
+            else
+            {
+                packetProcessor.SubscribeNetSerializable(handle);
+            }
         }
 
         public void RegisterReusablePacket<T>(Action<T> handle) where T : class, IReusable, new()
         {
-            packetProcessor.SubscribeReusable(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeReusableMT(handle);
+            }
+            else
+            {
+                packetProcessor.SubscribeReusable(handle);
+            }
         }
 
         public void RegisterReusablePacket<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
         {
-            packetProcessor.SubscribeReusable(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeReusableMT(handle);
+            }
+            else
+            {
+                packetProcessor.SubscribeReusable(handle);
+            }
         }
 
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)

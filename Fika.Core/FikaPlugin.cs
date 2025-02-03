@@ -197,6 +197,7 @@ namespace Fika.Core
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
         public static ConfigEntry<ESendRate> SendRate { get; set; }
         public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
+        public static ConfigEntry<bool> NetMultiThreaded { get; set; }
 
         // Gameplay
         public static ConfigEntry<bool> DisableBotMetabolism { get; set; }
@@ -232,7 +233,6 @@ namespace Fika.Core
             GetNatPunchServerConfig();
             EnableFikaPatches();
             EnableTranspilers();
-            gameObject.AddComponent<MainThreadDispatcher>();
 
 #if GOLDMASTER
             new TOS_Patch().Enable();
@@ -1243,6 +1243,15 @@ namespace Fika.Core
                     Order = 0
                 }),
                 "Smoothing Rate", ref failed, ref headers);
+
+            NetMultiThreaded = SetupSetting(networkDefaultHeader, "Use MultiThreading", false,
+                new ConfigDescription(LocaleUtils.BEPINEX_NET_MULTITHREAD_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = networkHeader,
+                    DispName = LocaleUtils.BEPINEX_NET_MULTITHREAD_T.Localized(),
+                    Order = 0
+                }),
+                "Use MultiThreading", ref failed, ref headers);
 
             // Gameplay
 
