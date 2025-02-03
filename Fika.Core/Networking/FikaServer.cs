@@ -149,7 +149,7 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 NatPunchEnabled = true,
-                UnsyncedEvents = true
+                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
             };
 
             packetProcessor = new();

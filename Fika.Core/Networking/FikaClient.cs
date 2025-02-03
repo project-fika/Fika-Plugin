@@ -128,7 +128,7 @@ namespace Fika.Core.Networking
                 EnableStatistics = true,
                 MaxConnectAttempts = 5,
                 ReconnectDelay = 1 * 1000,
-                UnsyncedEvents = true
+                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
             };
 
             packetProcessor = new();
