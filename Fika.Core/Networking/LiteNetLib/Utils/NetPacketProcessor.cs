@@ -24,7 +24,7 @@ namespace LiteNetLib.Utils
             }
         }
 
-        public delegate void SubscribeDelegate(NetDataReader reader, object userData);
+        protected delegate void SubscribeDelegate(NetDataReader reader, object userData);
         private readonly NetSerializer _netSerializer;
         private readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new();
 
@@ -58,7 +58,7 @@ namespace LiteNetLib.Utils
             return HashCache<T>.Id;
         }
 
-        public virtual SubscribeDelegate GetCallbackFromData(NetDataReader reader)
+        protected virtual SubscribeDelegate GetCallbackFromData(NetDataReader reader)
         {
             ulong hash = reader.GetULong();
             if (!_callbacks.TryGetValue(hash, out var action))
@@ -267,7 +267,7 @@ namespace LiteNetLib.Utils
                 _actions.Enqueue(() =>
                 {
                     onReceive(reference, (TUserData)userData);
-                });                
+                });
             };
         }
 
@@ -314,7 +314,7 @@ namespace LiteNetLib.Utils
                 pkt.Deserialize(reader);
                 onReceive(pkt);
             };
-        }        
+        }
 
         public void SubscribeNetSerializableMT<T, TUserData>(
             Action<T, TUserData> onReceive) where T : INetSerializable, new()

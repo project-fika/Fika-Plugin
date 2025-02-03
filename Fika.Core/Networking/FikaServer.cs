@@ -261,34 +261,41 @@ namespace Fika.Core.Networking
                 externalIp = FikaPlugin.Instance.WanIP.ToString();
             }
 
-            if (FikaPlugin.UseNatPunching.Value)
+            Thread startThread = new(() =>
             {
-                netServer.NatPunchModule.UnsyncedEvents = true;
-                netServer.NatPunchModule.Init(this);
-                netServer.Start();
-
-                natIntroduceRoutineCts = new CancellationTokenSource();
-
-                string natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
-                int natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-                string token = $"server:{RequestHandler.SessionId}";
-
-                Task natIntroduceTask = Task.Run(() =>
+                if (FikaPlugin.UseNatPunching.Value)
                 {
-                    NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, natIntroduceRoutineCts.Token);
-                });
-            }
-            else
-            {
-                if (FikaPlugin.ForceBindIP.Value != "Disabled")
-                {
-                    netServer.Start(FikaPlugin.ForceBindIP.Value, "", port);
+                    netServer.NatPunchModule.UnsyncedEvents = true;
+                    netServer.NatPunchModule.Init(this);
+                    netServer.Start();
+
+                    natIntroduceRoutineCts = new CancellationTokenSource();
+
+                    string natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
+                    int natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
+                    string token = $"server:{RequestHandler.SessionId}";
+
+                    Task natIntroduceTask = Task.Run(() =>
+                    {
+                        NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, natIntroduceRoutineCts.Token);
+                    });
                 }
                 else
                 {
-                    netServer.Start(port);
+                    if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                    {
+                        netServer.Start(FikaPlugin.ForceBindIP.Value, "", port);
+                    }
+                    else
+                    {
+                        netServer.Start(port);
+                    }
                 }
-            }
+            })
+            {
+                IsBackground = true
+            };
+            startThread.Start();
 
             logger.LogInfo("Started Fika Server");
 

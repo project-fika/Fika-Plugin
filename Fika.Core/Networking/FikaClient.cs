@@ -193,7 +193,14 @@ namespace Fika.Core.Networking
                 NetManagerUtils.DestroyPingingClient();
             }
 
-            netClient.Start(FikaBackendUtils.LocalPort);
+            Thread startThread = new(() =>
+            {
+                netClient.Start(FikaBackendUtils.LocalPort);
+            })
+            {
+                IsBackground = true
+            };
+            startThread.Start();
 
             string ip = FikaBackendUtils.RemoteIp;
             int port = FikaBackendUtils.RemotePort;
