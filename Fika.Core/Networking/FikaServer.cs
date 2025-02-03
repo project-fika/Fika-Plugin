@@ -2,6 +2,7 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using Comfort.Net.Monitoring;
 using Diz.Utils;
 using EFT;
 using EFT.Airdrop;
@@ -1222,13 +1223,16 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            if (MultiThreaded)
+            if (netServer != null)
             {
-                packetProcessor.RunActions();
-            }
-            else
-            {
-                netServer?.PollEvents();
+                if (netServer.UnsyncedEvents)
+                {
+                    packetProcessor.RunActions();
+                }
+                else
+                {
+                    netServer?.PollEvents();
+                } 
             }
 
             statisticsCounter++;

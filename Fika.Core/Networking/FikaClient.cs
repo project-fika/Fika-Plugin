@@ -1083,13 +1083,16 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            if (MultiThreaded)
+            if (netClient != null)
             {
-                packetProcessor.RunActions();
-            }
-            else
-            {
-                netClient?.PollEvents();
+                if (netClient.UnsyncedEvents)
+                {
+                    packetProcessor.RunActions();
+                }
+                else
+                {
+                    netClient.PollEvents();
+                } 
             }
         }
 
