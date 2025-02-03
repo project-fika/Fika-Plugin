@@ -98,6 +98,10 @@ namespace Fika.Core.Coop.ClientClasses
 
         public Player.BaseAnimationOperationClass Weapon3()
         {
+            if (Item is GClass3113)
+            {
+                return new GClass1800(this);
+            }
             if (Item.IsFlareGun)
             {
                 return new FlareGunFireOperationClass(this);
@@ -727,7 +731,7 @@ namespace Fika.Core.Coop.ClientClasses
         }
 
         // Check for GClass increments
-        private class FirearmClass4(Player.FirearmController controller) : GClass1793(controller)
+        private class FirearmClass4(Player.FirearmController controller) : GClass1795(controller)
         {
             public override void Start()
             {
