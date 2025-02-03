@@ -1222,13 +1222,13 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            if (netServer.UnsyncedEvents)
+            if (MultiThreaded)
             {
                 packetProcessor.RunActions();
             }
             else
             {
-                netServer.PollEvents();
+                netServer?.PollEvents();
             }
 
             statisticsCounter++;
@@ -1241,6 +1241,11 @@ namespace Fika.Core.Networking
 
         private void SendStatisticsPacket()
         {
+            if (netServer == null)
+            {
+                return;
+            }
+
             int fps = (int)(1f / Time.unscaledDeltaTime);
             StatisticsPacket packet = new(fps);
 
