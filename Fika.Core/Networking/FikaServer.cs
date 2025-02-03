@@ -2,6 +2,7 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT;
 using EFT.Airdrop;
 using EFT.Interactive;
@@ -1239,11 +1240,8 @@ namespace Fika.Core.Networking
 
         public void OnPeerConnected(NetPeer peer)
         {
-            MainThreadDispatcher.RunOnMainThread(() =>
-            {
-                NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
-                iconType: EFT.Communications.ENotificationIconType.Friend);
-            });
+            AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
+                iconType: EFT.Communications.ENotificationIconType.Friend));
             logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
 
             HasHadPeer = true;
@@ -1346,11 +1344,8 @@ namespace Fika.Core.Networking
             logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
             if (disconnectInfo.Reason != DisconnectReason.RemoteConnectionClose)
             {
-                MainThreadDispatcher.RunOnMainThread(() =>
-                {
-                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
-                        iconType: EFT.Communications.ENotificationIconType.Alert);
-                });
+                AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
+                        iconType: EFT.Communications.ENotificationIconType.Alert));
             }
 
             if (peer.Tag is string nickname)

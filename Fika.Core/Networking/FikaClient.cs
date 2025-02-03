@@ -2,6 +2,7 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Communications;
@@ -1056,11 +1057,8 @@ namespace Fika.Core.Networking
 
         public void OnPeerConnected(NetPeer peer)
         {
-            MainThreadDispatcher.RunOnMainThread(() =>
-            {
-                NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
-                ENotificationDurationType.Default, ENotificationIconType.Friend);
-            });
+            AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
+                ENotificationDurationType.Default, ENotificationIconType.Friend));
 
             Profile ownProfile = FikaGlobals.GetProfile(FikaBackendUtils.IsScav);
             if (ownProfile == null)
@@ -1116,7 +1114,7 @@ namespace Fika.Core.Networking
             logger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
             if (disconnectInfo.Reason is DisconnectReason.Timeout)
             {
-                MainThreadDispatcher.RunOnMainThread(() => NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized()));
+                AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized()));
                 Destroy(MyPlayer.PacketReceiver);
                 MyPlayer.PacketSender.DestroyThis();
                 Destroy(this);
@@ -1128,7 +1126,7 @@ namespace Fika.Core.Networking
                 string reason = disconnectInfo.AdditionalData.GetString();
                 if (!string.IsNullOrEmpty(reason))
                 {
-                    MainThreadDispatcher.RunOnMainThread(() => NotificationManagerClass.DisplayWarningNotification(reason));
+                    AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayWarningNotification(reason));
                     return;
                 }
 

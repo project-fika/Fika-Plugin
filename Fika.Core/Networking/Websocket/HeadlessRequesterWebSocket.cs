@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
@@ -49,10 +50,7 @@ namespace Fika.Core.Networking.Websocket
             webSocket.OnMessage += (sender, args) =>
             {
                 // Run the OnMessage event on main thread
-                MainThreadDispatcher.RunOnMainThread(() =>
-                {
-                    WebSocket_OnMessage(sender, args);
-                });
+                AsyncWorker.RunInMainTread(() => WebSocket_OnMessage(sender, args));
             };
         }
 

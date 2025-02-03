@@ -232,7 +232,6 @@ namespace Fika.Core
             GetNatPunchServerConfig();
             EnableFikaPatches();
             EnableTranspilers();
-            gameObject.AddComponent<MainThreadDispatcher>();
 
 #if GOLDMASTER
             new TOS_Patch().Enable();
