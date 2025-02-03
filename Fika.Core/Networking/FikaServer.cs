@@ -30,7 +30,6 @@ using LiteNetLib.Utils;
 using Open.Nat;
 using SPT.Common.Http;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -109,6 +108,14 @@ namespace Fika.Core.Networking
             }
         }
 
+        public bool MultiThreaded
+        {
+            get
+            {
+                return netServer != null && netServer.UnsyncedEvents;
+            }
+        }
+
         public EPlayerSide RaidSide { get; set; }
 
         private int sendRate;
@@ -130,6 +137,20 @@ namespace Fika.Core.Networking
 
         public async Task Init()
         {
+            netServer = new(this)
+            {
+                BroadcastReceiveEnabled = true,
+                UnconnectedMessagesEnabled = true,
+                UpdateTime = 50,
+                AutoRecycle = true,
+                IPv6Enabled = false,
+                DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
+                UseNativeSockets = FikaPlugin.NativeSockets.Value,
+                EnableStatistics = true,
+                NatPunchEnabled = true,
+                UnsyncedEvents = true
+            };
+
             packetProcessor = new();
             dataWriter = new();
             playersMissing = [];
@@ -176,56 +197,21 @@ namespace Fika.Core.Networking
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
+            
+            RegisterMultiThreadedPackets();
 
-            packetProcessor.SubscribeNetSerializableMT<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<DamagePacket, NetPeer>(OnDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InformationPacket, NetPeer>(OnInformationPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<GenericPacket, NetPeer>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<PingPacket, NetPeer>(OnPingPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<RequestPacket, NetPeer>(OnRequestPacketReceived);
-
-            packetProcessor.SubscribeReusableMT<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
+            if (netServer.UnsyncedEvents)
+            {
+                RegisterMultiThreadedPackets();
+            }
+            else
+            {
+                RegisterPackets();
+            }
 
 #if DEBUG
             AddDebugPackets();
-#endif
-
-            netServer = new(this)
-            {
-                BroadcastReceiveEnabled = true,
-                UnconnectedMessagesEnabled = true,
-                UpdateTime = 50,
-                AutoRecycle = true,
-                IPv6Enabled = false,
-                DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
-                UseNativeSockets = FikaPlugin.NativeSockets.Value,
-                EnableStatistics = true,
-                NatPunchEnabled = true,
-                UnsyncedEvents = true
-            };
+#endif            
 
             if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
             {
@@ -314,6 +300,76 @@ namespace Fika.Core.Networking
 
             SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadlessGame);
             FikaRequestHandler.UpdateSetHost(body);
+        }
+
+        private void RegisterMultiThreadedPackets()
+        {
+            packetProcessor.SubscribeNetSerializableMT<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<DamagePacket, NetPeer>(OnDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<InformationPacket, NetPeer>(OnInformationPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<GenericPacket, NetPeer>(OnGenericPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<PingPacket, NetPeer>(OnPingPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<RequestPacket, NetPeer>(OnRequestPacketReceived);
+
+            packetProcessor.SubscribeReusableMT<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
+        }
+
+        private void RegisterPackets()
+        {
+            packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
+            packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
+            packetProcessor.SubscribeNetSerializable<DamagePacket, NetPeer>(OnDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializable<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
+            packetProcessor.SubscribeNetSerializable<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
+            packetProcessor.SubscribeNetSerializable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
+            packetProcessor.SubscribeNetSerializable<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializable<InformationPacket, NetPeer>(OnInformationPacketReceived);
+            packetProcessor.SubscribeNetSerializable<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
+            packetProcessor.SubscribeNetSerializable<GenericPacket, NetPeer>(OnGenericPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
+            packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
+            packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
+            packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
+            packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
+            packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
+            packetProcessor.SubscribeNetSerializable<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
+            packetProcessor.SubscribeNetSerializable<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
+            packetProcessor.SubscribeNetSerializable<PingPacket, NetPeer>(OnPingPacketReceived);
+            packetProcessor.SubscribeNetSerializable<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
+            packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
+            packetProcessor.SubscribeNetSerializable<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
+            packetProcessor.SubscribeNetSerializable<RequestPacket, NetPeer>(OnRequestPacketReceived);
+
+            packetProcessor.SubscribeReusable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
         }
 
         private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
@@ -1166,7 +1222,14 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            packetProcessor.RunActions();
+            if (netServer.UnsyncedEvents)
+            {
+                packetProcessor.RunActions();
+            }
+            else
+            {
+                netServer.PollEvents();
+            }
 
             statisticsCounter++;
             if (statisticsCounter > 600)
@@ -1422,22 +1485,50 @@ namespace Fika.Core.Networking
 
         public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
         {
-            packetProcessor.SubscribeNetSerializableMT(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeNetSerializableMT(handle); 
+            }
+            else
+            {
+                packetProcessor.SubscribeNetSerializable(handle);
+            }
         }
 
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
         {
-            packetProcessor.SubscribeNetSerializableMT(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeNetSerializableMT(handle);
+            }
+            else
+            {
+                packetProcessor.SubscribeNetSerializable(handle);
+            }
         }
 
         public void RegisterReusablePacket<T>(Action<T> handle) where T : class, IReusable, new()
         {
-            packetProcessor.SubscribeReusableMT(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeReusableMT(handle);
+            }
+            else
+            {
+                packetProcessor.SubscribeReusable(handle);
+            }
         }
 
         public void RegisterReusablePacket<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
         {
-            packetProcessor.SubscribeReusableMT(handle);
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeReusableMT(handle);
+            }
+            else
+            {
+                packetProcessor.SubscribeReusable(handle);
+            }
         }
 
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
