@@ -319,10 +319,9 @@ namespace LiteNetLib.Utils
         public void SubscribeNetSerializableMT<T, TUserData>(
             Action<T, TUserData> onReceive) where T : INetSerializable, new()
         {
-
-            var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
+                var reference = new T();
                 reference.Deserialize(reader);
                 _actions.Enqueue(() =>
                 {
@@ -345,9 +344,9 @@ namespace LiteNetLib.Utils
         public void SubscribeNetSerializableMT<T>(
             Action<T> onReceive) where T : INetSerializable, new()
         {
-            var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
+                var reference = new T();
                 reference.Deserialize(reader);
                 _actions.Enqueue(() =>
                 {
