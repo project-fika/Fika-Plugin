@@ -1435,28 +1435,33 @@ namespace Fika.Core.Networking
             {
                 if (netServer.ConnectedPeersCount == 0)
                 {
-                    foreach (Profile profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
-                    {
-                        if (profile is null)
-                        {
-                            continue;
-                        }
-
-                        if (profile.ProfileId == RequestHandler.SessionId)
-                        {
-                            foreach (Profile.ProfileHealthClass.GClass1970 bodyPartHealth in profile.Health.BodyParts.Values)
-                            {
-                                bodyPartHealth.Effects.Clear();
-                                bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
-                            }
-                        }
-                    }
-
-                    // End the raid
-                    CoopGame coopGame = CoopGame.Instance;
-                    coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, coopGame.ExitLocation, 0);
+                    AsyncWorker.RunInMainTread(DisconnectHeadless);                        
                 }
             }
+        }
+
+        private void DisconnectHeadless()
+        {
+            foreach (Profile profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
+            {
+                if (profile is null)
+                {
+                    continue;
+                }
+
+                if (profile.ProfileId == RequestHandler.SessionId)
+                {
+                    foreach (Profile.ProfileHealthClass.GClass1970 bodyPartHealth in profile.Health.BodyParts.Values)
+                    {
+                        bodyPartHealth.Effects.Clear();
+                        bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
+                    }
+                }
+            }
+
+            // End the raid
+            CoopGame coopGame = CoopGame.Instance;
+            coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, coopGame.ExitLocation, 0);
         }
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
