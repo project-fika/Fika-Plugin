@@ -58,7 +58,10 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 if (_isAiming == value)
                 {
-                    method_64(); // Reset animator flags
+                    if (FirearmsAnimator != null)
+                    {
+                        method_64(); // Reset animator flags 
+                    }
                     return;
                 }
                 _isAiming = value;

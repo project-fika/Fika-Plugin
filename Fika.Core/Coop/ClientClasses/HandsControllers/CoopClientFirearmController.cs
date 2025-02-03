@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.ClientClasses
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
-            operationFactoryDelegates[typeof(GClass1780)] = new OperationFactoryDelegate(Weapon2);
+            operationFactoryDelegates[typeof(GClass1782)] = new OperationFactoryDelegate(Weapon2);
             operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
             return operationFactoryDelegates;
         }
