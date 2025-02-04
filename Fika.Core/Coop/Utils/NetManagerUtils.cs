@@ -31,6 +31,11 @@ namespace Fika.Core.Coop.Utils
                 CreateFikaGameObject();
             }
 
+            if (FikaPlugin.UseFikaGC.Value)
+            {
+                FikaGameObject.AddComponent<GCManager>(); 
+            }
+
             if (isServer)
             {
                 FikaServer server = FikaGameObject.AddComponent<FikaServer>();
@@ -84,6 +89,12 @@ namespace Fika.Core.Coop.Utils
 
             if (FikaGameObject != null)
             {
+                GCManager gcManager = FikaGameObject.GetComponent<GCManager>();
+                if (gcManager != null)
+                {
+                    GameObject.Destroy(gcManager);
+                }
+
                 if (isServer)
                 {
                     FikaServer server = Singleton<FikaServer>.Instance;

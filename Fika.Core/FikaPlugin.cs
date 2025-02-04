@@ -171,6 +171,7 @@ namespace Fika.Core
         public static ConfigEntry<float> DynamicAIRange { get; set; }
         public static ConfigEntry<EDynamicAIRates> DynamicAIRate { get; set; }
         public static ConfigEntry<bool> DynamicAIIgnoreSnipers { get; set; }
+        public static ConfigEntry<bool> UseFikaGC { get; set; }
 
         // Performance | Bot Limits            
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
@@ -1006,6 +1007,15 @@ namespace Fika.Core
                     Order = 0
                 }),
                 "Ignore Snipers", ref failed, ref headers);
+
+            UseFikaGC = SetupSetting(performanceDefaultHeader, "Use Fika GC", false,
+                new ConfigDescription(LocaleUtils.BEPINEX_FIKA_GC_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = performanceHeader,
+                    DispName = LocaleUtils.BEPINEX_FIKA_GC_T.Localized(),
+                    Order = 0
+                }),
+                "Use Fika GC", ref failed, ref headers);
 
             // Performance | Max Bots
 

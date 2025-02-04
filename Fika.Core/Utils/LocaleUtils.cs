@@ -349,6 +349,8 @@ namespace Fika.Core.Utils
         public const string BEPINEX_DYNAMIC_AI_RATE_D = "F_BepInEx_DynamicAIRate_D";
         public const string BEPINEX_DYNAMIC_AI_NO_SNIPERS_T = "F_BepInEx_DynamicAINoSnipers_T";
         public const string BEPINEX_DYNAMIC_AI_NO_SNIPERS_D = "F_BepInEx_DynamicAINoSnipers_D";
+        public const string BEPINEX_FIKA_GC_T = "F_BepInEx_FikaGC_T";
+        public const string BEPINEX_FIKA_GC_D = "F_BepInEx_FikaGC_D";
 
         public const string BEPINEX_ENFORCED_SPAWN_LIMITS_T = "F_BepInEx_EnforcedSpawnLimits_T";
         public const string BEPINEX_ENFORCED_SPAWN_LIMITS_D = "F_BepInEx_EnforcedSpawnLimits_D";
@@ -378,8 +380,7 @@ namespace Fika.Core.Utils
         public const string BEPINEX_SMOOTHING_RATE_T = "F_BepInEx_SmoothingRate_T";
         public const string BEPINEX_SMOOTHING_RATE_D = "F_BepInEx_SmoothingRate_D";
         public const string BEPINEX_NET_MULTITHREAD_T = "F_BepInEx_NetMultiThread_T";
-        public const string BEPINEX_NET_MULTITHREAD_D = "F_BepInEx_NetMultiThread_D";
-        
+        public const string BEPINEX_NET_MULTITHREAD_D = "F_BepInEx_NetMultiThread_D";        
 
         public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
         public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";
