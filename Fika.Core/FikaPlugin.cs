@@ -976,7 +976,7 @@ namespace Fika.Core
                 {
                     Category = performanceHeader,
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_T.Localized(),
-                    Order = 3
+                    Order = 4
                 }),
                 "Dynamic AI", ref failed, ref headers);
 
@@ -986,7 +986,7 @@ namespace Fika.Core
                 {
                     Category = performanceHeader,
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_RANGE_T.Localized(),
-                    Order = 2
+                    Order = 3
                 }),
                 "Dynamic AI Range", ref failed, ref headers);
 
@@ -995,7 +995,7 @@ namespace Fika.Core
                 {
                     Category = performanceHeader,
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_RATE_T.Localized(),
-                    Order = 1
+                    Order = 2
                 }),
                 "Dynamic AI Rate", ref failed, ref headers);
 
@@ -1004,7 +1004,7 @@ namespace Fika.Core
                 {
                     Category = performanceHeader,
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_NO_SNIPERS_T.Localized(),
-                    Order = 0
+                    Order = 1
                 }),
                 "Ignore Snipers", ref failed, ref headers);
 
