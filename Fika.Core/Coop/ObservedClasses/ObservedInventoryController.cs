@@ -62,7 +62,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return true;
         }
 
-        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3842 error)
+        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3843 error)
         {
             error = null;
             return true;

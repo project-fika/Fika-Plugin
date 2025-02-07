@@ -99,13 +99,14 @@ namespace Fika.Core.Coop.Players
                 : new CoopClientInventoryController(player, profile, false);
 
             LocalQuestControllerClass questController;
+            //Todo for Lacyway: Check if inventoryController.PlayerSearchController is proper here.
             if (FikaPlugin.Instance.SharedQuestProgression)
             {
-                questController = new CoopClientSharedQuestController(profile, inventoryController, session, player);
+                questController = new CoopClientSharedQuestController(profile, inventoryController, inventoryController.PlayerSearchController, session, player);
             }
             else
             {
-                questController = new GClass3698(profile, inventoryController, session);
+                questController = new GClass3698(profile, inventoryController, inventoryController.PlayerSearchController, session);
             }
             questController.Init();
             GClass3702 achievementsController = new(profile, inventoryController, questController.Quests, session, true);

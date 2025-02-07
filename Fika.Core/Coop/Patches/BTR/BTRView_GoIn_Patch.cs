@@ -70,7 +70,7 @@ namespace Fika.Core.Coop.Patches
         {
             try
             {
-                CancellationToken cancellationToken = view.method_11(observedPlayer);
+                CancellationToken cancellationToken = view.method_12(observedPlayer);
                 observedPlayer.MovementContext.IsAxesIgnored = true;
                 observedPlayer.BtrState = EPlayerBtrState.Approach;
                 if (!fast)
@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.Patches
                         return;
                     }
                 }
-                view.method_17(observedPlayer);
+                view.method_18(observedPlayer);
                 observedPlayer.CharacterController.isEnabled = false;
                 observedPlayer.BtrState = EPlayerBtrState.GoIn;
                 side.AddPassenger(observedPlayer, placeId);
@@ -91,10 +91,10 @@ namespace Fika.Core.Coop.Patches
                 {
                     soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);
                 }
-                await view.method_14(observedPlayer.MovementContext.PlayerAnimator, fast, false, cancellationToken);
+                await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, false, cancellationToken);
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    if (view.method_19() == 1)
+                    if (view.method_20() == 1)
                     {
                         GlobalEventHandlerClass.CreateEvent<GClass3326>().Invoke(observedPlayer.Side);
                     }

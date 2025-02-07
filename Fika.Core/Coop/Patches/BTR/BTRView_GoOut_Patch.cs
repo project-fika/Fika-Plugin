@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.Patches
         {
             try
             {
-                CancellationToken cancellationToken = view.method_11(observedPlayer);
+                CancellationToken cancellationToken = view.method_12(observedPlayer);
                 observedPlayer.BtrState = EPlayerBtrState.GoOut;
                 BtrSoundController soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
                 if (soundController != null)
