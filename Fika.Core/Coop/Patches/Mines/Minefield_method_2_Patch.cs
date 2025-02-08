@@ -3,6 +3,7 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +74,7 @@ namespace Fika.Core.Coop.Patches
 
                 foreach (BodyPartCollider bodyPartCollider in enumerable)
                 {
-                    coopPlayer.PacketSender.DamagePackets.Enqueue(new()
+                    coopPlayer.PacketSender.PacketQueue.Enqueue(new DamagePacket()
                     {
                         DamageType = EDamageType.Landmine,
                         Damage = num4 * num2,

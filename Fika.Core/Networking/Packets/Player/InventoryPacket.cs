@@ -1,12 +1,19 @@
-﻿using LiteNetLib.Utils;
+﻿using Fika.Core.Coop.Players;
+using Fika.Core.Networking.Packets;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
-    public struct InventoryPacket(int netId) : INetSerializable
+    public struct InventoryPacket : IQueuePacket
     {
-        public int NetId = netId;
+        public int NetId { get; set; }
         public uint CallbackId;
         public byte[] OperationBytes;
+
+        public void Execute(CoopPlayer player)
+        {
+            player.PacketReceiver.ConvertInventoryPacket(this);
+        }
 
         public void Serialize(NetDataWriter writer)
         {

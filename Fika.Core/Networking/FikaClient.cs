@@ -919,7 +919,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.HealthSyncPackets.Enqueue(packet);
+                playerToApply.PacketReceiver.ObservedPacketQueue.Enqueue(packet);
             }
         }
 
@@ -1005,7 +1005,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.CommonPlayerPackets.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
         }
 
@@ -1013,7 +1013,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.InventoryPackets.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
         }
 
@@ -1021,7 +1021,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply) && playerToApply.IsYourPlayer)
             {
-                playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
         }
 
@@ -1029,7 +1029,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.ArmorDamagePackets.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
         }
 
@@ -1037,7 +1037,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.FirearmPackets.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
         }
 

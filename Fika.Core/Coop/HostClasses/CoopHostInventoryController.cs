@@ -168,7 +168,7 @@ namespace Fika.Core.Coop.HostClasses
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                coopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
+                coopPlayer.PacketSender.PacketQueue.Enqueue(packet);
                 return;
             }
             handler.operation.Dispose();

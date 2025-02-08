@@ -4,6 +4,7 @@ using Comfort.Common;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
@@ -15,15 +16,10 @@ namespace Fika.Core.Coop.PacketHandlers
     {
         private CoopPlayer player;
         private bool isServer;
-        public bool Enabled { get; set; } = true;
+        public bool Enabled { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
-        public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
-        public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
-        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
-        public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
-        public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
-        public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+        public Queue<IQueuePacket> PacketQueue { get; set; }
 
         protected void Awake()
         {
@@ -37,6 +33,8 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 Client = Singleton<FikaClient>.Instance;
             }
+            Enabled = true;
+            PacketQueue = new();
         }
 
         public void Init()
@@ -60,63 +58,37 @@ namespace Fika.Core.Coop.PacketHandlers
             Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
-        protected void Update()
+        protected void LateUpdate()
         {
             if (player == null)
             {
                 return;
             }
 
-            if (DamagePackets.Count > 0)
+            if (isServer)
             {
-                if (isServer)
+                int packetAmountServer = PacketQueue.Count;
+                for (int i = 0; i < packetAmountServer; i++)
                 {
-                    int damagePackets = DamagePackets.Count;
-                    for (int i = 0; i < damagePackets; i++)
-                    {
-                        DamagePacket damagePacket = DamagePackets.Dequeue();
-                        damagePacket.NetId = player.NetId;
-
-                        Server.SendDataToAll(ref damagePacket, DeliveryMethod.ReliableOrdered);
-                    }
-                    int armorDamagePackets = ArmorDamagePackets.Count;
-                    for (int i = 0; i < armorDamagePackets; i++)
-                    {
-                        ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
-                        armorDamagePacket.NetId = player.NetId;
-
-                        Server.SendDataToAll(ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
-                    }
+                    IQueuePacket packet = PacketQueue.Dequeue();
+                    packet.NetId = player.NetId;
+                    Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
                 }
-                else
-                {
-                    int damagePackets = DamagePackets.Count;
-                    for (int i = 0; i < damagePackets; i++)
-                    {
-                        DamagePacket damagePacket = DamagePackets.Dequeue();
-                        damagePacket.NetId = player.NetId;
+                return;
+            }
 
-                        Client.SendData(ref damagePacket, DeliveryMethod.ReliableOrdered);
-                    }
-                    int armorDamagePackets = ArmorDamagePackets.Count;
-                    for (int i = 0; i < armorDamagePackets; i++)
-                    {
-                        ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
-                        armorDamagePacket.NetId = player.NetId;
-
-                        Client.SendData(ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
-                    }
-                }
+            int packetAmount = PacketQueue.Count;
+            for (int i = 0; i < packetAmount; i++)
+            {
+                IQueuePacket packet = PacketQueue.Dequeue();
+                packet.NetId = player.NetId;
+                Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
         }
 
         public void DestroyThis()
         {
-            FirearmPackets.Clear();
-            DamagePackets.Clear();
-            InventoryPackets.Clear();
-            CommonPlayerPackets.Clear();
-            HealthSyncPackets.Clear();
+            PacketQueue.Clear();
             if (Server != null)
             {
                 Server = null;

@@ -1003,7 +1003,7 @@ namespace Fika.Core.Networking
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.HealthSyncPackets.Enqueue(packet);
+                playerToApply.PacketReceiver.ObservedPacketQueue.Enqueue(packet);
             }
         }
 
@@ -1114,7 +1114,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.CommonPlayerPackets?.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
 
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1183,7 +1183,7 @@ namespace Fika.Core.Networking
             {
                 if (playerToApply.IsAI || playerToApply.IsYourPlayer)
                 {
-                    playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
+                    playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
                     return;
                 }
 
@@ -1195,7 +1195,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.ArmorDamagePackets.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
 
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1205,7 +1205,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.FirearmPackets.Enqueue(packet);
+                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
             }
 
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);

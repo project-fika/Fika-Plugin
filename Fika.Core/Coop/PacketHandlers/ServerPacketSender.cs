@@ -13,6 +13,7 @@ using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
@@ -26,15 +27,10 @@ namespace Fika.Core.Coop.PacketHandlers
     {
         private CoopPlayer player;
 
-        public bool Enabled { get; set; } = false;
+        public bool Enabled { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
-        public Queue<WeaponPacket> FirearmPackets { get; set; } = new(50);
-        public Queue<DamagePacket> DamagePackets { get; set; } = new(50);
-        public Queue<ArmorDamagePacket> ArmorDamagePackets { get; set; } = new(50);
-        public Queue<InventoryPacket> InventoryPackets { get; set; } = new(50);
-        public Queue<CommonPlayerPacket> CommonPlayerPackets { get; set; } = new(50);
-        public Queue<HealthSyncPacket> HealthSyncPackets { get; set; } = new(50);
+        public Queue<IQueuePacket> PacketQueue { get; set; }
 
         private bool CanPing
         {
@@ -61,6 +57,8 @@ namespace Fika.Core.Coop.PacketHandlers
             updateRate = Server.SendRate;
             fixedUpdateCount = 0;
             fixedUpdatesPerTick = Mathf.FloorToInt(60f / updateRate);
+            Enabled = false;
+            PacketQueue = new();
         }
 
         public void Init()
@@ -112,74 +110,16 @@ namespace Fika.Core.Coop.PacketHandlers
             Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
         }
 
-        protected void Update()
+        protected void LateUpdate()
         {
-            int firearmPackets = FirearmPackets.Count;
-            if (firearmPackets > 0)
+            int packetAmount = PacketQueue.Count;
+            for (int i = 0; i < packetAmount; i++)
             {
-                for (int i = 0; i < firearmPackets; i++)
-                {
-                    WeaponPacket firearmPacket = FirearmPackets.Dequeue();
-                    firearmPacket.NetId = player.NetId;
-
-                    Server.SendDataToAll(ref firearmPacket, DeliveryMethod.ReliableOrdered);
-                }
+                IQueuePacket packet = PacketQueue.Dequeue();
+                packet.NetId = player.NetId;
+                Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
             }
-            int damagePackets = DamagePackets.Count;
-            if (damagePackets > 0)
-            {
-                for (int i = 0; i < damagePackets; i++)
-                {
-                    DamagePacket damagePacket = DamagePackets.Dequeue();
-                    damagePacket.NetId = player.NetId;
 
-                    Server.SendDataToAll(ref damagePacket, DeliveryMethod.ReliableOrdered);
-                }
-            }
-            int armorDamagePackets = ArmorDamagePackets.Count;
-            if (armorDamagePackets > 0)
-            {
-                for (int i = 0; i < armorDamagePackets; i++)
-                {
-                    ArmorDamagePacket armorDamagePacket = ArmorDamagePackets.Dequeue();
-                    armorDamagePacket.NetId = player.NetId;
-
-                    Server.SendDataToAll(ref armorDamagePacket, DeliveryMethod.ReliableOrdered);
-                }
-            }
-            int inventoryPackets = InventoryPackets.Count;
-            if (inventoryPackets > 0)
-            {
-                for (int i = 0; i < inventoryPackets; i++)
-                {
-                    InventoryPacket inventoryPacket = InventoryPackets.Dequeue();
-                    inventoryPacket.NetId = player.NetId;
-
-                    Server.SendDataToAll(ref inventoryPacket, DeliveryMethod.ReliableOrdered);
-                }
-            }
-            int commonPlayerPackets = CommonPlayerPackets.Count;
-            if (commonPlayerPackets > 0)
-            {
-                for (int i = 0; i < commonPlayerPackets; i++)
-                {
-                    CommonPlayerPacket commonPlayerPacket = CommonPlayerPackets.Dequeue();
-                    commonPlayerPacket.NetId = player.NetId;
-
-                    Server.SendDataToAll(ref commonPlayerPacket, DeliveryMethod.ReliableOrdered);
-                }
-            }
-            int healthSyncPackets = HealthSyncPackets.Count;
-            if (healthSyncPackets > 0)
-            {
-                for (int i = 0; i < healthSyncPackets; i++)
-                {
-                    HealthSyncPacket healthSyncPacket = HealthSyncPackets.Dequeue();
-                    healthSyncPacket.NetId = player.NetId;
-
-                    Server.SendDataToAll(ref healthSyncPacket, DeliveryMethod.ReliableOrdered);
-                }
-            }
             if (CanPing)
             {
                 SendPing();
@@ -295,11 +235,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void DestroyThis()
         {
-            FirearmPackets.Clear();
-            DamagePackets.Clear();
-            InventoryPackets.Clear();
-            CommonPlayerPackets.Clear();
-            HealthSyncPackets.Clear();
+            PacketQueue.Clear();
             if (Server != null)
             {
                 Server = null;

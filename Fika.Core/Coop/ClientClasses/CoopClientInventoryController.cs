@@ -161,7 +161,7 @@ namespace Fika.Core.Coop.ClientClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
 
-            coopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
+            coopPlayer.PacketSender.PacketQueue.Enqueue(packet);
         }
 
         public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)

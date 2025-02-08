@@ -240,8 +240,6 @@ namespace Fika.Core.Coop.Players
 
         public override void OnDead(EDamageType damageType)
         {
-            PacketSender.FirearmPackets.Clear();
-
             float num = EFTHardSettings.Instance.HIT_FORCE;
             num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
             _corpseAppliedForce = num;
@@ -354,7 +352,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopBot.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopBot.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()

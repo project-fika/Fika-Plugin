@@ -1,12 +1,19 @@
-﻿using LiteNetLib.Utils;
+﻿using Fika.Core.Coop.Players;
+using Fika.Core.Networking.Packets;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
-    public struct ArmorDamagePacket(int netId) : INetSerializable
+    public struct ArmorDamagePacket : IQueuePacket
     {
-        public int NetId = netId;
+        public int NetId { get; set; }
         public string[] ItemIds;
         public float[] Durabilities;
+
+        public void Execute(CoopPlayer player)
+        {
+            player.HandleArmorDamagePacket(ref this);
+        }
 
         public void Deserialize(NetDataReader reader)
         {

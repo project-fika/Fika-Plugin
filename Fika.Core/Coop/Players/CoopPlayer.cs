@@ -19,6 +19,7 @@ using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets;
 using HarmonyLib;
 using JsonType;
 using System;
@@ -290,7 +291,7 @@ namespace Fika.Core.Coop.Players
         public override void Proceed(bool withNetwork, Callback<GInterface171> callback, bool scheduled = true)
         {
             base.Proceed(withNetwork, callback, scheduled);
-            PacketSender.CommonPlayerPackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
             {
                 Type = ECommonSubPacketType.Proceed,
                 SubPacket = new ProceedPacket()
@@ -410,7 +411,7 @@ namespace Fika.Core.Coop.Players
 
         public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
         {
-            PacketSender.CommonPlayerPackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
             {
                 Type = ECommonSubPacketType.Drop,
                 SubPacket = new DropPacket()
@@ -593,7 +594,7 @@ namespace Fika.Core.Coop.Players
             }
 
             base.SetInventoryOpened(opened);
-            PacketSender.CommonPlayerPackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
             {
                 Type = ECommonSubPacketType.InventoryChanged,
                 SubPacket = new InventoryChangedPacket()
@@ -606,7 +607,7 @@ namespace Fika.Core.Coop.Players
         public override void SetCompassState(bool value)
         {
             base.SetCompassState(value);
-            PacketSender.FirearmPackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.CompassChange,
                 SubPacket = new CompassChangePacket()
@@ -622,7 +623,7 @@ namespace Fika.Core.Coop.Players
 
             if (PacketSender != null)
             {
-                PacketSender.CommonPlayerPackets.Enqueue(new()
+                PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.HeadLights,
                     SubPacket = new HeadLightsPacket()
@@ -646,7 +647,7 @@ namespace Fika.Core.Coop.Players
 
             if (ActiveHealthController.IsAlive)
             {
-                PacketSender.CommonPlayerPackets.Enqueue(new()
+                PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Phrase,
                     SubPacket = new PhrasePacket()
@@ -677,7 +678,7 @@ namespace Fika.Core.Coop.Players
         public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
         {
             base.OperateStationaryWeapon(stationaryWeapon, command);
-            PacketSender.CommonPlayerPackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
             {
                 Type = ECommonSubPacketType.Stationary,
                 SubPacket = new StationaryPacket()
@@ -710,7 +711,7 @@ namespace Fika.Core.Coop.Players
                     ItemId = (interactionResult is GClass3420 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
-            PacketSender.CommonPlayerPackets.Enqueue(packet);
+            PacketSender.PacketQueue.Enqueue(packet);
         }
 
         // Execute
@@ -737,7 +738,7 @@ namespace Fika.Core.Coop.Players
                         ItemId = (interactionResult is GClass3420 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                     }
                 };
-                PacketSender.CommonPlayerPackets.Enqueue(packet);
+                PacketSender.PacketQueue.Enqueue(packet);
             }
 
             UpdateInteractionCast();
@@ -747,7 +748,7 @@ namespace Fika.Core.Coop.Players
         {
             if (!FikaGlobals.BlockedInteractions.Contains(interaction))
             {
-                PacketSender.CommonPlayerPackets.Enqueue(new()
+                PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Interaction,
                     SubPacket = new InteractionPacket()
@@ -786,7 +787,7 @@ namespace Fika.Core.Coop.Players
                 packet.YawLimit = MovementContext.PlayerMountingPointData.YawLimit;
             }
 
-            PacketSender.CommonPlayerPackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
             {
                 Type = ECommonSubPacketType.Mounting,
                 SubPacket = packet
@@ -850,7 +851,7 @@ namespace Fika.Core.Coop.Players
             Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
         }
 
-        public HealthSyncPacket SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
+        public IQueuePacket SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
         {
             float num = EFTHardSettings.Instance.HIT_FORCE;
             num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
@@ -866,7 +867,7 @@ namespace Fika.Core.Coop.Players
 
             GClass1688 inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
-            HealthSyncPacket syncPacket = new(NetId)
+            HealthSyncPacket syncPacket = new()
             {
                 Packet = packet,
                 KillerId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty,
@@ -1252,7 +1253,7 @@ namespace Fika.Core.Coop.Players
                     durabilities[i] = armorComponents[i].Repairable.Durability;
                 }
 
-                PacketSender.ArmorDamagePackets.Enqueue(new()
+                PacketSender.PacketQueue.Enqueue(new ArmorDamagePacket()
                 {
                     ItemIds = ids,
                     Durabilities = durabilities,
@@ -1382,7 +1383,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnVaulting()
         {
-            PacketSender.CommonPlayerPackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
             {
                 Type = ECommonSubPacketType.Vault,
                 SubPacket = new VaultPacket()
@@ -1466,7 +1467,7 @@ namespace Fika.Core.Coop.Players
 
             public void Handle()
             {
-                player.PacketSender.CommonPlayerPackets.Enqueue(new()
+                player.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.ContainerInteraction,
                     SubPacket = new ContainerInteractionPacket()
@@ -1499,7 +1500,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1533,7 +1534,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1567,7 +1568,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1601,7 +1602,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1637,7 +1638,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1676,7 +1677,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1713,7 +1714,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1747,7 +1748,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1781,7 +1782,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
@@ -1815,7 +1816,7 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopPlayer.PacketSender.CommonPlayerPackets.Enqueue(new()
+                coopPlayer.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
                 {
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()

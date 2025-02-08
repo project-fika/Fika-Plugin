@@ -349,7 +349,7 @@ namespace Fika.Core.Coop.Players
             LastDamageInfo = DamageInfo;
             LastDamageType = DamageInfo.DamageType;
 
-            PacketSender.DamagePackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new DamagePacket()
             {
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,
@@ -385,7 +385,7 @@ namespace Fika.Core.Coop.Players
             LastDamageInfo = DamageInfo;
             LastDamageType = DamageInfo.DamageType;
 
-            PacketSender.DamagePackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new DamagePacket()
             {
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,
@@ -437,7 +437,7 @@ namespace Fika.Core.Coop.Players
             DamageInfo.DidBodyDamage = DamageInfo.Damage;
             ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
 
-            PacketSender.DamagePackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new DamagePacket()
             {
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,
@@ -532,7 +532,7 @@ namespace Fika.Core.Coop.Players
             DamageInfo.DidBodyDamage = DamageInfo.Damage;
             ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
 
-            PacketSender.DamagePackets.Enqueue(new()
+            PacketSender.PacketQueue.Enqueue(new DamagePacket()
             {
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,

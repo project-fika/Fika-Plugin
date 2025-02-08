@@ -5,6 +5,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using System;
 using UnityEngine;
 using static Fika.Core.Networking.FirearmSubPackets;
@@ -37,7 +38,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void ExamineWeapon()
         {
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
@@ -50,7 +51,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void HighThrow()
         {
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
@@ -63,7 +64,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void LowThrow()
         {
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
@@ -76,7 +77,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void PullRingForHighThrow()
         {
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
@@ -89,7 +90,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void PullRingForLowThrow()
         {
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
@@ -102,7 +103,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
         {
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
@@ -120,7 +121,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void PlantTripwire()
         {
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
@@ -146,7 +147,7 @@ namespace Fika.Core.Coop.ClientClasses
                 {
                     if (currentOperation is Class1161)
                     {
-                        player.PacketSender.FirearmPackets.Enqueue(new()
+                        player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
                         {
                             Type = EFirearmSubPacketType.Grenade,
                             SubPacket = new GrenadePacket()
@@ -158,7 +159,7 @@ namespace Fika.Core.Coop.ClientClasses
                 }
                 else
                 {
-                    player.PacketSender.FirearmPackets.Enqueue(new()
+                    player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
                     {
                         Type = EFirearmSubPacketType.Grenade,
                         SubPacket = new GrenadePacket()
@@ -175,7 +176,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             // TODO: Override Class1025
 
-            player.PacketSender.FirearmPackets.Enqueue(new()
+            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
             {
                 Type = EFirearmSubPacketType.CancelGrenade
             });

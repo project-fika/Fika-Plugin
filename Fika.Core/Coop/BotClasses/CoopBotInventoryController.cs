@@ -62,7 +62,7 @@ namespace Fika.Core.Coop.BotClasses
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                coopBot.PacketSender.InventoryPackets.Enqueue(packet);
+                coopBot.PacketSender.PacketQueue.Enqueue(packet);
             }
             HandleOperation(operation, callback).HandleExceptions();
         }
