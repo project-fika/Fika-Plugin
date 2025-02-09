@@ -1,15 +1,13 @@
 ﻿using EFT;
 using EFT.Ballistics;
-using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets;
 using LiteNetLib.Utils;
 using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    public struct DamagePacket : IQueuePacket
+    public struct DamagePacket : INetSerializable
     {
-        public int NetId { get; set; }
+        public int NetId;
         public EDamageType DamageType;
         public float Damage;
         public EBodyPart BodyPartType;
@@ -28,11 +26,6 @@ namespace Fika.Core.Networking
         public string ProfileId;
         public MaterialType Material;
         public string WeaponId;
-
-        public void Execute(CoopPlayer player)
-        {
-            player.HandleDamagePacket(ref this);
-        }
 
         public void Deserialize(NetDataReader reader)
         {

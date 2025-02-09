@@ -1,13 +1,12 @@
 ﻿using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking
 {
-    public struct WeaponPacket : IQueuePacket
+    public struct WeaponPacket : INetSerializable
     {
-        public int NetId { get; set; }
+        public int NetId;
         public EFirearmSubPacketType Type;
         public ISubPacket SubPacket;
 

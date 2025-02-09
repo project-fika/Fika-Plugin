@@ -164,11 +164,12 @@ namespace Fika.Core.Coop.HostClasses
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
+                    NetId = coopPlayer.NetId,
                     CallbackId = operation.Id,
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                coopPlayer.PacketSender.PacketQueue.Enqueue(packet);
+                coopPlayer.PacketSender.SendPacket(ref packet);
                 return;
             }
             handler.operation.Dispose();

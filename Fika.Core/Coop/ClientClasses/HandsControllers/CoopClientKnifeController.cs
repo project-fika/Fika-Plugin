@@ -23,14 +23,16 @@ namespace Fika.Core.Coop.ClientClasses
         {
             base.ExamineWeapon();
 
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Knife,
                 SubPacket = new KnifePacket()
                 {
                     Examine = true
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override bool MakeKnifeKick()
@@ -39,14 +41,16 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (knifeKick)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.Knife,
                     SubPacket = new KnifePacket()
                     {
                         Kick = true
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
 
             return knifeKick;
@@ -58,14 +62,16 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (alternateKnifeKick)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.Knife,
                     SubPacket = new KnifePacket()
                     {
                         AltKick = true
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
 
             return alternateKnifeKick;
@@ -75,14 +81,16 @@ namespace Fika.Core.Coop.ClientClasses
         {
             base.BrakeCombo();
 
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Knife,
                 SubPacket = new KnifePacket()
                 {
                     BreakCombo = true
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
     }
 }

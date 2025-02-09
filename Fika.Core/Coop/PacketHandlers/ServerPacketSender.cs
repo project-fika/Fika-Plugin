@@ -13,7 +13,6 @@ using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
@@ -30,7 +29,6 @@ namespace Fika.Core.Coop.PacketHandlers
         public bool Enabled { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
-        public Queue<IQueuePacket> PacketQueue { get; set; }
 
         private bool CanPing
         {
@@ -58,7 +56,6 @@ namespace Fika.Core.Coop.PacketHandlers
             fixedUpdateCount = 0;
             fixedUpdatesPerTick = Mathf.FloorToInt(60f / updateRate);
             Enabled = false;
-            PacketQueue = new();
         }
 
         public void Init()
@@ -110,16 +107,8 @@ namespace Fika.Core.Coop.PacketHandlers
             Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
         }
 
-        protected void LateUpdate()
+        protected void Update()
         {
-            int packetAmount = PacketQueue.Count;
-            for (int i = 0; i < packetAmount; i++)
-            {
-                IQueuePacket packet = PacketQueue.Dequeue();
-                packet.NetId = player.NetId;
-                Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-            }
-
             if (CanPing)
             {
                 SendPing();
@@ -235,7 +224,6 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void DestroyThis()
         {
-            PacketQueue.Clear();
             if (Server != null)
             {
                 Server = null;

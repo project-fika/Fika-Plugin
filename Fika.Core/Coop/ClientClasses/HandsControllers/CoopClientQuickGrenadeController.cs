@@ -24,8 +24,9 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
@@ -35,7 +36,8 @@ namespace Fika.Core.Coop.ClientClasses
                     ThrowForce = force,
                     LowThrow = lowThrow
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
 
             base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
         }

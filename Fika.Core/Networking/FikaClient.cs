@@ -32,8 +32,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -114,6 +112,7 @@ namespace Fika.Core.Networking
         private NetDataWriter dataWriter;
         private FikaChat fikaChat;
         private string myProfileId;
+        private Queue<BaseInventoryOperationClass> inventoryOperations;
 
         public async void Init()
         {
@@ -134,6 +133,7 @@ namespace Fika.Core.Networking
             packetProcessor = new();
             dataWriter = new();
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
+            inventoryOperations = new();
 
             Ping = 0;
             ServerFPS = 0;
@@ -151,7 +151,7 @@ namespace Fika.Core.Networking
 
             if (MultiThreaded)
             {
-                RegisterMultiThreadedPackets(); 
+                RegisterMultiThreadedPackets();
             }
             else
             {
@@ -919,7 +919,25 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.ObservedPacketQueue.Enqueue(packet);
+                if (playerToApply is ObservedCoopPlayer observedPlayer)
+                {
+                    if (packet.Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
+                    {
+                        observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
+                        observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
+                        if (packet.TriggerZones.Length > 0)
+                        {
+                            observedPlayer.TriggerZones.Clear();
+                            foreach (string triggerZone in packet.TriggerZones)
+                            {
+                                observedPlayer.TriggerZones.Add(triggerZone);
+                            }
+                        }
+                    }
+                    observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
+                    return;
+                }
+                logger.LogError($"OnHealthSyncPacketReceived::Player with id {playerToApply.NetId} was not observed. Name: {playerToApply.Profile.Nickname}");
             }
         }
 
@@ -1005,7 +1023,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
+                packet.SubPacket.Execute(playerToApply);
             }
         }
 
@@ -1013,7 +1031,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
+                HandleInventoryPacket(ref packet, playerToApply);
             }
         }
 
@@ -1021,7 +1039,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply) && playerToApply.IsYourPlayer)
             {
-                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
+                playerToApply.HandleDamagePacket(packet);
             }
         }
 
@@ -1029,7 +1047,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
+                playerToApply.HandleArmorDamagePacket(packet);
             }
         }
 
@@ -1037,7 +1055,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.PacketQueue.Enqueue(packet);
+                packet.SubPacket.Execute(playerToApply);
             }
         }
 
@@ -1092,7 +1110,16 @@ namespace Fika.Core.Networking
                 else
                 {
                     netClient.PollEvents();
-                } 
+                }
+            }
+            int inventoryOps = inventoryOperations.Count;
+            if (inventoryOps > 0)
+            {
+                if (inventoryOperations.Peek().WaitingForForeignEvents())
+                {
+                    return;
+                }
+                inventoryOperations.Dequeue().method_1(HandleResult);
             }
         }
 
@@ -1185,7 +1212,6 @@ namespace Fika.Core.Networking
             if (disconnectInfo.Reason is DisconnectReason.Timeout)
             {
                 AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized()));
-                Destroy(MyPlayer.PacketReceiver);
                 MyPlayer.PacketSender.DestroyThis();
                 Destroy(this);
                 Singleton<FikaClient>.Release(this);
@@ -1213,7 +1239,7 @@ namespace Fika.Core.Networking
             else
             {
                 packetProcessor.SubscribeNetSerializable(handle);
-            }            
+            }
         }
 
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
@@ -1265,6 +1291,52 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Received packets: {netClient.Statistics.PacketsReceived}");
             logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(netClient.Statistics.BytesReceived)}");
             logger.LogInfo($"Packet loss: {netClient.Statistics.PacketLossPercent}%");
+        }
+
+        private void HandleInventoryPacket(ref InventoryPacket packet, CoopPlayer player)
+        {
+            if (packet.OperationBytes.Length == 0)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Bytes were null!");
+                return;
+            }
+
+            InventoryController controller = player.InventoryController;
+            if (controller != null)
+            {
+                try
+                {
+                    if (controller is Interface16 networkController)
+                    {
+                        FikaReader eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
+                        BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
+                        GStruct449 result = networkController.CreateOperationFromDescriptor(descriptor);
+                        if (!result.Succeeded)
+                        {
+                            FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
+                            return;
+                        }
+
+                        inventoryOperations.Enqueue(result.Value);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Exception thrown: {exception}");
+                }
+            }
+            else
+            {
+                FikaPlugin.Instance.FikaLogger.LogError("ConvertInventoryPacket: inventory was null!");
+            }
+        }
+
+        private void HandleResult(IResult result)
+        {
+            if (result.Failed)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error}");
+            }
         }
     }
 }

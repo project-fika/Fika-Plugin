@@ -1,39 +1,18 @@
 ﻿using EFT;
-using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.SubPackets;
 
 namespace Fika.Core.Networking
 {
-    public struct HealthSyncPacket : IQueuePacket
+    public struct HealthSyncPacket : INetSerializable
     {
-        public int NetId {  get; set; }
+        public int NetId;
         public NetworkHealthSyncPacketStruct Packet;
         public string KillerId;
         public string WeaponId;
         public EBodyPart BodyPart;
         public CorpseSyncPacket CorpseSyncPacket;
         public string[] TriggerZones;
-
-        public void Execute(CoopPlayer player)
-        {
-            ObservedCoopPlayer observedPlayer = (ObservedCoopPlayer)player;
-            if (Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !Packet.Data.IsAlive.IsAlive)
-            {
-                observedPlayer.SetAggressorData(KillerId, BodyPart, WeaponId);
-                observedPlayer.CorpseSyncPacket = CorpseSyncPacket;
-                if (TriggerZones.Length > 0)
-                {
-                    observedPlayer.TriggerZones.Clear();
-                    foreach (string triggerZone in TriggerZones)
-                    {
-                        observedPlayer.TriggerZones.Add(triggerZone);
-                    }
-                }
-            }
-            observedPlayer.NetworkHealthController.HandleSyncPacket(Packet);
-        }
 
         public void Deserialize(NetDataReader reader)
         {

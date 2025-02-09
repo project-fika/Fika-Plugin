@@ -74,8 +74,9 @@ namespace Fika.Core.Coop.Patches
 
                 foreach (BodyPartCollider bodyPartCollider in enumerable)
                 {
-                    coopPlayer.PacketSender.PacketQueue.Enqueue(new DamagePacket()
+                    DamagePacket packet = new()
                     {
+                        NetId = coopPlayer.NetId,
                         DamageType = EDamageType.Landmine,
                         Damage = num4 * num2,
                         ArmorDamage = 0.5f,
@@ -84,7 +85,8 @@ namespace Fika.Core.Coop.Patches
                         HitNormal = Vector3.zero,
                         ColliderType = bodyPartCollider.BodyPartColliderType,
                         BodyPartType = bodyPartCollider.BodyPartType
-                    });
+                    };
+                    coopPlayer.PacketSender.SendPacket(ref packet);
                     if (++num5 >= num3)
                     {
                         break;

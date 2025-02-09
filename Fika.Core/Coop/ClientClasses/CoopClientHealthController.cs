@@ -23,14 +23,16 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
-                coopPlayer.PacketSender.PacketQueue.Enqueue(coopPlayer.SetupCorpseSyncPacket(packet));
+                HealthSyncPacket deathPacket = coopPlayer.SetupCorpseSyncPacket(packet);
+                coopPlayer.PacketSender.SendPacket(ref deathPacket);
                 return;
             }
 
-            coopPlayer.PacketSender.PacketQueue.Enqueue(new HealthSyncPacket()
+            HealthSyncPacket netPacket = new()
             {
                 Packet = packet
-            });
+            };
+            coopPlayer.PacketSender.SendPacket(ref netPacket);
         }
     }
 }

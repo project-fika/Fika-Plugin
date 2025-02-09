@@ -38,73 +38,84 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void ExamineWeapon()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
                     PacketType = EGrenadePacketType.ExamineWeapon
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.ExamineWeapon();
         }
 
         public override void HighThrow()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
                     PacketType = EGrenadePacketType.HighThrow
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.HighThrow();
         }
 
         public override void LowThrow()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
                     PacketType = EGrenadePacketType.LowThrow
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.LowThrow();
         }
 
         public override void PullRingForHighThrow()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
                     PacketType = EGrenadePacketType.PullRingForHighThrow
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.PullRingForHighThrow();
         }
 
         public override void PullRingForLowThrow()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
                     PacketType = EGrenadePacketType.PullRingForLowThrow
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.PullRingForLowThrow();
         }
 
         public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
@@ -115,20 +126,23 @@ namespace Fika.Core.Coop.ClientClasses
                     ThrowForce = force,
                     LowThrow = lowThrow
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
         }
 
         public override void PlantTripwire()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
                     PlantTripwire = true
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.PlantTripwire();
         }
 
@@ -147,26 +161,30 @@ namespace Fika.Core.Coop.ClientClasses
                 {
                     if (currentOperation is Class1161)
                     {
-                        player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                        WeaponPacket packet = new()
                         {
+                            NetId = player.NetId,
                             Type = EFirearmSubPacketType.Grenade,
                             SubPacket = new GrenadePacket()
                             {
                                 ChangeToIdle = true
                             }
-                        });
+                        };
+                        player.PacketSender.SendPacket(ref packet);
                     }
                 }
                 else
                 {
-                    player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                    WeaponPacket packet = new()
                     {
+                        NetId = player.NetId,
                         Type = EFirearmSubPacketType.Grenade,
                         SubPacket = new GrenadePacket()
                         {
                             ChangeToPlant = true
                         }
-                    });
+                    };
+                    player.PacketSender.SendPacket(ref packet);
                 }
             }
             base.ChangeFireMode(fireMode);
@@ -176,10 +194,12 @@ namespace Fika.Core.Coop.ClientClasses
         {
             // TODO: Override Class1025
 
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.CancelGrenade
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.ActualDrop(controller, animationSpeed, callback, fastDrop);
         }
     }

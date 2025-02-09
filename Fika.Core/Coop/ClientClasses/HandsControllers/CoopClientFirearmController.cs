@@ -130,10 +130,12 @@ namespace Fika.Core.Coop.ClientClasses
             bool success = base.ToggleBipod();
             if (success)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ToggleBipod
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
             return success;
         }
@@ -143,10 +145,12 @@ namespace Fika.Core.Coop.ClientClasses
             bool flag = base.CheckChamber();
             if (flag)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.CheckChamber
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -156,10 +160,12 @@ namespace Fika.Core.Coop.ClientClasses
             bool flag = base.CheckAmmo();
             if (flag)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.CheckAmmo
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -169,14 +175,16 @@ namespace Fika.Core.Coop.ClientClasses
             bool flag = base.ChangeFireMode(fireMode);
             if (flag)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ChangeFireMode,
                     SubPacket = new ChangeFireModePacket()
                     {
                         FireMode = fireMode
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -184,14 +192,16 @@ namespace Fika.Core.Coop.ClientClasses
         public override void ChangeAimingMode()
         {
             base.ChangeAimingMode();
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ToggleAim,
                 SubPacket = new ToggleAimPacket()
                 {
                     AimingIndex = IsAiming ? Item.AimIndex.Value : -1
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void SetAim(bool value)
@@ -201,14 +211,16 @@ namespace Fika.Core.Coop.ClientClasses
             base.SetAim(value);
             if (IsAiming != isAiming || aimingInterruptedByOverlap && player.HealthController.IsAlive)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ToggleAim,
                     SubPacket = new ToggleAimPacket()
                     {
                         AimingIndex = IsAiming ? Item.AimIndex.Value : -1
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
         }
 
@@ -217,14 +229,16 @@ namespace Fika.Core.Coop.ClientClasses
             base.AimingChanged(newValue);
             if (!IsAiming && player.HealthController.IsAlive)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ToggleAim,
                     SubPacket = new ToggleAimPacket()
                     {
                         AimingIndex = -1
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
         }
 
@@ -233,10 +247,12 @@ namespace Fika.Core.Coop.ClientClasses
             bool flag = base.CheckFireMode();
             if (flag && player.HealthController.IsAlive)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.CheckFireMode
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -244,8 +260,9 @@ namespace Fika.Core.Coop.ClientClasses
         public override void DryShot(int chamberIndex = 0, bool underbarrelShot = false)
         {
             base.DryShot(chamberIndex, underbarrelShot);
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket()
                 {
@@ -253,7 +270,8 @@ namespace Fika.Core.Coop.ClientClasses
                     ChamberIndex = chamberIndex,
                     UnderbarrelShot = underbarrelShot
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override bool ExamineWeapon()
@@ -261,10 +279,12 @@ namespace Fika.Core.Coop.ClientClasses
             bool flag = base.ExamineWeapon();
             if (flag && player.HealthController.IsAlive)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ExamineWeapon
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -295,8 +315,9 @@ namespace Fika.Core.Coop.ClientClasses
                     break;
             }
 
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket()
                 {
@@ -311,7 +332,8 @@ namespace Fika.Core.Coop.ClientClasses
                     LastShotTime = weapon.MalfState.LastShotTime,
                     SlideOnOverheatReached = weapon.MalfState.SlideOnOverheatReached
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
 
             player.StatisticsManager.OnShot(Weapon, ammo);
 
@@ -323,15 +345,17 @@ namespace Fika.Core.Coop.ClientClasses
             if (CanStartReload())
             {
                 base.QuickReloadMag(magazine, callback);
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.QuickReloadMag,
                     SubPacket = new QuickReloadMagPacket()
                     {
                         Reload = true,
                         MagId = magazine.Id
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
                 return;
             }
 
@@ -377,15 +401,17 @@ namespace Fika.Core.Coop.ClientClasses
             if (CanStartReload())
             {
                 string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ReloadLauncher,
                     SubPacket = new ReloadLauncherPacket()
                     {
                         Reload = true,
                         AmmoIds = reloadingAmmoIds
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
 
                 CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
                 return;
@@ -432,15 +458,17 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (force || CurrentOperation.CanChangeLightState(lightsStates))
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ToggleLightStates,
                     SubPacket = new LightStatesPacket()
                     {
                         Amount = lightsStates.Length,
                         States = lightsStates
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
 
             return base.SetLightsState(lightsStates, force);
@@ -470,15 +498,17 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ToggleScopeStates,
                 SubPacket = new ScopeStatesPacket()
                 {
                     Amount = scopeStates.Length,
                     States = scopeStates
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void ShotMisfired(AmmoItemClass ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
@@ -504,8 +534,9 @@ namespace Fika.Core.Coop.ClientClasses
                     break;
             }
 
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket()
                 {
@@ -513,7 +544,8 @@ namespace Fika.Core.Coop.ClientClasses
                     Overheat = overheat,
                     AmmoTemplate = ammo.TemplateId
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
 
             base.ShotMisfired(ammo, malfunctionState, overheat);
         }
@@ -523,10 +555,12 @@ namespace Fika.Core.Coop.ClientClasses
             bool flag = base.ToggleLauncher(callback);
             if (flag)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ToggleLauncher
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -534,54 +568,63 @@ namespace Fika.Core.Coop.ClientClasses
         public override void Loot(bool p)
         {
             base.Loot(p);
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.Loot
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void SetInventoryOpened(bool opened)
         {
             base.SetInventoryOpened(opened);
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ToggleInventory,
                 SubPacket = new ToggleInventoryPacket()
                 {
                     Open = opened
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void ChangeLeftStance()
         {
             base.ChangeLeftStance();
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.LeftStanceChange,
                 SubPacket = new LeftStanceChangePacket()
                 {
                     LeftStance = player.MovementContext.LeftStanceEnabled
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void SendStartOneShotFire()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.FlareShot,
                 SubPacket = new FlareShotPacket()
                 {
                     StartOneShotFire = true
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void CreateFlareShot(AmmoItemClass flareItem, Vector3 shotPosition, Vector3 forward)
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.FlareShot,
                 SubPacket = new FlareShotPacket()
                 {
@@ -589,14 +632,16 @@ namespace Fika.Core.Coop.ClientClasses
                     ShotForward = forward,
                     AmmoTemplateId = flareItem.TemplateId
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.CreateFlareShot(flareItem, shotPosition, forward);
         }
 
         public override void CreateRocketShot(AmmoItemClass rocketItem, Vector3 shotPosition, Vector3 forward)
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.RocketShot,
                 SubPacket = new RocketShotPacket()
                 {
@@ -604,14 +649,16 @@ namespace Fika.Core.Coop.ClientClasses
                     ShotPosition = shotPosition,
                     ShotForward = forward
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
             base.CreateRocketShot(rocketItem, shotPosition, forward);
         }
 
         private void SendAbortReloadPacket(int amount)
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ReloadWithAmmo,
                 SubPacket = new ReloadWithAmmoPacket()
                 {
@@ -619,7 +666,8 @@ namespace Fika.Core.Coop.ClientClasses
                     Status = EReloadWithAmmoStatus.AbortReload,
                     AmmoLoadedToMag = amount
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         public override void RollCylinder(bool rollToZeroCamora)
@@ -629,14 +677,16 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.RollCylinder,
                 SubPacket = new RollCylinderPacket()
                 {
                     RollToZeroCamora = rollToZeroCamora
                 }
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
 
             CurrentOperation.RollCylinder(null, rollToZeroCamora);
         }
@@ -645,8 +695,9 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (player.HealthController.IsAlive)
             {
-                player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                WeaponPacket packet = new()
                 {
+                    NetId = player.NetId,
                     Type = EFirearmSubPacketType.ReloadWithAmmo,
                     SubPacket = new ReloadWithAmmoPacket()
                     {
@@ -654,16 +705,19 @@ namespace Fika.Core.Coop.ClientClasses
                         Status = EReloadWithAmmoStatus.EndReload,
                         AmmoLoadedToMag = amount
                     }
-                });
+                };
+                player.PacketSender.SendPacket(ref packet);
             }
         }
 
         private void SendBoltActionReloadPacket()
         {
-            player.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+            WeaponPacket packet = new()
             {
+                NetId = player.NetId,
                 Type = EFirearmSubPacketType.ReloadBoltAction
-            });
+            };
+            player.PacketSender.SendPacket(ref packet);
         }
 
         private class FirearmClass1(Player.FirearmController controller) : GClass1782(controller)
@@ -813,8 +867,9 @@ namespace Fika.Core.Coop.ClientClasses
 
                 if (coopPlayer.HealthController.IsAlive)
                 {
-                    coopPlayer.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                    WeaponPacket packet = new()
                     {
+                        NetId = coopPlayer.NetId,
                         Type = EFirearmSubPacketType.ReloadMag,
                         SubPacket = new ReloadMagPacket()
                         {
@@ -822,7 +877,8 @@ namespace Fika.Core.Coop.ClientClasses
                             MagId = magazine.Id,
                             LocationDescription = locationDescription,
                         }
-                    });
+                    };
+                    coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }
@@ -840,8 +896,9 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 if (coopPlayer.HealthController.IsAlive)
                 {
-                    coopPlayer.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                    WeaponPacket packet = new()
                     {
+                        NetId = coopPlayer.NetId,
                         Type = EFirearmSubPacketType.CylinderMag,
                         SubPacket = new CylinderMagPacket()
                         {
@@ -852,7 +909,8 @@ namespace Fika.Core.Coop.ClientClasses
                             Status = EReloadWithAmmoStatus.StartReload,
                             AmmoIds = ammoIds
                         }
-                    });
+                    };
+                    coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }
@@ -878,13 +936,14 @@ namespace Fika.Core.Coop.ClientClasses
                 }
                 else
                 {
-                    locationDescription = Array.Empty<byte>();
+                    locationDescription = [];
                 }
 
                 if (coopPlayer.HealthController.IsAlive)
                 {
-                    coopPlayer.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                    WeaponPacket packet = new()
                     {
+                        NetId = coopPlayer.NetId,
                         Type = EFirearmSubPacketType.ReloadBarrels,
                         SubPacket = new ReloadBarrelsPacket()
                         {
@@ -892,7 +951,8 @@ namespace Fika.Core.Coop.ClientClasses
                             AmmoIds = ammoIds,
                             LocationDescription = locationDescription
                         }
-                    });
+                    };
+                    coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }
@@ -906,8 +966,9 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 if (coopPlayer.HealthController.IsAlive)
                 {
-                    coopPlayer.PacketSender.PacketQueue.Enqueue(new WeaponPacket()
+                    WeaponPacket packet = new()
                     {
+                        NetId = coopPlayer.NetId,
                         Type = EFirearmSubPacketType.ReloadWithAmmo,
                         SubPacket = new ReloadWithAmmoPacket()
                         {
@@ -915,7 +976,8 @@ namespace Fika.Core.Coop.ClientClasses
                             Status = EReloadWithAmmoStatus.StartReload,
                             AmmoIds = ammoIds
                         }
-                    });
+                    };
+                    coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }

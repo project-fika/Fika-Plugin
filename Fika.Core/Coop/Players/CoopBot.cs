@@ -58,7 +58,6 @@ namespace Fika.Core.Coop.Players
             CoopBotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
 
             player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
-            player.PacketReceiver = player.gameObject.AddComponent<PacketReceiver>();
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
@@ -138,7 +137,7 @@ namespace Fika.Core.Coop.Players
 #endif
 
                     float distance = Vector3.Distance(aggressor.Position, Position);
-                    mainPlayer.HandleTeammateKill(ref damageInfo, bodyPart, Side, role, ProfileId,
+                    mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, role, ProfileId,
                         distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
                         (CoopPlayer)aggressor);
                 }
@@ -352,15 +351,17 @@ namespace Fika.Core.Coop.Players
 
             internal void SendPacket()
             {
-                coopBot.PacketSender.PacketQueue.Enqueue(new CommonPlayerPacket()
+                CommonPlayerPacket packet = new()
                 {
+                    NetId = coopBot.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
                         ProceedType = weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon,
                         ItemId = weapon.Id
                     }
-                });
+                };
+                coopBot.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
