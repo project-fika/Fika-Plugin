@@ -341,7 +341,7 @@ namespace Fika.Core
             new RagfairScreen_Show_Patch().Enable();
             new MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch().Enable();
             new CoopSettingsWindow_Show_Patch().Enable();
-            new MainMenuController_method_52_Patch().Enable();
+            new MainMenuControllerClass_method_52_Patch().Enable();
             new GameWorld_ThrowItem_Patch().Enable();
             new RaidSettingsWindow_Show_Patch().Enable();
             new TransitControllerAbstractClass_Exist_Patch().Enable();
