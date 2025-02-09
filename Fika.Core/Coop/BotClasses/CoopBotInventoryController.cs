@@ -58,11 +58,12 @@ namespace Fika.Core.Coop.BotClasses
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
+                    NetId = coopBot.NetId,
                     CallbackId = operation.Id,
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                coopBot.PacketSender.InventoryPackets.Enqueue(packet);
+                coopBot.PacketSender.SendPacket(ref packet);
             }
             HandleOperation(operation, callback).HandleExceptions();
         }

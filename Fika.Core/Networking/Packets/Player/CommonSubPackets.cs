@@ -255,7 +255,7 @@ namespace Fika.Core.Networking
 
             public void Execute(CoopPlayer player)
             {
-                player.HandleHeadLightsPacket(ref this);
+                player.HandleHeadLightsPacket(this);
             }
 
             public void Serialize(NetDataWriter writer)
@@ -391,7 +391,7 @@ namespace Fika.Core.Networking
                 // A headless client can get stuck in permanent high-velocity states due to vaulting, skip it
                 if (!FikaBackendUtils.IsHeadless)
                 {
-                    player.DoObservedVault(ref this);
+                    player.DoObservedVault(this);
                 }
             }
 

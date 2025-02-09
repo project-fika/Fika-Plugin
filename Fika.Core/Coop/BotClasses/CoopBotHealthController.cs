@@ -3,6 +3,7 @@
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using Fika.Core.Networking;
 
 namespace Fika.Core.Coop.ClientClasses
 {
@@ -22,14 +23,17 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
-                coopBot.PacketSender.HealthSyncPackets.Enqueue(coopBot.SetupCorpseSyncPacket(packet));
-                return;
+                HealthSyncPacket deathPacket = coopBot.SetupCorpseSyncPacket(packet);
+                coopBot.PacketSender.SendPacket(ref deathPacket);                
             }
 
-            coopBot.PacketSender.HealthSyncPackets.Enqueue(new(coopBot.NetId)
+            return;
+            HealthSyncPacket netPacket = new()
             {
+                NetId = coopBot.NetId,
                 Packet = packet
-            });
+            };
+            coopBot.PacketSender.SendPacket(ref netPacket);
         }
     }
 }

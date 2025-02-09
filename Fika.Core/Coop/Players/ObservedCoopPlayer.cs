@@ -349,8 +349,9 @@ namespace Fika.Core.Coop.Players
             LastDamageInfo = DamageInfo;
             LastDamageType = DamageInfo.DamageType;
 
-            PacketSender.DamagePackets.Enqueue(new()
+            DamagePacket packet = new()
             {
+                NetId = NetId,
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,
                 BodyPartType = bodyPartType,
@@ -361,7 +362,8 @@ namespace Fika.Core.Coop.Players
                 PenetrationPower = DamageInfo.PenetrationPower,
                 SourceId = DamageInfo.SourceId,
                 WeaponId = DamageInfo.Weapon != null ? DamageInfo.Weapon.Id : string.Empty
-            });
+            };
+            PacketSender.SendPacket(ref packet);
         }
 
         public override void ApplyDamageInfo(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
@@ -385,8 +387,9 @@ namespace Fika.Core.Coop.Players
             LastDamageInfo = DamageInfo;
             LastDamageType = DamageInfo.DamageType;
 
-            PacketSender.DamagePackets.Enqueue(new()
+            DamagePacket packet = new()
             {
+                NetId = NetId,
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,
                 BodyPartType = bodyPartType,
@@ -401,7 +404,8 @@ namespace Fika.Core.Coop.Players
                 SourceId = DamageInfo.SourceId,
                 ArmorDamage = DamageInfo.ArmorDamage,
                 WeaponId = DamageInfo.Weapon.Id
-            });
+            };
+            PacketSender.SendPacket(ref packet);
 
             return new()
             {
@@ -437,8 +441,9 @@ namespace Fika.Core.Coop.Players
             DamageInfo.DidBodyDamage = DamageInfo.Damage;
             ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
 
-            PacketSender.DamagePackets.Enqueue(new()
+            DamagePacket packet = new()
             {
+                NetId = NetId,
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,
                 BodyPartType = bodyPartType,
@@ -455,7 +460,8 @@ namespace Fika.Core.Coop.Players
                 ProfileId = DamageInfo.Player.iPlayer.ProfileId,
                 Material = materialType,
                 WeaponId = DamageInfo.Weapon.Id
-            });
+            };
+            PacketSender.SendPacket(ref packet);
 
             if (list != null)
             {
@@ -532,8 +538,9 @@ namespace Fika.Core.Coop.Players
             DamageInfo.DidBodyDamage = DamageInfo.Damage;
             ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
 
-            PacketSender.DamagePackets.Enqueue(new()
+            DamagePacket packet = new()
             {
+                NetId = NetId,
                 Damage = DamageInfo.Damage,
                 DamageType = DamageInfo.DamageType,
                 BodyPartType = bodyPartType,
@@ -550,7 +557,8 @@ namespace Fika.Core.Coop.Players
                 ProfileId = DamageInfo.Player.iPlayer.ProfileId,
                 Material = materialType,
                 WeaponId = DamageInfo.Weapon.Id
-            });
+            };
+            PacketSender.SendPacket(ref packet);
 
             if (list != null)
             {
@@ -893,7 +901,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public override void HandleDamagePacket(ref DamagePacket packet)
+        public override void HandleDamagePacket(DamagePacket packet)
         {
             DamageInfoStruct DamageInfo = new()
             {
@@ -978,7 +986,7 @@ namespace Fika.Core.Coop.Players
 #endif
 
                     float distance = Vector3.Distance(aggressor.Position, Position);
-                    mainPlayer.HandleTeammateKill(ref damageInfo, bodyPart, Side, role, ProfileId,
+                    mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, role, ProfileId,
                         distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
                         (CoopPlayer)aggressor);
                 }
@@ -1088,7 +1096,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public override void DoObservedVault(ref VaultPacket packet)
+        public override void DoObservedVault(VaultPacket packet)
         {
             if (packet.VaultingStrategy != EVaultingStrategy.Vault)
             {
@@ -1153,8 +1161,6 @@ namespace Fika.Core.Coop.Players
                 playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
                 playerTraverse.Field("_climbAudioController").SetValue(null);
             }
-
-            PacketReceiver = gameObject.AddComponent<PacketReceiver>();
 
             if (!IsObservedAI)
             {

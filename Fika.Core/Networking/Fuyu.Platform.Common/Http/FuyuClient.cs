@@ -26,7 +26,7 @@ namespace Fuyu.Platform.Common.Http
             Cookie = $"PHPSESSID={sessionId}";
             Retries = retries;
 
-            var handler = new HttpClientHandler
+            HttpClientHandler handler = new()
             {
                 // set cookies in header instead
                 UseCookies = false
@@ -56,7 +56,7 @@ namespace Fuyu.Platform.Common.Http
         {
             HttpResponseMessage response = null;
 
-            using (var request = GetNewRequest(method, path))
+            using (HttpRequestMessage request = GetNewRequest(method, path))
             {
                 if (data != null)
                 {
@@ -79,13 +79,13 @@ namespace Fuyu.Platform.Common.Http
                 throw new Exception($"Code {response.StatusCode}");
             }
 
-            using (var ms = new MemoryStream())
+            using (MemoryStream ms = new())
             {
-                using (var stream = await response.Content.ReadAsStreamAsync())
+                using (Stream stream = await response.Content.ReadAsStreamAsync())
                 {
                     // grap response payload
                     await stream.CopyToAsync(ms);
-                    var body = ms.ToArray();
+                    byte[] body = ms.ToArray();
 
                     if (Zlib.IsCompressed(body))
                     {
@@ -95,7 +95,7 @@ namespace Fuyu.Platform.Common.Http
                     if (body == null)
                     {
                         // payload doesn't contains data
-                        var code = response.StatusCode.ToString();
+                        string code = response.StatusCode.ToString();
                         body = Encoding.UTF8.GetBytes(code);
                     }
 
@@ -106,10 +106,10 @@ namespace Fuyu.Platform.Common.Http
 
         protected async Task<byte[]> SendWithRetriesAsync(HttpMethod method, string path, byte[] data, bool zipped = true)
         {
-            var error = new Exception("Internal error");
+            Exception error = new("Internal error");
 
             // NOTE: <= is intentional. 0 is send, 1/2/3 is retry
-            for (var i = 0; i <= Retries; ++i)
+            for (int i = 0; i <= Retries; ++i)
             {
                 try
                 {

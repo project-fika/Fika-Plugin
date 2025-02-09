@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    public struct DamagePacket(int netId) : INetSerializable
+    public struct DamagePacket : INetSerializable
     {
-        public int NetId = netId;
+        public int NetId;
         public EDamageType DamageType;
         public float Damage;
         public EBodyPart BodyPartType;

@@ -1003,7 +1003,25 @@ namespace Fika.Core.Networking
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.HealthSyncPackets.Enqueue(packet);
+                if (playerToApply is ObservedCoopPlayer observedPlayer)
+                {
+                    if (packet.Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
+                    {
+                        observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
+                        observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
+                        if (packet.TriggerZones.Length > 0)
+                        {
+                            observedPlayer.TriggerZones.Clear();
+                            foreach (string triggerZone in packet.TriggerZones)
+                            {
+                                observedPlayer.TriggerZones.Add(triggerZone);
+                            }
+                        }
+                    }
+                    observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
+                    return;
+                }
+                logger.LogError($"OnHealthSyncPacketReceived::Player with id {playerToApply.NetId} was not observed. Name: {playerToApply.Profile.Nickname}");
             }
         }
 
@@ -1112,12 +1130,11 @@ namespace Fika.Core.Networking
 
         private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet, NetPeer peer)
         {
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.CommonPlayerPackets?.Enqueue(packet);
+                packet.SubPacket.Execute(playerToApply);
             }
-
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         private void OnInventoryPacketReceived(InventoryPacket packet, NetPeer peer)
@@ -1183,7 +1200,7 @@ namespace Fika.Core.Networking
             {
                 if (playerToApply.IsAI || playerToApply.IsYourPlayer)
                 {
-                    playerToApply.PacketReceiver.DamagePackets.Enqueue(packet);
+                    playerToApply.HandleDamagePacket(packet);
                     return;
                 }
 
@@ -1193,22 +1210,20 @@ namespace Fika.Core.Networking
 
         private void OnArmorDamagePacketReceived(ArmorDamagePacket packet, NetPeer peer)
         {
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.ArmorDamagePackets.Enqueue(packet);
+                playerToApply.HandleArmorDamagePacket(packet);
             }
-
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         private void OnWeaponPacketReceived(WeaponPacket packet, NetPeer peer)
         {
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                playerToApply.PacketReceiver.FirearmPackets.Enqueue(packet);
+                packet.SubPacket.Execute(playerToApply);
             }
-
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)
@@ -1299,6 +1314,7 @@ namespace Fika.Core.Networking
         public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
         {
             dataWriter.Reset();
+
             packetProcessor.WriteNetSerializable(dataWriter, ref packet);
             peer.Send(dataWriter, deliveryMethod);
         }

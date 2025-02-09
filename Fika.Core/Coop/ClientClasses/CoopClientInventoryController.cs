@@ -153,6 +153,7 @@ namespace Fika.Core.Coop.ClientClasses
             eftWriter.WritePolymorph(operation.ToDescriptor());
             InventoryPacket packet = new()
             {
+                NetId = coopPlayer.NetId,
                 CallbackId = operationNum,
                 OperationBytes = eftWriter.ToArray()
             };
@@ -161,7 +162,7 @@ namespace Fika.Core.Coop.ClientClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
 
-            coopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
+            coopPlayer.PacketSender.SendPacket(ref packet);
         }
 
         public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)

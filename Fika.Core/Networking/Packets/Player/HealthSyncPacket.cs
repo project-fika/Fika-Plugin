@@ -4,16 +4,15 @@ using static Fika.Core.Networking.SubPackets;
 
 namespace Fika.Core.Networking
 {
-    public struct HealthSyncPacket(int netId) : INetSerializable
+    public struct HealthSyncPacket : INetSerializable
     {
-        public int NetId = netId;
+        public int NetId;
         public NetworkHealthSyncPacketStruct Packet;
         public string KillerId;
         public string WeaponId;
         public EBodyPart BodyPart;
         public CorpseSyncPacket CorpseSyncPacket;
         public string[] TriggerZones;
-
 
         public void Deserialize(NetDataReader reader)
         {

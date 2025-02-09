@@ -2,9 +2,9 @@
 
 namespace Fika.Core.Networking
 {
-    public struct ArmorDamagePacket(int netId) : INetSerializable
+    public struct ArmorDamagePacket : INetSerializable
     {
-        public int NetId = netId;
+        public int NetId;
         public string[] ItemIds;
         public float[] Durabilities;
 
