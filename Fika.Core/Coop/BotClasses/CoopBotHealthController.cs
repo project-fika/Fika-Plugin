@@ -24,16 +24,19 @@ namespace Fika.Core.Coop.ClientClasses
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
                 HealthSyncPacket deathPacket = coopBot.SetupCorpseSyncPacket(packet);
-                coopBot.PacketSender.SendPacket(ref deathPacket);                
+                coopBot.PacketSender.SendPacket(ref deathPacket);
+                return;
             }
 
-            return;
-            HealthSyncPacket netPacket = new()
+            if (packet.SyncType is NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart or NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage or NetworkHealthSyncPacketStruct.ESyncType.BodyHealth)
             {
-                NetId = coopBot.NetId,
-                Packet = packet
-            };
-            coopBot.PacketSender.SendPacket(ref netPacket);
+                HealthSyncPacket netPacket = new()
+                {
+                    NetId = coopBot.NetId,
+                    Packet = packet
+                };
+                coopBot.PacketSender.SendPacket(ref netPacket);
+            }            
         }
     }
 }

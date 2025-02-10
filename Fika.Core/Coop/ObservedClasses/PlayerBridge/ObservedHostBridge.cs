@@ -66,6 +66,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
 
             observedPlayer.ShotReactions(damageInfo, bodyPart);
+            observedPlayer.ApplyHitDebuff(damageInfo.Damage, 0f, bodyPart, damageInfo.DamageType);
             return new()
             {
                 PoV = EPointOfView.ThirdPerson,

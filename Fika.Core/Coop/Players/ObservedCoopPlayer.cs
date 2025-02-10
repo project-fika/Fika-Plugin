@@ -382,6 +382,7 @@ namespace Fika.Core.Coop.Players
                 return null;
             }
 
+            ApplyHitDebuff(DamageInfo.Damage, 0f, bodyPartType, DamageInfo.DamageType);
             LastDamagedBodyPart = bodyPartType;
             LastBodyPart = bodyPartType;
             LastDamageInfo = DamageInfo;
@@ -423,6 +424,7 @@ namespace Fika.Core.Coop.Players
             }
 
             ShotReactions(DamageInfo, bodyPartType);
+            ApplyHitDebuff(DamageInfo.Damage, 0f, bodyPartType, DamageInfo.DamageType);
             bool flag = !string.IsNullOrEmpty(DamageInfo.DeflectedBy);
             float damage = DamageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true);
@@ -509,6 +511,7 @@ namespace Fika.Core.Coop.Players
         public ShotInfoClass ApplyClientShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
         {
             ShotReactions(DamageInfo, bodyPartType);
+            ApplyHitDebuff(DamageInfo.Damage, 0f, bodyPartType, DamageInfo.DamageType);
             LastAggressor = DamageInfo.Player.iPlayer;
             LastDamagedBodyPart = bodyPartType;
             LastBodyPart = bodyPartType;
