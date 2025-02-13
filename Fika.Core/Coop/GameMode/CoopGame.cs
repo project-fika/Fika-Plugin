@@ -847,12 +847,12 @@ namespace Fika.Core.Coop.GameMode
 
                 if (SpawnId != "RANDOM")
                 {
-                    Dictionary<ISpawnPoint, SpawnPointMarker> allSpawnPoints = Traverse.Create(spawnPoints).Field<Dictionary<ISpawnPoint, SpawnPointMarker>>("dictionary_0").Value;
-                    foreach (ISpawnPoint spawnPointObject in allSpawnPoints.Keys)
+                    IEnumerator<ISpawnPoint> allSpawnPoints = spawnPoints.GetEnumerator();
+                    while (allSpawnPoints.MoveNext())
                     {
-                        if (spawnPointObject.Id == SpawnId)
+                        if (allSpawnPoints.Current.Id == SpawnId)
                         {
-                            spawnPoint = spawnPointObject;
+                            spawnPoint = allSpawnPoints.Current;
                         }
                     }
                 }
