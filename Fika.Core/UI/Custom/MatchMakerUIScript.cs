@@ -400,12 +400,11 @@ namespace Fika.Core.UI.Custom
             }
 
             FikaBackendUtils.IsReconnect = reconnect;
-
             NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(), iconType: EFT.Communications.ENotificationIconType.EntryPoint);
-
             NetManagerUtils.CreatePingingClient();
-
             FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
+
+            WaitForSeconds waitForSeconds = new(0.1f);
 
             if (pingingClient.Init(serverId))
             {
@@ -425,7 +424,7 @@ namespace Fika.Core.UI.Custom
                     success = pingingClient.Received;
                     rejected = pingingClient.Rejected;
 
-                    yield return new WaitForSeconds(0.1f);
+                    yield return waitForSeconds;
                 } while (!rejected && !success && attempts < 50);
 
                 if (!success)
@@ -482,9 +481,7 @@ namespace Fika.Core.UI.Custom
             else
             {
                 NetManagerUtils.DestroyPingingClient();
-
                 Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
-
                 callback?.Invoke(false);
             }
         }

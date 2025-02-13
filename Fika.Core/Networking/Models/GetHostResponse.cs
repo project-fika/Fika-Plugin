@@ -24,5 +24,11 @@ namespace Fika.Core.Networking.Http
             NatPunch = natPunch;
             IsHeadless = isHeadless;
         }
+
+        public override readonly string ToString()
+        {
+            string ips = string.Join("; ", Ips);
+            return $"HostResponse Data: IPs: {ips}, Port: {Port},  NatPunch: {NatPunch}, IsHeadless: {IsHeadless}";
+        }
     }
 }
