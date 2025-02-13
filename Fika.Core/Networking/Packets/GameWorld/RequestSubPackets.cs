@@ -46,7 +46,7 @@ namespace Fika.Core.Networking
                             RequestSubPacket = new SpawnPointRequest(coopGame.SpawnPointName)
                         };
 
-                        server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
+                        server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
                         return;
                     }
                 }

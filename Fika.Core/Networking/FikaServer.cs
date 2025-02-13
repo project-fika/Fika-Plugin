@@ -588,7 +588,7 @@ namespace Fika.Core.Networking
         public void SendFlareSuccessEvent(string profileId, bool canSendAirdrop)
         {
             FlareSuccessPacket packet = new(profileId, canSendAirdrop);
-            SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
@@ -679,7 +679,7 @@ namespace Fika.Core.Networking
                                 Type = EGenericSubPacketType.ClearEffects
                             };
 
-                            SendDataToAll(ref clearEffectsPacket, DeliveryMethod.ReliableUnordered, peer);
+                            SendDataToAll(ref clearEffectsPacket, DeliveryMethod.ReliableOrdered, peer);
                         }
                     }
 
@@ -832,7 +832,7 @@ namespace Fika.Core.Networking
                     Data = coopGame.GetHostLootItems()
                 };
 
-                SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
+                SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
             }
         }
 
@@ -850,7 +850,7 @@ namespace Fika.Core.Networking
                             Interactables = (Dictionary<string, int>)world.Interactables
                         };
 
-                        SendDataToPeer(peer, ref response, DeliveryMethod.ReliableUnordered);
+                        SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
                     }
                 }
             }
@@ -858,7 +858,7 @@ namespace Fika.Core.Networking
 
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
             if (hostPlayer.HealthController.IsAlive)
             {
@@ -913,7 +913,7 @@ namespace Fika.Core.Networking
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
             if (hostPlayer.HealthController.IsAlive)
             {
@@ -926,7 +926,7 @@ namespace Fika.Core.Networking
 
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
             if (hostPlayer.HealthController.IsAlive)
             {
@@ -946,7 +946,7 @@ namespace Fika.Core.Networking
                 fikaChat.ReceiveMessage(packet.Nickname, packet.Message);
             }
 
-            SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         public int PopNetId()
@@ -982,14 +982,14 @@ namespace Fika.Core.Networking
                     packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
             }
 
-            SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered, peer);
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
             AssignNetIdPacket assignNetIdPacket = new()
             {
                 NetId = netId
             };
 
-            SendDataToPeer(peer, ref assignNetIdPacket, DeliveryMethod.ReliableUnordered);
+            SendDataToPeer(peer, ref assignNetIdPacket, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
@@ -1052,7 +1052,7 @@ namespace Fika.Core.Networking
                 respondPackage.SessionTime = gameTimer.SessionTime.Value;
             }
 
-            SendDataToAll(ref respondPackage, DeliveryMethod.ReliableUnordered);
+            SendDataToAll(ref respondPackage, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
@@ -1268,7 +1268,7 @@ namespace Fika.Core.Networking
             int fps = (int)(1f / Time.unscaledDeltaTime);
             StatisticsPacket packet = new(fps);
 
-            SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         protected void OnDestroy()

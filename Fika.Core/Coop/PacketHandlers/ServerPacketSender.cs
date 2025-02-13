@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
+            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         protected void FixedUpdate()

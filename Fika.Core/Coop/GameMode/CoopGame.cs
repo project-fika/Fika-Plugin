@@ -422,7 +422,7 @@ namespace Fika.Core.Coop.GameMode
                 IsZombie = profile.Info.Settings.UseSimpleAnimator
             }, true, true, position, netId);
             packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
             if (server.NetServer.ConnectedPeersCount > 0)
             {
@@ -634,7 +634,7 @@ namespace Fika.Core.Coop.GameMode
                     SessionTime = sessionTime.Value
                 };
 
-                server.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
+                server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
                 HostLootItems = null;
             }
 
@@ -756,7 +756,7 @@ namespace Fika.Core.Coop.GameMode
                     foreach (CoopPlayer player in coopHandler.Players.Values)
                     {
                         SyncNetIdPacket syncPacket = new(player.ProfileId, player.NetId);
-                        server.SendDataToAll(ref syncPacket, DeliveryMethod.ReliableUnordered);
+                        server.SendDataToAll(ref syncPacket, DeliveryMethod.ReliableOrdered);
                     }
 
                     if (DynamicAI != null)
@@ -835,7 +835,7 @@ namespace Fika.Core.Coop.GameMode
 
                 do
                 {
-                    client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                    client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
                     if (string.IsNullOrEmpty(SpawnId))
                     {
@@ -961,7 +961,7 @@ namespace Fika.Core.Coop.GameMode
                     await Task.Delay(250);
                 } while (client.NetClient.FirstPeer == null);
 
-                client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
 
             fikaDebug = gameObject.AddComponent<FikaDebug>();
@@ -1312,7 +1312,7 @@ namespace Fika.Core.Coop.GameMode
                 ProfileId = profileId
             };
             FikaClient client = Singleton<FikaClient>.Instance;
-            client.SendData(ref reconnectPacket, DeliveryMethod.ReliableUnordered);
+            client.SendData(ref reconnectPacket, DeliveryMethod.ReliableOrdered);
 
             do
             {
@@ -1333,7 +1333,7 @@ namespace Fika.Core.Coop.GameMode
                 ProfileId = ProfileId
             };
             FikaClient client = Singleton<FikaClient>.Instance;
-            client.SendData(ref reconnectPacket, DeliveryMethod.ReliableUnordered);
+            client.SendData(ref reconnectPacket, DeliveryMethod.ReliableOrdered);
 
             do
             {
@@ -1350,7 +1350,7 @@ namespace Fika.Core.Coop.GameMode
             };
             do
             {
-                client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                 await Task.Delay(1000);
                 if (!HasReceivedLoot && LootItems.Count < 1)
                 {
@@ -1447,7 +1447,7 @@ namespace Fika.Core.Coop.GameMode
 
             do
             {
-                client.SendData(ref request, DeliveryMethod.ReliableUnordered);
+                client.SendData(ref request, DeliveryMethod.ReliableOrdered);
                 await Task.Delay(1000);
             } while (!ExfiltrationReceived);
         }
@@ -1460,7 +1460,7 @@ namespace Fika.Core.Coop.GameMode
 
             do
             {
-                client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                 await Task.Delay(1000);
                 if (!InteractablesInitialized)
                 {
@@ -1515,10 +1515,10 @@ namespace Fika.Core.Coop.GameMode
             }
             FikaClient client = Singleton<FikaClient>.Instance;
             InformationPacket packet = new();
-            client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             do
             {
-                client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                 await Task.Delay(250);
             }
             while (!RaidStarted);
@@ -1754,14 +1754,14 @@ namespace Fika.Core.Coop.GameMode
             };
 
             FikaClient client = Singleton<FikaClient>.Instance;
-            client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
             while (!WeatherReady)
             {
                 await Task.Delay(1000);
                 if (!WeatherReady)
                 {
-                    client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+                    client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                 }
             }
         }
