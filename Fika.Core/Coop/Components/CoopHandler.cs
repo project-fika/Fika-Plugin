@@ -18,7 +18,7 @@ using UnityEngine;
 namespace Fika.Core.Coop.Components
 {
     /// <summary>
-    /// CoopHandler is the User 1-2-1 communication to the Server. This can be seen as an extension component to CoopGame.
+    /// CoopHandler handles most of the spawning logic in the raid, e.g. other players or AI. It also handles the extraction of the local player.
     /// </summary>
     public class CoopHandler : MonoBehaviour
     {
