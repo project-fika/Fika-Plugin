@@ -29,7 +29,8 @@ namespace Fika.Core.UI.Patches
         [PatchPrefix]
         private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
         {
-            if (contextInteractions is not GClass3464 gclass)
+            // Check for GClass increments, contains base Insure()
+            if (contextInteractions is not GClass3463 gclass)
             {
                 return;
             }
