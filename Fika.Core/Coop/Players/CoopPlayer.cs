@@ -105,10 +105,10 @@ namespace Fika.Core.Coop.Players
             }
             else
             {
-                questController = new GClass3698(profile, inventoryController, inventoryController.PlayerSearchController, session);
+                questController = new GClass3697(profile, inventoryController, inventoryController.PlayerSearchController, session);
             }
             questController.Init();
-            GClass3702 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
+            GClass3701 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
             achievementsController.Init();
             achievementsController.Run();
             questController.Run();
@@ -719,7 +719,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass3420 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass3419 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.SendPacket(ref packet);
@@ -747,7 +747,7 @@ namespace Fika.Core.Coop.Players
                         InteractiveId = door.Id,
                         InteractionType = interactionResult.InteractionType,
                         InteractionStage = EInteractionStage.Execute,
-                        ItemId = (interactionResult is GClass3420 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                        ItemId = (interactionResult is GClass3419 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                     }
                 };
                 PacketSender.SendPacket(ref packet);
@@ -1473,7 +1473,7 @@ namespace Fika.Core.Coop.Players
         public class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct454<GClass3420> unlockResult;
+            public GStruct454<GClass3419> unlockResult;
 
             internal void HandleKeyEvent()
             {

@@ -328,7 +328,7 @@ namespace Fika.Core
             new GClass1391_Constructor_Patch().Enable();
             new AchievementsScreen_Show_Patch().Enable();
             new AchievementView_Show_Patch().Enable();
-            new GClass3367_ExceptAI_Patch().Enable();
+            new GClass3366_ExceptAI_Patch().Enable();
             new GClass1670_method_9_Patch().Enable();
             new GrenadeClass_Init_Patch().Enable();
             new SessionResultExitStatus_Show_Patch().Enable();

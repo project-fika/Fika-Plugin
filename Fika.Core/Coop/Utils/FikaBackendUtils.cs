@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.Utils
         public static int LocalPort { get; internal set; } = 0;
         public static string HostLocationId { get; internal set; }
 
-        internal static GClass3864<GClass1337> GroupPlayers { get; set; } = [];
+        internal static GClass3863<GClass1337> GroupPlayers { get; set; } = [];
         internal static bool RequestFikaWorld;
         internal static Vector3 ReconnectPosition = Vector3.zero;
         internal static RaidSettings CachedRaidSettings;

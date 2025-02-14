@@ -1471,7 +1471,7 @@ namespace Fika.Core.Coop.Players
                     oldSlotView.Dispose();
                 }
                 observedPlayer.PlayerBody.ValidateHoodedDress(slotType);
-                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3341>().Invoke(observedPlayer.ProfileId);
+                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3340>().Invoke(observedPlayer.ProfileId);
                 Dispose();
             }
 

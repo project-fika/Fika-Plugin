@@ -1048,7 +1048,7 @@ namespace Fika.Core.Coop.GameMode
                 UnityEngine.Events.UnityEvent newEvent = new();
                 newEvent.AddListener(() =>
                 {
-                    GClass3543 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
+                    GClass3542 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
                         message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
                         ErrorScreen.EButtonType.OkButton, 15f);
                     errorScreen.OnAccept += StopFromCancel(myPlayer);
@@ -1773,7 +1773,7 @@ namespace Fika.Core.Coop.GameMode
         [Obsolete("Not implemented yet", true)]
         private void HandleHostTrain(Locomotive.ETravelState state)
         {
-            MovingPlatform.GClass3378 platformAdapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
+            MovingPlatform.GClass3377 platformAdapter = Singleton<GameWorld>.Instance.PlatformAdapters[0];
             if (!platformAdapter.HasNetPacket)
             {
                 return;
