@@ -28,7 +28,19 @@ namespace Fika.Core.Coop.Utils
         /// <summary>
         /// The local player <see cref="EFT.Profile"/>
         /// </summary>
-        public static Profile Profile { get; internal set; }
+        public static Profile Profile
+        {
+            get
+            {
+                profile ??= FikaGlobals.GetProfile(false);
+                return profile;
+            }
+
+            internal set
+            {
+                profile = value;
+            }
+        }
         /// <summary>
         /// The name of the local player PMC
         /// </summary>
@@ -55,6 +67,8 @@ namespace Fika.Core.Coop.Utils
         internal static RaidSettings CachedRaidSettings;
         internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         internal static MatchMakerGroupPreview MatchMakerGroupPreview;
+
+        private static Profile profile;
 
         internal static void CleanUpVariables()
         {
