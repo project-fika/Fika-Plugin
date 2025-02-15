@@ -623,10 +623,10 @@ namespace Fika.Core.Coop.Players
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates).ToArray();
-
-            if (PacketSender != null)
+            if (PacketSender != null && PacketSender.Enabled)
             {
+                FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates).ToArray();
+
                 CommonPlayerPacket packet = new()
                 {
                     NetId = NetId,
@@ -638,6 +638,52 @@ namespace Fika.Core.Coop.Players
                         LightStates = lightStates
                     }
                 };
+                PacketSender.SendPacket(ref packet);
+            }
+        }
+
+        public override void SendWeaponLightPacket()
+        {
+            if (PacketSender == null)
+            {
+                return;
+            }
+
+            if (HandsController is CoopClientFirearmController controller)
+            {
+                FirearmLightStateStruct[] array = controller.Item.AllSlots.Select(FikaGlobals.GetContainedItem)
+                    .GetComponents<LightComponent>().Select(FikaGlobals.GetFirearmLightStatesFromComponent)
+                    .ToArray();
+
+                if (array.Length == 0)
+                {
+                    return;
+                }
+
+                LightStatesPacket subPacket = new()
+                {
+                    Amount = array.Length,
+                    States = array
+                };
+
+                for (int i = 0; i < array.Length; i++)
+                {
+                    FirearmLightStateStruct firearmLightStateStruct = array[i];
+                    subPacket.States[i] = new FirearmLightStateStruct
+                    {
+                        Id = firearmLightStateStruct.Id,
+                        IsActive = firearmLightStateStruct.IsActive,
+                        LightMode = firearmLightStateStruct.LightMode
+                    };
+                }
+
+                WeaponPacket packet = new()
+                {
+                    NetId = NetId,
+                    Type = EFirearmSubPacketType.ToggleLightStates,
+                    SubPacket = subPacket
+                };
+
                 PacketSender.SendPacket(ref packet);
             }
         }
@@ -1393,11 +1439,13 @@ namespace Fika.Core.Coop.Players
 
         public override void Dispose()
         {
-            base.Dispose();
             if (PacketSender != null)
             {
+                PacketSender.Enabled = false;
                 PacketSender.DestroyThis();
+                PacketSender = null;
             }
+            base.Dispose();
         }
 
         public override void OnVaulting()

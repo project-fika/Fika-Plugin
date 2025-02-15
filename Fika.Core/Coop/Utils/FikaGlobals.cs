@@ -236,5 +236,30 @@ namespace Fika.Core.Coop.Utils
         {
             return controller.LightMod.GetLightState(false, false);
         }
+
+        /// <summary>
+        /// Gets the contained item in a <see cref="Slot"/>
+        /// </summary>
+        /// <param name="slot">The <see cref="Slot"/> to check</param>
+        /// <returns>An <see cref="Item"/> in the slot</returns>
+        public static Item GetContainedItem(Slot slot)
+        {
+            return slot.ContainedItem;
+        }
+
+        /// <summary>
+        /// Gets a light states from a <see cref="LightComponent"/>
+        /// </summary>
+        /// <param name="component">The <see cref="LightComponent"/> to check</param>
+        /// <returns>A new <see cref="FirearmLightStateStruct"/> with data</returns>
+        public static FirearmLightStateStruct GetFirearmLightStatesFromComponent(LightComponent component)
+        {
+            return new FirearmLightStateStruct
+            {
+                Id = component.Item.Id,
+                IsActive = component.IsActive,
+                LightMode = component.SelectedMode
+            };
+        }
     }
 }
