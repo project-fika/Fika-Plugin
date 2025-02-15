@@ -1,4 +1,5 @@
-﻿using Fika.Core.Utils;
+﻿using EFT.UI;
+using Fika.Core.Utils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,5 +61,8 @@ public class MatchMakerUI : MonoBehaviour
         LoadingScreenHeaderText.text = LocaleUtils.UI_MM_LOADING_HEADER.Localized();
         LoadingScreenInfoText.text = LocaleUtils.UI_MM_LOADING_DESCRIPTION.Localized();
         JoinAsSpectatorText.text = LocaleUtils.UI_MM_JOIN_AS_SPECTATOR.Localized().ToUpper();
+
+        HoverTooltipArea spectateTooltip = SpectatorToggle.gameObject.AddComponent<HoverTooltipArea>();
+        spectateTooltip.SetMessageText(LocaleUtils.UI_MM_JOIN_AS_SPECTATOR_DESCRIPTION.Localized());
     }
 }
