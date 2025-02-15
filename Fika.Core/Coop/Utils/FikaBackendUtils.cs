@@ -8,6 +8,7 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -46,6 +47,7 @@ namespace Fika.Core.Coop.Utils
         public static int RemotePort { get; internal set; }
         public static int LocalPort { get; internal set; } = 0;
         public static string HostLocationId { get; internal set; }
+        public static IPAddress VPNIP { get; internal set; }
 
         internal static GClass3863<GClass1337> GroupPlayers { get; set; } = [];
         internal static bool RequestFikaWorld;

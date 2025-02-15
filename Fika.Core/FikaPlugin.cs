@@ -11,6 +11,7 @@ using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.Coop.Patches.Lighthouse;
 using Fika.Core.Coop.Patches.SPTBugs;
+using Fika.Core.Coop.Utils;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
@@ -1284,6 +1285,12 @@ namespace Fika.Core
             }
 
             SetupConfigEventHandlers();
+
+            if (ForceBindIP.Value == "Disabled" && FikaBackendUtils.VPNIP != null)
+            {
+                ForceBindIP.Value = FikaBackendUtils.VPNIP.ToString();
+                Logger.LogInfo($"Auto-detected VPN IP: {FikaBackendUtils.VPNIP}, setting as ForceBindIP");
+            }
         }
 
         private void OfficialVersion_SettingChanged(object sender, EventArgs e)
@@ -1303,6 +1310,11 @@ namespace Fika.Core
                 {
                     foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)
                     {
+                        if (networkInterface.Description.Contains("Radmin VPN") || networkInterface.Description.Contains("ZeroTier"))
+                        {
+                            FikaBackendUtils.VPNIP = ip.Address;
+                        }
+
                         if (!ip.IsDnsEligible)
                         {
                             continue;
