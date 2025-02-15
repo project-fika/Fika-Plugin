@@ -164,6 +164,7 @@ namespace Fika.Core.Networking
                         FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
                         FikaBackendUtils.RemotePort = remoteEndPoint.Port;
                         FikaBackendUtils.LocalPort = NetClient.LocalPort;
+                        logger.LogInfo($"Got response from {FikaBackendUtils.RemoteIp}:{FikaBackendUtils.RemotePort}, using LocalPort: {NetClient.LocalPort}");
                         break;
                     case "fika.keepalive":
                         // Do nothing
