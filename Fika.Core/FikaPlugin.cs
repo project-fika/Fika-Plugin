@@ -349,6 +349,7 @@ namespace Fika.Core
             new Class1392_ReloadBackendLocale_Patch().Enable();
             new GClass2049_method_0_Patch().Enable();
             new PartyInfoPanel_Show_Patch().Enable();
+            new PlayerCameraController_LateUpdate_Transpiler().Enable();
 #if DEBUG
             TasksExtensions_HandleFinishedTask_Patches.Enable();
             new GClass1640_method_0_Patch().Enable();
