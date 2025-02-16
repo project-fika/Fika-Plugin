@@ -44,11 +44,11 @@ namespace Fika.Core.Networking
         public CoopPlayer MyPlayer;
         public int Ping;
         public int ServerFPS;
-        public int ReadyClients;
+        public int ReadyClients;        
         public bool HostReady;
         public bool HostLoaded;
         public bool ReconnectDone;
-        public NetPeer ServerConnection { get; private set; }
+        public NetPeer ServerConnection { get; private set; }        
         public NetManager NetClient
         {
             get
@@ -101,6 +101,7 @@ namespace Fika.Core.Networking
             }
         }
 
+        public int NetId { get; set; }
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
 
@@ -199,7 +200,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializableMT<GenericPacket>(OnGenericPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<SendCharacterPacket>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<TextMessagePacket>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializableMT<QuestConditionPacket>(OnQuestConditionPacketReceived);
@@ -245,7 +245,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<GenericPacket>(OnGenericPacketReceived);
             packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
             packetProcessor.SubscribeNetSerializable<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SyncNetIdPacket>(OnSyncNetIdPacketReceived);
             packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
             packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
@@ -497,8 +496,9 @@ namespace Fika.Core.Networking
 
         private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)
         {
-            logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}");
+            logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}, NetId: {packet.NetId}");
             sendRate = packet.SendRate;
+            NetId = packet.NetId;
         }
 
         private void OnUsableItemPacketReceived(UsableItemPacket packet)
@@ -840,47 +840,16 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnSyncNetIdPacketReceived(SyncNetIdPacket packet)
-        {
-            Dictionary<int, CoopPlayer> newPlayers = coopHandler.Players;
-            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
-            {
-                if (player.ProfileId != packet.ProfileId)
-                {
-                    FikaPlugin.Instance.FikaLogger.LogWarning($"OnSyncNetIdPacketReceived: {packet.ProfileId} had the wrong NetId: {coopHandler.Players[packet.NetId].NetId}, should be {packet.NetId}");
-                    for (int i = 0; i < coopHandler.Players.Count; i++)
-                    {
-                        KeyValuePair<int, CoopPlayer> playerToReorganize = coopHandler.Players.Where(x => x.Value.ProfileId == packet.ProfileId).First();
-                        coopHandler.Players.Remove(playerToReorganize.Key);
-                        coopHandler.Players[packet.NetId] = playerToReorganize.Value;
-                    }
-                }
-            }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError($"OnSyncNetIdPacketReceived: Could not find NetId {packet.NetId} in player list!");
-                string allPlayers = "";
-                foreach (KeyValuePair<int, CoopPlayer> kvp in coopHandler.Players)
-                {
-                    string toAdd = $"Key: {kvp.Key}, Nickname: {kvp.Value.Profile.Nickname}, NetId: {kvp.Value.NetId}";
-                    allPlayers = string.Join(", ", allPlayers + toAdd);
-                }
-                FikaPlugin.Instance.FikaLogger.LogError(allPlayers);
-            }
-        }
-
         private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet)
         {
             FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Assigned NetId {packet.NetId} to my own client.");
-            MyPlayer.NetId = packet.NetId;
-            MyPlayer.PlayerId = packet.NetId;
+            NetId = packet.NetId;
             int i = -1;
             foreach (KeyValuePair<int, CoopPlayer> player in coopHandler.Players)
             {
                 if (player.Value == MyPlayer)
                 {
                     i = player.Key;
-
                     break;
                 }
             }

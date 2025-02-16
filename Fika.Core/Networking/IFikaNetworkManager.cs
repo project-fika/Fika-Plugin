@@ -7,6 +7,7 @@ namespace Fika.Core.Networking
 {
     public interface IFikaNetworkManager
     {
+        public int NetId { get; set; }
         public CoopHandler CoopHandler { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public int SendRate { get; }

@@ -753,12 +753,6 @@ namespace Fika.Core.Coop.GameMode
                         SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
                     } while (server.ReadyClients < expectedPlayers);
 
-                    foreach (CoopPlayer player in coopHandler.Players.Values)
-                    {
-                        SyncNetIdPacket syncPacket = new(player.ProfileId, player.NetId);
-                        server.SendDataToAll(ref syncPacket, DeliveryMethod.ReliableOrdered);
-                    }
-
                     if (DynamicAI != null)
                     {
                         DynamicAI.AddHumans();
@@ -904,7 +898,7 @@ namespace Fika.Core.Coop.GameMode
             CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-                statisticsManager, new GClass1621(), session, localMode, isServer ? 0 : 1000);
+                statisticsManager, new GClass1621(), session, localMode, playerId);
 
             coopPlayer.Location = Location_0.Id;
 
@@ -1371,7 +1365,7 @@ namespace Fika.Core.Coop.GameMode
         /// <returns>A <see cref="Player"/></returns>
         private async Task<LocalPlayer> CreateLocalPlayer()
         {
-            int num = 0;
+            int num = Singleton<IFikaNetworkManager>.Instance.NetId;
 
             Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
             if (BackendConfigAbstractClass.Config.UseHandsFastAnimator)

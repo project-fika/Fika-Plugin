@@ -261,5 +261,15 @@ namespace Fika.Core.Coop.Utils
                 LightMode = component.SelectedMode
             };
         }
+
+        /// <summary>
+        /// Checks whether the player is part of the player group
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> to check</param>
+        /// <returns>True if in the player group</returns>
+        public static bool IsGroupMember(this Player player)
+        {
+            return player.GroupId == "Fika";
+        }
     }
 }

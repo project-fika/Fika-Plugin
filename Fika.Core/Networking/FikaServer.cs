@@ -2,7 +2,6 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
-using Comfort.Net.Monitoring;
 using Diz.Utils;
 using EFT;
 using EFT.Airdrop;
@@ -117,6 +116,7 @@ namespace Fika.Core.Networking
             }
         }
 
+        public int NetId { get; set; }
         public EPlayerSide RaidSide { get; set; }
 
         private int sendRate;
@@ -191,14 +191,14 @@ namespace Fika.Core.Networking
             NetworkGameSession.Rtt = 0;
             NetworkGameSession.LossPercent = 0;
 
-            // Start at 1 to avoid having 0 and making us think it's working when it's not
-            currentNetId = 1;
+            currentNetId = 2;
+            NetId = 1;
 
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
-            
+
             RegisterMultiThreadedPackets();
 
             if (netServer.UnsyncedEvents)
@@ -973,8 +973,6 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            int netId = PopNetId();
-            packet.NetId = netId;
             if (packet.PlayerInfoPacket.Profile.ProfileId != hostPlayer.ProfileId)
             {
                 coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
@@ -983,13 +981,6 @@ namespace Fika.Core.Networking
             }
 
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-
-            AssignNetIdPacket assignNetIdPacket = new()
-            {
-                NetId = netId
-            };
-
-            SendDataToPeer(peer, ref assignNetIdPacket, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
@@ -1247,7 +1238,7 @@ namespace Fika.Core.Networking
                 else
                 {
                     netServer?.PollEvents();
-                } 
+                }
             }
 
             statisticsCounter++;
@@ -1327,7 +1318,11 @@ namespace Fika.Core.Networking
 
             HasHadPeer = true;
 
-            NetworkSettingsPacket packet = new(sendRate);
+            NetworkSettingsPacket packet = new()
+            {
+                SendRate = sendRate,
+                NetId = PopNetId()
+            };
             SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
 
             FikaEventDispatcher.DispatchEvent(new PeerConnectedEvent(peer, this));
@@ -1451,7 +1446,7 @@ namespace Fika.Core.Networking
             {
                 if (netServer.ConnectedPeersCount == 0)
                 {
-                    AsyncWorker.RunInMainTread(DisconnectHeadless);                        
+                    AsyncWorker.RunInMainTread(DisconnectHeadless);
                 }
             }
         }
@@ -1517,7 +1512,7 @@ namespace Fika.Core.Networking
         {
             if (MultiThreaded)
             {
-                packetProcessor.SubscribeNetSerializableMT(handle); 
+                packetProcessor.SubscribeNetSerializableMT(handle);
             }
             else
             {
