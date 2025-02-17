@@ -68,8 +68,6 @@ namespace Fika.Core.Coop.Patches
 
             metricsEvents.SetGamePrepared();
 
-            LocationSettingsClass.Location location = raidSettings.SelectedLocation;
-
             if (Singleton<NotificationManagerClass>.Instantiated)
             {
                 Singleton<NotificationManagerClass>.Instance.Deactivate();
@@ -105,9 +103,11 @@ namespace Fika.Core.Coop.Patches
             applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
 
             LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
-            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.serverId = localSettings.serverId;
-            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.selectedLocation = localSettings.locationLoot;
-            applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value.transition = FikaBackendUtils.TransitData;
+            LocalRaidSettings raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
+            raidSettings.SelectedLocation = localSettings.locationLoot;
+            raidSettingsToUpdate.serverId = localSettings.serverId;
+            raidSettingsToUpdate.selectedLocation = localSettings.locationLoot;
+            raidSettingsToUpdate.transition = FikaBackendUtils.TransitData;
 
             GClass1321 profileInsurance = localSettings.profileInsurance;
             if ((profileInsurance?.insuredItems) != null)
@@ -143,7 +143,7 @@ namespace Fika.Core.Coop.Patches
             TimeSpan raidLimits = instance.method_46(raidSettings.SelectedLocation.EscapeTimeLimit);
 
             CoopGame coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
-                MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, location,
+                MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
                 timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
                 fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
                 new GClass2435(metricsConfig, instance), localRaidSettings, raidSettings);

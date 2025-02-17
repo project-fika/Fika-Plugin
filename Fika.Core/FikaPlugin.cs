@@ -1353,7 +1353,7 @@ namespace Fika.Core
             new GetProfileAtEndOfRaidPatch().Disable();
             new ScavExfilPatch().Disable();
             new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
-            new MatchStartServerLocationPatch.Disable();
+            new MatchStartServerLocationPatch().Disable();
         }
 
         public void FixSPTBugPatches()
