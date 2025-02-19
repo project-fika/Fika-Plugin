@@ -30,6 +30,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             HealthSyncPacket netPacket = new()
             {
+                NetId = coopPlayer.NetId,
                 Packet = packet
             };
             coopPlayer.PacketSender.SendPacket(ref netPacket);
