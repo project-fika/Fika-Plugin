@@ -6,6 +6,8 @@ using SPT.Common.Utils;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,11 +31,18 @@ namespace Fuyu.Platform.Common.Http
             HttpClientHandler handler = new()
             {
                 // set cookies in header instead
-                UseCookies = false
+                UseCookies = false,
+                ServerCertificateCustomValidationCallback = DiscardCallback
             };
 
             Httpv = new HttpClient(handler);
         }
+
+        private bool DiscardCallback(HttpRequestMessage message, X509Certificate2 cert, X509Chain chain, SslPolicyErrors errors)
+        {
+            return true;
+        }
+
 
         public HttpClient GetClient()
         {
