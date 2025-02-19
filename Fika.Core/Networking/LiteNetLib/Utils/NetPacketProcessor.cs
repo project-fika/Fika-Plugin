@@ -35,13 +35,13 @@ namespace LiteNetLib.Utils
         // FIKA
         private readonly ConcurrentQueue<Action> _actions = new();
 
-        private bool multiThreaded;
-        private object threadLock;
+        private readonly bool useLock;
+        private readonly object threadLock;
 
         public NetPacketProcessor(bool multiThreaded)
         {
-            this.multiThreaded = multiThreaded;
-            if (this.multiThreaded)
+            useLock = multiThreaded;
+            if (useLock)
             {
                 threadLock = new();
             }
