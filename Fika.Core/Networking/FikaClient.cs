@@ -304,7 +304,7 @@ namespace Fika.Core.Networking
                 if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
                 {
                     corpse.ApplyNetPacket(ragdollPacket);
-                    if (ragdollPacket.Done)
+                    if (ragdollPacket.Done && !corpse.IsVisible())
                     {
                         corpse.ForceApplyTransformSync(ragdollPacket.TransformSyncs);
                     }

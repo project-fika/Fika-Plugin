@@ -271,5 +271,10 @@ namespace Fika.Core.Coop.Utils
         {
             return player.GroupId == "Fika";
         }
+
+        public static bool IsVisible(this ObservedCorpse corpse)
+        {
+            return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
+        }
     }
 }
