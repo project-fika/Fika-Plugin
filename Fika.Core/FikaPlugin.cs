@@ -10,7 +10,6 @@ using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.Coop.Patches.Lighthouse;
-using Fika.Core.Coop.Patches.SPTBugs;
 using Fika.Core.Coop.Utils;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
@@ -1358,11 +1357,9 @@ namespace Fika.Core
 
         public void FixSPTBugPatches()
         {
-            if (ModHandler.SPTCoreVersion.ToString() == "3.10.0")
+            if (ModHandler.SPTCoreVersion.ToString() == "3.11.0")
             {
-                new FixAirdropCrashPatch().Disable();
-                new FixAirdropCrashPatch_Override().Enable();
-                new FixVFSDeleteFilePatch().Enable();
+                // Empty, for now ;)
             }
         }
 
