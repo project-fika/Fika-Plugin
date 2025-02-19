@@ -34,7 +34,6 @@ namespace LiteNetLib.Utils
 
         // FIKA
         private readonly ConcurrentQueue<Action> _actions = new();
-
         private readonly bool useLock;
         private readonly object threadLock;
 

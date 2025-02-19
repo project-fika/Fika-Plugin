@@ -272,6 +272,11 @@ namespace Fika.Core.Coop.Utils
             return player.GroupId == "Fika";
         }
 
+        /// <summary>
+        /// Checks whether a corpse is visible for the camera
+        /// </summary>
+        /// <param name="corpse"></param>
+        /// <returns>True if the corpse is visible</returns>
         public static bool IsVisible(this ObservedCorpse corpse)
         {
             return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
