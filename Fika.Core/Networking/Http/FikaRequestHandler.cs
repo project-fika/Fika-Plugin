@@ -3,7 +3,7 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Models;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
-using Fuyu.Platform.Common.Http;
+using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
@@ -19,16 +19,16 @@ namespace Fika.Core.Networking.Http
 {
     public static class FikaRequestHandler
     {
-        private static readonly FuyuClient _httpClient;
+        private static readonly Client _httpClient;
 
         static FikaRequestHandler()
         {
-            _httpClient = new FuyuClient(RequestHandler.Host, RequestHandler.SessionId);
+            _httpClient = RequestHandler.HttpClient;
         }
 
         public static async Task<IPAddress> GetPublicIP()
         {
-            HttpClient client = _httpClient.GetClient();
+            HttpClient client = Traverse.Create(_httpClient).Field<HttpClient>("_httpv").Value;
             string ipString = await client.GetStringAsync("https://api.ipify.org/");
             ipString = ipString.Replace("\n", "");
             if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
