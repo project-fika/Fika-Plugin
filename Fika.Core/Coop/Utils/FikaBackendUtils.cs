@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.Utils
             RequestFikaWorld = false;
             IsReconnect = false;
             ReconnectPosition = Vector3.zero;
-            GroupPlayers.Clear();
+            GroupPlayers?.Clear();
         }
 
         public static bool IsServer

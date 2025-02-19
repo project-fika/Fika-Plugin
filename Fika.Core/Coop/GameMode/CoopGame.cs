@@ -2532,8 +2532,8 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogError(ex);
                 }
             }
-            dictionary_0.Clear();
-            ThrownGrenades.Clear();
+            dictionary_0?.Clear();
+            ThrownGrenades?.Clear();
 
             if (extractRoutine != null)
             {
@@ -2543,7 +2543,10 @@ namespace Fika.Core.Coop.GameMode
             if (isServer)
             {
                 CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-                coopPlayer.PacketSender.DestroyThis();
+                if (coopPlayer.PacketSender != null)
+                {
+                    coopPlayer.PacketSender.DestroyThis();
+                }
 
                 if (DynamicAI != null)
                 {
