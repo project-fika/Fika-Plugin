@@ -29,7 +29,8 @@ namespace Fuyu.Platform.Common.Http
             HttpClientHandler handler = new()
             {
                 // set cookies in header instead
-                UseCookies = false
+                UseCookies = false,
+                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
             };
 
             Httpv = new HttpClient(handler);
