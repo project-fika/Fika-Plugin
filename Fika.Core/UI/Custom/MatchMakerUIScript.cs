@@ -13,6 +13,7 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using TMPro;
 using UnityEngine;
@@ -138,7 +139,7 @@ namespace Fika.Core.UI.Custom
         {
             FikaBackendUtils.IsHeadlessRequester = false;
 
-            GetHeadlessStatusResponse response = FikaRequestHandler.GetHeadlessStatus();
+            AvailableHeadlessClientsRequest[] availableHeadlesses = FikaRequestHandler.GetAvailableHeadlesses();
 
             GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.MatchmakerUI);
             GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
@@ -175,7 +176,8 @@ namespace Fika.Core.UI.Custom
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
 
-            if (!response.Available)
+            //Todo: Lacyway: Dropdown!!!!!
+            if (availableHeadlesses.Length < 0)
             {
                 fikaMatchMakerUi.DedicatedToggle.interactable = false;
                 TextMeshProUGUI dedicatedText = fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
@@ -298,6 +300,8 @@ namespace Fika.Core.UI.Custom
 
                     StartHeadlessRequest request = new()
                     {
+                        //Todo: Lacyway: Dropdown!!!!!
+                        HeadlessSessionID = availableHeadlesses.First().HeadlessSessionID,
                         Time = raidSettings.SelectedDateTime,
                         LocationId = raidSettings.SelectedLocation._Id,
                         SpawnPlace = raidSettings.PlayersSpawnPlace,

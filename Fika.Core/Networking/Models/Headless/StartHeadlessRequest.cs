@@ -8,6 +8,8 @@ namespace Fika.Core.Networking.Http
     [DataContract]
     public struct StartHeadlessRequest
     {
+        [DataMember(Name = "headlessSessionID")]
+        public string HeadlessSessionID { get; set; }
         [DataMember(Name = "time")]
         public EDateTime Time { get; set; }
 
