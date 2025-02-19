@@ -115,6 +115,9 @@ namespace Fika.Core.Networking
         private string myProfileId;
         private Queue<BaseInventoryOperationClass> inventoryOperations;
 
+        private List<RagdollPacketStruct> ragdollPackets;
+        private List<GrenadeDataPacketStruct> throwablePackets;
+
         public async void Init()
         {
             netClient = new(this)
@@ -135,6 +138,8 @@ namespace Fika.Core.Networking
             dataWriter = new();
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
             inventoryOperations = new();
+            ragdollPackets = new();
+            throwablePackets = new();
 
             Ping = 0;
             ServerFPS = 0;
@@ -290,8 +295,12 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            foreach (RagdollPacketStruct ragdollPacket in packet.RagdollPackets)
+            ragdollPackets.AddRange(packet.RagdollPackets);
+            throwablePackets.AddRange(packet.ThrowablePackets);
+
+            for (int i = 0; i < ragdollPackets.Count; i++)
             {
+                RagdollPacketStruct ragdollPacket = ragdollPackets[i];
                 if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
                 {
                     corpse.ApplyNetPacket(ragdollPacket);
@@ -308,8 +317,9 @@ namespace Fika.Core.Networking
                 gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
             }
 
-            foreach (GrenadeDataPacketStruct throwablePacket in packet.ThrowablePackets)
+            for (int i = 0; i < throwablePackets.Count; i++)
             {
+                GrenadeDataPacketStruct throwablePacket = throwablePackets[i];
                 GClass794<int, Throwable> grenades = gameWorld.Grenades;
                 if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
                 {
@@ -317,6 +327,8 @@ namespace Fika.Core.Networking
                 }
             }
 
+            ragdollPackets.Clear();
+            throwablePackets.Clear();
             packet.Flush();
         }
 
