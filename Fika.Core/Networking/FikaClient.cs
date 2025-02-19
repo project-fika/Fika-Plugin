@@ -28,7 +28,6 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -44,11 +43,11 @@ namespace Fika.Core.Networking
         public CoopPlayer MyPlayer;
         public int Ping;
         public int ServerFPS;
-        public int ReadyClients;        
+        public int ReadyClients;
         public bool HostReady;
         public bool HostLoaded;
         public bool ReconnectDone;
-        public NetPeer ServerConnection { get; private set; }        
+        public NetPeer ServerConnection { get; private set; }
         public NetManager NetClient
         {
             get
@@ -115,9 +114,6 @@ namespace Fika.Core.Networking
         private string myProfileId;
         private Queue<BaseInventoryOperationClass> inventoryOperations;
 
-        private List<RagdollPacketStruct> ragdollPackets;
-        private List<GrenadeDataPacketStruct> throwablePackets;
-
         public async void Init()
         {
             netClient = new(this)
@@ -134,12 +130,10 @@ namespace Fika.Core.Networking
                 UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
             };
 
-            packetProcessor = new();
+            packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
             dataWriter = new();
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
             inventoryOperations = new();
-            ragdollPackets = new();
-            throwablePackets = new();
 
             Ping = 0;
             ServerFPS = 0;
@@ -188,7 +182,8 @@ namespace Fika.Core.Networking
             else
             {
                 ServerConnection = netClient.Connect(ip, port, connectString);
-            };
+            }
+            ;
         }
 
         private void RegisterMultiThreadedPackets()
@@ -295,12 +290,9 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            ragdollPackets.AddRange(packet.RagdollPackets);
-            throwablePackets.AddRange(packet.ThrowablePackets);
-
-            for (int i = 0; i < ragdollPackets.Count; i++)
+            for (int i = 0; i < packet.RagdollPackets.Count; i++)
             {
-                RagdollPacketStruct ragdollPacket = ragdollPackets[i];
+                RagdollPacketStruct ragdollPacket = packet.RagdollPackets[i];
                 if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
                 {
                     corpse.ApplyNetPacket(ragdollPacket);
@@ -317,9 +309,9 @@ namespace Fika.Core.Networking
                 gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
             }
 
-            for (int i = 0; i < throwablePackets.Count; i++)
+            for (int i = 0; i < packet.ThrowablePackets.Count; i++)
             {
-                GrenadeDataPacketStruct throwablePacket = throwablePackets[i];
+                GrenadeDataPacketStruct throwablePacket = packet.ThrowablePackets[i];
                 GClass794<int, Throwable> grenades = gameWorld.Grenades;
                 if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
                 {
@@ -327,8 +319,6 @@ namespace Fika.Core.Networking
                 }
             }
 
-            ragdollPackets.Clear();
-            throwablePackets.Clear();
             packet.Flush();
         }
 
@@ -492,11 +482,19 @@ namespace Fika.Core.Networking
             logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
         }
 
-        [Conditional("Debug")]
+#if DEBUG
         private void AddDebugPackets()
         {
-            packetProcessor.SubscribeNetSerializableMT<SpawnItemPacket>(OnSpawnItemPacketReceived);
-        }
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeNetSerializableMT<SpawnItemPacket>(OnSpawnItemPacketReceived);
+            }
+            else
+            {
+                packetProcessor.SubscribeNetSerializable<SpawnItemPacket>(OnSpawnItemPacketReceived);
+            }
+        } 
+#endif
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet)
         {

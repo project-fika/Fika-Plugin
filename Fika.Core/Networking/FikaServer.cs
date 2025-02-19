@@ -31,7 +31,6 @@ using Open.Nat;
 using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -152,7 +151,7 @@ namespace Fika.Core.Networking
                 UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
             };
 
-            packetProcessor = new();
+            packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
             dataWriter = new();
             playersMissing = [];
             externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
@@ -515,11 +514,19 @@ namespace Fika.Core.Networking
             logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
         }
 
-        [Conditional("Debug")]
+#if DEBUG
         private void AddDebugPackets()
         {
-            packetProcessor.SubscribeNetSerializableMT<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
-        }
+            if (MultiThreaded)
+            {
+                packetProcessor.SubscribeNetSerializableMT<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
+            }
+            else
+            {
+                packetProcessor.SubscribeNetSerializable<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
+            }
+        } 
+#endif
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet, NetPeer peer)
         {

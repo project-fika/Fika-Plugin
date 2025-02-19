@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace LiteNetLib.Utils
 {
     public class NetPacketProcessor
-    {
+    {        
+
         private static class HashCache<T>
         {
             public static readonly ulong Id;
@@ -20,16 +22,31 @@ namespace LiteNetLib.Utils
                     hash ^= typeName[i];
                     hash *= 1099511628211UL; //prime
                 }
+
                 Id = hash;
             }
         }
 
         protected delegate void SubscribeDelegate(NetDataReader reader, object userData);
+
         private readonly NetSerializer _netSerializer;
         private readonly Dictionary<ulong, SubscribeDelegate> _callbacks = new();
 
         // FIKA
         private readonly ConcurrentQueue<Action> _actions = new();
+
+        private bool multiThreaded;
+        private object threadLock;
+
+        public NetPacketProcessor(bool multiThreaded)
+        {
+            this.multiThreaded = multiThreaded;
+            if (this.multiThreaded)
+            {
+                threadLock = new();
+            }
+            _netSerializer = new NetSerializer();
+        }
 
         public NetPacketProcessor()
         {
@@ -65,6 +82,7 @@ namespace LiteNetLib.Utils
             {
                 throw new ParseException("Undefined packet in NetDataReader");
             }
+
             return action;
         }
 
@@ -137,7 +155,7 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T>(NetDataWriter writer, T packet) where T : class, new()
+            T>(NetDataWriter writer, T packet) where T : class, new()
         {
             WriteHash<T>(writer);
             _netSerializer.Serialize(writer, packet);
@@ -170,7 +188,7 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T>(Action<T> onReceive, Func<T> packetConstructor) where T : class, new()
+            T>(Action<T> onReceive, Func<T> packetConstructor) where T : class, new()
         {
             _netSerializer.Register<T>();
             _callbacks[GetHash<T>()] = (reader, userData) =>
@@ -191,7 +209,7 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T, TUserData>(Action<T, TUserData> onReceive, Func<T> packetConstructor) where T : class, new()
+            T, TUserData>(Action<T, TUserData> onReceive, Func<T> packetConstructor) where T : class, new()
         {
             _netSerializer.Register<T>();
             _callbacks[GetHash<T>()] = (reader, userData) =>
@@ -212,17 +230,17 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T>(Action<T> onReceive) where T : class, new()
+            T>(Action<T> onReceive) where T : class, new()
         {
             _netSerializer.Register<T>();
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                _netSerializer.Deserialize(reader, reference);
-                _actions.Enqueue(() =>
+                lock (threadLock)
                 {
-                    onReceive(reference);
-                });
+                    _netSerializer.Deserialize(reader, reference);
+                    _actions.Enqueue(() => { onReceive(reference); });
+                }
             };
         }
 
@@ -236,14 +254,17 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T>(Action<T> onReceive) where T : class, new()
+            T>(Action<T> onReceive) where T : class, new()
         {
             _netSerializer.Register<T>();
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                _netSerializer.Deserialize(reader, reference);
-                onReceive(reference);
+                lock (threadLock)
+                {
+                    _netSerializer.Deserialize(reader, reference);
+                    onReceive(reference);
+                }
             };
         }
 
@@ -257,17 +278,14 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T, TUserData>(Action<T, TUserData> onReceive) where T : class, new()
+            T, TUserData>(Action<T, TUserData> onReceive) where T : class, new()
         {
             _netSerializer.Register<T>();
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
                 _netSerializer.Deserialize(reader, reference);
-                _actions.Enqueue(() =>
-                {
-                    onReceive(reference, (TUserData)userData);
-                });
+                _actions.Enqueue(() => { onReceive(reference, (TUserData)userData); });
             };
         }
 
@@ -281,7 +299,7 @@ namespace LiteNetLib.Utils
 #if NET5_0_OR_GREATER
             [DynamicallyAccessedMembers(Trimming.SerializerMemberTypes)]
 #endif
-        T, TUserData>(Action<T, TUserData> onReceive) where T : class, new()
+            T, TUserData>(Action<T, TUserData> onReceive) where T : class, new()
         {
             _netSerializer.Register<T>();
             var reference = new T();
@@ -323,10 +341,7 @@ namespace LiteNetLib.Utils
             {
                 var reference = new T();
                 reference.Deserialize(reader);
-                _actions.Enqueue(() =>
-                {
-                    onReceive(reference, (TUserData)userData);
-                });
+                _actions.Enqueue(() => { onReceive(reference, (TUserData)userData); });
             };
         }
 
@@ -348,10 +363,7 @@ namespace LiteNetLib.Utils
             {
                 var reference = new T();
                 reference.Deserialize(reader);
-                _actions.Enqueue(() =>
-                {
-                    onReceive(reference);
-                });
+                _actions.Enqueue(() => { onReceive(reference); });
             };
         }
 
