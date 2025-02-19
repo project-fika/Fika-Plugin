@@ -260,7 +260,10 @@ namespace Fika.Core.Coop.Components
 
         private void SyncPlayersWithServer()
         {
-            AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
+            AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
+            {
+                NetId = MyPlayer.NetId
+            };
 
             if (Players.Count > 0)
             {
