@@ -30,7 +30,7 @@ namespace Fuyu.Platform.Common.Http
             {
                 // set cookies in header instead
                 UseCookies = false,
-                ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };
 
             Httpv = new HttpClient(handler);
