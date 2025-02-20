@@ -305,7 +305,10 @@ namespace Fika.Core.Networking
                                     if (player.ProfileId == ProfileId)
                                     {
                                         IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(iPlayer.ProfileId);
-                                        borderZone.ProcessIncomingPacket(playerBridge, true);
+                                        if (playerBridge != null)
+                                        {
+                                            borderZone.ProcessIncomingPacket(playerBridge, true); 
+                                        }
                                     }
                                 }
                             }
