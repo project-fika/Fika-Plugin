@@ -177,7 +177,7 @@ namespace Fika.Core.UI.Custom
             });
 
             //Todo: Lacyway: Dropdown!!!!!
-            if (availableHeadlesses.Length < 0)
+            if (availableHeadlesses.Length == 0)
             {
                 fikaMatchMakerUi.DedicatedToggle.interactable = false;
                 TextMeshProUGUI dedicatedText = fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
