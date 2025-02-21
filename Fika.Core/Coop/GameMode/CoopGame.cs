@@ -1150,49 +1150,50 @@ namespace Fika.Core.Coop.GameMode
                 gameWorld.BtrController = new BTRControllerClass(gameWorld);
             }
 
-            /*bool transitActive;
-			if (instance == null)
-			{
-				transitActive = false;
-			}
-			else
-			{
-				BackendConfigSettingsClass.TransitSettingsClass transitSettings = instance.transitSettings;
-				transitActive = transitSettings != null && transitSettings.active;
-			}
-			if (transitActive && FikaPlugin.Instance.EnableTransits)
-			{
-				gameWorld.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
-					Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
-					Profile_0, localRaidSettings_0);
-			}
-			else
-			{
-				Logger.LogInfo("Transits are disabled");
-				TransitControllerAbstractClass.DisableTransitPoints();
-			}*/
+            if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
+            {
+                bool transitActive;
+                if (instance == null)
+                {
+                    transitActive = false;
+                }
+                else
+                {
+                    BackendConfigSettingsClass.TransitSettingsClass transitSettings = instance.transitSettings;
+                    transitActive = transitSettings != null && transitSettings.active;
+                }
+                if (transitActive)
+                {
+                    gameWorld.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
+                        Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
+                        Profile_0, localRaidSettings_0);
+                }
+                else
+                {
+                    Logger.LogInfo("Transits are disabled");
+                    TransitControllerAbstractClass.DisableTransitPoints();
+                } 
+            }
 
             /*bool runddansActive;
-			if (instance == null)
-			{
-				runddansActive = false;
-			}
-			else
-			{
-				GClass1505 runddansSettings = instance.runddansSettings;
-				runddansActive = runddansSettings != null && runddansSettings.active;
-			}
-			if (runddansActive)
-			{
-				gameWorld.RunddansController = new GClass2045(instance.runddansSettings, Location_0);
-			}
-			else
-			{
-				GClass2043.ToggleEventEnvironment(false);
-			}*/
+            if (instance == null)
+            {
+                runddansActive = false;
+            }
+            else
+            {
+                BackendConfigSettingsClass.GClass1506 runddansSettings = instance.runddansSettings;
+                runddansActive = runddansSettings != null && runddansSettings.active;
+            }
+            if (runddansActive)
+            {
+                gameWorld.RunddansController = new GClass2046(instance.runddansSettings, Location_0);
+            }
+            else
+            {
+                GClass2045.ToggleEventEnvironment(false);
+            }*/
 
-            Logger.LogInfo("Transits are disabled");
-            TransitControllerAbstractClass.DisableTransitPoints();
             GClass2045.ToggleEventEnvironment(false);
             gameWorld.ClientBroadcastSyncController = new GClass1094();
 

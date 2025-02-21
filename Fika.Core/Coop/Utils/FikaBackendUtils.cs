@@ -47,9 +47,9 @@ namespace Fika.Core.Coop.Utils
         public static string PMCName { get; internal set; }
         public static bool IsScav { get; internal set; }
         public static EMatchmakerType MatchingType { get; internal set; } = EMatchmakerType.Single;
-        public static bool IsHeadless = false;
+        public static bool IsHeadless { get; set; }
         public static bool IsReconnect { get; internal set; }
-        public static bool IsHeadlessGame { get; set; } = false;
+        public static bool IsHeadlessGame { get; set; }
         public static bool IsHeadlessRequester { get; set; }
         public static bool IsTransit { get; internal set; }
         public static bool IsSpectator { get; internal set; }
