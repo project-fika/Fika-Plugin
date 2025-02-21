@@ -13,7 +13,6 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using TMPro;
 using UnityEngine;
@@ -176,7 +175,6 @@ namespace Fika.Core.UI.Custom
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
 
-            //Todo: Lacyway: Dropdown!!!!!
             if (availableHeadlesses.Length == 0)
             {
                 fikaMatchMakerUi.DedicatedToggle.interactable = false;
@@ -190,11 +188,30 @@ namespace Fika.Core.UI.Custom
                 dediTooltipArea.enabled = true;
                 dediTooltipArea.SetMessageText(LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized());
             }
-            else
+
+            if (availableHeadlesses.Length >= 1)
             {
                 if (FikaPlugin.UseHeadlessIfAvailable.Value)
                 {
                     fikaMatchMakerUi.DedicatedToggle.isOn = true;
+                }
+
+                fikaMatchMakerUi.HeadlessSelection.gameObject.SetActive(true);
+                fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((value) =>
+                {
+                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
+                });
+
+                fikaMatchMakerUi.HeadlessSelection.ClearOptions();
+
+                List<TMP_Dropdown.OptionData> optionDatas = [];
+                for (int i = 0; i < availableHeadlesses.Length; i++)
+                {
+                    AvailableHeadlessClientsRequest user = availableHeadlesses[i];
+                    optionDatas.Add(new()
+                    {
+                        text = user.Alias
+                    });
                 }
             }
 
@@ -205,7 +222,7 @@ namespace Fika.Core.UI.Custom
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                if (!fikaMatchMakerUi.DediSelection.active)
+                if (!fikaMatchMakerUi.DediSelection.activeSelf)
                 {
                     fikaMatchMakerUi.DediSelection.SetActive(true);
                 }
@@ -224,7 +241,6 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            //fikaMatchMakerUi.DedicatedToggle.isOn = false;
             fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
@@ -298,10 +314,18 @@ namespace Fika.Core.UI.Custom
 
                     RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
+                    string headlessSessionId = availableHeadlesses[0].HeadlessSessionID;
+                    bool singleHeadless = !fikaMatchMakerUi.HeadlessSelection.isActiveAndEnabled;
+
+                    if (!singleHeadless)
+                    {
+                        int selectedHeadless = fikaMatchMakerUi.HeadlessSelection.value;
+                        headlessSessionId = availableHeadlesses[selectedHeadless].HeadlessSessionID;
+                    }
+
                     StartHeadlessRequest request = new()
                     {
-                        //Todo: Lacyway: Dropdown!!!!!
-                        HeadlessSessionID = availableHeadlesses.First().HeadlessSessionID,
+                        HeadlessSessionID = headlessSessionId,
                         Time = raidSettings.SelectedDateTime,
                         LocationId = raidSettings.SelectedLocation._Id,
                         SpawnPlace = raidSettings.PlayersSpawnPlace,
