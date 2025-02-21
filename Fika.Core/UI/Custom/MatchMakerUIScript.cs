@@ -204,13 +204,10 @@ namespace Fika.Core.UI.Custom
 
                 fikaMatchMakerUi.HeadlessSelection.ClearOptions();
 
-                FikaGlobals.LogWarning($"I HAVE {availableHeadlesses.Length} HEADLESSESSSSS AVAILABLE");
-
                 List<TMP_Dropdown.OptionData> optionDatas = [];
                 for (int i = 0; i < availableHeadlesses.Length; i++)
                 {
                     AvailableHeadlessClientsRequest user = availableHeadlesses[i];
-                    FikaGlobals.LogWarning($"HEADLESS: {user.Alias}");
                     optionDatas.Add(new()
                     {
                         text = user.Alias
