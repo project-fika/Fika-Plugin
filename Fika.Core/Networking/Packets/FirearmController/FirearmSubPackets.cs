@@ -700,6 +700,7 @@ namespace Fika.Core.Networking
                     }
                     if (magazine != null)
                     {
+                        controller.FastForwardCurrentState();
                         controller.ReloadMag(magazine, gridItemAddress, null);
                     }
                     else
@@ -748,6 +749,7 @@ namespace Fika.Core.Networking
                         }
                         if (result.Value is MagazineItemClass magazine)
                         {
+                            controller.FastForwardCurrentState();
                             controller.QuickReloadMag(magazine, null);
                         }
                         else
@@ -813,6 +815,7 @@ namespace Fika.Core.Networking
                         {
                             List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
                             AmmoPackReloadingClass ammoPack = new(bullets);
+                            controller.FastForwardCurrentState();
                             controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
                         }
                     }
@@ -879,6 +882,7 @@ namespace Fika.Core.Networking
                         {
                             List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
                             AmmoPackReloadingClass ammoPack = new(bullets);
+                            controller.FastForwardCurrentState();
                             controller.CurrentOperation.ReloadCylinderMagazine(ammoPack, null, null);
                         }
                     }
@@ -929,6 +933,7 @@ namespace Fika.Core.Networking
                 {
                     List<AmmoItemClass> ammo = controller.FindAmmoByIds(AmmoIds);
                     AmmoPackReloadingClass ammoPack = new(ammo);
+                    controller.FastForwardCurrentState();
                     controller.ReloadGrenadeLauncher(ammoPack, null);
                 }
             }
@@ -983,6 +988,7 @@ namespace Fika.Core.Networking
 
                     if (ammoPack != null)
                     {
+                        controller.FastForwardCurrentState();
                         controller.ReloadBarrels(ammoPack, gridItemAddress, null);
                     }
                     else
