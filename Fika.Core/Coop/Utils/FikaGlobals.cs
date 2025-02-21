@@ -10,6 +10,7 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -280,6 +281,46 @@ namespace Fika.Core.Coop.Utils
         public static bool IsVisible(this ObservedCorpse corpse)
         {
             return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
+        }
+
+        public static void LogInfo(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogInfo($"[{caller}]: {message}");
+        }
+
+        public static void LogWarning(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogWarning($"[{caller}]: {message}");
+        }
+
+        public static void LogError(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogError($"[{caller}]: {message}");
+        }
+
+        public static void LogFatal(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogFatal($"[{caller}]: {message}");
         }
     }
 }
