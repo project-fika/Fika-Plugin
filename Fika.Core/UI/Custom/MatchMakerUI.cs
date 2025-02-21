@@ -49,6 +49,8 @@ public class MatchMakerUI : MonoBehaviour
     public TextMeshProUGUI LoadingScreenInfoText;
     [SerializeField]
     public TextMeshProUGUI JoinAsSpectatorText;
+    [SerializeField]
+    public TMP_Dropdown HeadlessSelection;
 
     protected void Awake()
     {
