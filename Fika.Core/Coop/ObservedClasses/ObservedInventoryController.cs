@@ -132,7 +132,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private void HandleInProcess(Item item, ItemAddress to, GInterface412 operation, Callback callback)
         {
-            Player.Class1232 handler = new()
+            Player.Class1231 handler = new()
             {
                 player_0 = coopPlayer,
                 callback = callback
