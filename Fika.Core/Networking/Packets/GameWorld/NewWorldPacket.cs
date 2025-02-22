@@ -25,7 +25,6 @@ namespace Fika.Core.Networking
             /*int ragdollPacketsCount = reader.GetInt();
             if (ragdollPacketsCount > 0)
             {
-                FikaGlobals.LogInfo($"I received {ragdollPacketsCount} ragdoll packets");
                 RagdollPackets = [];
                 for (int i = 0; i < ragdollPacketsCount; i++)
                 {
@@ -46,7 +45,6 @@ namespace Fika.Core.Networking
             int grenadePacketsCount = reader.GetInt();
             if (grenadePacketsCount > 0)
             {
-                FikaGlobals.LogInfo($"I received {grenadePacketsCount} grenade packets");
                 GrenadePackets = [];
                 for (int i = 0; i < grenadePacketsCount; i++)
                 {
@@ -60,7 +58,6 @@ namespace Fika.Core.Networking
             /*writer.Put(RagdollPackets.Count);
             for (int i = 0; i < RagdollPackets.Count; i++)
             {
-                FikaGlobals.LogInfo("Writing ragdoll struct");
                 writer.PutRagdollStruct(RagdollPackets[i]);
             }*/
 
@@ -73,7 +70,6 @@ namespace Fika.Core.Networking
             writer.Put(GrenadePackets.Count);
             for (int i = 0; i < GrenadePackets.Count; i++)
             {
-                FikaGlobals.LogInfo("Writing grenade struct");
                 writer.PutGrenadeStruct(GrenadePackets[i]);
             }
         }
