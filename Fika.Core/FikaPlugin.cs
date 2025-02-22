@@ -24,6 +24,7 @@ using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
 using SPT.SinglePlayer.Patches.MainMenu;
+using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
@@ -1353,6 +1354,7 @@ namespace Fika.Core
             new ScavExfilPatch().Disable();
             new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
             new MatchStartServerLocationPatch().Disable();
+            new QuestAchievementRewardInRaidPatch().Disable();
         }
 
         public void FixSPTBugPatches()
