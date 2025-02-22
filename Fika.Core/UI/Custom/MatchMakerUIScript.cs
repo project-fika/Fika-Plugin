@@ -385,6 +385,7 @@ namespace Fika.Core.UI.Custom
         private void ToggleLoading(bool enabled)
         {
             fikaMatchMakerUi.RaidGroupHostButton.interactable = !enabled;
+            fikaMatchMakerUi.DediSelection.SetActive(!enabled);
             fikaMatchMakerUi.StartButton.interactable = !enabled;
             fikaMatchMakerUi.ServerBrowserPanel.SetActive(!enabled);
 
