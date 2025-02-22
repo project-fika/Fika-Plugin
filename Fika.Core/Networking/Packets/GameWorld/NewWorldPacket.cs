@@ -35,7 +35,7 @@ namespace Fika.Core.Networking
             int artilleryPacketsCount = reader.GetInt();
             if (artilleryPacketsCount > 0)
             {
-                ArtilleryPackets = [];
+                ArtilleryPackets = new(artilleryPacketsCount);
                 for (int i = 0; i < artilleryPacketsCount; i++)
                 {
                     ArtilleryPackets.Add(reader.GetArtilleryStruct());
@@ -45,7 +45,7 @@ namespace Fika.Core.Networking
             int grenadePacketsCount = reader.GetInt();
             if (grenadePacketsCount > 0)
             {
-                GrenadePackets = [];
+                GrenadePackets = new(grenadePacketsCount);
                 for (int i = 0; i < grenadePacketsCount; i++)
                 {
                     GrenadePackets.Add(reader.GetGrenadeStruct());
