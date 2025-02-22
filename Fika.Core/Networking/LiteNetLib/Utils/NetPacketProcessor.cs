@@ -34,16 +34,9 @@ namespace LiteNetLib.Utils
 
         // FIKA
         private readonly ConcurrentQueue<Action> _actions = new();
-        private readonly bool useLock;
-        private readonly object threadLock;
 
         public NetPacketProcessor(bool multiThreaded)
         {
-            useLock = multiThreaded;
-            if (useLock)
-            {
-                threadLock = new();
-            }
             _netSerializer = new NetSerializer();
         }
 
@@ -235,11 +228,8 @@ namespace LiteNetLib.Utils
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                lock (threadLock)
-                {
-                    _netSerializer.Deserialize(reader, reference);
-                    _actions.Enqueue(() => { onReceive(reference); });
-                }
+                _netSerializer.Deserialize(reader, reference);
+                _actions.Enqueue(() => { onReceive(reference); });
             };
         }
 
@@ -259,11 +249,8 @@ namespace LiteNetLib.Utils
             var reference = new T();
             _callbacks[GetHash<T>()] = (reader, userData) =>
             {
-                lock (threadLock)
-                {
-                    _netSerializer.Deserialize(reader, reference);
-                    onReceive(reference);
-                }
+                _netSerializer.Deserialize(reader, reference);
+                onReceive(reference);
             };
         }
 
