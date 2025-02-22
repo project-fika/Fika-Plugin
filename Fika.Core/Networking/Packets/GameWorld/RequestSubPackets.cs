@@ -103,7 +103,7 @@ namespace Fika.Core.Networking
             public void HandleRequest(NetPeer peer, FikaServer server)
             {
                 CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null)
+                if (coopGame != null && coopGame.SeasonsSettings != null && coopGame.WeatherClasses != null)
                 {
                     RequestPacket response = new()
                     {
