@@ -226,6 +226,7 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializableMT<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializableMT<SideEffectPacket>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<RequestPacket>(OnRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializableMT<NewWorldPacket>(OnNewWorldPacketReceived);
 
             packetProcessor.SubscribeReusableMT<WorldPacket>(OnWorldPacketReceived);
             packetProcessor.SubscribeReusableMT<SyncObjectPacket>(OnSyncObjectPacketReceived);
@@ -271,14 +272,62 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializable<RequestPacket>(OnRequestPacketReceived);
+            packetProcessor.SubscribeNetSerializable<NewWorldPacket>(OnNewWorldPacketReceived);
 
-            packetProcessor.SubscribeReusable<WorldPacket>(OnWorldPacketReceived);
             packetProcessor.SubscribeReusable<SyncObjectPacket>(OnSyncObjectPacketReceived);
         }
 
         private void OnRequestPacketReceived(RequestPacket packet)
         {
             packet.RequestSubPacket.HandleResponse();
+        }
+
+        private void OnNewWorldPacketReceived(NewWorldPacket packet)
+        {
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld == null)
+            {
+                logger.LogError("OnNewWorldPacketReceived: GameWorld was null!");
+                return;
+            }
+
+            if (packet.RagdollPackets != null)
+            {
+                for (int i = 0; i < packet.RagdollPackets.Count; i++)
+                {
+                    RagdollPacketStruct ragdollPacket = packet.RagdollPackets[i];
+                    if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
+                    {
+                        corpse.ApplyNetPacket(ragdollPacket);
+                        if (ragdollPacket.Done && !corpse.IsVisible())
+                        {
+                            corpse.ForceApplyTransformSync(ragdollPacket.TransformSyncs);
+                        }
+                    }
+                } 
+            }
+
+            if (packet.ArtilleryPackets != null)
+            {
+                if (packet.ArtilleryPackets.Count > 0)
+                {
+                    List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
+                    gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
+                } 
+            }
+
+            if (packet.GrenadePackets != null)
+            {
+                for (int i = 0; i < packet.GrenadePackets.Count; i++)
+                {
+                    GrenadeDataPacketStruct throwablePacket = packet.GrenadePackets[i];
+                    GClass794<int, Throwable> grenades = gameWorld.Grenades;
+                    if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
+                    {
+                        throwable.ApplyNetPacket(throwablePacket);
+                    }
+                } 
+            }
         }
 
         private void OnWorldPacketReceived(WorldPacket packet)

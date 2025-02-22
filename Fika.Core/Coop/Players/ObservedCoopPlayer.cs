@@ -19,6 +19,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
+using JetBrains.Annotations;
 using JsonType;
 using System;
 using System.Collections;
@@ -843,7 +844,8 @@ namespace Fika.Core.Coop.Players
             }
 
             Corpse corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
-            CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
+            corpse.IsZombieCorpse = UsedSimplifiedSkeleton;
+            //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
             return corpse;
         }
 

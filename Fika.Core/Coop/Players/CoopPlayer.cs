@@ -726,7 +726,8 @@ namespace Fika.Core.Coop.Players
             if (FikaBackendUtils.IsServer)
             {
                 Corpse corpse = base.CreateCorpse();
-                CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
+                corpse.IsZombieCorpse = UsedSimplifiedSkeleton;
+                //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
                 return corpse;
             }
 
