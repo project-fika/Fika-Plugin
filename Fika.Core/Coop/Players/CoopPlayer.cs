@@ -479,10 +479,18 @@ namespace Fika.Core.Coop.Players
 
         protected void FindKillerWeapon()
         {
+            if (!IsYourPlayer && LastAggressor.GroupId != "Fika")
+            {
+#if DEBUG
+                FikaGlobals.LogWarning($"Skipping because {LastAggressor.Profile.Nickname} is not a player"); 
+#endif
+                return;
+            }
+
             Item item = FindWeapon();
             if (item == null)
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"Could not find killer weapon: {lastWeaponId}!");
+                FikaGlobals.LogError($"Could not find killer weapon: {lastWeaponId}!");
                 return;
             }
             LastDamageInfo.Weapon = item;
