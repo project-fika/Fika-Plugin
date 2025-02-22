@@ -110,6 +110,7 @@ namespace Fika.Core.Coop.Players
             questController.Init();
             GClass3701 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
             achievementsController.Init();
+            achievementsController.AchievementUnlocked += player.UnlockAchievement;
             achievementsController.Run();
             questController.Run();
             GClass3693 prestigeController = new(profile, inventoryController, questController.Quests, session);
@@ -147,7 +148,7 @@ namespace Fika.Core.Coop.Players
             }
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, LocalPlayer.Class1655.class1655_0.method_0);
+            player._handsController.Spawn(1f, Class1655.class1655_0.method_0);
 
             player.AIData = new GClass563(null, player);
 
@@ -170,6 +171,11 @@ namespace Fika.Core.Coop.Players
             player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName);
 
             return player;
+        }
+
+        private void UnlockAchievement(string tpl)
+        {
+            _achievementsController.UnlockAchievementForced(tpl);
         }
 
         public override void CreateNestedSource()
@@ -1453,8 +1459,17 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Enabled = false;
                 PacketSender.DestroyThis();
                 PacketSender = null;
-            }
+            }            
             base.Dispose();
+        }
+
+        public override void OnGameSessionEnd(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
+        {
+            if (_achievementsController != null)
+            {
+                _achievementsController.AchievementUnlocked -= UnlockAchievement; 
+            }
+            base.OnGameSessionEnd(exitStatus, pastTime, locationId, exitName);
         }
 
         public override void OnVaulting()
