@@ -103,7 +103,7 @@ namespace Fika.Core.Networking
             public void HandleRequest(NetPeer peer, FikaServer server)
             {
                 CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null && coopGame.SeasonsSettings != null && coopGame.WeatherClasses != null)
+                if (coopGame != null && coopGame.WeatherClasses != null && coopGame.WeatherClasses.Length > 0)
                 {
                     RequestPacket response = new()
                     {
@@ -120,7 +120,7 @@ namespace Fika.Core.Networking
                     return;
                 }
 
-                FikaPlugin.Instance.FikaLogger.LogError("WeatherRequest::HandleRequest: CoopGame was null upon receiving packet!");
+                FikaPlugin.Instance.FikaLogger.LogError("WeatherRequest::HandleRequest: CoopGame or WeatherClasses was null upon receiving packet!");
             }
 
             public void HandleResponse()
