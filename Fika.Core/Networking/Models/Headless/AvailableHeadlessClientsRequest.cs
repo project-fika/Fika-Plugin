@@ -10,7 +10,7 @@ namespace Fika.Core.Networking.Http
         [DataMember(Name = "alias")]
         public string Alias { get; set; }
 
-        public AvailableHeadlessClientsRequest(string headlessSessionID, string alias) 
+        public AvailableHeadlessClientsRequest(string headlessSessionID, string alias)
         {
             HeadlessSessionID = headlessSessionID;
             Alias = alias;

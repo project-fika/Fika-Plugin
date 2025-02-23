@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.ClientClasses
                     Packet = packet
                 };
                 coopBot.PacketSender.SendPacket(ref netPacket);
-            }            
+            }
         }
     }
 }

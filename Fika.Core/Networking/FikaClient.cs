@@ -299,7 +299,7 @@ namespace Fika.Core.Networking
                             corpse.ForceApplyTransformSync(ragdollPacket.TransformSyncs);
                         }
                     }
-                } 
+                }
             }
 
             if (packet.ArtilleryPackets != null)
@@ -308,7 +308,7 @@ namespace Fika.Core.Networking
                 {
                     List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
                     gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
-                } 
+                }
             }
 
             if (packet.GrenadePackets != null)
@@ -321,7 +321,7 @@ namespace Fika.Core.Networking
                     {
                         throwable.ApplyNetPacket(throwablePacket);
                     }
-                } 
+                }
             }
 
             if (packet.SyncObjectPackets != null)
@@ -543,7 +543,7 @@ namespace Fika.Core.Networking
             {
                 packetProcessor.SubscribeNetSerializable<SpawnItemPacket>(OnSpawnItemPacketReceived);
             }
-        } 
+        }
 #endif
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet)

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
@@ -32,7 +31,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             lock (threadLock)
             {
                 Offset = serverOffset;
-                stopwatch.Restart(); 
+                stopwatch.Restart();
             }
         }
 
@@ -44,7 +43,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             lock (threadLock)
             {
                 stopwatch.Reset();
-                Offset = 0; 
+                Offset = 0;
             }
         }
     }

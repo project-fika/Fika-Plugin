@@ -381,7 +381,7 @@ namespace Fika.Core.Utils
         public const string BEPINEX_SMOOTHING_RATE_T = "F_BepInEx_SmoothingRate_T";
         public const string BEPINEX_SMOOTHING_RATE_D = "F_BepInEx_SmoothingRate_D";
         public const string BEPINEX_NET_MULTITHREAD_T = "F_BepInEx_NetMultiThread_T";
-        public const string BEPINEX_NET_MULTITHREAD_D = "F_BepInEx_NetMultiThread_D";        
+        public const string BEPINEX_NET_MULTITHREAD_D = "F_BepInEx_NetMultiThread_D";
 
         public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
         public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";

@@ -1172,7 +1172,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     Logger.LogInfo("Transits are disabled");
                     TransitControllerAbstractClass.DisableTransitPoints();
-                } 
+                }
             }
 
             /*bool runddansActive;

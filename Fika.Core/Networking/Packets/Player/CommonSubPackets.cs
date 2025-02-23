@@ -434,7 +434,8 @@ namespace Fika.Core.Networking
                 if (Command is <= MountingPacketStruct.EMountingCommand.Exit)
                 {
                     IsMounted = reader.GetBool();
-                };
+                }
+                ;
                 if (Command == MountingPacketStruct.EMountingCommand.Enter)
                 {
                     MountDirection = reader.GetVector3();

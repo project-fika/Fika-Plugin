@@ -26,7 +26,7 @@ namespace Fika.Core.Networking
         {
             writer.Reset();
             return writer;
-        }        
+        }
     }
 
     public class FikaReader(ArraySegment<byte> segment) : EFTReaderClass(segment)

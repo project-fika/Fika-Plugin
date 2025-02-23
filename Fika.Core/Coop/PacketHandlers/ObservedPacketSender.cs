@@ -6,7 +6,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Fika.Core.Coop.PacketHandlers

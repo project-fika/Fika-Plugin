@@ -20,7 +20,7 @@ namespace Fika.Core.Networking
             NetId = reader.GetInt();
             Type = (EFirearmSubPacketType)reader.GetByte();
             SubPacket = reader.GetFirearmSubPacket(Type);
-        }        
+        }
 
         public void Serialize(NetDataWriter writer)
         {

@@ -12,7 +12,6 @@ using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
-using Fika.Core.Coop.Components;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
@@ -488,7 +487,7 @@ namespace Fika.Core.Coop.Players
             if (!IsYourPlayer && LastAggressor.GroupId != "Fika")
             {
 #if DEBUG
-                FikaGlobals.LogWarning($"Skipping because {LastAggressor.Profile.Nickname} is not a player"); 
+                FikaGlobals.LogWarning($"Skipping because {LastAggressor.Profile.Nickname} is not a player");
 #endif
                 return;
             }
@@ -1466,7 +1465,7 @@ namespace Fika.Core.Coop.Players
                 PacketSender.Enabled = false;
                 PacketSender.DestroyThis();
                 PacketSender = null;
-            }            
+            }
             base.Dispose();
         }
 
@@ -1474,7 +1473,7 @@ namespace Fika.Core.Coop.Players
         {
             if (_achievementsController != null)
             {
-                _achievementsController.AchievementUnlocked -= UnlockAchievement; 
+                _achievementsController.AchievementUnlocked -= UnlockAchievement;
             }
             base.OnGameSessionEnd(exitStatus, pastTime, locationId, exitName);
         }

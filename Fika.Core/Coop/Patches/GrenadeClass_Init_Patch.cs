@@ -1,6 +1,4 @@
-﻿using Comfort.Common;
-using Fika.Core.Coop.GameMode;
-using Fika.Core.Networking;
+﻿using Fika.Core.Coop.GameMode;
 using SPT.Reflection.Patching;
 using System.Reflection;
 

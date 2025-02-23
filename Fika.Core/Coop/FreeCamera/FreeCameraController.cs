@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.FreeCamera
                     if (playerUI == null)
                     {
                         return null;
-                    } 
+                    }
                 }
 
                 return playerUI;

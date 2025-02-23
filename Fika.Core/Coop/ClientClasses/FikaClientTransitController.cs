@@ -1,5 +1,4 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;

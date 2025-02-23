@@ -521,7 +521,7 @@ namespace Fika.Core.Networking
             {
                 packetProcessor.SubscribeNetSerializable<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
             }
-        } 
+        }
 #endif
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet, NetPeer peer)
