@@ -15,7 +15,6 @@ namespace Fika.Core.Coop.HostClasses
     {
         public List<LootSyncStruct> LootSyncPackets;
         public NewWorldPacket WorldPacket;
-        public SyncObjectPacket SyncObjectPacket;
 
         private FikaServer server;
         private GameWorld gameWorld;
@@ -31,9 +30,9 @@ namespace Fika.Core.Coop.HostClasses
             {
                 ArtilleryPackets = [],
                 RagdollPackets = [],
-                GrenadePackets = []
+                GrenadePackets = [],
+                SyncObjectPackets = []
             };
-            hostWorld.SyncObjectPacket = new();
             return hostWorld;
         }
 
@@ -62,11 +61,6 @@ namespace Fika.Core.Coop.HostClasses
 
             gameWorld.GrenadesCriticalStates.Clear();
             gameWorld.ArtilleryProjectilesStates.Clear();
-
-            if (SyncObjectPacket.HasData)
-            {
-                server.SendReusableToAll(SyncObjectPacket, DeliveryMethod.ReliableOrdered);
-            }
         }
 
         public void UpdateLootItems(GClass794<int, LootItem> lootItems)

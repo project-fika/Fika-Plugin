@@ -227,9 +227,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializableMT<SideEffectPacket>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<RequestPacket>(OnRequestPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<NewWorldPacket>(OnNewWorldPacketReceived);
-
-            packetProcessor.SubscribeReusableMT<WorldPacket>(OnWorldPacketReceived);
-            packetProcessor.SubscribeReusableMT<SyncObjectPacket>(OnSyncObjectPacketReceived);
         }
 
         private void RegisterPackets()
@@ -273,8 +270,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializable<RequestPacket>(OnRequestPacketReceived);
             packetProcessor.SubscribeNetSerializable<NewWorldPacket>(OnNewWorldPacketReceived);
-
-            packetProcessor.SubscribeReusable<SyncObjectPacket>(OnSyncObjectPacketReceived);
         }
 
         private void OnRequestPacketReceived(RequestPacket packet)
@@ -328,9 +323,15 @@ namespace Fika.Core.Networking
                     }
                 } 
             }
+
+            if (packet.SyncObjectPackets != null)
+            {
+                CoopClientGameWorld clientGameWorld = (CoopClientGameWorld)gameWorld;
+                clientGameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.SyncObjectPackets);
+            }
         }
 
-        private void OnWorldPacketReceived(WorldPacket packet)
+        /*private void OnWorldPacketReceived(WorldPacket packet)
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null)
@@ -369,7 +370,7 @@ namespace Fika.Core.Networking
             }
 
             packet.Flush();
-        }
+        }*/
 
         private void OnSideEffectPacketReceived(SideEffectPacket packet)
         {
@@ -655,12 +656,12 @@ namespace Fika.Core.Networking
             packet.SubPacket.Execute();
         }
 
-        private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
+        /*private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
         {
             CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
             gameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.Packets);
             packet.Flush();
-        }
+        }*/
 
         private void OnReconnectPacketReceived(ReconnectPacket packet)
         {
@@ -1279,30 +1280,6 @@ namespace Fika.Core.Networking
             else
             {
                 packetProcessor.SubscribeNetSerializable(handle);
-            }
-        }
-
-        public void RegisterReusablePacket<T>(Action<T> handle) where T : class, IReusable, new()
-        {
-            if (MultiThreaded)
-            {
-                packetProcessor.SubscribeReusableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeReusable(handle);
-            }
-        }
-
-        public void RegisterReusablePacket<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
-        {
-            if (MultiThreaded)
-            {
-                packetProcessor.SubscribeReusableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeReusable(handle);
             }
         }
 

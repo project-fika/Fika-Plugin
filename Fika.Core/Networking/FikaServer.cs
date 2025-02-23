@@ -333,8 +333,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializableMT<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializableMT<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializableMT<RequestPacket, NetPeer>(OnRequestPacketReceived);
-
-            packetProcessor.SubscribeReusableMT<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
         }
 
         private void RegisterPackets()
@@ -368,8 +366,6 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializable<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializable<RequestPacket, NetPeer>(OnRequestPacketReceived);
-
-            packetProcessor.SubscribeReusable<SyncObjectPacket, NetPeer>(OnSyncObjectPacketReceived);
         }
 
         private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
@@ -616,29 +612,6 @@ namespace Fika.Core.Networking
                     SendDataToAll(ref response, DeliveryMethod.ReliableOrdered);
                 }
             }
-        }
-
-        private void OnSyncObjectPacketReceived(SyncObjectPacket packet, NetPeer peer)
-        {
-            foreach (AirplaneDataPacketStruct syncPacket in packet.Packets)
-            {
-                if (syncPacket.ObjectType == SynchronizableObjectType.Tripwire)
-                {
-                    CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
-                    TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(syncPacket.ObjectId);
-                    if (tripwire != null)
-                    {
-                        gameWorld.DeActivateTripwire(tripwire);
-                        continue;
-                    }
-
-                    logger.LogError($"OnSyncObjectPacketReceived: Tripwire with id {syncPacket.ObjectId} could not be found!");
-                    continue;
-                }
-
-                logger.LogWarning($"OnSyncObjectPacketReceived: Received a packet we shouldn't receive: {syncPacket.ObjectType}");
-            }
-            packet.Flush();
         }
 
         private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet, NetPeer peer)
@@ -1536,30 +1509,6 @@ namespace Fika.Core.Networking
             else
             {
                 packetProcessor.SubscribeNetSerializable(handle);
-            }
-        }
-
-        public void RegisterReusablePacket<T>(Action<T> handle) where T : class, IReusable, new()
-        {
-            if (MultiThreaded)
-            {
-                packetProcessor.SubscribeReusableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeReusable(handle);
-            }
-        }
-
-        public void RegisterReusablePacket<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
-        {
-            if (MultiThreaded)
-            {
-                packetProcessor.SubscribeReusableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeReusable(handle);
             }
         }
 

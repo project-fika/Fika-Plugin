@@ -897,7 +897,7 @@ namespace Fika.Core.Coop.Players
         public override void vmethod_4(TripwireSynchronizableObject tripwire)
         {
             base.vmethod_4(tripwire);
-            AirplaneDataPacketStruct packet = new()
+            AirplaneDataPacketStruct data = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
                 ObjectId = tripwire.ObjectId,
@@ -914,13 +914,20 @@ namespace Fika.Core.Coop.Players
             };
             UpdateInteractionCast();
 
+            GenericPacket packet = new()
+            {
+                NetId = NetId,
+                Type = EGenericSubPacketType.DisarmTripwire,
+                SubPacket = new GenericSubPackets.DisarmTripwire(data)
+            };
+
             if (FikaBackendUtils.IsServer)
             {
-                Singleton<CoopHostGameWorld>.Instance.FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
+                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 return;
             }
 
-            Singleton<CoopClientGameWorld>.Instance.FikaClientWorld.SyncObjectPacket.Packets.Add(packet);
+            Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
         }
 
         public override void ApplyCorpseImpulse()

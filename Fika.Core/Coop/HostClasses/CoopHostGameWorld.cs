@@ -169,7 +169,7 @@ namespace Fika.Core.Coop.HostClasses
                 Rotation = tripwire.transform.rotation.eulerAngles,
                 IsActive = true
             };
-            FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
+            FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
 
             base.TriggerTripwire(tripwire);
         }
@@ -191,7 +191,7 @@ namespace Fika.Core.Coop.HostClasses
                 Rotation = tripwire.transform.rotation.eulerAngles,
                 IsActive = true
             };
-            FikaHostWorld.SyncObjectPacket.Packets.Add(packet);
+            FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
 
             base.DeActivateTripwire(tripwire);
         }

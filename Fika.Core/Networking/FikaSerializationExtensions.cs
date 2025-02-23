@@ -1142,6 +1142,8 @@ namespace Fika.Core.Networking
                     return new BorderZoneEvent(reader);
                 case EGenericSubPacketType.Mine:
                     return new MineEvent(reader);
+                case EGenericSubPacketType.DisarmTripwire:
+                    return new DisarmTripwire(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
                     break;

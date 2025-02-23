@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿/*using System.Collections.Generic;
 
 namespace Fika.Core.Networking
 {
@@ -20,3 +20,4 @@ namespace Fika.Core.Networking
         }
     }
 }
+*/

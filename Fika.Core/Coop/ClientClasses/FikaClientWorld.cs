@@ -12,7 +12,6 @@ namespace Fika.Core.Coop.ClientClasses
     public class FikaClientWorld : World
     {
         public List<LootSyncStruct> LootSyncPackets;
-        public SyncObjectPacket SyncObjectPacket;
 
         private CoopClientGameWorld clientGameWorld;
         private FikaClient client;
@@ -22,7 +21,6 @@ namespace Fika.Core.Coop.ClientClasses
             FikaClientWorld clientWorld = gameWorld.gameObject.AddComponent<FikaClientWorld>();
             clientWorld.clientGameWorld = gameWorld;
             clientWorld.LootSyncPackets = new List<LootSyncStruct>(8);
-            clientWorld.SyncObjectPacket = new();
             clientWorld.client = Singleton<FikaClient>.Instance;
             clientWorld.client.FikaClientWorld = clientWorld;
             return clientWorld;
@@ -31,10 +29,6 @@ namespace Fika.Core.Coop.ClientClasses
         public void Update()
         {
             UpdateLootItems(clientGameWorld.LootItems);
-            if (SyncObjectPacket.HasData)
-            {
-                client.SendReusable(SyncObjectPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
-            }
         }
 
         public void UpdateLootItems(GClass794<int, LootItem> lootItems)

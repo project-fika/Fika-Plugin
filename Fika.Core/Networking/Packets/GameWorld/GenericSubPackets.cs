@@ -3,8 +3,10 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
+using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;
@@ -307,7 +309,7 @@ namespace Fika.Core.Networking
                                         IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(iPlayer.ProfileId);
                                         if (playerBridge != null)
                                         {
-                                            borderZone.ProcessIncomingPacket(playerBridge, true); 
+                                            borderZone.ProcessIncomingPacket(playerBridge, true);
                                         }
                                     }
                                 }
@@ -358,6 +360,44 @@ namespace Fika.Core.Networking
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(MinePosition);
+            }
+        }
+
+        public class DisarmTripwire : ISubPacket
+        {
+            public AirplaneDataPacketStruct Data;
+
+            public DisarmTripwire(AirplaneDataPacketStruct data)
+            {
+                Data = data;
+            }
+
+            public DisarmTripwire(NetDataReader reader)
+            {
+                Data = reader.GetAirplaneDataPacketStruct();
+            }
+
+            public void Execute(CoopPlayer player = null)
+            {
+                if (Data.ObjectType == SynchronizableObjectType.Tripwire)
+                {
+                    CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
+                    TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(Data.ObjectId);
+                    if (tripwire != null)
+                    {
+                        gameWorld.DeActivateTripwire(tripwire);
+                        return;
+                    }
+
+                    FikaGlobals.LogError($"OnSyncObjectPacketReceived: Tripwire with id {Data.ObjectId} could not be found!");
+                }
+
+                FikaGlobals.LogWarning($"OnSyncObjectPacketReceived: Received a packet we shouldn't receive: {Data.ObjectType}");
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.PutAirplaneDataPacketStruct(Data);
             }
         }
     }

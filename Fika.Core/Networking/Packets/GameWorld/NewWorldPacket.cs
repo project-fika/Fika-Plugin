@@ -1,5 +1,4 @@
-﻿using Fika.Core.Coop.Utils;
-using LiteNetLib.Utils;
+﻿using LiteNetLib.Utils;
 using System.Collections.Generic;
 
 namespace Fika.Core.Networking
@@ -9,6 +8,7 @@ namespace Fika.Core.Networking
         public List<RagdollPacketStruct> RagdollPackets;
         public List<ArtilleryPacketStruct> ArtilleryPackets;
         public List<GrenadeDataPacketStruct> GrenadePackets;
+        public List<AirplaneDataPacketStruct> SyncObjectPackets;
 
         public readonly bool HasData
         {
@@ -16,7 +16,8 @@ namespace Fika.Core.Networking
             {
                 return RagdollPackets.Count > 0
                     || ArtilleryPackets.Count > 0
-                    || GrenadePackets.Count > 0;
+                    || GrenadePackets.Count > 0
+                    || SyncObjectPackets.Count > 0;
             }
         }
 
@@ -51,6 +52,16 @@ namespace Fika.Core.Networking
                     GrenadePackets.Add(reader.GetGrenadeStruct());
                 }
             }
+
+            int syncObjectPacketsCount = reader.GetInt();
+            if (syncObjectPacketsCount > 0)
+            {
+                SyncObjectPackets = new(syncObjectPacketsCount);
+                for (int i = 0; i < syncObjectPacketsCount; i++)
+                {
+                    SyncObjectPackets.Add(reader.GetAirplaneDataPacketStruct());
+                }
+            }
         }
 
         public void Serialize(NetDataWriter writer)
@@ -71,6 +82,12 @@ namespace Fika.Core.Networking
             for (int i = 0; i < GrenadePackets.Count; i++)
             {
                 writer.PutGrenadeStruct(GrenadePackets[i]);
+            }
+
+            writer.Put(SyncObjectPackets.Count);
+            for (int i = 0; i < SyncObjectPackets.Count; i++)
+            {
+                writer.PutAirplaneDataPacketStruct(SyncObjectPackets[i]);
             }
         }
 
