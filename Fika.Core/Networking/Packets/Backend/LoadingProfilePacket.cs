@@ -13,7 +13,7 @@ namespace Fika.Core.Networking
             int count = reader.GetInt();
             if (count > 0)
             {
-                Profiles = [];
+                Profiles = new(count);
                 for (int i = 0; i < count; i++)
                 {
                     Profile profile = reader.GetProfile();
