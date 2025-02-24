@@ -244,7 +244,12 @@ namespace Fika.Core.Networking
             }
             else
             {
-                externalIp = FikaPlugin.Instance.WanIP?.ToString();
+                if (FikaPlugin.Instance.WanIP == null)
+                {
+                    throw new NullReferenceException("Failed to start Fika Server because WAN IP was null!");
+                }
+
+                externalIp = FikaPlugin.Instance.WanIP.ToString();
             }
 
             if (FikaPlugin.UseNatPunching.Value)
