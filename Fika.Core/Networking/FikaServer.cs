@@ -212,7 +212,6 @@ namespace Fika.Core.Networking
 #if DEBUG
             AddDebugPackets();
 #endif            
-
             if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
             {
                 bool upnpFailed = false;
@@ -245,9 +244,8 @@ namespace Fika.Core.Networking
             }
             else
             {
-                externalIp = FikaPlugin.Instance.WanIP.ToString();
+                externalIp = FikaPlugin.Instance.WanIP?.ToString();
             }
-
             if (FikaPlugin.UseNatPunching.Value)
             {
                 netServer.NatPunchModule.UnsyncedEvents = true;
