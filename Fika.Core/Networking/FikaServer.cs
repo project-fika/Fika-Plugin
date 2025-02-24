@@ -246,6 +246,7 @@ namespace Fika.Core.Networking
             {
                 externalIp = FikaPlugin.Instance.WanIP?.ToString();
             }
+
             if (FikaPlugin.UseNatPunching.Value)
             {
                 netServer.NatPunchModule.UnsyncedEvents = true;
