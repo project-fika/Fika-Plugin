@@ -212,7 +212,6 @@ namespace Fika.Core.Networking
 #if DEBUG
             AddDebugPackets();
 #endif            
-
             if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
             {
                 bool upnpFailed = false;
@@ -245,6 +244,11 @@ namespace Fika.Core.Networking
             }
             else
             {
+                if (FikaPlugin.Instance.WanIP == null)
+                {
+                    throw new NullReferenceException("Failed to start Fika Server because WAN IP was null!");
+                }
+
                 externalIp = FikaPlugin.Instance.WanIP.ToString();
             }
 

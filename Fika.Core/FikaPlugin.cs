@@ -399,6 +399,7 @@ namespace Fika.Core
             {
                 yield return null;
             }
+            
             WanIP = addressTask.Result;
 
             yield return new WaitForSeconds(5);

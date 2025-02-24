@@ -121,6 +121,11 @@ namespace Fika.Core.Networking.Http
             return GetJson<NatPunchServerConfigModel>("/fika/natpunchserver/config");
         }
 
+        public static HeadlessConfigModel GetHeadlessConfig()
+        {
+            return GetJson<HeadlessConfigModel>("/fika/headless/config");
+        }
+
         public static async Task UpdatePing(PingRequest data)
         {
             await PutJsonAsync("/fika/update/ping", data);
