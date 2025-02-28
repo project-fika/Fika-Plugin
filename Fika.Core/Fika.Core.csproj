@@ -41,6 +41,9 @@
     <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
     <Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
     <Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
+    <Reference Include="DOTween">
+      <HintPath>..\References\DOTween.dll</HintPath>
+    </Reference>
     <Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
     <Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />
     <Reference Include="Sirenix.Serialization" HintPath="..\References\Sirenix.Serialization.dll" Private="false" />

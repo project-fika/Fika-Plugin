@@ -87,6 +87,11 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
+        public override void InitVoip(EVoipState voipState)
+        {
+            // Do nothing
+        }
+
         public override void OnVaulting()
         {
             // Do nothing

@@ -2,6 +2,7 @@
 using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
+using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Utils;
@@ -83,6 +84,7 @@ namespace Fika.Core.Coop.Utils
             IsReconnect = false;
             ReconnectPosition = Vector3.zero;
             GroupPlayers?.Clear();
+            DissonanceComms_Start_Patch.IsReady = false;
         }
 
         public static bool IsServer

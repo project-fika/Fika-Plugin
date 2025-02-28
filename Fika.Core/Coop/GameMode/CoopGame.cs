@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio.RadioSystem;
 using CommonAssets.Scripts.Game;
+using Dissonance.Networking.Client;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
@@ -16,6 +17,7 @@ using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
 using EFT.InventoryLogic;
 using EFT.MovingPlatforms;
+using EFT.NextObservedPlayer;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
@@ -48,13 +50,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.SubPacket;
+using static WindowsManager;
 
 namespace Fika.Core.Coop.GameMode
 {
     /// <summary>
     /// Coop game used in Fika
     /// </summary>
-    public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame
+    public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IBotGame, IFikaGame, IClientHearingTable
     {
         public static CoopGame Instance
         {
@@ -116,6 +119,10 @@ namespace Fika.Core.Coop.GameMode
         private TimeSpan? sessionTime;
         private BotStateManager botStateManager;
         private ESeason season;
+        private CoopPlayer localPlayer;
+        private float voipDistance;
+        private CoopHandler coopHandler;
+
         BossSpawnScenario IBotGame.BossSpawnScenario
         {
             get
@@ -227,6 +234,9 @@ namespace Fika.Core.Coop.GameMode
                 new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
             localInstance = coopGame;
             coopGame.isServer = FikaBackendUtils.IsServer;
+            float hearingDistance = FikaGlobals.VOIPHandler.PushToTalkSettings.HearingDistance;
+            coopGame.voipDistance = hearingDistance * hearingDistance + 9;
+            ClientHearingTable.Instance = coopGame;
 
             if (timeAndWeather.TimeFlowType != ETimeFlowType.x1)
             {
@@ -1081,7 +1091,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (isServer)
             {
-                await NetManagerUtils.CreateCoopHandler();
+                await NetManagerUtils.CreateCoopHandler();                
             }
             else
             {
@@ -1201,7 +1211,7 @@ namespace Fika.Core.Coop.GameMode
             if (config.FixedFrameRate > 0f)
             {
                 FixedDeltaTime = 1f / config.FixedFrameRate;
-            }
+            }            
 
             if (FikaBackendUtils.IsReconnect)
             {
@@ -1418,6 +1428,9 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
+            // TODO: ADD IF
+            await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP();
+
             IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
 
             LocalPlayer myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
@@ -1427,6 +1440,8 @@ namespace Fika.Core.Coop.GameMode
                 iSession, (localRaidSettings_0 != null) ? localRaidSettings_0.mode : ELocalMode.TRAINING);
 
             myPlayer.OnEpInteraction += OnEpInteraction;
+
+            localPlayer = myPlayer as CoopPlayer;
 
             return myPlayer;
         }
@@ -1617,8 +1632,13 @@ namespace Fika.Core.Coop.GameMode
 
             await WaitForOtherPlayersToLoad();
 
+            if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            {
+                this.coopHandler = coopHandler;
+            }
+
             SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
-            Logger.LogInfo("All players are loaded, continuing...");
+            Logger.LogInfo("All players are loaded, continuing...");            
 
             if (isServer)
             {
@@ -1651,8 +1671,8 @@ namespace Fika.Core.Coop.GameMode
                 FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
             }
 
-            // Add FreeCamController to GameWorld GameObject
-            FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
+                // Add FreeCamController to GameWorld GameObject
+                FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
             Singleton<FreeCameraController>.Create(freeCamController);
 
             await SetupRaidCode();
@@ -1924,6 +1944,12 @@ namespace Fika.Core.Coop.GameMode
             }
 
             Logger.LogError("CoopGame::UpdateExfilPointFromServer: ExfilManager was null!");
+        }
+
+        public override void Dispose()
+        {
+            ClientHearingTable.Instance = null;
+            base.Dispose();
         }
 
         /// <summary>
@@ -2743,6 +2769,57 @@ namespace Fika.Core.Coop.GameMode
         {
             this.gameTime = gameTime;
             this.sessionTime = sessionTime;
+        }
+
+        public bool IsHeard()
+        {
+            if (Status != GameStatus.Started)
+            {
+                return false;
+            }
+            if (localPlayer == null)
+            {
+                return true;
+            }
+            bool flag = GClass1203.IsTalkDetected();
+            localPlayer.TalkDateTime = flag ? EFTDateTimeClass.UtcNow : default;
+            bool flag2;
+            bool flag3;
+            if (dictionary_0.Count == 1)
+            {
+                flag2 = true;
+                flag3 = true;
+            }
+            else
+            {
+                flag2 = false;
+                flag3 = false;
+                Vector3 position = localPlayer.Position;
+                foreach (CoopPlayer humanPlayer in coopHandler.HumanPlayers)
+                {
+                    if (humanPlayer.IsYourPlayer)
+                    {
+                        continue;
+                    }
+
+                    ValueTuple<bool, bool> valueTuple = humanPlayer.IsHeard(in position, voipDistance);
+                    bool item = valueTuple.Item1;
+                    bool item2 = valueTuple.Item2;
+                    flag2 = flag2 || item;
+                    flag3 = flag3 || item2;
+                    if (flag2 && flag3)
+                    {
+                        break;
+                    }
+                }
+            }
+            GClass1203.Blocked = !flag3;
+            return flag2;
+        }
+
+        public void ReportAbuse()
+        {
+            Logger.LogInfo("NO");
         }
     }
 }

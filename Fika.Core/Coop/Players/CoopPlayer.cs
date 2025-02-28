@@ -18,6 +18,7 @@ using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
 using System;
@@ -59,6 +60,8 @@ namespace Fika.Core.Coop.Players
 
         protected string lastWeaponId;
         private bool shouldSendSideEffect;
+        private GClass2037 voipHandler;
+        private FikaVOIPController voipController;
 
         public ClientMovementContext ClientMovementContext
         {
@@ -75,6 +78,7 @@ namespace Fika.Core.Coop.Players
             }
         }
         public virtual bool LeftStanceDisabled { get; internal set; }
+        public DateTime TalkDateTime { get; internal set; }
 
         #endregion
 
@@ -92,6 +96,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = true;
             player.NetId = netId;
+            player.voipHandler = GClass2037.Default;
 
             PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new CoopHostInventoryController(player, profile, false)
                 : new CoopClientInventoryController(player, profile, false);
@@ -133,7 +138,7 @@ namespace Fika.Core.Coop.Players
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
                 statisticsManager, questController, achievementsController, prestigeController, filter,
-                EVoipState.NotAvailable, false, false);
+                EVoipState.Available, false, false);
 
             foreach (MagazineItemClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
             {
@@ -175,6 +180,25 @@ namespace Fika.Core.Coop.Players
         private void UnlockAchievement(string tpl)
         {
             _achievementsController.UnlockAchievementForced(tpl);
+        }
+
+        public override void InitVoip(EVoipState voipState)
+        {
+            if (voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
+            {
+                GClass1046 settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+                if (!settings.VoipEnabled)
+                {
+                    voipState = EVoipState.Off;
+                }
+                if (!voipHandler.MicrophoneChecked)
+                {
+                    voipState = EVoipState.MicrophoneFail;
+                }
+                base.InitVoip(voipState);
+                voipController = new(this, settings);
+                VoipController = voipController;
+            }
         }
 
         public override void CreateNestedSource()
@@ -1449,6 +1473,12 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public override void UpdateTick()
+        {
+            voipController?.Update();
+            base.UpdateTick();
+        }
+
         public void CheckAndResetControllers(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
         {
             _questController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
@@ -1466,6 +1496,7 @@ namespace Fika.Core.Coop.Players
                 PacketSender.DestroyThis();
                 PacketSender = null;
             }
+            voipController?.Dispose();
             base.Dispose();
         }
 

@@ -46,6 +46,24 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
+        public static GClass2037 VOIPHandler
+        {
+            get
+            {
+                if (voipHandler == null)
+                {
+                    voipHandler = GClass2037.Default;
+                    voipHandler.VoipQualitySettings.Apply();
+                    voipHandler.MicrophoneChecked = GClass1046.CheckMicrophone();
+                    voipHandler.VoipEnabled = true;
+                }
+
+                return voipHandler;
+            }
+        }
+
+        private static GClass2037 voipHandler;
+
         internal static float GetOtherPlayerSensitivity()
         {
             return 1f;

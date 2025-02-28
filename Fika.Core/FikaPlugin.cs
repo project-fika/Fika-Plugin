@@ -10,6 +10,7 @@ using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.Coop.Patches.Lighthouse;
+using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Utils;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
@@ -351,6 +352,7 @@ namespace Fika.Core
             new GClass2049_method_0_Patch().Enable();
             new PartyInfoPanel_Show_Patch().Enable();
             new PlayerCameraController_LateUpdate_Transpiler().Enable();
+            new DissonanceComms_Start_Patch().Enable();
 #if DEBUG
             TasksExtensions_HandleFinishedTask_Patches.Enable();
             new GClass1640_method_0_Patch().Enable();

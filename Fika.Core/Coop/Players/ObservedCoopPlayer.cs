@@ -1,6 +1,8 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
+using Audio.SpatialSystem;
 using Comfort.Common;
+using Dissonance;
 using Diz.Binding;
 using EFT;
 using EFT.Ballistics;
@@ -29,6 +31,7 @@ using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.SubPacket;
 using static Fika.Core.Networking.SubPackets;
 using static Fika.Core.UI.FikaUIGlobals;
+using static Val;
 
 namespace Fika.Core.Coop.Players
 {
@@ -64,10 +67,16 @@ namespace Fika.Core.Coop.Players
                 ShouldOverlap = true;
             }
         }
+        public BetterSource VoipEftSource { get; set; }
+
         private bool leftStancedDisabled;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
         private bool isServer;
+        private VoiceBroadcastTrigger voiceBroadcastTrigger;
+        private GClass1046 soundSettings;
+        private bool voipAssigned;
+
         public ObservedHealthController NetworkHealthController
         {
             get
@@ -170,8 +179,10 @@ namespace Fika.Core.Coop.Players
                 observedQuestController.Run();
             }
 
+            player.VoipState = !aiControl ? EVoipState.Available : EVoipState.NotAvailable;
+
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-                statisticsManager, observedQuestController, null, null, filter, EVoipState.NotAvailable, aiControl, false);
+                statisticsManager, observedQuestController, null, null, filter, player.VoipState, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
@@ -200,8 +211,59 @@ namespace Fika.Core.Coop.Players
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = FikaSnapshotter.Create(player);
+            
 
             return player;
+        }
+
+        public override void InitVoip(EVoipState voipState)
+        {
+            if (voipState == EVoipState.Available)
+            {
+                SetupVoiceBroadcastTrigger();
+                DissonanceComms = DissonanceComms.Instance;
+                if (DissonanceComms != null)
+                {
+                    DissonanceComms.TrackPlayerPosition(this);
+                    if (VoipAudioSource != null)
+                    {
+                        SourceBindingCreated();
+                    }
+                }
+            }
+        }
+
+        private void SourceBindingCreated()
+        {
+            if (voipAssigned)
+            {
+                return;
+            }
+            VoipEftSource = MonoBehaviourSingleton<BetterAudio>.Instance.CreateBetterSource<SimpleSource>(
+                VoipAudioSource, BetterAudio.AudioSourceGroupType.Voip, true, true);
+            if (VoipEftSource == null)
+            {
+                FikaGlobals.LogError($"Could not initialize VOIP source for {Profile.Nickname}");
+                return;
+            }
+            VoipEftSource.SetMixerGroup(MonoBehaviourSingleton<BetterAudio>.Instance.ObservedPlayerSpeechMixer);
+            VoipEftSource.SetRolloff(60f);
+            MonoBehaviourSingleton<SpatialAudioSystem>.Instance.ProcessSourceOcclusion(this, VoipEftSource, false);
+            voipAssigned = true;
+        }
+
+        private void SetupVoiceBroadcastTrigger()
+        {
+            voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
+            voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
+            soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+            CompositeDisposable.BindState(soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);            
+        }
+
+        private void ChangeVoipDeviceSensitivity(int value)
+        {
+            float num = (float)value / 100f;
+            voiceBroadcastTrigger.ActivationFader.Volume = num;
         }
 
         public override BasePhysicalClass CreatePhysical()

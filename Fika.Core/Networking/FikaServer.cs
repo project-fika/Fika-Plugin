@@ -2,6 +2,8 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using Dissonance;
+using Dissonance.Integrations.MirrorIgnorance;
 using Diz.Utils;
 using EFT;
 using EFT.Airdrop;
@@ -18,11 +20,13 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
+using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -133,7 +137,10 @@ namespace Fika.Core.Networking
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
         private int statisticsCounter;
-        private Dictionary<Profile, bool> visualProfiles;
+        private Dictionary<Profile, bool> visualProfiles;        
+
+        internal FikaVOIPServer VOIPServer { get; set; }
+        internal FikaVOIPClient VOIPClient { get; set; }
 
         public async Task Init()
         {
@@ -148,7 +155,8 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 NatPunchEnabled = true,
-                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
+                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value,
+                ChannelsCount = 2
             };
 
             packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
@@ -304,6 +312,54 @@ namespace Fika.Core.Networking
 
             SetHostRequest body = new(Ips, port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadlessGame);
             FikaRequestHandler.UpdateSetHost(body);
+        }
+
+        async Task IFikaNetworkManager.InitializeVOIP()
+        {
+            GClass2037 voipHandler = FikaGlobals.VOIPHandler;
+
+            GClass1036 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+            if (voipHandler.MicrophoneChecked)
+            {
+                controller.ResetVoipDisabledReason();
+                DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
+                await GClass1573.LoadScene(AssetsManagerSingletonClass.Manager,
+                    GClass2073.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+
+                MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
+                do
+                {
+                    mirrorCommsNetwork = FindObjectOfType<MirrorIgnoranceCommsNetwork>();
+                    await Task.Yield();
+                } while (mirrorCommsNetwork == null);
+
+                GameObject gameObj = mirrorCommsNetwork.gameObject;
+                var commNet = gameObj.AddComponent<FikaCommsNetwork>();
+                Destroy(mirrorCommsNetwork);
+
+                DissonanceComms_Start_Patch.IsReady = true;
+                gameObj.GetComponent<DissonanceComms>().Invoke("Start", 0);
+            }
+            else
+            {
+                controller.VoipDisabledByInitializationFail();
+            }
+
+            do
+            {
+                await Task.Yield();
+            } while (VOIPServer == null && VOIPClient == null);
+
+            /*if (MultiThreaded)
+            {
+                packetProcessor.SubscribeNetSerializableMT<VOIPPacket, NetPeer>(VOIPServer.ReceivePacket);
+            }
+            else
+            {
+                packetProcessor.SubscribeNetSerializable<VOIPPacket, NetPeer>(VOIPServer.ReceivePacket);
+            }*/
+
+            return;
         }
 
         private void RegisterMultiThreadedPackets()
@@ -1294,6 +1350,21 @@ namespace Fika.Core.Networking
             peer.Send(dataWriter, deliveryMethod);
         }
 
+        public void SendVOIPPacket(ArraySegment<byte> data, bool reliable, NetPeer peer = null)
+        {
+            if (peer == null)
+            {
+                logger.LogError("SendVOIPPacket: peer was null!");
+                return;
+            }
+
+            dataWriter.Reset();
+
+            dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
+            //peer.Send(dataWriter, 1, reliable ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+            peer.Send(dataWriter, 1, DeliveryMethod.ReliableOrdered);
+        }
+
         public void OnPeerConnected(NetPeer peer)
         {
             AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
@@ -1461,7 +1532,14 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            packetProcessor.ReadAllPackets(reader, peer);
+            if (channelNumber == 1)
+            {
+                VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(reader.GetBytesWithLength())); 
+            }
+            else
+            {
+                packetProcessor.ReadAllPackets(reader, peer);
+            }
         }
 
         public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)

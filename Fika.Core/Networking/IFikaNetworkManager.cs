@@ -1,7 +1,9 @@
 ﻿using EFT;
 using Fika.Core.Coop.Components;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Networking
 {
@@ -12,9 +14,11 @@ namespace Fika.Core.Networking
         public EPlayerSide RaidSide { get; set; }
         public int SendRate { get; }
         public bool MultiThreaded { get; }
+        public void SendVOIPPacket(ArraySegment<byte> data, bool reliable, NetPeer peer = null);
         public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new();
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new();
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate);
+        internal Task InitializeVOIP();
         internal void PrintStatistics();
     }
 }
