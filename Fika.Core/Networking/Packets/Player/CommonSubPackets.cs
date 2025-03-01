@@ -187,7 +187,7 @@ namespace Fika.Core.Networking
             public float Amount;
             public int AnimationVariant;
             public bool Scheduled;
-            public GStruct350<EBodyPart> BodyParts;
+            public GStruct353<EBodyPart> BodyParts;
 
             public ProceedPacket(NetDataReader reader)
             {

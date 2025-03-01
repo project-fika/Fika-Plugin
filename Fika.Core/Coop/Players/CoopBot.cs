@@ -67,18 +67,18 @@ namespace Fika.Core.Coop.Players
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
 
-            player.AIData = new GClass563(null, player)
+            player.AIData = new GClass567(null, player)
             {
                 IsAI = true
             };
 
             Traverse botTraverse = Traverse.Create(player);
-            botTraverse.Field<GClass893>("gclass893_0").Value = new();
-            botTraverse.Field<GClass893>("gclass893_0").Value.Initialize(player, player.PlayerBones);
+            botTraverse.Field<GClass896>("gclass896_0").Value = new();
+            botTraverse.Field<GClass896>("gclass896_0").Value.Initialize(player, player.PlayerBones);
 
             if (FikaBackendUtils.IsHeadless)
             {
-                botTraverse.Field<GClass893>("gclass893_0").Value.SetMode(GClass892.EMode.Disabled);
+                botTraverse.Field<GClass896>("gclass896_0").Value.SetMode(GClass896.EMode.Disabled);
             }
 
             player.AggressorFound = false;

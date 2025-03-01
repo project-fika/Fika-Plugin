@@ -5,15 +5,15 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass1391_Constructor_Patch : ModulePatch
+    public class GClass1395_Constructor_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass1391).GetConstructors().Single();
+            return typeof(GClass1395).GetConstructors().Single();
         }
 
         [PatchPrefix]
-        public static bool Prefix(GClass1391 __instance, ref GClass1390 ___gclass1390_0)
+        public static bool Prefix(GClass1395 __instance, ref GClass1394 ___gclass1390_0)
         {
             __instance.speed = 50f;
             __instance.arcHeight = -150f;

@@ -178,8 +178,8 @@ namespace Fika.Core.Coop.ObservedClasses
             MovementContext.IgnoreDeltaMovement = false;
             MovementContext.MountedSmoothedTilt = 0f;
             MovementContext.MountedSmoothedTiltForCamera = 0f;
-            MovementContext.SetYawLimit(Player.GClass1767.FULL_YAW_RANGE);
-            MovementContext.SetPitchSmoothly(MovementContext.IsInPronePose ? Player.GClass1767.PRONE_POSE_ROTATION_PITCH_RANGE : Player.GClass1767.STAND_POSE_ROTATION_PITCH_RANGE);
+            MovementContext.SetYawLimit(Player.GClass1772.FULL_YAW_RANGE);
+            MovementContext.SetPitchSmoothly(MovementContext.IsInPronePose ? Player.GClass1772.PRONE_POSE_ROTATION_PITCH_RANGE : Player.GClass1772.STAND_POSE_ROTATION_PITCH_RANGE);
             MovementContext.RotationAction = MovementContext.DefaultRotationFunction;
             MovementContext.CanUseProp.Value = bool_0;
             player.ProceduralWeaponAnimation.SetStrategy(EPointOfView.ThirdPerson);

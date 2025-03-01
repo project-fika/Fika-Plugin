@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                return GClass2002.Instance;
+                return GClass2007.Instance;
             }
         }
 
@@ -219,7 +219,7 @@ namespace Fika.Core.Coop.Utils
         public static Profile GetLiteProfile(bool scav)
         {
             Profile profile = GetProfile(scav);
-            GClass1993 liteDescriptor = new(profile, SearchControllerSerializer)
+            GClass1998 liteDescriptor = new(profile, SearchControllerSerializer)
             {
                 Encyclopedia = [],
                 InsuredItems = [],

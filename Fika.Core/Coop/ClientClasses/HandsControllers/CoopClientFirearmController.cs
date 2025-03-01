@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.ClientClasses
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
-            operationFactoryDelegates[typeof(GClass1782)] = new OperationFactoryDelegate(Weapon2);
+            operationFactoryDelegates[typeof(GClass1787)] = new OperationFactoryDelegate(Weapon2);
             operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
             return operationFactoryDelegates;
         }
@@ -98,9 +98,9 @@ namespace Fika.Core.Coop.ClientClasses
 
         public Player.BaseAnimationOperationClass Weapon3()
         {
-            if (Item is GClass3113)
+            if (Item is GClass3118)
             {
-                return new GClass1800(this);
+                return new GClass1805(this);
             }
             if (Item.IsFlareGun)
             {
@@ -720,7 +720,7 @@ namespace Fika.Core.Coop.ClientClasses
             player.PacketSender.SendPacket(ref packet);
         }
 
-        private class FirearmClass1(Player.FirearmController controller) : GClass1782(controller)
+        private class FirearmClass1(Player.FirearmController controller) : GClass1787(controller)
         {
             public override void SetTriggerPressed(bool pressed)
             {
@@ -785,7 +785,7 @@ namespace Fika.Core.Coop.ClientClasses
         }
 
         // Check for GClass increments
-        private class FirearmClass4(Player.FirearmController controller) : GClass1795(controller)
+        private class FirearmClass4(Player.FirearmController controller) : GClass1800(controller)
         {
             public override void Start()
             {
@@ -851,7 +851,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = gridItemAddress;
-                GClass1716 descriptor = itemAddress?.ToDescriptor();
+                GClass1721 descriptor = itemAddress?.ToDescriptor();
                 FikaWriter eftWriter = EFTSerializationManager.GetWriter();
 
                 byte[] locationDescription;
@@ -924,7 +924,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
-                GClass1716 descriptor = itemAddress?.ToDescriptor();
+                GClass1721 descriptor = itemAddress?.ToDescriptor();
                 FikaWriter eftWriter = EFTSerializationManager.GetWriter();
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 

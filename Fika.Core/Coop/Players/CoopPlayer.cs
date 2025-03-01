@@ -104,15 +104,15 @@ namespace Fika.Core.Coop.Players
             }
             else
             {
-                questController = new GClass3697(profile, inventoryController, inventoryController.PlayerSearchController, session);
+                questController = new GClass3702(profile, inventoryController, inventoryController.PlayerSearchController, session);
             }
             questController.Init();
-            GClass3701 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
+            GClass3706 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
             achievementsController.Init();
             achievementsController.AchievementUnlocked += player.UnlockAchievement;
             achievementsController.Run();
             questController.Run();
-            GClass3693 prestigeController = new(profile, inventoryController, questController.Quests, session);
+            GClass3698 prestigeController = new(profile, inventoryController, questController.Quests, session);
 
             if (FikaBackendUtils.IsServer)
             {
@@ -149,7 +149,7 @@ namespace Fika.Core.Coop.Players
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, Class1655.class1655_0.method_0);
 
-            player.AIData = new GClass563(null, player);
+            player.AIData = new GClass567(null, player);
 
             player.AggressorFound = false;
 
@@ -198,7 +198,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnSkillLevelChanged(AbstractSkillClass skill)
         {
-            NotificationManagerClass.DisplayNotification(new GClass2307(skill));
+            NotificationManagerClass.DisplayNotification(new GClass2312(skill));
         }
 
         public override bool CheckSurface(float range)
@@ -307,7 +307,7 @@ namespace Fika.Core.Coop.Players
 
         public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface176> callback, int animationVariant, bool scheduled = true)
         {
-            GStruct350<EBodyPart> bodyparts = new(EBodyPart.Head);
+            GStruct353<EBodyPart> bodyparts = new(EBodyPart.Head);
             FoodControllerHandler handler = new(this, foodDrink, amount, bodyparts, animationVariant);
 
             Func<MedsController> func = new(handler.ReturnController);
@@ -316,7 +316,7 @@ namespace Fika.Core.Coop.Players
             handler.process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
-        public override void Proceed(MedsItemClass meds, GStruct350<EBodyPart> bodyParts, Callback<GInterface176> callback, int animationVariant, bool scheduled = true)
+        public override void Proceed(MedsItemClass meds, GStruct353<EBodyPart> bodyParts, Callback<GInterface176> callback, int animationVariant, bool scheduled = true)
         {
             MedsControllerHandler handler = new(this, meds, bodyParts, animationVariant);
 
@@ -456,7 +456,7 @@ namespace Fika.Core.Coop.Players
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{lastWeaponId}'!");
 #endif
-            GStruct454<Item> itemResult = FindItemById(lastWeaponId, false, false);
+            GStruct457<Item> itemResult = FindItemById(lastWeaponId, false, false);
             Item item = itemResult.Value;
             if (!itemResult.Succeeded)
             {
@@ -779,7 +779,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass3419 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is GClass3424 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.SendPacket(ref packet);
@@ -807,7 +807,7 @@ namespace Fika.Core.Coop.Players
                         InteractiveId = door.Id,
                         InteractionType = interactionResult.InteractionType,
                         InteractionStage = EInteractionStage.Execute,
-                        ItemId = (interactionResult is GClass3419 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                        ItemId = (interactionResult is GClass3424 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                     }
                 };
                 PacketSender.SendPacket(ref packet);
@@ -948,7 +948,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            GClass1688 inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
+            GClass1693 inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
             HealthSyncPacket syncPacket = new()
             {
@@ -1088,7 +1088,7 @@ namespace Fika.Core.Coop.Players
                             return;
                         }
 
-                        GStruct454<Item> result = FindItemById(packet.ItemId, false, false);
+                        GStruct457<Item> result = FindItemById(packet.ItemId, false, false);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogWarning("HandleInteractPacket: Could not find item: " + packet.ItemId);
@@ -1433,7 +1433,7 @@ namespace Fika.Core.Coop.Players
                         return;
                     }
                 }
-                GStruct454<Item> gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemIds[i]);
+                GStruct457<Item> gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemIds[i]);
                 if (gstruct.Failed)
                 {
                     FikaPlugin.Instance.FikaLogger.LogError("HandleArmorDamagePacket: " + gstruct.Error);
@@ -1551,7 +1551,7 @@ namespace Fika.Core.Coop.Players
         public class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct454<GClass3419> unlockResult;
+            public GStruct457<GClass3424> unlockResult;
 
             internal void HandleKeyEvent()
             {
@@ -1731,11 +1731,11 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class MedsControllerHandler(CoopPlayer coopPlayer, MedsItemClass meds, GStruct350<EBodyPart> bodyParts, int animationVariant)
+        private class MedsControllerHandler(CoopPlayer coopPlayer, MedsItemClass meds, GStruct353<EBodyPart> bodyParts, int animationVariant)
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly MedsItemClass meds = meds;
-            private readonly GStruct350<EBodyPart> bodyParts = bodyParts;
+            private readonly GStruct353<EBodyPart> bodyParts = bodyParts;
             private readonly int animationVariant = animationVariant;
             public Process<MedsController, GInterface176> process;
             public Action confirmCallback;
@@ -1771,12 +1771,12 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        private class FoodControllerHandler(CoopPlayer coopPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct350<EBodyPart> bodyParts, int animationVariant)
+        private class FoodControllerHandler(CoopPlayer coopPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct353<EBodyPart> bodyParts, int animationVariant)
         {
             private readonly CoopPlayer coopPlayer = coopPlayer;
             private readonly FoodDrinkItemClass foodDrink = foodDrink;
             private readonly float amount = amount;
-            private readonly GStruct350<EBodyPart> bodyParts = bodyParts;
+            private readonly GStruct353<EBodyPart> bodyParts = bodyParts;
             private readonly int animationVariant = animationVariant;
             public Process<MedsController, GInterface176> process;
             public Action confirmCallback;

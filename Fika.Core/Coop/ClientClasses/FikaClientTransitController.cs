@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class FikaClientTransitController : GClass1672
+    public class FikaClientTransitController : GClass1677
     {
         public FikaClientTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters)
@@ -85,7 +85,7 @@ namespace Fika.Core.Coop.ClientClasses
                 isSolo = true
             });
 
-            GClass1956 gclass = new()
+            GClass1961 gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,

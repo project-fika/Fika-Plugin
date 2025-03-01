@@ -154,12 +154,12 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             // Check for GClass increments
-            Class1154 currentOperation = CurrentOperation;
+            Class1153 currentOperation = CurrentOperation;
             if (currentOperation != null)
             {
-                if (currentOperation is not Class1159)
+                if (currentOperation is not Class1158)
                 {
-                    if (currentOperation is Class1160)
+                    if (currentOperation is Class1159)
                     {
                         WeaponPacket packet = new()
                         {
