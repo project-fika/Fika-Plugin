@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(GClass1395 __instance, ref GClass1394 ___gclass1390_0)
+        public static bool Prefix(GClass1395 __instance, ref GClass1394 ___gclass1394_0)
         {
             __instance.speed = 50f;
             __instance.arcHeight = -150f;
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
             __instance.zoneID = "";
             CoopGame coopGame = CoopGame.Instance;
             coopGame.UpdateByUnity += __instance.OnUpdate;
-            ___gclass1390_0 = new();
+            ___gclass1394_0 = new();
             return false;
         }
     }

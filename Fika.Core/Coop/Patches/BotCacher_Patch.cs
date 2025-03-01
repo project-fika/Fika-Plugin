@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass595).GetMethod(nameof(GClass598.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+            return typeof(GClass598).GetMethod(nameof(GClass598.LoadInternal), BindingFlags.Static | BindingFlags.Public);
         }
 
         [PatchPrefix]
