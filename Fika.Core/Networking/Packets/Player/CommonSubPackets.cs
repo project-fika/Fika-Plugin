@@ -80,7 +80,7 @@ namespace Fika.Core.Networking
                                 return;
                             }
 
-                            GStruct454<Item> result = player.FindItemById(ItemId, false, false);
+                            GStruct457<Item> result = player.FindItemById(ItemId, false, false);
                             if (!result.Succeeded)
                             {
                                 FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);

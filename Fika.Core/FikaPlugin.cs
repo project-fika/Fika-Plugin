@@ -300,7 +300,7 @@ namespace Fika.Core
             new Player_Hide_Patch().Enable();
             new Player_UpdateBtrTraderServiceData_Patch().Enable();
             BTRSide_Patches.Enable();
-            new GClass2456_UpdateOfflineClientLogic_Patch().Enable();
+            new GClass2461_UpdateOfflineClientLogic_Patch().Enable();
             new GClass2462_UpdateOfflineClientLogic_Patch().Enable();
             new SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch().Enable();
             LighthouseTraderZone_Patches.Enable();
@@ -347,7 +347,7 @@ namespace Fika.Core
             new RaidSettingsWindow_Show_Patch().Enable();
             new TransitControllerAbstractClass_Exist_Patch().Enable();
             new BotReload_method_1_Patch().Enable();
-            new Class1392_ReloadBackendLocale_Patch().Enable();
+            new Class1391_ReloadBackendLocale_Patch().Enable();
             new GClass2054_method_0_Patch().Enable();
             new PartyInfoPanel_Show_Patch().Enable();
             new PlayerCameraController_LateUpdate_Transpiler().Enable();
