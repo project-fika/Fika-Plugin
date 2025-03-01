@@ -31,7 +31,6 @@ using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.SubPacket;
 using static Fika.Core.Networking.SubPackets;
 using static Fika.Core.UI.FikaUIGlobals;
-using static Val;
 
 namespace Fika.Core.Coop.Players
 {
@@ -256,6 +255,7 @@ namespace Fika.Core.Coop.Players
         {
             voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
             voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
+            voiceBroadcastTrigger.RoomName = "Global";
             soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
             CompositeDisposable.BindState(soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);            
         }
