@@ -139,7 +139,7 @@ namespace Fika.Core.Coop.HostClasses
 
             // Do not replicate quest operations / search operations
             // Check for GClass increments, ReadPolymorph
-            if (operation is GClass3296 or GClass3300 or GClass3301 or GClass3302)
+            if (operation is GClass3303 or GClass3307 or GClass3308 or GClass3309)
             {
                 base.vmethod_1(operation, callback);
                 return;
@@ -149,7 +149,7 @@ namespace Fika.Core.Coop.HostClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
             // Check for GClass increments, TraderServices
-            if (operation is GClass3277)
+            if (operation is GClass3282)
             {
                 base.vmethod_1(operation, callback);
                 return;
