@@ -91,11 +91,12 @@ namespace Fika.Core.Networking
             }
         }
 
-        public void Flush()
+        public readonly void Flush()
         {
             RagdollPackets.Clear();
             ArtilleryPackets.Clear();
             GrenadePackets.Clear();
+            SyncObjectPackets.Clear();
         }
     }
 }
