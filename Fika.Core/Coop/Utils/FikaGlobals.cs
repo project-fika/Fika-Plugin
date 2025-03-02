@@ -283,6 +283,47 @@ namespace Fika.Core.Coop.Utils
             return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
         }
 
+        /// <summary>
+        /// Unsubscribes all delegates from an <see cref="Action{T}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="action"></param>
+        public static Action<T> ClearDelegates<T>(Action<T> action) where T : class
+        {
+            Delegate[] list = action.GetInvocationList();
+            for (int i = 0; i < list.Length; i++)
+            {
+#if DEBUG
+                LogWarning($"Clearing {list[i].Method.Name}");
+#endif
+                action = (Action<T>)Delegate.Remove(action, list[i]);
+            }
+
+            return action;
+        }
+
+        /// <summary>
+        /// Unsubscribes all delegates from an <see cref="Action{T, Y}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <param name="action"></param>
+        public static Action<T, Y> ClearDelegates<T, Y>(Action<T, Y> action)
+            where T : class
+            where Y : class
+        {
+            Delegate[] list = action.GetInvocationList();
+            for (int i = 0; i < list.Length; i++)
+            {
+#if DEBUG
+                LogWarning($"Clearing {list[i].Method.Name}"); 
+#endif
+                action = (Action<T, Y>)Delegate.Remove(action, list[i]);
+            }
+
+            return action;
+        }
+        
         public static void LogInfo(string message, [CallerMemberName] string caller = "")
         {
             if (string.IsNullOrEmpty(message))
