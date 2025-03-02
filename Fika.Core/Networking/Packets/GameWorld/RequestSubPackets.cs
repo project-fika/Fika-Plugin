@@ -327,7 +327,7 @@ namespace Fika.Core.Networking
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(NetId);
-                bool isRequest = string.IsNullOrEmpty(TraderId);
+                bool isRequest = !string.IsNullOrEmpty(TraderId);
                 writer.Put(isRequest);
                 if (isRequest)
                 {
