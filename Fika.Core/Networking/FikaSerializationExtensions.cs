@@ -1161,6 +1161,8 @@ namespace Fika.Core.Networking
                     return new WeatherRequest(reader);
                 case ERequestSubPacketType.Exfiltration:
                     return new ExfiltrationRequest(reader);
+                case ERequestSubPacketType.TraderServices:
+                    return new TraderServicesRequest(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetRequestSubPacket: type was outside of bounds!");
                     break;
