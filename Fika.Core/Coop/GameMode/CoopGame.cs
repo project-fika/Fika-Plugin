@@ -2558,6 +2558,10 @@ namespace Fika.Core.Coop.GameMode
                 {
                     NetManagerUtils.StopPinger();
                 }
+                else
+                {
+                    Singleton<FikaServer>.Instance.HostReady = false;
+                }
 
                 FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
                 FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;

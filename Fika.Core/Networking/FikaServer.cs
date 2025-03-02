@@ -1020,7 +1020,7 @@ namespace Fika.Core.Networking
                 coopHandler.LocalGameInstance.RaidStarted = true;
             }
 
-            if (HostReady)
+            if (gameExists && HostReady)
             {
                 respondPackage.GameTime = gameStartTime.Value;
                 GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
