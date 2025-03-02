@@ -1628,15 +1628,28 @@ namespace Fika.Core.Coop.GameMode
 
             await WaitForOtherPlayersToLoad();
 
-            if (gameWorld.TransitController != null && CoopHandler.TryGetCoopHandler(out CoopHandler handler))
+            if (CoopHandler.TryGetCoopHandler(out CoopHandler handler))
             {
                 for (int i = 0; i < handler.HumanPlayers.Count; i++)
                 {
-                    gameWorld.TransitController.TransferItemsController.InitPlayerStash(handler.HumanPlayers[i]);
-                }
+                    CoopPlayer player = handler.HumanPlayers[i];
+                    if (gameWorld.TransitController != null)
+                    {
+                        gameWorld.TransitController.TransferItemsController.InitPlayerStash(player);
+                    }
+
+                    if (gameWorld.BtrController != null)
+                    {
+                        gameWorld.BtrController.TransferItemsController.InitPlayerStash(player);
+                    }
+                }                
+            }
+            else
+            {
+                Logger.LogError("Could not find CoopHandler when trying to initialize player stashes for TransferItemsController!");
             }
 
-            SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+                SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
             Logger.LogInfo("All players are loaded, continuing...");
 
             if (isServer)
