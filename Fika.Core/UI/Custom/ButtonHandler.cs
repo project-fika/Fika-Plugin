@@ -12,7 +12,9 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
     private float alphaModifier;
 
     [SerializeField]
+#pragma warning disable CS0169 // Remove unused private members
     Sprite buttonSprite;
+#pragma warning restore CS0169 // Remove unused private members
 
     protected void Awake()
     {
