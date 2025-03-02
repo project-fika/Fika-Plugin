@@ -1563,7 +1563,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 await botsPresets.TryLoadBotsProfilesOnStart(waveInfos);
                 GClass898 botCreator = new(this, botsPresets, CreateBot);
-                BotZone[] botZones = LocationScene.GetAllObjects<BotZone>(false).ToArray();
+                BotZone[] botZones = [.. LocationScene.GetAllObjects<BotZone>(false)];
 
                 bool useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
