@@ -99,13 +99,13 @@ namespace Fika.Core.Coop.GameMode
 
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
-        private SpawnPointManagerClass spawnPoints = null;
-        private ISpawnPoint spawnPoint = null;
+        private SpawnPointManagerClass spawnPoints;
+        private ISpawnPoint spawnPoint;
         private WavesSpawnScenario wavesSpawnScenario_0;
         private NonWavesSpawnScenario nonWavesSpawnScenario_0;
         private BossSpawnScenario bossSpawnScenario;
         private Func<LocalPlayer, EftGamePlayerOwner> func_1;
-        private bool hasSaved = false;
+        private bool hasSaved;
         private CoopExfilManager exfilManager;
         private CoopTimeManager timeManager;
         private CoopHalloweenEventManager halloweenEventManager;
