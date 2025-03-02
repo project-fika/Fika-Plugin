@@ -426,8 +426,10 @@ namespace Fika.Core.Coop.Players
             ApplyHitDebuff(DamageInfo.Damage, 0f, bodyPartType, DamageInfo.DamageType);
             bool flag = !string.IsNullOrEmpty(DamageInfo.DeflectedBy);
             float damage = DamageInfo.Damage;
-            List<ArmorComponent> list = ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true);
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            _preAllocatedArmorComponents.Clear();
+            _preAllocatedArmorComponents.AddRange(ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true));
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
+                ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
@@ -464,9 +466,9 @@ namespace Fika.Core.Coop.Players
             };
             PacketSender.SendPacket(ref packet);
 
-            if (list != null)
+            if (_preAllocatedArmorComponents.Count > 0)
             {
-                QueueArmorDamagePackets([.. list]);
+                SendArmorDamagePacket();
             }
 
             // Run this to get weapon skill
@@ -480,9 +482,9 @@ namespace Fika.Core.Coop.Players
             if (isServer)
             {
                 _preAllocatedArmorComponents.Clear();
-                Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
-                List<ArmorComponent> armorComponents = [];
-                foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
+                List<ArmorComponent> listToCheck = [];
+                Inventory.GetPutOnArmorsNonAlloc(listToCheck);
+                foreach (ArmorComponent armorComponent in listToCheck)
                 {
                     float num = 0f;
                     foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
@@ -490,7 +492,7 @@ namespace Fika.Core.Coop.Players
                         if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                         {
                             num += keyValuePair.Value;
-                            armorComponents.Add(armorComponent);
+                            _preAllocatedArmorComponents.Add(armorComponent);
                         }
                     }
                     if (num > 0f)
@@ -500,9 +502,9 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
-                if (armorComponents.Count > 0)
+                if (_preAllocatedArmorComponents.Count > 0)
                 {
-                    QueueArmorDamagePackets([.. armorComponents]);
+                    SendArmorDamagePacket();
                 }
             }
         }
@@ -524,8 +526,10 @@ namespace Fika.Core.Coop.Players
 
             bool flag = !string.IsNullOrEmpty(DamageInfo.DeflectedBy);
             float damage = DamageInfo.Damage;
-            List<ArmorComponent> list = ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true);
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            _preAllocatedArmorComponents.Clear();
+            _preAllocatedArmorComponents.AddRange(ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true));
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
+                ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
@@ -562,9 +566,9 @@ namespace Fika.Core.Coop.Players
             };
             PacketSender.SendPacket(ref packet);
 
-            if (list != null)
+            if (_preAllocatedArmorComponents.Count > 0)
             {
-                QueueArmorDamagePackets([.. list]);
+                SendArmorDamagePacket();
             }
 
             // Run this to get weapon skill

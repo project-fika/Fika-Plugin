@@ -263,8 +263,10 @@ namespace Fika.Core.Coop.Players
             }
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
-            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            _preAllocatedArmorComponents.Clear();
+            _preAllocatedArmorComponents.AddRange(ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true));
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
+                ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
@@ -280,9 +282,9 @@ namespace Fika.Core.Coop.Players
             ShotReactions(damageInfo, bodyPartType);
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
-            if (list != null)
+            if (_preAllocatedArmorComponents.Count > 0)
             {
-                QueueArmorDamagePackets([.. list]);
+                SendArmorDamagePacket();
             }
 
             return hitInfo;
@@ -1296,9 +1298,9 @@ namespace Fika.Core.Coop.Players
             if (IsYourPlayer)
             {
                 _preAllocatedArmorComponents.Clear();
-                Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
-                List<ArmorComponent> armorComponents = [];
-                foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
+                List<ArmorComponent> listTocheck = [];
+                Inventory.GetPutOnArmorsNonAlloc(listTocheck);
+                foreach (ArmorComponent armorComponent in listTocheck)
                 {
                     float num = 0f;
                     foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
@@ -1306,7 +1308,7 @@ namespace Fika.Core.Coop.Players
                         if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                         {
                             num += keyValuePair.Value;
-                            armorComponents.Add(armorComponent);
+                            _preAllocatedArmorComponents.Add(armorComponent);
                         }
                     }
                     if (num > 0f)
@@ -1316,16 +1318,16 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
-                if (armorComponents.Count > 0)
+                if (_preAllocatedArmorComponents.Count > 0)
                 {
-                    QueueArmorDamagePackets([.. armorComponents]);
+                    SendArmorDamagePacket();
                 }
             }
         }
 
-        public void QueueArmorDamagePackets(ArmorComponent[] armorComponents)
+        public void SendArmorDamagePacket()
         {
-            int amount = armorComponents.Length;
+            int amount = _preAllocatedArmorComponents.Count;
             if (amount > 0)
             {
                 string[] ids = new string[amount];
@@ -1333,8 +1335,8 @@ namespace Fika.Core.Coop.Players
 
                 for (int i = 0; i < amount; i++)
                 {
-                    ids[i] = armorComponents[i].Item.Id;
-                    durabilities[i] = armorComponents[i].Repairable.Durability;
+                    ids[i] = _preAllocatedArmorComponents[i].Item.Id;
+                    durabilities[i] = _preAllocatedArmorComponents[i].Repairable.Durability;
                 }
 
                 ArmorDamagePacket packet = new()
