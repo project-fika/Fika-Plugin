@@ -106,7 +106,7 @@ namespace Fika.Core.Coop.Patches
             LocalRaidSettings raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
             if (isServer)
             {
-            raidSettings.SelectedLocation = localSettings.locationLoot;
+                raidSettings.SelectedLocation = localSettings.locationLoot; 
             }
             raidSettingsToUpdate.serverId = localSettings.serverId;
             raidSettingsToUpdate.selectedLocation = localSettings.locationLoot;

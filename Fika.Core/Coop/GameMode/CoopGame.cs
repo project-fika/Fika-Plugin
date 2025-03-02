@@ -1150,30 +1150,11 @@ namespace Fika.Core.Coop.GameMode
                 gameWorld.BtrController = new BTRControllerClass(gameWorld);
             }
 
-            if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
+            InitializeTransitSystem(gameWorld, instance);
+            /*if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
             {
-                bool transitActive;
-                if (instance == null)
-                {
-                    transitActive = false;
-                }
-                else
-                {
-                    BackendConfigSettingsClass.TransitSettingsClass transitSettings = instance.transitSettings;
-                    transitActive = transitSettings != null && transitSettings.active;
-                }
-                if (transitActive)
-                {
-                    gameWorld.TransitController = isServer ? new FikaHostTransitController(instance.transitSettings, Location_0.transitParameters,
-                        Profile_0, localRaidSettings_0) : new FikaClientTransitController(instance.transitSettings, Location_0.transitParameters,
-                        Profile_0, localRaidSettings_0);
-                }
-                else
-                {
-                    Logger.LogInfo("Transits are disabled");
-                    TransitControllerAbstractClass.DisableTransitPoints();
-                }
-            }
+                InitializeTransitSystem(gameWorld, instance);
+            }*/
 
             /*bool runddansActive;
             if (instance == null)
@@ -1280,6 +1261,36 @@ namespace Fika.Core.Coop.GameMode
 
             await method_6();
             FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
+        }
+
+        private void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass backendConfig)
+        {
+            bool transitActive;
+            if (backendConfig == null)
+            {
+                transitActive = false;
+            }
+            else
+            {
+                BackendConfigSettingsClass.TransitSettingsClass transitSettings = backendConfig.transitSettings;
+                transitActive = transitSettings != null && transitSettings.active;
+            }
+            if (transitActive)
+            {
+                gameWorld.TransitController = isServer ? new FikaHostTransitController(backendConfig.transitSettings, Location_0.transitParameters,
+                    Profile_0, localRaidSettings_0) : new FikaClientTransitController(backendConfig.transitSettings, Location_0.transitParameters,
+                    Profile_0, localRaidSettings_0);
+
+                if (gameWorld.TransitController is FikaHostTransitController fikaHostTransitController)
+                {
+                    fikaHostTransitController.PostConstruct();
+                }
+            }
+            else
+            {
+                Logger.LogInfo("Transits are disabled");
+                TransitControllerAbstractClass.DisableTransitPoints();
+            }
         }
 
         private async Task WaitForHostToLoad()
@@ -1616,6 +1627,14 @@ namespace Fika.Core.Coop.GameMode
             }
 
             await WaitForOtherPlayersToLoad();
+
+            if (gameWorld.TransitController != null && CoopHandler.TryGetCoopHandler(out CoopHandler handler))
+            {
+                for (int i = 0; i < handler.HumanPlayers.Count; i++)
+                {
+                    gameWorld.TransitController.TransferItemsController.InitPlayerStash(handler.HumanPlayers[i]);
+                }
+            }
 
             SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
             Logger.LogInfo("All players are loaded, continuing...");
@@ -2344,6 +2363,7 @@ namespace Fika.Core.Coop.GameMode
                     if (item.ID == profileId && !dictionary.ContainsKey(stashName))
                     {
                         dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
+                        break;
                     }
                 }
 
@@ -2369,6 +2389,7 @@ namespace Fika.Core.Coop.GameMode
                         if (item.ID == profileId && !dictionary.ContainsKey(stashName))
                         {
                             dictionary.Add(stashName, Singleton<ItemFactoryClass>.Instance.TreeToFlatItems(item.Items));
+                            break;
                         }
                     }
                 }

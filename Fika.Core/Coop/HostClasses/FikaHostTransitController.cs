@@ -20,17 +20,23 @@ namespace Fika.Core.Coop.HostClasses
         public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters, profile, localRaidSettings)
         {
-            this.localRaidSettings = localRaidSettings;
-            OnPlayerEnter += OnHostPlayerEnter;
-            OnPlayerExit += OnHostPlayerExit;
-            string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
+            this.localRaidSettings = localRaidSettings;            
+            string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
             summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
                 localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
-            TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");
+            TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
             server = Singleton<FikaServer>.Instance;
             playersInTransitZone = [];
             dediTransit = false;
             transittedPlayers = [];
+        }
+
+        public void PostConstruct()
+        {
+            OnPlayerEnter = FikaGlobals.ClearDelegates(OnPlayerEnter);
+            OnPlayerEnter += OnHostPlayerEnter;
+            OnPlayerExit = FikaGlobals.ClearDelegates(OnPlayerExit);
+            OnPlayerExit += OnHostPlayerExit;
         }
 
         public void SetupHeadlessPlayerTransitStash(LocalPlayer player)
@@ -77,7 +83,7 @@ namespace Fika.Core.Coop.HostClasses
 
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
-                TransferItemsController.InitPlayerStash(player);
+                //TransferItemsController.InitPlayerStash(player);
                 if (player is CoopPlayer coopPlayer)
                 {
                     coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
