@@ -382,7 +382,7 @@ namespace Fika.Core.Coop.GameMode
                 isSpecial = true;
             }
 
-            if (FikaPlugin.EnforcedSpawnLimits.Value && Bots.Count >= botsController_0.BotSpawner.MaxBots)
+            if (FikaPlugin.EnforcedSpawnLimits.Value && botsController_0.BotSpawner.MaxBots > 0 && Bots.Count >= botsController_0.BotSpawner.MaxBots)
             {
                 bool despawned = false;
                 if (FikaPlugin.DespawnFurthest.Value)
