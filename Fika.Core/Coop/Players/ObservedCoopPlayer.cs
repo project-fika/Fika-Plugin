@@ -3,7 +3,6 @@
 using Audio.SpatialSystem;
 using Comfort.Common;
 using Dissonance;
-using Dissonance.Audio.Playback;
 using Diz.Binding;
 using EFT;
 using EFT.Ballistics;
@@ -211,7 +210,7 @@ namespace Fika.Core.Coop.Players
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = FikaSnapshotter.Create(player);
-            
+
 
             return player;
         }
@@ -257,7 +256,7 @@ namespace Fika.Core.Coop.Players
             voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
             voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
             soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
-            CompositeDisposable.BindState(soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);            
+            CompositeDisposable.BindState(soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);
         }
 
         private void ChangeVoipDeviceSensitivity(int value)
@@ -489,8 +488,12 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(list);
+            if (list != null)
+            {
+                _preAllocatedArmorComponents.Clear();
+                _preAllocatedArmorComponents.AddRange(list);
+                SendArmorDamagePacket();
+            }
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
                 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
@@ -528,11 +531,6 @@ namespace Fika.Core.Coop.Players
                 WeaponId = damageInfo.Weapon.Id
             };
             PacketSender.SendPacket(ref packet);
-
-            if (_preAllocatedArmorComponents.Count > 0)
-            {
-                SendArmorDamagePacket();
-            }
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -589,11 +587,14 @@ namespace Fika.Core.Coop.Players
 
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
-            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(list);
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
-                ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);            
+            if (list != null)
+            {
+                _preAllocatedArmorComponents.Clear();
+                _preAllocatedArmorComponents.AddRange(list);
+                SendArmorDamagePacket();
+            }
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : (_preAllocatedArmorComponents.Count < 1 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
@@ -628,12 +629,7 @@ namespace Fika.Core.Coop.Players
                 Material = materialType,
                 WeaponId = damageInfo.Weapon.Id
             };
-            PacketSender.SendPacket(ref packet);
-
-            if (_preAllocatedArmorComponents.Count > 0)
-            {
-                SendArmorDamagePacket();
-            }
+            PacketSender.SendPacket(ref packet);            
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);

@@ -159,8 +159,12 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(list);
+            if (list != null)
+            {
+                _preAllocatedArmorComponents.Clear();
+                _preAllocatedArmorComponents.AddRange(list);
+                SendArmorDamagePacket();
+            }
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
                 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
@@ -177,11 +181,6 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
-
-            if (_preAllocatedArmorComponents.Count > 0)
-            {
-                SendArmorDamagePacket();
-            }
 
             if (damageInfo.Weapon != null)
             {
