@@ -180,6 +180,14 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
+        public void AbuseNotification(string reporterId)
+        {
+            if (IsYourPlayer)
+            {
+                voipController?.ReceiveAbuseNotification(reporterId); 
+            }
+        }
+
         private void UnlockAchievement(string tpl)
         {
             _achievementsController.UnlockAchievementForced(tpl);

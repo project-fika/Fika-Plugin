@@ -138,13 +138,6 @@ namespace Fika.Core.Networking.VOIP
         {
             public abstract EVoipControllerStatus Status { get; }
             public FikaVOIPController Controller { get; set; }
-            public SendLimit Limiter
-            {
-                get
-                {
-                    return Controller.limiter;
-                }
-            }
             public LimitChecker LimitChecker
             {
                 get
@@ -196,10 +189,6 @@ namespace Fika.Core.Networking.VOIP
             }
 
             public virtual void Update()
-            {
-            }
-
-            public class SendLimit
             {
 
             }
@@ -519,7 +508,6 @@ namespace Fika.Core.Networking.VOIP
             return @struct;
         }
 
-        private readonly VOIPState.SendLimit limiter;
         private readonly LimitChecker checker;
         private bool enabled = true;
         private bool forceMute;
@@ -567,17 +555,17 @@ namespace Fika.Core.Networking.VOIP
         }
         public event Action<string> AbuseNotification;
 
-        private OffState offState;
-        private ReadyState readyState;
-        private TalkingState talkingState;
-        private LimitedState limitedState;
-        private BlockedState blockedState;
-        private BannedState bannedState;
+        private readonly OffState offState;
+        private readonly ReadyState readyState;
+        private readonly TalkingState talkingState;
+        private readonly LimitedState limitedState;
+        private readonly BlockedState blockedState;
+        private readonly BannedState bannedState;
         private VOIPState currentState;
-        private CompositeDisposableClass compositeDisposableClass = new(2);
+        private readonly CompositeDisposableClass compositeDisposableClass = new(2);
 
-        private BindableStateClass<bool> hasInteraction;
-        private BindableStateClass<bool> talkDetected;
+        private readonly BindableStateClass<bool> hasInteraction;
+        private readonly BindableStateClass<bool> talkDetected;
 
         public void method_2()
         {
@@ -879,6 +867,11 @@ namespace Fika.Core.Networking.VOIP
         public EVoipControllerStatus ToggleTalk()
         {
             return currentState.ToggleTalk();
+        }
+
+        public void ReceiveAbuseNotification(string reporterId)
+        {
+            AbuseNotification?.Invoke(reporterId);
         }
     }
 }
