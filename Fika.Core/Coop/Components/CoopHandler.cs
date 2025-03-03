@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.Components
     {
         #region Fields/Properties
         public CoopGame LocalGameInstance { get; internal set; }
-        public string ServerId { get; internal set; } = null;
+        public string ServerId { get; internal set; }
         public CoopPlayer MyPlayer
         {
             get
@@ -36,27 +36,27 @@ namespace Fika.Core.Coop.Components
         /// <summary>
         /// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>
         /// </summary>
-        public Dictionary<int, CoopPlayer> Players { get; internal set; } = [];
+        public Dictionary<int, CoopPlayer> Players { get; internal set; }
         /// <summary>
         /// All human players in the form of <see cref="CoopPlayer"/> (excluding headless)
         /// </summary>
-        public List<CoopPlayer> HumanPlayers { get; internal set; } = [];
+        public List<CoopPlayer> HumanPlayers { get; internal set; }
         /// <summary>
         /// The amount of human players (including headless)
         /// </summary>
-        public int AmountOfHumans { get; internal set; } = 1;
+        public int AmountOfHumans { get; internal set; }
         /// <summary>
         /// List of <see cref="CoopPlayer.NetId"/>s that have extracted
         /// </summary>
-        public List<int> ExtractedPlayers { get; internal set; } = [];
+        public List<int> ExtractedPlayers { get; internal set; }
 
         private ManualLogSource logger;
-        private readonly List<string> queuedProfileIds = [];
-        private readonly Queue<SpawnObject> spawnQueue = new(50);
+        private List<string> queuedProfileIds;
+        private Queue<SpawnObject> spawnQueue;
         private bool ready;
         private bool isClient;
         private float charSyncCounter;
-        private bool requestQuitGame = false;
+        private bool requestQuitGame;
         #endregion
 
         public static bool TryGetCoopHandler(out CoopHandler coopHandler)
@@ -103,6 +103,12 @@ namespace Fika.Core.Coop.Components
         protected void Awake()
         {
             logger = BepInEx.Logging.Logger.CreateLogSource("CoopHandler");
+            spawnQueue = new(50);
+            queuedProfileIds = [];
+            Players = [];
+            HumanPlayers = [];
+            AmountOfHumans = 1;
+            ExtractedPlayers = [];
         }
 
         protected void Start()
