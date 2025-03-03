@@ -355,6 +355,7 @@ namespace Fika.Core
             new PlayerCameraController_LateUpdate_Transpiler().Enable();
             new DissonanceComms_Start_Patch().Enable();
             new Player_IDissonancePlayerType_Patch().Enable();
+            new BasicMicrophoneCapture_UpdateSubscribers_Transpiler().Enable();
 #if DEBUG
             TasksExtensions_HandleFinishedTask_Patches.Enable();
             new GClass1640_method_0_Patch().Enable();

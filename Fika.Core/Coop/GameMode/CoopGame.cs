@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio.RadioSystem;
 using CommonAssets.Scripts.Game;
+using Dissonance;
 using Dissonance.Networking.Client;
 using EFT;
 using EFT.AssetsManager;
@@ -1893,7 +1894,9 @@ namespace Fika.Core.Coop.GameMode
         private IEnumerator FixVOIPAudioDevice()
         {
             // Todo: Find root causes and fix elegantly...
+            DissonanceComms.Instance.IsMuted = false;
             yield return new WaitForSeconds(1);
+            DissonanceComms.Instance.IsMuted = true;
 
             for (int i = 0; i < coopHandler.HumanPlayers.Count; i++)
             {

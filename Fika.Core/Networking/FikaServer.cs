@@ -339,11 +339,12 @@ namespace Fika.Core.Networking
                 } while (mirrorCommsNetwork == null);
 
                 GameObject gameObj = mirrorCommsNetwork.gameObject;
-                var commNet = gameObj.AddComponent<FikaCommsNetwork>();
+                gameObj.AddComponent<FikaCommsNetwork>();
                 Destroy(mirrorCommsNetwork);
 
                 DissonanceComms_Start_Patch.IsReady = true;
-                gameObj.GetComponent<DissonanceComms>().Invoke("Start", 0);
+                DissonanceComms dissonance = gameObj.GetComponent<DissonanceComms>();
+                dissonance.Invoke("Start", 0);
             }
             else
             {
