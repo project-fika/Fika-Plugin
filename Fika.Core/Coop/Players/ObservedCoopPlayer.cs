@@ -3,6 +3,7 @@
 using Audio.SpatialSystem;
 using Comfort.Common;
 using Dissonance;
+using Dissonance.Audio.Playback;
 using Diz.Binding;
 using EFT;
 using EFT.Ballistics;

@@ -220,6 +220,8 @@ namespace Fika.Core.Networking
 #if DEBUG
             AddDebugPackets();
 #endif            
+            await NetManagerUtils.CreateCoopHandler();
+
             if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
             {
                 bool upnpFailed = false;

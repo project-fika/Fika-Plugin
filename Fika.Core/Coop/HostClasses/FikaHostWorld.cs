@@ -33,6 +33,7 @@ namespace Fika.Core.Coop.HostClasses
                 GrenadePackets = [],
                 SyncObjectPackets = []
             };
+            hostWorld.method_0();
             return hostWorld;
         }
 

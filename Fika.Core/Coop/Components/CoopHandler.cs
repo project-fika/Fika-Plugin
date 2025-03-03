@@ -25,13 +25,7 @@ namespace Fika.Core.Coop.Components
         #region Fields/Properties
         public CoopGame LocalGameInstance { get; internal set; }
         public string ServerId { get; internal set; }
-        public CoopPlayer MyPlayer
-        {
-            get
-            {
-                return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            }
-        }
+        public CoopPlayer MyPlayer { get; internal set; }
 
         /// <summary>
         /// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>
@@ -119,7 +113,6 @@ namespace Fika.Core.Coop.Components
             }
 
             isClient = false;
-            Singleton<GameWorld>.Instance.World_0.method_0(null);
         }
 
         protected void Update()
@@ -253,6 +246,11 @@ namespace Fika.Core.Coop.Components
 
         private void SyncPlayersWithServer()
         {
+            if (MyPlayer == null)
+            {
+                return;
+            }
+
             AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
             {
                 NetId = MyPlayer.NetId
