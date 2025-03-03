@@ -353,6 +353,7 @@ namespace Fika.Core
             new PartyInfoPanel_Show_Patch().Enable();
             new PlayerCameraController_LateUpdate_Transpiler().Enable();
             new DissonanceComms_Start_Patch().Enable();
+            new Player_IDissonancePlayerType_Patch().Enable();
 #if DEBUG
             TasksExtensions_HandleFinishedTask_Patches.Enable();
             new GClass1640_method_0_Patch().Enable();

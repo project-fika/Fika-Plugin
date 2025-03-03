@@ -255,7 +255,6 @@ namespace Fika.Core.Coop.Players
         {
             voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
             voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
-            voiceBroadcastTrigger.RoomName = "Global";
             soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
             CompositeDisposable.BindState(soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);            
         }
