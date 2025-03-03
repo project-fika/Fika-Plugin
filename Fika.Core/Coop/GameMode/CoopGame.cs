@@ -1240,7 +1240,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            coopHandler.SetReady(true);
             await vmethod_1(botsSettings, SpawnSystem);
 
             if (isServer && Singleton<IBotGame>.Instantiated)

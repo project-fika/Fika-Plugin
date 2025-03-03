@@ -53,7 +53,6 @@ namespace Fika.Core.Coop.Components
         private ManualLogSource logger;
         private List<string> queuedProfileIds;
         private Queue<SpawnObject> spawnQueue;
-        private bool ready;
         private bool isClient;
         private float charSyncCounter;
         private bool requestQuitGame;
@@ -91,7 +90,6 @@ namespace Fika.Core.Coop.Components
             ExtractedPlayers.Clear();
             queuedProfileIds.Clear();
             spawnQueue.Clear();
-            ready = false;
             LocalGameInstance = null;
             requestQuitGame = false;
             if (isClient)
@@ -121,18 +119,12 @@ namespace Fika.Core.Coop.Components
             }
 
             isClient = false;
-            ready = true;
             Singleton<GameWorld>.Instance.World_0.method_0(null);
         }
 
-        protected private void Update()
+        protected void Update()
         {
             if (LocalGameInstance == null)
-            {
-                return;
-            }
-
-            if (!ready)
             {
                 return;
             }
@@ -257,11 +249,6 @@ namespace Fika.Core.Coop.Components
                 }
                 return;
             }
-        }
-
-        public void SetReady(bool state)
-        {
-            ready = state;
         }
 
         private void SyncPlayersWithServer()
