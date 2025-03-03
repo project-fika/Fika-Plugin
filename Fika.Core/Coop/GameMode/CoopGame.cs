@@ -2813,7 +2813,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 return true;
             }
-            bool flag = GClass1203.IsTalkDetected();
+            bool flag = GClass1207.IsTalkDetected();
             localPlayer.TalkDateTime = flag ? EFTDateTimeClass.UtcNow : default;
             bool flag2;
             bool flag3;
@@ -2845,7 +2845,7 @@ namespace Fika.Core.Coop.GameMode
                     }
                 }
             }
-            GClass1203.Blocked = !flag3;
+            GClass1207.Blocked = !flag3;
             return flag2;
         }
 

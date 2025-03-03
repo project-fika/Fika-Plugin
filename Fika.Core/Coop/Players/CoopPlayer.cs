@@ -60,7 +60,7 @@ namespace Fika.Core.Coop.Players
 
         protected string lastWeaponId;
         private bool shouldSendSideEffect;
-        private GClass2037 voipHandler;
+        private GClass2042 voipHandler;
         private FikaVOIPController voipController;
 
         public ClientMovementContext ClientMovementContext
@@ -96,7 +96,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = true;
             player.NetId = netId;
-            player.voipHandler = GClass2037.Default;
+            player.voipHandler = GClass2042.Default;
 
             PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new CoopHostInventoryController(player, profile, false)
                 : new CoopClientInventoryController(player, profile, false);
@@ -186,7 +186,7 @@ namespace Fika.Core.Coop.Players
         {
             if (voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
             {
-                GClass1046 settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+                GClass1050 settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
                 if (!settings.VoipEnabled)
                 {
                     voipState = EVoipState.Off;

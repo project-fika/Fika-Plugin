@@ -14,12 +14,12 @@ namespace Fika.Core.Networking.VOIP
     {
         private static readonly TimeSpan HearingDetectionTime = TimeSpan.FromSeconds(2.0);
 
-        public FikaVOIPController(CoopPlayer localPlayer, GClass1046 soundSettings)
+        public FikaVOIPController(CoopPlayer localPlayer, GClass1050 soundSettings)
         {
             EVoipState voipState = localPlayer.VoipState;
             LocalPlayer = localPlayer;
             SoundSettings = soundSettings;
-            GClass2039 pushToTalkSettings = FikaGlobals.VOIPHandler.PushToTalkSettings;
+            var pushToTalkSettings = FikaGlobals.VOIPHandler.PushToTalkSettings;
             BlockingTime = TimeSpan.FromSeconds(pushToTalkSettings.BlockingTime);
             SpeakingSecondsInterval = TimeSpan.FromSeconds(pushToTalkSettings.SpeakingSecondsInterval);
             SpeakingSecondsLimit = TimeSpan.FromSeconds(pushToTalkSettings.SpeakingSecondsLimit);
@@ -97,7 +97,7 @@ namespace Fika.Core.Networking.VOIP
                 SetDefaultMicrophone();
                 return;
             }
-            if (GClass1046.IsValidMicrophone(device))
+            if (GClass1050.IsValidMicrophone(device))
             {
                 FikaGlobals.LogInfo($"VoipMicrophone set device: {device}");
                 DissonanceComms.MicrophoneName = device;
@@ -109,7 +109,7 @@ namespace Fika.Core.Networking.VOIP
 
         private void SetDefaultMicrophone()
         {
-            string defaultMicrophone = GClass1046.DefaultMicrophone;
+            string defaultMicrophone = GClass1050.DefaultMicrophone;
             if (defaultMicrophone != null)
             {
                 FikaGlobals.LogInfo($"VoipMicrophone set default: {defaultMicrophone}");
@@ -528,7 +528,7 @@ namespace Fika.Core.Networking.VOIP
 
 
         public CoopPlayer LocalPlayer { get; set; }
-        public GClass1046 SoundSettings { get; set; }
+        public GClass1050 SoundSettings { get; set; }
 
         public DissonanceComms DissonanceComms
         {
@@ -643,7 +643,7 @@ namespace Fika.Core.Networking.VOIP
 
         private Struct510 method_10()
         {
-            GClass1973 ban = LocalPlayer.Profile.Info.GetBan(EBanType.Voip);
+            GClass1978 ban = LocalPlayer.Profile.Info.GetBan(EBanType.Voip);
             if (ban == null)
             {
                 return default;

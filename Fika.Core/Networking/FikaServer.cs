@@ -316,15 +316,15 @@ namespace Fika.Core.Networking
 
         async Task IFikaNetworkManager.InitializeVOIP()
         {
-            GClass2037 voipHandler = FikaGlobals.VOIPHandler;
+            GClass2042 voipHandler = FikaGlobals.VOIPHandler;
 
-            GClass1036 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+            GClass1040 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
             if (voipHandler.MicrophoneChecked)
             {
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
-                await GClass1573.LoadScene(AssetsManagerSingletonClass.Manager,
-                    GClass2073.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                await GClass1578.LoadScene(AssetsManagerSingletonClass.Manager,
+                    GClass2078.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
                 do

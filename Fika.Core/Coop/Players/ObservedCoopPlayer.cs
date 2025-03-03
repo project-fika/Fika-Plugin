@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.Players
         private Coroutine waitForStartRoutine;
         private bool isServer;
         private VoiceBroadcastTrigger voiceBroadcastTrigger;
-        private GClass1046 soundSettings;
+        private GClass1050 soundSettings;
         private bool voipAssigned;
 
         public ObservedHealthController NetworkHealthController
