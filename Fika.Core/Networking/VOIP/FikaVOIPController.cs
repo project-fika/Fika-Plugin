@@ -519,8 +519,8 @@ namespace Fika.Core.Networking.VOIP
             return @struct;
         }
 
-        private VOIPState.SendLimit limiter;
-        private LimitChecker checker;
+        private readonly VOIPState.SendLimit limiter;
+        private readonly LimitChecker checker;
         private bool enabled = true;
         private bool forceMute;
 
