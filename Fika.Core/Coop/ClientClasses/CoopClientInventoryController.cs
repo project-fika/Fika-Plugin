@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             // Do not replicate picking up quest items, throws an error on the other clients            
-            if (operation is GClass3261 moveOperation)
+            if (operation is GClass3266 moveOperation)
             {
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.QuestItem)
@@ -135,7 +135,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             // Do not replicate quest operations / search operations
             // Check for GClass increments, ReadPolymorph
-            if (operation is GClass3298 or GClass3302 or GClass3303 or GClass3304)
+            if (operation is GClass3303 or GClass3307 or GClass3308 or GClass3309)
             {
                 base.vmethod_1(operation, callback);
                 return;
@@ -189,7 +189,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3298(method_12(), this, PlayerSearchController, Profile, item);
+            return new GClass3303(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class ClientInventoryOperationHandler

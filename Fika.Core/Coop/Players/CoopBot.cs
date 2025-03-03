@@ -67,18 +67,18 @@ namespace Fika.Core.Coop.Players
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
 
-            player.AIData = new GClass563(null, player)
+            player.AIData = new GClass567(null, player)
             {
                 IsAI = true
             };
 
             Traverse botTraverse = Traverse.Create(player);
-            botTraverse.Field<GClass893>("gclass893_0").Value = new();
-            botTraverse.Field<GClass893>("gclass893_0").Value.Initialize(player, player.PlayerBones);
+            botTraverse.Field<GClass896>("gclass896_0").Value = new();
+            botTraverse.Field<GClass896>("gclass896_0").Value.Initialize(player, player.PlayerBones);
 
             if (FikaBackendUtils.IsHeadless)
             {
-                botTraverse.Field<GClass893>("gclass893_0").Value.SetMode(GClass892.EMode.Disabled);
+                botTraverse.Field<GClass896>("gclass896_0").Value.SetMode(GClass896.EMode.Disabled);
             }
 
             player.AggressorFound = false;
@@ -159,7 +159,10 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1) ? MaterialType.Body : list[0].Material);
+            _preAllocatedArmorComponents.Clear();
+            _preAllocatedArmorComponents.AddRange(list);
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
+                ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
@@ -175,9 +178,9 @@ namespace Fika.Core.Coop.Players
             ShotReactions(damageInfo, bodyPartType);
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
-            if (list != null)
+            if (_preAllocatedArmorComponents.Count > 0)
             {
-                QueueArmorDamagePackets([.. list]);
+                SendArmorDamagePacket();
             }
 
             if (damageInfo.Weapon != null)
@@ -200,9 +203,9 @@ namespace Fika.Core.Coop.Players
         public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct damageInfo)
         {
             _preAllocatedArmorComponents.Clear();
-            Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
-            List<ArmorComponent> armorComponents = [];
-            foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
+            List<ArmorComponent> listTocheck = [];
+            Inventory.GetPutOnArmorsNonAlloc(listTocheck);
+            foreach (ArmorComponent armorComponent in listTocheck)
             {
                 float num = 0f;
                 foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
@@ -210,7 +213,7 @@ namespace Fika.Core.Coop.Players
                     if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                     {
                         num += keyValuePair.Value;
-                        armorComponents.Add(armorComponent);
+                        _preAllocatedArmorComponents.Add(armorComponent);
                     }
                 }
                 if (num > 0f)
@@ -220,9 +223,9 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            if (armorComponents.Count > 0)
+            if (_preAllocatedArmorComponents.Count > 0)
             {
-                QueueArmorDamagePackets([.. armorComponents]);
+                SendArmorDamagePacket();
             }
         }
 

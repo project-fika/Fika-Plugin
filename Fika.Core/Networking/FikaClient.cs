@@ -372,7 +372,7 @@ namespace Fika.Core.Networking
                 for (int i = 0; i < packet.GrenadePackets.Count; i++)
                 {
                     GrenadeDataPacketStruct throwablePacket = packet.GrenadePackets[i];
-                    GClass794<int, Throwable> grenades = gameWorld.Grenades;
+                    GClass797<int, Throwable> grenades = gameWorld.Grenades;
                     if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
                     {
                         throwable.ApplyNetPacket(throwablePacket);
@@ -440,7 +440,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            GStruct454<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+            GStruct457<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
             if (gstruct2.Failed)
             {
                 logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
@@ -681,7 +681,7 @@ namespace Fika.Core.Networking
             {
                 if (!packet.Success)
                 {
-                    NotificationManagerClass.DisplayNotification(new GClass2309("AirplaneDelayMessage".Localized(null),
+                    NotificationManagerClass.DisplayNotification(new GClass2314("AirplaneDelayMessage".Localized(null),
                                 ENotificationDurationType.Default, ENotificationIconType.Default, null));
                 }
             }
@@ -863,8 +863,8 @@ namespace Fika.Core.Networking
             if (coopGame != null)
             {
                 FikaReader eftReader = EFTSerializationManager.GetReader(packet.Data);
-                GClass1713 lootData = eftReader.ReadEFTLootDataDescriptor();
-                GClass1329 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
+                GClass1718 lootData = eftReader.ReadEFTLootDataDescriptor();
+                GClass1333 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
                 if (lootItems.Count < 1)
                 {
                     throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
@@ -1388,7 +1388,7 @@ namespace Fika.Core.Networking
                     {
                         FikaReader eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                        GStruct449 result = networkController.CreateOperationFromDescriptor(descriptor);
+                        GStruct452 result = networkController.CreateOperationFromDescriptor(descriptor);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");

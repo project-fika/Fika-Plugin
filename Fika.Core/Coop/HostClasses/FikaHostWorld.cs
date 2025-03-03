@@ -41,7 +41,7 @@ namespace Fika.Core.Coop.HostClasses
             UpdateLootItems(gameWorld.LootItems);
         }
 
-        protected void FixedUpdate()
+        protected void LateUpdate()
         {
             int grenadesCount = gameWorld.Grenades.Count;
             for (int i = 0; i < grenadesCount; i++)
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.HostClasses
             gameWorld.ArtilleryProjectilesStates.Clear();
         }
 
-        public void UpdateLootItems(GClass794<int, LootItem> lootItems)
+        public void UpdateLootItems(GClass797<int, LootItem> lootItems)
         {
             for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
             {

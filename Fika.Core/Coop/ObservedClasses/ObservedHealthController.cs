@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return false;
         }
 
-        public override bool ApplyItem(Item item, GStruct350<EBodyPart> bodyPart, float? amount = null)
+        public override bool ApplyItem(Item item, GStruct353<EBodyPart> bodyPart, float? amount = null)
         {
             return false;
         }
@@ -41,7 +41,7 @@ namespace Fika.Core.Coop.ObservedClasses
             for (int i = list_1.Count - 1; i >= 0; i--)
             {
                 handler.PausedEffects.Add(list_1[i]);
-                PausedEffectsStruct gstruct = gclass811_0.Withdraw();
+                PausedEffectsStruct gstruct = gclass814_0.Withdraw();
                 gstruct.SaveInfo(list_1[i].Id, list_1[i].HealthController, list_1[i].Type, list_1[i].BodyPart, list_1[i].Strength,
                     list_1[i].CurrentStrength, list_1[i].DelayTime, list_1[i].StateTime, list_1[i].WorkStateTime, list_1[i].BuildUpTime,
                     list_1[i].ResidueTime, list_1[i].State);
@@ -59,7 +59,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 Profile.ProfileHealthClass profileHealthClass2 = new()
                 {
-                    BodyParts = GClass842<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass1970>(),
+                    BodyParts = GClass845<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass1975>(),
                     Energy = new Profile.ProfileHealthClass.ValueInfo
                     {
                         Current = healthValue_0.Current,
@@ -93,9 +93,9 @@ namespace Fika.Core.Coop.ObservedClasses
                 keyValuePair.Deconstruct(out EBodyPart ebodyPart, out BodyPartState bodyPartState);
                 EBodyPart ebodyPart2 = ebodyPart;
                 BodyPartState bodyPartState2 = bodyPartState;
-                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass1970 gclass))
+                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass1975 gclass))
                 {
-                    gclass = new Profile.ProfileHealthClass.GClass1970();
+                    gclass = new Profile.ProfileHealthClass.GClass1975();
                     health.BodyParts.Add(ebodyPart2, gclass);
                 }
                 gclass.Health = new Profile.ProfileHealthClass.ValueInfo
@@ -110,7 +110,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 if (gclass is GInterface306 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments
                 {
-                    Profile.ProfileHealthClass.GClass1970 gclass2 = health.BodyParts[gclass.BodyPart];
+                    Profile.ProfileHealthClass.GClass1975 gclass2 = health.BodyParts[gclass.BodyPart];
                     gclass2.Effects ??= [];
                     gclass2.Effects.Add(gclass.GetType().Name, new()
                     {
@@ -138,7 +138,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         PausedEffectsInfo[i].BuildUpTime, PausedEffectsInfo[i].ResidueStateTime, PausedEffectsInfo[i].State);
                     healthController.AddEffectToList(PausedEffects[i]);
                     PausedEffects[i].UnPauseEffect();
-                    healthController.gclass811_0.Return(PausedEffectsInfo[i]);
+                    healthController.gclass814_0.Return(PausedEffectsInfo[i]);
                 }
             }
         }

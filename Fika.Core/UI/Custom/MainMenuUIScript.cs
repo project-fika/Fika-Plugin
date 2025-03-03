@@ -120,7 +120,6 @@ namespace Fika.Core.UI.Custom
             GameObject mainMenuUI = GameObject.Instantiate(mainMenuUIPrefab);
             this.mainMenuUI = mainMenuUI.GetComponent<MainMenuUI>();
             playerTemplate = this.mainMenuUI.PlayerTemplate;
-            playerTemplate.SetActive(false);
             Transform newParent = Singleton<CommonUI>.Instance.MenuScreen.gameObject.transform;
             mainMenuUI.transform.SetParent(newParent);
             gameObject.transform.SetParent(newParent);

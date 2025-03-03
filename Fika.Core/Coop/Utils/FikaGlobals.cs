@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Utils
     public static class FikaGlobals
     {
         public const string TransitTraderId = "656f0f98d80a697f855d34b1";
-        public const string TransiterTraderName = "BTR";
+        public const string TransitTraderName = "BTR";
         public const string DefaultTransitId = "66f5750951530ca5ae09876d";
 
         public const int PingRange = 1000;
@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                return GClass2002.Instance;
+                return GClass2007.Instance;
             }
         }
 
@@ -237,7 +237,7 @@ namespace Fika.Core.Coop.Utils
         public static Profile GetLiteProfile(bool scav)
         {
             Profile profile = GetProfile(scav);
-            GClass1993 liteDescriptor = new(profile, SearchControllerSerializer)
+            GClass1998 liteDescriptor = new(profile, SearchControllerSerializer)
             {
                 Encyclopedia = [],
                 InsuredItems = [],
@@ -301,6 +301,47 @@ namespace Fika.Core.Coop.Utils
             return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
         }
 
+        /// <summary>
+        /// Unsubscribes all delegates from an <see cref="Action{T}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="action"></param>
+        public static Action<T> ClearDelegates<T>(Action<T> action) where T : class
+        {
+            Delegate[] list = action.GetInvocationList();
+            for (int i = 0; i < list.Length; i++)
+            {
+#if DEBUG
+                LogWarning($"Clearing {list[i].Method.Name}");
+#endif
+                action = (Action<T>)Delegate.Remove(action, list[i]);
+            }
+
+            return action;
+        }
+
+        /// <summary>
+        /// Unsubscribes all delegates from an <see cref="Action{T, Y}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <param name="action"></param>
+        public static Action<T, Y> ClearDelegates<T, Y>(Action<T, Y> action)
+            where T : class
+            where Y : class
+        {
+            Delegate[] list = action.GetInvocationList();
+            for (int i = 0; i < list.Length; i++)
+            {
+#if DEBUG
+                LogWarning($"Clearing {list[i].Method.Name}"); 
+#endif
+                action = (Action<T, Y>)Delegate.Remove(action, list[i]);
+            }
+
+            return action;
+        }
+        
         public static void LogInfo(string message, [CallerMemberName] string caller = "")
         {
             if (string.IsNullOrEmpty(message))

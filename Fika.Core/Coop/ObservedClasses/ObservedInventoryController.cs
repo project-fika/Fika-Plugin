@@ -56,13 +56,13 @@ namespace Fika.Core.Coop.ObservedClasses
             return false;
         }
 
-        public override GStruct454<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
+        public override GStruct457<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
         {
             ThrowItem(item, false, callback);
             return true;
         }
 
-        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3842 error)
+        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3847 error)
         {
             error = null;
             return true;
@@ -132,7 +132,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private void HandleInProcess(Item item, ItemAddress to, GInterface412 operation, Callback callback)
         {
-            Player.Class1231 handler = new()
+            Player.Class1230 handler = new()
             {
                 player_0 = coopPlayer,
                 callback = callback
@@ -176,7 +176,7 @@ namespace Fika.Core.Coop.ObservedClasses
 			
 		}*/
 
-        GStruct449 Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+        GStruct452 Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
         {
             method_13(descriptor);
             return descriptor.ToInventoryOperation(coopPlayer);

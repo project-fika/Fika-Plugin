@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return SuccessfulResult.Task;
         }
 
-        public override Task<GStruct452<GStruct394<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
+        public override Task<GStruct455<GStruct397<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
             return default;
         }

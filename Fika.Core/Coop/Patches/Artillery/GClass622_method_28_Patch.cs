@@ -3,15 +3,15 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass619_method_28_Patch : ModulePatch
+    public class GClass622_method_28_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass619).GetMethod(nameof(GClass619.method_28));
+            return typeof(GClass622).GetMethod(nameof(GClass622.method_28));
         }
 
         [PatchPrefix]
-        public static void Prefix(GClass619 __instance, GClass1391 serverProjectile)
+        public static void Prefix(GClass622 __instance, GClass1395 serverProjectile)
         {
             __instance.method_31(serverProjectile);
         }

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class FikaClientTransitController : GClass1672
+    public class FikaClientTransitController : GClass1677
     {
         public FikaClientTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters)
@@ -19,9 +19,10 @@ namespace Fika.Core.Coop.ClientClasses
             string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
             summonedTransits[profile.Id] = new TransitDataClass(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
                 localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
-            TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransiterTraderName);
+            TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
             this.localRaidSettings = localRaidSettings;
         }
+
         public TransitInteractionPacketStruct InteractPacket { get; set; }
 
         private readonly LocalRaidSettings localRaidSettings;
@@ -30,7 +31,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
-                TransferItemsController.InitPlayerStash(player);
+                //TransferItemsController.InitPlayerStash(player);
                 if (player is CoopPlayer coopPlayer)
                 {
                     coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
@@ -85,7 +86,7 @@ namespace Fika.Core.Coop.ClientClasses
                 isSolo = true
             });
 
-            GClass1956 gclass = new()
+            GClass1961 gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,

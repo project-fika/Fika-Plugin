@@ -18,7 +18,7 @@ namespace Fika.Core.Coop.Patches
             switch (type)
             {
                 case SynchronizableObjectType.Tripwire:
-                    __result = new GClass2449();
+                    __result = new GClass2454();
                     break;
                 case SynchronizableObjectType.AirPlane:
                     __result = new AirplaneLogicClass(FikaBackendUtils.IsServer);

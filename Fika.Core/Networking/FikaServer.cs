@@ -453,7 +453,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            GStruct454<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+            GStruct457<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
             if (gstruct2.Failed)
             {
                 logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
@@ -729,7 +729,7 @@ namespace Fika.Core.Networking
                 GameWorld gameWorld = Singleton<GameWorld>.Instance;
                 Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
-                GClass794<int, Throwable>.GStruct45 grenades = gameWorld.Grenades.GetValuesEnumerator();
+                GClass797<int, Throwable>.GStruct46 grenades = gameWorld.Grenades.GetValuesEnumerator();
                 List<SmokeGrenadeDataPacketStruct> smokeData = [];
                 foreach (Throwable item in grenades)
                 {
@@ -790,7 +790,7 @@ namespace Fika.Core.Networking
                     SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
                 }
 
-                GClass794<int, WindowBreaker>.GStruct45 windows = gameWorld.Windows.GetValuesEnumerator();
+                GClass797<int, WindowBreaker>.GStruct46 windows = gameWorld.Windows.GetValuesEnumerator();
                 Dictionary<int, Vector3> windowData = [];
                 foreach (WindowBreaker window in windows)
                 {
@@ -1076,7 +1076,7 @@ namespace Fika.Core.Networking
                 coopHandler.LocalGameInstance.RaidStarted = true;
             }
 
-            if (HostReady)
+            if (gameExists && HostReady)
             {
                 respondPackage.GameTime = gameStartTime.Value;
                 GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
@@ -1179,7 +1179,7 @@ namespace Fika.Core.Networking
                     if (playerToApply.InventoryController is Interface16 inventoryController)
                     {
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                        GStruct449 result = inventoryController.CreateOperationFromDescriptor(descriptor);
+                        GStruct452 result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
                         ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
 #endif
@@ -1517,7 +1517,7 @@ namespace Fika.Core.Networking
 
                 if (profile.ProfileId == RequestHandler.SessionId)
                 {
-                    foreach (Profile.ProfileHealthClass.GClass1970 bodyPartHealth in profile.Health.BodyParts.Values)
+                    foreach (Profile.ProfileHealthClass.GClass1975 bodyPartHealth in profile.Health.BodyParts.Values)
                     {
                         bodyPartHealth.Effects.Clear();
                         bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
@@ -1609,9 +1609,9 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Packet loss: {netServer.Statistics.PacketLossPercent}%");
         }
 
-        private class InventoryOperationHandler(GStruct449 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
+        private class InventoryOperationHandler(GStruct452 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
         {
-            public GStruct449 OperationResult = operationResult;
+            public GStruct452 OperationResult = operationResult;
             private readonly uint operationId = operationId;
             private readonly int netId = netId;
             private readonly NetPeer peer = peer;
