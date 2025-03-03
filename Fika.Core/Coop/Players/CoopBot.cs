@@ -153,8 +153,9 @@ namespace Fika.Core.Coop.Players
             }
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true));
+            _preAllocatedArmorComponents.AddRange(list);
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
                 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()

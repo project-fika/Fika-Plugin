@@ -415,54 +415,55 @@ namespace Fika.Core.Coop.Players
             };
         }
 
-        public override ShotInfoClass ApplyShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
+        public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
         {
             if (HealthController != null && !HealthController.IsAlive)
             {
                 return null;
             }
 
-            ShotReactions(DamageInfo, bodyPartType);
-            ApplyHitDebuff(DamageInfo.Damage, 0f, bodyPartType, DamageInfo.DamageType);
-            bool flag = !string.IsNullOrEmpty(DamageInfo.DeflectedBy);
-            float damage = DamageInfo.Damage;
+            ShotReactions(damageInfo, bodyPartType);
+            ApplyHitDebuff(damageInfo.Damage, 0f, bodyPartType, damageInfo.DamageType);
+            bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+            float damage = damageInfo.Damage;
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true));
+            _preAllocatedArmorComponents.AddRange(list);
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
                 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
-                Penetrated = string.IsNullOrEmpty(DamageInfo.BlockedBy) || string.IsNullOrEmpty(DamageInfo.DeflectedBy),
+                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                 Material = materialType
             };
-            float num = damage - DamageInfo.Damage;
+            float num = damage - damageInfo.Damage;
             if (num > 0)
             {
-                DamageInfo.DidArmorDamage = num;
+                damageInfo.DidArmorDamage = num;
             }
-            DamageInfo.DidBodyDamage = DamageInfo.Damage;
-            ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
+            damageInfo.DidBodyDamage = damageInfo.Damage;
+            ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
             DamagePacket packet = new()
             {
                 NetId = NetId,
-                Damage = DamageInfo.Damage,
-                DamageType = DamageInfo.DamageType,
+                Damage = damageInfo.Damage,
+                DamageType = damageInfo.DamageType,
                 BodyPartType = bodyPartType,
                 ColliderType = colliderType,
                 ArmorPlateCollider = armorPlateCollider,
-                Direction = DamageInfo.Direction,
-                Point = DamageInfo.HitPoint,
-                HitNormal = DamageInfo.HitNormal,
-                PenetrationPower = DamageInfo.PenetrationPower,
-                BlockedBy = DamageInfo.BlockedBy,
-                DeflectedBy = DamageInfo.DeflectedBy,
-                SourceId = DamageInfo.SourceId,
-                ArmorDamage = DamageInfo.ArmorDamage,
-                ProfileId = DamageInfo.Player.iPlayer.ProfileId,
+                Direction = damageInfo.Direction,
+                Point = damageInfo.HitPoint,
+                HitNormal = damageInfo.HitNormal,
+                PenetrationPower = damageInfo.PenetrationPower,
+                BlockedBy = damageInfo.BlockedBy,
+                DeflectedBy = damageInfo.DeflectedBy,
+                SourceId = damageInfo.SourceId,
+                ArmorDamage = damageInfo.ArmorDamage,
+                ProfileId = damageInfo.Player.iPlayer.ProfileId,
                 Material = materialType,
-                WeaponId = DamageInfo.Weapon.Id
+                WeaponId = damageInfo.Weapon.Id
             };
             PacketSender.SendPacket(ref packet);
 
@@ -472,7 +473,7 @@ namespace Fika.Core.Coop.Players
             }
 
             // Run this to get weapon skill
-            ManageAggressor(DamageInfo, bodyPartType, colliderType);
+            ManageAggressor(damageInfo, bodyPartType, colliderType);
 
             return hitInfo;
         }
@@ -509,60 +510,61 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public ShotInfoClass ApplyClientShot(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
+        public ShotInfoClass ApplyClientShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
         {
-            ShotReactions(DamageInfo, bodyPartType);
-            ApplyHitDebuff(DamageInfo.Damage, 0f, bodyPartType, DamageInfo.DamageType);
-            LastAggressor = DamageInfo.Player.iPlayer;
+            ShotReactions(damageInfo, bodyPartType);
+            ApplyHitDebuff(damageInfo.Damage, 0f, bodyPartType, damageInfo.DamageType);
+            LastAggressor = damageInfo.Player.iPlayer;
             LastDamagedBodyPart = bodyPartType;
             LastBodyPart = bodyPartType;
-            LastDamageInfo = DamageInfo;
-            LastDamageType = DamageInfo.DamageType;
+            LastDamageInfo = damageInfo;
+            LastDamageType = damageInfo.DamageType;
 
             if (HealthController != null && !HealthController.IsAlive)
             {
                 return null;
             }
 
-            bool flag = !string.IsNullOrEmpty(DamageInfo.DeflectedBy);
-            float damage = DamageInfo.Damage;
+            bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+            float damage = damageInfo.Damage;
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(ProceedDamageThroughArmor(ref DamageInfo, colliderType, armorPlateCollider, true));
+            _preAllocatedArmorComponents.AddRange(list);
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
                 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
-                Penetrated = string.IsNullOrEmpty(DamageInfo.BlockedBy) || string.IsNullOrEmpty(DamageInfo.DeflectedBy),
+                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
                 Material = materialType
             };
-            float num = damage - DamageInfo.Damage;
+            float num = damage - damageInfo.Damage;
             if (num > 0)
             {
-                DamageInfo.DidArmorDamage = num;
+                damageInfo.DidArmorDamage = num;
             }
-            DamageInfo.DidBodyDamage = DamageInfo.Damage;
-            ReceiveDamage(DamageInfo.Damage, bodyPartType, DamageInfo.DamageType, num, hitInfo.Material);
+            damageInfo.DidBodyDamage = damageInfo.Damage;
+            ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
             DamagePacket packet = new()
             {
                 NetId = NetId,
-                Damage = DamageInfo.Damage,
-                DamageType = DamageInfo.DamageType,
+                Damage = damageInfo.Damage,
+                DamageType = damageInfo.DamageType,
                 BodyPartType = bodyPartType,
                 ColliderType = colliderType,
                 ArmorPlateCollider = armorPlateCollider,
-                Direction = DamageInfo.Direction,
-                Point = DamageInfo.HitPoint,
-                HitNormal = DamageInfo.HitNormal,
-                PenetrationPower = DamageInfo.PenetrationPower,
-                BlockedBy = DamageInfo.BlockedBy,
-                DeflectedBy = DamageInfo.DeflectedBy,
-                SourceId = DamageInfo.SourceId,
-                ArmorDamage = DamageInfo.ArmorDamage,
-                ProfileId = DamageInfo.Player.iPlayer.ProfileId,
+                Direction = damageInfo.Direction,
+                Point = damageInfo.HitPoint,
+                HitNormal = damageInfo.HitNormal,
+                PenetrationPower = damageInfo.PenetrationPower,
+                BlockedBy = damageInfo.BlockedBy,
+                DeflectedBy = damageInfo.DeflectedBy,
+                SourceId = damageInfo.SourceId,
+                ArmorDamage = damageInfo.ArmorDamage,
+                ProfileId = damageInfo.Player.iPlayer.ProfileId,
                 Material = materialType,
-                WeaponId = DamageInfo.Weapon.Id
+                WeaponId = damageInfo.Weapon.Id
             };
             PacketSender.SendPacket(ref packet);
 
@@ -572,7 +574,7 @@ namespace Fika.Core.Coop.Players
             }
 
             // Run this to get weapon skill
-            ManageAggressor(DamageInfo, bodyPartType, colliderType);
+            ManageAggressor(damageInfo, bodyPartType, colliderType);
 
             return hitInfo;
         }
