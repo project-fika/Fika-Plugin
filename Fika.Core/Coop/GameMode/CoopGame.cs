@@ -225,7 +225,7 @@ namespace Fika.Core.Coop.GameMode
                 gameTime = new(backendDateTime.DateTime_0, newTime, backendDateTime.TimeFactor);
                 gameTime.Reset(newTime);
                 dateTime = EDateTime.CURR;
-            }
+            }            
 
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
@@ -235,6 +235,11 @@ namespace Fika.Core.Coop.GameMode
             float hearingDistance = FikaGlobals.VOIPHandler.PushToTalkSettings.HearingDistance;
             coopGame.voipDistance = hearingDistance * hearingDistance + 9;
             ClientHearingTable.Instance = coopGame;
+
+            if (coopGame.isServer)
+            {
+                gameWorld.World_0.method_0();
+            }
 
             if (timeAndWeather.TimeFlowType != ETimeFlowType.x1)
             {

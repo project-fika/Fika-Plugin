@@ -42,6 +42,7 @@ namespace Fika.Core.Coop.HostClasses
             gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
             gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
             gameWorld.FikaHostWorld = FikaHostWorld.Create(gameWorld);
+            gameWorld.FikaHostWorld.method_0();
             Singleton<CoopHostGameWorld>.Create(gameWorld);
             return gameWorld;
         }
