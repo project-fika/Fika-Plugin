@@ -14,6 +14,7 @@ namespace Fika.Core.Networking
         public EPlayerSide RaidSide { get; set; }
         public int SendRate { get; }
         public bool MultiThreaded { get; }
+        public bool AllowVOIP { get; set; }
         public void SendVOIPPacket(ArraySegment<byte> data, bool reliable, NetPeer peer = null);
         public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new();
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new();

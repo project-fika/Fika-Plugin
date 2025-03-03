@@ -120,7 +120,8 @@ namespace Fika.Core.Networking
             SecretExfilFound,
             BorderZone,
             Mine,
-            DisarmTripwire
+            DisarmTripwire,
+            MuffledState
             //TrainSync,
             //TraderServiceNotification,
         }

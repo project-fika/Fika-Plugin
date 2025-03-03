@@ -201,6 +201,7 @@ namespace Fika.Core
         public static ConfigEntry<ESendRate> SendRate { get; set; }
         public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
         public static ConfigEntry<bool> NetMultiThreaded { get; set; }
+        public static ConfigEntry<bool> AllowVOIP { get; set; }
 
         // Gameplay
         public static ConfigEntry<bool> DisableBotMetabolism { get; set; }
@@ -487,7 +488,7 @@ namespace Fika.Core
             return header;
         }
 
-        private ConfigEntry<T> SetupSetting<T>(string section, string key, T defValue, ConfigDescription configDescription, string fallback, ref bool failed, ref List<string> error)
+        private ConfigEntry<T> SetupSetting<T>(string section, string key, T defValue, ConfigDescription configDescription, string fallback, ref bool failed, List<string> error)
         {
             try
             {
@@ -521,7 +522,7 @@ namespace Fika.Core
                         Category = LocaleUtils.BEPINEX_H_ADVANCED.Localized(),
                         DispName = LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized()
                     }),
-                    "Official Version", ref failed, ref headers);
+                    "Official Version", ref failed, headers);
 
             // Coop
 
@@ -534,7 +535,7 @@ namespace Fika.Core
                     Category = coopHeader,
                     DispName = LocaleUtils.BEPINEX_USE_HEADLESS_T.Localized(),
                     Order = 8
-                }), "Auto Use Headless", ref failed, ref headers);
+                }), "Auto Use Headless", ref failed, headers);
 
             ShowNotifications = SetupSetting(coopDefaultHeader, "Show Feed", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_SHOW_FEED_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -543,7 +544,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_SHOW_FEED_T.Localized(),
                     Order = 7
                 }),
-                "Show Feed", ref failed, ref headers);
+                "Show Feed", ref failed, headers);
 
             AutoExtract = SetupSetting(coopDefaultHeader, "Auto Extract", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_AUTO_EXTRACT_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -552,7 +553,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_AUTO_EXTRACT_T.Localized(),
                     Order = 6
                 }),
-                "Auto Extract", ref failed, ref headers);
+                "Auto Extract", ref failed, headers);
 
             ShowExtractMessage = SetupSetting(coopDefaultHeader, "Show Extract Message", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -561,7 +562,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_T.Localized(),
                     Order = 5
                 }),
-                "Show Extract Message", ref failed, ref headers);
+                "Show Extract Message", ref failed, headers);
 
             ExtractKey = SetupSetting(coopDefaultHeader, "Extract Key", new KeyboardShortcut(KeyCode.F8),
                 new ConfigDescription(LocaleUtils.BEPINEX_EXTRACT_KEY_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -570,7 +571,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_EXTRACT_KEY_T.Localized(),
                     Order = 4
                 }),
-                "Extract Key", ref failed, ref headers);
+                "Extract Key", ref failed, headers);
 
             EnableChat = SetupSetting(coopDefaultHeader, "Enable Chat", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_ENABLE_CHAT_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -579,7 +580,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_ENABLE_CHAT_T.Localized(),
                     Order = 3
                 }),
-                "Enable Chat", ref failed, ref headers);
+                "Enable Chat", ref failed, headers);
 
             ChatKey = SetupSetting(coopDefaultHeader, "Chat Key", new KeyboardShortcut(KeyCode.RightControl),
                 new ConfigDescription(LocaleUtils.BEPINEX_CHAT_KEY_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -588,7 +589,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_CHAT_KEY_T.Localized(),
                     Order = 2
                 }),
-                "Chat Key", ref failed, ref headers);
+                "Chat Key", ref failed, headers);
 
             EnableOnlinePlayers = SetupSetting(coopDefaultHeader, "Enable Online Players", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_ENABLE_ONLINE_PLAYER_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -597,7 +598,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_ENABLE_ONLINE_PLAYER_T.Localized(),
                     Order = 1
                 }),
-                "Enable Online Players", ref failed, ref headers);
+                "Enable Online Players", ref failed, headers);
 
             OnlinePlayersScale = SetupSetting(coopDefaultHeader, "Online Players Scale", 1f,
                 new ConfigDescription(LocaleUtils.BEPINEX_ONLINE_PLAYERS_SCALE_D.Localized(),
@@ -607,7 +608,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_ONLINE_PLAYERS_SCALE_T.Localized(),
                     Order = 0
                 }),
-                "Online Players Scale", ref failed, ref headers);
+                "Online Players Scale", ref failed, headers);
 
             // Coop | Name Plates
 
@@ -621,7 +622,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_USE_NAME_PLATES_T.Localized(),
                     Order = 13
                 }),
-                "Show Player Name Plates", ref failed, ref headers);
+                "Show Player Name Plates", ref failed, headers);
 
             HideHealthBar = SetupSetting(coopDefaultNamePlatesHeader, "Hide Health Bar", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_HIDE_HEALTH_BAR_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -630,7 +631,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_HIDE_HEALTH_BAR_T.Localized(),
                     Order = 12
                 }),
-                "Hide Health Bar", ref failed, ref headers);
+                "Hide Health Bar", ref failed, headers);
 
             UseHealthNumber = SetupSetting(coopDefaultNamePlatesHeader, "Show HP% instead of bar", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_USE_PERCENT_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -639,7 +640,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_USE_PERCENT_T.Localized(),
                     Order = 11
                 }),
-                "Show HP% instead of bar", ref failed, ref headers);
+                "Show HP% instead of bar", ref failed, headers);
 
             ShowEffects = SetupSetting(coopDefaultNamePlatesHeader, "Show Effects", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_SHOW_EFFECTS_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -648,7 +649,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_SHOW_EFFECTS_T.Localized(),
                     Order = 10
                 }),
-                "Show Effects", ref failed, ref headers);
+                "Show Effects", ref failed, headers);
 
             UsePlateFactionSide = SetupSetting(coopDefaultNamePlatesHeader, "Show Player Faction Icon", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_SHOW_FACTION_ICON_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -657,7 +658,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_SHOW_FACTION_ICON_T.Localized(),
                     Order = 9
                 }),
-                "Show Player Faction Icon", ref failed, ref headers);
+                "Show Player Faction Icon", ref failed, headers);
 
             HideNamePlateInOptic = SetupSetting(coopDefaultNamePlatesHeader, "Hide Name Plate in Optic", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_HIDE_IN_OPTIC_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -666,7 +667,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_HIDE_IN_OPTIC_T.Localized(),
                     Order = 8
                 }),
-                "Hide Name Plate in Optic", ref failed, ref headers);
+                "Hide Name Plate in Optic", ref failed, headers);
 
             NamePlateUseOpticZoom = SetupSetting(coopDefaultNamePlatesHeader, "Name Plates Use Optic Zoom", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_OPTIC_USE_ZOOM_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -676,7 +677,7 @@ namespace Fika.Core
                     Order = 7,
                     IsAdvanced = true
                 }),
-                "Name Plates Use Optic Zoom", ref failed, ref headers);
+                "Name Plates Use Optic Zoom", ref failed, headers);
 
             DecreaseOpacityNotLookingAt = SetupSetting(coopDefaultNamePlatesHeader, "Decrease Opacity In Peripheral", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_DEC_OPAC_PERI_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -685,7 +686,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DEC_OPAC_PERI_T.Localized(),
                     Order = 6
                 }),
-                "Decrease Opacity In Peripheral", ref failed, ref headers);
+                "Decrease Opacity In Peripheral", ref failed, headers);
 
             NamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Name Plate Scale", 0.22f,
                 new ConfigDescription(LocaleUtils.BEPINEX_NAME_PLATE_SCALE_D.Localized(),
@@ -695,7 +696,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_NAME_PLATE_SCALE_T.Localized(),
                     Order = 5
                 }),
-                "Name Plate Scale", ref failed, ref headers);
+                "Name Plate Scale", ref failed, headers);
 
             OpacityInADS = SetupSetting(coopDefaultNamePlatesHeader, "Opacity in ADS", 0.75f,
                 new ConfigDescription(LocaleUtils.BEPINEX_ADS_OPAC_D.Localized(),
@@ -705,7 +706,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_ADS_OPAC_T.Localized(),
                     Order = 4
                 }),
-                "Opacity in ADS", ref failed, ref headers);
+                "Opacity in ADS", ref failed, headers);
 
             MaxDistanceToShow = SetupSetting(coopDefaultNamePlatesHeader, "Max Distance to Show", 500f,
                 new ConfigDescription(LocaleUtils.BEPINEX_MAX_DISTANCE_D.Localized(),
@@ -715,7 +716,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_MAX_DISTANCE_T.Localized(),
                     Order = 3
                 }),
-                "Max Distance to Show", ref failed, ref headers);
+                "Max Distance to Show", ref failed, headers);
 
             MinimumOpacity = SetupSetting(coopDefaultNamePlatesHeader, "Minimum Opacity", 0.1f,
                 new ConfigDescription(LocaleUtils.BEPINEX_MIN_OPAC_D.Localized(),
@@ -725,7 +726,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_MIN_OPAC_T.Localized(),
                     Order = 2
                 }),
-                "Minimum Opacity", ref failed, ref headers);
+                "Minimum Opacity", ref failed, headers);
 
             MinimumNamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Minimum Name Plate Scale", 0.01f,
                 new ConfigDescription(LocaleUtils.BEPINEX_MIN_PLATE_SCALE_D.Localized(),
@@ -735,7 +736,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_MIN_PLATE_SCALE_T.Localized(),
                     Order = 1
                 }),
-                "Minimum Name Plate Scale", ref failed, ref headers);
+                "Minimum Name Plate Scale", ref failed, headers);
 
             UseOcclusion = SetupSetting(coopDefaultNamePlatesHeader, "Use Occlusion", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_USE_OCCLUSION_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -744,7 +745,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_USE_OCCLUSION_T.Localized(),
                     Order = 0
                 }),
-                "Use Occlusion", ref failed, ref headers);
+                "Use Occlusion", ref failed, headers);
 
             // Coop | Quest Sharing
 
@@ -761,7 +762,7 @@ namespace Fika.Core
                     Order = 4,
                     ReadOnly = !questSharingEnabled
                 }),
-                "Quest Types", ref failed, ref headers);
+                "Quest Types", ref failed, headers);
 
             QuestSharingNotifications = SetupSetting(coopDefaultQuestSharingHeader, "Show Notifications", true,
                 new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_QS_NOTIFICATIONS_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
@@ -771,7 +772,7 @@ namespace Fika.Core
                     Order = 3,
                     ReadOnly = !questSharingEnabled
                 }),
-                "Show Notifications", ref failed, ref headers);
+                "Show Notifications", ref failed, headers);
 
             EasyKillConditions = SetupSetting(coopDefaultQuestSharingHeader, "Easy Kill Conditions", false,
                 new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_EASY_KILL_CONDITIONS_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
@@ -781,7 +782,7 @@ namespace Fika.Core
                     Order = 2,
                     ReadOnly = !questSharingEnabled
                 }),
-                "Easy Kill Conditions", ref failed, ref headers);
+                "Easy Kill Conditions", ref failed, headers);
 
             SharedKillExperience = SetupSetting(coopDefaultQuestSharingHeader, "Shared Kill Experience", false,
                 new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_SHARED_KILL_XP_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
@@ -791,7 +792,7 @@ namespace Fika.Core
                     Order = 1,
                     ReadOnly = !questSharingEnabled
                 }),
-                "Shared Kill Experience", ref failed, ref headers);
+                "Shared Kill Experience", ref failed, headers);
 
             SharedBossExperience = SetupSetting(coopDefaultQuestSharingHeader, "Shared Boss Experience", false,
                 new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_SHARED_BOSS_XP_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
@@ -801,7 +802,7 @@ namespace Fika.Core
                     Order = 0,
                     ReadOnly = !questSharingEnabled
                 }),
-                "Shared Boss Experience", ref failed, ref headers);
+                "Shared Boss Experience", ref failed, headers);
 
             // Coop | Pinging
 
@@ -815,7 +816,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_SYSTEM_T.Localized(),
                     Order = 11
                 }),
-                "Ping System", ref failed, ref headers);
+                "Ping System", ref failed, headers);
 
             PingButton = SetupSetting(coopDefaultPingingHeader, "Ping Button", new KeyboardShortcut(KeyCode.Semicolon),
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_BUTTON_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -824,7 +825,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_BUTTON_T.Localized(),
                     Order = 10
                 }),
-                "Ping Button", ref failed, ref headers);
+                "Ping Button", ref failed, headers);
 
             PingColor = SetupSetting(coopDefaultPingingHeader, "Ping Color", Color.white,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_COLOR_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -833,7 +834,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_COLOR_T.Localized(),
                     Order = 9
                 }),
-                "Ping Color", ref failed, ref headers);
+                "Ping Color", ref failed, headers);
 
             PingSize = SetupSetting(coopDefaultPingingHeader, "Ping Size", 1f,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_SIZE_D.Localized(),
@@ -843,7 +844,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_SIZE_T.Localized(),
                     Order = 8
                 }),
-                "Ping Size", ref failed, ref headers);
+                "Ping Size", ref failed, headers);
 
             PingTime = SetupSetting(coopDefaultPingingHeader, "Ping Time", 3,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_TIME_D.Localized(),
@@ -853,7 +854,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_TIME_T.Localized(),
                     Order = 7
                 }),
-                "Ping Time", ref failed, ref headers);
+                "Ping Time", ref failed, headers);
 
             PlayPingAnimation = SetupSetting(coopDefaultPingingHeader, "Play Ping Animation", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_ANIMATION_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -862,7 +863,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_ANIMATION_T.Localized(),
                     Order = 6
                 }),
-                "Play Ping Animation", ref failed, ref headers);
+                "Play Ping Animation", ref failed, headers);
 
             ShowPingDuringOptics = SetupSetting(coopDefaultPingingHeader, "Show Ping During Optics", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_OPTICS_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -871,7 +872,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_OPTICS_T.Localized(),
                     Order = 5
                 }),
-                "Show Ping During Optics", ref failed, ref headers);
+                "Show Ping During Optics", ref failed, headers);
 
             PingUseOpticZoom = SetupSetting(coopDefaultPingingHeader, "Ping Use Optic Zoom", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_OPTIC_ZOOM_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -881,7 +882,7 @@ namespace Fika.Core
                     Order = 4,
                     IsAdvanced = true
                 }),
-                "Ping Use Optic Zoom", ref failed, ref headers);
+                "Ping Use Optic Zoom", ref failed, headers);
 
             PingScaleWithDistance = SetupSetting(coopDefaultPingingHeader, "Ping Scale With Distance", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_SCALE_DISTANCE_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -891,7 +892,7 @@ namespace Fika.Core
                     Order = 3,
                     IsAdvanced = true
                 }),
-                "Ping Scale With Distance", ref failed, ref headers);
+                "Ping Scale With Distance", ref failed, headers);
 
             PingMinimumOpacity = SetupSetting(coopDefaultPingingHeader, "Ping Minimum Opacity", 0.05f,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_MIN_OPAC_D.Localized(),
@@ -902,7 +903,7 @@ namespace Fika.Core
                     Order = 2,
                     IsAdvanced = true
                 }),
-                "Ping Minimum Opacity", ref failed, ref headers);
+                "Ping Minimum Opacity", ref failed, headers);
 
             ShowPingRange = SetupSetting(coopDefaultPingingHeader, "Show Ping Range", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_RANGE_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -911,7 +912,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_RANGE_T.Localized(),
                     Order = 1
                 }),
-                "Show Ping Range", ref failed, ref headers);
+                "Show Ping Range", ref failed, headers);
 
             PingSound = SetupSetting(coopDefaultPingingHeader, "Ping Sound", EPingSound.SubQuestComplete,
                 new ConfigDescription(LocaleUtils.BEPINEX_PING_SOUND_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -920,7 +921,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_PING_SOUND_T.Localized(),
                     Order = 0
                 }),
-                "Ping Sound", ref failed, ref headers);
+                "Ping Sound", ref failed, headers);
 
             // Coop | Debug
 
@@ -934,7 +935,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_FREE_CAM_BUTTON_T.Localized(),
                     Order = 4
                 }),
-                "Free Camera Button", ref failed, ref headers);
+                "Free Camera Button", ref failed, headers);
 
             AllowSpectateBots = SetupSetting(coopDefaultDebugHeader, "Allow Spectating Bots", true,
                 new ConfigDescription(CleanConfigString(LocaleUtils.BEPINEX_SPECTATE_BOTS_D.Localized()), tags: new ConfigurationManagerAttributes()
@@ -943,7 +944,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_SPECTATE_BOTS_T.Localized(),
                     Order = 3
                 }),
-                "Allow Spectating Bots", ref failed, ref headers);
+                "Allow Spectating Bots", ref failed, headers);
 
             AZERTYMode = SetupSetting(coopDefaultDebugHeader, "AZERTY Mode", false,
                 new ConfigDescription(CleanConfigString(LocaleUtils.BEPINEX_AZERTY_MODE_D.Localized()), tags: new ConfigurationManagerAttributes()
@@ -952,7 +953,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_AZERTY_MODE_T.Localized(),
                     Order = 2
                 }),
-                "AZERTY Mode", ref failed, ref headers);
+                "AZERTY Mode", ref failed, headers);
 
             DroneMode = SetupSetting(coopDefaultDebugHeader, "Drone Mode", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_DRONE_MODE_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -961,7 +962,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DRONE_MODE_T.Localized(),
                     Order = 1
                 }),
-                "Drone Mode", ref failed, ref headers);
+                "Drone Mode", ref failed, headers);
 
             KeybindOverlay = SetupSetting(coopDefaultDebugHeader, "Keybind Overlay", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_KEYBIND_OVERLAY_T.Localized(), tags: new ConfigurationManagerAttributes()
@@ -970,7 +971,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_KEYBIND_OVERLAY_T.Localized(),
                     Order = 0
                 }),
-                "Keybind Overlay", ref failed, ref headers);
+                "Keybind Overlay", ref failed, headers);
 
             // Performance
 
@@ -984,7 +985,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_T.Localized(),
                     Order = 4
                 }),
-                "Dynamic AI", ref failed, ref headers);
+                "Dynamic AI", ref failed, headers);
 
             DynamicAIRange = SetupSetting(performanceDefaultHeader, "Dynamic AI Range", 100f,
                 new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_RANGE_D.Localized(),
@@ -994,7 +995,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_RANGE_T.Localized(),
                     Order = 3
                 }),
-                "Dynamic AI Range", ref failed, ref headers);
+                "Dynamic AI Range", ref failed, headers);
 
             DynamicAIRate = SetupSetting(performanceDefaultHeader, "Dynamic AI Rate", EDynamicAIRates.Medium,
                 new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_RATE_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1003,7 +1004,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_RATE_T.Localized(),
                     Order = 2
                 }),
-                "Dynamic AI Rate", ref failed, ref headers);
+                "Dynamic AI Rate", ref failed, headers);
 
             DynamicAIIgnoreSnipers = SetupSetting(performanceDefaultHeader, "Ignore Snipers", true,
                 new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_NO_SNIPERS_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1012,7 +1013,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DYNAMIC_AI_NO_SNIPERS_T.Localized(),
                     Order = 1
                 }),
-                "Ignore Snipers", ref failed, ref headers);
+                "Ignore Snipers", ref failed, headers);
 
             UseFikaGC = SetupSetting(performanceDefaultHeader, "Use Fika GC", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_FIKA_GC_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1021,7 +1022,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_FIKA_GC_T.Localized(),
                     Order = 0
                 }),
-                "Use Fika GC", ref failed, ref headers);
+                "Use Fika GC", ref failed, headers);
 
             // Performance | Max Bots
 
@@ -1035,7 +1036,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_ENFORCED_SPAWN_LIMITS_T.Localized(),
                     Order = 14
                 }),
-                "Enforced Spawn Limits", ref failed, ref headers);
+                "Enforced Spawn Limits", ref failed, headers);
 
             DespawnFurthest = SetupSetting(performanceDefaultBotsHeader, "Despawn Furthest", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_DESPAWN_FURTHEST_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1044,7 +1045,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DESPAWN_FURTHEST_T.Localized(),
                     Order = 13
                 }),
-                "Despawn Furthest", ref failed, ref headers);
+                "Despawn Furthest", ref failed, headers);
 
             DespawnMinimumDistance = SetupSetting(performanceDefaultBotsHeader, "Despawn Minimum Distance", 200.0f,
                 new ConfigDescription(LocaleUtils.BEPINEX_DESPAWN_MIN_DISTANCE_D.Localized(),
@@ -1054,7 +1055,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DESPAWN_MIN_DISTANCE_T.Localized(),
                     Order = 12
                 }),
-                "Despawn Minimum Distance", ref failed, ref headers);
+                "Despawn Minimum Distance", ref failed, headers);
 
             string maxBotsHeader = CleanConfigString(LocaleUtils.BEPINEX_MAX_BOTS_T.Localized());
             string maxDefaultBotsHeader = "Max Bots {0}";
@@ -1069,7 +1070,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, factory),
                     Order = 11
                 }),
-                "Max Bots Factory", ref failed, ref headers);
+                "Max Bots Factory", ref failed, headers);
 
             string customs = "bigmap".Localized();
             MaxBotsCustoms = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Customs"), 0,
@@ -1080,7 +1081,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, customs),
                     Order = 10
                 }),
-                "Max Bots Customs", ref failed, ref headers);
+                "Max Bots Customs", ref failed, headers);
 
             string interchange = "interchange".Localized();
             MaxBotsInterchange = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Interchange"), 0,
@@ -1091,7 +1092,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, interchange),
                     Order = 8
                 }),
-                "Max Bots Interchange", ref failed, ref headers);
+                "Max Bots Interchange", ref failed, headers);
 
             string reserve = "rezervbase".Localized();
             MaxBotsReserve = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Reserve"), 0,
@@ -1102,7 +1103,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, reserve),
                     Order = 7
                 }),
-                "Max Bots Reserve", ref failed, ref headers);
+                "Max Bots Reserve", ref failed, headers);
 
             string woods = "woods".Localized();
             MaxBotsWoods = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Woods"), 0,
@@ -1113,7 +1114,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, woods),
                     Order = 6
                 }),
-                "Max Bots Woods", ref failed, ref headers);
+                "Max Bots Woods", ref failed, headers);
 
             string shoreline = "shoreline".Localized();
             MaxBotsShoreline = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Shoreline"), 0,
@@ -1124,7 +1125,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, shoreline),
                     Order = 5
                 }),
-                "Max Bots Shoreline", ref failed, ref headers);
+                "Max Bots Shoreline", ref failed, headers);
 
             string streets = "tarkovstreets".Localized();
             MaxBotsStreets = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Streets of Tarkov"), 0,
@@ -1135,7 +1136,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, streets),
                     Order = 4
                 }),
-                "Max Bots Streets of Tarkov", ref failed, ref headers);
+                "Max Bots Streets of Tarkov", ref failed, headers);
 
             string groundZero = "sandbox".Localized();
             MaxBotsGroundZero = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Ground Zero"), 0,
@@ -1146,7 +1147,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, groundZero),
                     Order = 3
                 }),
-                "Max Bots Ground Zero", ref failed, ref headers);
+                "Max Bots Ground Zero", ref failed, headers);
 
             string labs = "laboratory".Localized();
             MaxBotsLabs = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Labs"), 0,
@@ -1157,7 +1158,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, labs),
                     Order = 2
                 }),
-                "Max Bots Labs", ref failed, ref headers);
+                "Max Bots Labs", ref failed, headers);
 
             string lighthouse = "lighthouse".Localized();
             MaxBotsLighthouse = SetupSetting(performanceDefaultBotsHeader, string.Format(maxDefaultBotsHeader, "Lighthouse"), 0,
@@ -1168,7 +1169,7 @@ namespace Fika.Core
                     DispName = string.Format(maxBotsHeader, lighthouse),
                     Order = 1
                 }),
-                "Max Bots Lighthouse", ref failed, ref headers);
+                "Max Bots Lighthouse", ref failed, headers);
 
             // Network
 
@@ -1182,7 +1183,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_NATIVE_SOCKETS_T.Localized(),
                     Order = 9
                 }),
-                "Native Sockets", ref failed, ref headers);
+                "Native Sockets", ref failed, headers);
 
             ForceIP = SetupSetting(networkDefaultHeader, "Force IP", "",
                 new ConfigDescription(LocaleUtils.BEPINEX_FORCE_IP_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1191,7 +1192,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_FORCE_IP_T.Localized(),
                     Order = 8
                 }),
-                "Force IP", ref failed, ref headers);
+                "Force IP", ref failed, headers);
 
             ForceBindIP = SetupSetting(networkDefaultHeader, "Force Bind IP", "0.0.0.0",
                 new ConfigDescription(LocaleUtils.BEPINEX_FORCE_BIND_IP_D.Localized(),
@@ -1201,7 +1202,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_FORCE_BIND_IP_T.Localized(),
                     Order = 7
                 }),
-                "Force Bind IP", ref failed, ref headers);
+                "Force Bind IP", ref failed, headers);
 
             UDPPort = SetupSetting(networkDefaultHeader, "UDP Port", 25565,
                 new ConfigDescription(LocaleUtils.BEPINEX_UDP_PORT_D.Localized(), new AcceptableValueRange<int>(0, 65535),
@@ -1211,7 +1212,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_UDP_PORT_T.Localized(),
                     Order = 5
                 }),
-                "UDP Port", ref failed, ref headers);
+                "UDP Port", ref failed, headers);
 
             UseUPnP = SetupSetting(networkDefaultHeader, "Use UPnP", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_USE_UPNP_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1220,7 +1221,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_USE_UPNP_T.Localized(),
                     Order = 4
                 }),
-                "Use UPnP", ref failed, ref headers);
+                "Use UPnP", ref failed, headers);
 
             UseNatPunching = SetupSetting(networkDefaultHeader, "Use NAT Punching", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_USE_NAT_PUNCH_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1229,7 +1230,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_USE_NAT_PUNCH_T.Localized(),
                     Order = 3
                 }),
-                "Use NAT Punching", ref failed, ref headers);
+                "Use NAT Punching", ref failed, headers);
 
             ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 15,
                 new ConfigDescription(LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_D.Localized(),
@@ -1239,7 +1240,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_T.Localized(),
                     Order = 2
                 }),
-                "Connection Timeout", ref failed, ref headers);
+                "Connection Timeout", ref failed, headers);
 
             SendRate = SetupSetting(networkDefaultHeader, "Send Rate", ESendRate.Medium,
                 new ConfigDescription(LocaleUtils.BEPINEX_SEND_RATE_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1248,7 +1249,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_SEND_RATE_T.Localized(),
                     Order = 1
                 }),
-                "Send Rate", ref failed, ref headers);
+                "Send Rate", ref failed, headers);
 
             SmoothingRate = SetupSetting(networkDefaultHeader, "Smoothing Rate", ESmoothingRate.Medium,
                 new ConfigDescription(LocaleUtils.BEPINEX_SMOOTHING_RATE_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1257,7 +1258,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_SMOOTHING_RATE_T.Localized(),
                     Order = 0
                 }),
-                "Smoothing Rate", ref failed, ref headers);
+                "Smoothing Rate", ref failed, headers);
 
             NetMultiThreaded = SetupSetting(networkDefaultHeader, "Use MultiThreading", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_NET_MULTITHREAD_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1266,7 +1267,16 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_NET_MULTITHREAD_T.Localized(),
                     Order = 0
                 }),
-                "Use MultiThreading", ref failed, ref headers);
+                "Use MultiThreading", ref failed, headers);
+
+            AllowVOIP = SetupSetting(networkDefaultHeader, "Allow VOIP", false,
+                new ConfigDescription(LocaleUtils.BEPINEX_NET_VOIP_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = networkHeader,
+                    DispName = LocaleUtils.BEPINEX_NET_VOIP_T.Localized(),
+                    Order = 0
+                }),
+                "Allow VOIP", ref failed, headers);
 
             // Gameplay
 
@@ -1278,7 +1288,7 @@ namespace Fika.Core
                     DispName = LocaleUtils.BEPINEX_DISABLE_BOT_METABOLISM_T.Localized(),
                     Order = 1
                 }),
-                "Disable Bot Metabolism", ref failed, ref headers);
+                "Disable Bot Metabolism", ref failed, headers);
 
             if (failed)
             {

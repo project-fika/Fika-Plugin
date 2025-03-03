@@ -110,6 +110,7 @@ namespace Fika.Core.Networking
         public int NetId { get; set; }
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
+        public bool AllowVOIP { get; set; }
 
         private NetPacketProcessor packetProcessor;
         private int sendRate;
@@ -191,13 +192,12 @@ namespace Fika.Core.Networking
             {
                 ServerConnection = netClient.Connect(ip, port, connectString);
             }
-            ;
         }
 
         async Task IFikaNetworkManager.InitializeVOIP()
         {
             GClass2042 voipHandler = FikaGlobals.VOIPHandler;
-            
+
             GClass1040 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
             if (voipHandler.MicrophoneChecked)
             {
@@ -615,6 +615,7 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}, NetId: {packet.NetId}");
             sendRate = packet.SendRate;
             NetId = packet.NetId;
+            AllowVOIP = packet.AllowVOIP;
         }
 
         private void OnUsableItemPacketReceived(UsableItemPacket packet)

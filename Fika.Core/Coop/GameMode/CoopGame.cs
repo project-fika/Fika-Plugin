@@ -667,7 +667,10 @@ namespace Fika.Core.Coop.GameMode
             SyncTransitControllers();
             FikaEventDispatcher.DispatchEvent(new FikaRaidStartedEvent(FikaBackendUtils.IsServer));
 
-            StartCoroutine(FixVOIPAudioDevice());
+            if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
+            {
+                StartCoroutine(FixVOIPAudioDevice()); 
+            }
         }
 
         private void SyncTransitControllers()
@@ -904,7 +907,7 @@ namespace Fika.Core.Coop.GameMode
             CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-                statisticsManager, new GClass1626(), session, localMode, playerId);
+                statisticsManager, new GClass1626(), session, playerId);
 
             coopPlayer.Location = Location_0.Id;
 
@@ -1431,8 +1434,10 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            // TODO: ADD IF
-            await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP();
+            if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
+            {
+                await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP(); 
+            }
 
             IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
 

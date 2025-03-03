@@ -178,7 +178,7 @@ namespace Fika.Core.Coop.Players
                 observedQuestController.Run();
             }
 
-            player.VoipState = !aiControl ? EVoipState.Available : EVoipState.NotAvailable;
+            player.VoipState = (!aiControl && Singleton<IFikaNetworkManager>.Instance.AllowVOIP) ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
                 statisticsManager, observedQuestController, null, null, filter, player.VoipState, aiControl, false);
@@ -210,7 +210,6 @@ namespace Fika.Core.Coop.Players
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = FikaSnapshotter.Create(player);
-
 
             return player;
         }
@@ -1305,16 +1304,29 @@ namespace Fika.Core.Coop.Players
 
         public override void UpdateMuffledState()
         {
-            if (OcclusionDirty && MonoBehaviourSingleton<BetterAudio>.Instantiated)
+            // Do nothing
+        }
+
+        public override void SendVoiceMuffledState(bool isMuffled)
+        {
+            // Do nothing
+        }
+
+        public void SetMuffledState(bool muffled)
+        {
+            Muffled = muffled;
+            if (MonoBehaviourSingleton<BetterAudio>.Instantiated)
             {
-                OcclusionDirty = false;
                 BetterAudio instance = MonoBehaviourSingleton<BetterAudio>.Instance;
                 AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.ObservedPlayerSpeechMixer;
                 if (SpeechSource != null)
                 {
                     SpeechSource.SetMixerGroup(audioMixerGroup);
                 }
-                return;
+                if (VoipEftSource != null)
+                {
+                    VoipEftSource.SetMixerGroup(audioMixerGroup);
+                }
             }
         }
 

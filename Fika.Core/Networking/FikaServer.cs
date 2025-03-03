@@ -121,6 +121,7 @@ namespace Fika.Core.Networking
 
         public int NetId { get; set; }
         public EPlayerSide RaidSide { get; set; }
+        public bool AllowVOIP { get; set; }
 
         private int sendRate;
         private NetPacketProcessor packetProcessor;
@@ -158,6 +159,8 @@ namespace Fika.Core.Networking
                 UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value,
                 ChannelsCount = 2
             };
+
+            AllowVOIP = FikaPlugin.AllowVOIP.Value;
 
             packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
             dataWriter = new();
@@ -1378,7 +1381,8 @@ namespace Fika.Core.Networking
             NetworkSettingsPacket packet = new()
             {
                 SendRate = sendRate,
-                NetId = PopNetId()
+                NetId = PopNetId(),
+                AllowVOIP = AllowVOIP
             };
             SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
 

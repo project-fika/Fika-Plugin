@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
 using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
@@ -82,12 +83,12 @@ namespace Fika.Core.Coop.Players
 
         #endregion
 
-        public static async Task<CoopPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
-            string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
-            EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
+        public static async Task<CoopPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
+            Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
+            bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
-            ELocalMode localMode, int netId)
+            int netId)
         {
             bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
             ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
@@ -135,10 +136,12 @@ namespace Fika.Core.Coop.Players
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
 
+            EVoipState voipState = (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && GClass1050.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
+
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
                 statisticsManager, questController, achievementsController, prestigeController, filter,
-                EVoipState.Available, false, false);
+                voipState, false, false);
 
             foreach (MagazineItemClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
             {
@@ -224,6 +227,17 @@ namespace Fika.Core.Coop.Players
         {
             NotificationManagerClass.DisplayNotification(new GClass2312(skill));
         }
+
+        public override void SendVoiceMuffledState(bool isMuffled)
+        {
+            GenericPacket packet = new()
+            {
+                NetId = NetId,
+                Type = EGenericSubPacketType.MuffledState,
+                SubPacket = new GenericSubPackets.MuffledState(NetId, isMuffled)
+            };
+            PacketSender.SendPacket(ref packet);
+        }        
 
         public override bool CheckSurface(float range)
         {
