@@ -18,6 +18,7 @@ using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
 using System;
@@ -26,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
 using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
@@ -59,6 +61,8 @@ namespace Fika.Core.Coop.Players
 
         protected string lastWeaponId;
         private bool shouldSendSideEffect;
+        private GClass2042 voipHandler;
+        private FikaVOIPController voipController;
 
         public ClientMovementContext ClientMovementContext
         {
@@ -75,15 +79,16 @@ namespace Fika.Core.Coop.Players
             }
         }
         public virtual bool LeftStanceDisabled { get; internal set; }
+        public DateTime TalkDateTime { get; internal set; }
 
         #endregion
 
-        public static async Task<CoopPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
-            string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
-            EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
+        public static async Task<CoopPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
+            Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
+            bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
-            ELocalMode localMode, int netId)
+            int netId)
         {
             bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
             ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
@@ -92,6 +97,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = true;
             player.NetId = netId;
+            player.voipHandler = GClass2042.Default;
 
             PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new CoopHostInventoryController(player, profile, false)
                 : new CoopClientInventoryController(player, profile, false);
@@ -130,10 +136,12 @@ namespace Fika.Core.Coop.Players
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
 
+            EVoipState voipState = (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && GClass1050.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
+
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
                 statisticsManager, questController, achievementsController, prestigeController, filter,
-                EVoipState.NotAvailable, false, false);
+                voipState, false, false);
 
             foreach (MagazineItemClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
             {
@@ -172,9 +180,36 @@ namespace Fika.Core.Coop.Players
             return player;
         }
 
+        public void AbuseNotification(string reporterId)
+        {
+            if (IsYourPlayer)
+            {
+                voipController?.ReceiveAbuseNotification(reporterId); 
+            }
+        }
+
         private void UnlockAchievement(string tpl)
         {
             _achievementsController.UnlockAchievementForced(tpl);
+        }
+
+        public override void InitVoip(EVoipState voipState)
+        {
+            if (voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
+            {
+                GClass1050 settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+                if (!settings.VoipEnabled)
+                {
+                    voipState = EVoipState.Off;
+                }
+                if (!voipHandler.MicrophoneChecked)
+                {
+                    voipState = EVoipState.MicrophoneFail;
+                }
+                base.InitVoip(voipState);
+                voipController = new(this, settings);
+                VoipController = voipController;
+            }
         }
 
         public override void CreateNestedSource()
@@ -200,6 +235,17 @@ namespace Fika.Core.Coop.Players
         {
             NotificationManagerClass.DisplayNotification(new GClass2312(skill));
         }
+
+        public override void SendVoiceMuffledState(bool isMuffled)
+        {
+            GenericPacket packet = new()
+            {
+                NetId = NetId,
+                Type = EGenericSubPacketType.MuffledState,
+                SubPacket = new GenericSubPackets.MuffledState(NetId, isMuffled)
+            };
+            PacketSender.SendPacket(ref packet);
+        }        
 
         public override bool CheckSurface(float range)
         {
@@ -264,8 +310,12 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(list);
+            if (list != null)
+            {
+                _preAllocatedArmorComponents.Clear();
+                _preAllocatedArmorComponents.AddRange(list);
+                SendArmorDamagePacket();
+            }
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
                 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
@@ -282,11 +332,6 @@ namespace Fika.Core.Coop.Players
             ApplyDamageInfo(damageInfo, bodyPartType, colliderType, 0f);
             ShotReactions(damageInfo, bodyPartType);
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
-
-            if (_preAllocatedArmorComponents.Count > 0)
-            {
-                SendArmorDamagePacket();
-            }
 
             return hitInfo;
         }
@@ -1452,6 +1497,12 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public override void UpdateTick()
+        {
+            voipController?.Update();
+            base.UpdateTick();
+        }
+
         public void CheckAndResetControllers(ExitStatus exitStatus, float pastTime, string locationId, string exitName)
         {
             _questController?.CheckExitConditionCounters(exitStatus, pastTime, locationId, exitName, HealthController.BodyPartEffects, TriggerZones);
@@ -1469,6 +1520,7 @@ namespace Fika.Core.Coop.Players
                 PacketSender.DestroyThis();
                 PacketSender = null;
             }
+            voipController?.Dispose();
             base.Dispose();
         }
 

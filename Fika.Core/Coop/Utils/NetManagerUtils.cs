@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Dissonance.Networking;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
@@ -26,6 +27,9 @@ namespace Fika.Core.Coop.Utils
 
         public static void CreateNetManager(bool isServer)
         {
+            // Required for VOIP
+            TrafficCounters.Reset();
+
             if (FikaGameObject == null)
             {
                 CreateFikaGameObject();

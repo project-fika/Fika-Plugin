@@ -2,6 +2,8 @@
 
 using BepInEx.Logging;
 using Comfort.Common;
+using Dissonance;
+using Dissonance.Integrations.MirrorIgnorance;
 using Diz.Utils;
 using EFT;
 using EFT.AssetsManager;
@@ -18,10 +20,12 @@ using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
+using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -31,6 +35,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -100,9 +105,12 @@ namespace Fika.Core.Networking
             }
         }
 
+        internal FikaVOIPClient VOIPClient { get; set; }
+
         public int NetId { get; set; }
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
+        public bool AllowVOIP { get; set; }
 
         private NetPacketProcessor packetProcessor;
         private int sendRate;
@@ -127,7 +135,8 @@ namespace Fika.Core.Networking
                 EnableStatistics = true,
                 MaxConnectAttempts = 5,
                 ReconnectDelay = 1 * 1000,
-                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
+                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value,
+                ChannelsCount = 2
             };
 
             packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
@@ -183,7 +192,45 @@ namespace Fika.Core.Networking
             {
                 ServerConnection = netClient.Connect(ip, port, connectString);
             }
-            ;
+        }
+
+        async Task IFikaNetworkManager.InitializeVOIP()
+        {
+            GClass2042 voipHandler = FikaGlobals.VOIPHandler;
+
+            GClass1040 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+            if (voipHandler.MicrophoneChecked)
+            {
+                controller.ResetVoipDisabledReason();
+                DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
+                await GClass1578.LoadScene(AssetsManagerSingletonClass.Manager,
+                    GClass2078.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+
+                MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
+                do
+                {
+                    mirrorCommsNetwork = FindObjectOfType<MirrorIgnoranceCommsNetwork>();
+                    await Task.Yield();
+                } while (mirrorCommsNetwork == null);
+
+                GameObject gameObj = mirrorCommsNetwork.gameObject;
+                FikaCommsNetwork commNet = gameObj.AddComponent<FikaCommsNetwork>();
+                Destroy(mirrorCommsNetwork);
+
+                DissonanceComms_Start_Patch.IsReady = true;
+                gameObj.GetComponent<DissonanceComms>().Invoke("Start", 0);
+            }
+            else
+            {
+                controller.VoipDisabledByInitializationFail();
+            }
+
+            do
+            {
+                await Task.Yield();
+            } while (VOIPClient == null);
+
+            return;
         }
 
         private void RegisterMultiThreadedPackets()
@@ -330,47 +377,6 @@ namespace Fika.Core.Networking
                 clientGameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.SyncObjectPackets);
             }
         }
-
-        /*private void OnWorldPacketReceived(WorldPacket packet)
-        {
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            if (gameWorld == null)
-            {
-                logger.LogError("OnWorldPacketReceived: GameWorld was null!");
-                return;
-            }
-
-            for (int i = 0; i < packet.RagdollPackets.Count; i++)
-            {
-                RagdollPacketStruct ragdollPacket = packet.RagdollPackets[i];
-                if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
-                {
-                    corpse.ApplyNetPacket(ragdollPacket);
-                    if (ragdollPacket.Done && !corpse.IsVisible())
-                    {
-                        corpse.ForceApplyTransformSync(ragdollPacket.TransformSyncs);
-                    }
-                }
-            }
-
-            if (packet.ArtilleryPackets.Count > 0)
-            {
-                List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
-                gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
-            }
-
-            for (int i = 0; i < packet.ThrowablePackets.Count; i++)
-            {
-                GrenadeDataPacketStruct throwablePacket = packet.ThrowablePackets[i];
-                GClass794<int, Throwable> grenades = gameWorld.Grenades;
-                if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
-                {
-                    throwable.ApplyNetPacket(throwablePacket);
-                }
-            }
-
-            packet.Flush();
-        }*/
 
         private void OnSideEffectPacketReceived(SideEffectPacket packet)
         {
@@ -559,6 +565,7 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}, NetId: {packet.NetId}");
             sendRate = packet.SendRate;
             NetId = packet.NetId;
+            AllowVOIP = packet.AllowVOIP;
         }
 
         private void OnUsableItemPacketReceived(UsableItemPacket packet)
@@ -655,13 +662,6 @@ namespace Fika.Core.Networking
         {
             packet.SubPacket.Execute();
         }
-
-        /*private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
-        {
-            CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
-            gameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.Packets);
-            packet.Flush();
-        }*/
 
         private void OnReconnectPacketReceived(ReconnectPacket packet)
         {
@@ -1167,8 +1167,18 @@ namespace Fika.Core.Networking
         public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
         {
             dataWriter.Reset();
+
             packetProcessor.WriteNetSerializable(dataWriter, ref packet);
             netClient.FirstPeer.Send(dataWriter, deliveryMethod);
+        }
+
+        public void SendVOIPPacket(ArraySegment<byte> data, bool reliable, NetPeer peer = null)
+        {
+            dataWriter.Reset();
+
+            dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
+            //netClient.FirstPeer.Send(dataWriter, 1, reliable ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+            netClient.FirstPeer.Send(dataWriter, 1, DeliveryMethod.ReliableOrdered);
         }
 
         public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
@@ -1211,7 +1221,14 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            packetProcessor.ReadAllPackets(reader, peer);
+            if (channelNumber == 1)
+            {
+                VOIPClient.NetworkReceivedPacket(new(reader.GetBytesWithLength()));
+            }
+            else
+            {
+                packetProcessor.ReadAllPackets(reader, peer);
+            }
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)

@@ -1,6 +1,8 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
+using Audio.SpatialSystem;
 using Comfort.Common;
+using Dissonance;
 using Diz.Binding;
 using EFT;
 using EFT.Ballistics;
@@ -64,10 +66,16 @@ namespace Fika.Core.Coop.Players
                 ShouldOverlap = true;
             }
         }
+        public BetterSource VoipEftSource { get; set; }
+
         private bool leftStancedDisabled;
         private FikaHealthBar healthBar = null;
         private Coroutine waitForStartRoutine;
         private bool isServer;
+        private VoiceBroadcastTrigger voiceBroadcastTrigger;
+        private GClass1050 soundSettings;
+        private bool voipAssigned;
+
         public ObservedHealthController NetworkHealthController
         {
             get
@@ -170,8 +178,10 @@ namespace Fika.Core.Coop.Players
                 observedQuestController.Run();
             }
 
+            player.VoipState = (!aiControl && Singleton<IFikaNetworkManager>.Instance.AllowVOIP) ? EVoipState.Available : EVoipState.NotAvailable;
+
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-                statisticsManager, observedQuestController, null, null, filter, EVoipState.NotAvailable, aiControl, false);
+                statisticsManager, observedQuestController, null, null, filter, player.VoipState, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
@@ -202,6 +212,56 @@ namespace Fika.Core.Coop.Players
             player.Snapshotter = FikaSnapshotter.Create(player);
 
             return player;
+        }
+
+        public override void InitVoip(EVoipState voipState)
+        {
+            if (voipState == EVoipState.Available)
+            {
+                SetupVoiceBroadcastTrigger();
+                DissonanceComms = DissonanceComms.Instance;
+                if (DissonanceComms != null)
+                {
+                    DissonanceComms.TrackPlayerPosition(this);
+                    if (VoipAudioSource != null)
+                    {
+                        SourceBindingCreated();
+                    }
+                }
+            }
+        }
+
+        private void SourceBindingCreated()
+        {
+            if (voipAssigned)
+            {
+                return;
+            }
+            VoipEftSource = MonoBehaviourSingleton<BetterAudio>.Instance.CreateBetterSource<SimpleSource>(
+                VoipAudioSource, BetterAudio.AudioSourceGroupType.Voip, true, true);
+            if (VoipEftSource == null)
+            {
+                FikaGlobals.LogError($"Could not initialize VOIP source for {Profile.Nickname}");
+                return;
+            }
+            VoipEftSource.SetMixerGroup(MonoBehaviourSingleton<BetterAudio>.Instance.ObservedPlayerSpeechMixer);
+            VoipEftSource.SetRolloff(60f);
+            MonoBehaviourSingleton<SpatialAudioSystem>.Instance.ProcessSourceOcclusion(this, VoipEftSource, false);
+            voipAssigned = true;
+        }
+
+        private void SetupVoiceBroadcastTrigger()
+        {
+            voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
+            voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
+            soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+            CompositeDisposable.BindState(soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);
+        }
+
+        private void ChangeVoipDeviceSensitivity(int value)
+        {
+            float num = (float)value / 100f;
+            voiceBroadcastTrigger.ActivationFader.Volume = num;
         }
 
         public override BasePhysicalClass CreatePhysical()
@@ -427,8 +487,12 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(list);
+            if (list != null)
+            {
+                _preAllocatedArmorComponents.Clear();
+                _preAllocatedArmorComponents.AddRange(list);
+                SendArmorDamagePacket();
+            }
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
                 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
@@ -466,11 +530,6 @@ namespace Fika.Core.Coop.Players
                 WeaponId = damageInfo.Weapon.Id
             };
             PacketSender.SendPacket(ref packet);
-
-            if (_preAllocatedArmorComponents.Count > 0)
-            {
-                SendArmorDamagePacket();
-            }
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -527,11 +586,14 @@ namespace Fika.Core.Coop.Players
 
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
-            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            _preAllocatedArmorComponents.Clear();
-            _preAllocatedArmorComponents.AddRange(list);
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
-                ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);            
+            if (list != null)
+            {
+                _preAllocatedArmorComponents.Clear();
+                _preAllocatedArmorComponents.AddRange(list);
+                SendArmorDamagePacket();
+            }
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : (_preAllocatedArmorComponents.Count < 1 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
@@ -566,12 +628,7 @@ namespace Fika.Core.Coop.Players
                 Material = materialType,
                 WeaponId = damageInfo.Weapon.Id
             };
-            PacketSender.SendPacket(ref packet);
-
-            if (_preAllocatedArmorComponents.Count > 0)
-            {
-                SendArmorDamagePacket();
-            }
+            PacketSender.SendPacket(ref packet);            
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -1247,16 +1304,29 @@ namespace Fika.Core.Coop.Players
 
         public override void UpdateMuffledState()
         {
-            if (OcclusionDirty && MonoBehaviourSingleton<BetterAudio>.Instantiated)
+            // Do nothing
+        }
+
+        public override void SendVoiceMuffledState(bool isMuffled)
+        {
+            // Do nothing
+        }
+
+        public void SetMuffledState(bool muffled)
+        {
+            Muffled = muffled;
+            if (MonoBehaviourSingleton<BetterAudio>.Instantiated)
             {
-                OcclusionDirty = false;
                 BetterAudio instance = MonoBehaviourSingleton<BetterAudio>.Instance;
                 AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.ObservedPlayerSpeechMixer;
                 if (SpeechSource != null)
                 {
                     SpeechSource.SetMixerGroup(audioMixerGroup);
                 }
-                return;
+                if (VoipEftSource != null)
+                {
+                    VoipEftSource.SetMixerGroup(audioMixerGroup);
+                }
             }
         }
 

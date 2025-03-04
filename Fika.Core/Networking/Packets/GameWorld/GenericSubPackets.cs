@@ -400,5 +400,45 @@ namespace Fika.Core.Networking
                 writer.PutAirplaneDataPacketStruct(Data);
             }
         }
+
+        public class MuffledState : ISubPacket
+        {
+            public int NetId;
+            public bool Muffled;
+
+            public MuffledState(int netId, bool muffled)
+            {
+                NetId = netId;
+                Muffled = muffled;
+            }
+
+            public MuffledState(NetDataReader reader)
+            {
+                NetId = reader.GetInt();
+                Muffled = reader.GetBool();
+            }
+
+            public void Execute(CoopPlayer player = null)
+            {
+                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+                {
+                    if (coopHandler.Players.TryGetValue(NetId, out CoopPlayer coopPlayer) && coopPlayer is ObservedCoopPlayer observed)
+                    {
+                        observed.SetMuffledState(Muffled);
+                        return;
+                    }
+
+                    FikaGlobals.LogError($"MuffledState: Could not find player with id {NetId} or they were not observed!");
+                }
+
+                FikaGlobals.LogWarning($"MuffledState: Could not get CoopHandler!");
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(NetId);
+                writer.Put(Muffled);
+            }
+        }
     }
 }
