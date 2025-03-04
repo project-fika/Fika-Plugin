@@ -62,11 +62,7 @@ namespace Fika.Core.Networking
         {
             get
             {
-                if (netServer == null)
-                {
-                    return false;
-                }
-                return netServer.IsRunning;
+                return netServer != null && netServer.IsRunning;
             }
         }
         public DateTime? GameStartTime
