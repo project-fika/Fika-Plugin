@@ -22,11 +22,6 @@ namespace Fika.Core.Networking.VOIP
 
         }
 
-        /*public void ReceivePacket(VOIPPacket packet, NetPeer peer)
-        {
-            NetworkReceivedPacket(new(new RemotePeer(peer)), new(packet.DissonanceData));
-        }*/
-
         public override void SendReliable([NotNull] List<FikaVOIPPeer> connections, ArraySegment<byte> packet)
         {
             base.SendReliable(connections, packet);
@@ -40,12 +35,7 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            /*VOIPPacket pack = new()
-            {
-                DissonanceData = packet.Array
-            };*/
             connection.Peer.SendData(packet, true);
-            //Singleton<FikaServer>.Instance.SendDataToPeer(connection.Peer, ref pack, DeliveryMethod.ReliableOrdered);
         }
 
         protected override void SendUnreliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
@@ -56,13 +46,7 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            /*VOIPPacket pack = new()
-            {
-                DissonanceData = packet.Array
-            };*/
-
             connection.Peer.SendData(packet, false);
-            //Singleton<FikaServer>.Instance.SendDataToPeer(connection.Peer, ref pack, DeliveryMethod.Unreliable);
         }
     }
 }

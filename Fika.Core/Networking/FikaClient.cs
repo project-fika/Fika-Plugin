@@ -230,15 +230,6 @@ namespace Fika.Core.Networking
                 await Task.Yield();
             } while (VOIPClient == null);
 
-            /*if (MultiThreaded)
-            {
-                packetProcessor.SubscribeNetSerializableMT<VOIPPacket>(VOIPClient.ReceivePacket);
-            }
-            else
-            {
-                packetProcessor.SubscribeNetSerializable<VOIPPacket>(VOIPClient.ReceivePacket);
-            }*/
-
             return;
         }
 
@@ -386,47 +377,6 @@ namespace Fika.Core.Networking
                 clientGameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.SyncObjectPackets);
             }
         }
-
-        /*private void OnWorldPacketReceived(WorldPacket packet)
-        {
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            if (gameWorld == null)
-            {
-                logger.LogError("OnWorldPacketReceived: GameWorld was null!");
-                return;
-            }
-
-            for (int i = 0; i < packet.RagdollPackets.Count; i++)
-            {
-                RagdollPacketStruct ragdollPacket = packet.RagdollPackets[i];
-                if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
-                {
-                    corpse.ApplyNetPacket(ragdollPacket);
-                    if (ragdollPacket.Done && !corpse.IsVisible())
-                    {
-                        corpse.ForceApplyTransformSync(ragdollPacket.TransformSyncs);
-                    }
-                }
-            }
-
-            if (packet.ArtilleryPackets.Count > 0)
-            {
-                List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
-                gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
-            }
-
-            for (int i = 0; i < packet.ThrowablePackets.Count; i++)
-            {
-                GrenadeDataPacketStruct throwablePacket = packet.ThrowablePackets[i];
-                GClass794<int, Throwable> grenades = gameWorld.Grenades;
-                if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
-                {
-                    throwable.ApplyNetPacket(throwablePacket);
-                }
-            }
-
-            packet.Flush();
-        }*/
 
         private void OnSideEffectPacketReceived(SideEffectPacket packet)
         {
@@ -712,13 +662,6 @@ namespace Fika.Core.Networking
         {
             packet.SubPacket.Execute();
         }
-
-        /*private void OnSyncObjectPacketReceived(SyncObjectPacket packet)
-        {
-            CoopClientGameWorld gameWorld = (CoopClientGameWorld)Singleton<GameWorld>.Instance;
-            gameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.Packets);
-            packet.Flush();
-        }*/
 
         private void OnReconnectPacketReceived(ReconnectPacket packet)
         {

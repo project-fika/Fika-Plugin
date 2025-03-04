@@ -1,18 +1,12 @@
 ﻿using Comfort.Common;
-using Fika.Core.Coop.Players;
 using LiteNetLib;
 using System;
 
 namespace Fika.Core.Networking.VOIP
 {
-    public readonly struct FikaVOIPPeer : IEquatable<FikaVOIPPeer>
+    public readonly struct FikaVOIPPeer(IPeer connection) : IEquatable<FikaVOIPPeer>
     {
-        public readonly IPeer Peer;
-
-        public FikaVOIPPeer(IPeer connection)
-        {
-            Peer = connection;
-        }
+        public readonly IPeer Peer = connection;
 
         public override int GetHashCode()
         {
@@ -49,24 +43,17 @@ namespace Fika.Core.Networking.VOIP
     {
         public void SendData(ArraySegment<byte> data, bool reliable)
         {
-            //FikaVOIPPeer peer = new(this);
             Singleton<FikaServer>.Instance.VOIPClient.NetworkReceivedPacket(data);
         }
     }
 
-    public class RemotePeer : IPeer
+    public class RemotePeer(NetPeer peer) : IPeer
     {
-        private readonly NetPeer peer;
-
-        public RemotePeer(NetPeer peer)
-        {
-            this.peer = peer;
-        }
+        private readonly NetPeer peer = peer;
 
         public void SendData(ArraySegment<byte> data, bool reliable)
         {
             Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(data, reliable, peer);
-            //Singleton<FikaServer>.Instance.SendDataToPeer(peer, ref pack, deliveryMethod);
         }
     }
 }

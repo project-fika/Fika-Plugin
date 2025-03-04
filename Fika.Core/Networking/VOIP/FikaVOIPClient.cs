@@ -25,11 +25,6 @@ namespace Fika.Core.Networking.VOIP
 
         }
 
-        /*public void ReceivePacket(VOIPPacket packet)
-        {
-            NetworkReceivedPacket(new(packet.DissonanceData));
-        }*/
-
         public override void SendVoiceData(ArraySegment<byte> encodedAudio)
         {
             GClass1207.SetTalkDateTime();
@@ -47,12 +42,6 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            /*VOIPPacket pack = new()
-            {
-                DissonanceData = packet.Array
-            };
-
-            Singleton<FikaClient>.Instance.SendData(ref pack, LiteNetLib.DeliveryMethod.ReliableOrdered);*/
             Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(packet, true);
         }
 
@@ -63,13 +52,6 @@ namespace Fika.Core.Networking.VOIP
                 Singleton<FikaServer>.Instance.VOIPServer.NetworkReceivedPacket(new(new LocalPeer()), packet);
                 return;
             }
-
-            /*VOIPPacket pack = new()
-            {
-                DissonanceData = packet.Array
-            };
-
-            Singleton<FikaClient>.Instance.SendData(ref pack, LiteNetLib.DeliveryMethod.ReliableSequenced);*/
 
             Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(packet, false);
         }

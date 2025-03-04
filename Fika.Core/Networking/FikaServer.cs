@@ -352,15 +352,6 @@ namespace Fika.Core.Networking
                 await Task.Yield();
             } while (VOIPServer == null && VOIPClient == null);
 
-            /*if (MultiThreaded)
-            {
-                packetProcessor.SubscribeNetSerializableMT<VOIPPacket, NetPeer>(VOIPServer.ReceivePacket);
-            }
-            else
-            {
-                packetProcessor.SubscribeNetSerializable<VOIPPacket, NetPeer>(VOIPServer.ReceivePacket);
-            }*/
-
             return;
         }
 
