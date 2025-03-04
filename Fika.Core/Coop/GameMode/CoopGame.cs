@@ -1162,12 +1162,12 @@ namespace Fika.Core.Coop.GameMode
                 gameWorld.BtrController = new BTRControllerClass(gameWorld);
             }
 
-            InitializeTransitSystem(gameWorld, instance);
-            /*if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
+            if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
             {
                 InitializeTransitSystem(gameWorld, instance);
-            }*/
+            }
 
+            // TODO: Add christmas event
             /*bool runddansActive;
             if (instance == null)
             {
@@ -1275,7 +1275,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         private void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass backendConfig)
-        {
+        { 
             bool transitActive;
             if (backendConfig == null)
             {
