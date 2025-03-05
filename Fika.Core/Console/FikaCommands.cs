@@ -342,6 +342,19 @@ namespace Fika.Core.Console
             ConsoleScreen.Log("Started airdrop");
         }
 
+        [ConsoleCommand("debugCamera", "", null, "Spawns or destroy the camera debugger")]
+        public static void DebugCamera()
+        {
+            if (!CheckForGame())
+            {
+                return;
+            }
+
+            bool exist = WorldToScreen.ToggleDebugger();
+            string message = exist ? "Removed debugger" : "Added debugger";
+            ConsoleScreen.Log(message);
+        }
+
 #endif
 
         [ConsoleCommand("debug", "", null, "Toggle debug window", [])]

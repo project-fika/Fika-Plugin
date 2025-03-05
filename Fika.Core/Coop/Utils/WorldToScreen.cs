@@ -11,6 +11,23 @@ namespace Fika.Core.Coop.Utils
     /// </summary>
     public static class WorldToScreen
     {
+#if DEBUG
+        private static WorldToScreenDebugger debugger;
+
+        public static bool ToggleDebugger()
+        {
+            if (debugger != null)
+            {
+                GameObject.Destroy(debugger);
+                debugger = null;
+                return true;
+            }
+
+            debugger = CameraClass.Instance.Camera.gameObject.AddComponent<WorldToScreenDebugger>();
+            return false;
+        }
+#endif
+
         public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true, bool skip = false)
         {
             CameraClass worldCameraInstance = CameraClass.Instance;
@@ -45,6 +62,14 @@ namespace Fika.Core.Coop.Utils
                         float opticScale = height / opticCamera.scaledPixelHeight;
                         Vector3 opticCameraOffset = new(worldCamera.pixelWidth / 2 - opticCamera.pixelWidth / 2, worldCamera.pixelHeight / 2 - opticCamera.pixelHeight / 2, 0);
                         Vector3 opticScreenPoint = (opticCamera.WorldToScreenPoint(worldPosition) + opticCameraOffset) * opticScale;
+
+#if DEBUG
+                        if (debugger != null)
+                        {
+                            debugger.UpdateData(width, height, opticCenterScreenPosition, opticCenterScreenOffset,
+                                opticCameraOffset, opticScreenPoint);
+                        }
+#endif
 
                         if (opticScreenPoint.z > 0f)
                         {
@@ -149,4 +174,66 @@ namespace Fika.Core.Coop.Utils
             return new Vector3(0f, 0f, angle);
         }
     }
+
+#if DEBUG
+    internal class WorldToScreenDebugger : MonoBehaviour
+    {
+        private int width;
+        private int height;
+
+        private Vector3 opticCenterScreenPosition;
+        private Vector3 opticCenterScreenOffset;
+
+        private Vector3 opticCameraOffset;
+        private Vector3 opticScreenPoint;
+
+        private Rect windowRect;
+
+        protected void Awake()
+        {
+            width = 0;
+            height = 0;
+            opticCenterScreenPosition = Vector3.zero;
+            opticCenterScreenOffset = Vector3.zero;
+            opticCameraOffset = Vector3.zero;
+            opticScreenPoint = Vector3.zero;
+
+            windowRect = new(20, 20, 300, 10);
+        }
+
+        public void UpdateData(int width, int height, Vector3 opticPos, Vector3 opticOffset,
+            Vector3 cameraOffset, Vector3 screenPoint)
+        {
+            this.width = width;
+            this.height = height;
+            opticCenterScreenPosition = opticPos;
+            opticCenterScreenOffset = opticOffset;
+            opticCameraOffset = cameraOffset;
+            opticScreenPoint = screenPoint;
+        }
+
+        protected void OnGUI()
+        {
+            GUILayout.BeginArea(windowRect);
+            GUILayout.BeginVertical();
+
+            windowRect = GUILayout.Window(1, windowRect, DrawWindow, "WTS Debugger");
+
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
+        }
+
+        private void DrawWindow(int windowId)
+        {
+            GUILayout.Label($"Width: {width}");
+            GUILayout.Label($"Height: {height}");
+            GUILayout.Label($"CenterScreenPos: {opticCenterScreenPosition}");
+            GUILayout.Label($"CenterScreenOffset: {opticCenterScreenOffset}");
+            GUILayout.Label($"CameraOffset: {opticCameraOffset}");
+            GUILayout.Label($"ScreenPoint: {opticScreenPoint}");
+
+            GUI.DragWindow();
+        }
+    }
+#endif
 }
