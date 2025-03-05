@@ -1,6 +1,7 @@
 using EFT;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Models;
+using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
 using HarmonyLib;
@@ -121,9 +122,9 @@ namespace Fika.Core.Networking.Http
             return GetJson<NatPunchServerConfigModel>("/fika/natpunchserver/config");
         }
 
-        public static HeadlessConfigModel GetHeadlessConfig()
+        public static RestartAfterRaidAmountModel GetHeadlessRestartAfterRaidAmount()
         {
-            return GetJson<HeadlessConfigModel>("/fika/headless/config");
+            return GetJson<RestartAfterRaidAmountModel>("/fika/headless/restartafterraidamount");
         }
 
         public static async Task UpdatePing(PingRequest data)
@@ -198,7 +199,7 @@ namespace Fika.Core.Networking.Http
 
         public static AvailableHeadlessClientsRequest[] GetAvailableHeadlesses()
         {
-            return GetJson<AvailableHeadlessClientsRequest[]>("/fika/raid/headless/available");
+            return GetJson<AvailableHeadlessClientsRequest[]>("/fika/headless/available");
         }
 
         public static async Task RegisterPlayer(RegisterPlayerRequest request)
