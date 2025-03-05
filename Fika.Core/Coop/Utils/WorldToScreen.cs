@@ -67,7 +67,7 @@ namespace Fika.Core.Coop.Utils
                         if (debugger != null)
                         {
                             debugger.UpdateData(width, height, opticCenterScreenPosition, opticCenterScreenOffset,
-                                opticCameraOffset, opticScreenPoint);
+                                opticCameraOffset, opticScreenPoint, worldCamera, opticCamera);
                         }
 #endif
 
@@ -181,6 +181,12 @@ namespace Fika.Core.Coop.Utils
         private int width;
         private int height;
 
+        private int worldCameraPW;
+        private int worldCameraSPW;
+
+        private int opticCameraPW;
+        private int opticCameraSPW;
+
         private Vector3 opticCenterScreenPosition;
         private Vector3 opticCenterScreenOffset;
 
@@ -193,23 +199,39 @@ namespace Fika.Core.Coop.Utils
         {
             width = 0;
             height = 0;
+
+            worldCameraPW = 0;
+            worldCameraSPW = 0;
+
+            opticCameraPW = 0;
+            opticCameraSPW = 0;
+
             opticCenterScreenPosition = Vector3.zero;
             opticCenterScreenOffset = Vector3.zero;
+
             opticCameraOffset = Vector3.zero;
-            opticScreenPoint = Vector3.zero;
+            opticScreenPoint = Vector3.zero;          
 
             windowRect = new(20, 20, 300, 10);
         }
 
         public void UpdateData(int width, int height, Vector3 opticPos, Vector3 opticOffset,
-            Vector3 cameraOffset, Vector3 screenPoint)
+            Vector3 cameraOffset, Vector3 screenPoint, Camera worldCamera, Camera opticCamera)
         {
             this.width = width;
             this.height = height;
+
+            worldCameraPW = worldCamera.pixelWidth;
+            worldCameraSPW = worldCamera.scaledPixelWidth;
+
+            opticCameraPW = opticCamera.pixelWidth;
+            opticCameraSPW = opticCamera.scaledPixelWidth;
+
             opticCenterScreenPosition = opticPos;
             opticCenterScreenOffset = opticOffset;
+
             opticCameraOffset = cameraOffset;
-            opticScreenPoint = screenPoint;
+            opticScreenPoint = screenPoint;            
         }
 
         protected void OnGUI()
@@ -227,6 +249,10 @@ namespace Fika.Core.Coop.Utils
         {
             GUILayout.Label($"Width: {width}");
             GUILayout.Label($"Height: {height}");
+            GUILayout.Label($"WorldCameraPW: {worldCameraPW}");
+            GUILayout.Label($"WorldCameraSPW: {worldCameraSPW}");
+            GUILayout.Label($"OpticCameraPW: {opticCameraPW}");
+            GUILayout.Label($"OpticCameraSPW: {opticCameraSPW}");
             GUILayout.Label($"CenterScreenPos: {opticCenterScreenPosition}");
             GUILayout.Label($"CenterScreenOffset: {opticCenterScreenOffset}");
             GUILayout.Label($"CameraOffset: {opticCameraOffset}");
