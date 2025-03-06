@@ -115,21 +115,23 @@ namespace Fika.Core.Console
                     return;
                 }
 
-                CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler);
-
-                List<IPlayer> Bots = new(coopGame.BotsController.Players);
-
-                foreach (Player bot in Bots)
+                if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    if (bot.AIData.BotOwner == null)
+                    foreach (Player bot in coopGame.Bots.Values)
                     {
-                        continue;
+                        if (bot.AIData.BotOwner == null)
+                        {
+                            continue;
+                        }
+
+                        ConsoleScreen.Log($"Despawning: {bot.Profile.Nickname}");
+
+                        coopGame.DespawnBot(coopHandler, bot);
                     }
-
-                    ConsoleScreen.Log($"Despawning: {bot.Profile.Nickname}");
-
-                    coopGame.DespawnBot(coopHandler, bot);
+                    return;
                 }
+
+                ConsoleScreen.LogError("Could not find CoopHandler!");
             }
         }
 
@@ -283,7 +285,6 @@ namespace Fika.Core.Console
                 ChanceGroup = 100f,
                 WithCheckMinMax = false
             };
-
 
             IBotGame botController = (IBotGame)Singleton<AbstractGame>.Instance;
             botController.BotsController.BotSpawner.ActivateBotsByWave(newBotData);
