@@ -11,23 +11,6 @@ namespace Fika.Core.Coop.Utils
     /// </summary>
     public static class WorldToScreen
     {
-#if DEBUG
-        private static WorldToScreenDebugger debugger;
-
-        public static bool ToggleDebugger()
-        {
-            if (debugger != null)
-            {
-                GameObject.Destroy(debugger);
-                debugger = null;
-                return true;
-            }
-
-            debugger = CameraClass.Instance.Camera.gameObject.AddComponent<WorldToScreenDebugger>();
-            return false;
-        }
-#endif
-
         public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true, bool skip = false)
         {
             CameraClass worldCameraInstance = CameraClass.Instance;
@@ -46,33 +29,37 @@ namespace Fika.Core.Coop.Utils
             {
                 if (weaponAnimation.IsAiming && weaponAnimation.CurrentScope.IsOptic)
                 {
-                    Camera opticCamera = worldCameraInstance.OpticCameraManager.Camera;
                     if (GetScopeZoomLevel(weaponAnimation) > 1f)
                     {
+                        Camera opticCamera = worldCameraInstance.OpticCameraManager.Camera;
+
+                        float renderScale = worldCameraInstance.SSAA.GetCurrentSSRatio();
+
                         int width = worldCameraInstance.SSAA.GetInputWidth();
                         int height = worldCameraInstance.SSAA.GetInputHeight();
-                        if (worldCameraInstance.SSAA.GetCurrentSSRatio() > 1)
+
+                        if (renderScale > 1)
                         {
                             width = Screen.width;
                             height = Screen.height;
                         }
+
+                        //get difference between center of optic & center of screen
                         Vector3 opticCenterScreenPosition = GetOpticCenterScreenPosition(weaponAnimation, worldCamera);
                         Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(width, height, 0f) / 2);
 
-                        float opticScale = height / opticCamera.scaledPixelHeight;
-                        Vector3 opticCameraOffset = new(worldCamera.pixelWidth / 2 - opticCamera.pixelWidth / 2, worldCamera.pixelHeight / 2 - opticCamera.pixelHeight / 2, 0);
-                        Vector3 opticScreenPoint = (opticCamera.WorldToScreenPoint(worldPosition) + opticCameraOffset) * opticScale;
+                        //worldCamera uses DLSS/FSR/SSAA scaled resolution, opticCamera does not so it must be manually scaled
+                        Vector3 opticCameraOffset = new Vector3(width / 2 - opticCamera.pixelWidth * renderScale / 2, height / 2 - opticCamera.pixelHeight * renderScale / 2, 0);
 
-#if DEBUG
-                        if (debugger != null)
-                        {
-                            debugger.UpdateData(width, height, opticCenterScreenPosition, opticCenterScreenOffset,
-                                opticCameraOffset, opticScreenPoint, worldCamera, opticCamera);
-                        }
-#endif
+                        //must manually scale output of opticCamera.WorldToScreenPoint
+                        Vector3 initialOpticScreenPoint = opticCamera.WorldToScreenPoint(worldPosition) * renderScale;
+
+                        //the scaled point on the screen offset for the zoom & position of the optic camera
+                        Vector3 opticScreenPoint = (initialOpticScreenPoint + opticCameraOffset);
 
                         if (opticScreenPoint.z > 0f)
                         {
+                            //since optic sways & is not always centered offset the point to compensate
                             screenPoint = opticScreenPoint + opticCenterScreenOffset;
                         }
                     }
@@ -174,92 +161,4 @@ namespace Fika.Core.Coop.Utils
             return new Vector3(0f, 0f, angle);
         }
     }
-
-#if DEBUG
-    internal class WorldToScreenDebugger : MonoBehaviour
-    {
-        private int width;
-        private int height;
-
-        private int worldCameraPW;
-        private int worldCameraSPW;
-
-        private int opticCameraPW;
-        private int opticCameraSPW;
-
-        private Vector3 opticCenterScreenPosition;
-        private Vector3 opticCenterScreenOffset;
-
-        private Vector3 opticCameraOffset;
-        private Vector3 opticScreenPoint;
-
-        private Rect windowRect;
-
-        protected void Awake()
-        {
-            width = 0;
-            height = 0;
-
-            worldCameraPW = 0;
-            worldCameraSPW = 0;
-
-            opticCameraPW = 0;
-            opticCameraSPW = 0;
-
-            opticCenterScreenPosition = Vector3.zero;
-            opticCenterScreenOffset = Vector3.zero;
-
-            opticCameraOffset = Vector3.zero;
-            opticScreenPoint = Vector3.zero;          
-
-            windowRect = new(20, 20, 300, 10);
-        }
-
-        public void UpdateData(int width, int height, Vector3 opticPos, Vector3 opticOffset,
-            Vector3 cameraOffset, Vector3 screenPoint, Camera worldCamera, Camera opticCamera)
-        {
-            this.width = width;
-            this.height = height;
-
-            worldCameraPW = worldCamera.pixelWidth;
-            worldCameraSPW = worldCamera.scaledPixelWidth;
-
-            opticCameraPW = opticCamera.pixelWidth;
-            opticCameraSPW = opticCamera.scaledPixelWidth;
-
-            opticCenterScreenPosition = opticPos;
-            opticCenterScreenOffset = opticOffset;
-
-            opticCameraOffset = cameraOffset;
-            opticScreenPoint = screenPoint;            
-        }
-
-        protected void OnGUI()
-        {
-            GUILayout.BeginArea(windowRect);
-            GUILayout.BeginVertical();
-
-            windowRect = GUILayout.Window(1, windowRect, DrawWindow, "WTS Debugger");
-
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
-        }
-
-        private void DrawWindow(int windowId)
-        {
-            GUILayout.Label($"Width: {width}");
-            GUILayout.Label($"Height: {height}");
-            GUILayout.Label($"WorldCameraPW: {worldCameraPW}");
-            GUILayout.Label($"WorldCameraSPW: {worldCameraSPW}");
-            GUILayout.Label($"OpticCameraPW: {opticCameraPW}");
-            GUILayout.Label($"OpticCameraSPW: {opticCameraSPW}");
-            GUILayout.Label($"CenterScreenPos: {opticCenterScreenPosition}");
-            GUILayout.Label($"CenterScreenOffset: {opticCenterScreenOffset}");
-            GUILayout.Label($"CameraOffset: {opticCameraOffset}");
-            GUILayout.Label($"ScreenPoint: {opticScreenPoint}");
-
-            GUI.DragWindow();
-        }
-    }
-#endif
 }
