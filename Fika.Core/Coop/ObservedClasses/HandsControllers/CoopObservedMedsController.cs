@@ -3,6 +3,7 @@
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -47,6 +48,13 @@ namespace Fika.Core.Coop.ObservedClasses
             FirearmsAnimator.SetAnimationSpeed(animationSpeed);
             FirearmsAnimator.SetPointOfViewOnSpawn(EPointOfView.ThirdPerson);
             InitiateOperation<ObservedMedsOperation>().ObservedStart(callback);
+        }
+
+        public override void Destroy()
+        {
+            coopPlayer.HealthController.EffectRemovedEvent -= ObservedObsOperation.HealthController_EffectRemovedEvent;
+            Item.Owner.RemoveItemEvent -= ObservedObsOperation.Owner_RemoveItemEvent;
+            base.Destroy();
         }
 
         public override void Drop(float animationSpeed, Action callback, bool fastDrop = false, Item nextControllerItem = null)
@@ -101,6 +109,54 @@ namespace Fika.Core.Coop.ObservedClasses
                 SetLeftStanceAnimOnStartOperation();
                 callback();
                 observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
+                observedMedsController.coopPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
+                observedMedsController.Item.Owner.RemoveItemEvent += Owner_RemoveItemEvent;
+            }
+
+            public void HealthController_EffectRemovedEvent(IEffect effect)
+            {
+                if (effect is not GInterface350)
+                {
+                    return;
+                }
+
+                if (observedMedsController.FirearmsAnimator != null)
+                {
+                    FirearmsAnimator animator = observedMedsController.FirearmsAnimator;
+
+                    animator.SetActiveParam(false, false);
+                    if (animator.HasNextLimb())
+                    {
+                        animator.SetNextLimb(true);
+                    }
+
+                    float mult = observedMedsController.coopPlayer.Skills.SurgerySpeed.Value / 100f;
+                    animator.SetUseTimeMultiplier(1f + mult);
+
+                    int variant = 0;
+                    if (observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
+                    {
+                        int numVariants = animationVariantsComponent.VariantsNumber;
+                        variant = UnityEngine.Random.Range(0, numVariants);
+                    }
+
+                    animator.SetAnimationVariant(variant);
+                }
+            }
+
+            public override void OnEnd()
+            {
+                base.OnEnd();
+            }
+
+            public void Owner_RemoveItemEvent(GEventArgs3 args)
+            {
+                if (args.Item != observedMedsController.Item)
+                {
+                    return;
+                }
+
+                observedMedsController.coopPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
             }
 
             public void HideObservedWeapon()
@@ -112,7 +168,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
 
             public void HideObservedWeaponComplete()
-            {
+            {                
                 State = Player.EOperationState.Finished;
             }
 
