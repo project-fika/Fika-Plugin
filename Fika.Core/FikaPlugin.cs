@@ -108,10 +108,11 @@ namespace Fika.Core
         #region config values
 
         // Hidden
-        public static ConfigEntry<bool> AcceptedTOS { get; set; }
+        public static ConfigEntry<bool> AcceptedTOS { get; set; }        
 
         //Advanced
         public static ConfigEntry<bool> OfficialVersion { get; set; }
+        public static ConfigEntry<bool> DevMode { get; set; }
 
         // Coop
         public static ConfigEntry<bool> UseHeadlessIfAvailable { get; set; }
@@ -516,14 +517,25 @@ namespace Fika.Core
 
             // Advanced
 
-            OfficialVersion = SetupSetting("Advanced", "Show Official Version", false,
+            string advancedHeader = LocaleUtils.BEPINEX_H_ADVANCED.Localized();
+            string advancedDefaultHeader = "Advanced";
+
+            OfficialVersion = SetupSetting(advancedDefaultHeader, "Show Official Version", false,
                     new ConfigDescription(LocaleUtils.BEPINEX_OFFICIAL_VERSION_D.Localized(), tags: new ConfigurationManagerAttributes()
                     {
                         IsAdvanced = true,
-                        Category = LocaleUtils.BEPINEX_H_ADVANCED.Localized(),
+                        Category = advancedHeader,
                         DispName = LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized()
                     }),
                     "Official Version", ref failed, headers);
+
+            DevMode = SetupSetting(advancedDefaultHeader, "Developer Mode", false,
+                new ConfigDescription("Enables developer features", tags: new ConfigurationManagerAttributes()
+                {
+                    IsAdvanced = true,
+                    Category = advancedHeader,
+                    DispName = "Developer Mode"
+                }), "Developer Mode", ref failed, headers);
 
             // Coop
 

@@ -1512,6 +1512,11 @@ namespace Fika.Core.Coop.GameMode
                 FikaServer server = Singleton<FikaServer>.Instance;
                 server.RaidInitialized = true;
 
+                if (FikaPlugin.DevMode.Value)
+                {
+                    RaidStarted = true;
+                }
+
                 while (!RaidStarted)
                 {
                     await Task.Yield();
@@ -1531,12 +1536,22 @@ namespace Fika.Core.Coop.GameMode
                 server.SendDataToAll(ref continuePacket, DeliveryMethod.ReliableOrdered);
                 SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
                 await FikaRequestHandler.UpdateSetStatus(status);
+
                 return;
             }
 
             if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.AnyoneCanStartRaid)
             {
                 startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
+                if (FikaPlugin.DevMode.Value)
+                {
+                    FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
+                    InformationPacket devModePacket = new()
+                    {
+                        RequestStart = true
+                    };
+                    fikaClient.SendData(ref devModePacket, DeliveryMethod.ReliableOrdered);
+                }
             }
             FikaClient client = Singleton<FikaClient>.Instance;
             InformationPacket packet = new();
