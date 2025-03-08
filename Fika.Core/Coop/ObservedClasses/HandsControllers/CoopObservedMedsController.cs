@@ -3,16 +3,17 @@
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Mono.Cecil;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
     internal class CoopObservedMedsController : Player.MedsController
     {
         private CoopPlayer coopPlayer;
+        private GStruct353<EBodyPart> healParts;
 
         private ObservedMedsOperation ObservedOperation
         {
@@ -26,6 +27,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             CoopObservedMedsController controller = smethod_6<CoopObservedMedsController>(player, item, bodyParts, amount, animationVariant);
             controller.coopPlayer = player;
+            controller.healParts = bodyParts;
             return controller;
         }
 
@@ -52,15 +54,21 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void Destroy()
         {
-            coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
-            Item.Owner.RemoveItemEvent -= ObservedOperation.Owner_RemoveItemEvent;
+            if (ObservedOperation != null)
+            {
+                coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
+                OnOutUseEvent -= ObservedOperation.ObservedMedsController_OnOutUseEvent;
+            }
             base.Destroy();
         }
 
         public override void OnPlayerDead()
         {
-            coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
-            Item.Owner.RemoveItemEvent -= ObservedOperation.Owner_RemoveItemEvent;
+            if (ObservedOperation != null)
+            {
+                coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
+                OnOutUseEvent -= ObservedOperation.ObservedMedsController_OnOutUseEvent;
+            }
             base.OnPlayerDead();
         }
 
@@ -109,15 +117,36 @@ namespace Fika.Core.Coop.ObservedClasses
         private class ObservedMedsOperation(Player.MedsController controller) : Class1172(controller)
         {
             private readonly CoopObservedMedsController observedMedsController = (CoopObservedMedsController)controller;
+            private int animation;
 
             public void ObservedStart(Action callback)
             {
                 State = Player.EOperationState.Executing;
                 SetLeftStanceAnimOnStartOperation();
                 callback();
+                if (observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
+                {
+                    animation = UnityEngine.Random.Range(0, animationVariantsComponent.VariantsNumber);
+                }
+                else
+                {
+                    animation = 0;
+                }
                 observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
                 observedMedsController.coopPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
-                observedMedsController.Item.Owner.RemoveItemEvent += Owner_RemoveItemEvent;
+                observedMedsController.OnOutUseEvent += ObservedMedsController_OnOutUseEvent;
+            }
+
+            public void ObservedMedsController_OnOutUseEvent()
+            {
+                if (observedMedsController.FirearmsAnimator != null)
+                {
+                    observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
+                }
+                if (observedMedsController.FirearmsAnimator != null) // Yes, this double check is intentional
+                {
+                    observedMedsController.FirearmsAnimator.SetNextLimb(false);
+                }
             }
 
             public void HealthController_EffectRemovedEvent(IEffect effect)
@@ -141,41 +170,28 @@ namespace Fika.Core.Coop.ObservedClasses
                     animator.SetUseTimeMultiplier(1f + mult);
 
                     int variant = 0;
+                    animation++;
                     if (observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
                     {
-                        int numVariants = animationVariantsComponent.VariantsNumber;
-                        variant = UnityEngine.Random.Range(0, numVariants);
+                        variant = animationVariantsComponent.VariantsNumber;
                     }
+                    int newAnim = (int)Mathf.Repeat((float)animation, (float)variant);
 
-                    animator.SetAnimationVariant(variant);
+                    animator.SetAnimationVariant(newAnim);
                 }
-            }
-
-            public override void OnEnd()
-            {
-                base.OnEnd();
-            }
-
-            public void Owner_RemoveItemEvent(GEventArgs3 args)
-            {
-                if (args.Item != observedMedsController.Item)
-                {
-                    return;
-                }
-
-                observedMedsController.coopPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
             }
 
             public void HideObservedWeapon()
             {
                 if (observedMedsController != null && observedMedsController.FirearmsAnimator != null)
                 {
-                    observedMedsController.FirearmsAnimator.SetActiveParam(false, false);
+                    observedMedsController.FirearmsAnimator.SetNextLimb(false);
+                    observedMedsController.FirearmsAnimator.SetActiveParam(false, true);
                 }
             }
 
             public void HideObservedWeaponComplete()
-            {                
+            {
                 State = Player.EOperationState.Finished;
             }
 
