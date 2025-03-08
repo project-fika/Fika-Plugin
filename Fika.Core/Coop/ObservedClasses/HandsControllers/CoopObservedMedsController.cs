@@ -14,7 +14,7 @@ namespace Fika.Core.Coop.ObservedClasses
     {
         private CoopPlayer coopPlayer;
 
-        private ObservedMedsOperation ObservedObsOperation
+        private ObservedMedsOperation ObservedOperation
         {
             get
             {
@@ -52,15 +52,15 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void Destroy()
         {
-            coopPlayer.HealthController.EffectRemovedEvent -= ObservedObsOperation.HealthController_EffectRemovedEvent;
-            Item.Owner.RemoveItemEvent -= ObservedObsOperation.Owner_RemoveItemEvent;
+            coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
+            Item.Owner.RemoveItemEvent -= ObservedOperation.Owner_RemoveItemEvent;
             base.Destroy();
         }
 
         public override void OnPlayerDead()
         {
-            coopPlayer.HealthController.EffectRemovedEvent -= ObservedObsOperation.HealthController_EffectRemovedEvent;
-            Item.Owner.RemoveItemEvent -= ObservedObsOperation.Owner_RemoveItemEvent;
+            coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
+            Item.Owner.RemoveItemEvent -= ObservedOperation.Owner_RemoveItemEvent;
             base.OnPlayerDead();
         }
 
@@ -73,7 +73,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             await Task.Delay(600);
             Destroyed = true;
-            ObservedObsOperation.HideObservedWeapon();
+            ObservedOperation.HideObservedWeapon();
         }
 
         private Player.BaseAnimationOperationClass GetObservedMedsOperation()
@@ -98,12 +98,12 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void FastForwardCurrentState()
         {
-            ObservedObsOperation.FastForwardObserved();
+            ObservedOperation.FastForwardObserved();
         }
 
         public override void IEventsConsumerOnWeapOut()
         {
-            ObservedObsOperation.HideObservedWeaponComplete();
+            ObservedOperation.HideObservedWeaponComplete();
         }
 
         private class ObservedMedsOperation(Player.MedsController controller) : Class1172(controller)
