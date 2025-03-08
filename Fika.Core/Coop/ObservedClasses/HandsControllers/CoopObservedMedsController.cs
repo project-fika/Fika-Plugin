@@ -57,6 +57,13 @@ namespace Fika.Core.Coop.ObservedClasses
             base.Destroy();
         }
 
+        public override void OnPlayerDead()
+        {
+            coopPlayer.HealthController.EffectRemovedEvent -= ObservedObsOperation.HealthController_EffectRemovedEvent;
+            Item.Owner.RemoveItemEvent -= ObservedObsOperation.Owner_RemoveItemEvent;
+            base.OnPlayerDead();
+        }
+
         public override void Drop(float animationSpeed, Action callback, bool fastDrop = false, Item nextControllerItem = null)
         {
             DropController().HandleExceptions();
