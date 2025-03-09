@@ -226,7 +226,7 @@ namespace Fika.Core.Coop.GameMode
                 gameTime = new(backendDateTime.DateTime_0, newTime, backendDateTime.TimeFactor);
                 gameTime.Reset(newTime);
                 dateTime = EDateTime.CURR;
-            }            
+            }
 
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, menuUI, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
@@ -675,7 +675,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
             {
-                StartCoroutine(FixVOIPAudioDevice()); 
+                StartCoroutine(FixVOIPAudioDevice());
             }
         }
 
@@ -919,7 +919,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (coopHandler == null)
             {
-                Logger.LogError($"{nameof(vmethod_3)}: CoopHandler was null!");
+                Logger.LogError("vmethod_3: CoopHandler was null!");
                 throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
@@ -933,15 +933,15 @@ namespace Fika.Core.Coop.GameMode
             coopHandler.HumanPlayers.Add(coopPlayer);
             coopPlayer.SetupMainPlayer();
 
-            PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
-            await FikaRequestHandler.UpdatePlayerSpawn(body);
+                PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
+                await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             coopPlayer.SpawnPoint = spawnPoint;
 
-            GameObject customButton = null;
+            //GameObject customButton = null;
 
             await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
-            customButton = CreateCancelButton(coopPlayer, customButton);
+            //customButton = CreateCancelButton(coopPlayer, customButton);
 
             if (!isServer && !FikaBackendUtils.IsReconnect)
             {
@@ -973,9 +973,10 @@ namespace Fika.Core.Coop.GameMode
                 client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
 
+            Logger.LogInfo("Adding debug component...");
             fikaDebug = gameObject.AddComponent<FikaDebug>();
 
-            Destroy(customButton);
+            //Destroy(customButton);
 
             if (FikaBackendUtils.IsReconnect && !FikaBackendUtils.ReconnectPosition.Equals(Vector3.zero))
             {
@@ -1201,16 +1202,19 @@ namespace Fika.Core.Coop.GameMode
                 await GetReconnectProfile(ProfileId);
             }
 
-            LocalPlayer player = await CreateLocalPlayer();
-            dictionary_0.Add(player.ProfileId, player);
-            gparam_0 = func_1(player);
-            PlayerCameraController.Create(gparam_0.Player);
-            CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
-            CameraClass.Instance.IsActive = false;
-
-            if (FikaBackendUtils.IsHeadless && gameWorld.TransitController is FikaHostTransitController hostController)
+            try
             {
-                hostController.SetupHeadlessPlayerTransitStash(player);
+                LocalPlayer player = await CreateLocalPlayer() ?? throw new NullReferenceException("InitPlayer: Player was null!");
+                dictionary_0.Add(player.ProfileId, player);
+                gparam_0 = func_1(player);
+                PlayerCameraController.Create(gparam_0.Player);
+                CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
+                CameraClass.Instance.IsActive = false;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"InitPlayer: {ex.Message}");
+                throw;
             }
 
             await WaitForHostToStart();
@@ -1275,7 +1279,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         private void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass backendConfig)
-        { 
+        {
             bool transitActive;
             if (backendConfig == null)
             {
@@ -1442,22 +1446,33 @@ namespace Fika.Core.Coop.GameMode
 
             if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
             {
-                await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP(); 
+                Logger.LogInfo("VOIP enabled, initializing...");
+                await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP();
             }
 
             IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
 
-            LocalPlayer myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
-                Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
-                BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
-                FikaGlobals.GetLocalPlayerSensitivity, FikaGlobals.GetLocalPlayerAimingSensitivity, statisticsManager,
-                iSession, (localRaidSettings_0 != null) ? localRaidSettings_0.mode : ELocalMode.TRAINING);
+            LocalPlayer myPlayer;
+            try
+            {
+                myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
+                        Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
+                        BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
+                        FikaGlobals.GetLocalPlayerSensitivity, FikaGlobals.GetLocalPlayerAimingSensitivity, statisticsManager,
+                        iSession, (localRaidSettings_0 != null) ? localRaidSettings_0.mode : ELocalMode.TRAINING);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"CreateLocalPlayer: {ex.Message}");
+                throw;
+            }
 
             myPlayer.OnEpInteraction += OnEpInteraction;
 
             localPlayer = myPlayer as CoopPlayer;
             coopHandler.MyPlayer = localPlayer;
 
+            Logger.LogInfo("Local player created");
             return myPlayer;
         }
 
@@ -1514,6 +1529,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (FikaPlugin.DevMode.Value)
                 {
+                    Logger.LogWarning("DevMode is enabled, skipping wait...");
                     RaidStarted = true;
                 }
 
@@ -1545,6 +1561,7 @@ namespace Fika.Core.Coop.GameMode
                 startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
                 if (FikaPlugin.DevMode.Value)
                 {
+                    Logger.LogWarning("DevMode is enabled, skipping wait...");
                     FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
                     InformationPacket devModePacket = new()
                     {
@@ -1903,7 +1920,7 @@ namespace Fika.Core.Coop.GameMode
                 coopClientHealthController.Start();
             }
             gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
-            gparam_0.vmethod_0();            
+            gparam_0.vmethod_0();
         }
 
         private IEnumerator FixVOIPAudioDevice()

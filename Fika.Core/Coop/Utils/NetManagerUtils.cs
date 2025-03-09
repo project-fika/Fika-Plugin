@@ -182,6 +182,7 @@ namespace Fika.Core.Coop.Utils
 
         public static Task SetupGameVariables(bool isServer, CoopPlayer coopPlayer)
         {
+            logger.LogInfo("Setting up game variables...");
             if (isServer)
             {
                 Singleton<FikaServer>.Instance.SetupGameVariables(coopPlayer);
