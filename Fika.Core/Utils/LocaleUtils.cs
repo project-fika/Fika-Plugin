@@ -9,26 +9,6 @@ namespace Fika.Core.Utils
     /// </summary>
     public static class LocaleUtils
     {
-        private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
-
-        /// <summary>
-        /// Used to get the prefix of a word for EN locale, no longer used
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        [Obsolete("No longer used", true)]
-        public static string GetPrefix(string word)
-        {
-            char firstLetter = char.ToUpper(word[0]);
-
-            if (vowels.Contains(firstLetter))
-            {
-                return "an";
-            }
-
-            return "a";
-        }
-
         /// <summary>
         /// Used to determine whether this player was a boss
         /// </summary>

@@ -40,7 +40,7 @@ namespace Fika.Core.UI
                 UnityEngine.Object.Destroy(watermarkText);
             }
 
-            obj.active = true;
+            obj.SetActive(true);
             TextMeshProUGUI text = obj.AddComponent<TextMeshProUGUI>();
             text.horizontalAlignment = HorizontalAlignmentOptions.Center;
             text.verticalAlignment = VerticalAlignmentOptions.Bottom;
