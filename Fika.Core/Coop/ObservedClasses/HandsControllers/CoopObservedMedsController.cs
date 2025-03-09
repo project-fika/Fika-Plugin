@@ -142,9 +142,6 @@ namespace Fika.Core.Coop.ObservedClasses
                 if (observedMedsController.FirearmsAnimator != null)
                 {
                     observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
-                }
-                if (observedMedsController.FirearmsAnimator != null) // Yes, this double check is intentional
-                {
                     observedMedsController.FirearmsAnimator.SetNextLimb(false);
                 }
             }
