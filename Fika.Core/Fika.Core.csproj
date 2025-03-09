@@ -13,6 +13,11 @@
     <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Coop\Patches\SPTBugs\**" />
+    <EmbeddedResource Remove="Coop\Patches\SPTBugs\**" />
+    <None Remove="Coop\Patches\SPTBugs\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Bundles\Files\masterbundle.bundle" />
   </ItemGroup>
   <ItemGroup>
@@ -58,10 +63,6 @@
     <Reference Include="UnityEngine" HintPath="..\References\UnityEngine.dll" Private="false" />
     <Reference Include="UnityEngine.UI" HintPath="..\References\UnityEngine.UI.dll" Private="false" />
 	<Reference Include="websocket-sharp" HintPath="..\References\websocket-sharp.dll" Private="false" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Coop\Patches\SPTBugs\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
