@@ -36,7 +36,7 @@ namespace Fika.Core.Bundles
                     }
                     else
                     {
-                        FikaPlugin.Instance.FikaLogger.LogFatal("Unknwon bundle loaded! Terminating...");
+                        FikaPlugin.Instance.FikaLogger.LogFatal("Unknown bundle loaded! Terminating...");
                         Application.Quit();
                     }
                 }
