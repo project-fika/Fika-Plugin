@@ -6,20 +6,19 @@ namespace Fika.Core.Coop.Components
     public class GCManager : MonoBehaviour
     {
         private float counter;
+        private float threshold;
 
         protected void Awake()
         {
             counter = 0f;
+            threshold = 20f;
         }
 
         protected void Update()
         {
             counter += Time.deltaTime;
-            if (counter > 10f)
+            if (counter > threshold)
             {
-#if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogWarning("Running GC");
-#endif
                 counter = 0f;
                 GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
                 GarbageCollector.CollectIncremental(10000000);
