@@ -678,6 +678,11 @@ namespace Fika.Core.Coop.GameMode
                 StartCoroutine(FixVOIPAudioDevice());
             }
             StartCoroutine(CreateStashes());
+
+            if (FikaPlugin.UseFikaGC.Value)
+            {
+                NetManagerUtils.FikaGameObject.AddComponent<GCManager>();
+            }
         }
 
         private IEnumerator CreateStashes()

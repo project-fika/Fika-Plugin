@@ -33,12 +33,7 @@ namespace Fika.Core.Coop.Utils
             if (FikaGameObject == null)
             {
                 CreateFikaGameObject();
-            }
-
-            if (FikaPlugin.UseFikaGC.Value)
-            {
-                FikaGameObject.AddComponent<GCManager>();
-            }
+            }            
 
             if (isServer)
             {
