@@ -10,6 +10,7 @@ using Fika.Core.Coop.FreeCamera.Patches;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Patches.Camera;
 using Fika.Core.Coop.Patches.Lighthouse;
+using Fika.Core.Coop.Patches.PlayerPatches;
 using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Utils;
 using Fika.Core.EssentialPatches;
@@ -357,6 +358,7 @@ namespace Fika.Core
             new DissonanceComms_Start_Patch().Enable();
             new Player_IDissonancePlayerType_Patch().Enable();
             new BasicMicrophoneCapture_UpdateSubscribers_Transpiler().Enable();
+            new Player_HasMarkOfUnknown_Patch().Enable();
 #if DEBUG
             TasksExtensions_HandleFinishedTask_Patches.Enable();
             new GClass1640_method_0_Patch().Enable();
