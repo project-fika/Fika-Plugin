@@ -1,10 +1,6 @@
-﻿using Comfort.Common;
-using Dissonance.Networking;
+﻿using Dissonance.Networking;
 using Fika.Core.Coop.Utils;
-using JetBrains.Annotations;
-using LiteNetLib;
 using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.VOIP
 {
@@ -20,11 +16,6 @@ namespace Fika.Core.Networking.VOIP
         protected override void ReadMessages()
         {
 
-        }
-
-        public override void SendReliable([NotNull] List<FikaVOIPPeer> connections, ArraySegment<byte> packet)
-        {
-            base.SendReliable(connections, packet);
         }
 
         protected override void SendReliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
