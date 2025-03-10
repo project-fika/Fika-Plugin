@@ -1966,8 +1966,13 @@ namespace Fika.Core.Coop.GameMode
             for (int i = 0; i < coopHandler.HumanPlayers.Count; i++)
             {
                 CoopPlayer player = coopHandler.HumanPlayers[i];
-                if (player.IsYourPlayer)
+                if (player.IsYourPlayer || player.Profile.IsHeadlessProfile())
                 {
+                    continue;
+                }
+                if (player.VoipAudioSource == null)
+                {
+                    Logger.LogError($"FixVOIPAudioDevice: VoipAudioSource was null for {player.Profile.Nickname}");
                     continue;
                 }
                 player.VoipAudioSource.gameObject.SetActive(false);
@@ -1978,8 +1983,13 @@ namespace Fika.Core.Coop.GameMode
             for (int i = 0; i < coopHandler.HumanPlayers.Count; i++)
             {
                 CoopPlayer player = coopHandler.HumanPlayers[i];
-                if (player.IsYourPlayer)
+                if (player.IsYourPlayer || player.Profile.IsHeadlessProfile())
                 {
+                    continue;
+                }
+                if (player.VoipAudioSource == null)
+                {
+                    Logger.LogError($"FixVOIPAudioDevice: VoipAudioSource was null for {player.Profile.Nickname}");
                     continue;
                 }
                 player.VoipAudioSource.gameObject.SetActive(true);
