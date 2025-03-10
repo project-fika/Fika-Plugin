@@ -134,7 +134,7 @@ namespace Fika.Core.Networking
         private FikaChat fikaChat;
         private CancellationTokenSource natIntroduceRoutineCts;
         private int statisticsCounter;
-        private Dictionary<Profile, bool> visualProfiles;        
+        private Dictionary<Profile, bool> visualProfiles;
 
         internal FikaVOIPServer VOIPServer { get; set; }
         internal FikaVOIPClient VOIPClient { get; set; }
@@ -366,10 +366,20 @@ namespace Fika.Core.Networking
                 controller.VoipDisabledByInitializationFail();
             }
 
-            do
+            if (!FikaBackendUtils.IsHeadless)
             {
-                await Task.Yield();
-            } while (VOIPServer == null && VOIPClient == null);
+                do
+                {
+                    await Task.Yield();
+                } while (VOIPServer == null && VOIPClient == null);
+            }
+            else
+            {
+                do
+                {
+                    await Task.Yield();
+                } while (VOIPServer == null);
+            }
 
             return;
         }
@@ -1547,7 +1557,7 @@ namespace Fika.Core.Networking
         {
             if (channelNumber == 1)
             {
-                VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(reader.GetBytesWithLength())); 
+                VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(reader.GetBytesWithLength()));
             }
             else
             {
