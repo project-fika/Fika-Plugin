@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.Components
 
             ProcessQuitting();
 
-            if (isClient)
+            if (isClient && MyPlayer != null)
             {
                 charSyncCounter += Time.unscaledDeltaTime;
                 int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
