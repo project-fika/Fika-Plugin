@@ -171,11 +171,6 @@ namespace Fika.Core.Coop.ObservedClasses
             mongoID_0 = newId;
         }
 
-        /*public GStruct450<BaseInventoryOperationClass> CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
-		{
-			
-		}*/
-
         GStruct452 Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
         {
             method_13(descriptor);
