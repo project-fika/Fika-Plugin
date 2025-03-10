@@ -586,7 +586,7 @@ namespace Fika.Core.Coop.Players
 
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
-            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);            
+            List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             if (list != null)
             {
                 _preAllocatedArmorComponents.Clear();
@@ -628,7 +628,7 @@ namespace Fika.Core.Coop.Players
                 Material = materialType,
                 WeaponId = damageInfo.Weapon.Id
             };
-            PacketSender.SendPacket(ref packet);            
+            PacketSender.SendPacket(ref packet);
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -1255,8 +1255,6 @@ namespace Fika.Core.Coop.Players
                         ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),
                     EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
                 }
-
-                Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
             }
         }
 
@@ -1274,6 +1272,12 @@ namespace Fika.Core.Coop.Players
             }
 
             healthBar = FikaHealthBar.Create(this);
+
+            while (Singleton<GameWorld>.Instance.MainPlayer == null)
+            {
+                yield return null;
+            }
+            Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
 
             yield break;
         }
