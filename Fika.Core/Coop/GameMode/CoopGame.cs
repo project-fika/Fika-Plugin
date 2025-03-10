@@ -677,6 +677,58 @@ namespace Fika.Core.Coop.GameMode
             {
                 StartCoroutine(FixVOIPAudioDevice());
             }
+            StartCoroutine(CreateStashes());
+        }
+
+        private IEnumerator CreateStashes()
+        {
+            GameWorld gameWorld = GameWorld_0;
+            
+            if (gameWorld.TransitController != null)
+            {
+                while (gameWorld.TransitController.TransferItemsController.Stash == null)
+                {
+                    yield return null;
+                }
+            }
+
+            if (gameWorld.BtrController != null)
+            {
+                while (gameWorld.BtrController.TransferItemsController.Stash == null)
+                {
+                    yield return null;
+                }
+            }
+
+            if (coopHandler != null)
+            {
+                for (int i = 0; i < coopHandler.HumanPlayers.Count; i++)
+                {
+                    CoopPlayer player = coopHandler.HumanPlayers[i];
+                    try
+                    {
+                        if (gameWorld.TransitController != null)
+                        {
+                            gameWorld.TransitController.TransferItemsController.InitPlayerStash(player);
+                        }
+
+                        if (gameWorld.BtrController != null)
+                        {
+                            gameWorld.BtrController.TransferItemsController.InitPlayerStash(player);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError($"Could not initialize transfer stash on {player.Profile.Nickname}: {ex.Message}");
+                    }
+                }
+            }
+            else
+            {
+                Logger.LogError("Could not find CoopHandler when trying to initialize player stashes for TransferItemsController!");
+            }
+
+            yield break;
         }
 
         private void SyncTransitControllers()
@@ -1447,7 +1499,14 @@ namespace Fika.Core.Coop.GameMode
             if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
             {
                 Logger.LogInfo("VOIP enabled, initializing...");
-                await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP();
+                try
+                {
+                    await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"There was an error initializing the VOIP module: {ex.Message}");
+                }
             }
 
             IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
@@ -1677,28 +1736,7 @@ namespace Fika.Core.Coop.GameMode
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
             }
 
-            await WaitForOtherPlayersToLoad();
-
-            if (coopHandler != null)
-            {
-                for (int i = 0; i < coopHandler.HumanPlayers.Count; i++)
-                {
-                    CoopPlayer player = coopHandler.HumanPlayers[i];
-                    if (gameWorld.TransitController != null)
-                    {
-                        gameWorld.TransitController.TransferItemsController.InitPlayerStash(player);
-                    }
-
-                    if (gameWorld.BtrController != null)
-                    {
-                        gameWorld.BtrController.TransferItemsController.InitPlayerStash(player);
-                    }
-                }
-            }
-            else
-            {
-                Logger.LogError("Could not find CoopHandler when trying to initialize player stashes for TransferItemsController!");
-            }
+            await WaitForOtherPlayersToLoad();            
 
             SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
             Logger.LogInfo("All players are loaded, continuing...");
