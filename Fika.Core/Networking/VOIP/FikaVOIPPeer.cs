@@ -30,6 +30,11 @@ namespace Fika.Core.Networking.VOIP
                 return other.Peer == null;
             }
 
+            if (Peer is RemotePeer localRemote && other.Peer is RemotePeer otherRemote)
+            {
+                return localRemote.Peer.Equals(otherRemote.Peer);
+            }
+
             return Peer.Equals(other.Peer);
         }
     }
