@@ -117,10 +117,7 @@ namespace Fika.Core.Networking
                     };
 
                     server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
-                    return;
                 }
-
-                FikaPlugin.Instance.FikaLogger.LogError("WeatherRequest::HandleRequest: CoopGame or WeatherClasses was null upon receiving packet!");
             }
 
             public void HandleResponse()
