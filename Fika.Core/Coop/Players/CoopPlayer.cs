@@ -136,7 +136,7 @@ namespace Fika.Core.Coop.Players
                 player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
             }
 
-            EVoipState voipState = (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && GClass1050.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
+            EVoipState voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && GClass1050.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
@@ -156,11 +156,8 @@ namespace Fika.Core.Coop.Players
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, Class1655.class1655_0.method_0);
-
             player.AIData = new GClass567(null, player);
-
             player.AggressorFound = false;
-
             player._animators[0].enabled = true;
 
             RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();

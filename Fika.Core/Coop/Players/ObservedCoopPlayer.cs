@@ -178,7 +178,7 @@ namespace Fika.Core.Coop.Players
                 observedQuestController.Run();
             }
 
-            player.VoipState = (!aiControl && Singleton<IFikaNetworkManager>.Instance.AllowVOIP) ? EVoipState.Available : EVoipState.NotAvailable;
+            player.VoipState = (!FikaBackendUtils.IsHeadless && !aiControl && Singleton<IFikaNetworkManager>.Instance.AllowVOIP) ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
                 statisticsManager, observedQuestController, null, null, filter, player.VoipState, aiControl, false);
@@ -218,6 +218,7 @@ namespace Fika.Core.Coop.Players
         {
             if (voipState == EVoipState.Available)
             {
+                FikaGlobals.LogInfo($"Initializing VOIP for {Profile.Nickname}");
                 SetupVoiceBroadcastTrigger();
                 DissonanceComms = DissonanceComms.Instance;
                 if (DissonanceComms != null)
@@ -227,6 +228,14 @@ namespace Fika.Core.Coop.Players
                     {
                         SourceBindingCreated();
                     }
+                    else
+                    {
+                        FikaGlobals.LogError($"VoipAudioSource was null when attempting to initialize VOIP for {Profile.Nickname}");
+                    }
+                }
+                else
+                {
+                    FikaGlobals.LogError($"DissonanceComms was null when attempting to initialize VOIP for {Profile.Nickname}");
                 }
             }
         }
@@ -241,7 +250,7 @@ namespace Fika.Core.Coop.Players
                 VoipAudioSource, BetterAudio.AudioSourceGroupType.Voip, true, true);
             if (VoipEftSource == null)
             {
-                FikaGlobals.LogError($"Could not initialize VOIP source for {Profile.Nickname}");
+                FikaGlobals.LogError($"Could not initialize VoipEftSource for {Profile.Nickname}");
                 return;
             }
             VoipEftSource.SetMixerGroup(MonoBehaviourSingleton<BetterAudio>.Instance.ObservedPlayerSpeechMixer);
