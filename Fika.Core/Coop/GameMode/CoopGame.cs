@@ -1017,11 +1017,6 @@ namespace Fika.Core.Coop.GameMode
                     packet.PlayerInfoPacket.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
                 }
 
-                do
-                {
-                    await Task.Delay(250);
-                } while (client.NetClient.FirstPeer == null);
-
                 client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
 
