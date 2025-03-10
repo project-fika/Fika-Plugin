@@ -673,7 +673,7 @@ namespace Fika.Core.Coop.GameMode
             SyncTransitControllers();
             FikaEventDispatcher.DispatchEvent(new FikaRaidStartedEvent(FikaBackendUtils.IsServer));
 
-            if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
+            if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && !FikaBackendUtils.IsHeadless)
             {
                 StartCoroutine(FixVOIPAudioDevice());
             }

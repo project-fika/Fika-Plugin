@@ -318,12 +318,31 @@ namespace Fika.Core.Networking
         async Task IFikaNetworkManager.InitializeVOIP()
         {
             GClass2042 voipHandler = FikaGlobals.VOIPHandler;
-
             GClass1040 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
-            if (voipHandler.MicrophoneChecked)
+            if (voipHandler.MicrophoneChecked && !FikaBackendUtils.IsHeadless)
             {
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
+                await GClass1578.LoadScene(AssetsManagerSingletonClass.Manager,
+                    GClass2078.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+
+                MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
+                do
+                {
+                    mirrorCommsNetwork = FindObjectOfType<MirrorIgnoranceCommsNetwork>();
+                    await Task.Yield();
+                } while (mirrorCommsNetwork == null);
+
+                GameObject gameObj = mirrorCommsNetwork.gameObject;
+                gameObj.AddComponent<FikaCommsNetwork>();
+                Destroy(mirrorCommsNetwork);
+
+                DissonanceComms_Start_Patch.IsReady = true;
+                DissonanceComms dissonance = gameObj.GetComponent<DissonanceComms>();
+                dissonance.Invoke("Start", 0);
+            }
+            else if (FikaBackendUtils.IsHeadless)
+            {
                 await GClass1578.LoadScene(AssetsManagerSingletonClass.Manager,
                     GClass2078.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
