@@ -1,5 +1,4 @@
-﻿using Comfort.Common;
-using Dissonance;
+﻿using Dissonance;
 using EFT;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -466,7 +465,7 @@ namespace Fika.Core.Networking.VOIP
                     return struct510.TimeSpan_0;
                 }
             }
-        }        
+        }
 
         private Struct510 method_8()
         {
