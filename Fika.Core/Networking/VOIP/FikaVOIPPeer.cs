@@ -49,6 +49,14 @@ namespace Fika.Core.Networking.VOIP
 
     public class RemotePeer(NetPeer peer) : IPeer
     {
+        public NetPeer Peer
+        {
+            get
+            {
+                return peer;
+            }
+        }
+
         private readonly NetPeer peer = peer;
 
         public void SendData(ArraySegment<byte> data, bool reliable)
