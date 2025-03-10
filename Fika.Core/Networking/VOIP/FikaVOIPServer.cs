@@ -1,5 +1,4 @@
-﻿using Dissonance;
-using Dissonance.Networking;
+﻿using Dissonance.Networking;
 using Dissonance.Networking.Server;
 using Fika.Core.Coop.Utils;
 using LiteNetLib;
@@ -8,32 +7,23 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking.VOIP
 {
-    class FikaVOIPServer : BaseServer<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>
+    class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>
     {
-        private readonly List<NetPeer> peers;
-
-        public FikaVOIPServer(FikaCommsNetwork commsNetwork)
-        {
-            peers = [];
-        }
+        private readonly List<NetPeer> peers = [];
+        private readonly FikaCommsNetwork fikaComms = commsNetwork;
 
         protected override void AddClient(ClientInfo<FikaVOIPPeer> client)
         {
             base.AddClient(client);
-            if (DissonanceComms.Instance != null)
+            if (client.PlayerName != fikaComms.PlayerName)
             {
-                if (client.PlayerName != DissonanceComms.Instance.LocalPlayerName)
+                if (client.Connection.Peer is RemotePeer peer)
                 {
-                    if (client.Connection.Peer is RemotePeer peer)
-                    {
-                        peers.Add(peer.Peer);
-                        return; 
-                    }
-                    FikaGlobals.LogError($"FikaVOIPServer::AddClient: Connection.Peer was not a RemotePeer!");
-                }                
+                    peers.Add(peer.Peer);
+                    return;
+                }
+                FikaGlobals.LogError($"FikaVOIPServer::AddClient: Connection.Peer was not a RemotePeer!");
             }
-
-            FikaGlobals.LogError($"FikaVOIPServer::AddClient: DissonanceComms.Instance was null when attempting to add a client!");
         }
 
         public override ServerState Update()
@@ -82,6 +72,7 @@ namespace Fika.Core.Networking.VOIP
             {
                 throw new ArgumentNullException("connections");
             }
+
             for (int i = 0; i < connections.Count; i++)
             {
                 SendReliable(connections[i], packet);
@@ -94,6 +85,7 @@ namespace Fika.Core.Networking.VOIP
             {
                 throw new ArgumentNullException("connections");
             }
+
             for (int i = 0; i < connections.Count; i++)
             {
                 SendUnreliable(connections[i], packet);
