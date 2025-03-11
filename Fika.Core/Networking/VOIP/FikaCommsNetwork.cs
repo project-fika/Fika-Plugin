@@ -1,12 +1,19 @@
 ﻿using Comfort.Common;
 using Dissonance;
+using Dissonance.Datastructures;
+using Dissonance.Extensions;
 using Dissonance.Networking;
 using Fika.Core.Coop.Utils;
+using System;
+using System.Collections.Generic;
 
 namespace Fika.Core.Networking.VOIP
 {
-    class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer, Unit, Unit>
+    public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer, Unit, Unit>
     {
+        private readonly ConcurrentPool<byte[]> loopbackBuffers = new(8, () => new byte[1024]);
+        private readonly List<ArraySegment<byte>> loopbackQueue = [];
+
         protected override FikaVOIPClient CreateClient(Unit connectionParameters)
         {
             FikaVOIPClient client = new(this);
@@ -26,6 +33,43 @@ namespace Fika.Core.Networking.VOIP
             FikaVOIPServer server = new(this);
             Singleton<FikaServer>.Instance.VOIPServer = server;
             return server;
+        }
+
+        public bool PreprocessPacketToClient(ArraySegment<byte> packet, FikaVOIPPeer peer)
+        {
+            if (Server == null)
+            {
+                FikaGlobals.LogError("Server packet processing running, but this peer is not a server");
+                return true;
+            }
+            if (Client == null)
+            {
+                return false;
+            }
+            if (!peer.Peer.IsLocal)
+            {
+                return false;
+            }
+            if (Client != null)
+            {
+                loopbackQueue.Add(packet.CopyToSegment(loopbackBuffers.Get(), 0));
+            }
+            return true;
+        }
+
+        public bool PreprocessPacketToServer(ArraySegment<byte> packet)
+        {
+            if (Client == null)
+            {
+                FikaGlobals.LogError("Client packet processing running, but this peer is not a client");
+                return true;
+            }
+            if (Server == null)
+            {
+                return false;
+            }
+            Server.NetworkReceivedPacket(new(new LocalPeer()), packet);
+            return true;
         }
 
         protected override void Update()
@@ -51,6 +95,16 @@ namespace Fika.Core.Networking.VOIP
             else if (Mode != NetworkMode.None)
             {
                 Stop();
+                loopbackQueue.Clear();
+            }
+            for (int i = 0; i < loopbackQueue.Count; i++)
+            {
+                ArraySegment<byte> segment = loopbackQueue[i];
+                if (Client != null)
+                {
+                    Client.NetworkReceivedPacket(segment);
+                }
+                loopbackBuffers.Put(segment.Array);
             }
             base.Update();
         }

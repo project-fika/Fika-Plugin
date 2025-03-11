@@ -158,14 +158,7 @@ namespace Fika.Core.Networking
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
 
-            if (MultiThreaded)
-            {
-                RegisterMultiThreadedPackets();
-            }
-            else
-            {
-                RegisterPackets();
-            }
+            RegisterPackets();
 
 #if DEBUG
             AddDebugPackets();
@@ -235,90 +228,47 @@ namespace Fika.Core.Networking
             return;
         }
 
-        private void RegisterMultiThreadedPackets()
-        {
-            packetProcessor.SubscribeNetSerializableMT<PlayerStatePacket>(OnPlayerStatePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<WeaponPacket>(OnWeaponPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<DamagePacket>(OnDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ArmorDamagePacket>(OnArmorDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InventoryPacket>(OnInventoryPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<AllCharacterRequestPacket>(OnAllCharacterRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InformationPacket>(OnInformationPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<HealthSyncPacket>(OnHealthSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<GenericPacket>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SendCharacterPacket>(OnSendCharacterPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<TextMessagePacket>(OnTextMessagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestConditionPacket>(OnQuestConditionPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestItemPacket>(OnQuestItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InteractableInitPacket>(OnInteractableInitPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<StatisticsPacket>(OnStatisticsPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<WorldLootPacket>(OnWorldLootPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ReconnectPacket>(OnReconnectPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BTRPacket>(OnBTRPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BufferZonePacket>(OnBufferZonePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<UsableItemPacket>(OnUsableItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<TransitEventPacket>(OnTransitEventPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BotStatePacket>(OnBotStatePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<PingPacket>(OnPingPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<LootSyncPacket>(OnLootSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SideEffectPacket>(OnSideEffectPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<RequestPacket>(OnRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<NewWorldPacket>(OnNewWorldPacketReceived);
-        }
-
         private void RegisterPackets()
         {
-            packetProcessor.SubscribeNetSerializable<PlayerStatePacket>(OnPlayerStatePacketReceived);
-            packetProcessor.SubscribeNetSerializable<WeaponPacket>(OnWeaponPacketReceived);
-            packetProcessor.SubscribeNetSerializable<DamagePacket>(OnDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializable<ArmorDamagePacket>(OnArmorDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializable<InventoryPacket>(OnInventoryPacketReceived);
-            packetProcessor.SubscribeNetSerializable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AllCharacterRequestPacket>(OnAllCharacterRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializable<InformationPacket>(OnInformationPacketReceived);
-            packetProcessor.SubscribeNetSerializable<HealthSyncPacket>(OnHealthSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializable<GenericPacket>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SendCharacterPacket>(OnSendCharacterPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
-            packetProcessor.SubscribeNetSerializable<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
-            packetProcessor.SubscribeNetSerializable<TextMessagePacket>(OnTextMessagePacketReceived);
-            packetProcessor.SubscribeNetSerializable<QuestConditionPacket>(OnQuestConditionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<QuestItemPacket>(OnQuestItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
-            packetProcessor.SubscribeNetSerializable<InteractableInitPacket>(OnInteractableInitPacketReceived);
-            packetProcessor.SubscribeNetSerializable<StatisticsPacket>(OnStatisticsPacketReceived);
-            packetProcessor.SubscribeNetSerializable<WorldLootPacket>(OnWorldLootPacketReceived);
-            packetProcessor.SubscribeNetSerializable<ReconnectPacket>(OnReconnectPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRPacket>(OnBTRPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BufferZonePacket>(OnBufferZonePacketReceived);
-            packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
-            packetProcessor.SubscribeNetSerializable<UsableItemPacket>(OnUsableItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
-            packetProcessor.SubscribeNetSerializable<TransitEventPacket>(OnTransitEventPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BotStatePacket>(OnBotStatePacketReceived);
-            packetProcessor.SubscribeNetSerializable<PingPacket>(OnPingPacketReceived);
-            packetProcessor.SubscribeNetSerializable<LootSyncPacket>(OnLootSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializable<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
-            packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
-            packetProcessor.SubscribeNetSerializable<RequestPacket>(OnRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializable<NewWorldPacket>(OnNewWorldPacketReceived);
+            RegisterPacket<PlayerStatePacket>(OnPlayerStatePacketReceived);
+            RegisterPacket<WeaponPacket>(OnWeaponPacketReceived);
+            RegisterPacket<DamagePacket>(OnDamagePacketReceived);
+            RegisterPacket<ArmorDamagePacket>(OnArmorDamagePacketReceived);
+            RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
+            RegisterPacket<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
+            RegisterPacket<AllCharacterRequestPacket>(OnAllCharacterRequestPacketReceived);
+            RegisterPacket<InformationPacket>(OnInformationPacketReceived);
+            RegisterPacket<HealthSyncPacket>(OnHealthSyncPacketReceived);
+            RegisterPacket<GenericPacket>(OnGenericPacketReceived);
+            RegisterPacket<SendCharacterPacket>(OnSendCharacterPacketReceived);
+            RegisterPacket<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
+            RegisterPacket<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
+            RegisterPacket<TextMessagePacket>(OnTextMessagePacketReceived);
+            RegisterPacket<QuestConditionPacket>(OnQuestConditionPacketReceived);
+            RegisterPacket<QuestItemPacket>(OnQuestItemPacketReceived);
+            RegisterPacket<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
+            RegisterPacket<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
+            RegisterPacket<InteractableInitPacket>(OnInteractableInitPacketReceived);
+            RegisterPacket<StatisticsPacket>(OnStatisticsPacketReceived);
+            RegisterPacket<WorldLootPacket>(OnWorldLootPacketReceived);
+            RegisterPacket<ReconnectPacket>(OnReconnectPacketReceived);
+            RegisterPacket<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
+            RegisterPacket<BTRPacket>(OnBTRPacketReceived);
+            RegisterPacket<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
+            RegisterPacket<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
+            RegisterPacket<BufferZonePacket>(OnBufferZonePacketReceived);
+            RegisterPacket<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
+            RegisterPacket<UsableItemPacket>(OnUsableItemPacketReceived);
+            RegisterPacket<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
+            RegisterPacket<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
+            RegisterPacket<TransitEventPacket>(OnTransitEventPacketReceived);
+            RegisterPacket<BotStatePacket>(OnBotStatePacketReceived);
+            RegisterPacket<PingPacket>(OnPingPacketReceived);
+            RegisterPacket<LootSyncPacket>(OnLootSyncPacketReceived);
+            RegisterPacket<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
+            RegisterPacket<SideEffectPacket>(OnSideEffectPacketReceived);
+            RegisterPacket<RequestPacket>(OnRequestPacketReceived);
+            RegisterPacket<NewWorldPacket>(OnNewWorldPacketReceived);
         }
 
         private void OnVOIPPacketReceived(VOIPPacket packet)
@@ -550,7 +500,7 @@ namespace Fika.Core.Networking
         {
             if (MultiThreaded)
             {
-                packetProcessor.SubscribeNetSerializableMT<SpawnItemPacket>(OnSpawnItemPacketReceived);
+                RegisterPacket<SpawnItemPacket>(OnSpawnItemPacketReceived);
             }
             else
             {
@@ -1181,6 +1131,12 @@ namespace Fika.Core.Networking
 
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
         {
+            if (packet.Data == null)
+            {
+                logger.LogError("SendVOIPPacket: data was null");
+                return;
+            }
+
             SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 

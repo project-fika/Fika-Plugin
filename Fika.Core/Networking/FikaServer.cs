@@ -205,16 +205,7 @@ namespace Fika.Core.Networking
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
             packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
 
-            RegisterMultiThreadedPackets();
-
-            if (netServer.UnsyncedEvents)
-            {
-                RegisterMultiThreadedPackets();
-            }
-            else
-            {
-                RegisterPackets();
-            }
+            RegisterPackets();
 
 #if DEBUG
             AddDebugPackets();
@@ -384,72 +375,39 @@ namespace Fika.Core.Networking
             RegisterPacket<VOIPPacket, NetPeer>(OnVOIPPacketReceived);
 
             return;
-        }        
-
-        private void RegisterMultiThreadedPackets()
-        {
-            packetProcessor.SubscribeNetSerializableMT<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<DamagePacket, NetPeer>(OnDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InformationPacket, NetPeer>(OnInformationPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<GenericPacket, NetPeer>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<PingPacket, NetPeer>(OnPingPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
-            packetProcessor.SubscribeNetSerializableMT<RequestPacket, NetPeer>(OnRequestPacketReceived);
         }
 
         private void RegisterPackets()
         {
-            packetProcessor.SubscribeNetSerializable<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-            packetProcessor.SubscribeNetSerializable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
-            packetProcessor.SubscribeNetSerializable<DamagePacket, NetPeer>(OnDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializable<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
-            packetProcessor.SubscribeNetSerializable<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
-            packetProcessor.SubscribeNetSerializable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
-            packetProcessor.SubscribeNetSerializable<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
-            packetProcessor.SubscribeNetSerializable<InformationPacket, NetPeer>(OnInformationPacketReceived);
-            packetProcessor.SubscribeNetSerializable<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializable<GenericPacket, NetPeer>(OnGenericPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
-            packetProcessor.SubscribeNetSerializable<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
-            packetProcessor.SubscribeNetSerializable<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
-            packetProcessor.SubscribeNetSerializable<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
-            packetProcessor.SubscribeNetSerializable<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
-            packetProcessor.SubscribeNetSerializable<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
-            packetProcessor.SubscribeNetSerializable<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
-            packetProcessor.SubscribeNetSerializable<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
-            packetProcessor.SubscribeNetSerializable<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
-            packetProcessor.SubscribeNetSerializable<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
-            packetProcessor.SubscribeNetSerializable<PingPacket, NetPeer>(OnPingPacketReceived);
-            packetProcessor.SubscribeNetSerializable<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
-            packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
-            packetProcessor.SubscribeNetSerializable<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
-            packetProcessor.SubscribeNetSerializable<RequestPacket, NetPeer>(OnRequestPacketReceived);
+            RegisterPacket<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
+            RegisterPacket<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
+            RegisterPacket<DamagePacket, NetPeer>(OnDamagePacketReceived);
+            RegisterPacket<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
+            RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
+            RegisterPacket<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
+            RegisterPacket<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
+            RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
+            RegisterPacket<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
+            RegisterPacket<GenericPacket, NetPeer>(OnGenericPacketReceived);
+            RegisterPacket<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
+            RegisterPacket<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
+            RegisterPacket<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
+            RegisterPacket<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
+            RegisterPacket<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
+            RegisterPacket<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
+            RegisterPacket<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
+            RegisterPacket<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
+            RegisterPacket<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
+            RegisterPacket<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
+            RegisterPacket<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
+            RegisterPacket<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
+            RegisterPacket<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
+            RegisterPacket<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
+            RegisterPacket<PingPacket, NetPeer>(OnPingPacketReceived);
+            RegisterPacket<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
+            RegisterPacket<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
+            RegisterPacket<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
+            RegisterPacket<RequestPacket, NetPeer>(OnRequestPacketReceived);
         }
 
         private void OnVOIPPacketReceived(VOIPPacket packet, NetPeer peer)
@@ -604,11 +562,11 @@ namespace Fika.Core.Networking
         {
             if (MultiThreaded)
             {
-                packetProcessor.SubscribeNetSerializableMT<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
+                RegisterPacketMT<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
             }
             else
             {
-                packetProcessor.SubscribeNetSerializable<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
+                RegisterPacket<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
             }
         }
 #endif
@@ -1387,6 +1345,12 @@ namespace Fika.Core.Networking
                 return;
             }
 
+            if (packet.Data == null)
+            {
+                logger.LogError("SendVOIPPacket: data was null");
+                return;
+            }
+
             SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
         }
 
@@ -1577,7 +1541,7 @@ namespace Fika.Core.Networking
             }
             else
             {
-                packetProcessor.ReadAllPackets(reader, peer); 
+                packetProcessor.ReadAllPackets(reader, peer);
             }
         }
 

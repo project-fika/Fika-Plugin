@@ -1,4 +1,5 @@
-﻿using Dissonance.Networking;
+﻿using Comfort.Common;
+using Dissonance.Networking;
 using Dissonance.Networking.Server;
 using Fika.Core.Coop.Utils;
 using LiteNetLib;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking.VOIP
 {
-    class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>
+    public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>
     {
         private readonly List<NetPeer> peers = [];
         private readonly FikaCommsNetwork fikaComms = commsNetwork;
@@ -44,6 +45,17 @@ namespace Fika.Core.Networking.VOIP
         protected override void ReadMessages()
         {
 
+        }
+
+        public override void Disconnect()
+        {
+            Singleton<IFikaNetworkManager>.Instance.RegisterPacket<VOIPPacket>(OnVoicePacketReceived);
+            base.Disconnect();
+        }
+
+        private void OnVoicePacketReceived(VOIPPacket packet)
+        {
+            // Do nothing
         }
 
         protected override void SendReliable(FikaVOIPPeer connection, ArraySegment<byte> packet)

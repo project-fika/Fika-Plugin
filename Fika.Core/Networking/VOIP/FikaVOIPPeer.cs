@@ -41,19 +41,24 @@ namespace Fika.Core.Networking.VOIP
 
     public interface IPeer
     {
+        public bool IsLocal { get; set; }
         void SendData(ArraySegment<byte> data, bool reliable);
     }
 
     public class LocalPeer : IPeer
     {
+        public bool IsLocal { get; set; } = true;
+
         public void SendData(ArraySegment<byte> data, bool reliable)
         {
             Singleton<FikaServer>.Instance.VOIPClient.NetworkReceivedPacket(data);
         }
     }
 
-    public readonly struct RemotePeer(NetPeer peer) : IPeer
+    public struct RemotePeer(NetPeer peer) : IPeer
     {
+        public bool IsLocal { get; set; } = false;
+
         public NetPeer Peer
         {
             get
