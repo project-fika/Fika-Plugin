@@ -169,6 +169,26 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
+        /// Serializes an <see cref="ArraySegment{T}"/> of <see cref="byte"/>[]
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="segment"></param>
+        public static void PutByteSegment(this NetDataWriter writer, ArraySegment<byte> segment)
+        {
+            writer.PutBytesWithLength(segment.Array, segment.Offset, (ushort)segment.Count);
+        }
+
+        /// <summary>
+        /// Deserializes an <see cref="ArraySegment{T}"/> of <see cref="byte"/>[]
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static byte[] GetByteSegment(this NetDataReader reader)
+        {
+            return reader.GetBytesWithLength();
+        }
+
+        /// <summary>
         /// Serializes a <see cref="DateTime"/>
         /// </summary>
         /// <param name="writer"></param>

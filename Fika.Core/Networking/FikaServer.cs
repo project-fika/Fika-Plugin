@@ -152,7 +152,8 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 NatPunchEnabled = true,
-                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
+                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value,
+                ChannelsCount = 2
             };
 
             AllowVOIP = FikaPlugin.AllowVOIP.Value;
@@ -1378,7 +1379,7 @@ namespace Fika.Core.Networking
             peer.Send(dataWriter, deliveryMethod);
         }
 
-        public void SendVOIPPacket(ref VOIPPacket packet, bool reliable, NetPeer peer = null)
+        public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
         {
             if (peer == null)
             {
@@ -1386,7 +1387,20 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            SendDataToPeer(peer, ref packet, reliable ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+            SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
+        public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
+        {
+            if (peer == null)
+            {
+                logger.LogError("SendVOIPData: peer was null!");
+                return;
+            }
+
+            dataWriter.Reset();
+            dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
+            peer.Send(dataWriter, 1, DeliveryMethod.Sequenced);
         }
 
         public void OnPeerConnected(NetPeer peer)
@@ -1557,7 +1571,14 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            packetProcessor.ReadAllPackets(reader, peer);
+            if (channelNumber == 1)
+            {
+                VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(reader.GetBytesWithLength()));
+            }
+            else
+            {
+                packetProcessor.ReadAllPackets(reader, peer); 
+            }
         }
 
         public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)

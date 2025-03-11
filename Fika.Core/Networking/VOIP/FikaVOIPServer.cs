@@ -33,7 +33,7 @@ namespace Fika.Core.Networking.VOIP
                 if (peers[i].ConnectionState != ConnectionState.Connected)
                 {
                     NetPeer peer = peers[i];
-                    FikaGlobals.LogInfo($"FikaVOIPServer::Update: Peer {peer.Address} disconnected from VOIP service");
+                    FikaGlobals.LogInfo($"FikaVOIPServer::Update: Peer {peer} disconnected from VOIP service");
                     ClientDisconnected(new(new RemotePeer(peer)));
                     peers.RemoveAt(i);
                 }

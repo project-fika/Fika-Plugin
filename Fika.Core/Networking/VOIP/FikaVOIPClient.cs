@@ -1,19 +1,13 @@
 ﻿using Comfort.Common;
 using Dissonance.Networking;
-using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using System;
 
 namespace Fika.Core.Networking.VOIP
 {
-    class FikaVOIPClient : BaseClient<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>
+    class FikaVOIPClient(ICommsNetworkState network) : BaseClient<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>(network)
     {
-        private readonly FikaCommsNetwork commsNet;
-
-        public FikaVOIPClient(ICommsNetworkState network) : base(network)
-        {
-            commsNet = (FikaCommsNetwork)network;
-        }
+        private readonly FikaCommsNetwork commsNet = (FikaCommsNetwork)network;
 
         public override void Connect()
         {
@@ -47,7 +41,7 @@ namespace Fika.Core.Networking.VOIP
                 Data = packet.Array
             };
 
-            Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref voipPacket, true);
+            Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref voipPacket);
         }
 
         protected override void SendUnreliable(ArraySegment<byte> packet)
@@ -58,12 +52,7 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            VOIPPacket voipPacket = new()
-            {
-                Data = packet.Array
-            };
-
-            Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref voipPacket, false);
+            Singleton<IFikaNetworkManager>.Instance.SendVOIPData(packet);
         }
     }
 }

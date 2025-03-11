@@ -52,7 +52,7 @@ namespace Fika.Core.Networking.VOIP
         }
     }
 
-    public class RemotePeer(NetPeer peer) : IPeer
+    public readonly struct RemotePeer(NetPeer peer) : IPeer
     {
         public NetPeer Peer
         {
@@ -66,11 +66,18 @@ namespace Fika.Core.Networking.VOIP
 
         public void SendData(ArraySegment<byte> data, bool reliable)
         {
-            VOIPPacket packet = new()
+            if (reliable)
             {
-                Data = data.Array
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, reliable, peer);
+                VOIPPacket packet = new()
+                {
+                    Data = data.Array
+                };
+                Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, peer); 
+            }
+            else
+            {
+                Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, peer);
+            }
         }
     }
 }
