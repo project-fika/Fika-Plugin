@@ -498,7 +498,7 @@ namespace Fika.Core.Networking
 #if DEBUG
         private void AddDebugPackets()
         {
-            RegisterPacket<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
+            RegisterPacket<SpawnItemPacket>(OnSpawnItemPacketReceived);
         }
 #endif
 
