@@ -152,8 +152,7 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 NatPunchEnabled = true,
-                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value,
-                ChannelsCount = 2
+                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value
             };
 
             AllowVOIP = FikaPlugin.AllowVOIP.Value;
@@ -381,8 +380,10 @@ namespace Fika.Core.Networking
                 } while (VOIPServer == null);
             }
 
+            RegisterPacket<VOIPPacket, NetPeer>(OnVOIPPacketReceived);
+
             return;
-        }
+        }        
 
         private void RegisterMultiThreadedPackets()
         {
@@ -448,6 +449,11 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
             packetProcessor.SubscribeNetSerializable<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializable<RequestPacket, NetPeer>(OnRequestPacketReceived);
+        }
+
+        private void OnVOIPPacketReceived(VOIPPacket packet, NetPeer peer)
+        {
+            VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(packet.Data));
         }
 
         private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
@@ -1372,7 +1378,7 @@ namespace Fika.Core.Networking
             peer.Send(dataWriter, deliveryMethod);
         }
 
-        public void SendVOIPPacket(ArraySegment<byte> data, bool reliable, NetPeer peer = null)
+        public void SendVOIPPacket(ref VOIPPacket packet, bool reliable, NetPeer peer = null)
         {
             if (peer == null)
             {
@@ -1380,11 +1386,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            dataWriter.Reset();
-
-            dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-            //peer.Send(dataWriter, 1, reliable ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
-            peer.Send(dataWriter, 1, DeliveryMethod.ReliableOrdered);
+            SendDataToPeer(peer, ref packet, reliable ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
         }
 
         public void OnPeerConnected(NetPeer peer)
@@ -1555,14 +1557,7 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            if (channelNumber == 1)
-            {
-                VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(reader.GetBytesWithLength()));
-            }
-            else
-            {
-                packetProcessor.ReadAllPackets(reader, peer);
-            }
+            packetProcessor.ReadAllPackets(reader, peer);
         }
 
         public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)

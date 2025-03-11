@@ -230,8 +230,10 @@ namespace Fika.Core.Networking
                 await Task.Yield();
             } while (VOIPClient == null);
 
+            RegisterPacket<VOIPPacket>(OnVOIPPacketReceived);
+
             return;
-        }
+        }        
 
         private void RegisterMultiThreadedPackets()
         {
@@ -317,6 +319,11 @@ namespace Fika.Core.Networking
             packetProcessor.SubscribeNetSerializable<SideEffectPacket>(OnSideEffectPacketReceived);
             packetProcessor.SubscribeNetSerializable<RequestPacket>(OnRequestPacketReceived);
             packetProcessor.SubscribeNetSerializable<NewWorldPacket>(OnNewWorldPacketReceived);
+        }
+
+        private void OnVOIPPacketReceived(VOIPPacket packet)
+        {
+            VOIPClient.NetworkReceivedPacket(new(packet.Data));
         }
 
         private void OnRequestPacketReceived(RequestPacket packet)
@@ -1172,13 +1179,9 @@ namespace Fika.Core.Networking
             netClient.FirstPeer.Send(dataWriter, deliveryMethod);
         }
 
-        public void SendVOIPPacket(ArraySegment<byte> data, bool reliable, NetPeer peer = null)
+        public void SendVOIPPacket(ref VOIPPacket packet, bool reliable, NetPeer peer = null)
         {
-            dataWriter.Reset();
-
-            dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-            //netClient.FirstPeer.Send(dataWriter, 1, reliable ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
-            netClient.FirstPeer.Send(dataWriter, 1, DeliveryMethod.ReliableOrdered);
+            SendData(ref packet, reliable ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
         }
 
         public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
@@ -1221,14 +1224,7 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            if (channelNumber == 1)
-            {
-                VOIPClient.NetworkReceivedPacket(new(reader.GetBytesWithLength()));
-            }
-            else
-            {
-                packetProcessor.ReadAllPackets(reader, peer);
-            }
+            packetProcessor.ReadAllPackets(reader, peer);
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)

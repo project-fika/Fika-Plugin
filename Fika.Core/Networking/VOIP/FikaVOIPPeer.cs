@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using Fika.Core.Networking.Packets.Communication;
 using LiteNetLib;
 using System;
 
@@ -66,7 +67,11 @@ namespace Fika.Core.Networking.VOIP
 
         public void SendData(ArraySegment<byte> data, bool reliable)
         {
-            Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(data, reliable, peer);
+            VOIPPacket packet = new()
+            {
+                Data = data.Array
+            };
+            Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, reliable, peer);
         }
     }
 }
