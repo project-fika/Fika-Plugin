@@ -2090,6 +2090,22 @@ namespace Fika.Core.Coop.GameMode
         public override void Dispose()
         {
             ClientHearingTable.Instance = null;
+            foreach (Player player in dictionary_0.Values)
+            {
+                try
+                {
+                    if (player != null)
+                    {
+                        player.Dispose();
+                        AssetPoolObject.ReturnToPool(player.gameObject, true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex);
+                }
+            }
+            dictionary_0.Clear();
             base.Dispose();
         }
 
@@ -2702,7 +2718,7 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogError(ex);
                 }
             }
-            dictionary_0?.Clear();
+            dictionary_0.Clear();
             ThrownGrenades?.Clear();
 
             if (extractRoutine != null)
