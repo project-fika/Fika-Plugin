@@ -429,6 +429,7 @@ namespace Fika.Core.Networking
                     }
 
                     FikaGlobals.LogError($"MuffledState: Could not find player with id {NetId} or they were not observed!");
+                    return;
                 }
 
                 FikaGlobals.LogWarning($"MuffledState: Could not get CoopHandler!");
