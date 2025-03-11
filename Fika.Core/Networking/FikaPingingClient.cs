@@ -161,6 +161,10 @@ namespace Fika.Core.Networking
                 switch (result)
                 {
                     case "fika.hello":
+                        if (Received)
+                        {
+                            break;
+                        }
                         Received = true;
                         FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
                         FikaBackendUtils.RemotePort = remoteEndPoint.Port;
