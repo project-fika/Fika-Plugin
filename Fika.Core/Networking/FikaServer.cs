@@ -560,14 +560,7 @@ namespace Fika.Core.Networking
 #if DEBUG
         private void AddDebugPackets()
         {
-            if (MultiThreaded)
-            {
-                RegisterPacketMT<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
-            }
-            else
-            {
-                RegisterPacket<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
-            }
+            RegisterPacket<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
         }
 #endif
 

@@ -498,14 +498,7 @@ namespace Fika.Core.Networking
 #if DEBUG
         private void AddDebugPackets()
         {
-            if (MultiThreaded)
-            {
-                RegisterPacket<SpawnItemPacket>(OnSpawnItemPacketReceived);
-            }
-            else
-            {
-                packetProcessor.SubscribeNetSerializable<SpawnItemPacket>(OnSpawnItemPacketReceived);
-            }
+            RegisterPacket<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
         }
 #endif
 
