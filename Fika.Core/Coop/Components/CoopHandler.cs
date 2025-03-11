@@ -32,7 +32,7 @@ namespace Fika.Core.Coop.Components
         /// </summary>
         public Dictionary<int, CoopPlayer> Players { get; internal set; }
         /// <summary>
-        /// All human players in the form of <see cref="CoopPlayer"/> (excluding headless)
+        /// All human players in the form of <see cref="CoopPlayer"/> (excluding headless if not playing as a headless client)
         /// </summary>
         public List<CoopPlayer> HumanPlayers { get; internal set; }
         /// <summary>
