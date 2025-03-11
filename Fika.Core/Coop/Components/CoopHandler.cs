@@ -122,7 +122,7 @@ namespace Fika.Core.Coop.Components
                 return;
             }
 
-            if (spawnQueue.Count > 0)
+            if (spawnQueue.Count > 0 && MyPlayer != null)
             {
                 SpawnPlayer(spawnQueue.Dequeue());
             }
