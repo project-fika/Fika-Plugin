@@ -569,7 +569,7 @@ namespace Fika.Core.Networking
 
         private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet)
         {
-            logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}, NetId: {packet.NetId}");
+            logger.LogInfo($"Received settings from server. SendRate: {packet.SendRate}, NetId: {packet.NetId}, AllowVOIP: {packet.AllowVOIP}");
             sendRate = packet.SendRate;
             NetId = packet.NetId;
             AllowVOIP = packet.AllowVOIP;
