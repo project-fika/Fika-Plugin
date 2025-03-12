@@ -1271,6 +1271,8 @@ namespace Fika.Core.Coop.GameMode
 
             await WaitForHostToStart();
 
+            coopHandler.ShouldSync = true;
+
             LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
             if (isServer)
             {
@@ -1529,7 +1531,7 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.OnEpInteraction += OnEpInteraction;
 
             localPlayer = myPlayer as CoopPlayer;
-            coopHandler.MyPlayer = localPlayer;
+            coopHandler.MyPlayer = localPlayer;            
 
             Logger.LogInfo("Local player created");
             return myPlayer;

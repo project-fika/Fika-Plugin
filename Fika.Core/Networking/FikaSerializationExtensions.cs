@@ -1185,6 +1185,8 @@ namespace Fika.Core.Networking
                     return new ExfiltrationRequest(reader);
                 case ERequestSubPacketType.TraderServices:
                     return new TraderServicesRequest(reader);
+                case ERequestSubPacketType.CharacterSync:
+                    return new RequestCharactersPacket(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetRequestSubPacket: type was outside of bounds!");
                     break;

@@ -343,5 +343,97 @@ namespace Fika.Core.Networking
                 }
             }
         }
+
+        public class RequestCharactersPacket : IRequestPacket
+        {
+            public List<int> MissingIds;
+
+            public RequestCharactersPacket(List<int> missingIds)
+            {
+#if DEBUG
+                FikaGlobals.LogWarning($"Requesting {missingIds.Count} missing ids");
+#endif
+                MissingIds = [.. missingIds];
+            }
+
+            public RequestCharactersPacket(NetDataReader reader)
+            {
+                int amount = reader.GetUShort();
+#if DEBUG
+                FikaGlobals.LogWarning($"A client has requested {amount} missing players");
+#endif
+                if (amount > 0)
+                {
+                    MissingIds = new(amount);
+                    for (int i = 0; i < amount; i++)
+                    {
+                        MissingIds.Add(reader.GetInt());
+                    } 
+                }
+            }
+
+            public void HandleRequest(NetPeer peer, FikaServer server)
+            {
+                if (MissingIds != null && server.CoopHandler != null)
+                {
+                    foreach (int netId in MissingIds)
+                    {
+#if DEBUG
+                        FikaGlobals.LogWarning($"Looking for missing netId {netId}"); 
+#endif
+                        if (server.CoopHandler.Players.TryGetValue(netId, out CoopPlayer coopPlayer))
+                        {
+#if DEBUG
+                            FikaGlobals.LogWarning($"Found {coopPlayer.Profile.Nickname} that was missing from client, sending...");
+#endif
+                            SendCharacterPacket packet = new(new()
+                            {
+                                Profile = coopPlayer.Profile,
+                                ControllerId = coopPlayer.InventoryController.CurrentId,
+                                FirstOperationId = coopPlayer.InventoryController.NextOperationId
+                            }, coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
+
+                            if (coopPlayer.ActiveHealthController != null)
+                            {
+                                packet.PlayerInfoPacket.HealthByteArray = coopPlayer.ActiveHealthController.SerializeState();
+                            }
+                            else
+                            {
+                                packet.PlayerInfoPacket.HealthByteArray = coopPlayer.Profile.Health.SerializeHealthInfo();
+                            }
+
+                            if (coopPlayer.HandsController != null)
+                            {
+                                packet.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(coopPlayer.HandsController);
+                                packet.PlayerInfoPacket.ItemId = coopPlayer.HandsController.Item.Id;
+                                packet.PlayerInfoPacket.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
+                            }
+
+                            server.SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Handled in <see cref="FikaClient.OnSendCharacterPacketReceived(SendCharacterPacket)"/>
+            /// </summary>
+            public void HandleResponse()
+            {
+                // Do nothing
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put((ushort)MissingIds.Count);
+                if (MissingIds.Count > 0)
+                {
+                    foreach (int netId in MissingIds)
+                    {
+                        writer.Put(netId);
+                    } 
+                }
+            }
+        }
     }
 }

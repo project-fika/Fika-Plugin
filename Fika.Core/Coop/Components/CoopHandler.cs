@@ -23,9 +23,22 @@ namespace Fika.Core.Coop.Components
     public class CoopHandler : MonoBehaviour
     {
         #region Fields/Properties
+        /// <summary>
+        /// Reference to the local <see cref="CoopGame"/> instance
+        /// </summary>
         public CoopGame LocalGameInstance { get; internal set; }
+        /// <summary>
+        /// The ID of the raid session
+        /// </summary>
         public string ServerId { get; internal set; }
+        /// <summary>
+        /// Reference to the local <see cref="CoopPlayer"/> player
+        /// </summary>
         public CoopPlayer MyPlayer { get; internal set; }
+        /// <summary>
+        /// If the <see cref="CoopHandler"/> should sync and spawn profiles during <see cref="Update"/>
+        /// </summary>
+        public bool ShouldSync { get; internal set; }
 
         /// <summary>
         /// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>
@@ -45,7 +58,13 @@ namespace Fika.Core.Coop.Components
         public List<int> ExtractedPlayers { get; internal set; }
 
         private ManualLogSource logger;
-        private List<string> queuedProfileIds;
+        /// <summary>
+        /// List of all queued players by <see cref="CoopPlayer.NetId"/>
+        /// </summary>
+        private List<int> queuedPlayers;
+        /// <summary>
+        /// Queue of <see cref="SpawnObject"/> containing all players to spawn
+        /// </summary>
         private Queue<SpawnObject> spawnQueue;
         private bool isClient;
         private float charSyncCounter;
@@ -78,11 +97,12 @@ namespace Fika.Core.Coop.Components
 
         public void CleanUpForTransit()
         {
+            ShouldSync = false;
             Players.Clear();
             HumanPlayers.Clear();
             AmountOfHumans = 1;
             ExtractedPlayers.Clear();
-            queuedProfileIds.Clear();
+            queuedPlayers.Clear();
             spawnQueue.Clear();
             LocalGameInstance = null;
             requestQuitGame = false;
@@ -96,11 +116,12 @@ namespace Fika.Core.Coop.Components
         {
             logger = BepInEx.Logging.Logger.CreateLogSource("CoopHandler");
             spawnQueue = new(50);
-            queuedProfileIds = [];
+            queuedPlayers = [];
             Players = [];
             HumanPlayers = [];
             AmountOfHumans = 1;
             ExtractedPlayers = [];
+            ShouldSync = false;
         }
 
         protected void Start()
@@ -122,30 +143,37 @@ namespace Fika.Core.Coop.Components
                 return;
             }
 
-            if (spawnQueue.Count > 0 && MyPlayer != null)
+            if (ShouldSync)
             {
-                SpawnPlayer(spawnQueue.Dequeue());
+                if (spawnQueue.Count > 0)
+                {
+                    SpawnPlayer(spawnQueue.Dequeue());
+                }
+
+                if (!isClient)
+                {
+                    charSyncCounter += Time.unscaledDeltaTime;
+                    int waitTime = LocalGameInstance.Status == GameStatus.Started ? 20 : 5;
+                    if (charSyncCounter > waitTime)
+                    {
+                        charSyncCounter = 0f;
+                        if (Players == null)
+                        {
+                            return;
+                        }
+
+                        SyncPlayersWithClients(); 
+                    }
+                }
             }
 
             ProcessQuitting();
+        }
 
-            if (isClient && MyPlayer != null)
-            {
-                charSyncCounter += Time.unscaledDeltaTime;
-                int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
-
-                if (charSyncCounter > waitTime)
-                {
-                    charSyncCounter = 0f;
-
-                    if (Players == null)
-                    {
-                        return;
-                    }
-
-                    SyncPlayersWithServer();
-                }
-            }
+        private void SyncPlayersWithClients()
+        {
+            CharacterSyncPacket characterSyncPacket = new(Players);
+            Singleton<FikaServer>.Instance.SendDataToAll(ref characterSyncPacket, DeliveryMethod.ReliableOrdered);
         }
 
         protected void OnDestroy()
@@ -244,42 +272,12 @@ namespace Fika.Core.Coop.Components
             }
         }
 
-        private void SyncPlayersWithServer()
-        {
-            if (MyPlayer == null)
-            {
-                return;
-            }
-
-            AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
-            {
-                NetId = MyPlayer.NetId
-            };
-
-            if (Players.Count > 0)
-            {
-                requestPacket.HasCharacters = true;
-                List<int> characters = [];
-                foreach (int netId in Players.Keys)
-                {
-                    characters.Add(netId);
-                }
-                requestPacket.Characters = [.. characters];
-            }
-
-            FikaClient client = Singleton<FikaClient>.Instance;
-            if (client != null && client.NetClient?.FirstPeer != null)
-            {
-                client.SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
-            }
-        }
-
         private async void SpawnPlayer(SpawnObject spawnObject)
         {
             if (spawnObject.Profile == null)
             {
                 logger.LogError("SpawnPlayer: Profile was null!");
-                queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
+                queuedPlayers.Remove(spawnObject.NetId);
                 return;
             }
 
@@ -345,7 +343,7 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
+            queuedPlayers.Remove(spawnObject.NetId);
         }
 
         public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie,
@@ -365,12 +363,12 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            if (queuedProfileIds.Contains(profile.ProfileId))
+            if (queuedPlayers.Contains(netId))
             {
                 return;
             }
 
-            queuedProfileIds.Add(profile.ProfileId);
+            queuedPlayers.Add(netId);
 #if DEBUG
             logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
 #endif

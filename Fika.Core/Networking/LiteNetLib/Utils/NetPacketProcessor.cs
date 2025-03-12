@@ -72,7 +72,7 @@ namespace LiteNetLib.Utils
             ulong hash = reader.GetULong();
             if (!_callbacks.TryGetValue(hash, out var action))
             {
-                throw new ParseException("Undefined packet in NetDataReader");
+                throw new ParseException($"Undefined packet in NetDataReader: {hash}");
             }
 
             return action;

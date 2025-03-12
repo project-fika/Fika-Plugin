@@ -1,4 +1,5 @@
-﻿using LiteNetLib.Utils;
+﻿using Fika.Core.Coop.Utils;
+using LiteNetLib.Utils;
 using static Fika.Core.Networking.RequestSubPackets;
 using static Fika.Core.Networking.SubPacket;
 
@@ -37,10 +38,13 @@ namespace Fika.Core.Networking
                 case ERequestSubPacketType.Exfiltration:
                     return new ExfiltrationRequest();
                 case ERequestSubPacketType.TraderServices:
-                    FikaPlugin.Instance.FikaLogger.LogError("RequestPacket::GenerateDefaultSubPacket: Type was TraderServices which should never be null!");
+                    FikaGlobals.LogError("Type was TraderServices which should never be null!");
+                    break;
+                case ERequestSubPacketType.CharacterSync:
+                    FikaGlobals.LogError("Type was CharacterSync which should never be null!");
                     break;
                 default:
-                    FikaPlugin.Instance.FikaLogger.LogError("RequestPacket::GenerateDefaultSubPacket: Type was out of bounds!");
+                    FikaGlobals.LogError("Type was out of bounds!");
                     break;
             }
 

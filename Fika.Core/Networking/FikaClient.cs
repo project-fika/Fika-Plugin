@@ -121,6 +121,7 @@ namespace Fika.Core.Networking
         private FikaChat fikaChat;
         private string myProfileId;
         private Queue<BaseInventoryOperationClass> inventoryOperations;
+        private List<int> missingIds;
 
         public async void Init()
         {
@@ -143,6 +144,7 @@ namespace Fika.Core.Networking
             dataWriter = new();
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
             inventoryOperations = new();
+            missingIds = [];
 
             Ping = 0;
             ServerFPS = 0;
@@ -236,7 +238,6 @@ namespace Fika.Core.Networking
             RegisterPacket<ArmorDamagePacket>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
             RegisterPacket<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
-            RegisterPacket<AllCharacterRequestPacket>(OnAllCharacterRequestPacketReceived);
             RegisterPacket<InformationPacket>(OnInformationPacketReceived);
             RegisterPacket<HealthSyncPacket>(OnHealthSyncPacketReceived);
             RegisterPacket<GenericPacket>(OnGenericPacketReceived);
@@ -269,6 +270,41 @@ namespace Fika.Core.Networking
             RegisterPacket<SideEffectPacket>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket>(OnRequestPacketReceived);
             RegisterPacket<NewWorldPacket>(OnNewWorldPacketReceived);
+            RegisterPacket<CharacterSyncPacket>(OnCharacterSyncPacketReceived);            
+        }
+
+        private void OnCharacterSyncPacketReceived(CharacterSyncPacket packet)
+        {
+            missingIds.Clear();
+
+            if (coopHandler == null)
+            {
+                return;
+            }
+
+            if (packet.PlayerIds == null)
+            {
+                return;
+            }
+
+            foreach (int id in packet.PlayerIds)
+            {
+                if (!coopHandler.Players.ContainsKey(id))
+                {
+                    missingIds.Add(id);
+                }
+            }
+
+            if (missingIds.Count > 0)
+            {
+                RequestPacket request = new()
+                {
+                    PacketType = SubPacket.ERequestSubPacketType.CharacterSync,
+                    RequestSubPacket = new RequestSubPackets.RequestCharactersPacket(missingIds)
+                };
+
+                SendData(ref request, DeliveryMethod.ReliableOrdered);
+            }
         }
 
         private void OnVOIPPacketReceived(VOIPPacket packet)
@@ -940,61 +976,6 @@ namespace Fika.Core.Networking
             if (packet.AmountOfPeers > 0)
             {
                 FikaBackendUtils.HostExpectedNumberOfPlayers = packet.AmountOfPeers;
-            }
-        }
-
-        private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet)
-        {
-            if (coopHandler == null)
-            {
-                return;
-            }
-
-            if (!packet.IsRequest)
-            {
-#if DEBUG
-                logger.LogInfo($"Received CharacterRequest! ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}");
-#endif
-                if (packet.ProfileId != MyPlayer.ProfileId)
-                {
-                    coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-                        packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
-                        packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
-                }
-            }
-            else if (packet.IsRequest)
-            {
-#if DEBUG
-                logger.LogInfo($"Received CharacterRequest from server, send my Profile.");
-#endif
-                AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId)
-                {
-                    IsRequest = false,
-                    PlayerInfoPacket = new()
-                    {
-                        Profile = MyPlayer.Profile,
-                        ControllerId = MyPlayer.InventoryController.CurrentId,
-                        FirstOperationId = MyPlayer.InventoryController.NextOperationId
-                    },
-                    IsAlive = MyPlayer.ActiveHealthController.IsAlive,
-                    IsAI = MyPlayer.IsAI,
-                    Position = MyPlayer.Transform.position,
-                    NetId = MyPlayer.NetId
-                };
-
-                if (MyPlayer.ActiveHealthController != null)
-                {
-                    requestPacket.PlayerInfoPacket.HealthByteArray = MyPlayer.ActiveHealthController.SerializeState();
-                }
-
-                if (MyPlayer.HandsController != null)
-                {
-                    requestPacket.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(MyPlayer.HandsController);
-                    requestPacket.PlayerInfoPacket.ItemId = MyPlayer.HandsController.Item.Id;
-                    requestPacket.PlayerInfoPacket.IsStationary = MyPlayer.MovementContext.IsStationaryWeaponInHands;
-                }
-
-                SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
             }
         }
 

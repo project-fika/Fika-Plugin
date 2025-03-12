@@ -385,7 +385,6 @@ namespace Fika.Core.Networking
             RegisterPacket<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
             RegisterPacket<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
-            RegisterPacket<AllCharacterRequestPacket, NetPeer>(OnAllCharacterRequestPacketReceived);
             RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
             RegisterPacket<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
             RegisterPacket<GenericPacket, NetPeer>(OnGenericPacketReceived);
@@ -1064,79 +1063,6 @@ namespace Fika.Core.Networking
             }
 
             SendDataToAll(ref respondPackage, DeliveryMethod.ReliableOrdered);
-        }
-
-        private void OnAllCharacterRequestPacketReceived(AllCharacterRequestPacket packet, NetPeer peer)
-        {
-            if (coopHandler == null)
-            {
-                return;
-            }
-
-            if (packet.IsRequest)
-            {
-                foreach (KeyValuePair<int, CoopPlayer> pair in coopHandler.Players)
-                {
-                    if (pair.Value.ProfileId == packet.ProfileId)
-                    {
-                        continue;
-                    }
-
-                    if (packet.Characters.Contains(pair.Key))
-                    {
-                        continue;
-                    }
-
-                    AllCharacterRequestPacket requestPacket = new(pair.Value.ProfileId)
-                    {
-                        IsRequest = false,
-                        PlayerInfoPacket = new()
-                        {
-                            Profile = pair.Value.Profile,
-                            ControllerId = pair.Value.InventoryController.CurrentId,
-                            FirstOperationId = pair.Value.InventoryController.NextOperationId
-                        },
-                        IsAlive = pair.Value.HealthController.IsAlive,
-                        IsAI = pair.Value.IsAI,
-                        Position = pair.Value.Transform.position,
-                        NetId = pair.Value.NetId
-                    };
-
-                    if (pair.Value.ActiveHealthController != null)
-                    {
-                        requestPacket.PlayerInfoPacket.HealthByteArray = pair.Value.ActiveHealthController.SerializeState();
-                    }
-
-                    if (pair.Value.HandsController != null)
-                    {
-                        requestPacket.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(pair.Value.HandsController);
-                        requestPacket.PlayerInfoPacket.ItemId = pair.Value.HandsController.Item.Id;
-                        requestPacket.PlayerInfoPacket.IsStationary = pair.Value.MovementContext.IsStationaryWeaponInHands;
-                    }
-
-                    SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
-                }
-            }
-
-            if (!coopHandler.Players.ContainsKey(packet.NetId) && !playersMissing.Contains(packet.ProfileId) && !coopHandler.ExtractedPlayers.Contains(packet.NetId))
-            {
-                playersMissing.Add(packet.ProfileId);
-                logger.LogInfo($"Requesting missing player from server.");
-                AllCharacterRequestPacket requestPacket = new(hostPlayer.ProfileId);
-                SendDataToPeer(peer, ref requestPacket, DeliveryMethod.ReliableOrdered);
-            }
-
-            if (!packet.IsRequest && playersMissing.Contains(packet.ProfileId))
-            {
-                logger.LogInfo($"Received CharacterRequest from client: ProfileID: {packet.PlayerInfoPacket.Profile.ProfileId}, Nickname: {packet.PlayerInfoPacket.Profile.Nickname}");
-                if (packet.ProfileId != hostPlayer.ProfileId)
-                {
-                    coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-                        packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
-                        packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
-                    playersMissing.Remove(packet.ProfileId);
-                }
-            }
         }
 
         private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet, NetPeer peer)
