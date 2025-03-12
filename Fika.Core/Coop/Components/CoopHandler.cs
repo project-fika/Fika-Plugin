@@ -545,6 +545,17 @@ namespace Fika.Core.Coop.Components
             logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
         }
 
+        public void CheckIds(List<int> playerIds, List<int> missingIds)
+        {
+            foreach (int netId in playerIds)
+            {
+                if (!queuedPlayers.Contains(netId) && !Players.ContainsKey(netId))
+                {
+                    missingIds.Add(netId);
+                }
+            }
+        }
+
         /// <summary>
         /// The state your character or game is in to Quit.
         /// </summary>

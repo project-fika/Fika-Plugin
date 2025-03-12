@@ -287,13 +287,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            foreach (int id in packet.PlayerIds)
-            {
-                if (!coopHandler.Players.ContainsKey(id))
-                {
-                    missingIds.Add(id);
-                }
-            }
+            coopHandler.CheckIds(packet.PlayerIds, missingIds);
 
             if (missingIds.Count > 0)
             {
