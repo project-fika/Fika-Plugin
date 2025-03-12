@@ -122,7 +122,6 @@ namespace Fika.Core.Networking
         private int sendRate;
         private NetPacketProcessor packetProcessor;
         private CoopPlayer hostPlayer;
-        private List<string> playersMissing;
         private string externalIp;
         private NetManager netServer;
         private DateTime? gameStartTime;
@@ -160,7 +159,6 @@ namespace Fika.Core.Networking
 
             packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
             dataWriter = new();
-            playersMissing = [];
             externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
             statisticsCounter = 0;
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
