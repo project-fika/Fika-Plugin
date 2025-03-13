@@ -54,10 +54,6 @@ namespace Fika.Core.Coop.ObservedClasses
             }
             set
             {
-                if (!value)
-                {
-                    _player.Physical.HoldBreath(false);
-                }
                 if (_isAiming == value)
                 {
                     if (FirearmsAnimator != null)
@@ -68,8 +64,6 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 _isAiming = value;
                 _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
-                _player.MovementContext.SetAimingSlowdown(IsAiming, 0.33f + aimMovementSpeed);
-                _player.Physical.Aim((!_isAiming || !(_player.MovementContext.StationaryWeapon == null)) ? 0f : ErgonomicWeight);
                 method_63(_isAiming); // Set animator flags
                 coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
             }
@@ -159,14 +153,19 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private void SetObservedAim(bool isAiming)
         {
-            IsAiming = isAiming;
-
             // Lacyway: Unsure if this is needed, remove later if it is
             /*if (Weapon is GClass3111 && coopPlayer.ProceduralWeaponAnimation.IsAiming != isAiming)
             {
                 FirearmsAnimator.SetAiming(!isAiming);
             }*/
 
+            if (_player.UsedSimplifiedSkeleton)
+            {
+                _player.MovementContext.PlayerAnimator.SetAiming(isAiming);
+            }
+            IsAiming = isAiming;
+            _player.ProceduralWeaponAnimation.CheckShouldMoveWeaponCloser();
+            _player.ProceduralWeaponAnimation.Shootingg.CurrentRecoilEffect.WeaponRecoilEffect.SetAiming(isAiming);
             _player.method_58(0.2f, false);
             if (isAiming)
             {
