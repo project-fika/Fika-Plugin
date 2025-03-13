@@ -136,11 +136,11 @@ namespace Fika.Core.Networking
                 EnableStatistics = true,
                 MaxConnectAttempts = 5,
                 ReconnectDelay = 1 * 1000,
-                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value,
+                UnsyncedEvents = false, //FikaPlugin.NetMultiThreaded.Value,
                 ChannelsCount = 2
             };
 
-            packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
+            packetProcessor = new();
             dataWriter = new();
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
             inventoryOperations = new();

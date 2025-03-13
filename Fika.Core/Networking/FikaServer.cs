@@ -151,13 +151,13 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 NatPunchEnabled = true,
-                UnsyncedEvents = FikaPlugin.NetMultiThreaded.Value,
+                UnsyncedEvents = false, //FikaPlugin.NetMultiThreaded.Value,
                 ChannelsCount = 2
             };
 
             AllowVOIP = FikaPlugin.AllowVOIP.Value;
 
-            packetProcessor = new(FikaPlugin.NetMultiThreaded.Value);
+            packetProcessor = new(); //FikaPlugin.NetMultiThreaded.Value
             dataWriter = new();
             externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
             statisticsCounter = 0;

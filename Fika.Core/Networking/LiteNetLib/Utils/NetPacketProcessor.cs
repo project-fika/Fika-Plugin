@@ -35,11 +35,6 @@ namespace LiteNetLib.Utils
         // FIKA
         private readonly ConcurrentQueue<Action> _actions = new();
 
-        public NetPacketProcessor(bool multiThreaded)
-        {
-            _netSerializer = new NetSerializer();
-        }
-
         public NetPacketProcessor()
         {
             _netSerializer = new NetSerializer();
