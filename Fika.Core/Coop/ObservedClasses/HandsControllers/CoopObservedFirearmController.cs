@@ -31,6 +31,8 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
+        public bool IsRevolver { get; internal set; }
+
         private ObservedCoopPlayer coopPlayer;
         private bool triggerPressed;
         private bool needsReset;
@@ -129,6 +131,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 underBarrelManager = Traverse.Create(this).Field<GClass1780>("gclass1780_0").Value;
             }
+            IsRevolver = Weapon is RevolverItemClass;
         }
 
         public static CoopObservedFirearmController Create(ObservedCoopPlayer player, Weapon weapon)
@@ -547,15 +550,13 @@ namespace Fika.Core.Coop.ObservedClasses
                 needsReset = true;
             }
 
-            bool isRevolver = Weapon is RevolverItemClass;
-
             MagazineItemClass magazine = Weapon.GetCurrentMagazine();
 
             FirearmsAnimator.SetFire(true);
 
             if (Weapon.MalfState.State == Weapon.EMalfunctionState.None)
             {
-                if (isRevolver && Weapon.CylinderHammerClosed)
+                if (IsRevolver && Weapon.CylinderHammerClosed)
                 {
                     FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0.2f);
                 }
@@ -632,7 +633,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
             }
 
-            if (isRevolver)
+            if (IsRevolver)
             {
                 if (magazine is CylinderMagazineItemClass cylinderMagazine)
                 {
