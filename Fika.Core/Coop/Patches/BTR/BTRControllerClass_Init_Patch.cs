@@ -18,7 +18,14 @@ namespace Fika.Core.Coop.Patches
         [PatchPrefix]
         public static bool Prefix(BTRControllerClass __instance, ref CancellationToken cancellationToken, ref Task __result, ref GameWorld ___gameWorld_0, ref BackendConfigSettingsClass.BTRGlobalSettings ___btrglobalSettings_0, ref bool ___bool_1)
         {
-            ___btrglobalSettings_0 = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings;
+            if (Singleton<BackendConfigSettingsClass>.Instance != null && Singleton<BackendConfigSettingsClass>.Instance.BTRSettings != null)
+            {
+                ___btrglobalSettings_0 = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings; 
+            }
+            else
+            {
+                Logger.LogError("BackendConfigSettingsClass or BTRSettings was null!");
+            }
 
             if (FikaBackendUtils.IsServer)
             {
@@ -36,7 +43,6 @@ namespace Fika.Core.Coop.Patches
             if (FikaBackendUtils.IsClient)
             {
                 __instance.TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");
-
             }
 
             __result = Task.CompletedTask;
