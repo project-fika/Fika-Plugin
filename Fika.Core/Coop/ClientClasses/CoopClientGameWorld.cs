@@ -3,6 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class CoopClientGameWorld : ClientLocalGameWorld
     {
-        public FikaClientWorld FikaClientWorld { get; private set; }
+        public FikaClientWorld FikaClientWorld { get; private set; }        
 
         public static CoopClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {
@@ -67,7 +68,7 @@ namespace Fika.Core.Coop.ClientClasses
             base.Dispose();
             Singleton<CoopClientGameWorld>.Release(this);
             NetManagerUtils.DestroyNetManager(false);
-            List<SynchronizableObject> syncObjects = SynchronizableObjectLogicProcessor.GetSynchronizableObjects().ToList();
+            List<SynchronizableObject> syncObjects = [.. SynchronizableObjectLogicProcessor.GetSynchronizableObjects()];
             foreach (SynchronizableObject syncObject in syncObjects)
             {
                 syncObject.OnUpdateRequired -= SynchronizableObjectLogicProcessor.method_1;

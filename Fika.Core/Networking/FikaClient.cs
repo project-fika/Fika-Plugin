@@ -320,7 +320,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            if (packet.RagdollPackets != null)
+            /*if (packet.RagdollPackets != null)
             {
                 for (int i = 0; i < packet.RagdollPackets.Count; i++)
                 {
@@ -334,7 +334,7 @@ namespace Fika.Core.Networking
                         }
                     }
                 }
-            }
+            }*/
 
             if (packet.ArtilleryPackets != null)
             {
@@ -360,8 +360,7 @@ namespace Fika.Core.Networking
 
             if (packet.SyncObjectPackets != null)
             {
-                CoopClientGameWorld clientGameWorld = (CoopClientGameWorld)gameWorld;
-                clientGameWorld.ClientSynchronizableObjectLogicProcessor?.ProcessSyncObjectPackets(packet.SyncObjectPackets);
+                FikaClientWorld.SyncObjectPackets.AddRange(packet.SyncObjectPackets);                
             }
         }
 

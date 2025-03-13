@@ -11,7 +11,8 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class FikaClientWorld : World
     {
-        public List<LootSyncStruct> LootSyncPackets;
+        public List<LootSyncStruct> LootSyncPackets { get; private set; }
+        public List<AirplaneDataPacketStruct> SyncObjectPackets { get; private set; }
 
         private CoopClientGameWorld clientGameWorld;
         private FikaClient client;
@@ -20,7 +21,8 @@ namespace Fika.Core.Coop.ClientClasses
         {
             FikaClientWorld clientWorld = gameWorld.gameObject.AddComponent<FikaClientWorld>();
             clientWorld.clientGameWorld = gameWorld;
-            clientWorld.LootSyncPackets = new List<LootSyncStruct>(8);
+            clientWorld.LootSyncPackets = new(8);
+            clientWorld.SyncObjectPackets = new(16);
             clientWorld.client = Singleton<FikaClient>.Instance;
             clientWorld.client.FikaClientWorld = clientWorld;
             return clientWorld;
@@ -29,6 +31,7 @@ namespace Fika.Core.Coop.ClientClasses
         public void Update()
         {
             UpdateLootItems(clientGameWorld.LootItems);
+            clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
         }
 
         public void UpdateLootItems(GClass797<int, LootItem> lootItems)
