@@ -97,14 +97,6 @@ namespace Fika.Core.Networking
             }
         }
 
-        public bool MultiThreaded
-        {
-            get
-            {
-                return netClient != null && netClient.UnsyncedEvents;
-            }
-        }
-
         internal FikaVOIPClient VOIPClient { get; set; }
 
         public int NetId { get; set; }
@@ -136,7 +128,6 @@ namespace Fika.Core.Networking
                 EnableStatistics = true,
                 MaxConnectAttempts = 5,
                 ReconnectDelay = 1 * 1000,
-                UnsyncedEvents = false, //FikaPlugin.NetMultiThreaded.Value,
                 ChannelsCount = 2
             };
 
@@ -1211,26 +1202,28 @@ namespace Fika.Core.Networking
 
         public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
         {
-            if (MultiThreaded)
+            packetProcessor.SubscribeNetSerializable(handle);
+            /*if (MultiThreaded)
             {
                 packetProcessor.SubscribeNetSerializableMT(handle);
             }
             else
             {
                 packetProcessor.SubscribeNetSerializable(handle);
-            }
+            }*/
         }
 
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
         {
-            if (MultiThreaded)
+            packetProcessor.SubscribeNetSerializable(handle);
+            /*if (MultiThreaded)
             {
                 packetProcessor.SubscribeNetSerializableMT(handle);
             }
             else
             {
                 packetProcessor.SubscribeNetSerializable(handle);
-            }
+            */
         }
 
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)

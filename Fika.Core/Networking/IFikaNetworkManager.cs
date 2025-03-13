@@ -13,7 +13,6 @@ namespace Fika.Core.Networking
         public CoopHandler CoopHandler { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public int SendRate { get; }
-        public bool MultiThreaded { get; }
         public bool AllowVOIP { get; set; }
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null);
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null);
