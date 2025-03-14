@@ -179,7 +179,8 @@ namespace Fika.Core.Coop.Utils
         /// <param name="nickname"></param>
         public static void SetProfileNickname(this InfoClass infoClass, string nickname)
         {
-            Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
+            //Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
+            infoClass.Nickname = nickname;
         }
 
         /// <summary>
@@ -298,7 +299,8 @@ namespace Fika.Core.Coop.Utils
         /// <returns>True if the corpse is visible</returns>
         public static bool IsVisible(this ObservedCorpse corpse)
         {
-            return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
+            return corpse.IsVisible();
+            //return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
         }
 
         /// <summary>

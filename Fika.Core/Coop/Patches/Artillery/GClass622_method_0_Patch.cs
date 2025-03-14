@@ -2,6 +2,7 @@
 using CommonAssets.Scripts.ArtilleryShelling;
 using EFT;
 using Fika.Core.Coop.GameMode;
+using GPUInstancer;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System;
@@ -29,9 +30,8 @@ namespace Fika.Core.Coop.Patches
 
         private static async Task SetupServerArtilleryController(CancellationToken token, GClass622 instance)
         {
-            Traverse controllerTraverse = Traverse.Create(instance);
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            controllerTraverse.Field<GameWorld>("gameWorld_0").Value = gameWorld;
+            instance.gameWorld_0 = gameWorld;
 
             CoopGame coopGame = CoopGame.Instance;
             if (coopGame == null)
@@ -45,29 +45,29 @@ namespace Fika.Core.Coop.Patches
             }
 
             BackendConfigSettingsClass.ArtilleryShellingGlobalSettings configuration = Singleton<BackendConfigSettingsClass>.Instance.ArtilleryShelling;
-            controllerTraverse.Field<BackendConfigSettingsClass.ArtilleryShellingGlobalSettings>("artilleryShellingGlobalSettings_0").Value = configuration;
+            instance.artilleryShellingGlobalSettings_0 = configuration;
             string locationId = gameWorld.LocationId;
             if (configuration.ArtilleryMapsConfigs.Keys.Contains(locationId))
             {
-                controllerTraverse.Field<ArtilleryShellingMapConfiguration>("artilleryShellingMapConfiguration_0").Value = configuration.ArtilleryMapsConfigs[locationId];
+                instance.artilleryShellingMapConfiguration_0 = configuration.ArtilleryMapsConfigs[locationId];
             }
 
             instance.method_23(10);
             instance.method_5();
             instance.method_1();
 
-            controllerTraverse.Field<bool>("bool_3").Value = true;
+            instance.bool_3 = true;
             coopGame.UpdateByUnity += instance.OnUpdate;
 
-            ArtilleryShellingMapConfiguration mapConfiguration = controllerTraverse.Field<ArtilleryShellingMapConfiguration>("artilleryShellingMapConfiguration_0").Value;
+            ArtilleryShellingMapConfiguration mapConfiguration = instance.artilleryShellingMapConfiguration_0;
             if (mapConfiguration.PlanedShellingOn)
             {
                 if (mapConfiguration.ShellingZones.Length != 0)
                 {
                     int airDropTime = mapConfiguration.ArtilleryShellingAirDropSettings.AirDropTime;
-                    controllerTraverse.Field<int>("int_1").Value = airDropTime;
+                    instance.int_1 = airDropTime;
                     Vector3 airDropPosition = mapConfiguration.ArtilleryShellingAirDropSettings.AirDropPosition;
-                    controllerTraverse.Field<Vector3>("vector3_0").Value = airDropPosition;
+                    instance.vector3_0 = airDropPosition;
                     if (mapConfiguration.ArtilleryShellingAirDropSettings.UseAirDrop)
                     {
                         instance.InitAirdrop(airDropTime, airDropPosition).HandleExceptions();

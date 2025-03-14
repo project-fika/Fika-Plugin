@@ -325,14 +325,13 @@ namespace Fika.Core.Console
                 return;
             }
 
-            Traverse managerTraverse = Traverse.Create(serverAirdropManager);
-            List<Vector3> dropPoints = managerTraverse.Field<List<Vector3>>("list_2").Value;
+            List<Vector3> dropPoints = serverAirdropManager.list_2;
             if (dropPoints != null && dropPoints.Count > 0)
             {
-                string templateId = managerTraverse.Field<string>("string_0").Value;
+                string templateId = serverAirdropManager.string_0;
                 serverAirdropManager.method_5(serverAirdropManager.Single_0);
                 gameWorld.InitAirdrop(templateId, true, serverAirdropManager.method_6());
-                managerTraverse.Field<string>("string_0").Value = null;
+                serverAirdropManager.string_0 = null;
                 dropPoints.Clear();
                 ConsoleScreen.Log("Started airdrop");
                 return;
