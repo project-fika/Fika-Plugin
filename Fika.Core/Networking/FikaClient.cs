@@ -1045,17 +1045,8 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            if (netClient != null)
-            {
-                if (netClient.UnsyncedEvents)
-                {
-                    packetProcessor.RunActions();
-                }
-                else
-                {
-                    netClient.PollEvents();
-                }
-            }
+            netClient?.PollEvents();
+
             int inventoryOps = inventoryOperations.Count;
             if (inventoryOps > 0)
             {

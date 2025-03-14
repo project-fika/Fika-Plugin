@@ -202,7 +202,6 @@ namespace Fika.Core
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
         public static ConfigEntry<ESendRate> SendRate { get; set; }
         public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
-        public static ConfigEntry<bool> NetMultiThreaded { get; set; }
         public static ConfigEntry<bool> AllowVOIP { get; set; }
 
         // Gameplay
@@ -1274,15 +1273,6 @@ namespace Fika.Core
                     Order = 0
                 }),
                 "Smoothing Rate", ref failed, headers);
-
-            NetMultiThreaded = SetupSetting(networkDefaultHeader, "Use MultiThreading", false,
-                new ConfigDescription(LocaleUtils.BEPINEX_NET_MULTITHREAD_D.Localized(), tags: new ConfigurationManagerAttributes()
-                {
-                    Category = networkHeader,
-                    DispName = LocaleUtils.BEPINEX_NET_MULTITHREAD_T.Localized(),
-                    Order = 0
-                }),
-                "Use MultiThreading", ref failed, headers);
 
             AllowVOIP = SetupSetting(networkDefaultHeader, "Allow VOIP", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_NET_VOIP_D.Localized(), tags: new ConfigurationManagerAttributes()

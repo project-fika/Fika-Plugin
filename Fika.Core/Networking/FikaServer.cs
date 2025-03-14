@@ -107,14 +107,6 @@ namespace Fika.Core.Networking
             }
         }
 
-        public bool MultiThreaded
-        {
-            get
-            {
-                return netServer != null && netServer.UnsyncedEvents;
-            }
-        }
-
         public int NetId { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
@@ -151,7 +143,6 @@ namespace Fika.Core.Networking
                 UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 NatPunchEnabled = true,
-                UnsyncedEvents = FikaBackendUtils.IsHeadless && FikaPlugin.NetMultiThreaded.Value,
                 ChannelsCount = 2
             };
 
@@ -1173,17 +1164,7 @@ namespace Fika.Core.Networking
 
         protected void Update()
         {
-            if (netServer != null)
-            {
-                if (netServer.UnsyncedEvents)
-                {
-                    packetProcessor.RunActions();
-                }
-                else
-                {
-                    netServer?.PollEvents();
-                }
-            }
+            netServer?.PollEvents();
 
             statisticsCounter++;
             if (statisticsCounter > 600)
@@ -1492,26 +1473,12 @@ namespace Fika.Core.Networking
 
         public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
         {
-            if (MultiThreaded)
-            {
-                packetProcessor.SubscribeNetSerializableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeNetSerializable(handle);
-            }
+            packetProcessor.SubscribeNetSerializable(handle);
         }
 
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
         {
-            if (MultiThreaded)
-            {
-                packetProcessor.SubscribeNetSerializableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeNetSerializable(handle);
-            }
+            packetProcessor.SubscribeNetSerializable(handle);
         }
 
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)
