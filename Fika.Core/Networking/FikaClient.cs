@@ -1093,8 +1093,8 @@ namespace Fika.Core.Networking
 
         public void OnPeerConnected(NetPeer peer)
         {
-            AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
-                ENotificationDurationType.Default, ENotificationIconType.Friend));
+            NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
+                ENotificationDurationType.Default, ENotificationIconType.Friend);
 
             Profile ownProfile = FikaGlobals.GetProfile(FikaBackendUtils.IsScav);
             if (ownProfile == null)
@@ -1157,7 +1157,7 @@ namespace Fika.Core.Networking
             logger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
             if (disconnectInfo.Reason is DisconnectReason.Timeout)
             {
-                AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized()));
+                NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized());
                 MyPlayer.PacketSender.DestroyThis();
                 Destroy(this);
                 Singleton<FikaClient>.Release(this);
@@ -1168,7 +1168,7 @@ namespace Fika.Core.Networking
                 string reason = disconnectInfo.AdditionalData.GetString();
                 if (!string.IsNullOrEmpty(reason))
                 {
-                    AsyncWorker.RunInMainTread(() => NotificationManagerClass.DisplayWarningNotification(reason));
+                    NotificationManagerClass.DisplayWarningNotification(reason);
                     return;
                 }
 
