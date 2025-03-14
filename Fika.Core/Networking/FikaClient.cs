@@ -314,8 +314,6 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            logger.LogWarning($"{packet.LootSyncStructs.Count}, {packet.GrenadePackets.Count}, {packet.ArtilleryPackets.Count}, {packet.SyncObjectPackets.Count}");
-
             /*if (packet.RagdollPackets != null)
             {
                 for (int i = 0; i < packet.RagdollPackets.Count; i++)
