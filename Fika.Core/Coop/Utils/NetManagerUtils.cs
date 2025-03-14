@@ -158,7 +158,7 @@ namespace Fika.Core.Coop.Utils
                     FikaServer server = Singleton<FikaServer>.Instance;
                     if (!server.Started)
                     {
-                        return server.Init();
+                        server.Init();
                     }
                     return Task.CompletedTask;
                 }

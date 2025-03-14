@@ -131,7 +131,7 @@ namespace Fika.Core.Networking
         internal FikaVOIPServer VOIPServer { get; set; }
         internal FikaVOIPClient VOIPClient { get; set; }
 
-        public async Task Init()
+        public async void Init()
         {
             netServer = new(this)
             {
