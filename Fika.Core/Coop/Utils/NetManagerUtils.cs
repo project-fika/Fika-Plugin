@@ -160,6 +160,7 @@ namespace Fika.Core.Coop.Utils
                     {
                         server.Init();
                     }
+                    FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(server));
                     return Task.CompletedTask;
                 }
 
@@ -168,6 +169,7 @@ namespace Fika.Core.Coop.Utils
                 {
                     client.Init();
                 }
+                FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(client));
                 return Task.CompletedTask;
             }
 
