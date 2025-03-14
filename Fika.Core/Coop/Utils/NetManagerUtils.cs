@@ -41,7 +41,6 @@ namespace Fika.Core.Coop.Utils
                 Singleton<FikaServer>.Create(server);
                 logger.LogInfo("FikaServer has started!");
                 Singleton<IFikaNetworkManager>.Create(server);
-                FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(server));
                 return;
             }
 
@@ -49,7 +48,7 @@ namespace Fika.Core.Coop.Utils
             Singleton<FikaClient>.Create(client);
             logger.LogInfo("FikaClient has started!");
             Singleton<IFikaNetworkManager>.Create(client);
-            FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(client));
+
         }
 
         public static void CreatePingingClient()
