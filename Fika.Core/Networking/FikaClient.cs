@@ -1016,11 +1016,7 @@ namespace Fika.Core.Networking
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld != null)
             {
-                BTRControllerClass btrController = gameWorld.BtrController;
-                if (btrController != null)
-                {
-                    btrController.SyncBTRVehicleFromServer(packet.Data);
-                }
+                gameWorld.BtrController?.SyncBTRVehicleFromServer(packet.Data);
             }
         }
 
