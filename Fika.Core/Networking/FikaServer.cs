@@ -368,6 +368,7 @@ namespace Fika.Core.Networking
             RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
             RegisterCustomType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
             RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
             RegisterPacket<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             RegisterPacket<WeaponPacket, NetPeer>(OnWeaponPacketReceived);

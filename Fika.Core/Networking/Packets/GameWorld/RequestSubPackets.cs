@@ -126,10 +126,13 @@ namespace Fika.Core.Networking
                 if (coopGame != null)
                 {
                     coopGame.Season = Season;
-                    coopGame.SeasonsSettings = new()
+                    if (SpringSnowFactor != Vector3.zero)
                     {
-                        SpringSnowFactor = SpringSnowFactor
-                    };
+                        coopGame.SeasonsSettings = new()
+                        {
+                            SpringSnowFactor = SpringSnowFactor
+                        }; 
+                    }
                     coopGame.WeatherClasses = WeatherClasses;
                     return;
                 }

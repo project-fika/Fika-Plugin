@@ -6,11 +6,11 @@ namespace Fika.Core.Networking
 {
     public class WorldPacket : IReusable
     {
-        public List<RagdollPacketStruct> RagdollPackets = [];
-        public List<ArtilleryPacketStruct> ArtilleryPackets = [];
-        public List<GrenadeDataPacketStruct> GrenadePackets = [];
-        public List<AirplaneDataPacketStruct> SyncObjectPackets = [];
-        public List<LootSyncStruct> LootSyncStructs = [];
+        public List<RagdollPacketStruct> RagdollPackets { get; set; }
+        public List<ArtilleryPacketStruct> ArtilleryPackets { get; set; }
+        public List<GrenadeDataPacketStruct> GrenadePackets { get; set; }
+        public List<AirplaneDataPacketStruct> SyncObjectPackets { get; set; }
+        public List<LootSyncStruct> LootSyncStructs { get; set; }
 
         public bool HasData
         {
