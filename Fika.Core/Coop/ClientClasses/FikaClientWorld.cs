@@ -2,6 +2,7 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
+using LiteNetLib;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -11,8 +12,9 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class FikaClientWorld : World
     {
-        public List<LootSyncStruct> LootSyncPackets { get; private set; }
-        public List<AirplaneDataPacketStruct> SyncObjectPackets { get; private set; }
+        public List<LootSyncStruct> LootSyncPackets;
+        public List<AirplaneDataPacketStruct> SyncObjectPackets;
+        public WorldPacket WorldPacket;
 
         private CoopClientGameWorld clientGameWorld;
         private FikaClient client;
@@ -23,6 +25,7 @@ namespace Fika.Core.Coop.ClientClasses
             clientWorld.clientGameWorld = gameWorld;
             clientWorld.LootSyncPackets = new(8);
             clientWorld.SyncObjectPackets = new(16);
+            clientWorld.WorldPacket = new();
             clientWorld.client = Singleton<FikaClient>.Instance;
             clientWorld.client.FikaClientWorld = clientWorld;
             return clientWorld;
@@ -32,6 +35,14 @@ namespace Fika.Core.Coop.ClientClasses
         {
             UpdateLootItems(clientGameWorld.LootItems);
             clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
+        }
+
+        protected void LateUpdate()
+        {
+            if (WorldPacket.HasData)
+            {
+                client.SendReusable(WorldPacket, DeliveryMethod.ReliableOrdered);
+            }
         }
 
         public void UpdateLootItems(GClass797<int, LootItem> lootItems)

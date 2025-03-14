@@ -18,6 +18,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Patches.VOIP;
@@ -25,6 +26,7 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -144,14 +146,9 @@ namespace Fika.Core.Networking
             NetworkGameSession.Rtt = 0;
             NetworkGameSession.LossPercent = 0;
 
-            myProfileId = FikaBackendUtils.Profile.ProfileId;
+            myProfileId = FikaBackendUtils.Profile.ProfileId;            
 
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
-
-            RegisterPackets();
+            RegisterPacketsAndTypes();
 
 #if DEBUG
             AddDebugPackets();
@@ -221,8 +218,14 @@ namespace Fika.Core.Networking
             return;
         }
 
-        private void RegisterPackets()
+        private void RegisterPacketsAndTypes()
         {
+            RegisterCustomType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
+
             RegisterPacket<PlayerStatePacket>(OnPlayerStatePacketReceived);
             RegisterPacket<WeaponPacket>(OnWeaponPacketReceived);
             RegisterPacket<DamagePacket>(OnDamagePacketReceived);
@@ -256,12 +259,12 @@ namespace Fika.Core.Networking
             RegisterPacket<TransitEventPacket>(OnTransitEventPacketReceived);
             RegisterPacket<BotStatePacket>(OnBotStatePacketReceived);
             RegisterPacket<PingPacket>(OnPingPacketReceived);
-            RegisterPacket<LootSyncPacket>(OnLootSyncPacketReceived);
             RegisterPacket<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
             RegisterPacket<SideEffectPacket>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket>(OnRequestPacketReceived);
-            RegisterPacket<NewWorldPacket>(OnNewWorldPacketReceived);
-            RegisterPacket<CharacterSyncPacket>(OnCharacterSyncPacketReceived);            
+            RegisterPacket<CharacterSyncPacket>(OnCharacterSyncPacketReceived);
+
+            RegisterReusable<WorldPacket>(OnWorldPacketReceived);
         }
 
         private void OnCharacterSyncPacketReceived(CharacterSyncPacket packet)
@@ -302,7 +305,7 @@ namespace Fika.Core.Networking
             packet.RequestSubPacket.HandleResponse();
         }
 
-        private void OnNewWorldPacketReceived(NewWorldPacket packet)
+        private void OnWorldPacketReceived(WorldPacket packet)
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null)
@@ -327,32 +330,26 @@ namespace Fika.Core.Networking
                 }
             }*/
 
-            if (packet.ArtilleryPackets != null)
+            if (packet.ArtilleryPackets.Count > 0)
             {
-                if (packet.ArtilleryPackets.Count > 0)
+                List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
+                gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
+            }
+
+            for (int i = 0; i < packet.GrenadePackets.Count; i++)
+            {
+                GrenadeDataPacketStruct throwablePacket = packet.GrenadePackets[i];
+                GClass797<int, Throwable> grenades = gameWorld.Grenades;
+                if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
                 {
-                    List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
-                    gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
+                    throwable.ApplyNetPacket(throwablePacket);
                 }
             }
 
-            if (packet.GrenadePackets != null)
-            {
-                for (int i = 0; i < packet.GrenadePackets.Count; i++)
-                {
-                    GrenadeDataPacketStruct throwablePacket = packet.GrenadePackets[i];
-                    GClass797<int, Throwable> grenades = gameWorld.Grenades;
-                    if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
-                    {
-                        throwable.ApplyNetPacket(throwablePacket);
-                    }
-                }
-            }
+            FikaClientWorld.SyncObjectPackets.AddRange(packet.SyncObjectPackets);
+            FikaClientWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
 
-            if (packet.SyncObjectPackets != null)
-            {
-                FikaClientWorld.SyncObjectPackets.AddRange(packet.SyncObjectPackets);                
-            }
+            packet.Flush();
         }
 
         private void OnSideEffectPacketReceived(SideEffectPacket packet)
@@ -395,14 +392,6 @@ namespace Fika.Core.Networking
             }
 
             logger.LogWarning("OnLoadingProfilePacketReceived: Profiles was null!");
-        }
-
-        private void OnLootSyncPacketReceived(LootSyncPacket packet)
-        {
-            if (FikaClientWorld != null)
-            {
-                FikaClientWorld.LootSyncPackets.Add(packet.Data);
-            }
         }
 
         private void OnPingPacketReceived(PingPacket packet)
@@ -1194,27 +1183,21 @@ namespace Fika.Core.Networking
         public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
         {
             packetProcessor.SubscribeNetSerializable(handle);
-            /*if (MultiThreaded)
-            {
-                packetProcessor.SubscribeNetSerializableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeNetSerializable(handle);
-            }*/
         }
 
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
         {
             packetProcessor.SubscribeNetSerializable(handle);
-            /*if (MultiThreaded)
-            {
-                packetProcessor.SubscribeNetSerializableMT(handle);
-            }
-            else
-            {
-                packetProcessor.SubscribeNetSerializable(handle);
-            */
+        }
+
+        public void RegisterReusable<T>(Action<T> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
+        }
+
+        public void RegisterReusable<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
         }
 
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)

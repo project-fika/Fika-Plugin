@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.Interactive;
 using Fika.Core.Networking;
-using LiteNetLib;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Components
@@ -67,18 +66,14 @@ namespace Fika.Core.Coop.Components
                 data.Velocity = Vector3.zero;
                 data.AngularVelocity = Vector3.zero;
                 data.Done = true;
-                LootSyncPacket endPacket = new()
-                {
-                    Data = data
-                };
                 if (isServer)
                 {
-                    server.SendDataToAll(ref endPacket, DeliveryMethod.ReliableOrdered);
+                    server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(data);
                     Destroy(this);
                     return;
                 }
 
-                client.SendData(ref endPacket, DeliveryMethod.ReliableOrdered);
+                client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(data);
                 Destroy(this);
                 return;
             }
@@ -91,17 +86,13 @@ namespace Fika.Core.Coop.Components
                 data.Rotation = lootItem.transform.rotation;
                 data.Velocity = Rigidbody.velocity;
                 data.AngularVelocity = Rigidbody.angularVelocity;
-                LootSyncPacket packet = new()
-                {
-                    Data = data
-                };
                 if (isServer)
                 {
-                    server.SendDataToAll(ref packet, DeliveryMethod.Unreliable);
+                    server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(data);
                     return;
                 }
 
-                client.SendData(ref packet, DeliveryMethod.Unreliable);
+                client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(data);
             }
         }
     }

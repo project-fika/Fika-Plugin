@@ -26,6 +26,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -189,12 +190,7 @@ namespace Fika.Core.Networking
             currentNetId = 2;
             NetId = 1;
 
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
-            packetProcessor.RegisterNestedType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
-
-            RegisterPackets();
+            RegisterPacketsAndTypes();
 
 #if DEBUG
             AddDebugPackets();
@@ -366,8 +362,13 @@ namespace Fika.Core.Networking
             return;
         }
 
-        private void RegisterPackets()
+        private void RegisterPacketsAndTypes()
         {
+            RegisterCustomType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
+            RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
+
             RegisterPacket<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
             RegisterPacket<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
             RegisterPacket<DamagePacket, NetPeer>(OnDamagePacketReceived);
@@ -392,10 +393,25 @@ namespace Fika.Core.Networking
             RegisterPacket<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
             RegisterPacket<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
             RegisterPacket<PingPacket, NetPeer>(OnPingPacketReceived);
-            RegisterPacket<LootSyncPacket, NetPeer>(OnLootSyncPacketReceived);
             RegisterPacket<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
             RegisterPacket<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket, NetPeer>(OnRequestPacketReceived);
+
+            RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
+        }
+
+        private void OnWorldPacketReceived(WorldPacket packet, NetPeer peer)
+        {
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld == null)
+            {
+                logger.LogError("OnNewWorldPacketReceived: GameWorld was null!");
+                return;
+            }
+
+            FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
+
+            SendReusableToAll(packet, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnVOIPPacketReceived(VOIPPacket packet, NetPeer peer)
@@ -476,16 +492,6 @@ namespace Fika.Core.Networking
             SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
 
             peer.Tag = kvp.Key.Nickname;
-        }
-
-        private void OnLootSyncPacketReceived(LootSyncPacket packet, NetPeer peer)
-        {
-            SendDataToAll(ref packet, packet.Data.Done ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable, peer);
-
-            if (FikaHostWorld != null)
-            {
-                FikaHostWorld.LootSyncPackets.Add(packet.Data);
-            }
         }
 
         private void OnPingPacketReceived(PingPacket packet, NetPeer peer)
@@ -1217,12 +1223,19 @@ namespace Fika.Core.Networking
             netServer.SendToAll(dataWriter, deliveryMethod);
         }
 
-        public void SendReusableToAll<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
+        public void SendReusableToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer peerToExlude = null) where T : class, IReusable, new()
         {
             dataWriter.Reset();
 
             packetProcessor.Write(dataWriter, packet);
-            netServer.SendToAll(dataWriter, deliveryMethod);
+            if (peerToExlude != null)
+            {
+                netServer.SendToAll(dataWriter, deliveryMethod, peerToExlude);
+            }
+            else
+            {
+                netServer.SendToAll(dataWriter, deliveryMethod);
+            }
 
             packet.Flush();
         }
@@ -1479,6 +1492,16 @@ namespace Fika.Core.Networking
         public void RegisterPacket<T, TUserData>(Action<T, TUserData> handle) where T : INetSerializable, new()
         {
             packetProcessor.SubscribeNetSerializable(handle);
+        }
+
+        public void RegisterReusable<T>(Action<T> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
+        }
+
+        public void RegisterReusable<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
+        {
+            packetProcessor.SubscribeReusable(handle);
         }
 
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)

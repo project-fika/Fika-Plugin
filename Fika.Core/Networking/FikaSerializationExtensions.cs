@@ -994,6 +994,40 @@ namespace Fika.Core.Networking
             return packet;
         }
 
+        public static void PutLootSyncStruct(this NetDataWriter writer, LootSyncStruct packet)
+        {
+            writer.Put(packet.Id);
+            writer.Put(packet.Position);
+            writer.Put(packet.Rotation);
+            writer.Put(packet.Done);
+
+            if (!packet.Done)
+            {
+                writer.Put(packet.Velocity);
+                writer.Put(packet.AngularVelocity);
+            }
+        }
+
+        public static LootSyncStruct GetLootSyncStruct(this NetDataReader reader)
+        {
+            LootSyncStruct data = new()
+            {
+                Id = reader.GetInt(),
+                Position = reader.GetVector3(),
+                Rotation = reader.GetQuaternion(),
+                Done = reader.GetBool()
+            };
+
+            if (!data.Done)
+            {
+                data.Velocity = reader.GetVector3();
+                data.AngularVelocity = reader.GetVector3();
+            }
+
+            return data;
+        }
+
+
         public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
         {
             switch (type)

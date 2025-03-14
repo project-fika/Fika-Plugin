@@ -1,12 +1,16 @@
-﻿/*using System.Collections.Generic;
+﻿using Fika.Core.Networking.Packets;
+using LiteNetLib.Utils;
+using System.Collections.Generic;
 
 namespace Fika.Core.Networking
 {
     public class WorldPacket : IReusable
     {
-        public List<RagdollPacketStruct> RagdollPackets { get; set; } = [];
-        public List<ArtilleryPacketStruct> ArtilleryPackets { get; set; } = [];
-        public List<GrenadeDataPacketStruct> ThrowablePackets { get; set; } = [];
+        public List<RagdollPacketStruct> RagdollPackets = [];
+        public List<ArtilleryPacketStruct> ArtilleryPackets = [];
+        public List<GrenadeDataPacketStruct> GrenadePackets = [];
+        public List<AirplaneDataPacketStruct> SyncObjectPackets = [];
+        public List<LootSyncStruct> LootSyncStructs = [];
 
         public bool HasData
         {
@@ -14,7 +18,9 @@ namespace Fika.Core.Networking
             {
                 return RagdollPackets.Count > 0
                     || ArtilleryPackets.Count > 0
-                    || ThrowablePackets.Count > 0;
+                    || GrenadePackets.Count > 0
+                    || SyncObjectPackets.Count > 0
+                    || LootSyncStructs.Count > 0;
             }
         }
 
@@ -22,8 +28,9 @@ namespace Fika.Core.Networking
         {
             RagdollPackets.Clear();
             ArtilleryPackets.Clear();
-            ThrowablePackets.Clear();
+            GrenadePackets.Clear();
+            SyncObjectPackets.Clear();
+            LootSyncStructs.Clear();
         }
     }
 }
-*/
