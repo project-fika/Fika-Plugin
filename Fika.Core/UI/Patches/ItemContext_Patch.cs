@@ -69,8 +69,8 @@ namespace Fika.Core.UI.Patches
                 }
 
                 // Check for GClass increments
-                Dictionary<string, GClass3502> dynamicInteractions = Traverse.Create(contextInteractions)
-                    .Field<Dictionary<string, GClass3502>>("dictionary_0").Value;
+                Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions)
+                    .Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
                 if (dynamicInteractions == null)
                 {
                     dynamicInteractions = [];
