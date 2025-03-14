@@ -1325,7 +1325,7 @@ namespace Fika.Core.Coop.GameMode
                 };
                 gclass.Init(true);
                 (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = gclass;
-                Traverse.Create(GameWorld_0.SynchronizableObjectLogicProcessor).Field<GInterface253>("ginterface253_0").Value = Singleton<FikaServer>.Instance;
+                GameWorld_0.SynchronizableObjectLogicProcessor.ginterface253_0 = Singleton<FikaServer>.Instance;
             }
 
             await method_6();
