@@ -10,7 +10,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
     {
         public static void Enable()
         {
-            new GClass422_Activate_Patch().Enable();
+            new GClass436_Activate_Patch().Enable();
 
 #if DEBUG
             /*new zryachiydebugpatch1().Enable();
@@ -22,11 +22,11 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 #endif
         }
 
-        internal class GClass422_Activate_Patch : ModulePatch
+        internal class GClass436_Activate_Patch : ModulePatch
         {
             protected override MethodBase GetTargetMethod()
             {
-                return typeof(GClass422).GetMethod(nameof(GClass422.Activate));
+                return typeof(GClass437).GetMethod(nameof(GClass437.Activate));
             }
 
             [PatchPostfix]
@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
         {
             protected override MethodBase GetTargetMethod()
             {
-                return typeof(GClass422).GetMethod(nameof(GClass422.IsEnemyNow));
+                return typeof(GClass437).GetMethod(nameof(GClass437.IsEnemyNow));
             }
 
             [PatchPostfix]
@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
         {
             protected override MethodBase GetTargetMethod()
             {
-                return typeof(GClass422).GetMethod(nameof(GClass422.method_6));
+                return typeof(GClass437).GetMethod(nameof(GClass437.method_6));
             }
 
             [PatchPostfix]
@@ -132,7 +132,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
         {
             protected override MethodBase GetTargetMethod()
             {
-                return typeof(BossSpawnerClass.Class328).GetMethod(nameof(BossSpawnerClass.Class328.method_0));
+                return typeof(BossSpawnerClass.Class329).GetMethod(nameof(BossSpawnerClass.Class329.method_0));
             }
 
             [PatchPostfix]

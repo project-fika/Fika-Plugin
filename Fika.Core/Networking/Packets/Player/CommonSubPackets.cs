@@ -11,7 +11,7 @@ using LiteNetLib.Utils;
 using System;
 using UnityEngine;
 using static Fika.Core.Coop.Players.CoopPlayer;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -80,7 +80,7 @@ namespace Fika.Core.Networking
                                 return;
                             }
 
-                            GStruct448<Item> result = player.FindItemById(ItemId, false, false);
+                            GStruct457<Item> result = player.FindItemById(ItemId, false, false);
                             if (!result.Succeeded)
                             {
                                 FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
@@ -187,7 +187,7 @@ namespace Fika.Core.Networking
             public float Amount;
             public int AnimationVariant;
             public bool Scheduled;
-            public EBodyPart BodyPart;
+            public GStruct353<EBodyPart> BodyParts;
 
             public ProceedPacket(NetDataReader reader)
             {
@@ -196,7 +196,12 @@ namespace Fika.Core.Networking
                 Amount = reader.GetFloat();
                 AnimationVariant = reader.GetInt();
                 Scheduled = reader.GetBool();
-                BodyPart = (EBodyPart)reader.GetInt();
+                BodyParts = default;
+                int bodyPartsAmount = reader.GetInt();
+                for (int i = 0; i < bodyPartsAmount; i++)
+                {
+                    BodyParts.Add((EBodyPart)reader.GetByte());
+                }
             }
 
             public void Execute(CoopPlayer player)
@@ -214,7 +219,12 @@ namespace Fika.Core.Networking
                 writer.Put(Amount);
                 writer.Put(AnimationVariant);
                 writer.Put(Scheduled);
-                writer.Put((int)BodyPart);
+                int bodyPartsAmount = BodyParts.Length;
+                writer.Put(bodyPartsAmount);
+                for (int i = 0; i < bodyPartsAmount; i++)
+                {
+                    writer.Put((byte)BodyParts[i]);
+                }
             }
         }
 
@@ -245,7 +255,7 @@ namespace Fika.Core.Networking
 
             public void Execute(CoopPlayer player)
             {
-                player.HandleHeadLightsPacket(ref this);
+                player.HandleHeadLightsPacket(this);
             }
 
             public void Serialize(NetDataWriter writer)
@@ -322,7 +332,7 @@ namespace Fika.Core.Networking
             {
                 StationaryWeapon stationaryWeapon = (Command == EStationaryCommand.Occupy)
                     ? Singleton<GameWorld>.Instance.FindStationaryWeapon(Id) : null;
-                player.ObservedStationaryInteract(stationaryWeapon, (GStruct177.EStationaryCommand)Command);
+                player.ObservedStationaryInteract(stationaryWeapon, (StationaryPacketStruct.EStationaryCommand)Command);
             }
 
             public void Serialize(NetDataWriter writer)
@@ -378,10 +388,10 @@ namespace Fika.Core.Networking
 
             public void Execute(CoopPlayer player)
             {
-                // Dedicated can get stuck in permanent high-velocity states due to vaulting, skip it
-                if (!FikaBackendUtils.IsDedicated)
+                // A headless client can get stuck in permanent high-velocity states due to vaulting, skip it
+                if (!FikaBackendUtils.IsHeadless)
                 {
-                    player.DoObservedVault(ref this);
+                    player.DoObservedVault(this);
                 }
             }
 
@@ -399,7 +409,7 @@ namespace Fika.Core.Networking
 
         public struct MountingPacket : ISubPacket
         {
-            public GStruct179.EMountingCommand Command;
+            public MountingPacketStruct.EMountingCommand Command;
             public bool IsMounted;
             public Vector3 MountDirection;
             public Vector3 MountingPoint;
@@ -416,16 +426,17 @@ namespace Fika.Core.Networking
 
             public MountingPacket(NetDataReader reader)
             {
-                Command = (GStruct179.EMountingCommand)reader.GetByte();
-                if (Command == GStruct179.EMountingCommand.Update)
+                Command = (MountingPacketStruct.EMountingCommand)reader.GetByte();
+                if (Command == MountingPacketStruct.EMountingCommand.Update)
                 {
                     CurrentMountingPointVerticalOffset = reader.GetFloat();
                 }
-                if (Command is <= GStruct179.EMountingCommand.Exit)
+                if (Command is <= MountingPacketStruct.EMountingCommand.Exit)
                 {
                     IsMounted = reader.GetBool();
-                };
-                if (Command == GStruct179.EMountingCommand.Enter)
+                }
+                ;
+                if (Command == MountingPacketStruct.EMountingCommand.Enter)
                 {
                     MountDirection = reader.GetVector3();
                     MountingPoint = reader.GetVector3();
@@ -445,7 +456,7 @@ namespace Fika.Core.Networking
             {
                 switch (Command)
                 {
-                    case GStruct179.EMountingCommand.Enter:
+                    case MountingPacketStruct.EMountingCommand.Enter:
                         {
                             player.MovementContext.PlayerMountingPointData.SetData(new MountPointData(MountingPoint, MountDirection,
                                 (EMountSideDirection)MountingDirection), TargetPos, TargetPoseLevel, TargetHandsRotation,
@@ -454,17 +465,17 @@ namespace Fika.Core.Networking
                             player.MovementContext.EnterMountedState();
                         }
                         break;
-                    case GStruct179.EMountingCommand.Exit:
+                    case MountingPacketStruct.EMountingCommand.Exit:
                         {
                             player.MovementContext.ExitMountedState();
                         }
                         break;
-                    case GStruct179.EMountingCommand.Update:
+                    case MountingPacketStruct.EMountingCommand.Update:
                         {
                             player.MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = CurrentMountingPointVerticalOffset;
                         }
                         break;
-                    case GStruct179.EMountingCommand.StartLeaving:
+                    case MountingPacketStruct.EMountingCommand.StartLeaving:
                         {
                             if (player.MovementContext is ObservedMovementContext observedMovementContext)
                             {
@@ -480,15 +491,15 @@ namespace Fika.Core.Networking
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)Command);
-                if (Command == GStruct179.EMountingCommand.Update)
+                if (Command == MountingPacketStruct.EMountingCommand.Update)
                 {
                     writer.Put(CurrentMountingPointVerticalOffset);
                 }
-                if (Command is <= GStruct179.EMountingCommand.Exit)
+                if (Command is <= MountingPacketStruct.EMountingCommand.Exit)
                 {
                     writer.Put(IsMounted);
                 }
-                if (Command == GStruct179.EMountingCommand.Enter)
+                if (Command == MountingPacketStruct.EMountingCommand.Enter)
                 {
                     writer.Put(MountDirection);
                     writer.Put(MountingPoint);

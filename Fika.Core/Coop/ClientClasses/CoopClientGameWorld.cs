@@ -3,7 +3,10 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -13,7 +16,9 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class CoopClientGameWorld : ClientLocalGameWorld
     {
-        public static CoopClientGameWorld Create(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+        public FikaClientWorld FikaClientWorld { get; private set; }        
+
+        public static CoopClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {
             CoopClientGameWorld gameWorld = gameObject.AddComponent<CoopClientGameWorld>();
             gameWorld.ObjectsFactory = objectsFactory;
@@ -24,18 +29,19 @@ namespace Fika.Core.Coop.ClientClasses
             gameWorld.CurrentProfileId = currentProfileId;
             gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
             gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
-            FikaClientWorld.Create(gameWorld);
+            gameWorld.FikaClientWorld = FikaClientWorld.Create(gameWorld);
+            Singleton<CoopClientGameWorld>.Create(gameWorld);
             return gameWorld;
         }
 
         public override GrenadeFactoryClass CreateGrenadeFactory()
         {
-            return new GClass738();
+            return new GClass749();
         }
 
         public override void PlayerTick(float dt)
         {
-            method_10(Class994.class994_0.method_5);
+            method_10(smethod_2);
         }
 
         public override void vmethod_1(float dt)
@@ -48,7 +54,7 @@ namespace Fika.Core.Coop.ClientClasses
             // Do nothing
         }
 
-        public override GClass2400 SyncObjectProcessorFactory()
+        public override SyncObjectProcessorClass SyncObjectProcessorFactory()
         {
             ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
             {
@@ -60,7 +66,15 @@ namespace Fika.Core.Coop.ClientClasses
         public override void Dispose()
         {
             base.Dispose();
+            Singleton<CoopClientGameWorld>.Release(this);
             NetManagerUtils.DestroyNetManager(false);
+            List<SynchronizableObject> syncObjects = [.. SynchronizableObjectLogicProcessor.GetSynchronizableObjects()];
+            foreach (SynchronizableObject syncObject in syncObjects)
+            {
+                syncObject.OnUpdateRequired -= SynchronizableObjectLogicProcessor.method_1;
+                syncObject.Logic.ReturnToPool();
+                syncObject.ReturnToPool();
+            }
         }
 
         public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)

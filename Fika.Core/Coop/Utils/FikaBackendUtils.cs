@@ -2,12 +2,14 @@
 using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
+using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -27,17 +29,29 @@ namespace Fika.Core.Coop.Utils
         /// <summary>
         /// The local player <see cref="EFT.Profile"/>
         /// </summary>
-        public static Profile Profile { get; internal set; }
+        public static Profile Profile
+        {
+            get
+            {
+                profile ??= FikaGlobals.GetProfile(false);
+                return profile;
+            }
+
+            internal set
+            {
+                profile = value;
+            }
+        }
         /// <summary>
         /// The name of the local player PMC
         /// </summary>
         public static string PMCName { get; internal set; }
         public static bool IsScav { get; internal set; }
         public static EMatchmakerType MatchingType { get; internal set; } = EMatchmakerType.Single;
-        public static bool IsDedicated = false;
+        public static bool IsHeadless { get; set; }
         public static bool IsReconnect { get; internal set; }
-        public static bool IsDedicatedGame { get; set; } = false;
-        public static bool IsDedicatedRequester { get; set; }
+        public static bool IsHeadlessGame { get; set; }
+        public static bool IsHeadlessRequester { get; set; }
         public static bool IsTransit { get; internal set; }
         public static bool IsSpectator { get; internal set; }
         public static bool IsHostNatPunch { get; internal set; }
@@ -46,11 +60,32 @@ namespace Fika.Core.Coop.Utils
         public static int RemotePort { get; internal set; }
         public static int LocalPort { get; internal set; } = 0;
         public static string HostLocationId { get; internal set; }
-        internal static bool RequestFikaWorld = false;
+        public static IPAddress VPNIP { get; internal set; }
+
+        internal static GClass3868<GClass1341> GroupPlayers { get; set; } = [];
+        internal static bool RequestFikaWorld;
         internal static Vector3 ReconnectPosition = Vector3.zero;
         internal static RaidSettings CachedRaidSettings;
         internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         internal static MatchMakerGroupPreview MatchMakerGroupPreview;
+
+        private static Profile profile;
+
+        internal static void CleanUpVariables()
+        {
+            if (!IsTransit)
+            {
+                HostExpectedNumberOfPlayers = 1;
+                IsSpectator = false;
+                IsHeadlessRequester = false;
+            }
+
+            RequestFikaWorld = false;
+            IsReconnect = false;
+            ReconnectPosition = Vector3.zero;
+            GroupPlayers?.Clear();
+            DissonanceComms_Start_Patch.IsReady = false;
+        }
 
         public static bool IsServer
         {
@@ -76,7 +111,7 @@ namespace Fika.Core.Coop.Utils
         }
         public static string GroupId { get; internal set; }
         public static string RaidCode { get; internal set; }
-        public static GClass1348 TransitData
+        public static GClass1368 TransitData
         {
             get
             {
@@ -84,7 +119,7 @@ namespace Fika.Core.Coop.Utils
                 {
                     return new()
                     {
-                        isLocationTransition = true,
+                        transitionType = ELocationTransition.None,
                         transitionCount = 0,
                         transitionRaidId = FikaGlobals.DefaultTransitId,
                         visitedLocations = []
@@ -99,7 +134,7 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
-        private static GClass1348 transitData;
+        private static GClass1368 transitData;
 
         internal static void ResetTransitData()
         {
@@ -121,14 +156,14 @@ namespace Fika.Core.Coop.Utils
 
             if (result.GameVersion != FikaPlugin.EFTVersionMajor)
             {
-                errorMessage = $"You are attempting to use a different version of EFT than what the server is running.\nClient: {FikaPlugin.EFTVersionMajor}\nServer: {result.GameVersion}";
+                errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_EFT_MISMATCH.Localized(), FikaPlugin.EFTVersionMajor, result.GameVersion);
                 return false;
             }
 
             Version detectedFikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
             if (result.FikaVersion != detectedFikaVersion)
             {
-                errorMessage = $"You are attempting to use a different version of Fika than what the server is running.\nClient: {detectedFikaVersion}\nServer: {result.FikaVersion}";
+                errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_FIKA_MISMATCH.Localized(), detectedFikaVersion, result.FikaVersion);
                 return false;
             }
 
@@ -142,7 +177,7 @@ namespace Fika.Core.Coop.Utils
             NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             string raidCode = GenerateRaidCode(6);
-            CreateMatch body = new(raidCode, profileId, hostUsername, FikaBackendUtils.IsSpectator, timestamp, raidSettings,
+            CreateMatch body = new(raidCode, profileId, hostUsername, IsSpectator, timestamp, raidSettings,
                 HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
 
             await FikaRequestHandler.RaidCreate(body);
@@ -169,7 +204,7 @@ namespace Fika.Core.Coop.Utils
 
         internal static void AddPartyMembers(Dictionary<Profile, bool> profiles)
         {
-            if (IsDedicated)
+            if (IsHeadless)
             {
                 return;
             }
@@ -180,12 +215,12 @@ namespace Fika.Core.Coop.Utils
                 return;
             }
 
-            GClass3771<GClass1323> playerList = [];
+            GroupPlayers.Clear();
             foreach (KeyValuePair<Profile, bool> kvp in profiles)
             {
                 Profile profile = kvp.Key;
                 InfoClass info = profile.Info;
-                GClass1322 infoSet = new()
+                GClass1340 infoSet = new()
                 {
                     AccountId = profile.AccountId,
                     Id = profile.Id,
@@ -201,12 +236,12 @@ namespace Fika.Core.Coop.Utils
                         HasCoopExtension = info.HasCoopExtension
                     }
                 };
-                GClass1323 visualProfile = new(infoSet)
+                GClass1341 visualProfile = new(infoSet)
                 {
                     PlayerVisualRepresentation = profile.GetVisualEquipmentState(false)
                 };
 
-                playerList.Add(visualProfile);
+                GroupPlayers.Add(visualProfile);
             }
 
             if (TarkovApplication.Exist(out TarkovApplication app))
@@ -219,7 +254,7 @@ namespace Fika.Core.Coop.Utils
                     {
                         PartyInfoPanel panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
                         panel.Close();
-                        panel.Show(playerList, Profile, false);
+                        panel.Show(GroupPlayers, Profile, false);
                         return;
                     }
                     FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MenuUI was null!");

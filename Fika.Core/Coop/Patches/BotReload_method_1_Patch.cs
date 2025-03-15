@@ -15,8 +15,8 @@ namespace Fika.Core.Coop.Patches
             return typeof(BotReload).GetMethod(nameof(BotReload.method_1));
         }
 
-        [PatchPrefix]
-        public static void Prefix(BotOwner ___botOwner_0)
+        [PatchPostfix]
+        public static void Postfix(BotOwner ___botOwner_0)
         {
             ___botOwner_0.ShootData.BlockFor(0.7f);
         }

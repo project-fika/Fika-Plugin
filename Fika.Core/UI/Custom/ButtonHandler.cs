@@ -8,13 +8,21 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
 {
     private Image handleImage;
     private TextMeshProUGUI handleText;
+    private WaitForFixedUpdate fixedUpdateAwaiter;
+    private float alphaModifier;
 
     [SerializeField]
 #pragma warning disable CS0169 // Remove unused private members
     Sprite buttonSprite;
 #pragma warning restore CS0169 // Remove unused private members
 
-    void Start()
+    protected void Awake()
+    {
+        fixedUpdateAwaiter = new();
+        alphaModifier = 0.15f;
+    }
+
+    protected void Start()
     {
         handleImage = GetComponent<Image>();
         handleText = GetComponentInChildren<TextMeshProUGUI>();
@@ -24,14 +32,14 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
     {
         while (handleImage.color.a > 0)
         {
-            yield return new WaitForFixedUpdate();
-            handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a - 0.15f);
-            handleText.color = new Color(0, 0, 0, handleText.color.a - 0.15f);
+            yield return fixedUpdateAwaiter;
+            handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a - alphaModifier);
+            handleText.color = new Color(0, 0, 0, handleText.color.a - alphaModifier);
         }
         while (handleText.color.a < 1)
         {
-            yield return new WaitForFixedUpdate();
-            handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a + 0.15f);
+            yield return fixedUpdateAwaiter;
+            handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a + alphaModifier);
         }
     }
 
@@ -39,14 +47,14 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
     {
         while (handleText.color.a > 0)
         {
-            yield return new WaitForFixedUpdate();
-            handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a - 0.15f);
+            yield return fixedUpdateAwaiter;
+            handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a - alphaModifier);
         }
         while (handleImage.color.a < 1)
         {
-            yield return new WaitForFixedUpdate();
-            handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a + 0.15f);
-            handleText.color = new Color(0, 0, 0, handleText.color.a + 0.15f);
+            yield return fixedUpdateAwaiter;
+            handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a + alphaModifier);
+            handleText.color = new Color(0, 0, 0, handleText.color.a + alphaModifier);
         }
     }
 

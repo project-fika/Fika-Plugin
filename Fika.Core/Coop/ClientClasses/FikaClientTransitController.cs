@@ -1,5 +1,4 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
@@ -10,19 +9,21 @@ using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class FikaClientTransitController : GClass1643
+    public class FikaClientTransitController : GClass1677
     {
-        public FikaClientTransitController(BackendConfigSettingsClass.GClass1529 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+        public FikaClientTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters)
         {
             OnPlayerEnter += OnClientPlayerEnter;
             OnPlayerExit += OnClientPlayerExit;
             string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
-            summonedTransits[profile.Id] = new GClass1639(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
-            TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransiterTraderName);
+            summonedTransits[profile.Id] = new TransitDataClass(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
+                localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
+            TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
             this.localRaidSettings = localRaidSettings;
         }
-        public GStruct176 InteractPacket { get; set; }
+
+        public TransitInteractionPacketStruct InteractPacket { get; set; }
 
         private readonly LocalRaidSettings localRaidSettings;
 
@@ -30,7 +31,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
-                TransferItemsController.InitPlayerStash(player);
+                //TransferItemsController.InitPlayerStash(player);
                 if (player is CoopPlayer coopPlayer)
                 {
                     coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
@@ -45,7 +46,8 @@ namespace Fika.Core.Coop.ClientClasses
 
         public void Init()
         {
-            method_5(dictionary_0.Values);
+            EnablePoints(true);
+            method_6(dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
         }
 
         public override void Dispose()
@@ -57,7 +59,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public void HandleClientExtract(int transitId, int playerId)
         {
-            if (!smethod_0(playerId, out Player myPlayer))
+            if (!smethod_2(playerId, out Player myPlayer))
             {
                 return;
             }
@@ -73,7 +75,7 @@ namespace Fika.Core.Coop.ClientClasses
             if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
             {
                 eraidMode = ERaidMode.Local;
-                tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+                tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
             }
             string profileId = myPlayer.ProfileId;
             Dictionary<string, ProfileKey> profileKeys = [];
@@ -84,7 +86,7 @@ namespace Fika.Core.Coop.ClientClasses
                 isSolo = true
             });
 
-            GClass1926 gclass = new()
+            GClass1961 gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,
@@ -98,7 +100,8 @@ namespace Fika.Core.Coop.ClientClasses
             };
 
             alreadyTransits.Add(profileId, gclass);
-            if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+            CoopGame coopGame = CoopGame.Instance;
+            if (coopGame != null)
             {
                 coopGame.Extract((CoopPlayer)myPlayer, null, transitPoint);
             }

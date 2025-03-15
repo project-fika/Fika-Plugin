@@ -1,5 +1,6 @@
-﻿using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPacket;
+﻿using Fika.Core.Coop.Players;
+using LiteNetLib.Utils;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -8,6 +9,11 @@ namespace Fika.Core.Networking
         public int NetId;
         public EFirearmSubPacketType Type;
         public ISubPacket SubPacket;
+
+        public void Execute(CoopPlayer player)
+        {
+            SubPacket.Execute(player);
+        }
 
         public void Deserialize(NetDataReader reader)
         {

@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.Custom
             healthBar.effects = [];
             // Check for GClass increments, can be checked in EFT.UI.StaticIcons.EffectSprites method UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize
             // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
-            healthBar.ignoredTypes = [typeof(GInterface313), typeof(GInterface315), typeof(GInterface316), typeof(GInterface328), typeof(GInterface329), typeof(GInterface330)];
+            healthBar.ignoredTypes = [typeof(GInterface335), typeof(GInterface337), typeof(GInterface338), typeof(GInterface351), typeof(GInterface352), typeof(GInterface353)];
             healthBar.CreateHealthBar();
             return healthBar;
         }
@@ -216,7 +216,7 @@ namespace Fika.Core.Coop.Custom
 
         private void CreateHealthBar()
         {
-            GameObject uiPrefab = InternalBundleLoader.Instance.GetAssetBundle("playerui").LoadAsset<GameObject>("PlayerFriendlyUI");
+            GameObject uiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.PlayerUI);
             GameObject uiGameObj = Instantiate(uiPrefab);
             playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
             playerPlate.SetNameText(currentPlayer.Profile.Info.MainProfileNickname);

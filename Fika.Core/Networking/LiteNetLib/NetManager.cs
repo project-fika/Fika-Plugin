@@ -637,7 +637,12 @@ namespace LiteNetLib
 
 		private void ProcessNtpRequests(float elapsedMilliseconds)
 		{
-			List<IPEndPoint> requestsToRemove = null;
+            if (_ntpRequests.IsEmpty)
+            {
+                return;
+            }
+
+            List<IPEndPoint> requestsToRemove = null;
 			foreach (var ntpRequest in _ntpRequests)
 			{
 				ntpRequest.Value.Send(_udpSocketv4, elapsedMilliseconds);

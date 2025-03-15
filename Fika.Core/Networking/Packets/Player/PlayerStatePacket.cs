@@ -7,7 +7,7 @@ namespace Fika.Core.Networking
 {
     public struct PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
         EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed, bool isProne,
-        float poseLevel, bool isSprinting, BasePhysicalClass.GStruct36 stamina, int blindfire, float weaponOverlap,
+        float poseLevel, bool isSprinting, BasePhysicalClass.PhysicalStateStruct stamina, int blindfire, float weaponOverlap,
         bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, double remoteTime) : INetSerializable, ISnapshot
     {
         public int NetId = netId;
@@ -23,7 +23,7 @@ namespace Fika.Core.Networking
         public bool IsProne = isProne;
         public float PoseLevel = poseLevel;
         public bool IsSprinting = isSprinting;
-        public BasePhysicalClass.GStruct36 Stamina = stamina;
+        public BasePhysicalClass.PhysicalStateStruct Stamina = stamina;
         public int Blindfire = blindfire;
         public float WeaponOverlap = weaponOverlap;
         public bool LeftStanceDisabled = leftStanceDisabled;

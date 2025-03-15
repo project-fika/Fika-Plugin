@@ -4,7 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Networking.Packets;
+using Fika.Core.Networking;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,11 +26,11 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-            operationFactoryDelegates[typeof(Class1145)] = new OperationFactoryDelegate(Grenade1);
+            operationFactoryDelegates[typeof(Class1159)] = new OperationFactoryDelegate(Grenade1);
             return operationFactoryDelegates;
         }
 
-        private Player.BaseAnimationOperation Grenade1()
+        private Player.BaseAnimationOperationClass Grenade1()
         {
             return new ObservedTripwireState(this, coopPlayer);
         }
@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.ObservedClasses
         }
     }
 
-    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1145(controller)
+    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1159(controller)
     {
         private readonly CoopPlayer coopPlayer = player;
 
@@ -114,7 +114,7 @@ namespace Fika.Core.Coop.ObservedClasses
             // Do nothing
         }
 
-        public override void Execute(GInterface400 operation, Callback callback)
+        public override void Execute(GInterface412 operation, Callback callback)
         {
             callback.Succeed();
         }

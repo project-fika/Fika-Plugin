@@ -4,6 +4,7 @@ using EFT.Interactive;
 using Fika.Core.Networking;
 using LiteNetLib;
 using System.Collections.Generic;
+using static Fika.Core.Networking.GenericSubPackets;
 
 namespace Fika.Core.Coop.HostClasses
 {
@@ -25,7 +26,14 @@ namespace Fika.Core.Coop.HostClasses
             hostWorld.server.FikaHostWorld = hostWorld;
             hostWorld.gameWorld = gameWorld;
             hostWorld.LootSyncPackets = new List<LootSyncStruct>(8);
-            hostWorld.WorldPacket = new();
+            hostWorld.WorldPacket = new()
+            {
+                ArtilleryPackets = [],
+                SyncObjectPackets = [],
+                GrenadePackets = [],
+                LootSyncStructs = [],
+                RagdollPackets = []
+            };
             return hostWorld;
         }
 
@@ -34,7 +42,7 @@ namespace Fika.Core.Coop.HostClasses
             UpdateLootItems(gameWorld.LootItems);
         }
 
-        protected void FixedUpdate()
+        protected void LateUpdate()
         {
             int grenadesCount = gameWorld.Grenades.Count;
             for (int i = 0; i < grenadesCount; i++)
@@ -43,20 +51,19 @@ namespace Fika.Core.Coop.HostClasses
                 gameWorld.method_2(throwable);
             }
 
-            WorldPacket.ThrowablePackets.AddRange(gameWorld.GrenadesCriticalStates);
+            WorldPacket.GrenadePackets.AddRange(gameWorld.GrenadesCriticalStates);
             WorldPacket.ArtilleryPackets.AddRange(gameWorld.ArtilleryProjectilesStates);
 
             if (WorldPacket.HasData)
             {
-                server.SendReusableToAll(ref WorldPacket, DeliveryMethod.ReliableOrdered);
-                WorldPacket.Flush();
+                server.SendReusableToAll(WorldPacket, DeliveryMethod.ReliableOrdered);
             }
 
             gameWorld.GrenadesCriticalStates.Clear();
             gameWorld.ArtilleryProjectilesStates.Clear();
         }
 
-        public void UpdateLootItems(GClass786<int, LootItem> lootItems)
+        public void UpdateLootItems(GClass797<int, LootItem> lootItems)
         {
             for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
             {
@@ -92,10 +99,11 @@ namespace Fika.Core.Coop.HostClasses
         /// <param name="arg4"></param>
         private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
         {
-            BorderZonePacket packet = new()
+            GenericPacket packet = new()
             {
-                ProfileId = player.iPlayer.ProfileId,
-                ZoneId = zone.Id
+                NetId = player.iPlayer.Id,
+                Type = SubPacket.EGenericSubPacketType.BorderZone,
+                SubPacket = new BorderZoneEvent(player.iPlayer.ProfileId, zone.Id)
             };
 
             server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);

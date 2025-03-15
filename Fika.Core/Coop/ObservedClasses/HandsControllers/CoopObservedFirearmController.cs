@@ -31,7 +31,9 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private CoopPlayer coopPlayer;
+        public bool IsRevolver { get; internal set; }
+
+        private ObservedCoopPlayer coopPlayer;
         private bool triggerPressed;
         private bool needsReset;
         private float lastFireTime = 0f;
@@ -39,8 +41,8 @@ namespace Fika.Core.Coop.ObservedClasses
         private float aimMovementSpeed = 1f;
         private bool hasFired = false;
         private WeaponPrefab weaponPrefab;
-        private GClass1746 underBarrelManager;
         private WeaponManagerClass weaponManager;
+        private GClass1780 underBarrelManager;
         private bool boltActionReload;
         private bool isThrowingPatron;
 
@@ -52,18 +54,17 @@ namespace Fika.Core.Coop.ObservedClasses
             }
             set
             {
-                if (!value)
-                {
-                    _player.Physical.HoldBreath(false);
-                }
                 if (_isAiming == value)
                 {
+                    if (FirearmsAnimator != null)
+                    {
+                        method_64(); // Reset animator flags 
+                    }
                     return;
                 }
                 _isAiming = value;
                 _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
-                _player.MovementContext.SetAimingSlowdown(IsAiming, 0.33f + aimMovementSpeed);
-                _player.Physical.Aim((!_isAiming || !(_player.MovementContext.StationaryWeapon == null)) ? 0f : ErgonomicWeight);
+                method_63(_isAiming); // Set animator flags
                 coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
             }
         }
@@ -80,35 +81,35 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-            operationFactoryDelegates[typeof(GClass1771)] = new OperationFactoryDelegate(Idle1);
-            operationFactoryDelegates[typeof(GClass1756)] = new OperationFactoryDelegate(ThrowPatron1);
-            operationFactoryDelegates[typeof(GClass1757)] = new OperationFactoryDelegate(ThrowPatron2);
-            operationFactoryDelegates[typeof(GClass1782)] = new OperationFactoryDelegate(ThrowPatron3);
-            operationFactoryDelegates[typeof(GClass1785)] = new OperationFactoryDelegate(ThrowPatron4);
+            operationFactoryDelegates[typeof(GClass1806)] = new OperationFactoryDelegate(Idle1);
+            operationFactoryDelegates[typeof(GClass1790)] = new OperationFactoryDelegate(ThrowPatron1);
+            operationFactoryDelegates[typeof(GClass1791)] = new OperationFactoryDelegate(ThrowPatron2);
+            operationFactoryDelegates[typeof(GClass1817)] = new OperationFactoryDelegate(ThrowPatron3);
+            operationFactoryDelegates[typeof(GClass1820)] = new OperationFactoryDelegate(ThrowPatron4);
             return operationFactoryDelegates;
         }
 
-        private BaseAnimationOperation ThrowPatron1()
+        private BaseAnimationOperationClass ThrowPatron1()
         {
             return new ObservedThrowPatronOperation1(this);
         }
 
-        private BaseAnimationOperation ThrowPatron2()
+        private BaseAnimationOperationClass ThrowPatron2()
         {
             return new ObservedThrowPatronOperation2(this);
         }
 
-        private BaseAnimationOperation ThrowPatron3()
+        private BaseAnimationOperationClass ThrowPatron3()
         {
             return new ObservedThrowPatronOperation3(this);
         }
 
-        private BaseAnimationOperation ThrowPatron4()
+        private BaseAnimationOperationClass ThrowPatron4()
         {
             return new ObservedThrowPatronOperation4(this);
         }
 
-        private BaseAnimationOperation Idle1()
+        private BaseAnimationOperationClass Idle1()
         {
             return new ObservedIdleOperation(this);
         }
@@ -122,11 +123,12 @@ namespace Fika.Core.Coop.ObservedClasses
             weaponManager = weaponPrefab.ObjectInHands as WeaponManagerClass;
             if (UnderbarrelWeapon != null)
             {
-                underBarrelManager = Traverse.Create(this).Field<GClass1746>("GClass1746_0").Value;
+                underBarrelManager = Traverse.Create(this).Field<GClass1780>("gclass1780_0").Value;
             }
+            IsRevolver = Weapon is RevolverItemClass;
         }
 
-        public static CoopObservedFirearmController Create(CoopPlayer player, Weapon weapon)
+        public static CoopObservedFirearmController Create(ObservedCoopPlayer player, Weapon weapon)
         {
             CoopObservedFirearmController controller = smethod_6<CoopObservedFirearmController>(player, weapon);
             controller.coopPlayer = player;
@@ -136,6 +138,39 @@ namespace Fika.Core.Coop.ObservedClasses
         public override bool CanStartReload()
         {
             return true;
+        }
+
+        public override bool IsInInteractionStrictCheck()
+        {
+            return false;
+        }
+
+        public override void SetAim(int scopeIndex)
+        {
+            Item.AimIndex.Value = Mathf.Max(0, scopeIndex);
+            SetObservedAim(scopeIndex >= 0);
+        }
+
+        private void SetObservedAim(bool isAiming)
+        {
+            // Lacyway: Unsure if this is needed, remove later if it is
+            /*if (Weapon is GClass3111 && coopPlayer.ProceduralWeaponAnimation.IsAiming != isAiming)
+            {
+                FirearmsAnimator.SetAiming(!isAiming);
+            }*/
+
+            if (_player.UsedSimplifiedSkeleton)
+            {
+                _player.MovementContext.PlayerAnimator.SetAiming(isAiming);
+            }
+            IsAiming = isAiming;
+            _player.ProceduralWeaponAnimation.CheckShouldMoveWeaponCloser();
+            _player.ProceduralWeaponAnimation.Shootingg.CurrentRecoilEffect.WeaponRecoilEffect.SetAiming(isAiming);
+            _player.method_58(0.2f, false);
+            if (isAiming)
+            {
+                method_60();
+            }
         }
 
         public override void ManualUpdate(float deltaTime)
@@ -157,8 +192,58 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
+        public override void ReloadMag(MagazineItemClass magazine, ItemAddress itemAddress, Callback callback)
+        {
+            _player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
+            CurrentOperation.ReloadMag(magazine, itemAddress, callback, null);
+        }
+
+        public override void QuickReloadMag(MagazineItemClass magazine, Callback callback)
+        {
+            CurrentOperation.QuickReloadMag(magazine, callback, null);
+        }
+
+        public override void ReloadGrenadeLauncher(AmmoPackReloadingClass foundItem, Callback callback)
+        {
+            CurrentOperation.ReloadGrenadeLauncher(foundItem, callback);
+        }
+
+        public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback callback, bool quickReload = false)
+        {
+            if (Item.GetCurrentMagazine() == null)
+            {
+                return;
+            }
+
+            CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, quickReload);
+        }
+
+        public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
+        {
+            if (Item is RevolverItemClass)
+            {
+                CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, false);
+                return;
+            }
+
+            CurrentOperation.ReloadWithAmmo(ammoPack, callback, null);
+        }
+
+        public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
+        {
+            if (ammoPack.AmmoCount > 0)
+            {
+                CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, null);
+            }
+        }
+
         public override void WeaponOverlapping()
         {
+            if (!coopPlayer.ShouldOverlap)
+            {
+                return;
+            }
+
             SetWeaponOverlapValue(coopPlayer.ObservedOverlap);
             ObservedOverlapView();
             if (overlapCounter <= 1f)
@@ -175,22 +260,24 @@ namespace Fika.Core.Coop.ObservedClasses
                 coopPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
                 overlapCounter = 0f;
             }
+
+            coopPlayer.ShouldOverlap = false;
         }
 
         private void ObservedOverlapView()
         {
-            Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
             if (coopPlayer.ObservedOverlap < 0.02f)
             {
                 _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
                 _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = true;
+                coopPlayer.ShouldOverlap = false;
+                return;
             }
-            else
-            {
-                _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
-                _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
-                _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
-            }
+
+            Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
+            _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
+            _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
+            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
         }
 
         public override void OnPlayerDead()
@@ -296,6 +383,15 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public void HandleShotInfoPacket(ref ShotInfoPacket packet, InventoryController inventoryController)
         {
+            if (packet.ShotType == EShotType.DryFire)
+            {
+                FirearmsAnimator.SetFire(true);
+                DryShot();
+                hasFired = true;
+                lastFireTime = 0f;
+                return;
+            }
+
             if (packet.ShotType >= EShotType.Misfire)
             {
                 switch (packet.ShotType)
@@ -326,34 +422,99 @@ namespace Fika.Core.Coop.ObservedClasses
                 AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate.Value, null);
                 Weapon.MalfState.MalfunctionedAmmo = ammo;
                 Weapon.MalfState.AmmoToFire = ammo;
-                if (Weapon.HasChambers && Weapon.Chambers[0].ContainedItem is AmmoItemClass)
-                {
-                    Weapon.Chambers[0].RemoveItemWithoutRestrictions();
-                }
+
+                FirearmsAnimator.MisfireSlideUnknown(false);
                 weaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
+                FirearmsAnimator.Malfunction((int)Weapon.MalfState.State);
+
+                switch (Weapon.MalfState.State)
+                {
+                    case Weapon.EMalfunctionState.Misfire:
+                        FirearmsAnimator.Animator.Play("MISFIRE", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.Jam:
+                        FirearmsAnimator.Animator.Play("JAM", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.HardSlide:
+                        FirearmsAnimator.Animator.Play("HARD_SLIDE", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.SoftSlide:
+                        FirearmsAnimator.Animator.Play("SOFT_SLIDE", 1, 0f);
+                        break;
+                    case Weapon.EMalfunctionState.Feed:
+                        FirearmsAnimator.Animator.Play("FEED", 1, 0f);
+                        break;
+                }
+
                 if (Weapon.MalfState.State == Weapon.EMalfunctionState.Misfire)
                 {
-                    weaponPrefab.RevertMalfunctionState(Weapon, true, true);
-                    coopPlayer.InventoryController.ExamineMalfunction(Weapon, true);
+                    if (Weapon.HasChambers)
+                    {
+                        Slot firstChamber = Weapon.Chambers[0];
+                        if (firstChamber.ContainedItem is AmmoItemClass)
+                        {
+                            firstChamber.RemoveItemWithoutRestrictions();
+                        }
+                    }
+
+                    FirearmsAnimator.SetFire(true);
+                    hasFired = true;
+                    lastFireTime = 0f;
+                    return;
                 }
-                return;
+
+                if (Weapon.HasChambers)
+                {
+                    Slot firstChamber = Weapon.Chambers[0];
+                    if (firstChamber.ContainedItem is AmmoItemClass)
+                    {
+                        firstChamber.RemoveItemWithoutRestrictions();
+                    }
+
+                    if (Weapon.MalfState.State == Weapon.EMalfunctionState.Feed)
+                    {
+                        MagazineItemClass currentMagazine = Weapon.GetCurrentMagazine();
+                        if (currentMagazine != null)
+                        {
+                            AmmoItemClass fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(coopPlayer.InventoryController).Value.ResultItem;
+                            if (fedAmmo != null)
+                            {
+                                Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
+                                // Leave here for now - Lacyway
+                                /*weaponManager.SetRoundIntoWeapon(fedAmmo, 0);
+                                weaponManager.MoveAmmoFromChamberToShellPort(false, 0);*/
+                            }
+                            else
+                            {
+                                FikaPlugin.Instance.FikaLogger.LogError("HandleShotInfoPacket: Could not find ammo when setting up feed malfunction!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        weaponManager.MoveAmmoFromChamberToShellPort(true, 0);
+                    }
+                }
             }
 
-            if (packet.ShotType == EShotType.DryFire)
-            {
-                FirearmsAnimator.SetFire(true);
-                DryShot();
-                hasFired = true;
-                lastFireTime = 0f;
-                return;
-            }
-
-            if (packet.ShotType == EShotType.RegularShot)
-            {
-                HandleObservedShot(ref packet, inventoryController);
-                return;
-            }
+            HandleObservedShot(ref packet, inventoryController);
         }
+
+        // Leave here for now - Lacyway
+        /*private AmmoItemClass GetFedAmmoFromMalfunction(MagazineItemClass currentMagazine)
+        {
+            if (!Weapon.HasChambers)
+            {
+                return (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(coopPlayer.InventoryController).Value.ResultItem;
+            }
+
+            Slot chamberSlot = Weapon.Chambers[0];
+            if (chamberSlot.ContainedItem != null)
+            {
+                chamberSlot.RemoveItemWithoutRestrictions();
+            }
+            return (AmmoItemClass)currentMagazine.Cartridges.PopTo(coopPlayer.InventoryController, chamberSlot.CreateItemAddress()).Value.ResultItem;
+        }*/
 
         private void HandleObservedShot(ref ShotInfoPacket packet, InventoryController inventoryController)
         {
@@ -372,7 +533,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 triggerPressed = true;
             }
 
-            float pitchMult = method_60();
+            float pitchMult = method_61();
             WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
                 pitchMult, Malfunction, false, IsBirstOf2Start);
 
@@ -394,17 +555,18 @@ namespace Fika.Core.Coop.ObservedClasses
 
             if (Weapon.MalfState.State == Weapon.EMalfunctionState.None)
             {
-                if (Weapon is RevolverItemClass && Weapon.CylinderHammerClosed)
+                if (IsRevolver && Weapon.CylinderHammerClosed)
                 {
                     FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0.2f);
-                    return;
                 }
-                if (Weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
+                else if (Weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
                 {
                     FirearmsAnimator.Animator.Play(FirearmsAnimator.FullSemiFireStateName, 1, 0.2f);
-                    return;
                 }
-                FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f);
+                else
+                {
+                    FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f);
+                }
             }
 
             if (packet.UnderbarrelShot)
@@ -470,7 +632,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
             }
 
-            if (Weapon is RevolverItemClass)
+            if (IsRevolver)
             {
                 if (magazine is CylinderMagazineItemClass cylinderMagazine)
                 {
@@ -479,10 +641,10 @@ namespace Fika.Core.Coop.ObservedClasses
                     AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
                     if (cylinderAmmo != null)
                     {
-                        GStruct446<GInterface385> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
+                        GStruct455<GInterface398> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
                         if (removeOperation.Failed)
                         {
-                            FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}");
+                            FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}, error: {removeOperation.Error}");
                         }
                         inventoryController.CheckChamber(Weapon, false);
                         cylinderAmmo.IsUsed = true;
@@ -528,7 +690,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             if (ammo.AmmoTemplate.IsLightAndSoundShot)
             {
-                method_61(packet.ShotPosition, packet.ShotDirection);
+                method_62(packet.ShotPosition, packet.ShotDirection);
                 LightAndSoundShot(packet.ShotPosition, packet.ShotDirection, ammo.AmmoTemplate);
             }
         }
@@ -546,7 +708,7 @@ namespace Fika.Core.Coop.ObservedClasses
             _preallocatedAmmoList.Clear();
             foreach (string id in ammoIds)
             {
-                GStruct448<Item> gstruct = _player.FindItemById(id);
+                GStruct457<Item> gstruct = _player.FindItemById(id);
                 if (gstruct.Succeeded && gstruct.Value is AmmoItemClass bulletClass)
                 {
                     _preallocatedAmmoList.Add(bulletClass);
@@ -583,7 +745,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedIdleOperation(FirearmController controller) : GClass1771(controller)
+        private class ObservedIdleOperation(FirearmController controller) : GClass1806(controller)
         {
             public override void ProcessRemoveOneOffWeapon()
             {
@@ -591,29 +753,29 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation1(FirearmController controller) : GClass1756(controller)
+        private class ObservedThrowPatronOperation1(FirearmController controller) : GClass1790(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1743 reloadMultiBarrelResult, Callback callback)
+            public override void Start(GClass1777 reloadMultiBarrelResult, Callback callback)
             {
                 observedController.isThrowingPatron = true;
                 base.Start(reloadMultiBarrelResult, callback);
             }
         }
 
-        private class ObservedThrowPatronOperation2(FirearmController controller) : GClass1757(controller)
+        private class ObservedThrowPatronOperation2(FirearmController controller) : GClass1791(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1744 reloadSingleBarrelResult, Callback callback)
+            public override void Start(GClass1778 reloadSingleBarrelResult, Callback callback)
             {
                 observedController.isThrowingPatron = true;
                 base.Start(reloadSingleBarrelResult, callback);
             }
         }
 
-        private class ObservedThrowPatronOperation3(FirearmController controller) : GClass1782(controller)
+        private class ObservedThrowPatronOperation3(FirearmController controller) : GClass1817(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
@@ -624,7 +786,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation4(FirearmController controller) : GClass1785(controller)
+        private class ObservedThrowPatronOperation4(FirearmController controller) : GClass1820(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 

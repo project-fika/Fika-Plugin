@@ -2,9 +2,9 @@
 
 namespace Fika.Core.Networking
 {
-    public struct InventoryPacket(int netId) : INetSerializable
+    public struct InventoryPacket : INetSerializable
     {
-        public int NetId = netId;
+        public int NetId;
         public uint CallbackId;
         public byte[] OperationBytes;
 

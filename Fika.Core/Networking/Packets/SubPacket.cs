@@ -1,13 +1,21 @@
 ﻿using Fika.Core.Coop.Players;
+using LiteNetLib;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets
+namespace Fika.Core.Networking
 {
     public class SubPacket
     {
         public interface ISubPacket
         {
-            public void Execute(CoopPlayer player);
+            public void Execute(CoopPlayer player = null);
+            public void Serialize(NetDataWriter writer);
+        }
+
+        public interface IRequestPacket
+        {
+            public void HandleRequest(NetPeer peer, FikaServer server);
+            public void HandleResponse();
             public void Serialize(NetDataWriter writer);
         }
 
@@ -77,6 +85,7 @@ namespace Fika.Core.Networking.Packets
             CompassChange,
             Knife,
             FlareShot,
+            RocketShot,
             ReloadBoltAction,
             RollCylinder,
             UnderbarrelSightingRangeUp,
@@ -103,11 +112,27 @@ namespace Fika.Core.Networking.Packets
         public enum EGenericSubPacketType
         {
             ClientExtract,
+            ClientConnected,
+            ClientDisconnected,
             ExfilCountdown,
             ClearEffects,
-            UpdateBackendData
+            UpdateBackendData,
+            SecretExfilFound,
+            BorderZone,
+            Mine,
+            DisarmTripwire,
+            MuffledState
             //TrainSync,
             //TraderServiceNotification,
+        }
+
+        public enum ERequestSubPacketType
+        {
+            SpawnPoint,
+            Weather,
+            Exfiltration,
+            TraderServices,
+            CharacterSync
         }
     }
 }

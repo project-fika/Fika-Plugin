@@ -32,7 +32,13 @@ namespace Fika.Core.UI.Models
         [DataMember]
         public Dictionary<string, bool> Players;
 
-        public LobbyEntry(string serverId, string hostUsername, int playerCount, ELobbyStatus status, string location, ESideType side, EDateTime time, Dictionary<string, bool> players)
+        [DataMember]
+        public bool IsHeadless;
+
+        [DataMember]
+        public string HeadlessRequesterNickname;
+
+        public LobbyEntry(string serverId, string hostUsername, int playerCount, ELobbyStatus status, string location, ESideType side, EDateTime time, Dictionary<string, bool> players, bool isHeadless, string headlessRequesterNickname)
         {
             ServerId = serverId;
             HostUsername = hostUsername;
@@ -42,6 +48,8 @@ namespace Fika.Core.UI.Models
             Side = side;
             Time = time;
             Players = players;
+            IsHeadless = isHeadless;
+            HeadlessRequesterNickname = headlessRequesterNickname;
         }
 
         public enum ELobbyStatus

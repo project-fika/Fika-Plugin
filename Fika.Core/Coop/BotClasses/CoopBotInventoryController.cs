@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.BotClasses
             coopBot = (CoopBot)player;
             mongoID_0 = currentId;
             ushort_0 = nextOperationId;
-            searchController = new GClass1973(profile);
+            searchController = new BotSearchControllerClass(profile);
         }
 
         public override IPlayerSearchController PlayerSearchController
@@ -49,20 +49,21 @@ namespace Fika.Core.Coop.BotClasses
         {
             // Check for GClass increments
             // Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-            if (operation is not GClass3210)
+            if (operation is not GClass3281)
             {
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
-                GClass1198 writer = new();
-                writer.WritePolymorph(operation.ToDescriptor());
+                FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+                eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
+                    NetId = coopBot.NetId,
                     CallbackId = operation.Id,
-                    OperationBytes = writer.ToArray()
+                    OperationBytes = eftWriter.ToArray()
                 };
 
-                coopBot.PacketSender.InventoryPackets.Enqueue(packet);
+                coopBot.PacketSender.SendPacket(ref packet);
             }
             HandleOperation(operation, callback).HandleExceptions();
         }
@@ -90,7 +91,7 @@ namespace Fika.Core.Coop.BotClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
+            return new GClass3303(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class BotInventoryOperationHandler(CoopBotInventoryController controller, BaseInventoryOperationClass operation, Callback callback)

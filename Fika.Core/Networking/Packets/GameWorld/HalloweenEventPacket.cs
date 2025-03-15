@@ -7,7 +7,7 @@ namespace Fika.Core.Networking
     public struct HalloweenEventPacket : INetSerializable
     {
         public EHalloweenPacketType PacketType;
-        public BaseSyncEvent SyncEvent;
+        public SyncEventFromServer SyncEvent;
 
         public void Deserialize(NetDataReader reader)
         {

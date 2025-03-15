@@ -43,7 +43,7 @@ namespace Fika.Core.UI.Custom
         private DateTime lastSet;
         private int minSecondsToWait;
         private RectTransform transformToScale;
-        private GInterface186<RaidSettings> backendSession;
+        private GInterface198<RaidSettings> backendSession;
 
         private DateTime BackendTime
         {
@@ -116,11 +116,10 @@ namespace Fika.Core.UI.Custom
 
         private void CreateMainMenuUI()
         {
-            GameObject mainMenuUIPrefab = InternalBundleLoader.Instance.GetAssetBundle("mainmenuui").LoadAsset<GameObject>("MainMenuUI");
+            GameObject mainMenuUIPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.MainMenuUI);
             GameObject mainMenuUI = GameObject.Instantiate(mainMenuUIPrefab);
             this.mainMenuUI = mainMenuUI.GetComponent<MainMenuUI>();
             playerTemplate = this.mainMenuUI.PlayerTemplate;
-            playerTemplate.SetActive(false);
             Transform newParent = Singleton<CommonUI>.Instance.MenuScreen.gameObject.transform;
             mainMenuUI.transform.SetParent(newParent);
             gameObject.transform.SetParent(newParent);

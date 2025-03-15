@@ -12,23 +12,16 @@
     <Configurations>Debug;Release;GoldMaster</Configurations>
     <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
   </PropertyGroup>
-
   <ItemGroup>
-    <!-- hide files in vs2022 -->
-    <None Remove="Bundles\Files\mainmenuui.bundle" />
-    <None Remove="Bundles\Files\newmatchmakerui.bundle" />
-    <None Remove="Bundles\Files\playerui.bundle" />
-    <None Remove="Bundles\Files\ping.bundle" />
-    <None Remove="Bundles\Files\senditemmenu.bundle" />
+    <Compile Remove="Coop\Patches\SPTBugs\**" />
+    <EmbeddedResource Remove="Coop\Patches\SPTBugs\**" />
+    <None Remove="Coop\Patches\SPTBugs\**" />
   </ItemGroup>
-
   <ItemGroup>
-    <!-- embedded resources -->
-    <EmbeddedResource Include="Bundles\Files\mainmenuui.bundle" />
-    <EmbeddedResource Include="Bundles\Files\newmatchmakerui.bundle" />
-    <EmbeddedResource Include="Bundles\Files\playerui.bundle" />
-    <EmbeddedResource Include="Bundles\Files\ping.bundle" />
-    <EmbeddedResource Include="Bundles\Files\senditemmenu.bundle" />
+    <None Remove="Bundles\Files\masterbundle.bundle" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Bundles\Files\masterbundle.bundle" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,6 +46,9 @@
     <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
     <Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
     <Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
+    <Reference Include="DOTween">
+      <HintPath>..\References\DOTween.dll</HintPath>
+    </Reference>
     <Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
     <Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />
     <Reference Include="Sirenix.Serialization" HintPath="..\References\Sirenix.Serialization.dll" Private="false" />

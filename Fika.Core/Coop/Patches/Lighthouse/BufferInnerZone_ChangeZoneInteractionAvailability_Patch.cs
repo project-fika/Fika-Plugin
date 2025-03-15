@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Patches
                 Available = isAvailable
             };
 
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableUnordered);
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
     }
 }

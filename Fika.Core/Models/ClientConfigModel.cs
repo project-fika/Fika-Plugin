@@ -8,57 +8,43 @@ namespace Fika.Core.Models
     public struct ClientConfigModel
     {
         [DataMember(Name = "useBtr")]
-        public bool UseBTR;
+        public bool UseBTR { get; set; }
 
         [DataMember(Name = "friendlyFire")]
-        public bool FriendlyFire;
+        public bool FriendlyFire { get; set; }
 
         [DataMember(Name = "dynamicVExfils")]
-        public bool DynamicVExfils;
+        public bool DynamicVExfils { get; set; }
 
         [DataMember(Name = "allowFreeCam")]
-        public bool AllowFreeCam;
+        public bool AllowFreeCam { get; set; }
 
         [DataMember(Name = "AllowSpectateFreeCam")]
-        public bool AllowSpectateFreeCam;
+        public bool AllowSpectateFreeCam { get; set; }
 
         [DataMember(Name = "allowItemSending")]
-        public bool AllowItemSending;
+        public bool AllowItemSending { get; set; }
 
         [DataMember(Name = "blacklistedItems")]
-        public string[] BlacklistedItems;
+        public string[] BlacklistedItems { get; set; }
 
         [DataMember(Name = "forceSaveOnDeath")]
-        public bool ForceSaveOnDeath;
+        public bool ForceSaveOnDeath { get; set; }
 
         [DataMember(Name = "useInertia")]
-        public bool UseInertia;
+        public bool UseInertia { get; set; }
 
         [DataMember(Name = "sharedQuestProgression")]
-        public bool SharedQuestProgression;
+        public bool SharedQuestProgression { get; set; }
 
         [DataMember(Name = "canEditRaidSettings")]
-        public bool CanEditRaidSettings;
+        public bool CanEditRaidSettings { get; set; }
 
         [DataMember(Name = "enableTransits")]
-        public bool EnableTransits;
+        public bool EnableTransits { get; set; }
 
-        public ClientConfigModel(bool useBTR, bool friendlyFire, bool dynamicVExfils, bool allowFreeCam, bool allowSpectateFreeCam, bool allowItemSending, string[] blacklistedItems, bool forceSaveOnDeath, bool useInertia,
-            bool sharedQuestProgression, bool canEditRaidSettings, bool enableTransits)
-        {
-            UseBTR = useBTR;
-            FriendlyFire = friendlyFire;
-            DynamicVExfils = dynamicVExfils;
-            AllowFreeCam = allowFreeCam;
-            AllowSpectateFreeCam = allowSpectateFreeCam;
-            AllowItemSending = allowItemSending;
-            BlacklistedItems = blacklistedItems;
-            ForceSaveOnDeath = forceSaveOnDeath;
-            UseInertia = useInertia;
-            SharedQuestProgression = sharedQuestProgression;
-            CanEditRaidSettings = canEditRaidSettings;
-            EnableTransits = enableTransits;
-        }
+        [DataMember(Name = "anyoneCanStartRaid")]
+        public bool AnyoneCanStartRaid { get; set; }
 
         public void LogValues()
         {

@@ -5,7 +5,7 @@ using EFT.InventoryLogic;
 using System;
 using UnityEngine;
 
-namespace Fika.Core.Networking.Packets
+namespace Fika.Core.Networking
 {
     /// <summary>
     /// Class containing several static methods to serialize/deserialize sub-packages
@@ -53,7 +53,7 @@ namespace Fika.Core.Networking.Packets
             public Vector3 Point;
             public float Force;
             public Vector3 OverallVelocity;
-            public GClass1659 InventoryDescriptor;
+            public GClass1693 InventoryDescriptor;
             public EquipmentSlot ItemSlot;
             public Item ItemInHands;
         }

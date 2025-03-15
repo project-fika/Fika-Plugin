@@ -34,7 +34,7 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
         }
 
         [PatchPostfix]
-        public static void Postfix(ref ISession session, Profile ___profile_0, MatchMakerAcceptScreen __instance)
+        public static void Postfix(ref ISession session, MatchMakerAcceptScreen __instance)
         {
             FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
             FikaBackendUtils.Profile = session.Profile;

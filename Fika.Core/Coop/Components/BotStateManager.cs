@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.Components
             return component;
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
             fixedUpdateCount++;
             if (fixedUpdateCount >= fixedUpdatesPerTick)
@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.Components
             }
         }
 
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             OnUpdate = null;
         }

@@ -1,16 +1,16 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using LiteNetLib;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.GameWorld.GenericSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.GenericSubPackets;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Coop.Components
 {
@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.Components
         private List<ExtractionPlayerHandler> playerHandlers;
         private List<ExfiltrationPoint> countdownPoints;
         private ExfiltrationPoint[] exfiltrationPoints;
-        private CarExtraction carExfil = null;
+        private SecretExfiltrationPoint[] secretExfiltrationPoints;
 
         protected void Awake()
         {
@@ -28,12 +28,12 @@ namespace Fika.Core.Coop.Components
             playerHandlers = [];
             countdownPoints = [];
             exfiltrationPoints = [];
-            carExfil = FindObjectOfType<CarExtraction>();
+            secretExfiltrationPoints = [];
         }
 
         protected void Update()
         {
-            if (exfiltrationPoints == null)
+            if (exfiltrationPoints == null || secretExfiltrationPoints == null)
             {
                 return;
             }
@@ -78,27 +78,20 @@ namespace Fika.Core.Coop.Components
                         }
                     }
 
-                    if (carExfil != null)
-                    {
-                        if (carExfil.Subscribee == exfiltrationPoint)
-                        {
-                            carExfil.Play();
-                        }
-                    }
-
                     exfiltrationPoint.ExternalSetStatus(EExfiltrationStatus.NotPresent);
                     countdownPoints.Remove(exfiltrationPoint);
                 }
             }
         }
 
-        public void Run(ExfiltrationPoint[] exfilPoints)
+        public void Run(ExfiltrationPoint[] exfilPoints, SecretExfiltrationPoint[] secretExfilPoints)
         {
             foreach (ExfiltrationPoint exfiltrationPoint in exfilPoints)
             {
                 exfiltrationPoint.OnStartExtraction += ExfiltrationPoint_OnStartExtraction;
                 exfiltrationPoint.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
                 exfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
+                exfiltrationPoint.OnStatusChanged += game.method_9;
                 game.UpdateExfiltrationUi(exfiltrationPoint, false, true);
                 if (FikaPlugin.Instance.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < FikaBackendUtils.HostExpectedNumberOfPlayers)
                 {
@@ -106,7 +99,32 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
+            foreach (SecretExfiltrationPoint secretExfiltrationPoint in secretExfilPoints)
+            {
+                secretExfiltrationPoint.OnStartExtraction += ExfiltrationPoint_OnStartExtraction;
+                secretExfiltrationPoint.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
+                secretExfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
+                secretExfiltrationPoint.OnStatusChanged += game.method_9;
+                secretExfiltrationPoint.OnStatusChanged += game.ShowNewSecretExit;
+                game.UpdateExfiltrationUi(secretExfiltrationPoint, false, true);
+                secretExfiltrationPoint.OnPointFoundEvent += SecretExfiltrationPoint_OnPointFoundEvent;
+            }
+
             exfiltrationPoints = exfilPoints;
+            secretExfiltrationPoints = secretExfilPoints;
+        }
+
+        private void SecretExfiltrationPoint_OnPointFoundEvent(string exitName, bool sharedExit)
+        {
+            CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            GenericPacket packet = new()
+            {
+                NetId = mainPlayer.NetId,
+                Type = EGenericSubPacketType.SecretExfilFound,
+                SubPacket = new SecretExfilFound(mainPlayer.GroupId, exitName)
+            };
+
+            mainPlayer.PacketSender.SendPacket(ref packet);
         }
 
         public void Stop()
@@ -114,17 +132,30 @@ namespace Fika.Core.Coop.Components
             playerHandlers.Clear();
             countdownPoints.Clear();
 
-            if (exfiltrationPoints == null)
+            if (exfiltrationPoints != null)
             {
-                return;
+                foreach (ExfiltrationPoint exfiltrationPoint in exfiltrationPoints)
+                {
+                    exfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
+                    exfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
+                    exfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
+                    exfiltrationPoint.OnStatusChanged -= game.method_9;
+                    exfiltrationPoint.Disable();
+                }
             }
 
-            foreach (ExfiltrationPoint exfiltrationPoint in exfiltrationPoints)
+            if (secretExfiltrationPoints != null)
             {
-                exfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
-                exfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
-                exfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
-                exfiltrationPoint.Disable();
+                foreach (SecretExfiltrationPoint secretExfiltrationPoint in secretExfiltrationPoints)
+                {
+                    secretExfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
+                    secretExfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
+                    secretExfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
+                    secretExfiltrationPoint.OnStatusChanged -= game.method_9;
+                    secretExfiltrationPoint.OnStatusChanged -= game.ShowNewSecretExit;
+                    secretExfiltrationPoint.OnPointFoundEvent -= SecretExfiltrationPoint_OnPointFoundEvent;
+                    secretExfiltrationPoint.Disable();
+                }
             }
         }
 
@@ -178,14 +209,6 @@ namespace Fika.Core.Coop.Components
             {
                 point.ExfiltrationStartTime = -100;
                 countdownPoints.Remove(point);
-
-                if (carExfil != null)
-                {
-                    if (carExfil.Subscribee == point)
-                    {
-                        carExfil.Play();
-                    }
-                }
             }
 
             if (!isCounting && point.Status == EExfiltrationStatus.Countdown)
@@ -199,21 +222,10 @@ namespace Fika.Core.Coop.Components
                     {
                         NetId = mainPlayer.NetId,
                         Type = EGenericSubPacketType.ExfilCountdown,
-                        SubPacket = new ExfilCountdown()
-                        {
-                            ExfilName = point.Settings.Name,
-                            ExfilStartTime = point.ExfiltrationStartTime
-                        }
+                        SubPacket = new ExfilCountdown(point.Settings.Name, point.ExfiltrationStartTime)
                     };
 
-                    if (FikaBackendUtils.IsServer)
-                    {
-                        mainPlayer.PacketSender.Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-                    }
-                    else if (FikaBackendUtils.IsClient)
-                    {
-                        mainPlayer.PacketSender.Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                    }
+                    mainPlayer.PacketSender.SendPacket(ref packet);
                 }
                 countdownPoints.Add(point);
             }

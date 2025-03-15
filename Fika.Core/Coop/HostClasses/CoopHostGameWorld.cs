@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.Networking.GenericSubPackets;
 
 namespace Fika.Core.Coop.HostClasses
 {
@@ -27,7 +28,9 @@ namespace Fika.Core.Coop.HostClasses
             }
         }
 
-        public static CoopHostGameWorld Create(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+        public FikaHostWorld FikaHostWorld { get; private set; }
+
+        public static CoopHostGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {
             CoopHostGameWorld gameWorld = gameObject.AddComponent<CoopHostGameWorld>();
             gameWorld.ObjectsFactory = objectsFactory;
@@ -38,7 +41,9 @@ namespace Fika.Core.Coop.HostClasses
             gameWorld.CurrentProfileId = currentProfileId;
             gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
             gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
-            FikaHostWorld.Create(gameWorld);
+            gameWorld.FikaHostWorld = FikaHostWorld.Create(gameWorld);
+            gameWorld.FikaHostWorld.method_0();
+            Singleton<CoopHostGameWorld>.Create(gameWorld);
             return gameWorld;
         }
 
@@ -47,7 +52,8 @@ namespace Fika.Core.Coop.HostClasses
             return new HostGrenadeFactory();
         }
 
-        public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2011 config, bool loadBundlesAndCreatePools = true, List<ResourceKey> resources = null, IProgress<LoadingProgressStruct> progress = null, CancellationToken ct = default)
+        public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2045 config, bool loadBundlesAndCreatePools = true,
+            List<ResourceKey> resources = null, IProgress<LoadingProgressStruct> progress = null, CancellationToken ct = default)
         {
             await base.InitLevel(itemFactory, config, loadBundlesAndCreatePools, resources, progress, ct);
             MineManager.OnExplosion += OnMineExplode;
@@ -64,16 +70,20 @@ namespace Fika.Core.Coop.HostClasses
                 return;
             }
 
-            MinePacket packet = new()
+            GenericPacket packet = new()
             {
-                MinePositon = directional.transform.position
+                NetId = 0,
+                Type = SubPacket.EGenericSubPacketType.Mine,
+                SubPacket = new MineEvent(directional.transform.position)
             };
+
             Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void Dispose()
         {
             base.Dispose();
+            Singleton<CoopHostGameWorld>.Release(this);
             MineManager.OnExplosion -= OnMineExplode;
             NetManagerUtils.DestroyNetManager(true);
         }
@@ -94,7 +104,7 @@ namespace Fika.Core.Coop.HostClasses
             ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
         }
 
-        public override GClass2400 SyncObjectProcessorFactory()
+        public override SyncObjectProcessorClass SyncObjectProcessorFactory()
         {
             ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
             {
@@ -113,7 +123,7 @@ namespace Fika.Core.Coop.HostClasses
             if (SynchronizableObjectLogicProcessor.TripwireManager == null)
             {
                 FikaPlugin.Instance.FikaLogger.LogError("TripwireManager was null! Creating new...");
-                SynchronizableObjectLogicProcessor.TripwireManager = new GClass2402(this);
+                SynchronizableObjectLogicProcessor.TripwireManager = new GClass2457(this);
             }
 
             TripwireSynchronizableObject tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);
@@ -124,16 +134,20 @@ namespace Fika.Core.Coop.HostClasses
             Vector3 vector = (fromPosition + toPosition) * 0.5f;
             Singleton<BotEventHandler>.Instance.PlantTripwire(tripwireSynchronizableObject, vector);
 
-            SpawnSyncObjectPacket packet = new(tripwireSynchronizableObject.ObjectId)
+            SpawnSyncObjectPacket packet = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
-                IsStatic = tripwireSynchronizableObject.IsStatic,
-                GrenadeTemplate = grenadeClass.TemplateId,
-                GrenadeId = grenadeClass.Id,
-                ProfileId = profileId,
-                Position = fromPosition,
-                ToPosition = toPosition,
-                Rotation = tripwireSynchronizableObject.transform.rotation
+                SubPacket = new SpawnSyncObjectSubPackets.SpawnTripwire()
+                {
+                    ObjectId = tripwireSynchronizableObject.ObjectId,
+                    IsStatic = tripwireSynchronizableObject.IsStatic,
+                    GrenadeTemplate = grenadeClass.TemplateId,
+                    GrenadeId = grenadeClass.Id,
+                    ProfileId = profileId,
+                    Position = fromPosition,
+                    ToPosition = toPosition,
+                    Rotation = tripwireSynchronizableObject.transform.rotation
+                }
             };
 
             Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
@@ -141,49 +155,45 @@ namespace Fika.Core.Coop.HostClasses
 
         public override void TriggerTripwire(TripwireSynchronizableObject tripwire)
         {
-            SyncObjectPacket packet = new(tripwire.ObjectId)
+            AirplaneDataPacketStruct packet = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
-                Data = new()
+                ObjectId = tripwire.ObjectId,
+                PacketData = new()
                 {
-                    PacketData = new()
+                    TripwireDataPacket = new()
                     {
-                        TripwireDataPacket = new()
-                        {
-                            State = ETripwireState.Active
-                        }
-                    },
-                    Position = tripwire.transform.position,
-                    Rotation = tripwire.transform.rotation.eulerAngles,
-                    IsActive = true
-                }
+                        State = ETripwireState.Active
+                    }
+                },
+                Position = tripwire.transform.position,
+                Rotation = tripwire.transform.rotation.eulerAngles,
+                IsActive = true
             };
+            FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
 
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
             base.TriggerTripwire(tripwire);
         }
 
         public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
         {
-            SyncObjectPacket packet = new(tripwire.ObjectId)
+            AirplaneDataPacketStruct packet = new()
             {
                 ObjectType = SynchronizableObjectType.Tripwire,
-                Data = new()
+                ObjectId = tripwire.ObjectId,
+                PacketData = new()
                 {
-                    PacketData = new()
+                    TripwireDataPacket = new()
                     {
-                        TripwireDataPacket = new()
-                        {
-                            State = ETripwireState.Inert
-                        }
-                    },
-                    Position = tripwire.transform.position,
-                    Rotation = tripwire.transform.rotation.eulerAngles,
-                    IsActive = true
-                }
+                        State = ETripwireState.Inert
+                    }
+                },
+                Position = tripwire.transform.position,
+                Rotation = tripwire.transform.rotation.eulerAngles,
+                IsActive = true
             };
+            FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
 
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
             base.DeActivateTripwire(tripwire);
         }
     }

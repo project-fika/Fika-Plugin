@@ -2,6 +2,7 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
+using LiteNetLib;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -12,23 +13,46 @@ namespace Fika.Core.Coop.ClientClasses
     public class FikaClientWorld : World
     {
         public List<LootSyncStruct> LootSyncPackets;
+        public List<AirplaneDataPacketStruct> SyncObjectPackets;
+        public WorldPacket WorldPacket;
+
         private CoopClientGameWorld clientGameWorld;
+        private FikaClient client;
 
         public static FikaClientWorld Create(CoopClientGameWorld gameWorld)
         {
             FikaClientWorld clientWorld = gameWorld.gameObject.AddComponent<FikaClientWorld>();
             clientWorld.clientGameWorld = gameWorld;
-            clientWorld.LootSyncPackets = new List<LootSyncStruct>(8);
-            Singleton<FikaClient>.Instance.FikaClientWorld = clientWorld;
+            clientWorld.LootSyncPackets = new(8);
+            clientWorld.SyncObjectPackets = new(16);
+            clientWorld.WorldPacket = new()
+            {
+                ArtilleryPackets = [],
+                SyncObjectPackets = [],
+                GrenadePackets = [],
+                LootSyncStructs = [],
+                RagdollPackets = []
+            };
+            clientWorld.client = Singleton<FikaClient>.Instance;
+            clientWorld.client.FikaClientWorld = clientWorld;
             return clientWorld;
         }
 
         public void Update()
         {
             UpdateLootItems(clientGameWorld.LootItems);
+            clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
         }
 
-        public void UpdateLootItems(GClass786<int, LootItem> lootItems)
+        protected void LateUpdate()
+        {
+            if (WorldPacket.HasData)
+            {
+                client.SendReusable(WorldPacket, DeliveryMethod.ReliableOrdered);
+            }
+        }
+
+        public void UpdateLootItems(GClass797<int, LootItem> lootItems)
         {
             for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
             {

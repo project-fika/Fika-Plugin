@@ -13,7 +13,7 @@ using UnityEngine;
 namespace Fika.Core.Networking
 {
     /// <summary>
-    /// Client used to verify that a P2P connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
+    /// Client used to verify that a connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
     /// </summary>
     public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
     {
@@ -21,10 +21,15 @@ namespace Fika.Core.Networking
         public bool Received;
         public bool Rejected;
 
-        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
+        private ManualLogSource logger;
         private IPEndPoint remoteEndPoint;
         private IPEndPoint localEndPoint;
         private Coroutine _keepAliveRoutine;
+
+        public void Awake()
+        {
+            logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
+        }
 
         public bool Init(string serverId)
         {
@@ -36,9 +41,10 @@ namespace Fika.Core.Networking
 
             GetHostRequest body = new(serverId);
             GetHostResponse result = FikaRequestHandler.GetHost(body);
+            logger.LogInfo(result.ToString());
 
             FikaBackendUtils.IsHostNatPunch = result.NatPunch;
-            FikaBackendUtils.IsDedicatedGame = result.IsDedicated;
+            FikaBackendUtils.IsHeadlessGame = result.IsHeadless;
 
             NetClient.Start();
 
@@ -91,13 +97,14 @@ namespace Fika.Core.Networking
             NetDataWriter writer = new();
             writer.Put(message);
 
-            if (remoteEndPoint != null)
-            {
-                NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
-            }
+            
             if (localEndPoint != null)
             {
                 NetClient.SendUnconnectedMessage(writer, localEndPoint);
+            }
+            if (remoteEndPoint != null)
+            {
+                NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
             }
         }
 
@@ -116,13 +123,14 @@ namespace Fika.Core.Networking
 
         public IEnumerator KeepAlive()
         {
+            WaitForSeconds waitForSeconds = new(1f);
             while (true)
             {
                 PingEndPoint("fika.keepalive");
                 NetClient.PollEvents();
                 NetClient.NatPunchModule.PollEvents();
 
-                yield return new WaitForSeconds(1.0f);
+                yield return waitForSeconds;
             }
         }
 
@@ -153,10 +161,15 @@ namespace Fika.Core.Networking
                 switch (result)
                 {
                     case "fika.hello":
+                        if (Received)
+                        {
+                            break;
+                        }
                         Received = true;
                         FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
                         FikaBackendUtils.RemotePort = remoteEndPoint.Port;
                         FikaBackendUtils.LocalPort = NetClient.LocalPort;
+                        logger.LogInfo($"Got response from {FikaBackendUtils.RemoteIp}:{FikaBackendUtils.RemotePort}, using LocalPort: {NetClient.LocalPort}");
                         break;
                     case "fika.keepalive":
                         // Do nothing

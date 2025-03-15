@@ -10,6 +10,7 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace Fika.Core.Coop.Utils
     public static class FikaGlobals
     {
         public const string TransitTraderId = "656f0f98d80a697f855d34b1";
-        public const string TransiterTraderName = "BTR";
+        public const string TransitTraderName = "BTR";
         public const string DefaultTransitId = "66f5750951530ca5ae09876d";
 
         public const int PingRange = 1000;
@@ -41,9 +42,27 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                return GClass1971.Instance;
+                return GClass2007.Instance;
             }
         }
+
+        public static GClass2042 VOIPHandler
+        {
+            get
+            {
+                if (voipHandler == null)
+                {
+                    voipHandler = GClass2042.Default;
+                    voipHandler.VoipQualitySettings.Apply();
+                    voipHandler.MicrophoneChecked = GClass1050.CheckMicrophone();
+                    voipHandler.VoipEnabled = true;
+                }
+
+                return voipHandler;
+            }
+        }
+
+        private static GClass2042 voipHandler;
 
         internal static float GetOtherPlayerSensitivity()
         {
@@ -115,8 +134,8 @@ namespace Fika.Core.Coop.Utils
                     collection.Add(resourceKey);
                 }
             }
-            Task loadTask = Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid, PoolManager.AssemblyType.Online,
-                [.. collection], JobPriority.Immediate, null, default);
+            Task loadTask = Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
+                [.. collection], JobPriorityClass.Immediate, null, default);
 
             while (!loadTask.IsCompleted)
             {
@@ -144,13 +163,13 @@ namespace Fika.Core.Coop.Utils
         }
 
         /// <summary>
-        /// Returns true if the profile is a dedicated user in game
+        /// Returns true if the profile is a headless user in game
         /// </summary>
         /// <param name="profile"></param>
         /// <returns><see cref="bool"/></returns>
-        public static bool IsDedicatedProfile(this Profile profile)
+        public static bool IsHeadlessProfile(this Profile profile)
         {
-            return profile.Info.GroupId.ToLower() == "dedicated";
+            return profile.Info.GroupId.ToLower() == "headless";
         }
 
         /// <summary>
@@ -160,7 +179,8 @@ namespace Fika.Core.Coop.Utils
         /// <param name="nickname"></param>
         public static void SetProfileNickname(this InfoClass infoClass, string nickname)
         {
-            Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
+            //Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
+            infoClass.Nickname = nickname;
         }
 
         /// <summary>
@@ -218,13 +238,150 @@ namespace Fika.Core.Coop.Utils
         public static Profile GetLiteProfile(bool scav)
         {
             Profile profile = GetProfile(scav);
-            GClass1962 liteDescriptor = new(profile, SearchControllerSerializer)
+            GClass1998 liteDescriptor = new(profile, SearchControllerSerializer)
             {
                 Encyclopedia = [],
                 InsuredItems = [],
                 TaskConditionCounters = []
             };
             return new(liteDescriptor);
+        }
+
+        /// <summary>
+        /// Gets the states from a <see cref="TacticalComboVisualController"/>
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <returns><see cref="FirearmLightStateStruct"/></returns>
+        public static FirearmLightStateStruct GetFirearmLightStates(TacticalComboVisualController controller)
+        {
+            return controller.LightMod.GetLightState(false, false);
+        }
+
+        /// <summary>
+        /// Gets the contained item in a <see cref="Slot"/>
+        /// </summary>
+        /// <param name="slot">The <see cref="Slot"/> to check</param>
+        /// <returns>An <see cref="Item"/> in the slot</returns>
+        public static Item GetContainedItem(Slot slot)
+        {
+            return slot.ContainedItem;
+        }
+
+        /// <summary>
+        /// Gets a light states from a <see cref="LightComponent"/>
+        /// </summary>
+        /// <param name="component">The <see cref="LightComponent"/> to check</param>
+        /// <returns>A new <see cref="FirearmLightStateStruct"/> with data</returns>
+        public static FirearmLightStateStruct GetFirearmLightStatesFromComponent(LightComponent component)
+        {
+            return new FirearmLightStateStruct
+            {
+                Id = component.Item.Id,
+                IsActive = component.IsActive,
+                LightMode = component.SelectedMode
+            };
+        }
+
+        /// <summary>
+        /// Checks whether the player is part of the player group
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> to check</param>
+        /// <returns>True if in the player group</returns>
+        public static bool IsGroupMember(this Player player)
+        {
+            return player.GroupId == "Fika";
+        }
+
+        /// <summary>
+        /// Checks whether a corpse is visible for the camera
+        /// </summary>
+        /// <param name="corpse"></param>
+        /// <returns>True if the corpse is visible</returns>
+        public static bool IsVisible(this ObservedCorpse corpse)
+        {
+            return corpse.IsVisible();
+            //return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
+        }
+
+        /// <summary>
+        /// Unsubscribes all delegates from an <see cref="Action{T}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="action"></param>
+        public static Action<T> ClearDelegates<T>(Action<T> action) where T : class
+        {
+            Delegate[] list = action.GetInvocationList();
+            for (int i = 0; i < list.Length; i++)
+            {
+#if DEBUG
+                LogWarning($"Clearing {list[i].Method.Name}");
+#endif
+                action = (Action<T>)Delegate.Remove(action, list[i]);
+            }
+
+            return action;
+        }
+
+        /// <summary>
+        /// Unsubscribes all delegates from an <see cref="Action{T, Y}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <param name="action"></param>
+        public static Action<T, Y> ClearDelegates<T, Y>(Action<T, Y> action)
+            where T : class
+            where Y : class
+        {
+            Delegate[] list = action.GetInvocationList();
+            for (int i = 0; i < list.Length; i++)
+            {
+#if DEBUG
+                LogWarning($"Clearing {list[i].Method.Name}"); 
+#endif
+                action = (Action<T, Y>)Delegate.Remove(action, list[i]);
+            }
+
+            return action;
+        }
+        
+        public static void LogInfo(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogInfo($"[{caller}]: {message}");
+        }
+
+        public static void LogWarning(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogWarning($"[{caller}]: {message}");
+        }
+
+        public static void LogError(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogError($"[{caller}]: {message}");
+        }
+
+        public static void LogFatal(string message, [CallerMemberName] string caller = "")
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
+            FikaPlugin.Instance.FikaLogger.LogFatal($"[{caller}]: {message}");
         }
     }
 }

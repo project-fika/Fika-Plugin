@@ -7,7 +7,7 @@ namespace Fika.Core.Networking
     public struct BTRInteractionPacket(int netId) : INetSerializable
     {
         public int NetId = netId;
-        public bool IsResponse = false;
+        public bool IsResponse;
         public EBtrInteractionStatus Status;
         public PlayerInteractPacket Data;
 

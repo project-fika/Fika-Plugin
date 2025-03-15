@@ -24,35 +24,53 @@ namespace Fika.Core.Coop.FreeCamera
     /// </summary>
     public class FreeCamera : MonoBehaviour
     {
-        public bool IsActive = false;
-        private readonly bool isSpectator = FikaBackendUtils.IsSpectator;
+        public bool IsActive { get; set; }
+
+        private const float lookSensitivity = 3f;
+        private const float minFov = 10f;
+
+        private bool isSpectator;
         private CoopPlayer currentPlayer;
         private Vector3 lastKnownPlayerPosition;
-        private bool isFollowing = false;
-        private bool isSpectatingBots = false;
-        private bool leftMode = false;
-        private bool disableInput = false;
+        private bool isFollowing;
+        private bool isSpectatingBots;
+        private bool leftMode;
+        private bool disableInput;
         private bool showOverlay;
         private NightVision nightVision;
         private ThermalVision thermalVision;
         private FreeCameraController freeCameraController;
-        private float yaw = 0f;
-        private float pitch = 0f;
-        private const float lookSensitivity = 3f;
-        private const float minFov = 10f;
+        private float yaw;
+        private float pitch;
         private float originalFov;
-        private bool nightVisionActive = false;
-        private bool thermalVisionActive = false;
+        private bool nightVisionActive;
+        private bool thermalVisionActive;
 
-        private KeyCode forwardKey = KeyCode.W;
-        private KeyCode backKey = KeyCode.S;
-        private KeyCode leftKey = KeyCode.A;
-        private KeyCode rightKey = KeyCode.D;
-        private KeyCode relUpKey = KeyCode.E;
-        private KeyCode relDownKey = KeyCode.Q;
-        private KeyCode detachKey = KeyCode.G;
-        private readonly KeyCode upKey = KeyCode.R;
-        private readonly KeyCode downKey = KeyCode.F;
+        private KeyCode forwardKey;
+        private KeyCode backKey;
+        private KeyCode leftKey;
+        private KeyCode rightKey;
+        private KeyCode relUpKey;
+        private KeyCode relDownKey;
+        private KeyCode detachKey;
+        private KeyCode upKey;
+        private KeyCode downKey;
+
+        protected void Awake()
+        {
+            isSpectator = FikaBackendUtils.IsSpectator;
+            yaw = 0f;
+            pitch = 0f;
+            forwardKey = KeyCode.W;
+            backKey = KeyCode.S;
+            leftKey = KeyCode.A;
+            rightKey = KeyCode.D;
+            relUpKey = KeyCode.E;
+            relDownKey = KeyCode.Q;
+            detachKey = KeyCode.G;
+            upKey = KeyCode.R;
+            downKey = KeyCode.F;
+        }
 
         protected void Start()
         {
@@ -535,7 +553,7 @@ namespace Fika.Core.Coop.FreeCamera
             }
         }
 
-        public void AttachDedicated(CoopPlayer player)
+        public void AttachHeadless(CoopPlayer player)
         {
             FikaPlugin.Instance.FikaLogger.LogInfo("Attaching camera to: " + player.Profile.Info.MainProfileNickname);
             transform.SetParent(player.Transform.Original);

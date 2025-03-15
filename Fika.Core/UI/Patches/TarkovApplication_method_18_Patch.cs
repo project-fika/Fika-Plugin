@@ -1,6 +1,4 @@
-﻿using Comfort.Common;
-using EFT;
-using EFT.UI;
+﻿using EFT;
 using Fika.Core.Networking.Websocket;
 using SPT.Reflection.Patching;
 using System.Reflection;
@@ -14,7 +12,7 @@ namespace Fika.Core.UI.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_18));
+            return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_16));
         }
 
         [PatchPostfix]
@@ -22,7 +20,7 @@ namespace Fika.Core.UI.Patches
         {
             if (!FikaNotificationManager.Exists)
             {
-                Singleton<PreloaderUI>.Instance.gameObject.AddComponent<FikaNotificationManager>();
+                FikaPlugin.Instance.NotificationManager = new();
             }
         }
     }

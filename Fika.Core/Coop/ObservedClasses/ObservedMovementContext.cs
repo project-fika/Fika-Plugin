@@ -162,7 +162,6 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             PlayerAnimatorTransitionSpeed = TransitionSpeed;
             UpdateCovertEfficiency(ClampedSpeed, true);
-            _player.UpdateStepSoundRolloff();
             TiltInertia = EFTHardSettings.Instance.InertiaTiltCurve.Evaluate(_player.Physical.Inertia);
             WalkInertia = InertiaSettings.WalkInertia.Evaluate(_player.Physical.Inertia);
             SprintBrakeInertia = InertiaSettings.SprintBrakeInertia.Evaluate(_player.Physical.Inertia);
@@ -198,9 +197,9 @@ namespace Fika.Core.Coop.ObservedClasses
             OnHandsControllerChanged += handler.HandleSwap;
         }
 
-        public override void DropStationary(GStruct177.EStationaryCommand command)
+        public override void DropStationary(StationaryPacketStruct.EStationaryCommand command)
         {
-            if (command is GStruct177.EStationaryCommand.Leave)
+            if (command is StationaryPacketStruct.EStationaryCommand.Leave)
             {
                 PlayerAnimatorSetStationary(false);
                 RotationAction = DefaultRotationFunction;

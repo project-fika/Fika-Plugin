@@ -7,7 +7,7 @@ namespace Fika.Core.Networking
     public class TransitEventPacket : INetSerializable
     {
         public ETransitEventType EventType;
-        public BaseSyncEvent TransitEvent;
+        public SyncEventFromServer TransitEvent;
         public int TransitId;
         public int PlayerId;
 

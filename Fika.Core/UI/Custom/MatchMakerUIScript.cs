@@ -136,11 +136,11 @@ namespace Fika.Core.UI.Custom
 
         private void CreateMatchMakerUI()
         {
-            FikaBackendUtils.IsDedicatedRequester = false;
+            FikaBackendUtils.IsHeadlessRequester = false;
 
-            GetDedicatedStatusResponse response = FikaRequestHandler.GetDedicatedStatus();
+            AvailableHeadlessClientsRequest[] availableHeadlesses = FikaRequestHandler.GetAvailableHeadlesses();
 
-            GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("newmatchmakerui").LoadAsset<GameObject>("NewMatchMakerUI");
+            GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.MatchmakerUI);
             GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
             mmGameObject = uiGameObj;
             fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
@@ -175,7 +175,7 @@ namespace Fika.Core.UI.Custom
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
 
-            if (!response.Available)
+            if (availableHeadlesses.Length == 0)
             {
                 fikaMatchMakerUi.DedicatedToggle.interactable = false;
                 TextMeshProUGUI dedicatedText = fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
@@ -189,11 +189,42 @@ namespace Fika.Core.UI.Custom
                 dediTooltipArea.SetMessageText(LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized());
             }
 
-            TMP_Text matchmakerUiHostRaidText = fikaMatchMakerUi.RaidGroupHostButton.GetComponentInChildren<TMP_Text>();
+            if (availableHeadlesses.Length >= 1)
+            {
+                if (FikaPlugin.UseHeadlessIfAvailable.Value)
+                {
+                    fikaMatchMakerUi.DedicatedToggle.isOn = true;
+                }
+
+                fikaMatchMakerUi.HeadlessSelection.gameObject.SetActive(true);
+                fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((value) =>
+                {
+                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
+                });
+
+                fikaMatchMakerUi.HeadlessSelection.ClearOptions();
+
+                List<TMP_Dropdown.OptionData> optionDatas = [];
+                for (int i = 0; i < availableHeadlesses.Length; i++)
+                {
+                    AvailableHeadlessClientsRequest user = availableHeadlesses[i];
+                    optionDatas.Add(new()
+                    {
+                        text = user.Alias
+                    });
+                }
+
+                fikaMatchMakerUi.HeadlessSelection.AddOptions(optionDatas);
+            }
+
+            HoverTooltipArea hostTooltipArea = fikaMatchMakerUi.RaidGroupHostButton.GetOrAddComponent<HoverTooltipArea>();
+            hostTooltipArea.enabled = true;
+            hostTooltipArea.SetMessageText(LocaleUtils.UI_HOST_RAID_TOOLTIP.Localized());
+
             fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                if (!fikaMatchMakerUi.DediSelection.active)
+                if (!fikaMatchMakerUi.DediSelection.activeSelf)
                 {
                     fikaMatchMakerUi.DediSelection.SetActive(true);
                 }
@@ -212,7 +243,6 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            //fikaMatchMakerUi.DedicatedToggle.isOn = false;
             fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
@@ -250,7 +280,7 @@ namespace Fika.Core.UI.Custom
                         {
                             Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_FORCE_IP_HEADER.Localized(),
                                 string.Format(LocaleUtils.UI_ERROR_FORCE_IP.Localized(), ip),
-                                ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                                ErrorScreen.EButtonType.OkButton, 10f);
 
                             ToggleLoading(false);
                             return;
@@ -263,7 +293,7 @@ namespace Fika.Core.UI.Custom
                         {
                             Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_BIND_IP_HEADER.Localized(),
                                 string.Format(LocaleUtils.UI_ERROR_BIND_IP.Localized(), FikaPlugin.ForceBindIP.Value),
-                                ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                                ErrorScreen.EButtonType.OkButton, 10f);
 
                             ToggleLoading(false);
                             return;
@@ -277,17 +307,27 @@ namespace Fika.Core.UI.Custom
                 {
                     ToggleLoading(true);
 
-                    FikaPlugin.DedicatedRaidWebSocket ??= new DedicatedRaidWebSocketClient();
+                    FikaPlugin.HeadlessRequesterWebSocket ??= new HeadlessRequesterWebSocket();
 
-                    if (!FikaPlugin.DedicatedRaidWebSocket.Connected)
+                    if (!FikaPlugin.HeadlessRequesterWebSocket.Connected)
                     {
-                        FikaPlugin.DedicatedRaidWebSocket.Connect();
+                        FikaPlugin.HeadlessRequesterWebSocket.Connect();
                     }
 
                     RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
-                    StartDedicatedRequest request = new()
+                    string headlessSessionId = availableHeadlesses[0].HeadlessSessionID;
+                    bool singleHeadless = !fikaMatchMakerUi.HeadlessSelection.isActiveAndEnabled;
+
+                    if (!singleHeadless)
                     {
+                        int selectedHeadless = fikaMatchMakerUi.HeadlessSelection.value;
+                        headlessSessionId = availableHeadlesses[selectedHeadless].HeadlessSessionID;
+                    }
+
+                    StartHeadlessRequest request = new()
+                    {
+                        HeadlessSessionID = headlessSessionId,
                         Time = raidSettings.SelectedDateTime,
                         LocationId = raidSettings.SelectedLocation._Id,
                         SpawnPlace = raidSettings.PlayersSpawnPlace,
@@ -299,14 +339,14 @@ namespace Fika.Core.UI.Custom
                         CustomWeather = OfflineRaidSettingsMenuPatch_Override.UseCustomWeather
                     };
 
-                    StartDedicatedResponse response = await FikaRequestHandler.StartDedicated(request);
-                    FikaBackendUtils.IsDedicatedRequester = true;
+                    StartHeadlessResponse response = await FikaRequestHandler.StartHeadless(request);
+                    FikaBackendUtils.IsHeadlessRequester = true;
 
                     if (!string.IsNullOrEmpty(response.Error))
                     {
                         PreloaderUI.Instance.ShowErrorScreen(LocaleUtils.UI_DEDICATED_ERROR.Localized(), response.Error);
                         ToggleLoading(false);
-                        FikaBackendUtils.IsDedicatedRequester = false;
+                        FikaBackendUtils.IsHeadlessRequester = false;
                     }
                     else
                     {
@@ -345,6 +385,7 @@ namespace Fika.Core.UI.Custom
         private void ToggleLoading(bool enabled)
         {
             fikaMatchMakerUi.RaidGroupHostButton.interactable = !enabled;
+            fikaMatchMakerUi.DediSelection.SetActive(!enabled);
             fikaMatchMakerUi.StartButton.interactable = !enabled;
             fikaMatchMakerUi.ServerBrowserPanel.SetActive(!enabled);
 
@@ -390,12 +431,11 @@ namespace Fika.Core.UI.Custom
             }
 
             FikaBackendUtils.IsReconnect = reconnect;
-
             NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(), iconType: EFT.Communications.ENotificationIconType.EntryPoint);
-
             NetManagerUtils.CreatePingingClient();
-
             FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
+
+            WaitForSeconds waitForSeconds = new(0.1f);
 
             if (pingingClient.Init(serverId))
             {
@@ -415,7 +455,7 @@ namespace Fika.Core.UI.Custom
                     success = pingingClient.Received;
                     rejected = pingingClient.Rejected;
 
-                    yield return new WaitForSeconds(0.1f);
+                    yield return waitForSeconds;
                 } while (!rejected && !success && attempts < 50);
 
                 if (!success)
@@ -423,7 +463,7 @@ namespace Fika.Core.UI.Custom
                     Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
                     LocaleUtils.UI_ERROR_CONNECTING.Localized(),
                     LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                    ErrorScreen.EButtonType.OkButton, 10f);
 
                     string logError = "Unable to connect to the session!";
                     if (rejected)
@@ -445,7 +485,7 @@ namespace Fika.Core.UI.Custom
                 Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
                     LocaleUtils.UI_ERROR_CONNECTING.Localized(),
                     LocaleUtils.UI_PINGER_START_FAIL.Localized(),
-                    ErrorScreen.EButtonType.OkButton, 10f, null, null);
+                    ErrorScreen.EButtonType.OkButton, 10f);
                 callback.Invoke(false);
                 yield break;
             }
@@ -472,10 +512,7 @@ namespace Fika.Core.UI.Custom
             else
             {
                 NetManagerUtils.DestroyPingingClient();
-
-                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("ERROR JOINING", errorMessage,
-                    ErrorScreen.EButtonType.OkButton, 15, null, null);
-
+                Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
                 callback?.Invoke(false);
             }
         }
@@ -525,18 +562,18 @@ namespace Fika.Core.UI.Custom
                     }
                 }
 
-                bool isDedicated = entry.HostUsername.StartsWith("dedicated_");
+                bool isHeadless = entry.HostUsername.StartsWith("headless_");
 
                 // player label
                 GameObject playerLabel = GameObject.Find("PlayerLabel");
                 playerLabel.name = "PlayerLabel" + i;
-                string sessionName = isDedicated ? "Dedicated" : entry.HostUsername;
+                string sessionName = isHeadless ? "Headless" : entry.HostUsername;
                 playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
 
                 // players count label
                 GameObject playerCountLabel = GameObject.Find("PlayerCountLabel");
                 playerCountLabel.name = "PlayerCountLabel" + i;
-                int playerCount = isDedicated ? entry.PlayerCount - 1 : entry.PlayerCount;
+                int playerCount = isHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
                 playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
 
                 // player join button

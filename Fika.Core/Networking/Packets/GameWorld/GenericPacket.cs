@@ -1,7 +1,7 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking
 {

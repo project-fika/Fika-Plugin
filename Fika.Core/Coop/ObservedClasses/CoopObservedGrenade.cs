@@ -4,7 +4,7 @@ namespace Fika.Core.Coop.ObservedClasses
 {
     public class CoopObservedGrenade : Grenade
     {
-        public override void ApplyNetPacket(GStruct131 packet)
+        public override void ApplyNetPacket(GrenadeDataPacketStruct packet)
         {
             base.ApplyNetPacket(packet);
         }

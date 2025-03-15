@@ -40,7 +40,7 @@ namespace Fika.Core.UI
                 UnityEngine.Object.Destroy(watermarkText);
             }
 
-            obj.active = true;
+            obj.SetActive(true);
             TextMeshProUGUI text = obj.AddComponent<TextMeshProUGUI>();
             text.horizontalAlignment = HorizontalAlignmentOptions.Center;
             text.verticalAlignment = VerticalAlignmentOptions.Bottom;
@@ -50,22 +50,20 @@ namespace Fika.Core.UI
             return text;
         }
 
-        public static GClass3477 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
+        public static GClass3542 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
             ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
         {
             Traverse preloaderUiTraverse = Traverse.Create(preloaderUI);
 
-            PreloaderUI.Class2778 messageHandler = new()
+            PreloaderUI.Class2821 messageHandler = new()
             {
-                preloaderUI_0 = preloaderUI,
-                acceptCallback = acceptCallback,
-                endTimeCallback = endTimeCallback
+                preloaderUI_0 = preloaderUI
             };
 
             if (!AsyncWorker.CheckIsMainThread())
             {
                 FikaPlugin.Instance.FikaLogger.LogError("You are trying to show error screen from non-main thread!");
-                return new GClass3477();
+                return new GClass3542();
             }
 
             ErrorScreen errorScreenTemplate = preloaderUiTraverse.Field("_criticalErrorScreenTemplate").GetValue<ErrorScreen>();
@@ -73,22 +71,22 @@ namespace Fika.Core.UI
 
             messageHandler.errorScreen = UnityEngine.Object.Instantiate(errorScreenTemplate, errorScreenContainer.transform, false);
             errorScreenContainer.AddChildNode(messageHandler.errorScreen);
-            return messageHandler.errorScreen.ShowFikaMessage(header, message, messageHandler.method_1, waitingTime, messageHandler.method_2, buttonType, true);
+            return messageHandler.errorScreen.ShowFikaMessage(header, message, acceptCallback, waitingTime, endTimeCallback, buttonType, true);
         }
 
-        public static GClass3477 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
+        public static GClass3547 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
             Action closeManuallyCallback = null, float waitingTime = 0f, Action timeOutCallback = null,
             ErrorScreen.EButtonType buttonType = ErrorScreen.EButtonType.OkButton, bool removeHtml = true)
         {
             Traverse errorScreenTraverse = Traverse.Create(errorScreen);
 
-            ErrorScreen.Class2549 errorScreenHandler = new()
+            ErrorScreen.Class2583 errorScreenHandler = new()
             {
                 errorScreen_0 = errorScreen
             };
             if (!MonoBehaviourSingleton<PreloaderUI>.Instance.CanShowErrorScreen)
             {
-                return new GClass3477();
+                return new GClass3547();
             }
             if (removeHtml)
             {
@@ -100,7 +98,7 @@ namespace Fika.Core.UI
             errorScreenTraverse.Field("action_1").SetValue(action_1);
             MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
 
-            errorScreenHandler.context = (GClass3477)baseShow.Invoke(errorScreen, [closeManuallyCallback]);
+            errorScreenHandler.context = (GClass3547)baseShow.Invoke(errorScreen, [closeManuallyCallback]);
             errorScreenHandler.context.OnAccept += errorScreen.method_3;
             errorScreenHandler.context.OnDecline += errorScreen.method_4;
             errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;

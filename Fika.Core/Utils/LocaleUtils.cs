@@ -9,26 +9,6 @@ namespace Fika.Core.Utils
     /// </summary>
     public static class LocaleUtils
     {
-        private static readonly List<char> vowels = ['A', 'E', 'I', 'O', 'U'];
-
-        /// <summary>
-        /// Used to get the prefix of a word for EN locale, no longer used
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        [Obsolete("No longer used", true)]
-        public static string GetPrefix(string word)
-        {
-            char firstLetter = char.ToUpper(word[0]);
-
-            if (vowels.Contains(firstLetter))
-            {
-                return "an";
-            }
-
-            return "a";
-        }
-
         /// <summary>
         /// Used to determine whether this player was a boss
         /// </summary>
@@ -156,6 +136,7 @@ namespace Fika.Core.Utils
         public const string UI_MM_LOADING_HEADER = "F_MMUI_LoadingScreenHeader";
         public const string UI_MM_LOADING_DESCRIPTION = "F_MMUI_LoadingScreenDescription";
         public const string UI_MM_JOIN_AS_SPECTATOR = "F_MMUI_JoinAsSpectator";
+        public const string UI_MM_JOIN_AS_SPECTATOR_DESCRIPTION = "F_MMUI_JoinAsSpectator_D";
         public const string UI_START_RAID = "F_UI_StartRaid";
         public const string UI_START_RAID_DESCRIPTION = "F_UI_StartRaidDescription";
         public const string UI_CANNOT_JOIN_RAID_OTHER_MAP = "F_UI_CannotJoinRaidOtherMap";
@@ -177,6 +158,7 @@ namespace Fika.Core.Utils
         public const string UI_ERROR_BIND_IP_HEADER = "F_UI_ErrorBindIPHeader";
         public const string UI_ERROR_BIND_IP = "F_UI_ErrorBindIP";
         public const string UI_NO_DEDICATED_CLIENTS = "F_UI_NoDedicatedClients";
+        public const string UI_HOST_RAID_TOOLTIP = "F_UI_HostRaidTooltip";
         public const string UI_WAIT_FOR_HOST_START_RAID = "F_UI_WaitForHostStartRaid";
         public const string UI_WAIT_FOR_HOST_FINISH_INIT = "F_UI_WaitForHostFinishInit";
         public const string UI_WAIT_FOR_OTHER_PLAYERS = "F_UI_WaitForOtherPlayers";
@@ -214,6 +196,11 @@ namespace Fika.Core.Utils
         public const string UI_DOWNLOAD_PROFILE = "F_UI_DownloadProfile";
         public const string UI_LOCALE_ERROR_HEADER = "F_UI_LocaleError_H";
         public const string UI_LOCALE_ERROR_DESCRIPTION = "F_UI_LocaleError_D";
+        public const string UI_ERROR_HOST_EFT_MISMATCH = "F_UI_EFTVersionError";
+        public const string UI_ERROR_HOST_FIKA_MISMATCH = "F_UI_FikaVersionError";
+        public const string UI_PLAYER_CONNECTED = "F_UI_PlayerConnected";
+        public const string UI_PLAYER_DISCONNECTED = "F_UI_PlayerDisconnected";
+        public const string UI_DISABLED_BY_HOST = "F_UI_DisabledByServerHost";
 
         // Main Menu UI
         public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";
@@ -240,6 +227,8 @@ namespace Fika.Core.Utils
         public const string BEPINEX_OFFICIAL_VERSION_T = "F_BepInEx_OfficialVersion_T";
         public const string BEPINEX_OFFICIAL_VERSION_D = "F_BepInEx_OfficialVersion_D";
 
+        public const string BEPINEX_USE_HEADLESS_T = "F_BepInEx_UseHeadless_T";
+        public const string BEPINEX_USE_HEADLESS_D = "F_BepInEx_UseHeadless_D";
         public const string BEPINEX_SHOW_FEED_T = "F_BepInEx_ShowFeed_T";
         public const string BEPINEX_SHOW_FEED_D = "F_BepInEx_ShowFeed_D";
         public const string BEPINEX_AUTO_EXTRACT_T = "F_BepInEx_AutoExtract_T";
@@ -341,6 +330,8 @@ namespace Fika.Core.Utils
         public const string BEPINEX_DYNAMIC_AI_RATE_D = "F_BepInEx_DynamicAIRate_D";
         public const string BEPINEX_DYNAMIC_AI_NO_SNIPERS_T = "F_BepInEx_DynamicAINoSnipers_T";
         public const string BEPINEX_DYNAMIC_AI_NO_SNIPERS_D = "F_BepInEx_DynamicAINoSnipers_D";
+        public const string BEPINEX_FIKA_GC_T = "F_BepInEx_FikaGC_T";
+        public const string BEPINEX_FIKA_GC_D = "F_BepInEx_FikaGC_D";
 
         public const string BEPINEX_ENFORCED_SPAWN_LIMITS_T = "F_BepInEx_EnforcedSpawnLimits_T";
         public const string BEPINEX_ENFORCED_SPAWN_LIMITS_D = "F_BepInEx_EnforcedSpawnLimits_D";
@@ -369,6 +360,10 @@ namespace Fika.Core.Utils
         public const string BEPINEX_SEND_RATE_D = "F_BepInEx_SendRate_D";
         public const string BEPINEX_SMOOTHING_RATE_T = "F_BepInEx_SmoothingRate_T";
         public const string BEPINEX_SMOOTHING_RATE_D = "F_BepInEx_SmoothingRate_D";
+        public const string BEPINEX_NET_MULTITHREAD_T = "F_BepInEx_NetMultiThread_T";
+        public const string BEPINEX_NET_MULTITHREAD_D = "F_BepInEx_NetMultiThread_D";
+        public const string BEPINEX_NET_VOIP_T = "F_BepInEx_VOIP_T";
+        public const string BEPINEX_NET_VOIP_D = "F_BepInEx_VOIP_D";
 
         public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
         public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";

@@ -18,45 +18,57 @@ using UnityEngine;
 namespace Fika.Core.Coop.Components
 {
     /// <summary>
-    /// CoopHandler is the User 1-2-1 communication to the Server. This can be seen as an extension component to CoopGame.
+    /// CoopHandler handles most of the spawning logic in the raid, e.g. other players or AI. It also handles the extraction of the local player.
     /// </summary>
     public class CoopHandler : MonoBehaviour
     {
         #region Fields/Properties
+        /// <summary>
+        /// Reference to the local <see cref="CoopGame"/> instance
+        /// </summary>
         public CoopGame LocalGameInstance { get; internal set; }
-        public string ServerId { get; internal set; } = null;
-        public CoopPlayer MyPlayer
-        {
-            get
-            {
-                return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            }
-        }
+        /// <summary>
+        /// The ID of the raid session
+        /// </summary>
+        public string ServerId { get; internal set; }
+        /// <summary>
+        /// Reference to the local <see cref="CoopPlayer"/> player
+        /// </summary>
+        public CoopPlayer MyPlayer { get; internal set; }
+        /// <summary>
+        /// If the <see cref="CoopHandler"/> should sync and spawn profiles during <see cref="Update"/>
+        /// </summary>
+        public bool ShouldSync { get; internal set; }
 
         /// <summary>
         /// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>
         /// </summary>
-        public Dictionary<int, CoopPlayer> Players { get; internal set; } = [];
+        public Dictionary<int, CoopPlayer> Players { get; internal set; }
         /// <summary>
-        /// All human players in the form of <see cref="CoopPlayer"/> (excluding headless)
+        /// All human players in the form of <see cref="CoopPlayer"/> (excluding headless if not playing as a headless client)
         /// </summary>
-        public List<CoopPlayer> HumanPlayers { get; internal set; } = [];
+        public List<CoopPlayer> HumanPlayers { get; internal set; }
         /// <summary>
         /// The amount of human players (including headless)
         /// </summary>
-        public int AmountOfHumans { get; internal set; } = 1;
+        public int AmountOfHumans { get; internal set; }
         /// <summary>
         /// List of <see cref="CoopPlayer.NetId"/>s that have extracted
         /// </summary>
-        public List<int> ExtractedPlayers { get; internal set; } = [];
+        public List<int> ExtractedPlayers { get; internal set; }
 
         private ManualLogSource logger;
-        private readonly List<string> queuedProfileIds = [];
-        private readonly Queue<SpawnObject> spawnQueue = new(50);
-        private bool ready;
+        /// <summary>
+        /// List of all queued players by <see cref="CoopPlayer.NetId"/>
+        /// </summary>
+        private List<int> queuedPlayers;
+        /// <summary>
+        /// Queue of <see cref="SpawnObject"/> containing all players to spawn
+        /// </summary>
+        private Queue<SpawnObject> spawnQueue;
         private bool isClient;
         private float charSyncCounter;
-        private bool requestQuitGame = false;
+        private bool requestQuitGame;
         #endregion
 
         public static bool TryGetCoopHandler(out CoopHandler coopHandler)
@@ -85,13 +97,13 @@ namespace Fika.Core.Coop.Components
 
         public void CleanUpForTransit()
         {
+            ShouldSync = false;
             Players.Clear();
             HumanPlayers.Clear();
             AmountOfHumans = 1;
             ExtractedPlayers.Clear();
-            queuedProfileIds.Clear();
+            queuedPlayers.Clear();
             spawnQueue.Clear();
-            ready = false;
             LocalGameInstance = null;
             requestQuitGame = false;
             if (isClient)
@@ -103,6 +115,13 @@ namespace Fika.Core.Coop.Components
         protected void Awake()
         {
             logger = BepInEx.Logging.Logger.CreateLogSource("CoopHandler");
+            spawnQueue = new(50);
+            queuedPlayers = [];
+            Players = [];
+            HumanPlayers = [];
+            AmountOfHumans = 1;
+            ExtractedPlayers = [];
+            ShouldSync = false;
         }
 
         protected void Start()
@@ -115,46 +134,46 @@ namespace Fika.Core.Coop.Components
             }
 
             isClient = false;
-            ready = true;
-            Singleton<GameWorld>.Instance.World_0.method_0(null);
         }
 
-        protected private void Update()
+        protected void Update()
         {
             if (LocalGameInstance == null)
             {
                 return;
             }
 
-            if (!ready)
+            if (ShouldSync)
             {
-                return;
-            }
+                if (spawnQueue.Count > 0)
+                {
+                    SpawnPlayer(spawnQueue.Dequeue());
+                }
 
-            if (spawnQueue.Count > 0)
-            {
-                SpawnPlayer(spawnQueue.Dequeue());
+                if (!isClient)
+                {
+                    charSyncCounter += Time.unscaledDeltaTime;
+                    int waitTime = LocalGameInstance.Status == GameStatus.Started ? 20 : 5;
+                    if (charSyncCounter > waitTime)
+                    {
+                        charSyncCounter = 0f;
+                        if (Players == null)
+                        {
+                            return;
+                        }
+
+                        SyncPlayersWithClients(); 
+                    }
+                }
             }
 
             ProcessQuitting();
+        }
 
-            if (isClient)
-            {
-                charSyncCounter += Time.unscaledDeltaTime;
-                int waitTime = LocalGameInstance.Status == GameStatus.Started ? 15 : 2;
-
-                if (charSyncCounter > waitTime)
-                {
-                    charSyncCounter = 0f;
-
-                    if (Players == null)
-                    {
-                        return;
-                    }
-
-                    SyncPlayersWithServer();
-                }
-            }
+        private void SyncPlayersWithClients()
+        {
+            CharacterSyncPacket characterSyncPacket = new(Players);
+            Singleton<FikaServer>.Instance.SendDataToAll(ref characterSyncPacket, DeliveryMethod.ReliableOrdered);
         }
 
         protected void OnDestroy()
@@ -215,7 +234,7 @@ namespace Fika.Core.Coop.Components
                 logger.LogInfo($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
 
                 requestQuitGame = true;
-                CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+                CoopGame coopGame = CoopGame.Instance;
 
                 // If you are the server / host
                 if (!isClient)
@@ -253,39 +272,12 @@ namespace Fika.Core.Coop.Components
             }
         }
 
-        public void SetReady(bool state)
-        {
-            ready = state;
-        }
-
-        private void SyncPlayersWithServer()
-        {
-            AllCharacterRequestPacket requestPacket = new(MyPlayer.ProfileId);
-
-            if (Players.Count > 0)
-            {
-                requestPacket.HasCharacters = true;
-                List<int> characters = [];
-                foreach (int netId in Players.Keys)
-                {
-                    characters.Add(netId);
-                }
-                requestPacket.Characters = [.. characters];
-            }
-
-            FikaClient client = Singleton<FikaClient>.Instance;
-            if (client.NetClient.FirstPeer != null)
-            {
-                client.SendData(ref requestPacket, DeliveryMethod.ReliableOrdered);
-            }
-        }
-
         private async void SpawnPlayer(SpawnObject spawnObject)
         {
             if (spawnObject.Profile == null)
             {
                 logger.LogError("SpawnPlayer: Profile was null!");
-                queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
+                queuedPlayers.Remove(spawnObject.NetId);
                 return;
             }
 
@@ -299,15 +291,15 @@ namespace Fika.Core.Coop.Components
 
             int playerId = LocalGameInstance.method_15();
 
-            IEnumerable<ResourceKey> allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths();
-            if (allPrefabPaths.Count() == 0)
+            ResourceKey[] allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths(!spawnObject.IsAI).ToArray();
+            if (allPrefabPaths.Length == 0)
             {
                 logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::PrefabPaths are empty!");
                 return;
             }
 
-            await Singleton<PoolManager>.Instance.LoadBundlesAndCreatePools(PoolManager.PoolsCategory.Raid,
-                PoolManager.AssemblyType.Local, allPrefabPaths.ToArray(), JobPriority.Low).ContinueWith(x =>
+            await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
+                PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.Low).ContinueWith(x =>
                 {
                     if (x.IsFaulted)
                     {
@@ -351,7 +343,7 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            queuedProfileIds.Remove(spawnObject.Profile.ProfileId);
+            queuedPlayers.Remove(spawnObject.NetId);
         }
 
         public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie,
@@ -371,12 +363,12 @@ namespace Fika.Core.Coop.Components
                 }
             }
 
-            if (queuedProfileIds.Contains(profile.ProfileId))
+            if (queuedPlayers.Contains(netId))
             {
                 return;
             }
 
-            queuedProfileIds.Add(profile.ProfileId);
+            queuedPlayers.Add(netId);
 #if DEBUG
             logger.LogInfo($"Queueing profile: {profile.Nickname}, {profile.ProfileId}");
 #endif
@@ -404,7 +396,7 @@ namespace Fika.Core.Coop.Components
             int netId = spawnObject.NetId;
             MongoID firstId = spawnObject.CurrentId;
             ushort firstOperationId = spawnObject.FirstOperationId;
-            bool isDedicatedProfile = !isAi && profile.IsDedicatedProfile();
+            bool isHeadlessProfile = !isAi && profile.IsHeadlessProfile();
             byte[] healthBytes = spawnObject.HealthBytes;
             bool isZombie = spawnObject.IsZombie;
 
@@ -419,7 +411,7 @@ namespace Fika.Core.Coop.Components
                 isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
                 EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode, FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
-                GClass1599.Default, firstId, firstOperationId, isZombie).Result;
+                GClass1627.Default, firstId, firstOperationId, isZombie).Result;
 
             if (otherPlayer == null)
             {
@@ -444,7 +436,7 @@ namespace Fika.Core.Coop.Components
                 logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
             }
 
-            if (!isAi && !isDedicatedProfile && !HumanPlayers.Contains(otherPlayer))
+            if (!isAi && !isHeadlessProfile && !HumanPlayers.Contains(otherPlayer))
             {
                 HumanPlayers.Add(otherPlayer);
             }
@@ -487,7 +479,7 @@ namespace Fika.Core.Coop.Components
                 profile.SetSpawnedInSession(false);
             }
 
-            otherPlayer.InitObservedPlayer(isDedicatedProfile);
+            otherPlayer.InitObservedPlayer(isHeadlessProfile);
 
 #if DEBUG
             logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
@@ -551,6 +543,17 @@ namespace Fika.Core.Coop.Components
             }
 
             logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
+        }
+
+        public void CheckIds(List<int> playerIds, List<int> missingIds)
+        {
+            foreach (int netId in playerIds)
+            {
+                if (!queuedPlayers.Contains(netId) && !Players.ContainsKey(netId))
+                {
+                    missingIds.Add(netId);
+                }
+            }
         }
 
         /// <summary>

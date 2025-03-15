@@ -12,7 +12,7 @@ namespace Fika.Core.UI.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(AchievementView).GetMethod("GInterface466.Show");
+            return typeof(AchievementView).GetMethod("GInterface480.Show");
         }
 
         [PatchPostfix]

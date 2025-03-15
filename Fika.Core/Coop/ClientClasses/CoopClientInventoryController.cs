@@ -49,12 +49,17 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (FikaBackendUtils.IsClient)
             {
-                TraderServicesPacket packet = new(coopPlayer.NetId)
+                RequestPacket request = new()
                 {
-                    IsRequest = true,
-                    TraderId = traderId
+                    PacketType = SubPacket.ERequestSubPacketType.TraderServices,
+                    RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
+                    {
+                        NetId = coopPlayer.NetId,
+                        TraderId = traderId
+                    }
                 };
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+
+                Singleton<FikaClient>.Instance.SendData(ref request, DeliveryMethod.ReliableOrdered);
                 return;
             }
 
@@ -93,7 +98,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             // Do not replicate picking up quest items, throws an error on the other clients            
-            if (operation is GClass3195 moveOperation)
+            if (operation is GClass3266 moveOperation)
             {
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.QuestItem)
@@ -130,13 +135,13 @@ namespace Fika.Core.Coop.ClientClasses
 
             // Do not replicate quest operations / search operations
             // Check for GClass increments, ReadPolymorph
-            if (operation is GClass3232 or GClass3236 or GClass3237 or GClass3238)
+            if (operation is GClass3303 or GClass3307 or GClass3308 or GClass3309)
             {
                 base.vmethod_1(operation, callback);
                 return;
             }
 
-            GClass1198 writer = new();
+            FikaWriter eftWriter = EFTSerializationManager.GetWriter();
             ClientInventoryOperationHandler handler = new()
             {
                 Operation = operation,
@@ -145,18 +150,19 @@ namespace Fika.Core.Coop.ClientClasses
             };
 
             uint operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
-            writer.WritePolymorph(operation.ToDescriptor());
+            eftWriter.WritePolymorph(operation.ToDescriptor());
             InventoryPacket packet = new()
             {
+                NetId = coopPlayer.NetId,
                 CallbackId = operationNum,
-                OperationBytes = writer.ToArray()
+                OperationBytes = eftWriter.ToArray()
             };
 
 #if DEBUG
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
 
-            coopPlayer.PacketSender.InventoryPackets.Enqueue(packet);
+            coopPlayer.PacketSender.SendPacket(ref packet);
         }
 
         public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
@@ -183,7 +189,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3232(method_12(), this, PlayerSearchController, Profile, item);
+            return new GClass3303(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class ClientInventoryOperationHandler
@@ -239,7 +245,7 @@ namespace Fika.Core.Coop.ClientClasses
                 EOperationStatus localStatus = Operation.Status;
                 if (localStatus.InProgress())
                 {
-                    if (Operation is GInterface403 ginterface)
+                    if (Operation is GInterface415 ginterface)
                     {
                         ginterface.Terminate();
                     }

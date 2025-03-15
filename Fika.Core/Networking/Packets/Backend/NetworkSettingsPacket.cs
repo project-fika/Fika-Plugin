@@ -2,18 +2,24 @@
 
 namespace Fika.Core.Networking
 {
-    public struct NetworkSettingsPacket(int sendRate) : INetSerializable
+    public struct NetworkSettingsPacket : INetSerializable
     {
-        public int SendRate = sendRate;
+        public int SendRate;
+        public int NetId;
+        public bool AllowVOIP;
 
         public void Deserialize(NetDataReader reader)
         {
             SendRate = reader.GetInt();
+            NetId = reader.GetInt();
+            AllowVOIP = reader.GetBool();
         }
 
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(SendRate);
+            writer.Put(NetId);
+            writer.Put(AllowVOIP);
         }
     }
 }

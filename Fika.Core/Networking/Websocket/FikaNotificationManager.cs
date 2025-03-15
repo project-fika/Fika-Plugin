@@ -1,20 +1,19 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Websocket.Notifications;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Linq;
-using UnityEngine;
+using System.Threading.Tasks;
 using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket
 {
-    public class FikaNotificationManager : MonoBehaviour
+    internal class FikaNotificationManager
     {
         private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaNotificationManager");
         public static FikaNotificationManager Instance;
@@ -25,60 +24,49 @@ namespace Fika.Core.Networking.Websocket
                 return Instance != null;
             }
         }
-
         public string Host { get; set; }
         public string Url { get; set; }
         public string SessionId { get; set; }
-        public bool Reconnecting { get; private set; }
         public bool Connected
         {
             get
             {
-                return _webSocket.ReadyState == WebSocketState.Open;
+                return webSocket.ReadyState == WebSocketState.Open;
             }
         }
 
-        private WebSocket _webSocket;
-        // Add a queue for incoming notifications, so they can be brought to the main thread in a nice way.
-        private ConcurrentQueue<NotificationAbstractClass> notificationsQueue = new();
+        public bool reconnecting;
 
-        public void Awake()
+        private WebSocket webSocket;
+
+        public FikaNotificationManager()
         {
             Instance = this;
             Host = RequestHandler.Host.Replace("http", "ws");
             SessionId = RequestHandler.SessionId;
             Url = $"{Host}/fika/notification/";
 
-            _webSocket = new WebSocket(Url)
+            webSocket = new WebSocket(Url)
             {
                 WaitTime = TimeSpan.FromMinutes(1),
                 EmitOnPing = true
             };
 
-            _webSocket.SetCredentials(SessionId, "", true);
+            webSocket.SetCredentials(SessionId, "", true);
 
-            _webSocket.OnError += WebSocket_OnError;
-            _webSocket.OnMessage += WebSocket_OnMessage;
-            _webSocket.OnClose += (sender, e) =>
+            webSocket.OnError += WebSocket_OnError;
+            webSocket.OnMessage += WebSocket_OnMessage;
+            webSocket.OnClose += (sender, e) =>
             {
-                // Prevent looping the Coroutine over and over.
-                if (Reconnecting)
+                if (reconnecting)
                 {
                     return;
                 }
 
-                StartCoroutine(ReconnectWebSocket());
+                Task.Run(ReconnectWebSocket);
             };
 
             Connect();
-        }
-
-        public void Update()
-        {
-            while (notificationsQueue.TryDequeue(out NotificationAbstractClass notification))
-            {
-                Singleton<PreloaderUI>.Instance.NotifierView.method_3(notification);
-            }
         }
 
         private void WebSocket_OnError(object sender, ErrorEventArgs e)
@@ -88,12 +76,12 @@ namespace Fika.Core.Networking.Websocket
 
         public void Connect()
         {
-            _webSocket.Connect();
+            webSocket.Connect();
         }
 
         public void Close()
         {
-            _webSocket.Close();
+            webSocket.Close();
         }
 
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
@@ -120,61 +108,70 @@ namespace Fika.Core.Networking.Websocket
 #if DEBUG
             logger.LogDebug($"Received type: {type}");
 #endif
-
+            NotificationAbstractClass notification = null;
             switch (type)
             {
                 case EFikaNotifications.StartedRaid:
-                    StartRaidNotification startRaidNotification = e.Data.ParseJsonTo<StartRaidNotification>([]);
+                    notification = e.Data.ParseJsonTo<StartRaidNotification>([]);
 
                     if (FikaGlobals.IsInRaid())
                     {
                         return;
                     }
-
-                    notificationsQueue.Enqueue(startRaidNotification);
+                    HandleNotification(notification);
                     break;
                 case EFikaNotifications.SentItem:
-                    ReceivedSentItemNotification SentItemNotification = e.Data.ParseJsonTo<ReceivedSentItemNotification>([]);
-
-                    notificationsQueue.Enqueue(SentItemNotification);
+                    notification = e.Data.ParseJsonTo<ReceivedSentItemNotification>([]);
+                    HandleNotification(notification);
                     break;
                 case EFikaNotifications.PushNotification:
-                    PushNotification pushNotification = e.Data.ParseJsonTo<PushNotification>([]);
-
-                    notificationsQueue.Enqueue(pushNotification);
+                    notification = e.Data.ParseJsonTo<PushNotification>([]);
+                    HandleNotification(notification);
                     break;
             }
         }
 
-        private IEnumerator ReconnectWebSocket()
+        private void HandleNotification(NotificationAbstractClass notification)
         {
-            Reconnecting = true;
-
-            while (true)
+            AsyncWorker.RunInMainTread(() =>
             {
-                if (_webSocket.ReadyState == WebSocketState.Open)
+                Singleton<PreloaderUI>.Instance.NotifierView.method_3(notification);
+            });
+        }
+
+        private async Task ReconnectWebSocket()
+        {
+            reconnecting = true;
+
+            while (reconnecting)
+            {
+                if (webSocket.ReadyState == WebSocketState.Open)
                 {
                     break;
                 }
 
                 // Don't attempt to reconnect if we're still attempting to connect.
-                if (_webSocket.ReadyState != WebSocketState.Connecting)
+                if (webSocket.ReadyState != WebSocketState.Connecting)
                 {
-                    _webSocket.Connect();
+                    webSocket.Connect();
                 }
-                yield return new WaitForSeconds(10f);
+
+                await Task.Delay(10 * 1000);
+
+                if (webSocket.ReadyState == WebSocketState.Open)
+                {
+                    break;
+                }
             }
 
-            Reconnecting = false;
-
-            yield return null;
+            reconnecting = false;
         }
 
 #if DEBUG
         public static void TestNotification(EFikaNotifications type)
         {
             // Ugly ass one-liner, who cares. It's for debug purposes
-            string Username = FikaPlugin.DevelopersList.ToList()[new System.Random().Next(FikaPlugin.DevelopersList.Count)].Key;
+            string Username = FikaPlugin.DevelopersList.ToList()[new Random().Next(FikaPlugin.DevelopersList.Count)].Key;
 
             switch (type)
             {

@@ -15,24 +15,31 @@ using System.Linq;
 
 namespace Fika.Core.Coop.HostClasses
 {
-    public class FikaHostTransitController : GClass1641
+    public class FikaHostTransitController : GClass1676
     {
-        public FikaHostTransitController(BackendConfigSettingsClass.GClass1529 settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
-            : base(settings, parameters)
+        public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+            : base(settings, parameters, profile, localRaidSettings)
         {
-            this.localRaidSettings = localRaidSettings;
-            OnPlayerEnter += OnHostPlayerEnter;
-            OnPlayerExit += OnHostPlayerExit;
-            string[] array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
-            summonedTransits[profile.Id] = new GClass1639(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array);
-            TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");
+            this.localRaidSettings = localRaidSettings;            
+            string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
+            summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
+                localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
+            TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
             server = Singleton<FikaServer>.Instance;
             playersInTransitZone = [];
             dediTransit = false;
             transittedPlayers = [];
         }
 
-        public void SetupDedicatedPlayerTransitStash(LocalPlayer player)
+        public void PostConstruct()
+        {
+            OnPlayerEnter = FikaGlobals.ClearDelegates(OnPlayerEnter);
+            OnPlayerEnter += OnHostPlayerEnter;
+            OnPlayerExit = FikaGlobals.ClearDelegates(OnPlayerExit);
+            OnPlayerExit += OnHostPlayerExit;
+        }
+
+        public void SetupHeadlessPlayerTransitStash(LocalPlayer player)
         {
             TransferItemsController.InitPlayerStash(player);
             player.UpdateBtrTraderServiceData().HandleExceptions();
@@ -53,17 +60,17 @@ namespace Fika.Core.Coop.HostClasses
 
         private void OnHostPlayerEnter(TransitPoint point, Player player)
         {
-            if (!method_8(player, point.parameters.id, out string _))
+            if (!method_9(player, point.parameters.id, out string _))
             {
                 if (player.IsYourPlayer)
                 {
-                    method_10();
+                    method_11();
                 }
                 return;
             }
             else
             {
-                if (!method_8(player, point.parameters.id, out string _))
+                if (!method_9(player, point.parameters.id, out string _))
                 {
                     return;
                 }
@@ -76,14 +83,14 @@ namespace Fika.Core.Coop.HostClasses
 
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
-                TransferItemsController.InitPlayerStash(player);
+                //TransferItemsController.InitPlayerStash(player);
                 if (player is CoopPlayer coopPlayer)
                 {
                     coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
                 }
                 if (player.IsYourPlayer)
                 {
-                    method_11(point.parameters.id, player, method_13());
+                    method_12(point.parameters.id, player, method_14());
                     return;
                 }
                 TransitEventPacket packet = new()
@@ -119,7 +126,7 @@ namespace Fika.Core.Coop.HostClasses
             }
             if (player.IsYourPlayer)
             {
-                method_14(player);
+                method_15(player);
                 return;
             }
 
@@ -180,7 +187,7 @@ namespace Fika.Core.Coop.HostClasses
             {
                 if (GamePlayerOwner.MyPlayer.Id == timer.Key)
                 {
-                    method_9(pointId);
+                    method_10(pointId);
                     MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
                     MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value);
                 }
@@ -204,7 +211,7 @@ namespace Fika.Core.Coop.HostClasses
             if (GamePlayerOwner.MyPlayer.Id == playerId)
             {
                 NotificationManagerClass.DisplayWarningNotification("Transit/InactivePoint".Localized(null), ENotificationDurationType.Default);
-                method_9(pointId);
+                method_10(pointId);
                 return;
             }
 
@@ -222,7 +229,7 @@ namespace Fika.Core.Coop.HostClasses
             server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
-        public override void InteractWithTransit(Player player, GStruct176 packet)
+        public override void InteractWithTransit(Player player, TransitInteractionPacketStruct packet)
         {
             TransitPoint point = dictionary_0[packet.pointId];
             if (point == null)
@@ -237,7 +244,7 @@ namespace Fika.Core.Coop.HostClasses
 
             if (player.IsYourPlayer)
             {
-                method_14(player);
+                method_15(player);
                 transitPlayers.Add(player.ProfileId, player.Id);
                 profileKeys[player.ProfileId] = packet.keyId;
                 dictionary_0[packet.pointId].GroupEnter(player);
@@ -274,7 +281,7 @@ namespace Fika.Core.Coop.HostClasses
             {
                 if (coopPlayer.HealthController.IsAlive)
                 {
-                    if (coopPlayer.IsYourPlayer && FikaBackendUtils.IsDedicated)
+                    if (coopPlayer.IsYourPlayer && FikaBackendUtils.IsHeadless)
                     {
                         continue;
                     }
@@ -332,10 +339,10 @@ namespace Fika.Core.Coop.HostClasses
                 if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
                 {
                     eraidMode = ERaidMode.Local;
-                    tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+                    tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
                 }
                 string profileId = player.ProfileId;
-                GClass1926 gclass = new()
+                GClass1961 gclass = new()
                 {
                     hash = hash,
                     playersCount = playersCount,
@@ -348,7 +355,8 @@ namespace Fika.Core.Coop.HostClasses
                     dayTime = localRaidSettings.timeVariant
                 };
                 alreadyTransits.Add(profileId, gclass);
-                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                CoopGame coopGame = CoopGame.Instance;
+                if (coopGame != null)
                 {
                     coopGame.Extract((CoopPlayer)player, null, point);
                 }
@@ -367,13 +375,13 @@ namespace Fika.Core.Coop.HostClasses
 
             server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
-            if (FikaBackendUtils.IsDedicated && !dediTransit)
+            if (FikaBackendUtils.IsHeadless && !dediTransit)
             {
-                ExtractDedicatedClient(point);
+                ExtractHeadlessClient(point);
             }
         }
 
-        private void ExtractDedicatedClient(TransitPoint point)
+        private void ExtractHeadlessClient(TransitPoint point)
         {
             Dictionary<string, ProfileKey> keys;
             dediTransit = true;
@@ -385,7 +393,7 @@ namespace Fika.Core.Coop.HostClasses
             if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
             {
                 eraidMode = ERaidMode.Local;
-                tarkovApplication.transitionStatus = new GStruct136(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+                tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
             }
             string profileId = dediPlayer.ProfileId;
             keys = [];
@@ -396,7 +404,7 @@ namespace Fika.Core.Coop.HostClasses
                 _id = profileId,
             });
 
-            GClass1926 gclass = new()
+            GClass1961 gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,
@@ -411,9 +419,10 @@ namespace Fika.Core.Coop.HostClasses
             alreadyTransits.Add(profileId, gclass);
 
             TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
-            if (transitController != null && Singleton<IFikaGame>.Instance is CoopGame coopGame)
+            CoopGame coopGame = CoopGame.Instance;
+            if (transitController != null && coopGame != null)
             {
-                if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1926 data))
+                if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1961 _))
                 {
                     coopGame.ExitStatus = ExitStatus.Transit;
                     coopGame.ExitLocation = point.parameters.name;
@@ -434,11 +443,9 @@ namespace Fika.Core.Coop.HostClasses
 
         public void Init()
         {
-            foreach (TransitPoint transitPoint in dictionary_0.Values)
-            {
-                transitPoint.Enabled = true;
-            }
-            method_5(dictionary_0.Values);
+            EnablePoints(true);
+            method_6(dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
+            method_2(dictionary_0.Values, GamePlayerOwner.MyPlayer);
 
             /*TransitEventPacket packet = new()
 			{

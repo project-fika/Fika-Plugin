@@ -128,12 +128,11 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             {
                 from = to = 0;
                 t = 0;
+                return;
             }
-            else
-            {
-                from = to = buffer.Count - 1;
-                t = 0;
-            }
+
+            from = to = buffer.Count - 1;
+            t = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

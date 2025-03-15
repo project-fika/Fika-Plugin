@@ -34,7 +34,6 @@ namespace Fika.Core.Coop.ClientClasses
                 _player.ProceduralWeaponAnimation.WeaponFlipSpeed = InertiaSettings.WeaponFlipSpeed.Evaluate(_player.Physical.Inertia);
             }
             UpdateCovertEfficiency(_player.MovementContext.ClampedSpeed, true);
-            _player.UpdateStepSoundRolloff();
             _player.HealthController.FallSafeHeight = Mathf.Lerp(Singleton<BackendConfigSettingsClass>.Instance.Health.Falling.SafeHeight, Singleton<BackendConfigSettingsClass>.Instance.Stamina.SafeHeightOverweight, _player.Physical.Overweight);
             PlayerAnimatorTransitionSpeed = TransitionSpeed;
             if (PoseLevel > _player.Physical.MaxPoseLevel && CurrentState is MovementState movementState)

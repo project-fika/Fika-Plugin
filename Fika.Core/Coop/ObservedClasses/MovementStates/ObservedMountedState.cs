@@ -149,7 +149,7 @@ namespace Fika.Core.Coop.ObservedClasses
             MovementContext.SetPitchSmoothly(PitchLimitX, PitchLimitY);
             bool_0 = MovementContext.CanUseProp.Value;
             bool_1 = false;
-            player.OnMounting(GStruct179.EMountingCommand.Enter);
+            player.OnMounting(MountingPacketStruct.EMountingCommand.Enter);
             float_5 = ((playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward || MovementContext.IsInPronePose)
                 ? ((MovementContext.Pitch < MovementContext.PitchLimit.x) ? PitchLimitX : ((MovementContext.Pitch > MovementContext.PitchLimit.y) ? MovementContext.PitchLimit.y : MovementContext.Pitch)) : 0f);
             float num5 = Mathf.InverseLerp(PitchLimitX, PitchLimitY, float_5);
@@ -178,8 +178,8 @@ namespace Fika.Core.Coop.ObservedClasses
             MovementContext.IgnoreDeltaMovement = false;
             MovementContext.MountedSmoothedTilt = 0f;
             MovementContext.MountedSmoothedTiltForCamera = 0f;
-            MovementContext.SetYawLimit(Player.GClass1738.FULL_YAW_RANGE);
-            MovementContext.SetPitchSmoothly(MovementContext.IsInPronePose ? Player.GClass1738.PRONE_POSE_ROTATION_PITCH_RANGE : Player.GClass1738.STAND_POSE_ROTATION_PITCH_RANGE);
+            MovementContext.SetYawLimit(Player.GClass1772.FULL_YAW_RANGE);
+            MovementContext.SetPitchSmoothly(MovementContext.IsInPronePose ? Player.GClass1772.PRONE_POSE_ROTATION_PITCH_RANGE : Player.GClass1772.STAND_POSE_ROTATION_PITCH_RANGE);
             MovementContext.RotationAction = MovementContext.DefaultRotationFunction;
             MovementContext.CanUseProp.Value = bool_0;
             player.ProceduralWeaponAnimation.SetStrategy(EPointOfView.ThirdPerson);
@@ -215,13 +215,13 @@ namespace Fika.Core.Coop.ObservedClasses
             if (float_4 <= playerMountingPointData.CurrentApproachTime)
             {
                 UpdateApproach(deltaTime * Time.timeScale);
-                player.OnMounting(GStruct179.EMountingCommand.Update);
+                player.OnMounting(MountingPacketStruct.EMountingCommand.Update);
                 return;
             }
             MovementContext.SetYawLimit(playerMountingPointData.YawLimit);
             MovementContext.SetPitchSmoothly(PitchLimitX, PitchLimitY);
             UpdateState();
-            player.OnMounting(GStruct179.EMountingCommand.Update);
+            player.OnMounting(MountingPacketStruct.EMountingCommand.Update);
         }
 
         public void UpdateState()
@@ -393,7 +393,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 MovementContext.PlayerAnimatorSetTilt(MovementContext.MountedSmoothedTilt);
             }
-            player.OnMounting(GStruct179.EMountingCommand.StartLeaving);
+            player.OnMounting(MountingPacketStruct.EMountingCommand.StartLeaving);
             Action<float> onExitMountedState = playerMountingPointData.OnExitMountedState;
             if (onExitMountedState == null)
             {

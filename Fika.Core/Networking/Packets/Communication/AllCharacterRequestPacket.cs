@@ -1,8 +1,8 @@
-﻿// © 2025 Lacyway All Rights Reserved
+﻿/*// © 2025 Lacyway All Rights Reserved
 
 using LiteNetLib.Utils;
 using UnityEngine;
-using static Fika.Core.Networking.Packets.SubPackets;
+using static Fika.Core.Networking.SubPackets;
 
 namespace Fika.Core.Networking
 {
@@ -57,3 +57,4 @@ namespace Fika.Core.Networking
         }
     }
 }
+*/

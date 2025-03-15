@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(ref GameWorld __result, GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
+        public static bool Prefix(ref GameWorld __result, GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
         {
 
             if (!FikaBackendUtils.RequestFikaWorld)
@@ -34,14 +34,15 @@ namespace Fika.Core.Coop.Patches
             {
                 __result = CoopClientGameWorld.Create(gameObject, objectsFactory, updateQueue, currentProfileId);
             }
+            FikaBackendUtils.RequestFikaWorld = false;
             return false;
         }
 
-        private static GameWorld CreateHideoutWorld(GameObject gameObject, PoolManager objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
+        private static GameWorld CreateHideoutWorld(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
         {
             HideoutGameWorld gameWorld = gameObject.AddComponent<HideoutGameWorld>();
             Traverse gameWorldTraverse = Traverse.Create(gameWorld);
-            gameWorldTraverse.Field<PoolManager>("ObjectsFactory").Value = objectsFactory;
+            gameWorldTraverse.Field<PoolManagerClass>("ObjectsFactory").Value = objectsFactory;
             gameWorldTraverse.Field<EUpdateQueue>("eupdateQueue_0").Value = updateQueue;
             gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
             gameWorld.ExfiltrationController = new ExfiltrationControllerClass();

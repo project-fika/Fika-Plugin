@@ -120,8 +120,9 @@ namespace Fika.Core.Utils
             string message = "Your client doesn't meet server requirements, check logs for more details";
 
             // -1f time makes the message permanent
-            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
-                ErrorScreen.EButtonType.QuitButton, -1f, Application.Quit, null);
+            GClass3547 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
+                ErrorScreen.EButtonType.QuitButton, -1f);
+            errorScreen.OnAccept += Application.Quit;
         }
 
         private void CheckSpecialMods(string key)

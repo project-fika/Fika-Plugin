@@ -123,8 +123,8 @@ namespace Fika.Core.Coop.Custom
         {
             foreach (CoopPlayer player in coopHandler.HumanPlayers)
             {
-                // Do not count the dedicated profile as an active player
-                if (player.Profile.IsDedicatedProfile())
+                // Do not count the headless client profile as an active player
+                if (player.Profile.IsHeadlessProfile())
                 {
                     continue;
                 }
@@ -157,7 +157,7 @@ namespace Fika.Core.Coop.Custom
                 logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
             }
 
-            CoopGame coopGame = (CoopGame)Singleton<IFikaGame>.Instance;
+            CoopGame coopGame = CoopGame.Instance;
             if (coopGame == null)
             {
                 return;

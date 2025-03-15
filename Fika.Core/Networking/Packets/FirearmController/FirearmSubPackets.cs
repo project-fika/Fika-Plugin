@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using static EFT.Player;
-using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -660,7 +660,7 @@ namespace Fika.Core.Networking
                     MagazineItemClass magazine = null;
                     try
                     {
-                        GStruct448<Item> result = player.FindItemById(MagId);
+                        GStruct457<Item> result = player.FindItemById(MagId);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -686,10 +686,10 @@ namespace Fika.Core.Networking
                     {
                         try
                         {
-                            GClass1193 reader = new(LocationDescription);
+                            FikaReader eftReader = EFTSerializationManager.GetReader(LocationDescription);
                             if (LocationDescription.Length != 0)
                             {
-                                GClass1687 descriptor = reader.ReadPolymorph<GClass1687>();
+                                GClass1721 descriptor = eftReader.ReadPolymorph<GClass1721>();
                                 gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                             }
                         }
@@ -700,6 +700,7 @@ namespace Fika.Core.Networking
                     }
                     if (magazine != null)
                     {
+                        controller.FastForwardCurrentState();
                         controller.ReloadMag(magazine, gridItemAddress, null);
                     }
                     else
@@ -740,7 +741,7 @@ namespace Fika.Core.Networking
                 {
                     try
                     {
-                        GStruct448<Item> result = player.FindItemById(MagId);
+                        GStruct457<Item> result = player.FindItemById(MagId);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -748,6 +749,7 @@ namespace Fika.Core.Networking
                         }
                         if (result.Value is MagazineItemClass magazine)
                         {
+                            controller.FastForwardCurrentState();
                             controller.QuickReloadMag(magazine, null);
                         }
                         else
@@ -813,6 +815,7 @@ namespace Fika.Core.Networking
                         {
                             List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
                             AmmoPackReloadingClass ammoPack = new(bullets);
+                            controller.FastForwardCurrentState();
                             controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
                         }
                     }
@@ -879,6 +882,7 @@ namespace Fika.Core.Networking
                         {
                             List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
                             AmmoPackReloadingClass ammoPack = new(bullets);
+                            controller.FastForwardCurrentState();
                             controller.CurrentOperation.ReloadCylinderMagazine(ammoPack, null, null);
                         }
                     }
@@ -929,6 +933,7 @@ namespace Fika.Core.Networking
                 {
                     List<AmmoItemClass> ammo = controller.FindAmmoByIds(AmmoIds);
                     AmmoPackReloadingClass ammoPack = new(ammo);
+                    controller.FastForwardCurrentState();
                     controller.ReloadGrenadeLauncher(ammoPack, null);
                 }
             }
@@ -967,12 +972,12 @@ namespace Fika.Core.Networking
                     AmmoPackReloadingClass ammoPack = new(ammo);
                     ItemAddress gridItemAddress = null;
 
-                    GClass1193 reader = new(LocationDescription);
+                    FikaReader eftReader = EFTSerializationManager.GetReader(LocationDescription);
                     try
                     {
                         if (LocationDescription.Length > 0)
                         {
-                            GClass1687 descriptor = reader.ReadPolymorph<GClass1687>();
+                            GClass1721 descriptor = eftReader.ReadPolymorph<GClass1721>();
                             gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                         }
                     }
@@ -983,6 +988,7 @@ namespace Fika.Core.Networking
 
                     if (ammoPack != null)
                     {
+                        controller.FastForwardCurrentState();
                         controller.ReloadBarrels(ammoPack, gridItemAddress, null);
                     }
                     else
@@ -1060,6 +1066,36 @@ namespace Fika.Core.Networking
                     writer.Put(ShotForward);
                     writer.Put(AmmoTemplateId);
                 }
+            }
+        }
+
+        public struct RocketShotPacket : ISubPacket
+        {
+            public Vector3 ShotPosition;
+            public Vector3 ShotForward;
+            public string AmmoTemplateId;
+
+            public RocketShotPacket(NetDataReader reader)
+            {
+                ShotPosition = reader.GetVector3();
+                ShotForward = reader.GetVector3();
+                AmmoTemplateId = reader.GetString();
+            }
+
+            public void Execute(CoopPlayer player)
+            {
+                if (player.HandsController is CoopObservedFirearmController controller)
+                {
+                    AmmoItemClass rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
+                    controller.CreateRocketShot(rocketClass, ShotPosition, ShotForward);
+                }
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(ShotPosition);
+                writer.Put(ShotForward);
+                writer.Put(AmmoTemplateId);
             }
         }
     }

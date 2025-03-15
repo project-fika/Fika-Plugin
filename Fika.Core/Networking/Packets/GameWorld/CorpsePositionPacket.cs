@@ -4,7 +4,7 @@ namespace Fika.Core.Networking
 {
     public struct CorpsePositionPacket : INetSerializable
     {
-        public GStruct129 Data;
+        public RagdollPacketStruct Data;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -17,7 +17,7 @@ namespace Fika.Core.Networking
 
             if (Data.Done)
             {
-                Data.TransformSyncs = new GStruct107[12];
+                Data.TransformSyncs = new GStruct111[12];
                 for (int i = 0; i < 12; i++)
                 {
                     Data.TransformSyncs[i] = new()
@@ -37,7 +37,7 @@ namespace Fika.Core.Networking
 
             if (Data.Done && Data.TransformSyncs != null)
             {
-                GStruct107[] transforms = Data.TransformSyncs;
+                GStruct111[] transforms = Data.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
                     writer.Put(transforms[i].Position);

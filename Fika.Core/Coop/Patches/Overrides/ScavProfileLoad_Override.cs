@@ -8,7 +8,7 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_49));
+            return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_48));
         }
 
         [PatchPrefix]

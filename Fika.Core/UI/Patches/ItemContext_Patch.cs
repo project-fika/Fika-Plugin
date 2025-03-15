@@ -29,7 +29,8 @@ namespace Fika.Core.UI.Patches
         [PatchPrefix]
         private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
         {
-            if (contextInteractions is not GClass3402 gclass)
+            // Check for GClass increments, contains base Insure()
+            if (contextInteractions is not GClass3468 gclass)
             {
                 return;
             }
@@ -68,8 +69,7 @@ namespace Fika.Core.UI.Patches
                 }
 
                 // Check for GClass increments
-                Dictionary<string, DynamicInteractionClass> dynamicInteractions = Traverse.Create(contextInteractions)
-                    .Field<Dictionary<string, DynamicInteractionClass>>("dictionary_0").Value;
+                Dictionary<string, DynamicInteractionClass> dynamicInteractions = contextInteractions.dictionary_0;
                 if (dynamicInteractions == null)
                 {
                     dynamicInteractions = [];
@@ -123,10 +123,10 @@ namespace Fika.Core.UI.Patches
                     }
 
                     // Create the window
-                    GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetAssetBundle("senditemmenu").LoadAsset<GameObject>("SendItemMenu");
+                    GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.SendItemMenu);
                     GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
                     uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
-                    InventoryScreen.GClass3511 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3511>("ScreenController").Value;
+                    InventoryScreen.GClass3582 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3582>("ScreenController").Value;
                     screenController.OnClose += () => { Object.Destroy(uiGameObj); };
                     SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
                     sendItemUI.PlayersDropdown.ClearOptions();

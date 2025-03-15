@@ -11,7 +11,7 @@ namespace Fika.Core.Coop.Patches
 {
     public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
     {
-        public static GClass1962 ProfileDescriptor { get; private set; }
+        public static GClass1998 ProfileDescriptor { get; private set; }
 
         protected override MethodBase GetTargetMethod()
         {
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
         [PatchPrefix]
         public static void PatchPrefix(CoopGame __instance)
         {
-            ProfileDescriptor = new GClass1962(__instance.Profile_0, FikaGlobals.SearchControllerSerializer);
+            ProfileDescriptor = new GClass1998(__instance.Profile_0, FikaGlobals.SearchControllerSerializer);
         }
     }
     /// <summary>

@@ -1,9 +1,10 @@
 using EFT;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Models;
+using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
-using Fuyu.Platform.Common.Http;
+using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
@@ -19,16 +20,16 @@ namespace Fika.Core.Networking.Http
 {
     public static class FikaRequestHandler
     {
-        private static readonly FuyuClient _httpClient;
+        private static readonly Client _httpClient;
 
         static FikaRequestHandler()
         {
-            _httpClient = new FuyuClient(RequestHandler.Host, RequestHandler.SessionId);
+            _httpClient = RequestHandler.HttpClient;
         }
 
         public static async Task<IPAddress> GetPublicIP()
         {
-            HttpClient client = _httpClient.GetClient();
+            HttpClient client = Traverse.Create(_httpClient).Field<HttpClient>("_httpv").Value;
             string ipString = await client.GetStringAsync("https://api.ipify.org/");
             ipString = ipString.Replace("\n", "");
             if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
@@ -121,6 +122,11 @@ namespace Fika.Core.Networking.Http
             return GetJson<NatPunchServerConfigModel>("/fika/natpunchserver/config");
         }
 
+        public static RestartAfterRaidAmountModel GetHeadlessRestartAfterRaidAmount()
+        {
+            return GetJson<RestartAfterRaidAmountModel>("/fika/headless/restartafterraidamount");
+        }
+
         public static async Task UpdatePing(PingRequest data)
         {
             await PutJsonAsync("/fika/update/ping", data);
@@ -186,19 +192,14 @@ namespace Fika.Core.Networking.Http
             return await GetJsonAsync<JObject>("/fika/profile/download");
         }
 
-        public static async Task<StartDedicatedResponse> StartDedicated(StartDedicatedRequest request)
+        public static async Task<StartHeadlessResponse> StartHeadless(StartHeadlessRequest request)
         {
-            return await PostJsonAsync<StartDedicatedRequest, StartDedicatedResponse>("/fika/raid/dedicated/start", request);
+            return await PostJsonAsync<StartHeadlessRequest, StartHeadlessResponse>("/fika/raid/headless/start", request);
         }
 
-        public static async Task<SetDedicatedStatusResponse> SetDedicatedStatus(SetDedicatedStatusRequest request)
+        public static AvailableHeadlessClientsRequest[] GetAvailableHeadlesses()
         {
-            return await PostJsonAsync<SetDedicatedStatusRequest, SetDedicatedStatusResponse>("/fika/raid/dedicated/status", request);
-        }
-
-        public static GetDedicatedStatusResponse GetDedicatedStatus()
-        {
-            return GetJson<GetDedicatedStatusResponse>("/fika/raid/dedicated/getstatus");
+            return GetJson<AvailableHeadlessClientsRequest[]>("/fika/headless/available");
         }
 
         public static async Task RegisterPlayer(RegisterPlayerRequest request)
