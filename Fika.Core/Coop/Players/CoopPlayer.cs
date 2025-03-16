@@ -172,7 +172,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName);
+            player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName ?? profile.Nickname);
 
             return player;
         }
