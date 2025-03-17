@@ -169,7 +169,7 @@ namespace Fika.Core.Coop.Utils
         /// <returns><see cref="bool"/></returns>
         public static bool IsHeadlessProfile(this Profile profile)
         {
-            return profile.Info.GroupId.ToLower() == "headless";
+            return profile.Info != null && profile.Info.GroupId.ToLower() == "headless";
         }
 
         /// <summary>
@@ -179,8 +179,7 @@ namespace Fika.Core.Coop.Utils
         /// <param name="nickname"></param>
         public static void SetProfileNickname(this InfoClass infoClass, string nickname)
         {
-            //Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
-            infoClass.Nickname = nickname;
+            Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
         }
 
         /// <summary>

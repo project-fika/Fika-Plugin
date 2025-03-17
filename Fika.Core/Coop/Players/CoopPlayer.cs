@@ -172,7 +172,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName);
+            player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName ?? profile.Nickname);
 
             return player;
         }
@@ -833,6 +833,11 @@ namespace Fika.Core.Coop.Players
         // Execute
         public override void vmethod_1(WorldInteractiveObject door, InteractionResult interactionResult)
         {
+            if (door == null)
+            {
+                return;
+            }
+
             if (this is ObservedCoopPlayer)
             {
                 base.vmethod_1(door, interactionResult);

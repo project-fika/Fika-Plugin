@@ -176,16 +176,10 @@ namespace Fika.Core.Coop.Utils
             throw new NullReferenceException("FikaGameObject was null");
         }
 
-        public static Task SetupGameVariables(bool isServer, CoopPlayer coopPlayer)
+        public static Task SetupGameVariables(CoopPlayer coopPlayer)
         {
-            logger.LogInfo("Setting up game variables...");
-            if (isServer)
-            {
-                Singleton<FikaServer>.Instance.SetupGameVariables(coopPlayer);
-                return Task.CompletedTask;
-            }
-
-            Singleton<FikaClient>.Instance.SetupGameVariables(coopPlayer);
+            logger.LogInfo("Setting up game variables...");            
+            Singleton<IFikaNetworkManager>.Instance.SetupGameVariables(coopPlayer);
             return Task.CompletedTask;
         }
 
