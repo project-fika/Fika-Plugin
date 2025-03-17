@@ -1446,6 +1446,8 @@ namespace Fika.Core.Coop.GameMode
         /// <returns>A <see cref="Player"/></returns>
         private async Task<LocalPlayer> CreateLocalPlayer()
         {
+            Status = GameStatus.Running;
+
             int num = Singleton<IFikaNetworkManager>.Instance.NetId;
 
             Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
