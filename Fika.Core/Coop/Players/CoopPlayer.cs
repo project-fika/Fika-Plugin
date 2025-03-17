@@ -833,7 +833,7 @@ namespace Fika.Core.Coop.Players
         // Execute
         public override void vmethod_1(WorldInteractiveObject door, InteractionResult interactionResult)
         {
-            if (door = null)
+            if (door == null)
             {
                 return;
             }
