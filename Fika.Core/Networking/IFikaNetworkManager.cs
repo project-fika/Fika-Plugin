@@ -1,5 +1,6 @@
 ﻿using EFT;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.Players;
 using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -15,6 +16,7 @@ namespace Fika.Core.Networking
         public EPlayerSide RaidSide { get; set; }
         public int SendRate { get; }
         public bool AllowVOIP { get; set; }
+        public void SetupGameVariables(CoopPlayer coopPlayer);
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null);
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null);
         /// <summary>

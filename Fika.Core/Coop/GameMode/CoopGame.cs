@@ -997,7 +997,7 @@ namespace Fika.Core.Coop.GameMode
 
             //GameObject customButton = null;
 
-            await NetManagerUtils.SetupGameVariables(isServer, coopPlayer);
+            await NetManagerUtils.SetupGameVariables(coopPlayer);
             //customButton = CreateCancelButton(coopPlayer, customButton);
 
             if (!isServer && !FikaBackendUtils.IsReconnect)
