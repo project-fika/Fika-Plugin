@@ -833,6 +833,11 @@ namespace Fika.Core.Coop.Players
         // Execute
         public override void vmethod_1(WorldInteractiveObject door, InteractionResult interactionResult)
         {
+            if (door = null)
+            {
+                return;
+            }
+
             if (this is ObservedCoopPlayer)
             {
                 base.vmethod_1(door, interactionResult);

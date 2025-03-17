@@ -330,6 +330,11 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
+        public override void UpdateSpeedLimit(float speedDelta, ESpeedLimit cause, float duration)
+        {
+            // Do nothing
+        }
+
         public override void UpdatePhones()
         {
             // Do nothing
@@ -1342,7 +1347,7 @@ namespace Fika.Core.Coop.Players
                     VoipEftSource.SetMixerGroup(audioMixerGroup);
                 }
             }
-        }
+        }        
 
         public override void LandingAdjustments(float d)
         {
