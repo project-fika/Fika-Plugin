@@ -1518,6 +1518,11 @@ namespace Fika.Core.Coop.GameMode
             LocalPlayer myPlayer;
             try
             {
+                if (Profile_0.Side != EPlayerSide.Savage)
+                {
+                    GenerateNewDogTagId();
+                }
+
                 myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
                         Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
                         BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
@@ -1537,6 +1542,25 @@ namespace Fika.Core.Coop.GameMode
 
             Logger.LogInfo("Local player created");
             return myPlayer;
+        }
+
+        /// <summary>
+        /// Temporary workaround since SPT does not generate a unique ID >3.11 for the dogtag
+        /// </summary>
+        private void GenerateNewDogTagId()
+        {
+            Item dogTag = Profile_0.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+            if (dogTag != null)
+            {
+                Traverse.Create(dogTag).Field<string>("<Id>k__BackingField").Value = MongoID.Generate(true);
+#if DEBUG
+                Logger.LogWarning("Generated new ID for DogTag");
+#endif
+            }
+            else
+            {
+                Logger.LogError("Could not find DogTag when generating new ID!");
+            }
         }
 
         private async Task InitExfils()
