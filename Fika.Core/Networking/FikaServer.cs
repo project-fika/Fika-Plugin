@@ -127,6 +127,7 @@ namespace Fika.Core.Networking
         private CancellationTokenSource natIntroduceRoutineCts;
         private int statisticsCounter;
         private Dictionary<Profile, bool> visualProfiles;
+        private Dictionary<int, int> cachedConnections;
 
         internal FikaVOIPServer VOIPServer { get; set; }
         internal FikaVOIPClient VOIPClient { get; set; }
@@ -153,6 +154,7 @@ namespace Fika.Core.Networking
             dataWriter = new();
             externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
             statisticsCounter = 0;
+            cachedConnections = [];
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
 
             ReadyClients = 0;
@@ -788,6 +790,11 @@ namespace Fika.Core.Networking
 
                 foreach (CoopPlayer player in coopHandler.Players.Values)
                 {
+                    if (player.ProfileId == packet.ProfileId)
+                    {
+                        continue;
+                    }
+
                     SendCharacterPacket characterPacket = new(new()
                     {
                         Profile = player.Profile,
@@ -813,19 +820,6 @@ namespace Fika.Core.Networking
                     }
 
                     SendDataToPeer(peer, ref characterPacket, DeliveryMethod.ReliableOrdered);
-                }
-
-                foreach (CoopPlayer player in coopHandler.HumanPlayers)
-                {
-                    if (player.ProfileId == packet.ProfileId)
-                    {
-                        AssignNetIdPacket assignPacket = new()
-                        {
-                            NetId = player.NetId
-                        };
-
-                        SendDataToPeer(peer, ref assignPacket, DeliveryMethod.ReliableOrdered);
-                    }
                 }
 
                 ReconnectPacket finishPacket = new()
@@ -1287,10 +1281,17 @@ namespace Fika.Core.Networking
 
             HasHadPeer = true;
 
+            int hash = peer.Address.GetHashCode();
+            if (!cachedConnections.TryGetValue(hash, out int netId))
+            {
+                netId = PopNetId();
+                cachedConnections.Add(hash, netId);
+            }
+
             NetworkSettingsPacket packet = new()
             {
                 SendRate = sendRate,
-                NetId = PopNetId(),
+                NetId = netId,
                 AllowVOIP = AllowVOIP
             };
             SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);

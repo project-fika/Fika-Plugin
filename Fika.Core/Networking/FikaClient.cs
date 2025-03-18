@@ -236,7 +236,6 @@ namespace Fika.Core.Networking
             RegisterPacket<HealthSyncPacket>(OnHealthSyncPacketReceived);
             RegisterPacket<GenericPacket>(OnGenericPacketReceived);
             RegisterPacket<SendCharacterPacket>(OnSendCharacterPacketReceived);
-            RegisterPacket<AssignNetIdPacket>(OnAssignNetIdPacketReceived);
             RegisterPacket<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             RegisterPacket<TextMessagePacket>(OnTextMessagePacketReceived);
             RegisterPacket<QuestConditionPacket>(OnQuestConditionPacketReceived);
@@ -857,30 +856,6 @@ namespace Fika.Core.Networking
             {
                 player.HandleCallbackFromServer(packet);
             }
-        }
-
-        private void OnAssignNetIdPacketReceived(AssignNetIdPacket packet)
-        {
-            FikaPlugin.Instance.FikaLogger.LogInfo($"OnAssignNetIdPacketReceived: Assigned NetId {packet.NetId} to my own client.");
-            NetId = packet.NetId;
-            int i = -1;
-            foreach (KeyValuePair<int, CoopPlayer> player in coopHandler.Players)
-            {
-                if (player.Value == MyPlayer)
-                {
-                    i = player.Key;
-                    break;
-                }
-            }
-
-            if (i == -1)
-            {
-                FikaPlugin.Instance.FikaLogger.LogError("OnAssignNetIdPacketReceived: Could not find own player among players list");
-                return;
-            }
-
-            coopHandler.Players.Remove(i);
-            coopHandler.Players[packet.NetId] = MyPlayer;
         }
 
         private void OnSendCharacterPacketReceived(SendCharacterPacket packet)
