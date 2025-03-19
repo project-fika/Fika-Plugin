@@ -100,9 +100,14 @@ namespace Fika.Core.UI
             errorScreenTraverse.Field("action_1").SetValue(action_1);
             MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
 
-            errorScreenHandler.context = (GClass3547)baseShow.Invoke(errorScreen, [closeManuallyCallback]);
+            errorScreenHandler.context = (GClass3547)baseShow.Invoke(errorScreen, []);
             errorScreenHandler.context.OnAccept += errorScreen.method_3;
+            if (timeOutCallback != null)
+            {
+                errorScreenHandler.context.OnAccept += timeOutCallback;
+            }
             errorScreenHandler.context.OnDecline += errorScreen.method_4;
+            errorScreenHandler.context.OnDecline += Application.Quit;
             errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
 
             CompositeDisposableClass ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;

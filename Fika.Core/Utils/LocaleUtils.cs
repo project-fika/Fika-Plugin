@@ -171,6 +171,7 @@ namespace Fika.Core.Utils
         public const string UI_INIT_COOP_GAME = "F_UI_InitCoopGame";
         public const string UI_WAIT_FOR_PLAYER = "F_UI_WaitForPlayer";
         public const string UI_WAIT_FOR_PLAYERS = "F_UI_WaitForPlayers";
+        public const string UI_TOS_LONG = "F_UI_ToSLong";
         public const string UI_ALL_PLAYERS_JOINED = "F_UI_AllPlayersJoined";
         public const string UI_WAITING_FOR_CONNECT = "F_UI_WaitingForConnect";
         public const string UI_ERROR_CONNECTING_TO_RAID = "F_UI_ErrorConnectingToRaid";
