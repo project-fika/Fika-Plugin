@@ -1,9 +1,11 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using Diz.Utils;
+using EFT;
 using EFT.InputSystem;
 using EFT.UI;
 using HarmonyLib;
+using JsonType;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -163,6 +165,39 @@ namespace Fika.Core.UI
         public static string BoldText(string text)
         {
             return $"<b>{text}</b>";
+        }
+
+        public static DateTime StaticTime
+        {
+            get
+            {
+                return new DateTime(2016, 8, 4, 15, 28, 0);
+            }
+        }
+
+        public static string FormattedTime(EDateTime time, bool staticTime)
+        {
+            if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+            {
+                if (tarkovApplication.Session != null)
+                {
+                    ISession session = tarkovApplication.Session;
+
+                    if (staticTime)
+                    {
+                        DateTime staticDate = StaticTime;
+                        return time == EDateTime.CURR ? staticDate.ToString("HH:mm:ss") : staticDate.AddHours(-12).ToString("HH:mm:ss");
+                    }
+
+                    DateTime backendTime = session.GetCurrentLocationTime;
+                    if (backendTime == DateTime.MinValue)
+                    {
+                        return "";
+                    }
+                    return time == EDateTime.CURR ? backendTime.ToString("HH:mm:ss") : backendTime.AddHours(-12).ToString("HH:mm:ss");
+                }
+            }
+            return "";
         }
 
         public enum EFikaPlayerPresence
