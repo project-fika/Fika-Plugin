@@ -1610,7 +1610,10 @@ namespace Fika.Core.Coop.GameMode
             GameObject startButton = null;
             if (isServer)
             {
-                startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
+                if (!FikaBackendUtils.IsHeadless)
+                {
+                    startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!"); 
+                }
                 FikaServer server = Singleton<FikaServer>.Instance;
                 server.RaidInitialized = true;
 
