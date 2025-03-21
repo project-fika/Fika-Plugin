@@ -5,6 +5,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using LiteNetLib.Utils;
 using System;
 using UnityEngine;
@@ -155,10 +156,22 @@ namespace Fika.Core.Networking
                     return;
                 }
 
+#if DEBUG
+                FikaGlobals.LogWarning($"Spawning airdrop at {Position} with id {ObjectId}");
+#endif
+
                 AirdropSynchronizableObject syncObject = (AirdropSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirDrop);
                 syncObject.ObjectId = ObjectId;
                 syncObject.transform.position = Position;
                 syncObject.transform.rotation = Rotation;
+                if (syncObject.Logic is AirdropLogicClass airdropLogicClass)
+                {
+                    airdropLogicClass.vector3_0 = Position;
+                }
+                else
+                {
+                    FikaGlobals.LogWarning("AirdropSynchronizableObject logic was not of type AirdropLogicClass!");
+                }
                 syncObject.AirdropType = AirdropType;
                 LootableContainer container = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
                 container.enabled = true;

@@ -613,7 +613,7 @@ namespace Fika.Core.Networking
                 {
                     ObjectId = ObjectId,
                     IsStatic = false,
-                    Position = containerObject != null ? containerObject.transform.position : Vector3.zero,
+                    Position = new(0, -1000, 0),
                     Rotation = containerObject != null ? containerObject.transform.rotation : Quaternion.identity,
                     AirdropType = containerType,
                     AirdropItem = item,
