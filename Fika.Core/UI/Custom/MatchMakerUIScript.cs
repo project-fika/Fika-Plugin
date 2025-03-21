@@ -562,18 +562,16 @@ namespace Fika.Core.UI.Custom
                     }
                 }
 
-                bool isHeadless = entry.HostUsername.StartsWith("headless_");
-
                 // player label
                 GameObject playerLabel = GameObject.Find("PlayerLabel");
                 playerLabel.name = "PlayerLabel" + i;
-                string sessionName = isHeadless ? "Headless" : entry.HostUsername;
+                string sessionName = entry.HostUsername;
                 playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
 
                 // players count label
                 GameObject playerCountLabel = GameObject.Find("PlayerCountLabel");
                 playerCountLabel.name = "PlayerCountLabel" + i;
-                int playerCount = isHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
+                int playerCount = entry.IsHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
                 playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
 
                 // player join button
