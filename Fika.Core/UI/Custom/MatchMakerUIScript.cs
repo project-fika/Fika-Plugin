@@ -580,7 +580,7 @@ namespace Fika.Core.UI.Custom
                 Button button = joinButton.GetComponent<Button>();
                 button.onClick.AddListener(() =>
                 {
-                    if (fikaMatchMakerUi.DediSelection.active)
+                    if (fikaMatchMakerUi.DediSelection.activeSelf)
                     {
                         fikaMatchMakerUi.DediSelection.SetActive(false);
                     }
