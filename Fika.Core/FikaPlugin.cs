@@ -37,6 +37,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -55,7 +56,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.1";
+        public const string FikaVersion = "1.2.2";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -109,7 +110,7 @@ namespace Fika.Core
         #region config values
 
         // Hidden
-        public static ConfigEntry<bool> AcceptedTOS { get; set; }        
+        public static ConfigEntry<string> LastVersion { get; set; }
 
         //Advanced
         public static ConfigEntry<bool> OfficialVersion { get; set; }
@@ -238,11 +239,6 @@ namespace Fika.Core
             GetNatPunchServerConfig();
             EnableFikaPatches();
             EnableTranspilers();
-
-#if GOLDMASTER
-            new TOS_Patch().Enable();
-#endif
-
             DisableSPTPatches();
             FixSPTBugPatches();
             EnableOverridePatches();
@@ -406,7 +402,7 @@ namespace Fika.Core
             {
                 yield return null;
             }
-            
+
             WanIP = addressTask.Result;
 
             yield return new WaitForSeconds(5);
@@ -511,10 +507,24 @@ namespace Fika.Core
         {
             bool failed = false;
             List<string> headers = [];
+
             // Hidden
 
-            AcceptedTOS = Config.Bind("Hidden", "Accepted TOS", false,
-                new ConfigDescription("Has accepted TOS", tags: new ConfigurationManagerAttributes() { Browsable = false }));
+            LastVersion = Config.Bind("Hidden", "Last Version", "0",
+                new ConfigDescription("Last loaded version of Fika", tags: new ConfigurationManagerAttributes() { Browsable = false }));
+
+#if GOLDMASTER
+            if (LastVersion.Value != FikaVersion)
+            {
+                Singleton<PreloaderUI>.Instance.ShowFikaMessage("FIKA", LocaleUtils.UI_TOS_LONG.Localized(), ErrorScreen.EButtonType.QuitButton, 15f,
+                    null, () =>
+                    {
+                        LastVersion.Value = FikaVersion;
+                    });
+
+                
+            } 
+#endif
 
             // Advanced
 

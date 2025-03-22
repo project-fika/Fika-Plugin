@@ -1101,7 +1101,10 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            RefreshSlotViews();
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                RefreshSlotViews(); 
+            }
         }
 
         private void RefreshSlotViews()

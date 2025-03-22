@@ -1,9 +1,11 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using Diz.Utils;
+using EFT;
 using EFT.InputSystem;
 using EFT.UI;
 using HarmonyLib;
+using JsonType;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -98,9 +100,14 @@ namespace Fika.Core.UI
             errorScreenTraverse.Field("action_1").SetValue(action_1);
             MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
 
-            errorScreenHandler.context = (GClass3547)baseShow.Invoke(errorScreen, [closeManuallyCallback]);
+            errorScreenHandler.context = (GClass3547)baseShow.Invoke(errorScreen, []);
             errorScreenHandler.context.OnAccept += errorScreen.method_3;
+            if (timeOutCallback != null)
+            {
+                errorScreenHandler.context.OnAccept += timeOutCallback;
+            }
             errorScreenHandler.context.OnDecline += errorScreen.method_4;
+            errorScreenHandler.context.OnDecline += Application.Quit;
             errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
 
             CompositeDisposableClass ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
@@ -163,6 +170,39 @@ namespace Fika.Core.UI
         public static string BoldText(string text)
         {
             return $"<b>{text}</b>";
+        }
+
+        public static DateTime StaticTime
+        {
+            get
+            {
+                return new DateTime(2016, 8, 4, 15, 28, 0);
+            }
+        }
+
+        public static string FormattedTime(EDateTime time, bool staticTime)
+        {
+            if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+            {
+                if (tarkovApplication.Session != null)
+                {
+                    ISession session = tarkovApplication.Session;
+
+                    if (staticTime)
+                    {
+                        DateTime staticDate = StaticTime;
+                        return time == EDateTime.CURR ? staticDate.ToString("HH:mm:ss") : staticDate.AddHours(-12).ToString("HH:mm:ss");
+                    }
+
+                    DateTime backendTime = session.GetCurrentLocationTime;
+                    if (backendTime == DateTime.MinValue)
+                    {
+                        return "";
+                    }
+                    return time == EDateTime.CURR ? backendTime.ToString("HH:mm:ss") : backendTime.AddHours(-12).ToString("HH:mm:ss");
+                }
+            }
+            return "";
         }
 
         public enum EFikaPlayerPresence
