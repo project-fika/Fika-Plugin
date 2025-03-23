@@ -1103,7 +1103,7 @@ namespace Fika.Core.Coop.Players
 
             if (!FikaBackendUtils.IsHeadless)
             {
-                RefreshSlotViews(); 
+                RefreshSlotViews();
             }
         }
 
@@ -1350,7 +1350,7 @@ namespace Fika.Core.Coop.Players
                     VoipEftSource.SetMixerGroup(audioMixerGroup);
                 }
             }
-        }        
+        }
 
         public override void LandingAdjustments(float d)
         {

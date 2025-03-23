@@ -162,7 +162,7 @@ namespace Fika.Core.Coop.Components
                             return;
                         }
 
-                        SyncPlayersWithClients(); 
+                        SyncPlayersWithClients();
                     }
                 }
             }

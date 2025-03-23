@@ -4,7 +4,6 @@ using BepInEx.Logging;
 using Comfort.Common;
 using Dissonance;
 using Dissonance.Integrations.MirrorIgnorance;
-using Diz.Utils;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Communications;
@@ -18,7 +17,6 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Patches.VOIP;
@@ -146,7 +144,7 @@ namespace Fika.Core.Networking
             NetworkGameSession.Rtt = 0;
             NetworkGameSession.LossPercent = 0;
 
-            myProfileId = FikaBackendUtils.Profile.ProfileId;            
+            myProfileId = FikaBackendUtils.Profile.ProfileId;
 
             RegisterPacketsAndTypes();
 
@@ -343,7 +341,7 @@ namespace Fika.Core.Networking
                 {
                     throwable.ApplyNetPacket(throwablePacket);
                 }
-            }            
+            }
 
             FikaClientWorld.SyncObjectPackets.AddRange(packet.SyncObjectPackets);
             FikaClientWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);

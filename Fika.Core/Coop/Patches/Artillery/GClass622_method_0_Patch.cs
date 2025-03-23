@@ -2,7 +2,6 @@
 using CommonAssets.Scripts.ArtilleryShelling;
 using EFT;
 using Fika.Core.Coop.GameMode;
-using HarmonyLib;
 using SPT.Reflection.Patching;
 using System;
 using System.Linq;

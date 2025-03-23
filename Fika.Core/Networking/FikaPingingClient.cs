@@ -97,7 +97,7 @@ namespace Fika.Core.Networking
             NetDataWriter writer = new();
             writer.Put(message);
 
-            
+
             if (localEndPoint != null)
             {
                 NetClient.SendUnconnectedMessage(writer, localEndPoint);

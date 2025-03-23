@@ -77,7 +77,7 @@ namespace Fika.Core.Networking.VOIP
                 {
                     Data = data.Array
                 };
-                Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, peer); 
+                Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, peer);
             }
             else
             {

@@ -27,7 +27,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Audio;
 using static Fika.Core.Coop.ClientClasses.CoopClientInventoryController;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
@@ -181,7 +180,7 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
-                voipController?.ReceiveAbuseNotification(reporterId); 
+                voipController?.ReceiveAbuseNotification(reporterId);
             }
         }
 
@@ -242,7 +241,7 @@ namespace Fika.Core.Coop.Players
                 SubPacket = new GenericSubPackets.MuffledState(NetId, isMuffled)
             };
             PacketSender.SendPacket(ref packet);
-        }        
+        }
 
         public override bool CheckSurface(float range)
         {

@@ -43,7 +43,6 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
 using LiteNetLib;
-using LiteNetLib.Layers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -690,7 +689,7 @@ namespace Fika.Core.Coop.GameMode
         private IEnumerator CreateStashes()
         {
             GameWorld gameWorld = GameWorld_0;
-            
+
             if (gameWorld.TransitController != null)
             {
                 while (gameWorld.TransitController.TransferItemsController == null)
@@ -1002,8 +1001,8 @@ namespace Fika.Core.Coop.GameMode
             coopHandler.HumanPlayers.Add(coopPlayer);
             coopPlayer.SetupMainPlayer();
 
-                PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
-                await FikaRequestHandler.UpdatePlayerSpawn(body);
+            PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
+            await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             coopPlayer.SpawnPoint = spawnPoint;
 
@@ -1565,7 +1564,7 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.OnEpInteraction += OnEpInteraction;
 
             localPlayer = myPlayer as CoopPlayer;
-            coopHandler.MyPlayer = localPlayer;            
+            coopHandler.MyPlayer = localPlayer;
 
             Logger.LogInfo("Local player created");
             return myPlayer;
@@ -1639,7 +1638,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (!FikaBackendUtils.IsHeadless)
                 {
-                    startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!"); 
+                    startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
                 }
                 FikaServer server = Singleton<FikaServer>.Instance;
                 server.RaidInitialized = true;
@@ -1795,7 +1794,7 @@ namespace Fika.Core.Coop.GameMode
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
             }
 
-            await WaitForOtherPlayersToLoad();            
+            await WaitForOtherPlayersToLoad();
 
             SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
             Logger.LogInfo("All players are loaded, continuing...");
@@ -1844,7 +1843,7 @@ namespace Fika.Core.Coop.GameMode
 				adapter.Platform.TravelState.Bind(HandleHostTrain);
 			}*/
 
-            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);            
+            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
         }
 
         private async Task GenerateWeathers()

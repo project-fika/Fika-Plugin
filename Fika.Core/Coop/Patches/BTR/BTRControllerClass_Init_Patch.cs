@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.Patches
 
             if (Singleton<BackendConfigSettingsClass>.Instance != null && Singleton<BackendConfigSettingsClass>.Instance.BTRSettings != null)
             {
-                ___btrglobalSettings_0 = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings; 
+                ___btrglobalSettings_0 = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings;
             }
             else
             {

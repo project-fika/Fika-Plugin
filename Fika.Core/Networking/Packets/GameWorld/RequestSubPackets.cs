@@ -131,7 +131,7 @@ namespace Fika.Core.Networking
                         coopGame.SeasonsSettings = new()
                         {
                             SpringSnowFactor = SpringSnowFactor
-                        }; 
+                        };
                     }
                     coopGame.WeatherClasses = WeatherClasses;
                     return;
@@ -371,7 +371,7 @@ namespace Fika.Core.Networking
                     for (int i = 0; i < amount; i++)
                     {
                         MissingIds.Add(reader.GetInt());
-                    } 
+                    }
                 }
             }
 
@@ -382,7 +382,7 @@ namespace Fika.Core.Networking
                     foreach (int netId in MissingIds)
                     {
 #if DEBUG
-                        FikaGlobals.LogWarning($"Looking for missing netId {netId}"); 
+                        FikaGlobals.LogWarning($"Looking for missing netId {netId}");
 #endif
                         if (server.CoopHandler.Players.TryGetValue(netId, out CoopPlayer coopPlayer))
                         {
@@ -434,7 +434,7 @@ namespace Fika.Core.Networking
                     foreach (int netId in MissingIds)
                     {
                         writer.Put(netId);
-                    } 
+                    }
                 }
             }
         }

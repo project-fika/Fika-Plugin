@@ -335,14 +335,14 @@ namespace Fika.Core.Coop.Utils
             for (int i = 0; i < list.Length; i++)
             {
 #if DEBUG
-                LogWarning($"Clearing {list[i].Method.Name}"); 
+                LogWarning($"Clearing {list[i].Method.Name}");
 #endif
                 action = (Action<T, Y>)Delegate.Remove(action, list[i]);
             }
 
             return action;
         }
-        
+
         public static void LogInfo(string message, [CallerMemberName] string caller = "")
         {
             if (string.IsNullOrEmpty(message))
