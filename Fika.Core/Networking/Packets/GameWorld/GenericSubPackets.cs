@@ -305,9 +305,9 @@ namespace Fika.Core.Networking
                                 List<IPlayer> players = Singleton<GameWorld>.Instance.RegisteredPlayers;
                                 foreach (IPlayer iPlayer in players)
                                 {
-                                    if (player.ProfileId == ProfileId)
+                                    if (iPlayer.ProfileId == ProfileId)
                                     {
-                                        IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(iPlayer.ProfileId);
+                                        IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(ProfileId);
                                         if (playerBridge != null)
                                         {
                                             borderZone.ProcessIncomingPacket(playerBridge);
