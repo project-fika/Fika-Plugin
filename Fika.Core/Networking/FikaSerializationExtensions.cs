@@ -1200,6 +1200,8 @@ namespace Fika.Core.Networking
                     return new DisarmTripwire(reader);
                 case EGenericSubPacketType.MuffledState:
                     return new MuffledState(reader);
+                case EGenericSubPacketType.SpawnBTR:
+                    return new BtrSpawn(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
                     break;

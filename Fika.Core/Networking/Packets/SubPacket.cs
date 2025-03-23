@@ -121,7 +121,8 @@ namespace Fika.Core.Networking
             BorderZone,
             Mine,
             DisarmTripwire,
-            MuffledState
+            MuffledState,
+            SpawnBTR
             //TrainSync,
             //TraderServiceNotification,
         }

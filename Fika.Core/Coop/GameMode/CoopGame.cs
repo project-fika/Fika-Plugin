@@ -13,6 +13,7 @@ using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
 using EFT.GameTriggers;
+using EFT.GlobalEvents;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
@@ -42,6 +43,7 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
 using LiteNetLib;
+using LiteNetLib.Layers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -691,6 +693,11 @@ namespace Fika.Core.Coop.GameMode
             
             if (gameWorld.TransitController != null)
             {
+                while (gameWorld.TransitController.TransferItemsController == null)
+                {
+                    yield return null;
+                }
+
                 while (gameWorld.TransitController.TransferItemsController.Stash == null)
                 {
                     yield return null;
@@ -699,6 +706,11 @@ namespace Fika.Core.Coop.GameMode
 
             if (gameWorld.BtrController != null)
             {
+                while (gameWorld.BtrController.TransferItemsController == null)
+                {
+                    yield return null;
+                }
+
                 while (gameWorld.BtrController.TransferItemsController.Stash == null)
                 {
                     yield return null;
@@ -1213,6 +1225,10 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogWarning("Spawning BTR controller");
 #endif
                 gameWorld.BtrController = new BTRControllerClass(gameWorld);
+                if (isServer)
+                {
+                    GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
+                }
             }
 
             if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
@@ -1330,6 +1346,17 @@ namespace Fika.Core.Coop.GameMode
 
             await method_6();
             FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
+        }
+
+        private void OnBtrSpawn(BtrSpawnOnThePathEvent spawnEvent)
+        {
+            GenericPacket packet = new()
+            {
+                NetId = 0,
+                Type = EGenericSubPacketType.SpawnBTR,
+                SubPacket = new GenericSubPackets.BtrSpawn(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId)
+            };
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         private void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass backendConfig)
@@ -1702,6 +1729,7 @@ namespace Fika.Core.Coop.GameMode
 
             GameWorld gameWorld = GameWorld_0;
             gameWorld.RegisterRestrictableZones();
+            gameWorld.RegisterBorderZones();
 
             if (isServer)
             {
@@ -1816,8 +1844,7 @@ namespace Fika.Core.Coop.GameMode
 				adapter.Platform.TravelState.Bind(HandleHostTrain);
 			}*/
 
-            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
-            GameWorld_0.RegisterBorderZones();
+            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);            
         }
 
         private async Task GenerateWeathers()
