@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Components
             {
                 counter = 0f;
                 GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
-                GarbageCollector.CollectIncremental(10000000);
+                GarbageCollector.CollectIncremental(1000000);
                 GarbageCollector.GCMode = GarbageCollector.Mode.Disabled;
             }
         }
