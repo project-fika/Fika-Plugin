@@ -37,7 +37,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -56,7 +55,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.2";
+        public const string FikaVersion = "1.2.3";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -76,7 +75,7 @@ namespace Fika.Core
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
-        private static readonly Version RequiredServerVersion = new("2.4.0");
+        private static readonly Version RequiredServerVersion = new("2.4.3");
 
         public static HeadlessRequesterWebSocket HeadlessRequesterWebSocket { get; set; }
 
@@ -406,7 +405,9 @@ namespace Fika.Core
             WanIP = addressTask.Result;
 
             yield return new WaitForSeconds(5);
-            VerifyServerVersion();
+#if !DEBUG
+            VerifyServerVersion(); 
+#endif
             ModHandler.VerifyMods();
         }
 

@@ -35,10 +35,10 @@ namespace Fika.Core.Coop.Patches
 
             if (player.IsYourPlayer)
             {
-                CoopPlayer myPlayer = (CoopPlayer)player;
-                myPlayer.PacketSender.Enabled = false;
+                player.InputDirection = new(0, 0);
                 if (isServer)
                 {
+                    CoopPlayer myPlayer = (CoopPlayer)player;
                     BTRInteractionPacket packet = new(myPlayer.NetId)
                     {
                         Data = new()
@@ -83,7 +83,7 @@ namespace Fika.Core.Coop.Patches
                 {
                     soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);
                 }
-                await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, false, cancellationToken);
+                await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
                 if (!cancellationToken.IsCancellationRequested)
                 {
                     if (view.method_20() == 1)

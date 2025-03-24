@@ -1,5 +1,4 @@
 ﻿using LiteNetLib.Utils;
-using System;
 
 namespace Fika.Core.Networking
 {

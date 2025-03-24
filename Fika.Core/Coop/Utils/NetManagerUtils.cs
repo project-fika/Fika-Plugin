@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.Utils
             if (FikaGameObject == null)
             {
                 CreateFikaGameObject();
-            }            
+            }
 
             if (isServer)
             {
@@ -178,7 +178,7 @@ namespace Fika.Core.Coop.Utils
 
         public static Task SetupGameVariables(CoopPlayer coopPlayer)
         {
-            logger.LogInfo("Setting up game variables...");            
+            logger.LogInfo("Setting up game variables...");
             Singleton<IFikaNetworkManager>.Instance.SetupGameVariables(coopPlayer);
             return Task.CompletedTask;
         }

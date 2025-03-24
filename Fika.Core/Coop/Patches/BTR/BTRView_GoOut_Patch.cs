@@ -35,7 +35,6 @@ namespace Fika.Core.Coop.Patches
             if (player.IsYourPlayer)
             {
                 CoopPlayer myPlayer = (CoopPlayer)player;
-                myPlayer.PacketSender.Enabled = true;
                 if (FikaBackendUtils.IsServer)
                 {
                     BTRInteractionPacket packet = new(myPlayer.NetId)
@@ -68,14 +67,13 @@ namespace Fika.Core.Coop.Patches
                 {
                     soundController.UpdateBtrAudioRoom(EnvironmentType.Outdoor, observedPlayer);
                 }
-                await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, false, cancellationToken);
+                await view.method_16(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
                 ValueTuple<Vector3, Vector3> valueTuple = side.GoOutPoints();
                 side.ApplyPlayerRotation(observedPlayer.MovementContext, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.9f);
                 observedPlayer.BtrState = EPlayerBtrState.Outside;
                 observedPlayer.CharacterController.isEnabled = true;
                 side.RemovePassenger(observedPlayer);
                 observedPlayer.MovementContext.IsAxesIgnored = false;
-                //view.method_18(observedPlayer);
                 observedPlayer.IsInBufferZone = false;
             }
             catch (Exception ex)

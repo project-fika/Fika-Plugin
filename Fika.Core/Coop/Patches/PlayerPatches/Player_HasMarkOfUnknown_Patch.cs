@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.Patches.PlayerPatches
                     }
                 }
             }
-            
+
             return false;
         }
     }

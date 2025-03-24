@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using Dissonance.Networking;
-using Fika.Core.Coop.Utils;
 using System;
 
 namespace Fika.Core.Networking.VOIP
@@ -23,7 +22,7 @@ namespace Fika.Core.Networking.VOIP
         {
             if (!commsNet.Mode.IsServerEnabled())
             {
-                Singleton<IFikaNetworkManager>.Instance.RegisterPacket<VOIPPacket>(OnVoicePacketReceived); 
+                Singleton<IFikaNetworkManager>.Instance.RegisterPacket<VOIPPacket>(OnVoicePacketReceived);
             }
             base.Disconnect();
         }

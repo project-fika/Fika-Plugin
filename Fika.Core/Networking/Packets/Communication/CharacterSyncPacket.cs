@@ -1,5 +1,4 @@
 ﻿using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 

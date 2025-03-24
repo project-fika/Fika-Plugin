@@ -13,6 +13,7 @@ using EFT.Counters;
 using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
 using EFT.GameTriggers;
+using EFT.GlobalEvents;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
@@ -688,9 +689,14 @@ namespace Fika.Core.Coop.GameMode
         private IEnumerator CreateStashes()
         {
             GameWorld gameWorld = GameWorld_0;
-            
+
             if (gameWorld.TransitController != null)
             {
+                while (gameWorld.TransitController.TransferItemsController == null)
+                {
+                    yield return null;
+                }
+
                 while (gameWorld.TransitController.TransferItemsController.Stash == null)
                 {
                     yield return null;
@@ -699,6 +705,11 @@ namespace Fika.Core.Coop.GameMode
 
             if (gameWorld.BtrController != null)
             {
+                while (gameWorld.BtrController.TransferItemsController == null)
+                {
+                    yield return null;
+                }
+
                 while (gameWorld.BtrController.TransferItemsController.Stash == null)
                 {
                     yield return null;
@@ -990,8 +1001,8 @@ namespace Fika.Core.Coop.GameMode
             coopHandler.HumanPlayers.Add(coopPlayer);
             coopPlayer.SetupMainPlayer();
 
-                PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
-                await FikaRequestHandler.UpdatePlayerSpawn(body);
+            PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
+            await FikaRequestHandler.UpdatePlayerSpawn(body);
 
             coopPlayer.SpawnPoint = spawnPoint;
 
@@ -1213,6 +1224,10 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogWarning("Spawning BTR controller");
 #endif
                 gameWorld.BtrController = new BTRControllerClass(gameWorld);
+                if (isServer)
+                {
+                    GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
+                }
             }
 
             if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
@@ -1330,6 +1345,17 @@ namespace Fika.Core.Coop.GameMode
 
             await method_6();
             FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
+        }
+
+        private void OnBtrSpawn(BtrSpawnOnThePathEvent spawnEvent)
+        {
+            GenericPacket packet = new()
+            {
+                NetId = 0,
+                Type = EGenericSubPacketType.SpawnBTR,
+                SubPacket = new GenericSubPackets.BtrSpawn(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId)
+            };
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         private void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass backendConfig)
@@ -1538,7 +1564,7 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.OnEpInteraction += OnEpInteraction;
 
             localPlayer = myPlayer as CoopPlayer;
-            coopHandler.MyPlayer = localPlayer;            
+            coopHandler.MyPlayer = localPlayer;
 
             Logger.LogInfo("Local player created");
             return myPlayer;
@@ -1612,7 +1638,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (!FikaBackendUtils.IsHeadless)
                 {
-                    startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!"); 
+                    startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
                 }
                 FikaServer server = Singleton<FikaServer>.Instance;
                 server.RaidInitialized = true;
@@ -1702,6 +1728,7 @@ namespace Fika.Core.Coop.GameMode
 
             GameWorld gameWorld = GameWorld_0;
             gameWorld.RegisterRestrictableZones();
+            gameWorld.RegisterBorderZones();
 
             if (isServer)
             {
@@ -1767,7 +1794,7 @@ namespace Fika.Core.Coop.GameMode
                 DynamicAI = gameObject.AddComponent<FikaDynamicAI>();
             }
 
-            await WaitForOtherPlayersToLoad();            
+            await WaitForOtherPlayersToLoad();
 
             SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
             Logger.LogInfo("All players are loaded, continuing...");
@@ -1817,7 +1844,6 @@ namespace Fika.Core.Coop.GameMode
 			}*/
 
             Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
-            GameWorld_0.RegisterBorderZones();
         }
 
         private async Task GenerateWeathers()

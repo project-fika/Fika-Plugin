@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.Utils
                         Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(width, height, 0f) / 2);
 
                         //worldCamera uses DLSS/FSR/SSAA scaled resolution, opticCamera does not so it must be manually scaled
-                        Vector3 opticCameraOffset = new Vector3(width / 2 - opticCamera.pixelWidth * renderScale / 2, height / 2 - opticCamera.pixelHeight * renderScale / 2, 0);
+                        Vector3 opticCameraOffset = new(width / 2 - opticCamera.pixelWidth * renderScale / 2, height / 2 - opticCamera.pixelHeight * renderScale / 2, 0);
 
                         //must manually scale output of opticCamera.WorldToScreenPoint
                         Vector3 initialOpticScreenPoint = opticCamera.WorldToScreenPoint(worldPosition) * renderScale;

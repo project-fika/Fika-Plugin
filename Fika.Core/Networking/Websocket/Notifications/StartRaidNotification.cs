@@ -30,7 +30,7 @@ namespace Fika.Core.Networking.Websocket.Notifications
                     if (!string.IsNullOrEmpty(time))
                     {
                         message += $" ({BoldText(ColorizeText(EColor.BLUE, time))})";
-                    } 
+                    }
                 }
 
                 return message;

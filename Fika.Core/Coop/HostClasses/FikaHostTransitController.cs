@@ -11,7 +11,6 @@ using Fika.Core.Networking;
 using LiteNetLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Fika.Core.Coop.HostClasses
 {
@@ -20,7 +19,7 @@ namespace Fika.Core.Coop.HostClasses
         public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters, profile, localRaidSettings)
         {
-            this.localRaidSettings = localRaidSettings;            
+            this.localRaidSettings = localRaidSettings;
             string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
             summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
                 localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));

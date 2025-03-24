@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
+using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
 using EFT.SynchronizableObjects;
@@ -304,13 +305,14 @@ namespace Fika.Core.Networking
                                 List<IPlayer> players = Singleton<GameWorld>.Instance.RegisteredPlayers;
                                 foreach (IPlayer iPlayer in players)
                                 {
-                                    if (player.ProfileId == ProfileId)
+                                    if (iPlayer.ProfileId == ProfileId)
                                     {
-                                        IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(iPlayer.ProfileId);
+                                        IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(ProfileId);
                                         if (playerBridge != null)
                                         {
-                                            borderZone.ProcessIncomingPacket(playerBridge, true);
+                                            borderZone.ProcessIncomingPacket(playerBridge);
                                         }
+                                        break;
                                     }
                                 }
                             }
@@ -439,6 +441,39 @@ namespace Fika.Core.Networking
             {
                 writer.Put(NetId);
                 writer.Put(Muffled);
+            }
+        }
+
+        public class BtrSpawn : ISubPacket
+        {
+            public Vector3 Position;
+            public Quaternion Rotation;
+            public string PlayerProfileId;
+
+            public BtrSpawn(Vector3 position, Quaternion rotation, string profileId)
+            {
+                Position = position;
+                Rotation = rotation;
+                PlayerProfileId = profileId;
+            }
+
+            public BtrSpawn(NetDataReader reader)
+            {
+                Position = reader.GetVector3();
+                Rotation = reader.GetQuaternion();
+                PlayerProfileId = reader.GetString();
+            }
+
+            public void Execute(CoopPlayer player = null)
+            {
+                GlobalEventHandlerClass.CreateEvent<BtrSpawnOnThePathEvent>().Invoke(Position, Rotation, PlayerProfileId);
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(Position);
+                writer.Put(Rotation);
+                writer.Put(PlayerProfileId);
             }
         }
     }

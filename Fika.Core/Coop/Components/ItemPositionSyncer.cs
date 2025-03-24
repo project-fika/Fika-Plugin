@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.Interactive;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using UnityEngine;
 
@@ -46,13 +47,13 @@ namespace Fika.Core.Coop.Components
         {
             if (lootItem == null)
             {
-                FikaPlugin.Instance.FikaLogger.LogError("HostItemPositionSync::Start: LootItem was null!");
+                FikaGlobals.LogError("HostItemPositionSync::Start: LootItem was null!");
                 Destroy(this);
             }
 
             if (Rigidbody == null)
             {
-                FikaPlugin.Instance.FikaLogger.LogError("HostItemPositionSync::Start: Rigidbody was null!");
+                FikaGlobals.LogError("HostItemPositionSync::Start: Rigidbody was null!");
                 Destroy(this);
             }
         }

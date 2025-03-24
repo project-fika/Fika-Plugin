@@ -3,10 +3,8 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
-using Fika.Core.Networking;
 using HarmonyLib;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -16,7 +14,7 @@ namespace Fika.Core.Coop.ClientClasses
     /// </summary>
     public class CoopClientGameWorld : ClientLocalGameWorld
     {
-        public FikaClientWorld FikaClientWorld { get; private set; }        
+        public FikaClientWorld FikaClientWorld { get; private set; }
 
         public static CoopClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
         {

@@ -1,6 +1,4 @@
 ﻿using EFT;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Utils
 {
