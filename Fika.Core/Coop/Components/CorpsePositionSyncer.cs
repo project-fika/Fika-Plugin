@@ -2,16 +2,12 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Coop.HostClasses;
-using HarmonyLib;
-using System.Reflection;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Components
 {
     internal class CorpsePositionSyncer : MonoBehaviour
     {
-        private readonly FieldInfo ragdollDoneField = AccessTools.Field(typeof(RagdollClass), "bool_2");
-
         private Corpse corpse;
         private RagdollPacketStruct data;
         private FikaHostWorld world;
@@ -46,7 +42,7 @@ namespace Fika.Core.Coop.Components
 
         public void FixedUpdate()
         {
-            if ((bool)ragdollDoneField.GetValue(corpse.Ragdoll))
+            if (corpse.Ragdoll.bool_2)
             {
                 data.Position = corpse.TrackableTransform.position;
                 data.TransformSyncs = corpse.TransformSyncs;
