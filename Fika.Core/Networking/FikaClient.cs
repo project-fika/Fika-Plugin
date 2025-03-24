@@ -1076,6 +1076,12 @@ namespace Fika.Core.Networking
                 return;
             }
 
+            NetworkSettingsPacket settingsPacket = new()
+            {
+                ProfileId = ownProfile.ProfileId
+            };
+            SendData(ref settingsPacket, DeliveryMethod.ReliableOrdered);
+
             Dictionary<Profile, bool> profiles = [];
             profiles.Add(ownProfile, false);
             LoadingProfilePacket profilePacket = new()

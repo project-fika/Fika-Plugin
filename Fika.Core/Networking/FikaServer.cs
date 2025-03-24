@@ -126,7 +126,7 @@ namespace Fika.Core.Networking
         private CancellationTokenSource natIntroduceRoutineCts;
         private int statisticsCounter;
         private Dictionary<Profile, bool> visualProfiles;
-        private Dictionary<int, int> cachedConnections;
+        private Dictionary<string, int> cachedConnections;
 
         internal FikaVOIPServer VOIPServer { get; set; }
         internal FikaVOIPClient VOIPClient { get; set; }
@@ -398,8 +398,29 @@ namespace Fika.Core.Networking
             RegisterPacket<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
             RegisterPacket<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket, NetPeer>(OnRequestPacketReceived);
+            RegisterPacket<NetworkSettingsPacket, NetPeer>(OnNetworkSettingsPacketReceived);
 
             RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
+        }
+
+        private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet, NetPeer peer)
+        {
+#if DEBUG
+            logger.LogInfo($"Received connection from {packet.ProfileId}"); 
+#endif
+            if (!cachedConnections.TryGetValue(packet.ProfileId, out int netId))
+            {
+                netId = PopNetId();
+                cachedConnections.Add(packet.ProfileId, netId);
+            }
+
+            NetworkSettingsPacket response = new()
+            {
+                SendRate = sendRate,
+                NetId = netId,
+                AllowVOIP = AllowVOIP
+            };
+            SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnWorldPacketReceived(WorldPacket packet, NetPeer peer)
@@ -411,6 +432,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
+            logger.LogWarning($"Received WorldPacket, lootsync = {packet.LootSyncStructs.Count}");
             FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
             SendReusableToAll(packet, DeliveryMethod.ReliableOrdered, peer);
         }
@@ -1275,24 +1297,9 @@ namespace Fika.Core.Networking
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
                 iconType: EFT.Communications.ENotificationIconType.Friend);
-            logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}.");
+            logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}");
 
-            HasHadPeer = true;
-
-            int hash = peer.Address.GetHashCode();
-            if (!cachedConnections.TryGetValue(hash, out int netId))
-            {
-                netId = PopNetId();
-                cachedConnections.Add(hash, netId);
-            }
-
-            NetworkSettingsPacket packet = new()
-            {
-                SendRate = sendRate,
-                NetId = netId,
-                AllowVOIP = AllowVOIP
-            };
-            SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
+            HasHadPeer = true;                   
 
             FikaEventDispatcher.DispatchEvent(new PeerConnectedEvent(peer, this));
         }
