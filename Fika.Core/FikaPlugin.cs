@@ -405,7 +405,9 @@ namespace Fika.Core
             WanIP = addressTask.Result;
 
             yield return new WaitForSeconds(5);
-            VerifyServerVersion();
+#if !DEBUG
+            VerifyServerVersion(); 
+#endif
             ModHandler.VerifyMods();
         }
 
