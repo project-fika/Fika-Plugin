@@ -413,7 +413,6 @@ namespace Fika.Core.Networking
 
             FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
             SendReusableToAll(packet, DeliveryMethod.ReliableOrdered, peer);
-            packet.Flush();
         }
 
         private void OnVOIPPacketReceived(VOIPPacket packet, NetPeer peer)
