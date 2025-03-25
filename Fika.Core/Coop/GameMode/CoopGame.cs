@@ -99,6 +99,15 @@ namespace Fika.Core.Coop.GameMode
         public RaidSettings RaidSettings { get; private set; }
         public byte[] HostLootItems { get; private set; }
         public GClass1333 LootItems { get; internal set; } = [];
+        public ISpawnPoint HostSpawnPoint
+        {
+            get
+            {
+                return spawnPoint;
+            }
+        }
+        public Vector3 ClientSpawnPosition { get; internal set; }
+        public Quaternion ClientSpawnRotation { get; internal set; }
 
         private readonly Dictionary<int, int> botQueue = [];
         private Coroutine extractRoutine;
@@ -914,15 +923,15 @@ namespace Fika.Core.Coop.GameMode
                 {
                     client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                     await Task.Delay(1000);
-                    if (string.IsNullOrEmpty(SpawnId))
+                    if (string.IsNullOrEmpty(InfiltrationPoint))
                     {
                         await Task.Delay(2000);
                     }
-                } while (string.IsNullOrEmpty(SpawnId));
+                } while (string.IsNullOrEmpty(InfiltrationPoint));
 
-                Logger.LogInfo($"Retrieved spawn point id '{SpawnId}' from server");
+                Logger.LogInfo($"Retrieved infiltration point '{InfiltrationPoint}' from server");
 
-                if (SpawnId != "RANDOM")
+                /*if (SpawnId != "RANDOM")
                 {
                     IEnumerator<ISpawnPoint> allSpawnPoints = spawnPoints.GetEnumerator();
                     while (allSpawnPoints.MoveNext())
@@ -938,7 +947,7 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogInfo("Spawn Point was random");
                     NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
                     spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
-                }
+                }*/
             }
         }
 
@@ -978,7 +987,7 @@ namespace Fika.Core.Coop.GameMode
 
             statisticsManager = FikaBackendUtils.IsHeadless ? new ObservedStatisticsManager() : new GClass2035();
 
-            CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, spawnPoint.Position, spawnPoint.Rotation, "Player", "Main_", EPointOfView.FirstPerson,
+            CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
                 statisticsManager, new GClass1626(), session, playerId);
@@ -1482,26 +1491,35 @@ namespace Fika.Core.Coop.GameMode
                 eupdateMode = Player.EUpdateMode.Manual;
             }
 
-            spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
-                Location_0.SpawnPointParams);
-            int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-            SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-            SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
+            if (isServer)
+            {
+                spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
+                        Location_0.SpawnPointParams);
+                int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+                SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+                SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
+            }
 
             exfilManager = gameObject.AddComponent<CoopExfilManager>();
 
             if (isServer)
             {
                 spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                InfiltrationPoint = spawnPoint.Infiltration;
                 await SendOrReceiveSpawnPoint();
             }
 
             if (!isServer)
             {
                 await SendOrReceiveSpawnPoint();
-                if (spawnPoint == null)
+                if (string.IsNullOrEmpty(InfiltrationPoint))
                 {
                     Logger.LogWarning("SpawnPoint was null after retrieving it from the server!");
+                    spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
+                        Location_0.SpawnPointParams);
+                    int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+                    SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+                    SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
                     spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 }
 
@@ -1541,6 +1559,9 @@ namespace Fika.Core.Coop.GameMode
 
             IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
 
+            Vector3 spawnPos = isServer ? spawnPoint.Position : ClientSpawnPosition;
+            Quaternion spawnRot = isServer ? spawnPoint.Rotation : ClientSpawnRotation;
+
             LocalPlayer myPlayer;
             try
             {
@@ -1549,7 +1570,7 @@ namespace Fika.Core.Coop.GameMode
                     GenerateNewDogTagId();
                 }
 
-                myPlayer = await vmethod_3(GameWorld_0, num, spawnPoint.Position, spawnPoint.Rotation, "Player", "", EPointOfView.FirstPerson,
+                myPlayer = await vmethod_3(GameWorld_0, num, spawnPos, spawnRot, "Player", "", EPointOfView.FirstPerson,
                         Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
                         BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
                         FikaGlobals.GetLocalPlayerSensitivity, FikaGlobals.GetLocalPlayerAimingSensitivity, statisticsManager,
@@ -2073,9 +2094,16 @@ namespace Fika.Core.Coop.GameMode
                 skills[i].SetPointsEarnedInSession(0f, false);
             }
 
-            InfiltrationPoint = spawnPoint.Infiltration;
             Profile_0.Info.EntryPoint = InfiltrationPoint;
-            Logger.LogInfo("SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint);
+            if (isServer)
+            {
+                Logger.LogInfo("[SERVER] SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint); 
+            }
+            else
+            {
+                Logger.LogInfo("[CLIENT] SpawnPosition: " + ClientSpawnPosition + ", InfiltrationPoint: " + InfiltrationPoint);
+
+            }
 
             ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
             Player player = gparam_0.Player;
