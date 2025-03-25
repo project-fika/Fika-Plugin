@@ -13,7 +13,6 @@ namespace Fika.Core.Coop.Components
         private bool isServer;
         private ObservedLootItem lootItem;
         private LootSyncStruct data;
-        private int counter;
 
         private Rigidbody Rigidbody
         {
@@ -36,7 +35,6 @@ namespace Fika.Core.Coop.Components
                 posSync.client = Singleton<FikaClient>.Instance;
             }
             posSync.lootItem = lootItem;
-            posSync.counter = 0;
             posSync.data = new()
             {
                 Id = lootItem.GetNetId()
@@ -56,9 +54,21 @@ namespace Fika.Core.Coop.Components
                 FikaGlobals.LogError("HostItemPositionSync::Start: Rigidbody was null!");
                 Destroy(this);
             }
+
+            data.Position = lootItem.transform.position;
+            data.Rotation = lootItem.transform.rotation;
+            data.Velocity = Rigidbody.velocity;
+            data.AngularVelocity = Rigidbody.angularVelocity;
+            if (isServer)
+            {
+                server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(data);
+                return;
+            }
+
+            client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(data);
         }
 
-        public void FixedUpdate()
+        public void Update()
         {
             if (Rigidbody == null)
             {
@@ -77,23 +87,6 @@ namespace Fika.Core.Coop.Components
                 client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(data);
                 Destroy(this);
                 return;
-            }
-
-            counter++;
-            if (counter % 4 == 0)
-            {
-                counter = 0;
-                data.Position = lootItem.transform.position;
-                data.Rotation = lootItem.transform.rotation;
-                data.Velocity = Rigidbody.velocity;
-                data.AngularVelocity = Rigidbody.angularVelocity;
-                if (isServer)
-                {
-                    server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(data);
-                    return;
-                }
-
-                client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(data);
             }
         }
     }
