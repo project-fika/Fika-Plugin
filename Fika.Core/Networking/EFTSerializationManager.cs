@@ -19,7 +19,8 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Gets a <see cref="FikaWriter"/>
+        /// Gets a <see cref="FikaWriter"/> <br/>
+        /// The writer is <see cref="IDisposable"/> and should be wrapped in a using statement to call <see cref="EFTWriterClass.Reset"/>
         /// </summary>
         /// <returns>A <see cref="FikaWriter"/></returns>
         public static FikaWriter GetWriter()
