@@ -432,7 +432,6 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            logger.LogWarning($"Received WorldPacket, lootsync = {packet.LootSyncStructs.Count}");
             FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
             SendReusableToAll(packet, DeliveryMethod.ReliableOrdered, peer);
         }
