@@ -154,13 +154,13 @@ namespace Fika.Core.Networking
 
                 if (ExfiltrationControllerClass.Instance != null)
                 {
+                    CoopGame game = coopHandler.LocalGameInstance;
                     ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
                     foreach (ExfiltrationPoint exfiltrationPoint in exfilController.ExfiltrationPoints)
                     {
                         if (exfiltrationPoint.Settings.Name == ExfilName)
                         {
-                            CoopGame game = coopHandler.LocalGameInstance;
+                            
                             exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
 
                             if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
@@ -177,7 +177,6 @@ namespace Fika.Core.Networking
                         {
                             if (exfiltrationPoint.Settings.Name == ExfilName)
                             {
-                                CoopGame game = coopHandler.LocalGameInstance;
                                 exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
 
                                 if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
