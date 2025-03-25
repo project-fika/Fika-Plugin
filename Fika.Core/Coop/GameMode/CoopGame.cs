@@ -46,6 +46,7 @@ using LiteNetLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,7 +90,6 @@ namespace Fika.Core.Coop.GameMode
         public ISpawnSystem SpawnSystem { get; internal set; }
         public Dictionary<string, Player> Bots = [];
         public List<int> ExtractedPlayers { get; } = [];
-        public string SpawnId { get; internal set; }
         public bool InteractablesInitialized { get; internal set; }
         public bool HasReceivedLoot { get; internal set; }
         public List<ThrowWeapItemClass> ThrownGrenades { get; internal set; }
@@ -174,18 +174,6 @@ namespace Fika.Core.Coop.GameMode
                 season = value;
                 Logger.LogInfo($"Setting Season to: {value}");
                 WeatherReady = true;
-            }
-        }
-
-        public string SpawnPointName
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(SpawnId))
-                {
-                    return SpawnId;
-                }
-                return string.Empty;
             }
         }
 
@@ -894,25 +882,29 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         /// <returns></returns>
         private async Task SendOrReceiveSpawnPoint()
-        {
-            SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_SPAWN_INFO.Localized());
-            if (isServer)
+        {            
+            bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
+            if (!spawnTogether)
             {
-                bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
-                if (spawnTogether)
+                Logger.LogInfo("Using random spawn points!");
+                NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
+
+                if (!isServer)
                 {
-                    Logger.LogInfo($"Setting spawn point to name: '{spawnPoint.Name}', id: '{spawnPoint.Id}'");
-                    SpawnId = spawnPoint.Id;
+                    spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
+                        Location_0.SpawnPointParams);
+                    int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+                    SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+                    SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
+                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
                 }
-                else
-                {
-                    Logger.LogInfo("Using random spawn points!");
-                    NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
-                    SpawnId = "RANDOM";
-                }
+                return;
             }
-            else
+
+            if (!isServer && spawnTogether)
             {
+                SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_SPAWN_INFO.Localized());
+
                 RequestPacket packet = new()
                 {
                     PacketType = ERequestSubPacketType.SpawnPoint
@@ -930,24 +922,6 @@ namespace Fika.Core.Coop.GameMode
                 } while (string.IsNullOrEmpty(InfiltrationPoint));
 
                 Logger.LogInfo($"Retrieved infiltration point '{InfiltrationPoint}' from server");
-
-                /*if (SpawnId != "RANDOM")
-                {
-                    IEnumerator<ISpawnPoint> allSpawnPoints = spawnPoints.GetEnumerator();
-                    while (allSpawnPoints.MoveNext())
-                    {
-                        if (allSpawnPoints.Current.Id == SpawnId)
-                        {
-                            spawnPoint = allSpawnPoints.Current;
-                        }
-                    }
-                }
-                else
-                {
-                    Logger.LogInfo("Spawn Point was random");
-                    NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
-                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
-                }*/
             }
         }
 
@@ -1514,7 +1488,7 @@ namespace Fika.Core.Coop.GameMode
                 await SendOrReceiveSpawnPoint();
                 if (string.IsNullOrEmpty(InfiltrationPoint))
                 {
-                    Logger.LogWarning("SpawnPoint was null after retrieving it from the server!");
+                    Logger.LogError("InfiltrationPoint was null after retrieving it from the server!");
                     spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
                         Location_0.SpawnPointParams);
                     int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
