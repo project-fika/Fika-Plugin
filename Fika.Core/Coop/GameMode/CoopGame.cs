@@ -46,7 +46,6 @@ using LiteNetLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -882,7 +881,7 @@ namespace Fika.Core.Coop.GameMode
         /// </summary>
         /// <returns></returns>
         private async Task SendOrReceiveSpawnPoint()
-        {            
+        {
             bool spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
             if (!spawnTogether)
             {
@@ -891,12 +890,7 @@ namespace Fika.Core.Coop.GameMode
 
                 if (!isServer)
                 {
-                    spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
-                        Location_0.SpawnPointParams);
-                    int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-                    SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-                    SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
-                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                    CreateSpawnSystem();
                 }
                 return;
             }
@@ -1467,39 +1461,23 @@ namespace Fika.Core.Coop.GameMode
 
             if (isServer)
             {
-                spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
-                        Location_0.SpawnPointParams);
-                int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-                SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-                SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
-            }
-
-            exfilManager = gameObject.AddComponent<CoopExfilManager>();
-
-            if (isServer)
-            {
-                spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
-                InfiltrationPoint = spawnPoint.Infiltration;
+                CreateSpawnSystem();
                 await SendOrReceiveSpawnPoint();
             }
-
-            if (!isServer)
+            else
             {
                 await SendOrReceiveSpawnPoint();
                 if (string.IsNullOrEmpty(InfiltrationPoint))
                 {
                     Logger.LogError("InfiltrationPoint was null after retrieving it from the server!");
-                    spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
-                        Location_0.SpawnPointParams);
-                    int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
-                    SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
-                    SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
-                    spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+                    CreateSpawnSystem();
                 }
 
                 await InitInteractables();
                 await InitExfils();
             }
+
+            exfilManager = gameObject.AddComponent<CoopExfilManager>();
 
             if (Location_0.AccessKeys != null && Location_0.AccessKeys.Length > 0)
             {
@@ -1563,6 +1541,22 @@ namespace Fika.Core.Coop.GameMode
 
             Logger.LogInfo("Local player created");
             return myPlayer;
+        }
+
+        private void CreateSpawnSystem()
+        {
+            spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location_0.UnixDateTime)),
+                                    Location_0.SpawnPointParams);
+            int spawnSafeDistance = (Location_0.SpawnSafeDistanceMeters > 0) ? Location_0.SpawnSafeDistanceMeters : 100;
+            SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
+            SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
+            spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side);
+            InfiltrationPoint = spawnPoint.Infiltration;
+            if (!isServer)
+            {
+                ClientSpawnPosition = spawnPoint.Position;
+                ClientSpawnRotation = spawnPoint.Rotation;
+            }
         }
 
         /// <summary>
@@ -2071,7 +2065,7 @@ namespace Fika.Core.Coop.GameMode
             Profile_0.Info.EntryPoint = InfiltrationPoint;
             if (isServer)
             {
-                Logger.LogInfo("[SERVER] SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint); 
+                Logger.LogInfo("[SERVER] SpawnPoint: " + spawnPoint.Id + ", InfiltrationPoint: " + InfiltrationPoint);
             }
             else
             {
