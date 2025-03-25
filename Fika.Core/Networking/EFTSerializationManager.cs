@@ -24,7 +24,6 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="FikaWriter"/></returns>
         public static FikaWriter GetWriter()
         {
-            writer.Reset();
             return writer;
         }
     }
@@ -34,8 +33,11 @@ namespace Fika.Core.Networking
 
     }
 
-    public class FikaWriter : EFTWriterClass
+    public class FikaWriter : EFTWriterClass, IDisposable
     {
-
+        public void Dispose()
+        {
+            Reset();
+        }
     }
 }

@@ -215,7 +215,7 @@ namespace Fika.Core.Networking
         /// <param name="item">The <see cref="Item"/> to serialize</param>
         public static void PutItem(this NetDataWriter writer, Item item)
         {
-            FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+            using FikaWriter eftWriter = EFTSerializationManager.GetWriter();
             GClass1693 descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
@@ -248,7 +248,7 @@ namespace Fika.Core.Networking
 
         public static void PutItemDescriptor(this NetDataWriter writer, GClass1693 descriptor)
         {
-            FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+            using FikaWriter eftWriter = EFTSerializationManager.GetWriter();
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
         }
@@ -302,7 +302,7 @@ namespace Fika.Core.Networking
         /// <param name="profile"></param>
         public static void PutProfile(this NetDataWriter writer, Profile profile)
         {
-            FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+            using FikaWriter eftWriter = EFTSerializationManager.GetWriter();
             eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
             writer.PutByteArray(eftWriter.ToArray());
         }

@@ -189,30 +189,28 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                FikaWriter writer = EFTSerializationManager.GetWriter();
+                using FikaWriter writer = EFTSerializationManager.GetWriter();
+                writer.WriteInt(allExfils.Length);
+                foreach (ExfiltrationPoint exfilPoint in allExfils)
                 {
-                    writer.WriteInt(allExfils.Length);
-                    foreach (ExfiltrationPoint exfilPoint in allExfils)
+                    writer.WriteString(exfilPoint.Settings.Name);
+                    writer.WriteByte((byte)exfilPoint.Status);
+                    writer.WriteInt(exfilPoint.Settings.StartTime);
+                    if (exfilPoint.Status == EExfiltrationStatus.Countdown)
                     {
-                        writer.WriteString(exfilPoint.Settings.Name);
-                        writer.WriteByte((byte)exfilPoint.Status);
-                        writer.WriteInt(exfilPoint.Settings.StartTime);
-                        if (exfilPoint.Status == EExfiltrationStatus.Countdown)
-                        {
-                            writer.WriteFloat(exfilPoint.ExfiltrationStartTime);
-                        }
+                        writer.WriteFloat(exfilPoint.ExfiltrationStartTime);
                     }
-
-                    RequestPacket response = new()
-                    {
-                        PacketType = ERequestSubPacketType.Exfiltration,
-                        RequestSubPacket = new ExfiltrationRequest()
-                        {
-                            Data = writer.ToArray()
-                        }
-                    };
-                    server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
                 }
+
+                RequestPacket response = new()
+                {
+                    PacketType = ERequestSubPacketType.Exfiltration,
+                    RequestSubPacket = new ExfiltrationRequest()
+                    {
+                        Data = writer.ToArray()
+                    }
+                };
+                server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
             }
 
             public void HandleResponse()
