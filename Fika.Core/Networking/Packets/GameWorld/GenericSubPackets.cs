@@ -171,6 +171,24 @@ namespace Fika.Core.Networking
                         }
                     }
 
+                    if (exfilController.SecretExfiltrationPoints != null)
+                    {
+                        foreach (ExfiltrationPoint exfiltrationPoint in exfilController.SecretExfiltrationPoints)
+                        {
+                            if (exfiltrationPoint.Settings.Name == ExfilName)
+                            {
+                                CoopGame game = coopHandler.LocalGameInstance;
+                                exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
+
+                                if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
+                                {
+                                    exfiltrationPoint.Status = EExfiltrationStatus.Countdown;
+                                }
+                                return;
+                            }
+                        } 
+                    }
+
                     FikaPlugin.Instance.FikaLogger.LogError("ExfilCountdown: Could not find ExfiltrationPoint: " + ExfilName);
                 }
             }
