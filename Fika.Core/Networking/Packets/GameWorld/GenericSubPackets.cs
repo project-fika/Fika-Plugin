@@ -173,15 +173,15 @@ namespace Fika.Core.Networking
 
                     if (exfilController.SecretExfiltrationPoints != null)
                     {
-                        foreach (ExfiltrationPoint exfiltrationPoint in exfilController.SecretExfiltrationPoints)
+                        foreach (SecretExfiltrationPoint secretExfiltration in exfilController.SecretExfiltrationPoints)
                         {
-                            if (exfiltrationPoint.Settings.Name == ExfilName)
+                            if (secretExfiltration.Settings.Name == ExfilName)
                             {
-                                exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
+                                secretExfiltration.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
 
-                                if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
+                                if (secretExfiltration.Status != EExfiltrationStatus.Countdown)
                                 {
-                                    exfiltrationPoint.Status = EExfiltrationStatus.Countdown;
+                                    secretExfiltration.Status = EExfiltrationStatus.Countdown;
                                 }
                                 return;
                             }
