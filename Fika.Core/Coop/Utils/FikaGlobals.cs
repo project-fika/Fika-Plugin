@@ -169,7 +169,7 @@ namespace Fika.Core.Coop.Utils
         /// <returns><see cref="bool"/></returns>
         public static bool IsHeadlessProfile(this Profile profile)
         {
-            return profile.Info != null && profile.Info.GroupId.ToLower() == "headless";
+            return profile.Info != null && !string.IsNullOrEmpty(profile.Info.Nickname) && profile.Info.Nickname.ToLower().StartsWith("headless_");
         }
 
         /// <summary>
