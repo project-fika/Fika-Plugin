@@ -528,6 +528,11 @@ namespace Fika.Core.Coop.Players
 
         protected void FindKillerWeapon()
         {
+            if (LastAggressor == null)
+            {
+                FikaGlobals.LogWarning("LastAggressor was null, skipping");
+            }
+
             if (!IsYourPlayer && LastAggressor.GroupId != "Fika")
             {
 #if DEBUG
