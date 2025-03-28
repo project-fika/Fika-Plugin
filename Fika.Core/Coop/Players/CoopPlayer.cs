@@ -531,6 +531,7 @@ namespace Fika.Core.Coop.Players
             if (LastAggressor == null)
             {
                 FikaGlobals.LogWarning("LastAggressor was null, skipping");
+                return;
             }
 
             if (!IsYourPlayer && LastAggressor.GroupId != "Fika")
