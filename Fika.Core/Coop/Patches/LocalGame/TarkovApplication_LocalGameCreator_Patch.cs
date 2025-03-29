@@ -105,14 +105,21 @@ namespace Fika.Core.Coop.Patches
             LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
             LocalRaidSettings raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
             int escapeTimeLimit = raidSettings.SelectedLocation.EscapeTimeLimit;
-            if (isServer)
+            if (raidSettings.SelectedLocation.Id == localSettings.locationLoot.Id)
             {
-                raidSettings.SelectedLocation = localSettings.locationLoot;
-                raidSettings.SelectedLocation.EscapeTimeLimit = escapeTimeLimit;
+                if (isServer)
+                {
+                    //raidSettings.SelectedLocation = localSettings.locationLoot;
+                    raidSettings.SelectedLocation.NonWaveGroupScenario = localSettings.locationLoot.NonWaveGroupScenario;
+                    raidSettings.SelectedLocation.BossLocationSpawn = localSettings.locationLoot.BossLocationSpawn;
+                    raidSettings.SelectedLocation.EscapeTimeLimit = escapeTimeLimit;
+                }
+                else
+                {
+                    raidSettingsToUpdate.selectedLocation.EscapeTimeLimit = escapeTimeLimit;
+                }
             }
-            raidSettingsToUpdate.serverId = localSettings.serverId;
-            raidSettingsToUpdate.selectedLocation = localSettings.locationLoot;
-            raidSettingsToUpdate.selectedLocation.EscapeTimeLimit = escapeTimeLimit;
+            raidSettingsToUpdate.serverId = localSettings.serverId;            
             raidSettingsToUpdate.transition = FikaBackendUtils.TransitData;
 
             GClass1325 profileInsurance = localSettings.profileInsurance;
