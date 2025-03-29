@@ -23,11 +23,13 @@ namespace Fika.Core.Coop.PacketHandlers
 {
     public class ClientPacketSender : MonoBehaviour, IPacketSender
     {
-        private CoopPlayer player;
-
         public bool Enabled { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
+
+        private CoopPlayer player;
+        private PlayerStatePacket state;
+
 
         private bool CanPing
         {
@@ -54,6 +56,7 @@ namespace Fika.Core.Coop.PacketHandlers
             updateRate = Client.SendRate;
             fixedUpdateCount = 0;
             fixedUpdatesPerTick = Mathf.FloorToInt(60f / updateRate);
+            state = new(player.NetId);
             Enabled = false;
         }
 
@@ -94,16 +97,8 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private void SendPlayerState()
         {
-            Vector2 movementDirection = player.MovementContext.IsInMountedState ? Vector2.zero : player.MovementContext.MovementDirection;
-            PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, movementDirection,
-                player.CurrentManagedState.Name,
-                player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
-                player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-                player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-                player.MovementContext.BlindFire, player.ObservedOverlap, player.LeftStanceDisabled,
-                player.MovementContext.IsGrounded, player.HasGround, player.CurrentSurface, NetworkTimeSync.Time);
-
-            Client.SendData(ref playerStatePacket, DeliveryMethod.Unreliable);
+            state.UpdateData(player, !player.MovementContext.IsInMountedState);
+            Client.SendData(ref state, DeliveryMethod.Unreliable);
         }
 
         protected void LateUpdate()

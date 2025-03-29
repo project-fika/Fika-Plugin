@@ -21,11 +21,13 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private BotStateManager manager;
         private bool sendPackets;
+        private PlayerStatePacket state;
 
         protected void Awake()
         {
             player = GetComponent<CoopPlayer>();
             Server = Singleton<FikaServer>.Instance;
+            state = new(player.NetId);
             Enabled = true;
         }
 
@@ -78,16 +80,8 @@ namespace Fika.Core.Coop.PacketHandlers
             }
 
             bool isMoving = mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk;
-            Vector2 direction = isMoving ? player.MovementContext.MovementDirection : Vector2.zero;
-            PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, direction,
-                player.CurrentManagedState.Name,
-                player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
-                player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-                player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-                player.MovementContext.BlindFire, player.ObservedOverlap, player.LeftStanceDisabled,
-                player.MovementContext.IsGrounded, player.HasGround, player.CurrentSurface, NetworkTimeSync.Time);
-
-            Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
+            state.UpdateData(player, isMoving);
+            Server.SendDataToAll(ref state, DeliveryMethod.Unreliable);
         }
 
         public void DestroyThis()
