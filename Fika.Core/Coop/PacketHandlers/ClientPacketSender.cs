@@ -47,17 +47,18 @@ namespace Fika.Core.Coop.PacketHandlers
         private int fixedUpdateCount;
         private int fixedUpdatesPerTick;
 
-        protected void Awake()
+        public static ClientPacketSender Create(CoopPlayer player)
         {
-            player = GetComponent<CoopPlayer>();
-            Client = Singleton<FikaClient>.Instance;
-            enabled = false;
-            lastPingTime = DateTime.Now;
-            updateRate = Client.SendRate;
-            fixedUpdateCount = 0;
-            fixedUpdatesPerTick = Mathf.FloorToInt(60f / updateRate);
-            state = new(player.NetId);
-            Enabled = false;
+            ClientPacketSender sender = player.gameObject.AddComponent<ClientPacketSender>();
+            sender.player = player;
+            sender.Client = Singleton<FikaClient>.Instance;
+            sender.enabled = false;
+            sender.lastPingTime = DateTime.Now;
+            sender.updateRate = sender.Client.SendRate;
+            sender.fixedUpdateCount = 0;
+            sender.fixedUpdatesPerTick = Mathf.FloorToInt(60f / sender.updateRate);
+            sender.state = new(player.NetId);
+            return sender;
         }
 
         public void Init()

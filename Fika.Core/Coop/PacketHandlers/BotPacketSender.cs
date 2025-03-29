@@ -21,12 +21,14 @@ namespace Fika.Core.Coop.PacketHandlers
         private bool sendPackets;
         private PlayerStatePacket state;
 
-        protected void Awake()
+        public static BotPacketSender Create(CoopBot bot)
         {
-            player = GetComponent<CoopPlayer>();
-            Server = Singleton<FikaServer>.Instance;
-            state = new(player.NetId);
-            Enabled = true;
+            BotPacketSender sender = bot.gameObject.AddComponent<BotPacketSender>();
+            sender.player = bot;
+            sender.Server = Singleton<FikaServer>.Instance;
+            sender.state = new(bot.NetId);
+            sender.Enabled = true;
+            return sender;
         }
 
         public void Init()

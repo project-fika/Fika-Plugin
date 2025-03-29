@@ -58,7 +58,7 @@ namespace Fika.Core.Coop.Players
 
             CoopBotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
 
-            player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
+            player.PacketSender = BotPacketSender.Create(player);
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),

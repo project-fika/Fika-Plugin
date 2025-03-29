@@ -11,17 +11,19 @@ namespace Fika.Core.Coop.PacketHandlers
 {
     public class HeadlessPacketSender : MonoBehaviour, IPacketSender
     {
-        private CoopPlayer player;
-
         public bool Enabled { get; set; } = false;
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
-        protected void Awake()
+        private CoopPlayer player;
+
+        public static HeadlessPacketSender Create(CoopPlayer player)
         {
-            player = GetComponent<CoopPlayer>();
-            Server = Singleton<FikaServer>.Instance;
-            enabled = false;
+            HeadlessPacketSender sender = player.gameObject.AddComponent<HeadlessPacketSender>();
+            sender.player = player;
+            sender.Server = Singleton<FikaServer>.Instance;
+            sender.enabled = false;
+            return sender;
         }
 
         public void Init()
