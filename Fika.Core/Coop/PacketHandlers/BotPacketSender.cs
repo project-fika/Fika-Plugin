@@ -2,7 +2,6 @@
 
 using Comfort.Common;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -13,12 +12,11 @@ namespace Fika.Core.Coop.PacketHandlers
 {
     public class BotPacketSender : MonoBehaviour, IPacketSender
     {
-        private CoopPlayer player;
-
         public bool Enabled { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
+        private CoopPlayer player;
         private BotStateManager manager;
         private bool sendPackets;
         private PlayerStatePacket state;

@@ -472,7 +472,6 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            coopBot.NetId = netId;
             if (FikaPlugin.DisableBotMetabolism.Value)
             {
                 coopBot.HealthController.DisableMetabolism();
