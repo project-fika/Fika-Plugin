@@ -8,13 +8,13 @@ namespace Fika.Core.Networking.Http
         [DataMember(Name = "gameVersion")]
         public string GameVersion;
 
-        [DataMember(Name = "fikaVersion")]
-        public string FikaVersion;
+        [DataMember(Name = "crc32")]
+        public uint Crc32;
 
-        public MatchJoinResponse(string gameVersion, string fikaVersion)
+        public MatchJoinResponse(string gameVersion, uint crc32)
         {
             GameVersion = gameVersion;
-            FikaVersion = fikaVersion;
+            Crc32 = crc32;
         }
     }
 }
