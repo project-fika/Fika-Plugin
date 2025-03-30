@@ -178,7 +178,7 @@ namespace Fika.Core.Coop.Utils
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             string raidCode = GenerateRaidCode(6);
             CreateMatch body = new(raidCode, profileId, hostUsername, IsSpectator, timestamp, raidSettings,
-                HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
+                raidSettings.Side, raidSettings.SelectedDateTime);
 
             await FikaRequestHandler.RaidCreate(body);
 

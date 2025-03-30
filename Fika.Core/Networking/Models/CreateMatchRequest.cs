@@ -39,7 +39,7 @@ namespace Fika.Core.Networking.Http
         [DataMember(Name = "isSpectator")]
         public bool IsSpectator;
 
-        public CreateMatch(string raidCode, string serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, int expectedNumberOfPlayers, ESideType side, EDateTime time)
+        public CreateMatch(string raidCode, string serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, ESideType side, EDateTime time)
         {
             RaidCode = raidCode;
             ServerId = serverId;
