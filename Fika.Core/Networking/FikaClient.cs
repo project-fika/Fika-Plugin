@@ -157,9 +157,12 @@ namespace Fika.Core.Networking
             if (FikaBackendUtils.IsHostNatPunch)
             {
                 NetManagerUtils.DestroyPingingClient();
+                netClient.Start(FikaBackendUtils.LocalPort); // NAT punching has to re-use the same local port
             }
-
-            netClient.Start(FikaBackendUtils.LocalPort);
+            else
+            {
+                netClient.Start();
+            }
 
             string ip = FikaBackendUtils.RemoteIp;
             int port = FikaBackendUtils.RemotePort;
