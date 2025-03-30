@@ -22,6 +22,7 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
+using LiteNetLib.Utils;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
@@ -72,6 +73,7 @@ namespace Fika.Core
         public IPAddress WanIP;
         public bool LocalesLoaded;
 
+        internal static uint Crc32 { get; set; }
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
