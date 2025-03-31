@@ -315,9 +315,9 @@ namespace Fika.Core
             new Player_OnDead_Patch().Enable();
             new Player_ManageAggressor_Patch().Enable();
             new Player_SetDogtagInfo_Patch().Enable();
-            /*new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
+            new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
             new WeaponManagerClass_method_12_Patch().Enable();
-            new OpticRetrice_UpdateTransform_Patch().Enable();*/
+            new OpticRetrice_UpdateTransform_Patch().Enable();
             new MatchmakerOfflineRaidScreen_Close_Patch().Enable();
             new BodyPartCollider_SetUpPlayer_Patch().Enable();
             new MatchmakerOfflineRaidScreen_Show_Patch().Enable();

@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(WeaponManagerClass).GetMethod(nameof(WeaponManagerClass.method_12));
+            return typeof(WeaponManagerClass).GetMethod(nameof(WeaponManagerClass.method_13));
         }
 
         [PatchPostfix]
