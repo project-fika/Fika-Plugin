@@ -46,8 +46,8 @@ namespace Fika.Core.Coop.Custom
             healthBar.effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
             healthBar.effects = [];
             // Check for GClass increments, can be checked in EFT.UI.StaticIcons.EffectSprites method UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize
-            // Wound, Encumbered, OverEncumbered, MusclePain, MildMusclePlain, SevereMusclePain
-            healthBar.ignoredTypes = [typeof(GInterface335), typeof(GInterface337), typeof(GInterface338), typeof(GInterface351), typeof(GInterface352), typeof(GInterface353)];
+            // Wound, Encumbered, OverEncumbered, MildMusclePlain, SevereMusclePain
+            healthBar.ignoredTypes = [typeof(GInterface336), typeof(GInterface338), typeof(GInterface339), typeof(GInterface353), typeof(GInterface354)];
             healthBar.CreateHealthBar();
             return healthBar;
         }
