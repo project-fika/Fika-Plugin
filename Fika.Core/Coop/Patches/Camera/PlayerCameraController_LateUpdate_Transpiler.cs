@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches.Camera
         [PatchTranspiler]
         public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
         {
-            List<CodeInstruction> newInstructions = instructions.ToList();
+            List<CodeInstruction> newInstructions = [.. instructions];
             for (int i = 11; i < newInstructions.Count; i++)
             {
                 newInstructions[i].opcode = OpCodes.Ret;
