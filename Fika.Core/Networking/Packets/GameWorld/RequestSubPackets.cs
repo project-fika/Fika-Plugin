@@ -189,16 +189,16 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                using FikaWriter writer = EFTSerializationManager.GetWriter();
-                writer.WriteInt(allExfils.Length);
+                NetDataWriter writer = new();
+                writer.Put(allExfils.Length);
                 foreach (ExfiltrationPoint exfilPoint in allExfils)
                 {
-                    writer.WriteString(exfilPoint.Settings.Name);
-                    writer.WriteByte((byte)exfilPoint.Status);
-                    writer.WriteInt(exfilPoint.Settings.StartTime);
+                    writer.Put(exfilPoint.Settings.Name);
+                    writer.Put((byte)exfilPoint.Status);
+                    writer.Put(exfilPoint.Settings.StartTime);
                     if (exfilPoint.Status == EExfiltrationStatus.Countdown)
                     {
-                        writer.WriteFloat(exfilPoint.ExfiltrationStartTime);
+                        writer.Put(exfilPoint.ExfiltrationStartTime);
                     }
                 }
 
@@ -207,7 +207,7 @@ namespace Fika.Core.Networking
                     PacketType = ERequestSubPacketType.Exfiltration,
                     RequestSubPacket = new ExfiltrationRequest()
                     {
-                        Data = writer.ToArray()
+                        Data = writer.Data
                     }
                 };
                 server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
@@ -230,17 +230,17 @@ namespace Fika.Core.Networking
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                FikaReader eftReader = EFTSerializationManager.GetReader(Data);
-                int amount = eftReader.ReadInt();
+                NetDataReader reader = new(Data);
+                int amount = reader.GetInt();
                 for (int i = 0; i < amount; i++)
                 {
-                    string name = eftReader.ReadString();
-                    EExfiltrationStatus status = (EExfiltrationStatus)eftReader.ReadByte();
-                    int startTime = eftReader.ReadInt();
+                    string name = reader.GetString();
+                    EExfiltrationStatus status = (EExfiltrationStatus)reader.GetByte();
+                    int startTime = reader.GetInt();
                     int exfilStartTime = -1;
                     if (status == EExfiltrationStatus.Countdown)
                     {
-                        exfilStartTime = eftReader.ReadInt();
+                        exfilStartTime = reader.GetInt();
                     }
 
                     ExfiltrationPoint exfilPoint = allExfils.FirstOrDefault(x => x.Settings.Name == name);
