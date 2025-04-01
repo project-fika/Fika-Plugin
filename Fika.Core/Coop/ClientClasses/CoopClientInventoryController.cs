@@ -140,8 +140,8 @@ namespace Fika.Core.Coop.ClientClasses
                 base.vmethod_1(operation, callback);
                 return;
             }
-
-            using GClass1217 eftWriter = GClass1220.Get();
+            
+            EFTWriterClass eftWriter = new();
             ClientInventoryOperationHandler handler = new()
             {
                 Operation = operation,

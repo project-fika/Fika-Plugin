@@ -852,7 +852,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 ItemAddress itemAddress = gridItemAddress;
                 GClass1721 descriptor = itemAddress?.ToDescriptor();
-                using GClass1217 eftWriter = GClass1220.Get();
+                EFTWriterClass eftWriter = new();
 
                 byte[] locationDescription;
                 if (descriptor != null)
@@ -925,7 +925,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
                 GClass1721 descriptor = itemAddress?.ToDescriptor();
-                using GClass1217 eftWriter = GClass1220.Get();
+                EFTWriterClass eftWriter = new();
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 
                 byte[] locationDescription;
