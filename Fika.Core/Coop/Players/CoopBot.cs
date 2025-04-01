@@ -54,10 +54,11 @@ namespace Fika.Core.Coop.Players
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
             player.IsYourPlayer = false;
+            player.NetId = playerId;
 
             CoopBotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
 
-            player.PacketSender = player.gameObject.AddComponent<BotPacketSender>();
+            player.PacketSender = BotPacketSender.Create(player);
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),

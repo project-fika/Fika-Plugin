@@ -8,7 +8,7 @@ namespace Fika.Core.Coop.Custom
     public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
     {
         [JsonIgnore]
-        private CoreBotSettingsClass coreSettings;
+        private readonly CoreBotSettingsClass coreSettings;
 
         public BotDifficulties()
         {
@@ -22,7 +22,9 @@ namespace Fika.Core.Coop.Custom
 
         public BotSettingsComponents GetComponent(BotDifficulty botDifficulty, WildSpawnType role)
         {
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}");
+#if DEBUG
+            FikaPlugin.Instance.FikaLogger.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}"); 
+#endif
             if (TryGetValue(role.ToString().ToLower(), out RoleData value))
             {
                 if (value.TryGetValue(botDifficulty.ToString().ToLower(), out BotSettingsComponents botSettingsComponents))

@@ -27,8 +27,8 @@ namespace Fika.Core.Networking.Http
         [DataMember(Name = "gameVersion")]
         public string GameVersion;
 
-        [DataMember(Name = "fikaVersion")]
-        public Version FikaVersion;
+        [DataMember(Name = "crc32")]
+        public uint Crc32;
 
         [DataMember(Name = "side")]
         public ESideType Side;
@@ -39,7 +39,7 @@ namespace Fika.Core.Networking.Http
         [DataMember(Name = "isSpectator")]
         public bool IsSpectator;
 
-        public CreateMatch(string raidCode, string serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, int expectedNumberOfPlayers, ESideType side, EDateTime time)
+        public CreateMatch(string raidCode, string serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
         {
             RaidCode = raidCode;
             ServerId = serverId;
@@ -47,7 +47,7 @@ namespace Fika.Core.Networking.Http
             Timestamp = timestamp;
             Settings = settings;
             GameVersion = FikaPlugin.EFTVersionMajor;
-            FikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            Crc32 = crc32;
             Side = side;
             Time = time;
             IsSpectator = isSpectator;

@@ -154,13 +154,13 @@ namespace Fika.Core.Networking
 
                 if (ExfiltrationControllerClass.Instance != null)
                 {
+                    CoopGame game = coopHandler.LocalGameInstance;
                     ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
-
                     foreach (ExfiltrationPoint exfiltrationPoint in exfilController.ExfiltrationPoints)
                     {
                         if (exfiltrationPoint.Settings.Name == ExfilName)
                         {
-                            CoopGame game = coopHandler.LocalGameInstance;
+                            
                             exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
 
                             if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
@@ -169,6 +169,23 @@ namespace Fika.Core.Networking
                             }
                             return;
                         }
+                    }
+
+                    if (exfilController.SecretExfiltrationPoints != null)
+                    {
+                        foreach (SecretExfiltrationPoint secretExfiltration in exfilController.SecretExfiltrationPoints)
+                        {
+                            if (secretExfiltration.Settings.Name == ExfilName)
+                            {
+                                secretExfiltration.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
+
+                                if (secretExfiltration.Status != EExfiltrationStatus.Countdown)
+                                {
+                                    secretExfiltration.Status = EExfiltrationStatus.Countdown;
+                                }
+                                return;
+                            }
+                        } 
                     }
 
                     FikaPlugin.Instance.FikaLogger.LogError("ExfilCountdown: Could not find ExfiltrationPoint: " + ExfilName);

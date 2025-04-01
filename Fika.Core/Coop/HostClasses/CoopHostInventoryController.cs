@@ -160,7 +160,7 @@ namespace Fika.Core.Coop.HostClasses
             {
                 handler.operation.method_1(handler.HandleResult);
 
-                FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+                EFTWriterClass eftWriter = new();
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {

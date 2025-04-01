@@ -16,11 +16,15 @@ namespace Fika.Core.Networking
     {
         public class SpawnPointRequest : IRequestPacket
         {
-            public string Name;
+            public string Infiltration;
+            public Vector3 Position;
+            public Quaternion Rotation;
 
-            public SpawnPointRequest(string name)
+            public SpawnPointRequest(string name, Vector3 position, Quaternion rotation)
             {
-                Name = name;
+                Infiltration = name;
+                Position = position;        
+                Rotation = rotation;
             }
 
             public SpawnPointRequest()
@@ -30,7 +34,9 @@ namespace Fika.Core.Networking
 
             public SpawnPointRequest(NetDataReader reader)
             {
-                Name = reader.GetString();
+                Infiltration = reader.GetString();
+                Position = reader.GetVector3();
+                Rotation = reader.GetQuaternion();
             }
 
             public void HandleRequest(NetPeer peer, FikaServer server)
@@ -38,12 +44,12 @@ namespace Fika.Core.Networking
                 CoopGame coopGame = CoopGame.Instance;
                 if (coopGame != null)
                 {
-                    if (FikaBackendUtils.IsServer)
+                    if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(coopGame.InfiltrationPoint) && coopGame.HostSpawnPoint != null)
                     {
                         RequestPacket response = new()
                         {
                             PacketType = ERequestSubPacketType.SpawnPoint,
-                            RequestSubPacket = new SpawnPointRequest(coopGame.SpawnPointName)
+                            RequestSubPacket = new SpawnPointRequest(coopGame.InfiltrationPoint, coopGame.HostSpawnPoint.Position, coopGame.HostSpawnPoint.Rotation)
                         };
 
                         server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
@@ -51,7 +57,7 @@ namespace Fika.Core.Networking
                     }
                 }
 
-                FikaPlugin.Instance.FikaLogger.LogError("SpawnPointRequest::HandleRequest: CoopGame was null upon receiving packet!");
+                FikaGlobals.LogError("SpawnPointRequest::HandleRequest: CoopGame was null upon receiving packet!");
             }
 
             public void HandleResponse()
@@ -59,21 +65,26 @@ namespace Fika.Core.Networking
                 CoopGame coopGame = CoopGame.Instance;
                 if (coopGame != null)
                 {
-                    if (!string.IsNullOrEmpty(Name))
+                    if (!string.IsNullOrEmpty(Infiltration))
                     {
-                        coopGame.SpawnId = Name;
+                        coopGame.InfiltrationPoint = Infiltration;
+                        coopGame.ClientSpawnPosition = Position;
+                        coopGame.ClientSpawnRotation = Rotation;
+                        FikaGlobals.LogInfo($"Received spawn position from host: {Position}, rotation: {Rotation}");
                         return;
                     }
-                    FikaPlugin.Instance.FikaLogger.LogError("SpawnPointRequest::HandleResponse: Name was empty!");
+                    FikaGlobals.LogError("SpawnPointRequest::HandleResponse: Infiltration was empty!");
                     return;
                 }
 
-                FikaPlugin.Instance.FikaLogger.LogError("SpawnPointRequest::HandleResponse: CoopGame was null upon receiving packet!");
+                FikaGlobals.LogError("SpawnPointRequest::HandleResponse: CoopGame was null upon receiving packet!");
             }
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.Put(Name);
+                writer.Put(Infiltration);
+                writer.Put(Position);
+                writer.Put(Rotation);
             }
         }
 
@@ -137,7 +148,7 @@ namespace Fika.Core.Networking
                     return;
                 }
 
-                FikaPlugin.Instance.FikaLogger.LogError("WeatherRequest::HandleResponse: CoopGame was null upon receiving packet!");
+                FikaGlobals.LogError("WeatherRequest::HandleResponse: CoopGame was null upon receiving packet!");
             }
 
             public void Serialize(NetDataWriter writer)
@@ -171,67 +182,65 @@ namespace Fika.Core.Networking
             {
                 if (ExfiltrationControllerClass.Instance == null)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
+                    FikaGlobals.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
                     return;
                 }
 
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                FikaWriter writer = EFTSerializationManager.GetWriter();
+                NetDataWriter writer = new();
+                writer.Put(allExfils.Length);
+                foreach (ExfiltrationPoint exfilPoint in allExfils)
                 {
-                    writer.WriteInt(allExfils.Length);
-                    foreach (ExfiltrationPoint exfilPoint in allExfils)
+                    writer.Put(exfilPoint.Settings.Name);
+                    writer.Put((byte)exfilPoint.Status);
+                    writer.Put(exfilPoint.Settings.StartTime);
+                    if (exfilPoint.Status == EExfiltrationStatus.Countdown)
                     {
-                        writer.WriteString(exfilPoint.Settings.Name);
-                        writer.WriteByte((byte)exfilPoint.Status);
-                        writer.WriteInt(exfilPoint.Settings.StartTime);
-                        if (exfilPoint.Status == EExfiltrationStatus.Countdown)
-                        {
-                            writer.WriteFloat(exfilPoint.ExfiltrationStartTime);
-                        }
+                        writer.Put(exfilPoint.ExfiltrationStartTime);
                     }
-
-                    RequestPacket response = new()
-                    {
-                        PacketType = ERequestSubPacketType.Exfiltration,
-                        RequestSubPacket = new ExfiltrationRequest()
-                        {
-                            Data = writer.ToArray()
-                        }
-                    };
-                    server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
                 }
+
+                RequestPacket response = new()
+                {
+                    PacketType = ERequestSubPacketType.Exfiltration,
+                    RequestSubPacket = new ExfiltrationRequest()
+                    {
+                        Data = writer.Data
+                    }
+                };
+                server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
             }
 
             public void HandleResponse()
             {
                 if (Data == null || Data.Length == 0)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError("ExfiltrationRequest::HandleRequest: Data was null or empty!");
+                    FikaGlobals.LogError("ExfiltrationRequest::HandleRequest: Data was null or empty!");
                     return;
                 }
 
                 if (ExfiltrationControllerClass.Instance == null)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
+                    FikaGlobals.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
                     return;
                 }
 
                 ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                 ExfiltrationPoint[] allExfils = exfilController.ExfiltrationPoints;
 
-                FikaReader eftReader = EFTSerializationManager.GetReader(Data);
-                int amount = eftReader.ReadInt();
+                NetDataReader reader = new(Data);
+                int amount = reader.GetInt();
                 for (int i = 0; i < amount; i++)
                 {
-                    string name = eftReader.ReadString();
-                    EExfiltrationStatus status = (EExfiltrationStatus)eftReader.ReadByte();
-                    int startTime = eftReader.ReadInt();
+                    string name = reader.GetString();
+                    EExfiltrationStatus status = (EExfiltrationStatus)reader.GetByte();
+                    int startTime = reader.GetInt();
                     int exfilStartTime = -1;
                     if (status == EExfiltrationStatus.Countdown)
                     {
-                        exfilStartTime = eftReader.ReadInt();
+                        exfilStartTime = reader.GetInt();
                     }
 
                     ExfiltrationPoint exfilPoint = allExfils.FirstOrDefault(x => x.Settings.Name == name);
@@ -314,7 +323,7 @@ namespace Fika.Core.Networking
             {
                 if (Services == null || Services.Count < 1)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogWarning("OnTraderServicesPacketReceived: Services was 0, but might be intentional. Skipping...");
+                    FikaGlobals.LogWarning("OnTraderServicesPacketReceived: Services was 0, but might be intentional. Skipping...");
                     return;
                 }
 

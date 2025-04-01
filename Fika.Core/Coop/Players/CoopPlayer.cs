@@ -123,16 +123,16 @@ namespace Fika.Core.Coop.Players
             {
                 if (FikaBackendUtils.IsHeadless)
                 {
-                    player.PacketSender = player.gameObject.AddComponent<HeadlessPacketSender>();
+                    player.PacketSender = HeadlessPacketSender.Create(player);
                 }
                 else
                 {
-                    player.PacketSender = player.gameObject.AddComponent<ServerPacketSender>();
+                    player.PacketSender = ServerPacketSender.Create(player);
                 }
             }
             else if (FikaBackendUtils.IsClient)
             {
-                player.PacketSender = player.gameObject.AddComponent<ClientPacketSender>();
+                player.PacketSender = ClientPacketSender.Create(player);
             }
 
             EVoipState voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && GClass1050.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
@@ -528,6 +528,12 @@ namespace Fika.Core.Coop.Players
 
         protected void FindKillerWeapon()
         {
+            if (LastAggressor == null)
+            {
+                FikaGlobals.LogWarning("LastAggressor was null, skipping");
+                return;
+            }
+
             if (!IsYourPlayer && LastAggressor.GroupId != "Fika")
             {
 #if DEBUG

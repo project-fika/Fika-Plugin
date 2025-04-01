@@ -215,7 +215,7 @@ namespace Fika.Core.Networking
         /// <param name="item">The <see cref="Item"/> to serialize</param>
         public static void PutItem(this NetDataWriter writer, Item item)
         {
-            FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+            EFTWriterClass eftWriter = new();
             GClass1693 descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
@@ -228,7 +228,7 @@ namespace Fika.Core.Networking
         /// <returns>An <see cref="Item"/> (cast to type inside packet)</returns>
         public static Item GetItem(this NetDataReader reader)
         {
-            FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
+            using GClass1212 eftReader = GClass1215.Get(reader.GetByteArray());
             return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
         }
 
@@ -239,7 +239,7 @@ namespace Fika.Core.Networking
         /// <returns>An <see cref="Inventory"/></returns>
         public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
         {
-            FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
+            using GClass1212 eftReader = GClass1215.Get(reader.GetByteArray());
             return new GClass1685()
             {
                 Equipment = eftReader.ReadEFTItemDescriptor()
@@ -248,20 +248,20 @@ namespace Fika.Core.Networking
 
         public static void PutItemDescriptor(this NetDataWriter writer, GClass1693 descriptor)
         {
-            FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+            EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
         }
 
         public static GClass1693 GetItemDescriptor(this NetDataReader reader)
         {
-            FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
+            using GClass1212 eftReader = GClass1215.Get(reader.GetByteArray());
             return eftReader.ReadEFTItemDescriptor();
         }
 
         public static Item GetAirdropItem(this NetDataReader reader)
         {
-            FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
+            using GClass1212 eftReader = GClass1215.Get(reader.GetByteArray());
             Item item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
             GClass1333 enumerable = [new LootItemPositionClass()];
@@ -302,7 +302,7 @@ namespace Fika.Core.Networking
         /// <param name="profile"></param>
         public static void PutProfile(this NetDataWriter writer, Profile profile)
         {
-            FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+            EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
             writer.PutByteArray(eftWriter.ToArray());
         }
@@ -314,7 +314,7 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Profile"/></returns>
         public static Profile GetProfile(this NetDataReader reader)
         {
-            FikaReader eftReader = EFTSerializationManager.GetReader(reader.GetByteArray());
+            using GClass1212 eftReader = GClass1215.Get(reader.GetByteArray());
             return new(eftReader.ReadEFTProfileDescriptor());
         }
 

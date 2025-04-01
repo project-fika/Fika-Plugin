@@ -9,7 +9,6 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -23,11 +22,21 @@ namespace Fika.Core.Coop.PacketHandlers
 {
     public class ServerPacketSender : MonoBehaviour, IPacketSender
     {
-        private CoopPlayer player;
-
         public bool Enabled { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
+        public bool IsMoving
+        {
+            get
+            {
+                return (player.CharacterController.velocity.x != 0
+                    || player.CharacterController.velocity.z != 0)
+                    && !player.MovementContext.IsInMountedState;
+            }
+        }
+
+        private CoopPlayer player;
+        private PlayerStatePacket state;
 
         private bool CanPing
         {
@@ -45,16 +54,19 @@ namespace Fika.Core.Coop.PacketHandlers
         private int fixedUpdateCount;
         private int fixedUpdatesPerTick;
 
-        protected void Awake()
+        public static ServerPacketSender Create(CoopPlayer player)
         {
-            player = GetComponent<CoopPlayer>();
-            Server = Singleton<FikaServer>.Instance;
-            enabled = false;
-            lastPingTime = DateTime.Now;
-            updateRate = Server.SendRate;
-            fixedUpdateCount = 0;
-            fixedUpdatesPerTick = Mathf.FloorToInt(60f / updateRate);
-            Enabled = false;
+            ServerPacketSender sender = player.gameObject.AddComponent<ServerPacketSender>();
+            sender.player = player;
+            sender.Server = Singleton<FikaServer>.Instance;
+            sender.enabled = false;
+            sender.lastPingTime = DateTime.Now;
+            sender.updateRate = sender.Server.SendRate;
+            sender.fixedUpdateCount = 0;
+            sender.fixedUpdatesPerTick = Mathf.FloorToInt(60f / sender.updateRate);
+            sender.state = new(player.NetId);
+            sender.Enabled = true;
+            return sender;
         }
 
         public void Init()
@@ -94,16 +106,8 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private void SendPlayerState()
         {
-            Vector2 movementDirection = player.MovementContext.IsInMountedState ? Vector2.zero : player.MovementContext.MovementDirection;
-            PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, movementDirection,
-                player.CurrentManagedState.Name,
-                player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
-                player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-                player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-                player.MovementContext.BlindFire, player.ObservedOverlap, player.LeftStanceDisabled,
-                player.MovementContext.IsGrounded, player.HasGround, player.CurrentSurface, NetworkTimeSync.Time);
-
-            Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
+            state.UpdateData(player, IsMoving);
+            Server.SendDataToAll(ref state, DeliveryMethod.Unreliable);
         }
 
         protected void Update()

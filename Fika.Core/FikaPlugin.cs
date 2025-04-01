@@ -22,6 +22,7 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
+using LiteNetLib.Utils;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
@@ -55,7 +56,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.3";
+        public const string FikaVersion = "1.2.4";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -72,6 +73,7 @@ namespace Fika.Core
         public IPAddress WanIP;
         public bool LocalesLoaded;
 
+        internal static uint Crc32 { get; set; }
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
@@ -314,8 +316,8 @@ namespace Fika.Core
             new Player_ManageAggressor_Patch().Enable();
             new Player_SetDogtagInfo_Patch().Enable();
             new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
-            new WeaponManagerClass_method_12_Patch().Enable();
-            new OpticRetrice_UpdateTransform_Patch().Enable();
+            new WeaponManagerClass_method_13_Patch().Enable();
+            //new OpticRetrice_UpdateTransform_Patch().Enable();
             new MatchmakerOfflineRaidScreen_Close_Patch().Enable();
             new BodyPartCollider_SetUpPlayer_Patch().Enable();
             new MatchmakerOfflineRaidScreen_Show_Patch().Enable();

@@ -159,11 +159,10 @@ namespace Fika.Core.Coop.Utils
                 errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_EFT_MISMATCH.Localized(), FikaPlugin.EFTVersionMajor, result.GameVersion);
                 return false;
             }
-
-            Version detectedFikaVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            if (result.FikaVersion != detectedFikaVersion)
+           
+            if (result.Crc32 != FikaPlugin.Crc32)
             {
-                errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_FIKA_MISMATCH.Localized(), detectedFikaVersion, result.FikaVersion);
+                errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_FIKA_MISMATCH.Localized(), FikaPlugin.Crc32, result.Crc32);
                 return false;
             }
 
@@ -177,8 +176,8 @@ namespace Fika.Core.Coop.Utils
             NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
             long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             string raidCode = GenerateRaidCode(6);
-            CreateMatch body = new(raidCode, profileId, hostUsername, IsSpectator, timestamp, raidSettings,
-                HostExpectedNumberOfPlayers, raidSettings.Side, raidSettings.SelectedDateTime);
+            CreateMatch body = new(raidCode, profileId, hostUsername, IsSpectator, timestamp, raidSettings, FikaPlugin.Crc32,
+                raidSettings.Side, raidSettings.SelectedDateTime);
 
             await FikaRequestHandler.RaidCreate(body);
 

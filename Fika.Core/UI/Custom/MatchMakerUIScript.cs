@@ -305,8 +305,6 @@ namespace Fika.Core.UI.Custom
                 }
                 else
                 {
-                    ToggleLoading(true);
-
                     FikaPlugin.HeadlessRequesterWebSocket ??= new HeadlessRequesterWebSocket();
 
                     if (!FikaPlugin.HeadlessRequesterWebSocket.Connected)
@@ -317,9 +315,9 @@ namespace Fika.Core.UI.Custom
                     RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
                     string headlessSessionId = availableHeadlesses[0].HeadlessSessionID;
-                    bool singleHeadless = !fikaMatchMakerUi.HeadlessSelection.isActiveAndEnabled;
+                    bool multipleHeadlesses = availableHeadlesses.Length > 1;
 
-                    if (!singleHeadless)
+                    if (multipleHeadlesses)
                     {
                         int selectedHeadless = fikaMatchMakerUi.HeadlessSelection.value;
                         headlessSessionId = availableHeadlesses[selectedHeadless].HeadlessSessionID;

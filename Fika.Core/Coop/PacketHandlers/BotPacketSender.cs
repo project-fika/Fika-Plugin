@@ -2,7 +2,6 @@
 
 using Comfort.Common;
 using Fika.Core.Coop.Components;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -13,20 +12,36 @@ namespace Fika.Core.Coop.PacketHandlers
 {
     public class BotPacketSender : MonoBehaviour, IPacketSender
     {
-        private CoopPlayer player;
-
         public bool Enabled { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
+        private CoopPlayer player;
         private BotStateManager manager;
         private bool sendPackets;
-
-        protected void Awake()
+        private PlayerStatePacket state;
+        private bool IsMoving
         {
-            player = GetComponent<CoopPlayer>();
-            Server = Singleton<FikaServer>.Instance;
-            Enabled = true;
+            get
+            {
+                BotMover mover = player.AIData.BotOwner.Mover;
+                if (mover == null)
+                {
+                    return false;
+                }
+
+                return mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk;
+            }
+        }
+
+        public static BotPacketSender Create(CoopBot bot)
+        {
+            BotPacketSender sender = bot.gameObject.AddComponent<BotPacketSender>();
+            sender.player = bot;
+            sender.Server = Singleton<FikaServer>.Instance;
+            sender.state = new(bot.NetId);
+            sender.Enabled = true;
+            return sender;
         }
 
         public void Init()
@@ -71,23 +86,8 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
-            BotMover mover = player.AIData.BotOwner.Mover;
-            if (mover == null)
-            {
-                return;
-            }
-
-            bool isMoving = mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk;
-            Vector2 direction = isMoving ? player.MovementContext.MovementDirection : Vector2.zero;
-            PlayerStatePacket playerStatePacket = new(player.NetId, player.Position, player.Rotation, player.HeadRotation, direction,
-                player.CurrentManagedState.Name,
-                player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt,
-                player.MovementContext.Step, player.CurrentAnimatorStateIndex, player.MovementContext.SmoothedCharacterMovementSpeed,
-                player.IsInPronePose, player.PoseLevel, player.MovementContext.IsSprintEnabled, player.Physical.SerializationStruct,
-                player.MovementContext.BlindFire, player.ObservedOverlap, player.LeftStanceDisabled,
-                player.MovementContext.IsGrounded, player.HasGround, player.CurrentSurface, NetworkTimeSync.Time);
-
-            Server.SendDataToAll(ref playerStatePacket, DeliveryMethod.Unreliable);
+            state.UpdateData(player, IsMoving);
+            Server.SendDataToAll(ref state, DeliveryMethod.Unreliable);
         }
 
         public void DestroyThis()
