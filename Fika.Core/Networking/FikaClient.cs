@@ -765,7 +765,7 @@ namespace Fika.Core.Networking
             CoopGame coopGame = CoopGame.Instance;
             if (coopGame != null)
             {
-                FikaReader eftReader = EFTSerializationManager.GetReader(packet.Data);
+                using GClass1212 eftReader = GClass1215.Get(packet.Data);
                 GClass1718 lootData = eftReader.ReadEFTLootDataDescriptor();
                 GClass1333 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
                 if (lootItems.Count < 1)
@@ -1208,7 +1208,7 @@ namespace Fika.Core.Networking
                 {
                     if (controller is Interface16 networkController)
                     {
-                        FikaReader eftReader = EFTSerializationManager.GetReader(packet.OperationBytes);
+                        using GClass1212 eftReader = GClass1215.Get(packet.OperationBytes);
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                         GStruct452 result = networkController.CreateOperationFromDescriptor(descriptor);
                         if (!result.Succeeded)

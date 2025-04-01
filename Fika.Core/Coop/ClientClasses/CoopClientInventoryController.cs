@@ -141,7 +141,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            using FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+            using GClass1217 eftWriter = GClass1220.Get();
             ClientInventoryOperationHandler handler = new()
             {
                 Operation = operation,

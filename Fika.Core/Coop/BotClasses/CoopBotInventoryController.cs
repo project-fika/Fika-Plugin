@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.BotClasses
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
 #endif
-                using FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+                using GClass1217 eftWriter = GClass1220.Get();
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {

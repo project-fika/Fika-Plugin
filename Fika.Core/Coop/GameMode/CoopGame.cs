@@ -1268,7 +1268,7 @@ namespace Fika.Core.Coop.GameMode
             if (isServer)
             {
                 GClass1718 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
-                using FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+                using GClass1217 eftWriter = GClass1220.Get();
                 eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
                 HostLootItems = eftWriter.ToArray();
 
@@ -2925,7 +2925,7 @@ namespace Fika.Core.Coop.GameMode
                 list.Sort(LootCompare);
 
                 GClass1718 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
-                using FikaWriter eftWriter = EFTSerializationManager.GetWriter();
+                using GClass1217 eftWriter = GClass1220.Get();
                 eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
                 return eftWriter.ToArray();
             }
