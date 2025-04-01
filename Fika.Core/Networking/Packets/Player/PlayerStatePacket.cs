@@ -116,7 +116,7 @@ namespace Fika.Core.Networking
             RemoteTime = reader.GetDouble();
         }
 
-        public void UpdateData(CoopPlayer player, bool isMoving = true)
+        public void UpdateData(CoopPlayer player, bool isMoving)
         {
             Position = player.Position;
             Rotation = player.Rotation;

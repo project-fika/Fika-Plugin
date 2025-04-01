@@ -9,7 +9,6 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -29,6 +28,15 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private CoopPlayer player;
         private PlayerStatePacket state;
+        private bool IsMoving
+        {
+            get
+            {
+                return (player.CharacterController.velocity.x != 0
+                    || player.CharacterController.velocity.z != 0)
+                    && !player.MovementContext.IsInMountedState;
+            }
+        }
 
 
         private bool CanPing
@@ -98,7 +106,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private void SendPlayerState()
         {
-            state.UpdateData(player, !player.MovementContext.IsInMountedState);
+            state.UpdateData(player, IsMoving);
             Client.SendData(ref state, DeliveryMethod.Unreliable);
         }
 

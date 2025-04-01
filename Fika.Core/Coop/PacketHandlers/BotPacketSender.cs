@@ -20,6 +20,19 @@ namespace Fika.Core.Coop.PacketHandlers
         private BotStateManager manager;
         private bool sendPackets;
         private PlayerStatePacket state;
+        private bool IsMoving
+        {
+            get
+            {
+                BotMover mover = player.AIData.BotOwner.Mover;
+                if (mover == null)
+                {
+                    return false;
+                }
+
+                return mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk;
+            }
+        }
 
         public static BotPacketSender Create(CoopBot bot)
         {
@@ -73,14 +86,7 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
-            BotMover mover = player.AIData.BotOwner.Mover;
-            if (mover == null)
-            {
-                return;
-            }
-
-            bool isMoving = mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk;
-            state.UpdateData(player, isMoving);
+            state.UpdateData(player, IsMoving);
             Server.SendDataToAll(ref state, DeliveryMethod.Unreliable);
         }
 
