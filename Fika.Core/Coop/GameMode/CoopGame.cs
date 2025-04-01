@@ -1520,6 +1520,10 @@ namespace Fika.Core.Coop.GameMode
                 {
                     GenerateNewDogTagId();
                 }
+                else if (FikaBackendUtils.IsHeadless)
+                {
+                    Profile_0.Info.Nickname = Profile_0.Info.Nickname.Insert(0, "headless_");
+                }
 
                 myPlayer = await vmethod_3(GameWorld_0, num, spawnPos, spawnRot, "Player", "", EPointOfView.FirstPerson,
                         Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
