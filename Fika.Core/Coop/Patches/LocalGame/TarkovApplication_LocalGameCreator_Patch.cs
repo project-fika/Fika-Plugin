@@ -105,7 +105,7 @@ namespace Fika.Core.Coop.Patches
 
             LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
             LocalRaidSettings raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
-            int escapeTimeLimit = RaidChangesUtil.NewEscapeTimeMinutes;
+            int escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
             if (isServer)
             {
                 raidSettings.SelectedLocation = localSettings.locationLoot;
