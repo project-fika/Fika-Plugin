@@ -501,19 +501,21 @@ namespace Fika.Core.Networking
             FikaBackendUtils.AddPartyMembers(visualProfiles);
             packet.Profiles = visualProfiles;
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+
             GenericPacket notifPacket = new()
             {
                 NetId = 1,
                 Type = EGenericSubPacketType.ClientConnected,
                 SubPacket = new ClientConnected(kvp.Key.Nickname)
             };
+
             if (!FikaBackendUtils.IsHeadless)
             {
                 notifPacket.SubPacket.Execute();
             }
             SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
 
-            peer.Tag = kvp.Key.Nickname;
+            peer.Tag = kvp.Key.Info.MainProfileNickname;
         }
 
         private void OnPingPacketReceived(PingPacket packet, NetPeer peer)

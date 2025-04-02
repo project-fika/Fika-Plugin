@@ -1085,6 +1085,7 @@ namespace Fika.Core.Networking
             };
             SendData(ref settingsPacket, DeliveryMethod.ReliableOrdered);
 
+            ownProfile.Info.SetProfileNickname(FikaBackendUtils.PMCName ?? ownProfile.Nickname);
             Dictionary<Profile, bool> profiles = [];
             profiles.Add(ownProfile, false);
             LoadingProfilePacket profilePacket = new()
