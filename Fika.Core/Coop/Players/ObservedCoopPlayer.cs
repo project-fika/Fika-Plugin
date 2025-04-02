@@ -14,7 +14,6 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -26,6 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.Audio;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.SubPacket;
@@ -210,7 +210,7 @@ namespace Fika.Core.Coop.Players
             player.AggressorFound = false;
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
-            player.Snapshotter = FikaSnapshotter.Create(player);
+            player.Snapshotter = new(player);
 
             return player;
         }
@@ -975,6 +975,7 @@ namespace Fika.Core.Coop.Players
                 Corpse.SetItemInHandsLootedCallback(ReleaseHand);
             }
             CorpseSyncPacket = default;
+            Snapshotter.Clear();
         }
 
         public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
@@ -1298,6 +1299,12 @@ namespace Fika.Core.Coop.Players
             Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
 
             yield break;
+        }
+
+        public override void UpdateTick()
+        {
+            Snapshotter.ManualUpdate();
+            base.UpdateTick();
         }
 
         public override void LateUpdate()
