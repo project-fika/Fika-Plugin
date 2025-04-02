@@ -179,6 +179,10 @@ namespace Fika.Core.Coop.Utils
         /// <param name="nickname"></param>
         public static void SetProfileNickname(this InfoClass infoClass, string nickname)
         {
+            if (!string.IsNullOrEmpty(infoClass.MainProfileNickname))
+            {
+                return;
+            }
             Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
         }
 
