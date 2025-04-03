@@ -12,6 +12,7 @@ using Fika.Core.UI.Custom;
 using HarmonyLib;
 using JsonType;
 using SPT.Reflection.Patching;
+using SPT.SinglePlayer.Utils.InRaid;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -104,7 +105,7 @@ namespace Fika.Core.Coop.Patches
 
             LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
             LocalRaidSettings raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
-            int escapeTimeLimit = raidSettings.SelectedLocation.EscapeTimeLimit;
+            int escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
             if (isServer)
             {
                 raidSettings.SelectedLocation = localSettings.locationLoot;
