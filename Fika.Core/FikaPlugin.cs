@@ -398,19 +398,39 @@ namespace Fika.Core
         /// <returns></returns>
         private IEnumerator RunChecks()
         {
-            Task<IPAddress> addressTask = FikaRequestHandler.GetPublicIP();
-            while (!addressTask.IsCompleted)
+            Task<IPAddress> addressTask;
+            try
             {
-                yield return null;
+                addressTask = FikaRequestHandler.GetPublicIP();                                
+            }
+            catch (Exception ex)
+            {
+                MonoBehaviourSingleton<PreloaderUI>.Instance.ShowErrorScreen("IP ERROR", ex.Message);
+                Logger.LogError($"RunChecks: {ex.Message}");
+                addressTask = null;
             }
 
-            WanIP = addressTask.Result;
+            if (addressTask != null)
+            {
+                while (!addressTask.IsCompleted)
+                {
+                    yield return null;
+                }
+
+                WanIP = addressTask.Result;
+            }
 
             yield return new WaitForSeconds(5);
 #if !DEBUG
             VerifyServerVersion(); 
 #endif
             ModHandler.VerifyMods();
+
+            if (Crc32 == 0)
+            {
+                MonoBehaviourSingleton<PreloaderUI>.Instance.ShowErrorScreen("CRC32 ERROR", LocaleUtils.UI_MOD_VERIFY_FAIL.Localized());
+                Logger.LogError($"RunChecks: {LocaleUtils.UI_MOD_VERIFY_FAIL.Localized()}");
+            }
         }
 
         private void GetClientConfig()

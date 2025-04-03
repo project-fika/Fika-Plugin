@@ -209,6 +209,7 @@ namespace Fika.Core.Utils
         public const string UI_MMUI_IN_HIDEOUT = "F_MMUI_InHideout";
         public const string UI_MMUI_IN_FLEA = "F_MMUI_InFlea";
         public const string UI_MMUI_RAID_DETAILS = "F_MMUI_RaidDetails";
+        public const string UI_MOD_VERIFY_FAIL = "F_Mod_VerificationFailure";
 
         // BepInEx
 
