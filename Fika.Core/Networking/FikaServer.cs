@@ -506,7 +506,7 @@ namespace Fika.Core.Networking
             {
                 NetId = 1,
                 Type = EGenericSubPacketType.ClientConnected,
-                SubPacket = new ClientConnected(kvp.Key.Nickname)
+                SubPacket = new ClientConnected(kvp.Key.Info.MainProfileNickname)
             };
 
             if (!FikaBackendUtils.IsHeadless)
