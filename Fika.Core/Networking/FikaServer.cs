@@ -752,7 +752,8 @@ namespace Fika.Core.Networking
                 WorldInteractiveObject[] worldInteractiveObjects = worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
                 foreach (WorldInteractiveObject interactiveObject in worldInteractiveObjects)
                 {
-                    if ((interactiveObject.DoorState != interactiveObject.InitialDoorState && interactiveObject.DoorState != EDoorState.Interacting)
+                    if ((interactiveObject.DoorState != interactiveObject.InitialDoorState
+                        && interactiveObject.DoorState != EDoorState.Interacting)
                         || (interactiveObject is Door door && door.IsBroken))
                     {
                         interactivesData.Add(interactiveObject.GetStatusInfo(true));
@@ -809,7 +810,7 @@ namespace Fika.Core.Networking
                     SendDataToPeer(peer, ref windowPacket, DeliveryMethod.ReliableOrdered);
                 }
 
-                foreach (CoopPlayer player in coopHandler.Players.Values)
+                /*foreach (CoopPlayer player in coopHandler.Players.Values)
                 {
                     if (player.ProfileId == packet.ProfileId)
                     {
@@ -822,7 +823,7 @@ namespace Fika.Core.Networking
                         ControllerId = player.InventoryController.CurrentId,
                         FirstOperationId = player.InventoryController.NextOperationId
                     },
-                        player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
+                    player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
 
                     if (player.ActiveHealthController != null)
                     {
@@ -841,7 +842,7 @@ namespace Fika.Core.Networking
                     }
 
                     SendDataToPeer(peer, ref characterPacket, DeliveryMethod.ReliableOrdered);
-                }
+                }*/
 
                 ReconnectPacket finishPacket = new()
                 {
@@ -1300,7 +1301,7 @@ namespace Fika.Core.Networking
                 iconType: EFT.Communications.ENotificationIconType.Friend);
             logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}");
 
-            HasHadPeer = true;                   
+            HasHadPeer = true;
 
             FikaEventDispatcher.DispatchEvent(new PeerConnectedEvent(peer, this));
         }

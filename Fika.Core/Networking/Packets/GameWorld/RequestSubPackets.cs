@@ -403,7 +403,7 @@ namespace Fika.Core.Networking
                                 Profile = coopPlayer.Profile,
                                 ControllerId = coopPlayer.InventoryController.CurrentId,
                                 FirstOperationId = coopPlayer.InventoryController.NextOperationId
-                            }, coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
+                            }, coopPlayer.HealthController.IsAlive, coopPlayer.IsAI, coopPlayer.Transform.position, coopPlayer.NetId);
 
                             if (coopPlayer.ActiveHealthController != null)
                             {

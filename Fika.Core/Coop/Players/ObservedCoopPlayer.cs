@@ -150,7 +150,7 @@ namespace Fika.Core.Coop.Players
             string prefix, EPointOfView pointOfView, Profile profile, byte[] healthBytes, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity, Func<float> getAimingSensitivity,
-            IViewFilter filter, MongoID firstId, ushort firstOperationId, bool isZombie)
+            IViewFilter filter, MongoID firstId, ushort firstOperationId, bool isZombie, bool isAi)
         {
             bool useSimpleAnimator = isZombie;
 #if DEBUG
@@ -164,6 +164,7 @@ namespace Fika.Core.Coop.Players
                 armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
             player.IsYourPlayer = false;
+            player.IsObservedAI = isAi;
 
             ObservedInventoryController inventoryController = new(player, profile, true, firstId, firstOperationId, aiControl);
             ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
@@ -1213,11 +1214,6 @@ namespace Fika.Core.Coop.Players
 
         public void InitObservedPlayer(bool isHeadlessClient)
         {
-            if (gameObject.name.StartsWith("Bot_"))
-            {
-                IsObservedAI = true;
-            }
-
             PacketSender = gameObject.AddComponent<ObservedPacketSender>();
             Traverse playerTraverse = Traverse.Create(this);
 
