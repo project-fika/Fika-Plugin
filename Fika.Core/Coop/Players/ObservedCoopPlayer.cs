@@ -885,6 +885,11 @@ namespace Fika.Core.Coop.Players
 
         public void ManualStateUpdate()
         {
+            if (!ShouldUpdate)
+            {
+                return;
+            }
+
             bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
 
             method_74(CurrentPlayerState.HasGround, CurrentPlayerState.SurfaceSound);
