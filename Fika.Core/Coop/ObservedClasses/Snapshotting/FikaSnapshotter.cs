@@ -66,7 +66,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         {
             snapshot.LocalTime = NetworkTimeSync.Time;
             interpolationSettings.bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
-                driftEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);
+                deliveryTimeEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);
             SnapshotInterpolation.InsertAndAdjust(buffer, interpolationSettings.bufferLimit, snapshot, ref localTimeline, ref localTimeScale,
                 sendInterval, BufferTime, interpolationSettings.catchupSpeed, interpolationSettings.slowdownSpeed, ref driftEma,
                 interpolationSettings.catchupNegativeThreshold, interpolationSettings.catchupPositiveThreshold, ref deliveryTimeEma);
