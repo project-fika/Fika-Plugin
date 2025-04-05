@@ -971,6 +971,8 @@ namespace Fika.Core.Coop.Players
                 ShouldOverlap = true;
             }
             LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
+
+            ShouldUpdate = false;
         }
 
         public override void InteractionRaycast()
@@ -1069,6 +1071,7 @@ namespace Fika.Core.Coop.Players
             }
             CorpseSyncPacket = default;
             Snapshotter.Clear();
+            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this);
         }
 
         public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)

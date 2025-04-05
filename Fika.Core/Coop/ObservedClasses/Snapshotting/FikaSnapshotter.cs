@@ -72,7 +72,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         {
             snapshot.LocalTime = NetworkTimeSync.Time;
             interpolationSettings.bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
-                driftEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);
+                deliveryTimeEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);
             SnapshotInterpolation.InsertAndAdjust(buffer, interpolationSettings.bufferLimit, snapshot, ref localTimeline, ref localTimeScale,
                 sendInterval, BufferTime, interpolationSettings.catchupSpeed, interpolationSettings.slowdownSpeed, ref driftEma,
                 interpolationSettings.catchupNegativeThreshold, interpolationSettings.catchupPositiveThreshold, ref deliveryTimeEma);
@@ -90,16 +90,16 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, interpolateRatio);
             player.CurrentPlayerState.MovementDirection = to.MovementDirection;
             player.CurrentPlayerState.State = to.State;
-            player.CurrentPlayerState.Tilt = to.Tilt;
+            player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, interpolateRatio);
             player.CurrentPlayerState.Step = to.Step;
             player.CurrentPlayerState.AnimatorStateIndex = to.AnimatorStateIndex;
             player.CurrentPlayerState.CharacterMovementSpeed = to.CharacterMovementSpeed;
             player.CurrentPlayerState.IsProne = to.IsProne;
-            player.CurrentPlayerState.PoseLevel = to.PoseLevel;
+            player.CurrentPlayerState.PoseLevel = Mathf.LerpUnclamped(from.PoseLevel, to.PoseLevel, interpolateRatio);
             player.CurrentPlayerState.IsSprinting = to.IsSprinting;
             player.CurrentPlayerState.Stamina = to.Stamina;
             player.CurrentPlayerState.Blindfire = to.Blindfire;
-            player.CurrentPlayerState.WeaponOverlap = to.WeaponOverlap;
+            player.CurrentPlayerState.WeaponOverlap = Mathf.LerpUnclamped(from.WeaponOverlap, to.WeaponOverlap, interpolateRatio);
             player.CurrentPlayerState.LeftStanceDisabled = to.LeftStanceDisabled;
             player.CurrentPlayerState.IsGrounded = to.IsGrounded;
             player.CurrentPlayerState.HasGround = to.HasGround;
