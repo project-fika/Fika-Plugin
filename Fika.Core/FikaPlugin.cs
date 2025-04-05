@@ -1279,7 +1279,7 @@ namespace Fika.Core
                 }),
                 "Use NAT Punching", ref failed, headers);
 
-            ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 15,
+            ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 30,
                 new ConfigDescription(LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_D.Localized(),
                 new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes()
                 {
