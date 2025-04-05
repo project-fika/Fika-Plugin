@@ -161,7 +161,7 @@ namespace Fika.Core.Networking
             statisticsCounter = 0;
             cachedConnections = [];
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
-            Snapshots = [];
+            Snapshots = new(64);
             ObservedCoopPlayers = [];
 
             ReadyClients = 0;
