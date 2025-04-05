@@ -22,6 +22,7 @@ using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Jobs;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
@@ -35,7 +36,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -103,6 +106,8 @@ namespace Fika.Core.Networking
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
+        public List<ISnapshot> Snapshots { get; set; }
+        public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
 
         private NetPacketProcessor packetProcessor;
         private int sendRate;
@@ -114,6 +119,7 @@ namespace Fika.Core.Networking
         private string myProfileId;
         private Queue<BaseInventoryOperationClass> inventoryOperations;
         private List<int> missingIds;
+        private JobHandle stateHandle;
 
         public async void Init()
         {
@@ -136,6 +142,8 @@ namespace Fika.Core.Networking
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
             inventoryOperations = new();
             missingIds = [];
+            Snapshots = new(64);
+            ObservedCoopPlayers = [];
 
             Ping = 0;
             ServerFPS = 0;
@@ -998,15 +1006,18 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
         {
-            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            /*if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
                 playerToApply.Snapshotter.Insert(packet);
-            }
+            }*/
+            Snapshots.Add(packet);
         }
 
         protected void Update()
         {
             netClient?.PollEvents();
+            stateHandle = new UpdateInterpolators().Schedule(ObservedCoopPlayers.Count, 8,
+                new HandlePlayerStates().Schedule(Snapshots.Count, 8));
 
             int inventoryOps = inventoryOperations.Count;
             if (inventoryOps > 0)
@@ -1017,6 +1028,16 @@ namespace Fika.Core.Networking
                 }
                 inventoryOperations.Dequeue().method_1(HandleResult);
             }
+        }
+
+        protected void LateUpdate()
+        {
+            stateHandle.Complete();
+            for (int i = 0; i < ObservedCoopPlayers.Count; i++)
+            {
+                ObservedCoopPlayers[i].ManualStateUpdate();
+            }
+            Snapshots.Clear();
         }
 
         protected void OnDestroy()

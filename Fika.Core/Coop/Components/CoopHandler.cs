@@ -418,6 +418,8 @@ namespace Fika.Core.Coop.Components
                 return null;
             }
 
+            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer);
+
             otherPlayer.NetId = netId;
 #if DEBUG
             logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
