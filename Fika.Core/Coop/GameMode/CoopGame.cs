@@ -1554,7 +1554,7 @@ namespace Fika.Core.Coop.GameMode
             SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
             SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
             spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side, null, null, null, null, Profile_0.Id);
-            InfiltrationPoint = spawnPoint.Infiltration;
+            InfiltrationPoint = string.IsNullOrEmpty(HostSpawnPoint.Infiltration) ? "MissingInfiltration" : spawnPoint.Infiltration;
             if (!isServer)
             {
                 ClientSpawnPosition = spawnPoint.Position;
