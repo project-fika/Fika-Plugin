@@ -64,10 +64,10 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             return Mathd.Clamp(localTimeline, lowerBound, upperBound);
         }
 
-        public static void InsertAndAdjust<T>(SortedList<double, T> buffer, int bufferLimit, T snapshot, ref double localTimeline, ref double localTimescale,
-            float sendInterval, double bufferTime, double catchupSpeed, double slowdownSpeed,
-            ref ExponentialMovingAverage driftEma, float catchupNegativeThreshold, float catchupPositiveThreshold,
-            ref ExponentialMovingAverage deliveryTimeEma)
+        public static void InsertAndAdjust<T>(SortedList<double, T> buffer, int bufferLimit, T snapshot,
+            ref double localTimeline, ref double localTimescale, float sendInterval, double bufferTime,
+            double catchupSpeed, double slowdownSpeed, ref ExponentialMovingAverage driftEma,
+            float catchupNegativeThreshold, float catchupPositiveThreshold, ref ExponentialMovingAverage deliveryTimeEma)
             where T : ISnapshot
         {
             if (buffer.Count == 0)
