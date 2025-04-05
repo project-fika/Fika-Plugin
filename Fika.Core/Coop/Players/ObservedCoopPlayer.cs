@@ -66,6 +66,8 @@ namespace Fika.Core.Coop.Players
             }
         }
         public BetterSource VoipEftSource { get; set; }
+        public PlayerStatePacket CurrentPlayerState;
+        public bool ShouldUpdate;
 
         private bool leftStancedDisabled;
         private FikaHealthBar healthBar = null;
@@ -211,6 +213,7 @@ namespace Fika.Core.Coop.Players
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = new(player);
+            player.CurrentPlayerState = default;
 
             return player;
         }
@@ -880,6 +883,96 @@ namespace Fika.Core.Coop.Players
             LeftStanceDisabled = to.LeftStanceDisabled;
         }
 
+        public void ManualStateUpdate()
+        {
+            bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
+
+            method_74(CurrentPlayerState.HasGround, CurrentPlayerState.SurfaceSound);
+
+            Rotation = CurrentPlayerState.Rotation;
+
+            HeadRotation = CurrentPlayerState.HeadRotation;
+            ProceduralWeaponAnimation.SetHeadRotation(CurrentPlayerState.HeadRotation);
+
+            bool isGrounded = CurrentPlayerState.IsGrounded;
+            MovementContext.IsGrounded = isGrounded;
+
+            EPlayerState newState = CurrentPlayerState.State;
+
+            if (newState == EPlayerState.Jump)
+            {
+                MovementContext.PlayerAnimatorEnableJump(true);
+                if (isServer)
+                {
+                    MovementContext.method_2(1f);
+                }
+            }
+
+            if (isJumpSet && isGrounded)
+            {
+                MovementContext.PlayerAnimatorEnableJump(false);
+                MovementContext.PlayerAnimatorEnableLanding(true);
+            }
+            if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)
+            {
+                MovementContext.UpdateSprintInertia();
+                MovementContext.PlayerAnimatorEnableInert(false);
+            }
+
+            Physical.SerializationStruct = CurrentPlayerState.Stamina;
+
+            if (!Mathf.Approximately(MovementContext.Step, CurrentPlayerState.Step))
+            {
+                CurrentManagedState.SetStep(CurrentPlayerState.Step);
+            }
+
+            if (MovementContext.IsSprintEnabled != CurrentPlayerState.IsSprinting)
+            {
+                CurrentManagedState.EnableSprint(CurrentPlayerState.IsSprinting);
+            }
+
+            if (MovementContext.IsInPronePose != CurrentPlayerState.IsProne)
+            {
+                MovementContext.IsInPronePose = CurrentPlayerState.IsProne;
+            }
+
+            if (!Mathf.Approximately(PoseLevel, CurrentPlayerState.PoseLevel))
+            {
+                MovementContext.SetPoseLevel(CurrentPlayerState.PoseLevel);
+            }
+
+            MovementContext.SetCurrentClientAnimatorStateIndex(CurrentPlayerState.AnimatorStateIndex);
+            MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.CharacterMovementSpeed, true);
+
+            if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
+            {
+                MovementContext.SetBlindFire(CurrentPlayerState.Blindfire);
+            }
+
+            if (!IsInventoryOpened && isGrounded)
+            {
+                Move(CurrentPlayerState.MovementDirection);
+                if (isServer)
+                {
+                    MovementContext.method_1(CurrentPlayerState.MovementDirection);
+                }
+            }
+
+            Transform.position = CurrentPlayerState.Position;
+
+            if (!Mathf.Approximately(MovementContext.Tilt, CurrentPlayerState.Tilt))
+            {
+                MovementContext.SetTilt(CurrentPlayerState.Tilt, true);
+            }
+
+            if (!ObservedOverlap.ApproxEquals(CurrentPlayerState.WeaponOverlap))
+            {
+                ObservedOverlap = CurrentPlayerState.WeaponOverlap;
+                ShouldOverlap = true;
+            }
+            LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
+        }
+
         public override void InteractionRaycast()
         {
             if (_playerLookRaycastTransform == null || !HealthController.IsAlive)
@@ -1298,7 +1391,7 @@ namespace Fika.Core.Coop.Players
 
         public override void UpdateTick()
         {
-            Snapshotter.ManualUpdate();
+            //Snapshotter.ManualUpdate();
             base.UpdateTick();
         }
 
