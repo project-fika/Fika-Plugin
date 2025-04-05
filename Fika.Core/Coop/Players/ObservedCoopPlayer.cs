@@ -67,7 +67,6 @@ namespace Fika.Core.Coop.Players
         }
         public BetterSource VoipEftSource { get; set; }
         public PlayerStatePacket CurrentPlayerState;
-        public bool ShouldUpdate;
 
         private bool leftStancedDisabled;
         private FikaHealthBar healthBar = null;
@@ -885,11 +884,6 @@ namespace Fika.Core.Coop.Players
 
         public void ManualStateUpdate()
         {
-            if (!ShouldUpdate)
-            {
-                return;
-            }
-
             bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
 
             method_74(CurrentPlayerState.HasGround, CurrentPlayerState.SurfaceSound);
@@ -976,8 +970,6 @@ namespace Fika.Core.Coop.Players
                 ShouldOverlap = true;
             }
             LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
-
-            ShouldUpdate = false;
         }
 
         public override void InteractionRaycast()

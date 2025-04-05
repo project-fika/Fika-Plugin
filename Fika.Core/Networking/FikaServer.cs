@@ -1197,7 +1197,8 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             netServer?.PollEvents();
-            stateHandle = new HandlePlayerStates().Schedule(Snapshots.Count, 8);
+            stateHandle = new UpdateInterpolators().Schedule(ObservedCoopPlayers.Count, 8,
+                new HandlePlayerStates().Schedule(Snapshots.Count, 8));
 
             statisticsCounter++;
             if (statisticsCounter > 600)

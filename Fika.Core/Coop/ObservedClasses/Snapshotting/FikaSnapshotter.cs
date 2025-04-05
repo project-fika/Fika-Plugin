@@ -104,8 +104,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             player.CurrentPlayerState.IsGrounded = to.IsGrounded;
             player.CurrentPlayerState.HasGround = to.HasGround;
             player.CurrentPlayerState.SurfaceSound = to.SurfaceSound;
-
-            player.ShouldUpdate = true;
         }
 
         /// <summary>
