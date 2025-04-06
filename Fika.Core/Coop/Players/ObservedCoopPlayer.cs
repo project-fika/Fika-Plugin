@@ -1562,9 +1562,12 @@ namespace Fika.Core.Coop.Players
                 slotViewHandler.Dispose();
             }
             observedSlotViewHandlers.Clear();
-            if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this))
+            if (HealthController.IsAlive)
             {
-                FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
+                if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this))
+                {
+                    FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
+                } 
             }
             base.OnDestroy();
         }
