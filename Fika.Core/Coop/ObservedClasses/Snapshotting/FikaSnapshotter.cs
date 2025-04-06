@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             {
                 SnapshotInterpolation.Step(buffer, Time.unscaledDeltaTime, ref localTimeline, localTimeScale, out PlayerStatePacket fromSnapshot,
                     out PlayerStatePacket toSnapshot, out double ratio);
-                Interpolate(ref toSnapshot, ref fromSnapshot, ratio);
+                Interpolate(in toSnapshot, in fromSnapshot, ratio);
             }
         }
 
@@ -85,7 +85,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// <param name="to">Goal state</param>
         /// <param name="from">State to lerp from</param>
         /// <param name="ratio">Interpolation ratio</param>
-        public void Interpolate(ref PlayerStatePacket to, ref PlayerStatePacket from, double ratio)
+        public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, double ratio)
         {
             float interpolateRatio = (float)ratio;
 
