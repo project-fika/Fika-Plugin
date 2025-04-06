@@ -418,7 +418,10 @@ namespace Fika.Core.Coop.Components
                 return null;
             }
 
-            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer);
+            if (!isHeadlessProfile)
+            {
+                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer); 
+            }
 
             otherPlayer.NetId = netId;
 #if DEBUG
