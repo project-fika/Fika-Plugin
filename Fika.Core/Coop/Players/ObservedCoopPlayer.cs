@@ -75,6 +75,7 @@ namespace Fika.Core.Coop.Players
         private VoiceBroadcastTrigger voiceBroadcastTrigger;
         private GClass1050 soundSettings;
         private bool voipAssigned;
+        private int frameSkip;
 
         public ObservedHealthController NetworkHealthController
         {
@@ -213,6 +214,17 @@ namespace Fika.Core.Coop.Players
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = new(player);
             player.CurrentPlayerState = default;
+
+            if (GClass2762.int_1 == 0)
+            {
+                GClass2762.int_1 = 1;
+                player.frameSkip = 1;
+            }
+            else
+            {
+                GClass2762.int_1 = 0;
+                player.frameSkip = 0;
+            }
 
             return player;
         }
@@ -1389,12 +1401,6 @@ namespace Fika.Core.Coop.Players
             yield break;
         }
 
-        public override void UpdateTick()
-        {
-            //Snapshotter.ManualUpdate();
-            base.UpdateTick();
-        }
-
         public override void LateUpdate()
         {
             DistanceDirty = true;
@@ -1504,11 +1510,11 @@ namespace Fika.Core.Coop.Players
 
             method_13(deltaTime);
 
-            UpdateTriggerColliderSearcher(deltaTime, true);
-            if (cullingHandler != null)
+            if (Time.frameCount % 2 == frameSkip)
             {
-                cullingHandler.ManualUpdate(deltaTime);
+                UpdateTriggerColliderSearcher(deltaTime, cullingHandler.IsCloseToMyPlayerCamera);
             }
+            cullingHandler.ManualUpdate(deltaTime);
         }
 
         public override void InitAudioController()
@@ -1567,7 +1573,7 @@ namespace Fika.Core.Coop.Players
                 if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this))
                 {
                     FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
-                } 
+                }
             }
             base.OnDestroy();
         }
