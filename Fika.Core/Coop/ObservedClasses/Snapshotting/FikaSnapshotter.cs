@@ -64,9 +64,16 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// <param name="snapshot"></param>
         public void Insert(PlayerStatePacket snapshot)
         {
+            if (buffer.Count > interpolationSettings.bufferLimit || localTimeline > snapshot.RemoteTime)
+            {
+                buffer.Clear();
+            }
+
             snapshot.LocalTime = NetworkTimeSync.Time;
+
             interpolationSettings.bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
                 deliveryTimeEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);
+
             SnapshotInterpolation.InsertAndAdjust(buffer, interpolationSettings.bufferLimit, snapshot, ref localTimeline, ref localTimeScale,
                 sendInterval, BufferTime, interpolationSettings.catchupSpeed, interpolationSettings.slowdownSpeed, ref driftEma,
                 interpolationSettings.catchupNegativeThreshold, interpolationSettings.catchupPositiveThreshold, ref deliveryTimeEma);
