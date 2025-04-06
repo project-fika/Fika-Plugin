@@ -405,7 +405,7 @@ namespace Fika.Core
             }
             catch (Exception ex)
             {
-                MonoBehaviourSingleton<PreloaderUI>.Instance.ShowErrorScreen("IP ERROR", ex.Message);
+                NotificationManagerClass.DisplayWarningNotification("Failed to get external IP address");
                 Logger.LogError($"RunChecks: {ex.Message}");
                 addressTask = null;
             }
