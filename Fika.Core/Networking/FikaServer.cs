@@ -112,7 +112,7 @@ namespace Fika.Core.Networking
         public int NetId { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
-        public List<ISnapshot> Snapshots { get; set; }
+        public List<PlayerStatePacket> Snapshots { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
 
         private int sendRate;

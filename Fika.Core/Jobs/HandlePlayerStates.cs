@@ -10,7 +10,7 @@ namespace Fika.Core.Jobs
         public void Execute(int index)
         {
             IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
-            PlayerStatePacket packet = (PlayerStatePacket)manager.Snapshots[index];
+            PlayerStatePacket packet = manager.Snapshots[index];
             if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
                 player.Snapshotter.Insert(packet);                

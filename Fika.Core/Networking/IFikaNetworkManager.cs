@@ -18,7 +18,7 @@ namespace Fika.Core.Networking
         public EPlayerSide RaidSide { get; set; }
         public int SendRate { get; }
         public bool AllowVOIP { get; set; }
-        public List<ISnapshot> Snapshots { get; set; }
+        public List<PlayerStatePacket> Snapshots { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
         public void SetupGameVariables(CoopPlayer coopPlayer);
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null);

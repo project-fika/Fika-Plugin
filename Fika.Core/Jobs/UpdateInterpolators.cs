@@ -9,7 +9,6 @@ namespace Fika.Core.Jobs
     {
         public void Execute(int index)
         {
-            IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
             Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[index].Snapshotter.ManualUpdate();
         }
     }
