@@ -79,6 +79,12 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 interpolationSettings.catchupNegativeThreshold, interpolationSettings.catchupPositiveThreshold, ref deliveryTimeEma);
         }
 
+        /// <summary>
+        /// Interpolates states in the buffer
+        /// </summary>
+        /// <param name="to">Goal state</param>
+        /// <param name="from">State to lerp from</param>
+        /// <param name="ratio">Interpolation ratio</param>
         public void Interpolate(ref PlayerStatePacket to, ref PlayerStatePacket from, double ratio)
         {
             float interpolateRatio = (float)ratio;

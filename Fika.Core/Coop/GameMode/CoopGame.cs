@@ -1638,6 +1638,7 @@ namespace Fika.Core.Coop.GameMode
                 if (FikaPlugin.DevMode.Value)
                 {
                     Logger.LogWarning("DevMode is enabled, skipping wait...");
+                    NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
                     RaidStarted = true;
                 }
 
@@ -1670,6 +1671,7 @@ namespace Fika.Core.Coop.GameMode
                 if (FikaPlugin.DevMode.Value)
                 {
                     Logger.LogWarning("DevMode is enabled, skipping wait...");
+                    NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
                     FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
                     InformationPacket devModePacket = new()
                     {
