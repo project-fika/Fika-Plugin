@@ -1,14 +1,8 @@
 ﻿using Comfort.Common;
-using EFT.Animations;
-using EFT;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static BaseBallistic;
-using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
@@ -26,7 +20,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 
         public FikaSnapshotter(ObservedCoopPlayer player)
         {
-            buffer = [];
+            buffer = new(32);
             localTimeScale = Time.timeScale;
             this.player = player;
             double smoothingRate = FikaPlugin.SmoothingRate.Value switch
