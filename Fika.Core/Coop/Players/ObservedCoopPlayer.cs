@@ -151,7 +151,7 @@ namespace Fika.Core.Coop.Players
             string prefix, EPointOfView pointOfView, Profile profile, byte[] healthBytes, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity, Func<float> getAimingSensitivity,
-            IViewFilter filter, MongoID firstId, ushort firstOperationId, bool isZombie, bool isAi)
+            IViewFilter filter, MongoID firstId, ushort firstOperationId, bool isZombie)
         {
             bool useSimpleAnimator = isZombie;
 #if DEBUG
@@ -165,7 +165,7 @@ namespace Fika.Core.Coop.Players
                 armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
             player.IsYourPlayer = false;
-            player.IsObservedAI = isAi;
+            player.IsObservedAI = aiControl;
 
             ObservedInventoryController inventoryController = new(player, profile, true, firstId, firstOperationId, aiControl);
             ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
