@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +18,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         private readonly float sendInterval;
         private double bufferTimeMultiplier;
 
-        public Snapshotter()
+        protected Snapshotter()
         {
             buffer = new(32);
             localTimeScale = Time.timeScale;
