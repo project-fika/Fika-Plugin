@@ -141,7 +141,7 @@ namespace Fika.Core.Networking
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
             inventoryOperations = new();
             missingIds = [];
-            Snapshots = new(64);
+            Snapshots = new(128);
             ObservedCoopPlayers = [];
 
             Ping = 0;
