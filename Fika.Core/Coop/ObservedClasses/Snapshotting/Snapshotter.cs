@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         private ExponentialMovingAverage deliveryTimeEma;
         private readonly int sendRate;
         private readonly float sendInterval;
+        private double bufferTimeMultiplier;
 
         public Snapshotter()
         {
@@ -30,6 +32,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             };
             sendRate = Singleton<IFikaNetworkManager>.Instance.SendRate;
             interpolationSettings = new(smoothingRate);
+            bufferTimeMultiplier = interpolationSettings.bufferTimeMultiplier;
             driftEma = new(sendRate * interpolationSettings.driftEmaDuration);
             deliveryTimeEma = new(sendRate * interpolationSettings.deliveryTimeEmaDuration);
             sendInterval = 1f / sendRate;
@@ -39,7 +42,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         {
             get
             {
-                return sendInterval * interpolationSettings.bufferTimeMultiplier;
+                return sendInterval * bufferTimeMultiplier;
             }
         }
 
@@ -70,14 +73,15 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// <param name="snapshot"></param>
         public void Insert(T snapshot)
         {
-            if (buffer.Count > interpolationSettings.bufferLimit || localTimeline > snapshot.RemoteTime)
+            //localTimeline > snapshot.RemoteTime
+            if (buffer.Count > interpolationSettings.bufferLimit)
             {
                 buffer.Clear();
             }
 
-            snapshot.LocalTime = NetworkTimeSync.Time;
+            snapshot.LocalTime = NetworkTimeSync.NetworkTime;
 
-            interpolationSettings.bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
+            bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
                 deliveryTimeEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);
 
             SnapshotInterpolation.InsertAndAdjust(buffer, interpolationSettings.bufferLimit, snapshot, ref localTimeline, ref localTimeScale,

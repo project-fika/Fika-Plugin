@@ -7,8 +7,7 @@ using static BaseBallistic;
 namespace Fika.Core.Networking
 {
     public struct PlayerStatePacket : INetSerializable, ISnapshot
-    {
-        public int NetId;
+    {        
         public Vector3 Position;
         public Vector2 Rotation;
         public Vector3 HeadRotation;
@@ -63,6 +62,7 @@ namespace Fika.Core.Networking
         }*/
 
         // Snapshot
+        public int NetId { get; set; }
         public double RemoteTime { get; set; }
         public double LocalTime { get; set; }
 
@@ -137,7 +137,7 @@ namespace Fika.Core.Networking
             IsGrounded = player.MovementContext.IsGrounded;
             HasGround = player.HasGround;
             SurfaceSound = player.CurrentSurface;
-            RemoteTime = NetworkTimeSync.Time;
+            RemoteTime = NetworkTimeSync.NetworkTime;
         }
     }
 }

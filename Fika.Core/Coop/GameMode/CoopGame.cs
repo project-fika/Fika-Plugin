@@ -662,10 +662,6 @@ namespace Fika.Core.Coop.GameMode
             GameUi.gameObject.SetActive(true);
             GameUi.TimerPanel.ProfileId = ProfileId;
             yield return new WaitForSeconds(timeBeforeDeployLocal);
-            if (!FikaBackendUtils.IsReconnect)
-            {
-                NetworkTimeSync.Start();
-            }
             SyncTransitControllers();
             FikaEventDispatcher.DispatchEvent(new FikaRaidStartedEvent(FikaBackendUtils.IsServer));
 
@@ -2408,7 +2404,6 @@ namespace Fika.Core.Coop.GameMode
                 FikaBackendUtils.ResetTransitData();
             }
 
-            NetworkTimeSync.Reset();
             Logger.LogDebug("Stop");
 
             ToggleDebug(false);

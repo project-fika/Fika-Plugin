@@ -112,7 +112,7 @@ namespace Fika.Core.Networking
         public int NetId { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
-        public List<PlayerStatePacket> Snapshots { get; set; }
+        public List<ISnapshot> Snapshots { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
 
         private int sendRate;
@@ -712,8 +712,7 @@ namespace Fika.Core.Networking
                                 Type = EReconnectDataType.OwnCharacter,
                                 Profile = observedCoopPlayer.Profile,
                                 ProfileHealthClass = observedCoopPlayer.NetworkHealthController.Store(),
-                                PlayerPosition = observedCoopPlayer.Position,
-                                TimeOffset = NetworkTimeSync.Time
+                                PlayerPosition = observedCoopPlayer.Position
                             };
 
                             SendDataToPeer(peer, ref ownCharacterPacket, DeliveryMethod.ReliableOrdered);
@@ -818,7 +817,7 @@ namespace Fika.Core.Networking
                     SendDataToPeer(peer, ref windowPacket, DeliveryMethod.ReliableOrdered);
                 }
 
-                /*foreach (CoopPlayer player in coopHandler.Players.Values)
+                foreach (CoopPlayer player in coopHandler.Players.Values)
                 {
                     if (player.ProfileId == packet.ProfileId)
                     {
@@ -850,7 +849,7 @@ namespace Fika.Core.Networking
                     }
 
                     SendDataToPeer(peer, ref characterPacket, DeliveryMethod.ReliableOrdered);
-                }*/
+                }
 
                 ReconnectPacket finishPacket = new()
                 {
@@ -1185,11 +1184,6 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)
         {
-            /*if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-            {
-                playerToApply.Snapshotter.Insert(packet);
-            }*/
-
             Snapshots.Add(packet);
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }

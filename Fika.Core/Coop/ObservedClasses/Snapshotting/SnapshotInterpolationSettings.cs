@@ -22,11 +22,11 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         public float catchupNegativeThreshold = -1;
 
         [Tooltip("Catchup begins when the local timeline is moving too slow and getting too far away from remote time. Threshold is in frames worth of snapshots.\nThis needs to be positive.\nDon't modify unless you know what you are doing.")]
-        public float catchupPositiveThreshold = 1;
+        public float catchupPositiveThreshold = 2;
 
         [Tooltip("Local timeline acceleration in % while catching up.")]
         [Range(0, 1)]
-        public double catchupSpeed = 0.02f;
+        public double catchupSpeed = 0.05f;
 
         [Tooltip("Local timeline slowdown in % while slowing down.")]
         [Range(0, 1)]

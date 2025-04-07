@@ -105,7 +105,7 @@ namespace Fika.Core.Networking
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
-        public List<PlayerStatePacket> Snapshots { get; set; }
+        public List<ISnapshot> Snapshots { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
 
         private NetPacketProcessor packetProcessor;
@@ -755,7 +755,6 @@ namespace Fika.Core.Networking
                         coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
                         coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
                         FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
-                        NetworkTimeSync.Start(packet.TimeOffset);
                         break;
                     case ReconnectPacket.EReconnectDataType.Finished:
                         coopGame.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
@@ -1005,10 +1004,6 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
         {
-            /*if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-            {
-                playerToApply.Snapshotter.Insert(packet);
-            }*/
             Snapshots.Add(packet);
         }
 
