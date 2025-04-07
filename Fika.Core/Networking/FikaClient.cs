@@ -105,7 +105,7 @@ namespace Fika.Core.Networking
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
-        public List<ISnapshot> Snapshots { get; set; }
+        public List<PlayerStatePacket> Snapshots { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
 
         private NetPacketProcessor packetProcessor;
