@@ -22,7 +22,6 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
-using LiteNetLib.Utils;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
@@ -401,7 +400,7 @@ namespace Fika.Core
             Task<IPAddress> addressTask;
             try
             {
-                addressTask = FikaRequestHandler.GetPublicIP();                                
+                addressTask = FikaRequestHandler.GetPublicIP();
             }
             catch (Exception ex)
             {

@@ -140,7 +140,7 @@ namespace Fika.Core.Coop.ClientClasses
                 base.vmethod_1(operation, callback);
                 return;
             }
-            
+
             EFTWriterClass eftWriter = new();
             ClientInventoryOperationHandler handler = new()
             {

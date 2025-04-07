@@ -1,8 +1,6 @@
 ﻿using Comfort.Common;
-using EFT;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -85,7 +83,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             SnapshotInterpolation.InsertAndAdjust(buffer, interpolationSettings.bufferLimit, snapshot, ref localTimeline, ref localTimeScale,
                 sendInterval, BufferTime, interpolationSettings.catchupSpeed, interpolationSettings.slowdownSpeed, ref driftEma,
                 interpolationSettings.catchupNegativeThreshold, interpolationSettings.catchupPositiveThreshold, ref deliveryTimeEma);
-        }        
+        }
 
         /// <summary>
         /// Clears the <see cref="buffer"/>
@@ -94,5 +92,5 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         {
             buffer.Clear();
         }
-    }    
+    }
 }

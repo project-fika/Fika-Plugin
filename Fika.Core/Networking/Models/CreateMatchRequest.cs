@@ -1,7 +1,5 @@
 using EFT;
 using JsonType;
-using System;
-using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Http

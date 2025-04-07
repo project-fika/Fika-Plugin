@@ -23,7 +23,7 @@ namespace Fika.Core.Networking
             public SpawnPointRequest(string name, Vector3 position, Quaternion rotation)
             {
                 Infiltration = name;
-                Position = position;        
+                Position = position;
                 Rotation = rotation;
             }
 

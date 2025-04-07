@@ -420,7 +420,7 @@ namespace Fika.Core.Coop.Components
 
             if (!isHeadlessProfile)
             {
-                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer); 
+                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer);
             }
 
             otherPlayer.NetId = netId;

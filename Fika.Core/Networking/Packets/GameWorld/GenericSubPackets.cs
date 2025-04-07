@@ -160,7 +160,7 @@ namespace Fika.Core.Networking
                     {
                         if (exfiltrationPoint.Settings.Name == ExfilName)
                         {
-                            
+
                             exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
 
                             if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
@@ -185,7 +185,7 @@ namespace Fika.Core.Networking
                                 }
                                 return;
                             }
-                        } 
+                        }
                     }
 
                     FikaPlugin.Instance.FikaLogger.LogError("ExfilCountdown: Could not find ExfiltrationPoint: " + ExfilName);

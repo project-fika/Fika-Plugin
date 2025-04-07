@@ -10,7 +10,6 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -159,7 +158,7 @@ namespace Fika.Core.Coop.Utils
                 errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_EFT_MISMATCH.Localized(), FikaPlugin.EFTVersionMajor, result.GameVersion);
                 return false;
             }
-           
+
             if (result.Crc32 != FikaPlugin.Crc32)
             {
                 errorMessage = string.Format(LocaleUtils.UI_ERROR_HOST_FIKA_MISMATCH.Localized(), FikaPlugin.Crc32, result.Crc32);

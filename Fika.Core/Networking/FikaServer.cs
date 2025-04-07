@@ -414,7 +414,7 @@ namespace Fika.Core.Networking
         private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet, NetPeer peer)
         {
 #if DEBUG
-            logger.LogInfo($"Received connection from {packet.ProfileId}"); 
+            logger.LogInfo($"Received connection from {packet.ProfileId}");
 #endif
             if (!cachedConnections.TryGetValue(packet.ProfileId, out int netId))
             {
