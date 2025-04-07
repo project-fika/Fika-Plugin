@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fika.Core.Coop.Utils;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -41,7 +42,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             double multiples = intervalWithJitter / sendInterval;
 
             double safezone = multiples + dynamicAdjustmentTolerance;
-            return safezone;
+
+            return Mathd.Clamp(safezone, 0, 5);
         }
 
         public static bool InsertIfNotExists<T>(SortedList<double, T> buffer, int bufferLimit, T snapshot)
