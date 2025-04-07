@@ -8,12 +8,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
     {
         private readonly ObservedCoopPlayer player = observedPlayer;
 
-        /// <summary>
-        /// Interpolates states in the buffer
-        /// </summary>
-        /// <param name="to">Goal state</param>
-        /// <param name="from">State to lerp from</param>
-        /// <param name="ratio">Interpolation ratio</param>
         public override void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, float ratio)
         {
             player.CurrentPlayerState.Rotation = new Vector2(Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, ratio),

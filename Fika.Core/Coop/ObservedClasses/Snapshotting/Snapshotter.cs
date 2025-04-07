@@ -58,6 +58,12 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             }
         }
 
+        /// <summary>
+        /// Interpolates states in the <see cref="buffer"/>
+        /// </summary>
+        /// <param name="to">Goal state</param>
+        /// <param name="from">State to lerp from</param>
+        /// <param name="ratio">Interpolation ratio</param>
         public abstract void Interpolate(in T to, in T from, float ratio);
 
         /// <summary>
