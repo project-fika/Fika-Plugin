@@ -202,7 +202,6 @@ namespace Fika.Core
         public static ConfigEntry<bool> UseNatPunching { get; set; }
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
         public static ConfigEntry<ESendRate> SendRate { get; set; }
-        public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
         public static ConfigEntry<bool> AllowVOIP { get; set; }
 
         // Gameplay
@@ -1297,15 +1296,6 @@ namespace Fika.Core
                 }),
                 "Send Rate", ref failed, headers);
 
-            SmoothingRate = SetupSetting(networkDefaultHeader, "Smoothing Rate", ESmoothingRate.Medium,
-                new ConfigDescription(LocaleUtils.BEPINEX_SMOOTHING_RATE_D.Localized(), tags: new ConfigurationManagerAttributes()
-                {
-                    Category = networkHeader,
-                    DispName = LocaleUtils.BEPINEX_SMOOTHING_RATE_T.Localized(),
-                    Order = 0
-                }),
-                "Smoothing Rate", ref failed, headers);
-
             AllowVOIP = SetupSetting(networkDefaultHeader, "Allow VOIP", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_NET_VOIP_D.Localized(), tags: new ConfigurationManagerAttributes()
                 {
@@ -1443,13 +1433,6 @@ namespace Fika.Core
             InspectWindow,
             InspectWindowClose,
             MenuEscape,
-        }
-
-        public enum ESmoothingRate
-        {
-            Low,
-            Medium,
-            High
         }
 
         public enum ESendRate

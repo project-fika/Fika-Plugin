@@ -22,15 +22,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         {
             buffer = new(32);
             localTimeScale = Time.timeScale;
-            double smoothingRate = FikaPlugin.SmoothingRate.Value switch
-            {
-                FikaPlugin.ESmoothingRate.Low => 1.5,
-                FikaPlugin.ESmoothingRate.Medium => 2,
-                FikaPlugin.ESmoothingRate.High => 2.5,
-                _ => 2,
-            };
             sendRate = Singleton<IFikaNetworkManager>.Instance.SendRate;
-            interpolationSettings = new(smoothingRate);
+            interpolationSettings = new();
             bufferTimeMultiplier = interpolationSettings.bufferTimeMultiplier;
             driftEma = new(sendRate * interpolationSettings.driftEmaDuration);
             deliveryTimeEma = new(sendRate * interpolationSettings.deliveryTimeEmaDuration);
