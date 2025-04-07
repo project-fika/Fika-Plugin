@@ -213,7 +213,11 @@ namespace Fika.Core.Coop.Players
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = new(player);
-            player.CurrentPlayerState = default;
+            player.CurrentPlayerState = new()
+            {
+                Position = position,
+                Rotation = player.Rotation
+            };
 
             if (GClass2762.int_1 == 0)
             {
