@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.Players
         public int NetId;
         public bool IsObservedAI;
         public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
-        public FikaSnapshotter Snapshotter;
+        public ObservedSnapshotter Snapshotter;
         public bool WaitingForCallback
         {
             get
