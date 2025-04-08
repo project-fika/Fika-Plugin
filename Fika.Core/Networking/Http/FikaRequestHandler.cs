@@ -30,12 +30,11 @@ namespace Fika.Core.Networking.Http
         public static async Task<IPAddress> GetPublicIP()
         {
             HttpClient client = Traverse.Create(_httpClient).Field<HttpClient>("_httpv").Value;
-            string[] urls = new[]
-            {
-                "https://api.ipify.org/",
+            string[] urls = [
+                "https://api.ip.sb/ip",
                 "https://checkip.amazonaws.com/",
                 "https://ipv4.icanhazip.com/"
-            };
+            ];
 
             foreach (string url in urls)
             {
