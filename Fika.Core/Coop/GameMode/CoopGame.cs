@@ -1256,9 +1256,7 @@ namespace Fika.Core.Coop.GameMode
                 throw;
             }
 
-            await WaitForHostToStart();
-
-            coopHandler.ShouldSync = true;
+            await WaitForHostToStart();            
 
             LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
             if (isServer)
@@ -1284,6 +1282,8 @@ namespace Fika.Core.Coop.GameMode
                 location.Loot = LootItems;
                 await method_11(location);
             }
+
+            coopHandler.ShouldSync = true;
 
             if (FikaBackendUtils.IsReconnect)
             {
