@@ -29,9 +29,9 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             get
             {
-                return (player.CharacterController.velocity.x != 0
-                    || player.CharacterController.velocity.z != 0)
-                    && !player.MovementContext.IsInMountedState;
+                return player.CurrentManagedState.Name is not (EPlayerState.Idle
+                    or EPlayerState.IdleWeaponMounting
+                    or EPlayerState.ProneIdle);
             }
         }
 

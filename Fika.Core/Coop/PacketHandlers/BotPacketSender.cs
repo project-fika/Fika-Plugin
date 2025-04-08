@@ -24,13 +24,9 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             get
             {
-                BotMover mover = player.AIData.BotOwner.Mover;
-                if (mover == null)
-                {
-                    return false;
-                }
-
-                return mover.IsMoving && !mover.Pause && player.MovementContext.CanWalk;
+                return player.CurrentManagedState.Name is not (EPlayerState.Idle
+                    or EPlayerState.IdleWeaponMounting
+                    or EPlayerState.ProneIdle);
             }
         }
 
