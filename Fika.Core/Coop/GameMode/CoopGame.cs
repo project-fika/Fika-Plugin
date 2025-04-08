@@ -646,9 +646,7 @@ namespace Fika.Core.Coop.GameMode
 
                 server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
                 HostLootItems = null;
-            }
-
-            localPlayer.PacketSender.Init();
+            }            
 
             DateTime dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
             new MatchmakerFinalCountdown.FinalCountdownScreenClass(Profile_0, dateTime).ShowScreen(EScreenState.Root);
@@ -675,6 +673,8 @@ namespace Fika.Core.Coop.GameMode
             {
                 NetManagerUtils.FikaGameObject.AddComponent<GCManager>();
             }
+
+            localPlayer.PacketSender.Init();
         }
 
         private IEnumerator CreateStashes()
