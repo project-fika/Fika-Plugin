@@ -1010,8 +1010,8 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             netClient?.PollEvents();
-            stateHandle = new UpdateInterpolators().Schedule(ObservedCoopPlayers.Count, 8,
-                new HandlePlayerStates().Schedule(Snapshots.Count, 8));
+            stateHandle = new UpdateInterpolators().Schedule(ObservedCoopPlayers.Count, 16,
+                new HandlePlayerStates().Schedule(Snapshots.Count, 16));
 
             int inventoryOps = inventoryOperations.Count;
             if (inventoryOps > 0)
