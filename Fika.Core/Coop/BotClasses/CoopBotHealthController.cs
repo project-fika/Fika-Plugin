@@ -28,7 +28,8 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            if (packet.SyncType is NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart or NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage or NetworkHealthSyncPacketStruct.ESyncType.BodyHealth)
+            if (packet.SyncType is NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart or NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage or NetworkHealthSyncPacketStruct.ESyncType.BodyHealth
+                or NetworkHealthSyncPacketStruct.ESyncType.AddEffect or NetworkHealthSyncPacketStruct.ESyncType.RemoveEffect or NetworkHealthSyncPacketStruct.ESyncType.EffectMedResource)
             {
                 HealthSyncPacket netPacket = new()
                 {
