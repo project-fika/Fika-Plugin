@@ -400,7 +400,7 @@ namespace Fika.Core.Networking
             {
                 if (Data.ObjectType == SynchronizableObjectType.Tripwire)
                 {
-                    CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
+                    GameWorld gameWorld = Singleton<GameWorld>.Instance;
                     TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(Data.ObjectId);
                     if (tripwire != null)
                     {
