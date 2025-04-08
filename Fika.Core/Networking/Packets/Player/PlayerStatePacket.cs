@@ -126,7 +126,7 @@ namespace Fika.Core.Networking
             Tilt = player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt;
             Step = player.MovementContext.Step;
             AnimatorStateIndex = player.CurrentAnimatorStateIndex;
-            CharacterMovementSpeed = player.MovementContext.ClampSpeed(player.MovementContext.SmoothedCharacterMovementSpeed);
+            CharacterMovementSpeed = player.MovementContext.SmoothedCharacterMovementSpeed;
             IsProne = player.IsInPronePose;
             PoseLevel = player.PoseLevel;
             IsSprinting = player.MovementContext.IsSprintEnabled;
