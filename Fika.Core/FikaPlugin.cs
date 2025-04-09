@@ -76,7 +76,7 @@ namespace Fika.Core
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
-        private static readonly Version RequiredServerVersion = new("2.4.3");
+        private static readonly Version RequiredServerVersion = new("2.4.5");
 
         public static HeadlessRequesterWebSocket HeadlessRequesterWebSocket { get; set; }
 
@@ -1435,14 +1435,15 @@ namespace Fika.Core
             MenuEscape,
         }
 
+        /// <summary>
+        /// The SendRate of the <see cref="Networking.IFikaNetworkManager"/>
+        /// </summary>
         public enum ESendRate
         {
-            [Description("Very Low")]
-            VeryLow,
             Low,
             Medium,
             High
-        }
+        }        
 
         [Flags]
         public enum EQuestSharingTypes

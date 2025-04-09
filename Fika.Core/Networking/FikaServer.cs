@@ -182,14 +182,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            sendRate = FikaPlugin.SendRate.Value switch
-            {
-                FikaPlugin.ESendRate.VeryLow => 10,
-                FikaPlugin.ESendRate.Low => 15,
-                FikaPlugin.ESendRate.Medium => 20,
-                FikaPlugin.ESendRate.High => 30,
-                _ => 20,
-            };
+            sendRate = FikaPlugin.SendRate.Value.ToNumber();
             logger.LogInfo($"Starting server with SendRate: {sendRate}");
             port = FikaPlugin.UDPPort.Value;
 
