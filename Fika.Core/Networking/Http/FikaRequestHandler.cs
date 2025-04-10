@@ -21,7 +21,13 @@ namespace Fika.Core.Networking.Http
     public static class FikaRequestHandler
     {
         private static readonly Client _httpClient;
-
+        private static string[] checkerUrls =
+        {
+            "https://api.ipify.org/",
+            "https://checkip.amazonaws.com/",
+            "https://ipv4.icanhazip.com/"
+        };
+        
         static FikaRequestHandler()
         {
             _httpClient = RequestHandler.HttpClient;
@@ -30,32 +36,34 @@ namespace Fika.Core.Networking.Http
         public static async Task<IPAddress> GetPublicIP()
         {
             HttpClient client = Traverse.Create(_httpClient).Field<HttpClient>("_httpv").Value;
-            string ipString = await client.GetStringAsync("https://api.ipify.org/");
-            ipString = ipString.Replace("\n", "");
-            if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
+            HttpClient client = new HttpClient();
+            IPAddress ipAddress = new IPAddress([0,0,0,0]);
+            foreach (string checkerUrl in checkerUrls)
             {
-                if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+                string ipString = await client.GetStringAsync(checkerUrl);
+                // some services return IP + newline, some don't
+                ipString = ipString.Replace("\n", "");
+                try
                 {
-                    return ipAddress;
+                    // does the result look like an IP address?
+                    ipAddress = IPAddress.Parse(ipString);
+                    // is the IP address IPv4?
+                    if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+                    {
+                        return ipAddress;
+                    }
+                } catch (ArgumentNullException)
+                {
+                    // ipString null
+                } catch (FormatException)
+                {
+                    // ipString not a valid IP
                 }
-                throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
             }
-            ipString = await client.GetStringAsync("https://checkip.amazonaws.com/");
-            if (IPAddress.TryParse(ipString, out ipAddress))
+            
+            // if we're out of the loop, either we couldn't parse an IP, or we only got IPv6 back
+            if (ipAddress.AddressFamily is AddressFamily.InterNetworkV6)
             {
-                if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
-                {
-                    return ipAddress;
-                }
-                throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
-            }
-            ipString = await client.GetStringAsync("https://ipv4.icanhazip.com/");
-            if (IPAddress.TryParse(ipString, out ipAddress))
-            {
-                if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
-                {
-                    return ipAddress;
-                }
                 throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
             }
             throw new Exception("Could not retrieve or parse the external address!");
