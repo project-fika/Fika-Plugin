@@ -1,5 +1,6 @@
 using EFT;
 using Fika.Core.Coop.Custom;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Models;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Models.Presence;
@@ -53,9 +54,7 @@ namespace Fika.Core.Networking.Http
                 }
                 catch (Exception ex)
                 {
-#if DEBUG
-                    FikaPlugin.Instance.FikaLogger.LogWarning($"Could not get public IP address by [{url}], Error message: {ex.Message}");
-#endif
+                    FikaGlobals.LogWarning($"Could not get public IP address by [{url}], Error message: {ex.Message}");
                     continue;
                 }
             }
