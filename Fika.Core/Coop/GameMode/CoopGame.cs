@@ -248,6 +248,8 @@ namespace Fika.Core.Coop.GameMode
 
             if (coopGame.isServer)
             {
+                coopGame.botStateManager = BotStateManager.Create(coopGame, Singleton<FikaServer>.Instance);
+
                 // Non Waves Scenario setup
                 coopGame.nonWavesSpawnScenario_0 = NonWavesSpawnScenario.smethod_0(coopGame, location, coopGame.botsController_0);
                 coopGame.nonWavesSpawnScenario_0.ImplementWaveSettings(wavesSettings);
@@ -262,9 +264,8 @@ namespace Fika.Core.Coop.GameMode
                 {
                     bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
                 }
-                coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, coopGame.botsController_0.ActivateBotsByWave);
 
-                coopGame.botStateManager = BotStateManager.Create(coopGame, Singleton<FikaServer>.Instance);
+                coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, coopGame.botsController_0.ActivateBotsByWave);
             }
 
             if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
@@ -477,11 +478,7 @@ namespace Fika.Core.Coop.GameMode
                 coopBot.HealthController.DisableMetabolism();
             }
             coopHandler.Players.Add(coopBot.NetId, coopBot);
-
-            if (coopBot.PacketSender is BotPacketSender botSender)
-            {
-                botSender.AssignManager(botStateManager);
-            }
+            botStateManager.AddBot(coopBot);
 
             return coopBot;
         }

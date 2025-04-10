@@ -1,7 +1,6 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using Comfort.Common;
-using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using LiteNetLib;
@@ -17,7 +16,6 @@ namespace Fika.Core.Coop.PacketHandlers
         public FikaClient Client { get; set; }
 
         private CoopPlayer player;
-        private BotStateManager manager;
         private bool sendPackets;
         private PlayerStatePacket state;
         private bool IsMoving
@@ -55,12 +53,6 @@ namespace Fika.Core.Coop.PacketHandlers
             sendPackets = false;
         }
 
-        public void AssignManager(BotStateManager stateManager)
-        {
-            manager = stateManager;
-            manager.OnUpdate += SendPlayerState;
-        }
-
         public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
         {
             if (Server != null)
@@ -69,16 +61,10 @@ namespace Fika.Core.Coop.PacketHandlers
             }
         }
 
-        private void SendPlayerState()
+        public void SendPlayerState()
         {
             if (!sendPackets)
             {
-                return;
-            }
-
-            if (!player.HealthController.IsAlive)
-            {
-                manager.OnUpdate -= SendPlayerState;
                 return;
             }
 
@@ -88,7 +74,6 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void DestroyThis()
         {
-            manager.OnUpdate -= SendPlayerState;
             if (Server != null)
             {
                 Server = null;
