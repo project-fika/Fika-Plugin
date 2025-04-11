@@ -23,39 +23,29 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override async Task<IResult> AcceptQuest(QuestClass quest, bool runNetworkTransaction)
         {
-            IResult result;
+            IResult result = SuccessfulResult.New;
             if (runNetworkTransaction)
             {
                 result = await iQuestActions.QuestAccept(quest.Id, quest is GClass3691);
             }
-            else
-            {
-                result = SuccessfulResult.New;
-            }
-            IResult result2 = result;
-            if (result2.Succeed)
+            if (result.Succeed)
             {
                 SetConditionalStatus(quest, EQuestStatus.Started);
             }
-            return result2;
+            return result;
         }
 
         public override async Task<GStruct455<GStruct397<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
-            IResult result;
+            IResult result = SuccessfulResult.New;
             if (runNetworkTransaction)
             {
                 result = await iQuestActions.QuestComplete(quest.Id, true, quest is GClass3691);
             }
-            else
-            {
-                result = SuccessfulResult.New;
-            }
-            IResult result2 = result;
             GStruct455<GStruct397<QuestClass>> gstruct;
-            if (result2.Failed)
+            if (result.Failed)
             {
-                gstruct = new GClass3854(result2.Error);
+                gstruct = new GClass3854(result.Error);
             }
             else
             {
@@ -88,17 +78,12 @@ namespace Fika.Core.Coop.ObservedClasses
         public override async Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
         {
             GClass1362[] array = ConditionHandoverItem.ConvertToHandoverItems(items);
-            IResult result;
+            IResult result = SuccessfulResult.New;
             if (runNetworkTransaction)
             {
                 result = await iQuestActions.QuestHandover(quest.Id, condition.id, array);
             }
-            else
-            {
-                result = SuccessfulResult.New;
-            }
-            IResult result2 = result;
-            if (result2.Succeed)
+            if (result.Succeed)
             {
                 TaskConditionCounterClass taskConditionCounter = Profile.GetTaskConditionCounter(quest, condition.id);
                 taskConditionCounter.Value += array.Sum(Class3436.class3436_0.method_0);
@@ -107,9 +92,9 @@ namespace Fika.Core.Coop.ObservedClasses
             }
             else
             {
-                FikaGlobals.LogError($"Failed to handover item, quest: {quest.Id}, condition: {condition.id}, error: {result2.Error}");
+                FikaGlobals.LogError($"Failed to handover item, quest: {quest.Id}, condition: {condition.id}, error: {result.Error}");
             }
-            return result2;
+            return result;
         }
 
         public override void SetConditionalStatus(QuestClass quest, EQuestStatus status)
