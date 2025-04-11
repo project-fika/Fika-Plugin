@@ -48,7 +48,6 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void Dispose()
         {
-            CompositeDisposableClass compositeDisposableClass = Traverse.Create(this).Field<CompositeDisposableClass>("compositeDisposableClass").Value;
             compositeDisposableClass?.Dispose();
         }
     }
