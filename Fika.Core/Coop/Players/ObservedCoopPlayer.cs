@@ -14,6 +14,7 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -66,7 +67,7 @@ namespace Fika.Core.Coop.Players
             }
         }
         public BetterSource VoipEftSource { get; set; }
-        public PlayerStatePacket CurrentPlayerState;
+        internal ObservedState CurrentPlayerState;
 
         private bool leftStancedDisabled;
         private FikaHealthBar healthBar = null;
@@ -213,11 +214,7 @@ namespace Fika.Core.Coop.Players
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = new(player);
-            player.CurrentPlayerState = new()
-            {
-                Position = position,
-                Rotation = player.Rotation
-            };
+            player.CurrentPlayerState = new(position, player.Rotation);
 
             if (GClass2762.int_1 == 0)
             {
