@@ -14,7 +14,7 @@ namespace Fika.Core.Jobs
             PlayerStatePacket packet = manager.Snapshots[index];
             if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
             {
-                player.Snapshotter.Insert((PlayerStatePacket)packet);
+                player.Snapshotter.Insert(packet);
             }
         }
     }
