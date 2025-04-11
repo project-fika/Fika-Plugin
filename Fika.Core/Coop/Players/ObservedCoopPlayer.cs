@@ -936,7 +936,7 @@ namespace Fika.Core.Coop.Players
 
             Physical.SerializationStruct = CurrentPlayerState.Stamina;
 
-            if (!Mathf.Approximately(MovementContext.Step, CurrentPlayerState.Step))
+            if (MovementContext.Step != CurrentPlayerState.Step)
             {
                 CurrentManagedState.SetStep(CurrentPlayerState.Step);
             }
