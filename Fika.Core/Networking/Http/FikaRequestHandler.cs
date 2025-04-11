@@ -32,7 +32,7 @@ namespace Fika.Core.Networking.Http
         {
             HttpClient client = Traverse.Create(_httpClient).Field<HttpClient>("_httpv").Value;
             string[] urls = [
-                "https://api.ip.sb/ip",
+                "https://api.ipify.org/",
                 "https://checkip.amazonaws.com/",
                 "https://ipv4.icanhazip.com/"
             ];
