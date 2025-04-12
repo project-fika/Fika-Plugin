@@ -1571,7 +1571,7 @@ namespace Fika.Core.Coop.Players
             observedSlotViewHandlers.Clear();
             if (HealthController.IsAlive)
             {
-                if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this))
+                if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this) && Profile.Nickname.StartsWith("headless_"))
                 {
                     FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
                 }
