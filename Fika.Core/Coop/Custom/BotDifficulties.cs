@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.Custom
         public BotSettingsComponents GetComponent(BotDifficulty botDifficulty, WildSpawnType role)
         {
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}"); 
+            FikaPlugin.Instance.FikaLogger.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}");
 #endif
             if (TryGetValue(role.ToString().ToLower(), out RoleData value))
             {

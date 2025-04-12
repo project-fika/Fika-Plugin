@@ -15,7 +15,6 @@ namespace Fika.Core.EssentialPatches
     {
         private static string versionLabel;
         private static Traverse versionNumberTraverse;
-        private static string fikaVersion;
         private static string officialVersion;
 
         protected override MethodBase GetTargetMethod()
@@ -35,8 +34,6 @@ namespace Fika.Core.EssentialPatches
                 versionLabel = Json.Deserialize<VersionResponse>(json).Version;
                 Logger.LogInfo($"Server version: {versionLabel}");
             }
-
-            fikaVersion = Assembly.GetAssembly(typeof(FikaVersionLabel_Patch)).GetName().Version.ToString();
 
             Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
 
@@ -60,11 +57,11 @@ namespace Fika.Core.EssentialPatches
             else
             {
 #if DEBUG
-                preloaderUiTraverse.Field("string_2").SetValue($"FIKA {fikaVersion} (DEBUG) | {versionLabel}");
+                preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} (DEBUG) | {versionLabel}");
 #else
-				preloaderUiTraverse.Field("string_2").SetValue($"FIKA {fikaVersion} | {versionLabel}");
+				preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} | {versionLabel}");
 #endif
-                versionNumberTraverse.Field("Major").SetValue($"{fikaVersion} {versionLabel}");
+                versionNumberTraverse.Field("Major").SetValue($"{FikaPlugin.FikaVersion} {versionLabel}");
             }
 
             // Game mode

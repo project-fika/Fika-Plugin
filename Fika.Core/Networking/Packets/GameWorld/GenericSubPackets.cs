@@ -160,7 +160,7 @@ namespace Fika.Core.Networking
                     {
                         if (exfiltrationPoint.Settings.Name == ExfilName)
                         {
-                            
+
                             exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
 
                             if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
@@ -185,7 +185,7 @@ namespace Fika.Core.Networking
                                 }
                                 return;
                             }
-                        } 
+                        }
                     }
 
                     FikaPlugin.Instance.FikaLogger.LogError("ExfilCountdown: Could not find ExfiltrationPoint: " + ExfilName);
@@ -400,7 +400,7 @@ namespace Fika.Core.Networking
             {
                 if (Data.ObjectType == SynchronizableObjectType.Tripwire)
                 {
-                    CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
+                    GameWorld gameWorld = Singleton<GameWorld>.Instance;
                     TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(Data.ObjectId);
                     if (tripwire != null)
                     {

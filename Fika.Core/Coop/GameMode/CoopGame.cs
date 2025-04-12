@@ -248,6 +248,8 @@ namespace Fika.Core.Coop.GameMode
 
             if (coopGame.isServer)
             {
+                coopGame.botStateManager = BotStateManager.Create(coopGame, Singleton<FikaServer>.Instance);
+
                 // Non Waves Scenario setup
                 coopGame.nonWavesSpawnScenario_0 = NonWavesSpawnScenario.smethod_0(coopGame, location, coopGame.botsController_0);
                 coopGame.nonWavesSpawnScenario_0.ImplementWaveSettings(wavesSettings);
@@ -257,14 +259,9 @@ namespace Fika.Core.Coop.GameMode
                 coopGame.wavesSpawnScenario_0 = WavesSpawnScenario.smethod_0(coopGame.gameObject, waves, coopGame.botsController_0.ActivateBotsByWave, location);
 
                 // Boss Scenario setup
-                BossLocationSpawn[] bossSpawns = [];
-                if (wavesSettings.IsBosses)
-                {
-                    bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
-                }
-                coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, coopGame.botsController_0.ActivateBotsByWave);
+                BossLocationSpawn[] bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
 
-                coopGame.botStateManager = BotStateManager.Create(coopGame, Singleton<FikaServer>.Instance);
+                coopGame.bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, coopGame.botsController_0.ActivateBotsByWave);
             }
 
             if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.isServer)
@@ -477,11 +474,7 @@ namespace Fika.Core.Coop.GameMode
                 coopBot.HealthController.DisableMetabolism();
             }
             coopHandler.Players.Add(coopBot.NetId, coopBot);
-
-            if (coopBot.PacketSender is BotPacketSender botSender)
-            {
-                botSender.AssignManager(botStateManager);
-            }
+            botStateManager.AddBot(coopBot);
 
             return coopBot;
         }
@@ -646,9 +639,7 @@ namespace Fika.Core.Coop.GameMode
 
                 server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
                 HostLootItems = null;
-            }
-
-            localPlayer.PacketSender.Init();
+            }            
 
             DateTime dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
             new MatchmakerFinalCountdown.FinalCountdownScreenClass(Profile_0, dateTime).ShowScreen(EScreenState.Root);
@@ -662,10 +653,6 @@ namespace Fika.Core.Coop.GameMode
             GameUi.gameObject.SetActive(true);
             GameUi.TimerPanel.ProfileId = ProfileId;
             yield return new WaitForSeconds(timeBeforeDeployLocal);
-            if (!FikaBackendUtils.IsReconnect)
-            {
-                NetworkTimeSync.Start();
-            }
             SyncTransitControllers();
             FikaEventDispatcher.DispatchEvent(new FikaRaidStartedEvent(FikaBackendUtils.IsServer));
 
@@ -673,15 +660,17 @@ namespace Fika.Core.Coop.GameMode
             {
                 StartCoroutine(FixVOIPAudioDevice());
             }
-            StartCoroutine(CreateStashes());
+            _ = Task.Run(CreateStashes);
 
             if (FikaPlugin.UseFikaGC.Value)
             {
                 NetManagerUtils.FikaGameObject.AddComponent<GCManager>();
             }
+
+            localPlayer.PacketSender.Init();
         }
 
-        private IEnumerator CreateStashes()
+        private async Task CreateStashes()
         {
             GameWorld gameWorld = GameWorld_0;
 
@@ -689,12 +678,12 @@ namespace Fika.Core.Coop.GameMode
             {
                 while (gameWorld.TransitController.TransferItemsController == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
 
                 while (gameWorld.TransitController.TransferItemsController.Stash == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
             }
 
@@ -702,12 +691,12 @@ namespace Fika.Core.Coop.GameMode
             {
                 while (gameWorld.BtrController.TransferItemsController == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
 
                 while (gameWorld.BtrController.TransferItemsController.Stash == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
             }
 
@@ -739,7 +728,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogError("Could not find CoopHandler when trying to initialize player stashes for TransferItemsController!");
             }
 
-            yield break;
+            
         }
 
         private void SyncTransitControllers()
@@ -1260,9 +1249,7 @@ namespace Fika.Core.Coop.GameMode
                 throw;
             }
 
-            await WaitForHostToStart();
-
-            coopHandler.ShouldSync = true;
+            await WaitForHostToStart();            
 
             LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
             if (isServer)
@@ -1288,6 +1275,8 @@ namespace Fika.Core.Coop.GameMode
                 location.Loot = LootItems;
                 await method_11(location);
             }
+
+            coopHandler.ShouldSync = true;
 
             if (FikaBackendUtils.IsReconnect)
             {
@@ -1520,6 +1509,10 @@ namespace Fika.Core.Coop.GameMode
                 {
                     GenerateNewDogTagId();
                 }
+                else if (FikaBackendUtils.IsHeadless)
+                {
+                    Profile_0.Info.Nickname = Profile_0.Info.Nickname.Insert(0, "headless_");
+                }
 
                 myPlayer = await vmethod_3(GameWorld_0, num, spawnPos, spawnRot, "Player", "", EPointOfView.FirstPerson,
                         Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
@@ -1550,7 +1543,7 @@ namespace Fika.Core.Coop.GameMode
             SpawnSettingsStruct settings = new(Location_0.MinDistToFreePoint, Location_0.MaxDistToFreePoint, Location_0.MaxBotPerZone, spawnSafeDistance);
             SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, botsController_0, spawnPoints);
             spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, Profile_0.Info.Side, null, null, null, null, Profile_0.Id);
-            InfiltrationPoint = spawnPoint.Infiltration;
+            InfiltrationPoint = string.IsNullOrEmpty(HostSpawnPoint.Infiltration) ? "MissingInfiltration" : spawnPoint.Infiltration;
             if (!isServer)
             {
                 ClientSpawnPosition = spawnPoint.Position;
@@ -1634,6 +1627,7 @@ namespace Fika.Core.Coop.GameMode
                 if (FikaPlugin.DevMode.Value)
                 {
                     Logger.LogWarning("DevMode is enabled, skipping wait...");
+                    NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
                     RaidStarted = true;
                 }
 
@@ -1666,6 +1660,7 @@ namespace Fika.Core.Coop.GameMode
                 if (FikaPlugin.DevMode.Value)
                 {
                     Logger.LogWarning("DevMode is enabled, skipping wait...");
+                    NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
                     FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
                     InformationPacket devModePacket = new()
                     {
@@ -2402,7 +2397,6 @@ namespace Fika.Core.Coop.GameMode
                 FikaBackendUtils.ResetTransitData();
             }
 
-            NetworkTimeSync.Reset();
             Logger.LogDebug("Stop");
 
             ToggleDebug(false);

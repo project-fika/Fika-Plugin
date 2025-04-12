@@ -22,6 +22,7 @@ using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Jobs;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
@@ -36,6 +37,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace Fika.Core.Networking
@@ -103,6 +105,8 @@ namespace Fika.Core.Networking
         public FikaClientWorld FikaClientWorld { get; set; }
         public EPlayerSide RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
+        public List<PlayerStatePacket> Snapshots { get; set; }
+        public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
 
         private NetPacketProcessor packetProcessor;
         private int sendRate;
@@ -114,6 +118,7 @@ namespace Fika.Core.Networking
         private string myProfileId;
         private Queue<BaseInventoryOperationClass> inventoryOperations;
         private List<int> missingIds;
+        private JobHandle stateHandle;
 
         public async void Init()
         {
@@ -136,6 +141,8 @@ namespace Fika.Core.Networking
             logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
             inventoryOperations = new();
             missingIds = [];
+            Snapshots = new(128);
+            ObservedCoopPlayers = [];
 
             Ping = 0;
             ServerFPS = 0;
@@ -748,7 +755,6 @@ namespace Fika.Core.Networking
                         coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
                         coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
                         FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
-                        NetworkTimeSync.Start(packet.TimeOffset);
                         break;
                     case ReconnectPacket.EReconnectDataType.Finished:
                         coopGame.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
@@ -998,15 +1004,14 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
         {
-            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
-            {
-                playerToApply.Snapshotter.Insert(packet);
-            }
+            Snapshots.Add(packet);
         }
 
         protected void Update()
         {
             netClient?.PollEvents();
+            stateHandle = new UpdateInterpolators().Schedule(ObservedCoopPlayers.Count, 16,
+                new HandlePlayerStates().Schedule(Snapshots.Count, 16));
 
             int inventoryOps = inventoryOperations.Count;
             if (inventoryOps > 0)
@@ -1017,6 +1022,16 @@ namespace Fika.Core.Networking
                 }
                 inventoryOperations.Dequeue().method_1(HandleResult);
             }
+        }
+
+        protected void LateUpdate()
+        {
+            stateHandle.Complete();
+            for (int i = 0; i < ObservedCoopPlayers.Count; i++)
+            {
+                ObservedCoopPlayers[i].ManualStateUpdate();
+            }
+            Snapshots.Clear();
         }
 
         protected void OnDestroy()
@@ -1085,6 +1100,7 @@ namespace Fika.Core.Networking
             };
             SendData(ref settingsPacket, DeliveryMethod.ReliableOrdered);
 
+            ownProfile.Info.SetProfileNickname(FikaBackendUtils.PMCName ?? ownProfile.Nickname);
             Dictionary<Profile, bool> profiles = [];
             profiles.Add(ownProfile, false);
             LoadingProfilePacket profilePacket = new()

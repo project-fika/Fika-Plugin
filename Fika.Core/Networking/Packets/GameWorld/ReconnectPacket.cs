@@ -17,7 +17,6 @@ namespace Fika.Core.Networking
         public Profile Profile;
         public Profile.ProfileHealthClass ProfileHealthClass;
         public Vector3 PlayerPosition;
-        public double TimeOffset;
 
         public List<SmokeGrenadeDataPacketStruct> ThrowableData;
         public List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> InteractivesData;
@@ -50,7 +49,6 @@ namespace Fika.Core.Networking
                         Profile = reader.GetProfile();
                         ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.ProfileHealthClass>();
                         PlayerPosition = reader.GetVector3();
-                        TimeOffset = reader.GetDouble();
                         break;
                     case EReconnectDataType.Finished:
                     default:
@@ -85,7 +83,6 @@ namespace Fika.Core.Networking
                         writer.PutProfile(Profile);
                         writer.PutByteArray(SimpleZlib.CompressToBytes(ProfileHealthClass.ToJson(), 4));
                         writer.Put(PlayerPosition);
-                        writer.Put(TimeOffset);
                         break;
                     case EReconnectDataType.Finished:
                     default:

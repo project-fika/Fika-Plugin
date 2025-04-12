@@ -42,14 +42,14 @@ namespace Fika.Core.Coop.Players
     {
         #region Fields and Properties
         public IPacketSender PacketSender;
-        public bool HasSkilledScav = false;
+        public bool HasSkilledScav;
         public float ObservedOverlap = 0f;
         public CorpseSyncPacket CorpseSyncPacket = default;
-        public bool HasGround = false;
+        public bool HasGround;
         public int NetId;
-        public bool IsObservedAI = false;
+        public bool IsObservedAI;
         public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
-        public FikaSnapshotter Snapshotter;
+        public ObservedSnapshotter Snapshotter;
         public bool WaitingForCallback
         {
             get
@@ -102,7 +102,6 @@ namespace Fika.Core.Coop.Players
                 : new CoopClientInventoryController(player, profile, false);
 
             LocalQuestControllerClass questController;
-            //Todo for Lacyway: Check if inventoryController.PlayerSearchController is proper here.
             if (FikaPlugin.Instance.SharedQuestProgression)
             {
                 questController = new CoopClientSharedQuestController(profile, inventoryController, inventoryController.PlayerSearchController, session, player);

@@ -34,7 +34,7 @@ namespace Fika.Core.Networking
             NetId = netId;
         }
 
-        public PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
+        /*public PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
             EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed, bool isProne,
             float poseLevel, bool isSprinting, BasePhysicalClass.PhysicalStateStruct stamina, int blindfire, float weaponOverlap,
             bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, double remoteTime)
@@ -60,7 +60,7 @@ namespace Fika.Core.Networking
             HasGround = hasGround;
             SurfaceSound = surfaceSound;
             RemoteTime = remoteTime;
-        }
+        }*/
 
         // Snapshot
         public double RemoteTime { get; set; }
@@ -137,7 +137,7 @@ namespace Fika.Core.Networking
             IsGrounded = player.MovementContext.IsGrounded;
             HasGround = player.HasGround;
             SurfaceSound = player.CurrentSurface;
-            RemoteTime = NetworkTimeSync.Time;
+            RemoteTime = NetworkTimeSync.NetworkTime;
         }
     }
 }

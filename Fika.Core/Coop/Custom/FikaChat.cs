@@ -1,9 +1,12 @@
 ﻿using Comfort.Common;
+using EFT;
+using EFT.InputSystem;
 using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib.Utils;
+using System.Reflection;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Custom
@@ -14,10 +17,16 @@ namespace Fika.Core.Coop.Custom
         private string nickname;
         private string chatText;
         private string textField;
+        private string textFieldName;
         private bool show;
+        private bool selectText;
         private bool isServer;
         private NetDataWriter writer;
         private UISoundsWrapper soundsWrapper;
+        private InputManager manager;
+
+        private static readonly FieldInfo showMouseField = typeof(InputManager).GetField("bool_2",
+            BindingFlags.Instance | BindingFlags.NonPublic);
 
         protected void Awake()
         {
@@ -25,11 +34,27 @@ namespace Fika.Core.Coop.Custom
             nickname = FikaBackendUtils.PMCName;
             chatText = string.Empty;
             textField = string.Empty;
+            textFieldName = "TextField";
             show = false;
             isServer = FikaBackendUtils.IsServer;
             writer = new();
             GUISounds guiSounds = Singleton<GUISounds>.Instance;
             soundsWrapper = Traverse.Create(guiSounds).Field<UISoundsWrapper>("uisoundsWrapper_0").Value;
+            GameObject managerObj = GameObject.Find("___Input");
+            if (managerObj != null)
+            {
+                InputManager inputManager = managerObj.GetComponent<InputManager>();
+                if (inputManager != null)
+                {
+                    manager = inputManager;
+                }
+                else
+                {
+                    FikaGlobals.LogError("Could not find InputManager on the manager object");
+                }
+                return;
+            }
+            FikaGlobals.LogError("Could not find ___Input game object");
         }
 
         protected void Update()
@@ -65,6 +90,25 @@ namespace Fika.Core.Coop.Custom
         private void ToggleVisibility()
         {
             show = !show;
+
+            if (show)
+            {
+                if (manager != null)
+                {
+                    GamePlayerOwner.SetIgnoreInput(true);
+                    showMouseField.SetValue(manager, true);
+                }
+                selectText = true;
+            }
+            else
+            {
+                if (manager != null)
+                {
+                    GamePlayerOwner.SetIgnoreInput(false);
+                    GamePlayerOwner.MyPlayer.MovementContext.IsAxesIgnored = false;
+                }
+                showMouseField.SetValue(manager, false);
+            }
         }
 
         private void SendMessage()
@@ -123,7 +167,13 @@ namespace Fika.Core.Coop.Custom
             GUI.Label(rect, chatText);
             rect.y += rect.height;
             Rect textRect = new(rect.x, rect.y, rect.width - 55, 25);
+            GUI.SetNextControlName(textFieldName);
             textField = GUI.TextField(textRect, textField);
+            if (selectText)
+            {
+                GUI.FocusControl(textFieldName);
+                selectText = false;
+            }
             rect.x += 535;
             Rect buttonRect = new(rect.x, rect.y, 50, 25);
             if (GUI.Button(buttonRect, "SEND"))

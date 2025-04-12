@@ -1,5 +1,6 @@
 using EFT;
 using Fika.Core.Coop.Custom;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Models;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Models.Presence;
@@ -30,35 +31,35 @@ namespace Fika.Core.Networking.Http
         public static async Task<IPAddress> GetPublicIP()
         {
             HttpClient client = Traverse.Create(_httpClient).Field<HttpClient>("_httpv").Value;
-            string ipString = await client.GetStringAsync("https://api.ipify.org/");
-            ipString = ipString.Replace("\n", "");
-            if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
+            string[] urls = [
+                "https://api.ipify.org/",
+                "https://checkip.amazonaws.com/",
+                "https://ipv4.icanhazip.com/"
+            ];
+
+            foreach (string url in urls)
             {
-                if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+                try
                 {
-                    return ipAddress;
+                    string ipString = await client.GetStringAsync(url);
+                    ipString = ipString.Trim();
+                    if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
+                    {
+                        if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            return ipAddress;
+                        }
+                        throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
+                    }
                 }
-                throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
-            }
-            ipString = await client.GetStringAsync("https://checkip.amazonaws.com/");
-            if (IPAddress.TryParse(ipString, out ipAddress))
-            {
-                if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
+                catch (Exception ex)
                 {
-                    return ipAddress;
+                    FikaGlobals.LogWarning($"Could not get public IP address by [{url}], Error message: {ex.Message}");
+                    continue;
                 }
-                throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
             }
-            ipString = await client.GetStringAsync("https://ipv4.icanhazip.com/");
-            if (IPAddress.TryParse(ipString, out ipAddress))
-            {
-                if (ipAddress.AddressFamily is AddressFamily.InterNetwork)
-                {
-                    return ipAddress;
-                }
-                throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
-            }
-            throw new Exception("Could not retrieve or parse the external address!");
+
+            throw new Exception("Could not retrieve or parse the external IP address!");
         }
 
         private static byte[] EncodeBody<T>(T o)

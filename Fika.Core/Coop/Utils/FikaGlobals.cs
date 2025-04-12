@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
+using static Fika.Core.FikaPlugin;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -179,6 +180,10 @@ namespace Fika.Core.Coop.Utils
         /// <param name="nickname"></param>
         public static void SetProfileNickname(this InfoClass infoClass, string nickname)
         {
+            if (!string.IsNullOrEmpty(infoClass.MainProfileNickname))
+            {
+                return;
+            }
             Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
         }
 
@@ -381,6 +386,17 @@ namespace Fika.Core.Coop.Utils
             }
 
             FikaPlugin.Instance.FikaLogger.LogFatal($"[{caller}]: {message}");
+        }
+
+        public static int ToNumber(this ESendRate rate)
+        {
+            return rate switch
+            {
+                ESendRate.Low => 10,
+                ESendRate.Medium => 20,
+                ESendRate.High => 30,
+                _ => 20,
+            };
         }
     }
 }

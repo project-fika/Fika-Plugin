@@ -22,7 +22,6 @@ using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
-using LiteNetLib.Utils;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
@@ -56,7 +55,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.4";
+        public const string FikaVersion = "1.2.5";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -67,11 +66,12 @@ namespace Fika.Core
                 return Logger;
             }
         }
+        public bool LocalesLoaded { get; internal set;
+        }
         public BotDifficulties BotDifficulties;
         public FikaModHandler ModHandler = new();
         public string[] LocalIPs;
         public IPAddress WanIP;
-        public bool LocalesLoaded;
 
         internal static uint Crc32 { get; set; }
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
@@ -203,7 +203,6 @@ namespace Fika.Core
         public static ConfigEntry<bool> UseNatPunching { get; set; }
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
         public static ConfigEntry<ESendRate> SendRate { get; set; }
-        public static ConfigEntry<ESmoothingRate> SmoothingRate { get; set; }
         public static ConfigEntry<bool> AllowVOIP { get; set; }
 
         // Gameplay
@@ -398,19 +397,39 @@ namespace Fika.Core
         /// <returns></returns>
         private IEnumerator RunChecks()
         {
-            Task<IPAddress> addressTask = FikaRequestHandler.GetPublicIP();
-            while (!addressTask.IsCompleted)
+            Task<IPAddress> addressTask;
+            try
             {
-                yield return null;
+                addressTask = FikaRequestHandler.GetPublicIP();
+            }
+            catch (Exception ex)
+            {
+                NotificationManagerClass.DisplayWarningNotification("Failed to get external IP address");
+                Logger.LogError($"RunChecks: {ex.Message}");
+                addressTask = null;
             }
 
-            WanIP = addressTask.Result;
+            if (addressTask != null)
+            {
+                while (!addressTask.IsCompleted)
+                {
+                    yield return null;
+                }
+
+                WanIP = addressTask.Result;
+            }
 
             yield return new WaitForSeconds(5);
 #if !DEBUG
             VerifyServerVersion(); 
 #endif
             ModHandler.VerifyMods();
+
+            if (Crc32 == 0)
+            {
+                MonoBehaviourSingleton<PreloaderUI>.Instance.ShowErrorScreen("CRC32 ERROR", LocaleUtils.UI_MOD_VERIFY_FAIL.Localized());
+                Logger.LogError($"RunChecks: {LocaleUtils.UI_MOD_VERIFY_FAIL.Localized()}");
+            }
         }
 
         private void GetClientConfig()
@@ -439,7 +458,7 @@ namespace Fika.Core
             NatPunchServerConfigModel natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
 
             NatPunchServerEnable = natPunchServerConfig.Enable;
-            NatPunchServerIP = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+            NatPunchServerIP = RequestHandler.Host.Replace("https://", "").Split(':')[0];
             NatPunchServerPort = natPunchServerConfig.Port;
             NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
 
@@ -1259,7 +1278,7 @@ namespace Fika.Core
                 }),
                 "Use NAT Punching", ref failed, headers);
 
-            ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 15,
+            ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 30,
                 new ConfigDescription(LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_D.Localized(),
                 new AcceptableValueRange<int>(5, 60), new ConfigurationManagerAttributes()
                 {
@@ -1277,15 +1296,6 @@ namespace Fika.Core
                     Order = 1
                 }),
                 "Send Rate", ref failed, headers);
-
-            SmoothingRate = SetupSetting(networkDefaultHeader, "Smoothing Rate", ESmoothingRate.Medium,
-                new ConfigDescription(LocaleUtils.BEPINEX_SMOOTHING_RATE_D.Localized(), tags: new ConfigurationManagerAttributes()
-                {
-                    Category = networkHeader,
-                    DispName = LocaleUtils.BEPINEX_SMOOTHING_RATE_T.Localized(),
-                    Order = 0
-                }),
-                "Smoothing Rate", ref failed, headers);
 
             AllowVOIP = SetupSetting(networkDefaultHeader, "Allow VOIP", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_NET_VOIP_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1426,21 +1436,15 @@ namespace Fika.Core
             MenuEscape,
         }
 
-        public enum ESmoothingRate
-        {
-            Low,
-            Medium,
-            High
-        }
-
+        /// <summary>
+        /// The SendRate of the <see cref="Networking.IFikaNetworkManager"/>
+        /// </summary>
         public enum ESendRate
         {
-            [Description("Very Low")]
-            VeryLow,
             Low,
             Medium,
             High
-        }
+        }        
 
         [Flags]
         public enum EQuestSharingTypes

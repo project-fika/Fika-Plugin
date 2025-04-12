@@ -28,7 +28,7 @@ namespace Fika.Core.Networking.Http
         public override readonly string ToString()
         {
             string ips = string.Join("; ", Ips);
-            return $"HostResponse Data: IPs: {ips}, Port: {Port},  NatPunch: {NatPunch}, IsHeadless: {IsHeadless}";
+            return $"HostResponse Data: IPs: {ips}, Port: {Port}, NatPunch: {NatPunch}, IsHeadless: {IsHeadless}";
         }
     }
 }

@@ -4,11 +4,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
     public class SnapshotInterpolationSettings
     {
-        public SnapshotInterpolationSettings(double bufferTimeMultiplier)
-        {
-            this.bufferTimeMultiplier = bufferTimeMultiplier;
-        }
-
         #region Buffering
         [Tooltip("Local simulation is behind by sendInterval * multiplier seconds.\nThis guarantees that we always have enough snapshots in the buffer to mitigate lags & jitter.\nIncrease this if the simulation isn't smooth. By default, it should be around 2.")]
         public double bufferTimeMultiplier = 2;
@@ -26,7 +21,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 
         [Tooltip("Local timeline acceleration in % while catching up.")]
         [Range(0, 1)]
-        public double catchupSpeed = 0.02f;
+        public double catchupSpeed = 0.05f;
 
         [Tooltip("Local timeline slowdown in % while slowing down.")]
         [Range(0, 1)]

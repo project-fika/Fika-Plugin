@@ -67,6 +67,7 @@ namespace Fika.Core.Coop.Players
             }
         }
         public BetterSource VoipEftSource { get; set; }
+        internal ObservedState CurrentPlayerState;
 
         private bool leftStancedDisabled;
         private FikaHealthBar healthBar = null;
@@ -75,6 +76,7 @@ namespace Fika.Core.Coop.Players
         private VoiceBroadcastTrigger voiceBroadcastTrigger;
         private GClass1050 soundSettings;
         private bool voipAssigned;
+        private int frameSkip;
 
         public ObservedHealthController NetworkHealthController
         {
@@ -165,6 +167,7 @@ namespace Fika.Core.Coop.Players
                 armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
             player.IsYourPlayer = false;
+            player.IsObservedAI = aiControl;
 
             ObservedInventoryController inventoryController = new(player, profile, true, firstId, firstOperationId, aiControl);
             ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
@@ -210,7 +213,19 @@ namespace Fika.Core.Coop.Players
             player.AggressorFound = false;
             player._animators[0].enabled = true;
             player.isServer = FikaBackendUtils.IsServer;
-            player.Snapshotter = FikaSnapshotter.Create(player);
+            player.Snapshotter = new(player);
+            player.CurrentPlayerState = new(position, player.Rotation);
+
+            if (GClass2762.int_1 == 0)
+            {
+                GClass2762.int_1 = 1;
+                player.frameSkip = 1;
+            }
+            else
+            {
+                GClass2762.int_1 = 0;
+                player.frameSkip = 0;
+            }
 
             return player;
         }
@@ -880,6 +895,96 @@ namespace Fika.Core.Coop.Players
             LeftStanceDisabled = to.LeftStanceDisabled;
         }
 
+        public void ManualStateUpdate()
+        {
+            bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
+
+            method_74(CurrentPlayerState.HasGround, CurrentPlayerState.SurfaceSound);
+
+            Rotation = CurrentPlayerState.Rotation;
+
+            HeadRotation = CurrentPlayerState.HeadRotation;
+            ProceduralWeaponAnimation.SetHeadRotation(CurrentPlayerState.HeadRotation);
+
+            bool isGrounded = CurrentPlayerState.IsGrounded;
+            MovementContext.IsGrounded = isGrounded;
+
+            EPlayerState newState = CurrentPlayerState.State;
+
+            if (newState == EPlayerState.Jump)
+            {
+                MovementContext.PlayerAnimatorEnableJump(true);
+                if (isServer)
+                {
+                    MovementContext.method_2(1f);
+                }
+            }
+
+            if (isJumpSet && isGrounded)
+            {
+                MovementContext.PlayerAnimatorEnableJump(false);
+                MovementContext.PlayerAnimatorEnableLanding(true);
+            }
+            if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)
+            {
+                MovementContext.UpdateSprintInertia();
+                MovementContext.PlayerAnimatorEnableInert(false);
+            }
+
+            Physical.SerializationStruct = CurrentPlayerState.Stamina;
+
+            if (MovementContext.Step != CurrentPlayerState.Step)
+            {
+                CurrentManagedState.SetStep(CurrentPlayerState.Step);
+            }
+
+            if (MovementContext.IsSprintEnabled != CurrentPlayerState.IsSprinting)
+            {
+                CurrentManagedState.EnableSprint(CurrentPlayerState.IsSprinting);
+            }
+
+            if (MovementContext.IsInPronePose != CurrentPlayerState.IsProne)
+            {
+                MovementContext.IsInPronePose = CurrentPlayerState.IsProne;
+            }
+
+            if (!Mathf.Approximately(PoseLevel, CurrentPlayerState.PoseLevel))
+            {
+                MovementContext.SetPoseLevel(CurrentPlayerState.PoseLevel);
+            }
+
+            MovementContext.SetCurrentClientAnimatorStateIndex(CurrentPlayerState.AnimatorStateIndex);
+            MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.CharacterMovementSpeed, true);
+
+            if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
+            {
+                MovementContext.SetBlindFire(CurrentPlayerState.Blindfire);
+            }
+
+            if (!IsInventoryOpened && isGrounded)
+            {
+                Move(CurrentPlayerState.MovementDirection);
+                if (isServer)
+                {
+                    MovementContext.method_1(CurrentPlayerState.MovementDirection);
+                }
+            }
+
+            Transform.position = CurrentPlayerState.Position;
+
+            if (!Mathf.Approximately(MovementContext.Tilt, CurrentPlayerState.Tilt))
+            {
+                MovementContext.SetTilt(CurrentPlayerState.Tilt, true);
+            }
+
+            if (!ObservedOverlap.ApproxEquals(CurrentPlayerState.WeaponOverlap))
+            {
+                ObservedOverlap = CurrentPlayerState.WeaponOverlap;
+                ShouldOverlap = true;
+            }
+            LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
+        }
+
         public override void InteractionRaycast()
         {
             if (_playerLookRaycastTransform == null || !HealthController.IsAlive)
@@ -975,6 +1080,8 @@ namespace Fika.Core.Coop.Players
                 Corpse.SetItemInHandsLootedCallback(ReleaseHand);
             }
             CorpseSyncPacket = default;
+            Snapshotter.Clear();
+            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this);
         }
 
         public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
@@ -1213,11 +1320,6 @@ namespace Fika.Core.Coop.Players
 
         public void InitObservedPlayer(bool isHeadlessClient)
         {
-            if (gameObject.name.StartsWith("Bot_"))
-            {
-                IsObservedAI = true;
-            }
-
             PacketSender = gameObject.AddComponent<ObservedPacketSender>();
             Traverse playerTraverse = Traverse.Create(this);
 
@@ -1409,11 +1511,11 @@ namespace Fika.Core.Coop.Players
 
             method_13(deltaTime);
 
-            UpdateTriggerColliderSearcher(deltaTime, true);
-            if (cullingHandler != null)
+            if (Time.frameCount % 2 == frameSkip)
             {
-                cullingHandler.ManualUpdate(deltaTime);
+                UpdateTriggerColliderSearcher(deltaTime, cullingHandler.IsCloseToMyPlayerCamera);
             }
+            cullingHandler.ManualUpdate(deltaTime);
         }
 
         public override void InitAudioController()
@@ -1467,6 +1569,13 @@ namespace Fika.Core.Coop.Players
                 slotViewHandler.Dispose();
             }
             observedSlotViewHandlers.Clear();
+            if (HealthController.IsAlive)
+            {
+                if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this) && Profile.Nickname.StartsWith("headless_"))
+                {
+                    FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
+                }
+            }
             base.OnDestroy();
         }
 
@@ -1618,6 +1727,7 @@ namespace Fika.Core.Coop.Players
             }
 
             base.SpawnController(controllerFactory(), handler.DisposeHandler);
+            OnSetInHands(new(item, CommandStatus.Succeed, InventoryController));
         }
 
         public void SpawnHandsController(EHandsControllerType controllerType, string itemId, bool isStationary)

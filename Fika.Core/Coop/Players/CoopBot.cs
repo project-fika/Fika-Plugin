@@ -42,6 +42,8 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public BotPacketSender BotPacketSender { get; internal set; }
+
         public static async Task<CoopBot> CreateBot(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
             string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
             EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
@@ -58,7 +60,9 @@ namespace Fika.Core.Coop.Players
 
             CoopBotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
 
-            player.PacketSender = BotPacketSender.Create(player);
+            BotPacketSender sender = BotPacketSender.Create(player);
+            player.BotPacketSender = sender;
+            player.PacketSender = sender;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopBotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),

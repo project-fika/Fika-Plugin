@@ -19,6 +19,36 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
+        private bool ShouldSend(NetworkHealthSyncPacketStruct.ESyncType syncType)
+        {
+            switch (syncType)
+            {
+                case NetworkHealthSyncPacketStruct.ESyncType.AddEffect:
+                case NetworkHealthSyncPacketStruct.ESyncType.RemoveEffect:
+                case NetworkHealthSyncPacketStruct.ESyncType.IsAlive:
+                case NetworkHealthSyncPacketStruct.ESyncType.BodyHealth:
+                case NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage:
+                case NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart:
+                case NetworkHealthSyncPacketStruct.ESyncType.EffectStrength:
+                case NetworkHealthSyncPacketStruct.ESyncType.EffectNextState:
+                case NetworkHealthSyncPacketStruct.ESyncType.EffectMedResource:
+                case NetworkHealthSyncPacketStruct.ESyncType.EffectStimulatorBuff:
+                    return true;
+                case NetworkHealthSyncPacketStruct.ESyncType.EffectStateTime:
+                case NetworkHealthSyncPacketStruct.ESyncType.Energy:
+                case NetworkHealthSyncPacketStruct.ESyncType.Hydration:
+                case NetworkHealthSyncPacketStruct.ESyncType.Temperature:
+                case NetworkHealthSyncPacketStruct.ESyncType.DamageCoeff:
+                case NetworkHealthSyncPacketStruct.ESyncType.HealthRates:
+                case NetworkHealthSyncPacketStruct.ESyncType.HealerDone:
+                case NetworkHealthSyncPacketStruct.ESyncType.BurnEyes:
+                case NetworkHealthSyncPacketStruct.ESyncType.Poison:
+                case NetworkHealthSyncPacketStruct.ESyncType.StaminaCoeff:
+                default:
+                    return false;
+            }
+        }
+
         public override void SendNetworkSyncPacket(NetworkHealthSyncPacketStruct packet)
         {
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
@@ -28,7 +58,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            if (packet.SyncType is NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart or NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage or NetworkHealthSyncPacketStruct.ESyncType.BodyHealth)
+            if (ShouldSend(packet.SyncType))
             {
                 HealthSyncPacket netPacket = new()
                 {

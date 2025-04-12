@@ -29,9 +29,9 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             get
             {
-                return (player.CharacterController.velocity.x != 0
-                    || player.CharacterController.velocity.z != 0)
-                    && !player.MovementContext.IsInMountedState;
+                return player.CurrentManagedState.Name is not (EPlayerState.Idle
+                    or EPlayerState.IdleWeaponMounting
+                    or EPlayerState.ProneIdle);
             }
         }
 
@@ -50,9 +50,9 @@ namespace Fika.Core.Coop.PacketHandlers
         }
 
         private DateTime lastPingTime;
-        private int updateRate;
-        private int fixedUpdateCount;
-        private int fixedUpdatesPerTick;
+        private float updateRate;
+        private float updateCount;
+        private float updatesPerTick;
 
         public static ServerPacketSender Create(CoopPlayer player)
         {
@@ -62,8 +62,8 @@ namespace Fika.Core.Coop.PacketHandlers
             sender.enabled = false;
             sender.lastPingTime = DateTime.Now;
             sender.updateRate = sender.Server.SendRate;
-            sender.fixedUpdateCount = 0;
-            sender.fixedUpdatesPerTick = Mathf.FloorToInt(60f / sender.updateRate);
+            sender.updateCount = 0;
+            sender.updatesPerTick = 1f / sender.updateRate;
             sender.state = new(player.NetId);
             sender.Enabled = true;
             return sender;
@@ -89,18 +89,18 @@ namespace Fika.Core.Coop.PacketHandlers
             Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
-        protected void FixedUpdate()
+        protected void Update()
         {
             if (player == null || Server == null || !Enabled)
             {
                 return;
             }
 
-            fixedUpdateCount++;
-            if (fixedUpdateCount >= fixedUpdatesPerTick)
+            updateCount += Time.unscaledDeltaTime;
+            if (updateCount >= updatesPerTick)
             {
                 SendPlayerState();
-                fixedUpdateCount = 0;
+                updateCount -= updatesPerTick;
             }
         }
 
@@ -110,7 +110,7 @@ namespace Fika.Core.Coop.PacketHandlers
             Server.SendDataToAll(ref state, DeliveryMethod.Unreliable);
         }
 
-        protected void Update()
+        protected void LateUpdate()
         {
             if (CanPing)
             {
