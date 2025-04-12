@@ -66,7 +66,7 @@ namespace Fika.Core
                 return Logger;
             }
         }
-        public bool LocalesLoaded { get; set;
+        public bool LocalesLoaded { get; internal set;
         }
         public BotDifficulties BotDifficulties;
         public FikaModHandler ModHandler = new();
