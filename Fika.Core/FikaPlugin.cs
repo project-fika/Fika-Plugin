@@ -66,11 +66,12 @@ namespace Fika.Core
                 return Logger;
             }
         }
+        public bool LocalesLoaded { get; set;
+        }
         public BotDifficulties BotDifficulties;
         public FikaModHandler ModHandler = new();
         public string[] LocalIPs;
         public IPAddress WanIP;
-        public bool LocalesLoaded;
 
         internal static uint Crc32 { get; set; }
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
