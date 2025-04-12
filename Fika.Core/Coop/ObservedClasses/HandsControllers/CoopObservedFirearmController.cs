@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -385,6 +386,10 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             if (packet.ShotType == EShotType.DryFire)
             {
+                if (IsRevolver)
+                {
+                    Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
+                }
                 FirearmsAnimator.SetFire(true);
                 DryShot();
                 hasFired = true;
@@ -657,11 +662,11 @@ namespace Fika.Core.Coop.ObservedClasses
                     FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
                     FirearmsAnimator.SetDoubleAction(Convert.ToSingle(Weapon.CylinderHammerClosed));
                     FirearmsAnimator.SetHammerArmed(!Weapon.CylinderHammerClosed);
-                    weaponManager.MoveAmmoFromChamberToShellPort(cylinderAmmo.IsUsed, firstIndex);
+                    weaponManager.MoveAmmoFromChamberToShellPort(true, firstIndex);
 
                     FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
 
-                    if (cylinderMagazine.Cartridges.Count > 0)
+                    if (cylinderMagazine.Count > 0)
                     {
                         Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
                     }
