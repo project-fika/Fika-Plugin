@@ -457,7 +457,7 @@ namespace Fika.Core
             NatPunchServerConfigModel natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
 
             NatPunchServerEnable = natPunchServerConfig.Enable;
-            NatPunchServerIP = RequestHandler.Host.Replace("http://", "").Split(':')[0];
+            NatPunchServerIP = RequestHandler.Host.Replace("https://", "").Split(':')[0];
             NatPunchServerPort = natPunchServerConfig.Port;
             NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
 
