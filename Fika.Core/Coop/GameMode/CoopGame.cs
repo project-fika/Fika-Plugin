@@ -660,7 +660,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 StartCoroutine(FixVOIPAudioDevice());
             }
-            StartCoroutine(CreateStashes());
+            _ = Task.Run(CreateStashes);
 
             if (FikaPlugin.UseFikaGC.Value)
             {
@@ -670,7 +670,7 @@ namespace Fika.Core.Coop.GameMode
             localPlayer.PacketSender.Init();
         }
 
-        private IEnumerator CreateStashes()
+        private async Task CreateStashes()
         {
             GameWorld gameWorld = GameWorld_0;
 
@@ -678,12 +678,12 @@ namespace Fika.Core.Coop.GameMode
             {
                 while (gameWorld.TransitController.TransferItemsController == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
 
                 while (gameWorld.TransitController.TransferItemsController.Stash == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
             }
 
@@ -691,12 +691,12 @@ namespace Fika.Core.Coop.GameMode
             {
                 while (gameWorld.BtrController.TransferItemsController == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
 
                 while (gameWorld.BtrController.TransferItemsController.Stash == null)
                 {
-                    yield return null;
+                    await Task.Delay(100);
                 }
             }
 
@@ -728,7 +728,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogError("Could not find CoopHandler when trying to initialize player stashes for TransferItemsController!");
             }
 
-            yield break;
+            
         }
 
         private void SyncTransitControllers()
