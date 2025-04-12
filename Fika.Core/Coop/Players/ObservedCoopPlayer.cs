@@ -1727,6 +1727,7 @@ namespace Fika.Core.Coop.Players
             }
 
             base.SpawnController(controllerFactory(), handler.DisposeHandler);
+            OnSetInHands(new(item, CommandStatus.Succeed, InventoryController));
         }
 
         public void SpawnHandsController(EHandsControllerType controllerType, string itemId, bool isStationary)
