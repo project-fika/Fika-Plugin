@@ -3,17 +3,22 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Coop.Utils;
-using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ObservedClasses
 {
-    public class ObservedQuestController(Profile profile, InventoryController inventoryController, IQuestActions session)
-        : LocalQuestControllerClass(profile, inventoryController, session)
+    public class ObservedQuestController : LocalQuestControllerClass
     {
+        private IPlayerSearchController searchController;
+
+        public ObservedQuestController(Profile profile, InventoryController inventoryController,
+            IPlayerSearchController searchController, IQuestActions session) : base(profile, inventoryController, session)
+        {
+            this.searchController = searchController;
+        }
+
         public override QuestControllerAbstractClass<QuestClass> InitConditionsConnectorsManager()
         {
             GClass3718_0 = new GClass3723(Profile, inventoryController_0,
@@ -21,80 +26,85 @@ namespace Fika.Core.Coop.ObservedClasses
             return GClass3718_0;
         }
 
-        public override async Task<IResult> AcceptQuest(QuestClass quest, bool runNetworkTransaction)
+        public override Task<IResult> AcceptQuest(QuestClass quest, bool runNetworkTransaction)
         {
-            IResult result = SuccessfulResult.New;
-            if (runNetworkTransaction)
-            {
-                result = await iQuestActions.QuestAccept(quest.Id, quest is GClass3691);
-            }
-            if (result.Succeed)
-            {
-                SetConditionalStatus(quest, EQuestStatus.Started);
-            }
-            return result;
+            SetConditionalStatus(quest, EQuestStatus.Started);
+            return SuccessfulResult.Task;
         }
 
         public override async Task<GStruct455<GStruct397<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
-            IResult result = SuccessfulResult.New;
-            if (runNetworkTransaction)
+            method_6(quest);
+            if (quest.QuestStatus != EQuestStatus.AvailableForFinish)
             {
-                result = await iQuestActions.QuestComplete(quest.Id, true, quest is GClass3691);
+                SetConditionalStatus(quest, EQuestStatus.AvailableForFinish);
             }
-            GStruct455<GStruct397<QuestClass>> gstruct;
+            GStruct455<GStruct397<QuestClass>> result = InteractionsHandlerClass.FinishConditional(quest, inventoryController_0,
+                this, false);
             if (result.Failed)
             {
-                gstruct = new GClass3854(result.Error);
+                FikaGlobals.LogError(result.Error.Localized());
+                return result;
             }
-            else
+
+            IEnumerator<QuestClass> enumerator = Quests.GetEnumerator();
+            try
             {
-                SetConditionalStatus(quest, EQuestStatus.Success);
-                using (IEnumerator<QuestClass> enumerator = Quests.GetEnumerator())
+                while (enumerator.MoveNext())
                 {
-                    while (enumerator.MoveNext())
+                    GClass3702.Class3440 checker = new()
                     {
-                        Class3437 conditionChecker = new()
+                        testQuest = enumerator.Current
+                    };
+                    if (checker.testQuest.QuestStatus == EQuestStatus.Started)
+                    {
+                        if (checker.testQuest.Template.Conditions.TryGetValue(EQuestStatus.Fail, out GClass3878 gclass2))
                         {
-                            testQuest = enumerator.Current
-                        };
-                        if (conditionChecker.testQuest.QuestStatus == EQuestStatus.Started)
-                        {
-                            if (conditionChecker.testQuest.Template.Conditions.TryGetValue(EQuestStatus.Fail, out GClass3878 gclass))
+                            if (gclass2.Any(checker.method_0))
                             {
-                                if (gclass.Any(conditionChecker.method_0))
-                                {
-                                    SetConditionalStatus(conditionChecker.testQuest, EQuestStatus.Fail);
-                                }
+                                SetConditionalStatus(checker.testQuest, EQuestStatus.Fail);
                             }
                         }
                     }
                 }
-                gstruct = default;
             }
-            return gstruct;
+            finally
+            {
+                enumerator?.Dispose();
+            }
+
+            IEnumerator<GClass3203> rewardsEnumerator = result.Value.Rewards.GetEnumerator();
+            try
+            {
+                while (rewardsEnumerator.MoveNext())
+                {
+                    GClass3203 currentReward = rewardsEnumerator.Current;
+                    searchController.SetItemAsKnown(currentReward.Item, false);
+                }
+            }
+            finally
+            {
+                rewardsEnumerator?.Dispose();
+            }
+
+            await method_5(result.Value.Rewards);
+            return result;
         }
 
-        public override async Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
+        public override Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
         {
+            GStruct455<GClass3226> gstruct = InteractionsHandlerClass.HandoverQuest(quest, items, condition, this.inventoryController_0, this, false);
+            if (gstruct.Failed)
+            {
+                FikaGlobals.LogError(gstruct.Error.Localized());
+                return new FailedResult("Failed to handover item", 0).Task;
+            }
             GClass1362[] array = ConditionHandoverItem.ConvertToHandoverItems(items);
-            IResult result = SuccessfulResult.New;
-            if (runNetworkTransaction)
-            {
-                result = await iQuestActions.QuestHandover(quest.Id, condition.id, array);
-            }
-            if (result.Succeed)
-            {
-                TaskConditionCounterClass taskConditionCounter = Profile.GetTaskConditionCounter(quest, condition.id);
-                taskConditionCounter.Value += array.Sum(Class3436.class3436_0.method_0);
-                quest.CheckForStatusChange(false, true);
-                quest.ProgressCheckers[condition].CallConditionChanged();
-            }
-            else
-            {
-                FikaGlobals.LogError($"Failed to handover item, quest: {quest.Id}, condition: {condition.id}, error: {result.Error}");
-            }
-            return result;
+            TaskConditionCounterClass taskConditionCounter = Profile.GetTaskConditionCounter(quest, condition.id);
+            taskConditionCounter.Value += array.Sum(GClass3702.Class3439.class3439_0.method_0);
+            quest.CheckForStatusChange(false, true);
+            quest.ProgressCheckers[condition].CallConditionChanged();
+            return SuccessfulResult.Task;
         }
 
         public override void SetConditionalStatus(QuestClass quest, EQuestStatus status)

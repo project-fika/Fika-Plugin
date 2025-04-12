@@ -176,7 +176,7 @@ namespace Fika.Core.Coop.Players
             ObservedQuestController observedQuestController = null;
             if (!aiControl)
             {
-                observedQuestController = new(profile, inventoryController, null);
+                observedQuestController = new(profile, inventoryController, inventoryController.PlayerSearchController, null);
                 observedQuestController.Init();
                 observedQuestController.Run();
             }
