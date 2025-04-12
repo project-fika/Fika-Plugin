@@ -1727,14 +1727,6 @@ namespace Fika.Core.Coop.Players
             }
 
             base.SpawnController(controllerFactory(), handler.DisposeHandler);
-            if (PlayerBody != null)
-            {
-                PlayerBody.GClass2119 slotByItem = PlayerBody.GetSlotViewByItem(item);
-                if (slotByItem != null)
-                {
-                    slotByItem.DestroyCurrentModel();
-                }
-            }
         }
 
         public void SpawnHandsController(EHandsControllerType controllerType, string itemId, bool isStationary)
