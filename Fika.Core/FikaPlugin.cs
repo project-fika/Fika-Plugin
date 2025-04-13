@@ -261,7 +261,7 @@ namespace Fika.Core
                 new ItemContext_Patch().Enable();
             }
 
-            StartCoroutine(RunChecks());
+            _ = Task.Run(RunChecks);
         }
 
         private void SetupConfigEventHandlers()
@@ -316,7 +316,6 @@ namespace Fika.Core
             new Player_SetDogtagInfo_Patch().Enable();
             new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
             new WeaponManagerClass_method_13_Patch().Enable();
-            //new OpticRetrice_UpdateTransform_Patch().Enable();
             new MatchmakerOfflineRaidScreen_Close_Patch().Enable();
             new BodyPartCollider_SetUpPlayer_Patch().Enable();
             new MatchmakerOfflineRaidScreen_Show_Patch().Enable();
@@ -395,31 +394,18 @@ namespace Fika.Core
         /// Coroutine to ensure all mods are loaded by waiting 5 seconds
         /// </summary>
         /// <returns></returns>
-        private IEnumerator RunChecks()
+        private async Task RunChecks()
         {
-            Task<IPAddress> addressTask;
             try
             {
-                addressTask = FikaRequestHandler.GetPublicIP();
+                WanIP = await FikaRequestHandler.GetPublicIP();
             }
             catch (Exception ex)
             {
-                NotificationManagerClass.DisplayWarningNotification("Failed to get external IP address");
                 Logger.LogError($"RunChecks: {ex.Message}");
-                addressTask = null;
             }
 
-            if (addressTask != null)
-            {
-                while (!addressTask.IsCompleted)
-                {
-                    yield return null;
-                }
-
-                WanIP = addressTask.Result;
-            }
-
-            yield return new WaitForSeconds(5);
+            await Task.Delay(5000);
 #if !DEBUG
             VerifyServerVersion(); 
 #endif
@@ -427,7 +413,6 @@ namespace Fika.Core
 
             if (Crc32 == 0)
             {
-                MonoBehaviourSingleton<PreloaderUI>.Instance.ShowErrorScreen("CRC32 ERROR", LocaleUtils.UI_MOD_VERIFY_FAIL.Localized());
                 Logger.LogError($"RunChecks: {LocaleUtils.UI_MOD_VERIFY_FAIL.Localized()}");
             }
         }
