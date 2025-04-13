@@ -185,7 +185,8 @@ namespace Fika.Core.Coop.Players
                 !profile.IsHeadlessProfile() && Singleton<IFikaNetworkManager>.Instance.AllowVOIP) ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-                statisticsManager, observedQuestController, null, null, filter, player.VoipState, aiControl, false);
+                statisticsManager, observedQuestController, null,
+                null, filter, player.VoipState, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
