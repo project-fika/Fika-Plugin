@@ -57,6 +57,11 @@ namespace Fika.Core.Coop.ClientClasses
 
                 foreach (Item item in items)
                 {
+                    if (item.QuestItem)
+                    {
+                        continue;
+                    }
+
                     packet.ItemIdsToRemove.Add(item.Id);
                 }
 
