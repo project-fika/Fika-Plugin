@@ -77,7 +77,7 @@ namespace Fika.Core
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
-        private static readonly Version RequiredServerVersion = new("2.4.3");
+        private static readonly Version RequiredServerVersion = new("2.4.6");
 
         public static HeadlessRequesterWebSocket HeadlessRequesterWebSocket { get; set; }
 
