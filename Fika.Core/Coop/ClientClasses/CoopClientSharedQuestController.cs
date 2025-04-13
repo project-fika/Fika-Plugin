@@ -13,7 +13,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 namespace Fika.Core.Coop.ClientClasses
 {
     public sealed class CoopClientSharedQuestController(Profile profile, InventoryController inventoryController,
-        IPlayerSearchController searchController, IQuestActions session, CoopPlayer player) : GClass3702(profile, inventoryController, searchController, session)
+        IPlayerSearchController searchController, IQuestActions session, CoopPlayer player) : CoopClientQuestController(profile, inventoryController, searchController, session)
     {
         private readonly CoopPlayer player = player;
         private readonly List<string> lastFromNetwork = [];

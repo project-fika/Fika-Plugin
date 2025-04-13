@@ -108,7 +108,7 @@ namespace Fika.Core.Coop.Players
             }
             else
             {
-                questController = new GClass3702(profile, inventoryController, inventoryController.PlayerSearchController, session);
+                questController = new CoopClientQuestController(profile, inventoryController, inventoryController.PlayerSearchController, session);
             }
             questController.Init();
             GClass3706 achievementsController = new(profile, inventoryController, questController.Quests, session, true);
