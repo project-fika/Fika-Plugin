@@ -7,7 +7,6 @@ using EFT.Interactive.SecretExfiltrations;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Utils;

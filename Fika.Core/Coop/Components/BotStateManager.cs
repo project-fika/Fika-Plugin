@@ -1,9 +1,7 @@
 ﻿using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
-using Fika.Core.Jobs;
 using Fika.Core.Networking;
 using System.Collections.Generic;
-using Unity.Jobs;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Components

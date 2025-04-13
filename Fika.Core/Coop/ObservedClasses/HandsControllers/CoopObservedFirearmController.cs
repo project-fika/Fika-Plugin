@@ -4,7 +4,6 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using System;
 using System.Collections;

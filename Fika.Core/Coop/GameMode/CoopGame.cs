@@ -29,8 +29,6 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
-using Fika.Core.Coop.PacketHandlers;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -639,7 +637,7 @@ namespace Fika.Core.Coop.GameMode
 
                 server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
                 HostLootItems = null;
-            }            
+            }
 
             DateTime dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
             new MatchmakerFinalCountdown.FinalCountdownScreenClass(Profile_0, dateTime).ShowScreen(EScreenState.Root);
@@ -728,7 +726,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogError("Could not find CoopHandler when trying to initialize player stashes for TransferItemsController!");
             }
 
-            
+
         }
 
         private void SyncTransitControllers()
@@ -1249,7 +1247,7 @@ namespace Fika.Core.Coop.GameMode
                 throw;
             }
 
-            await WaitForHostToStart();            
+            await WaitForHostToStart();
 
             LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
             if (isServer)

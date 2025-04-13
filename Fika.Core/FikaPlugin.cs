@@ -31,7 +31,6 @@ using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -66,7 +65,9 @@ namespace Fika.Core
                 return Logger;
             }
         }
-        public bool LocalesLoaded { get; internal set;
+        public bool LocalesLoaded
+        {
+            get; internal set;
         }
         public BotDifficulties BotDifficulties;
         public FikaModHandler ModHandler = new();
@@ -1429,7 +1430,7 @@ namespace Fika.Core
             Low,
             Medium,
             High
-        }        
+        }
 
         [Flags]
         public enum EQuestSharingTypes

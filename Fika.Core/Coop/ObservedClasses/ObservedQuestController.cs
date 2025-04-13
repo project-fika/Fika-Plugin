@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.Hideout;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Packets.Backend;
