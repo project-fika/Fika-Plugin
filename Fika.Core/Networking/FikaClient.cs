@@ -26,6 +26,7 @@ using Fika.Core.Jobs;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -270,8 +271,20 @@ namespace Fika.Core.Networking
             RegisterPacket<SideEffectPacket>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket>(OnRequestPacketReceived);
             RegisterPacket<CharacterSyncPacket>(OnCharacterSyncPacketReceived);
+            RegisterPacket<InraidQuestPacket>(OnInraidQuestPacketReceived);
 
             RegisterReusable<WorldPacket>(OnWorldPacketReceived);
+        }
+
+        private void OnInraidQuestPacketReceived(InraidQuestPacket packet)
+        {
+            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            {
+                if (player.AbstractQuestControllerClass is ObservedQuestController controller)
+                {
+                    controller.HandleInraidQuestPacket(packet);
+                }
+            }
         }
 
         private void OnCharacterSyncPacketReceived(CharacterSyncPacket packet)

@@ -18,7 +18,6 @@ using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -27,6 +26,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -400,8 +400,21 @@ namespace Fika.Core.Networking
             RegisterPacket<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket, NetPeer>(OnRequestPacketReceived);
             RegisterPacket<NetworkSettingsPacket, NetPeer>(OnNetworkSettingsPacketReceived);
+            RegisterPacket<InraidQuestPacket, NetPeer>(OnInraidQuestPacketReceived);
 
             RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
+        }
+
+        private void OnInraidQuestPacketReceived(InraidQuestPacket packet, NetPeer peer)
+        {
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            {
+                if (player.AbstractQuestControllerClass is ObservedQuestController controller)
+                {
+                    controller.HandleInraidQuestPacket(packet);
+                }
+            }
         }
 
         private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet, NetPeer peer)
