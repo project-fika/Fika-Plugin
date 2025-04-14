@@ -37,24 +37,19 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
         {
+            List<string> itemIds = [];
             bool hasNonQuestItem = false;
             foreach (Item item in items)
             {
-                if (item.QuestItem)
+                if (!item.QuestItem)
                 {
                     hasNonQuestItem = true;
                     break;
                 }
             }
+
             if (hasNonQuestItem)
             {
-                InraidQuestPacket packet = new()
-                {
-                    NetId = player.NetId,
-                    Type = InraidQuestPacket.InraidQuestType.Handover,
-                    ItemIdsToRemove = []
-                };
-
                 foreach (Item item in items)
                 {
                     if (item.QuestItem)
@@ -62,12 +57,24 @@ namespace Fika.Core.Coop.ClientClasses
                         continue;
                     }
 
-                    packet.ItemIdsToRemove.Add(item.Id);
-                }
+                    itemIds.Add(item.Id);
+                } 
+            }
+
+            Task<IResult> result = base.HandoverItem(quest, condition, items, runNetworkTransaction);
+            if (result.Result.Succeed && hasNonQuestItem)
+            {
+                
+                InraidQuestPacket packet = new()
+                {
+                    NetId = player.NetId,
+                    Type = InraidQuestPacket.InraidQuestType.Handover,
+                    ItemIdsToRemove = itemIds
+                };
 
                 player.PacketSender.SendPacket(ref packet);
             }
-            return base.HandoverItem(quest, condition, items, runNetworkTransaction);
+            return result;
         }
     }
 }
