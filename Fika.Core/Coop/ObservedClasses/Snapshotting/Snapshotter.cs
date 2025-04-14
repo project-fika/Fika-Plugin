@@ -41,11 +41,11 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// <summary>
         /// Checks the <see cref="buffer"/> and <see cref="ObservedCoopPlayer.Interpolate(ref PlayerStatePacket, ref PlayerStatePacket, double)"/>s any snapshots
         /// </summary>
-        public void ManualUpdate()
+        public void ManualUpdate(float unscaledDeltaTime)
         {
             if (buffer.Count > 0)
             {
-                SnapshotInterpolation.Step(buffer, Time.unscaledDeltaTime, ref localTimeline, localTimeScale, out T fromSnapshot,
+                SnapshotInterpolation.Step(buffer, unscaledDeltaTime, ref localTimeline, localTimeScale, out T fromSnapshot,
                     out T toSnapshot, out double ratio);
                 Interpolate(toSnapshot, fromSnapshot, (float)ratio);
             }
@@ -69,6 +69,11 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             if (buffer.Count > interpolationSettings.bufferLimit)
             {
                 buffer.Clear();
+            }
+
+            if (buffer.Count == interpolationSettings.bufferLimit)
+            {
+                buffer.RemoveAt(0);
             }
 
             snapshot.LocalTime = NetworkTimeSync.NetworkTime;
