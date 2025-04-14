@@ -10,7 +10,8 @@ namespace Fika.Core.Jobs
 
         public void Execute(int index)
         {
-            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[index].Snapshotter.ManualUpdate(_unscaledDeltaTime);
+            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[index]
+                .Snapshotter.ManualUpdate(_unscaledDeltaTime);
         }
     }
 }

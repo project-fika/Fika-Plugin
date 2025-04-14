@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// Inserts a snapshot to the <see cref="buffer"/>
         /// </summary>
         /// <param name="snapshot"></param>
-        public void Insert(T snapshot)
+        public void Insert(T snapshot, double networkTime)
         {
             //localTimeline > snapshot.RemoteTime
             if (buffer.Count > interpolationSettings.bufferLimit)
@@ -71,7 +71,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 buffer.Clear();
             }
 
-            snapshot.LocalTime = NetworkTimeSync.NetworkTime;
+            snapshot.LocalTime = networkTime;
 
             bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
                 deliveryTimeEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);

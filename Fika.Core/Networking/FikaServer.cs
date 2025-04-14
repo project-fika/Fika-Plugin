@@ -18,6 +18,7 @@ using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses;
+using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -1198,7 +1199,7 @@ namespace Fika.Core.Networking
         {
             netServer?.PollEvents();
             stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 16,
-                new HandlePlayerStates().Schedule(Snapshots.Count, 16));
+                new HandlePlayerStates(NetworkTimeSync.NetworkTime).Schedule(Snapshots.Count, 16));
 
             statisticsCounter++;
             if (statisticsCounter > 600)
