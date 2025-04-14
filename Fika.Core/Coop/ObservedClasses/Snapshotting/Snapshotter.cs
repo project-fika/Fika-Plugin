@@ -71,11 +71,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 buffer.Clear();
             }
 
-            if (buffer.Count == interpolationSettings.bufferLimit)
-            {
-                buffer.RemoveAt(0);
-            }
-
             snapshot.LocalTime = NetworkTimeSync.NetworkTime;
 
             bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
