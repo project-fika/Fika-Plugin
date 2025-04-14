@@ -1196,7 +1196,7 @@ namespace Fika.Core.Coop.Players
 
             Inventory inventory = new GClass1685()
             {
-                Equipment = inventoryDescriptor,
+                Equipment = inventoryDescriptor
             }.ToInventory();
 
             InventoryController.ReplaceInventory(inventory);
