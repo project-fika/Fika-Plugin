@@ -526,9 +526,7 @@ namespace Fika.Core
                     {
                         LastVersion.Value = FikaVersion;
                     });
-
-                
-            } 
+            }
 #endif
 
             // Advanced
