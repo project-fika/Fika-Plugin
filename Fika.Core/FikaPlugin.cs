@@ -65,10 +65,7 @@ namespace Fika.Core
                 return Logger;
             }
         }
-        public bool LocalesLoaded
-        {
-            get; internal set;
-        }
+        public bool LocalesLoaded { get; internal set; }
         public BotDifficulties BotDifficulties;
         public FikaModHandler ModHandler = new();
         public string[] LocalIPs;
@@ -408,7 +405,7 @@ namespace Fika.Core
 
             await Task.Delay(5000);
 #if !DEBUG
-            VerifyServerVersion(); 
+            VerifyServerVersion();
 #endif
             ModHandler.VerifyMods();
 
