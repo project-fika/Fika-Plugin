@@ -16,23 +16,29 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override Task<GStruct455<GStruct397<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
+            List<GClass1319[]> items = [];
+            bool hasRewards = false;
             if (quest.Rewards.TryGetValue(EQuestStatus.Success, out IReadOnlyList<GClass3743> list))
+            {
+                hasRewards = true;
+                foreach (GClass3743 item in list)
+                {
+                    items.Add(item.items);
+                }
+            }
+            Task<GStruct455<GStruct397<QuestClass>>> finishResult = base.FinishQuest(quest, runNetworkTransaction);
+            if (finishResult.Result.Succeeded && hasRewards)
             {
                 InraidQuestPacket packet = new()
                 {
                     NetId = player.NetId,
                     Type = InraidQuestPacket.InraidQuestType.Finish,
-                    Items = []
+                    Items = items
                 };
-
-                foreach (GClass3743 item in list)
-                {
-                    packet.Items.Add(item.items);
-                }
 
                 player.PacketSender.SendPacket(ref packet);
             }
-            return base.FinishQuest(quest, runNetworkTransaction);
+            return finishResult;
         }
 
         public override Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
@@ -61,8 +67,8 @@ namespace Fika.Core.Coop.ClientClasses
                 } 
             }
 
-            Task<IResult> result = base.HandoverItem(quest, condition, items, runNetworkTransaction);
-            if (result.Result.Succeed && hasNonQuestItem)
+            Task<IResult> handoverResult = base.HandoverItem(quest, condition, items, runNetworkTransaction);
+            if (handoverResult.Result.Succeed && hasNonQuestItem)
             {
                 
                 InraidQuestPacket packet = new()
@@ -74,7 +80,7 @@ namespace Fika.Core.Coop.ClientClasses
 
                 player.PacketSender.SendPacket(ref packet);
             }
-            return result;
+            return handoverResult;
         }
     }
 }
