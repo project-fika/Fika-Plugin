@@ -14,7 +14,7 @@ namespace Fika.Core.Coop.ClientClasses
     {
         protected readonly CoopPlayer player = player;
 
-        public override Task<GStruct455<GStruct397<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
+        public override async Task<GStruct455<GStruct397<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
             List<GClass1319[]> items = [];
             bool hasRewards = false;
@@ -23,11 +23,15 @@ namespace Fika.Core.Coop.ClientClasses
                 hasRewards = true;
                 foreach (GClass3743 item in list)
                 {
+                    if (item.type != ERewardType.Item)
+                    {
+                        continue;
+                    }
                     items.Add(item.items);
                 }
             }
-            Task<GStruct455<GStruct397<QuestClass>>> finishResult = base.FinishQuest(quest, runNetworkTransaction);
-            if (finishResult.Result.Succeeded && hasRewards)
+            GStruct455<GStruct397<QuestClass>> finishResult = await base.FinishQuest(quest, runNetworkTransaction);
+            if (finishResult.Succeeded && hasRewards)
             {
                 InraidQuestPacket packet = new()
                 {
@@ -41,7 +45,7 @@ namespace Fika.Core.Coop.ClientClasses
             return finishResult;
         }
 
-        public override Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
+        public override async Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
         {
             List<string> itemIds = [];
             bool hasNonQuestItem = false;
@@ -67,8 +71,8 @@ namespace Fika.Core.Coop.ClientClasses
                 } 
             }
 
-            Task<IResult> handoverResult = base.HandoverItem(quest, condition, items, runNetworkTransaction);
-            if (handoverResult.Result.Succeed && hasNonQuestItem)
+            IResult handoverResult = await base.HandoverItem(quest, condition, items, runNetworkTransaction);
+            if (handoverResult.Succeed && hasNonQuestItem)
             {
                 
                 InraidQuestPacket packet = new()
