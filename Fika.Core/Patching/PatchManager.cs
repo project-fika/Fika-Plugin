@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static EFT.ScenesPreset;
 
 namespace Fika.Core.Patching
 {
@@ -28,6 +29,23 @@ namespace Fika.Core.Patching
         {
             _patcherName = unityPlugin.Info.Metadata.Name + " PatchManager";
             _harmony = new(unityPlugin.Info.Metadata.GUID);
+            _autoPatch = autoPatch;
+            _patches = [];
+            _logger = Logger.CreateLogSource(_patcherName);
+        }
+
+        public PatchManager(string guid, string pluginName)
+        {
+            _patcherName = pluginName + " PatchManager";
+            _harmony = new(guid);
+            _patches = [];
+            _logger = Logger.CreateLogSource(_patcherName);
+        }
+
+        public PatchManager(string guid, string pluginName, bool autoPatch)
+        {
+            _patcherName = pluginName + " PatchManager";
+            _harmony = new(guid);
             _autoPatch = autoPatch;
             _patches = [];
             _logger = Logger.CreateLogSource(_patcherName);
