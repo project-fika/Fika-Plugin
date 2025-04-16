@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
         }
 
-        [DebugPatch]
+        /*[DebugPatch]
         internal class zryachiydebugpatch1 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
@@ -132,6 +132,6 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             {
                 FikaPlugin.Instance.FikaLogger.LogWarning($"BossSpawnerClass.Class324.method_0: State {owner.BotState}, role {owner.Profile.Info.Settings.Role}");
             }
-        }
+        }*/
     }
 }
