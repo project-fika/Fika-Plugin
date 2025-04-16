@@ -29,12 +29,14 @@ namespace Fika.Core.Coop.Patches
             if (player is ObservedCoopPlayer observedPlayer)
             {
                 __result = ObservedGoOut(__instance, observedPlayer, side, fast);
+                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(observedPlayer);
                 return false;
             }
 
             if (player.IsYourPlayer)
             {
                 CoopPlayer myPlayer = (CoopPlayer)player;
+                myPlayer.PacketSender.SendState = true;
                 if (FikaBackendUtils.IsServer)
                 {
                     BTRInteractionPacket packet = new(myPlayer.NetId)

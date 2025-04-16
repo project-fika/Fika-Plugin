@@ -8,6 +8,7 @@ namespace Fika.Core.Coop.PacketHandlers
     public interface IPacketSender
     {
         public bool Enabled { get; set; }
+        public bool SendState { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 

@@ -15,6 +15,7 @@ namespace Fika.Core.Coop.PacketHandlers
         private CoopPlayer player;
         private bool isServer;
         public bool Enabled { get; set; }
+        public bool SendState { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 

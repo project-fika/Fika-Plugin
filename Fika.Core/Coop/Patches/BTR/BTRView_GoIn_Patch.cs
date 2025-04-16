@@ -30,15 +30,17 @@ namespace Fika.Core.Coop.Patches
             if (player is ObservedCoopPlayer observedPlayer)
             {
                 __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
+                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(observedPlayer);
                 return false;
             }
 
             if (player.IsYourPlayer)
             {
+                CoopPlayer myPlayer = (CoopPlayer)player;
+                myPlayer.PacketSender.SendState = false;
                 player.InputDirection = new(0, 0);
                 if (isServer)
                 {
-                    CoopPlayer myPlayer = (CoopPlayer)player;
                     BTRInteractionPacket packet = new(myPlayer.NetId)
                     {
                         Data = new()
