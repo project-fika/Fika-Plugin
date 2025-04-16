@@ -1,6 +1,6 @@
 ﻿using EFT;
 using Fika.Core.Coop.GameMode;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Patches
     /// <summary>
     /// Used to prevent players from getting everyone elses BTR items
     /// </summary>
-    public class BaseLocalGame_method_13_Patch : ModulePatch
+    public class BaseLocalGame_method_13_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

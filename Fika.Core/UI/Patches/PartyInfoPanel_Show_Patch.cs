@@ -1,11 +1,11 @@
 ﻿using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
 {
-    public class PartyInfoPanel_Show_Patch : ModulePatch
+    public class PartyInfoPanel_Show_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

@@ -1,11 +1,11 @@
 ﻿using EFT;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
 {
-    public class MatchmakerOfflineRaidScreen_Close_Patch : ModulePatch
+    public class MatchmakerOfflineRaidScreen_Close_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

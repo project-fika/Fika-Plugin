@@ -1,10 +1,10 @@
-﻿using SPT.Reflection.Patching;
+﻿using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class WeaponManagerClass_method_13_Patch : ModulePatch
+    public class WeaponManagerClass_method_13_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

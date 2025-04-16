@@ -4,7 +4,7 @@ using EFT.UI;
 using Fika.Core.Networking.Http;
 using Fika.Core.Utils;
 using Newtonsoft.Json.Linq;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +16,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
-    public class MenuTaskBar_Patch : ModulePatch
+    public class MenuTaskBar_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

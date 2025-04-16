@@ -2,12 +2,12 @@
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class BodyPartCollider_SetUpPlayer_Patch : ModulePatch
+    public class BodyPartCollider_SetUpPlayer_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

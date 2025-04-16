@@ -1,11 +1,11 @@
-﻿using SPT.Reflection.Patching;
+﻿using Fika.Core.Patching;
 using System;
 using System.Reflection;
 using UnityEngine;
 
 namespace Fika.Core.Coop.FreeCamera.Patches
 {
-    public class DeathFade_Patch : ModulePatch
+    public class DeathFade_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

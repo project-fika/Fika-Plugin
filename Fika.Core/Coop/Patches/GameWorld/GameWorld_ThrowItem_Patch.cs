@@ -3,13 +3,13 @@ using EFT.Interactive;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GameWorld_ThrowItem_Patch : ModulePatch
+    public class GameWorld_ThrowItem_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

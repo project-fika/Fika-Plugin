@@ -3,13 +3,13 @@ using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GameWorld_Create_Patch : ModulePatch
+    public class GameWorld_Create_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

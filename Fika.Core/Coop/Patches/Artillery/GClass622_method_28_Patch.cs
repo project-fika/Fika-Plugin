@@ -1,9 +1,9 @@
-﻿using SPT.Reflection.Patching;
+﻿using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass622_method_28_Patch : ModulePatch
+    public class GClass622_method_28_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

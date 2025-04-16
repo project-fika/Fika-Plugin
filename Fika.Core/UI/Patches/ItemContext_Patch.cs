@@ -4,10 +4,10 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Networking.Http;
+using Fika.Core.Patching;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using HarmonyLib;
-using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,7 +17,8 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
-    public class ItemContext_Patch : ModulePatch
+    [IgnoreAutoPatch]
+    public class ItemContext_Patch : FikaPatch
     {
         private static int lastIndex = 0;
 

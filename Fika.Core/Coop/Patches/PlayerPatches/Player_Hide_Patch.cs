@@ -1,10 +1,10 @@
 ﻿using EFT;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class Player_Hide_Patch : ModulePatch
+    public class Player_Hide_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

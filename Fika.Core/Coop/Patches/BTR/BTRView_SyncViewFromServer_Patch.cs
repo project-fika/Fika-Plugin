@@ -3,12 +3,12 @@ using EFT.Vehicle;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class BTRView_SyncViewFromServer_Patch : ModulePatch
+    public class BTRView_SyncViewFromServer_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

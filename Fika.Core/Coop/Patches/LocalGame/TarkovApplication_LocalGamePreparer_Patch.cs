@@ -3,7 +3,7 @@ using EFT.Communications;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Patches
     /// <summary>
     /// Created by: Lacyway
     /// </summary>
-    internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
+    internal class TarkovApplication_LocalGamePreparer_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

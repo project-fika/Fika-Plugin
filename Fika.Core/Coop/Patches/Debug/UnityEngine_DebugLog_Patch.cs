@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -9,11 +9,12 @@ namespace Fika.Core.Coop.Patches
     {
         public static void Enable()
         {
-            new TasksExtensions_HandleFinishedTask_Patch1().Enable();
-            new TasksExtensions_HandleFinishedTask_Patch2().Enable();
+            /*new TasksExtensions_HandleFinishedTask_Patch1().Enable();
+            new TasksExtensions_HandleFinishedTask_Patch2().Enable();*/
         }
 
-        internal class TasksExtensions_HandleFinishedTask_Patch1 : ModulePatch
+        [DebugPatch]
+        internal class TasksExtensions_HandleFinishedTask_Patch1 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -32,7 +33,8 @@ namespace Fika.Core.Coop.Patches
             }
         }
 
-        internal class TasksExtensions_HandleFinishedTask_Patch2 : ModulePatch
+        [DebugPatch]
+        internal class TasksExtensions_HandleFinishedTask_Patch2 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {

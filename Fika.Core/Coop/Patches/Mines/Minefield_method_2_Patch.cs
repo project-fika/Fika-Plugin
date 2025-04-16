@@ -4,7 +4,7 @@ using EFT.Interactive;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +15,7 @@ namespace Fika.Core.Coop.Patches
     /// <summary>
     /// This patch prevents a null exception when an <see cref="ObservedCoopPlayer"/> is hit by a mine explosion
     /// </summary>
-    internal class Minefield_method_2_Patch : ModulePatch
+    internal class Minefield_method_2_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

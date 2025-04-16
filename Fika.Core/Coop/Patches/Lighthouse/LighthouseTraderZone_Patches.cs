@@ -3,7 +3,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -15,12 +15,13 @@ namespace Fika.Core.Coop.Patches
     {
         public static void Enable()
         {
-            new LighthouseTraderZone_AddPlayer_Patch().Enable();
+            /*new LighthouseTraderZone_AddPlayer_Patch().Enable();
             new LighthouseTraderZone_RemovePlayer_Patch().Enable();
-            new LighthouseTraderZone_Awake_Patch().Enable();
+            new LighthouseTraderZone_Awake_Patch().Enable();*/
         }
 
-        internal class LighthouseTraderZone_AddPlayer_Patch : ModulePatch
+        [DebugPatch]
+        internal class LighthouseTraderZone_AddPlayer_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -84,7 +85,8 @@ namespace Fika.Core.Coop.Patches
             }
         }
 
-        internal class LighthouseTraderZone_RemovePlayer_Patch : ModulePatch
+        [DebugPatch]
+        internal class LighthouseTraderZone_RemovePlayer_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -128,7 +130,8 @@ namespace Fika.Core.Coop.Patches
             }
         }
 
-        internal class LighthouseTraderZone_Awake_Patch : ModulePatch
+        [DebugPatch]
+        internal class LighthouseTraderZone_Awake_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {

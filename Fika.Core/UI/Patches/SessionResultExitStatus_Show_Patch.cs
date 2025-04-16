@@ -2,13 +2,13 @@
 using EFT.UI;
 using EFT.UI.SessionEnd;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
 {
-    public class SessionResultExitStatus_Show_Patch : ModulePatch
+    public class SessionResultExitStatus_Show_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

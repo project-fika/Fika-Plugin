@@ -1,11 +1,11 @@
 ﻿using EFT.UI.Ragfair;
 using Fika.Core.UI.Custom;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
 {
-    public class RagfairScreen_Show_Patch : ModulePatch
+    public class RagfairScreen_Show_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

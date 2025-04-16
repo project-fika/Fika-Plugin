@@ -1,7 +1,7 @@
 ﻿using EFT;
 using EFT.Vehicle;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -11,17 +11,9 @@ namespace Fika.Core.Coop.Patches
 {
     class BTRSide_Patches
     {
-        public static List<ValueTuple<BTRSide, Player, int>> Passengers;
+        public static List<ValueTuple<BTRSide, Player, int>> Passengers = [];
 
-        public static void Enable()
-        {
-            new BTRSide_AddPassenger_Patch().Enable();
-            new BTRSide_RemovePassenger_Patch().Enable();
-            new BTRSide_method_9_Patch().Enable();
-            Passengers = [];
-        }
-
-        public class BTRSide_AddPassenger_Patch : ModulePatch
+        public class BTRSide_AddPassenger_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -44,7 +36,7 @@ namespace Fika.Core.Coop.Patches
             }
         }
 
-        public class BTRSide_RemovePassenger_Patch : ModulePatch
+        public class BTRSide_RemovePassenger_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -73,7 +65,7 @@ namespace Fika.Core.Coop.Patches
             }
         }
 
-        public class BTRSide_method_9_Patch : ModulePatch
+        public class BTRSide_method_9_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {

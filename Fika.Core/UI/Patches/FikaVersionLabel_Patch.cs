@@ -1,9 +1,9 @@
 ﻿using EFT.UI;
+using Fika.Core.Patching;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Common.Utils;
 using SPT.Custom.Models;
-using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.EssentialPatches
@@ -11,7 +11,7 @@ namespace Fika.Core.EssentialPatches
     /// <summary>
     /// Originally developed by SPT team
     /// </summary>
-    public class FikaVersionLabel_Patch : ModulePatch
+    public class FikaVersionLabel_Patch : FikaPatch
     {
         private static string versionLabel;
         private static Traverse versionNumberTraverse;
@@ -59,7 +59,7 @@ namespace Fika.Core.EssentialPatches
 #if DEBUG
                 preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} (DEBUG) | {versionLabel}");
 #else
-				preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} | {versionLabel}");
+                preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} | {versionLabel}");
 #endif
                 versionNumberTraverse.Field("Major").SetValue($"{FikaPlugin.FikaVersion} {versionLabel}");
             }

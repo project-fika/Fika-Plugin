@@ -1,7 +1,7 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
@@ -10,7 +10,8 @@ namespace Fika.Core.Coop.Patches
     /// Borrowed from Tyfon's UI Fixes with permission, a patch that fixes a bug if you inspect a player during loading when the controller is instantiated <br/><br/>
     /// Source code here: <see href="https://github.com/tyfon7/UIFixes/blob/main/src/Patches/FixPlayerInspectPatch.cs"/>
     /// </summary>
-    public class PartyInfoPanel_method_3_Patch : ModulePatch
+    [IgnoreAutoPatch]
+    public class PartyInfoPanel_method_3_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

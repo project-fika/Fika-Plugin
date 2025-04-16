@@ -1,11 +1,11 @@
 ﻿using EFT.CameraControl;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 using UnityEngine;
 
 namespace Fika.Core.Coop.Patches.Camera
 {
-    public class OpticRetrice_UpdateTransform_Patch : ModulePatch
+    public class OpticRetrice_UpdateTransform_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

@@ -1,10 +1,10 @@
-﻿using SPT.Reflection.Patching;
+﻿using Fika.Core.Patching;
 using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Patches
 {
-    internal class Class1391_ReloadBackendLocale_Patch : ModulePatch
+    internal class Class1391_ReloadBackendLocale_Patch : FikaPatch
     {
         private static bool HasBeenSet = false;
 

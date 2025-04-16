@@ -1,13 +1,13 @@
 ﻿using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Newtonsoft.Json;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 {
-    public class MatchmakerAcceptScreen_Awake_Patch : ModulePatch
+    public class MatchmakerAcceptScreen_Awake_Patch : FikaPatch
     {
         [Serializable]
         private class ServerStatus
