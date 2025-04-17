@@ -1206,16 +1206,16 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                BackendConfigSettingsClass.GClass1506 runddansSettings = instance.runddansSettings;
+                BackendConfigSettingsClass.GClass1510 runddansSettings = instance.runddansSettings;
                 runddansActive = runddansSettings != null && runddansSettings.active;
             }
             if (runddansActive)
             {
-                gameWorld.RunddansController = new GClass2046(instance.runddansSettings, Location_0);
+                gameWorld.RunddansController = new GClass2052 (instance.runddansSettings, Location_0);
             }
             else
             {
-                GClass2045.ToggleEventEnvironment(false);
+                GClass2050.ToggleEventEnvironment(false);
             }*/
 
             GClass2050.ToggleEventEnvironment(false);
