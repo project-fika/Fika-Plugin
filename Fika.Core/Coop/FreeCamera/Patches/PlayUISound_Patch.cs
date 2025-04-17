@@ -1,11 +1,11 @@
 ﻿using EFT.UI;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.FreeCamera.Patches
 {
-    public class PlayUISound_Patch : ModulePatch
+    public class PlayUISound_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

@@ -4,11 +4,14 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs
 {
-    internal struct UpdateInterpolators : IJobParallelFor
+    internal struct UpdateInterpolators(float unscaledDeltaTime) : IJobParallelFor
     {
+        public float _unscaledDeltaTime = unscaledDeltaTime;
+
         public void Execute(int index)
         {
-            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[index].Snapshotter.ManualUpdate();
+            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[index]
+                .Snapshotter.ManualUpdate(_unscaledDeltaTime);
         }
     }
 }

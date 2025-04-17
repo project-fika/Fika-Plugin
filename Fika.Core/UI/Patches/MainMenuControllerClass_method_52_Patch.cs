@@ -1,4 +1,4 @@
-﻿using SPT.Reflection.Patching;
+﻿using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
@@ -6,7 +6,7 @@ namespace Fika.Core.UI.Patches
     /// <summary>
     /// This allows all game editions to edit the <see cref="EFT.RaidSettings"/>
     /// </summary>
-    public class MainMenuControllerClass_method_52_Patch : ModulePatch
+    public class MainMenuControllerClass_method_52_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

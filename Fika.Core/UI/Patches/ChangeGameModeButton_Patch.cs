@@ -1,5 +1,5 @@
 ﻿using EFT.UI;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -8,7 +8,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
-    public class ChangeGameModeButton_Patch : ModulePatch
+    public class ChangeGameModeButton_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

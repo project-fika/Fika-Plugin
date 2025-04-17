@@ -1,14 +1,14 @@
 ﻿using Comfort.Common;
 using EFT;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Patches
 {
-    internal class BTRControllerClass_Init_Patch : ModulePatch
+    internal class BTRControllerClass_Init_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

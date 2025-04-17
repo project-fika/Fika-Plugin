@@ -18,7 +18,6 @@ using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.Factories;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.ObservedClasses;
-using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -26,6 +25,7 @@ using Fika.Core.Jobs;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -270,8 +270,20 @@ namespace Fika.Core.Networking
             RegisterPacket<SideEffectPacket>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket>(OnRequestPacketReceived);
             RegisterPacket<CharacterSyncPacket>(OnCharacterSyncPacketReceived);
+            RegisterPacket<InraidQuestPacket>(OnInraidQuestPacketReceived);
 
             RegisterReusable<WorldPacket>(OnWorldPacketReceived);
+        }
+
+        private void OnInraidQuestPacketReceived(InraidQuestPacket packet)
+        {
+            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            {
+                if (player.AbstractQuestControllerClass is ObservedQuestController controller)
+                {
+                    controller.HandleInraidQuestPacket(packet);
+                }
+            }
         }
 
         private void OnCharacterSyncPacketReceived(CharacterSyncPacket packet)
@@ -1010,7 +1022,7 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             netClient?.PollEvents();
-            stateHandle = new UpdateInterpolators().Schedule(ObservedCoopPlayers.Count, 16,
+            stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 16,
                 new HandlePlayerStates().Schedule(Snapshots.Count, 16));
 
             int inventoryOps = inventoryOperations.Count;

@@ -3,13 +3,13 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Fika.Core.UI.Custom;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
 {
-    public class MatchmakerAcceptScreen_Show_Patch : ModulePatch
+    public class MatchmakerAcceptScreen_Show_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

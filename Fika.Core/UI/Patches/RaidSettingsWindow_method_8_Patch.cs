@@ -1,6 +1,6 @@
 ﻿using EFT.UI;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -10,7 +10,7 @@ namespace Fika.Core.UI.Patches
     /// <summary>
     /// This allows the user to modify all AI settings even after modifying AI amount / difficulty
     /// </summary>
-    public class RaidSettingsWindow_method_8_Patch : ModulePatch
+    public class RaidSettingsWindow_method_8_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

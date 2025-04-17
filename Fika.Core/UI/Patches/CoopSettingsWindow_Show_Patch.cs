@@ -1,12 +1,12 @@
 ﻿using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
 {
-    public class CoopSettingsWindow_Show_Patch : ModulePatch
+    public class CoopSettingsWindow_Show_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

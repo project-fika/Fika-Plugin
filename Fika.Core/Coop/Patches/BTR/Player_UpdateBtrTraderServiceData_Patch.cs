@@ -1,12 +1,12 @@
 ﻿using EFT;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class Player_UpdateBtrTraderServiceData_Patch : ModulePatch
+    public class Player_UpdateBtrTraderServiceData_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

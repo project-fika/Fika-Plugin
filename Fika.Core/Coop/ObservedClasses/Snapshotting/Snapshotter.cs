@@ -41,11 +41,11 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// <summary>
         /// Checks the <see cref="buffer"/> and <see cref="ObservedCoopPlayer.Interpolate(ref PlayerStatePacket, ref PlayerStatePacket, double)"/>s any snapshots
         /// </summary>
-        public void ManualUpdate()
+        public void ManualUpdate(float unscaledDeltaTime)
         {
             if (buffer.Count > 0)
             {
-                SnapshotInterpolation.Step(buffer, Time.unscaledDeltaTime, ref localTimeline, localTimeScale, out T fromSnapshot,
+                SnapshotInterpolation.Step(buffer, unscaledDeltaTime, ref localTimeline, localTimeScale, out T fromSnapshot,
                     out T toSnapshot, out double ratio);
                 Interpolate(toSnapshot, fromSnapshot, (float)ratio);
             }
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// Inserts a snapshot to the <see cref="buffer"/>
         /// </summary>
         /// <param name="snapshot"></param>
-        public void Insert(T snapshot)
+        public void Insert(T snapshot, double networkTime)
         {
             //localTimeline > snapshot.RemoteTime
             if (buffer.Count > interpolationSettings.bufferLimit)
@@ -71,7 +71,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 buffer.Clear();
             }
 
-            snapshot.LocalTime = NetworkTimeSync.NetworkTime;
+            snapshot.LocalTime = networkTime;
 
             bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(sendInterval,
                 deliveryTimeEma.StandardDeviation, interpolationSettings.dynamicAdjustmentTolerance);

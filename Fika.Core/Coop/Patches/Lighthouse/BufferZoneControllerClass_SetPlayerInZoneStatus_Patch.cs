@@ -3,12 +3,12 @@ using EFT.BufferZone;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : ModulePatch
+    public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

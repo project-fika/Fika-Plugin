@@ -1,10 +1,10 @@
 ﻿using EFT;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    internal class ScavProfileLoad_Override : ModulePatch
+    internal class ScavProfileLoad_Override : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

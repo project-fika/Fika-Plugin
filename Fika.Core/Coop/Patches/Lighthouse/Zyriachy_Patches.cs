@@ -1,28 +1,14 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches.Lighthouse
 {
     internal class Zyriachy_Patches
     {
-        public static void Enable()
-        {
-            new GClass436_Activate_Patch().Enable();
-
-#if DEBUG
-            /*new zryachiydebugpatch1().Enable();
-			new zryachiydebugpatch2().Enable();
-			new zryachiydebugpatch3().Enable();
-			new zryachiydebugpatch4().Enable();
-			new zryachiydebugpatch5().Enable();
-			new zryachiydebugpatch6().Enable();*/
-#endif
-        }
-
-        internal class GClass436_Activate_Patch : ModulePatch
+        internal class GClass436_Activate_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -43,7 +29,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
         }
 
-        internal class zryachiydebugpatch1 : ModulePatch
+        /*[DebugPatch]
+        internal class zryachiydebugpatch1 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -57,7 +44,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
         }
 
-        internal class zryachiydebugpatch2 : ModulePatch
+        [DebugPatch]
+        internal class zryachiydebugpatch2 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -81,7 +69,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
         }
 
-        internal class zryachiydebugpatch3 : ModulePatch
+        [DebugPatch]
+        internal class zryachiydebugpatch3 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -98,7 +87,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
         }
 
-        internal class zryachiydebugpatch4 : ModulePatch
+        [DebugPatch]
+        internal class zryachiydebugpatch4 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -112,7 +102,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
         }
 
-        internal class zryachiydebugpatch5 : ModulePatch
+        [DebugPatch]
+        internal class zryachiydebugpatch5 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -128,7 +119,8 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
         }
 
-        internal class zryachiydebugpatch6 : ModulePatch
+        [DebugPatch]
+        internal class zryachiydebugpatch6 : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -140,6 +132,6 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             {
                 FikaPlugin.Instance.FikaLogger.LogWarning($"BossSpawnerClass.Class324.method_0: State {owner.BotState}, role {owner.Profile.Info.Settings.Role}");
             }
-        }
+        }*/
     }
 }

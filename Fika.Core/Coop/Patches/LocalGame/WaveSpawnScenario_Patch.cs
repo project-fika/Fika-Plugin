@@ -1,11 +1,11 @@
 ﻿using EFT;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    internal class WaveSpawnScenario_Patch : ModulePatch
+    internal class WaveSpawnScenario_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod() => typeof(WavesSpawnScenario).GetMethod(nameof(WavesSpawnScenario.Run));
 

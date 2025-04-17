@@ -7,7 +7,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using LiteNetLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System;
 using System.Reflection;
 using System.Threading;
@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class BTRView_GoOut_Patch : ModulePatch
+    public class BTRView_GoOut_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -29,12 +29,14 @@ namespace Fika.Core.Coop.Patches
             if (player is ObservedCoopPlayer observedPlayer)
             {
                 __result = ObservedGoOut(__instance, observedPlayer, side, fast);
+                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(observedPlayer);
                 return false;
             }
 
             if (player.IsYourPlayer)
             {
                 CoopPlayer myPlayer = (CoopPlayer)player;
+                myPlayer.PacketSender.SendState = true;
                 if (FikaBackendUtils.IsServer)
                 {
                     BTRInteractionPacket packet = new(myPlayer.NetId)

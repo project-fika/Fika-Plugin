@@ -1,12 +1,12 @@
 ﻿using EFT;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass1675_method_9_Patch : ModulePatch
+    public class GClass1675_method_9_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

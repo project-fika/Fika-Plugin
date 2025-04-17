@@ -11,7 +11,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI.Custom;
 using HarmonyLib;
 using JsonType;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using SPT.SinglePlayer.Utils.InRaid;
 using System;
 using System.Reflection;
@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.Patches
     /// Created by: Paulov
     /// Paulov: Overwrite and use our own CoopGame instance instead
     /// </summary>
-    internal class TarkovApplication_LocalGameCreator_Patch : ModulePatch
+    internal class TarkovApplication_LocalGameCreator_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

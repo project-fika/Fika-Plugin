@@ -11,7 +11,8 @@ namespace Fika.Core.Coop.PacketHandlers
 {
     public class HeadlessPacketSender : MonoBehaviour, IPacketSender
     {
-        public bool Enabled { get; set; } = false;
+        public bool Enabled { get; set; }
+        public bool SendState { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
@@ -23,6 +24,8 @@ namespace Fika.Core.Coop.PacketHandlers
             sender.player = player;
             sender.Server = Singleton<FikaServer>.Instance;
             sender.enabled = false;
+            sender.Enabled = false;
+            sender.SendState = false;
             return sender;
         }
 

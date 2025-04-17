@@ -2,7 +2,7 @@
 
 using EFT.UI;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI
@@ -10,7 +10,7 @@ namespace Fika.Core.UI
     /// <summary>
     /// Created by: Lacyway
     /// </summary>
-    public class DisableReadyButton_Patch : ModulePatch
+    public class DisableReadyButton_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

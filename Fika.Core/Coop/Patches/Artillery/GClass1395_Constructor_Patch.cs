@@ -1,11 +1,11 @@
 ﻿using Fika.Core.Coop.GameMode;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass1395_Constructor_Patch : ModulePatch
+    public class GClass1395_Constructor_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

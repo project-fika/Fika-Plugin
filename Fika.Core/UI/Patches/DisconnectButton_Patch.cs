@@ -3,12 +3,12 @@ using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Utils;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
 {
-    public class DisconnectButton_Patch : ModulePatch
+    public class DisconnectButton_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

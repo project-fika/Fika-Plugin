@@ -5,12 +5,12 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    internal class BTRVehicle_method_38_Patch : ModulePatch
+    internal class BTRVehicle_method_38_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

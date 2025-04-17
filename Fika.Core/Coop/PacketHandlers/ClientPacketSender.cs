@@ -23,6 +23,7 @@ namespace Fika.Core.Coop.PacketHandlers
     public class ClientPacketSender : MonoBehaviour, IPacketSender
     {
         public bool Enabled { get; set; }
+        public bool SendState { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
@@ -73,6 +74,7 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             enabled = true;
             Enabled = true;
+            SendState = true;
             if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.LateInit();
@@ -91,7 +93,7 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void Update()
         {
-            if (player == null || Client == null || !Enabled)
+            if (!SendState)
             {
                 return;
             }

@@ -1,11 +1,11 @@
 ﻿using Comfort.Common;
 using Fika.Core.Coop.HostClasses;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass2461_UpdateOfflineClientLogic_Patch : ModulePatch
+    public class GClass2461_UpdateOfflineClientLogic_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

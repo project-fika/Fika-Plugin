@@ -176,7 +176,7 @@ namespace Fika.Core.Coop.Players
             ObservedQuestController observedQuestController = null;
             if (!aiControl)
             {
-                observedQuestController = new(profile, inventoryController, null);
+                observedQuestController = new(profile, inventoryController, inventoryController.PlayerSearchController, null);
                 observedQuestController.Init();
                 observedQuestController.Run();
             }
@@ -185,7 +185,8 @@ namespace Fika.Core.Coop.Players
                 !profile.IsHeadlessProfile() && Singleton<IFikaNetworkManager>.Instance.AllowVOIP) ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-                statisticsManager, observedQuestController, null, null, filter, player.VoipState, aiControl, false);
+                statisticsManager, observedQuestController, null,
+                null, filter, player.VoipState, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
@@ -1195,7 +1196,7 @@ namespace Fika.Core.Coop.Players
 
             Inventory inventory = new GClass1685()
             {
-                Equipment = inventoryDescriptor,
+                Equipment = inventoryDescriptor
             }.ToInventory();
 
             InventoryController.ReplaceInventory(inventory);
@@ -1571,7 +1572,7 @@ namespace Fika.Core.Coop.Players
             observedSlotViewHandlers.Clear();
             if (HealthController.IsAlive)
             {
-                if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this) && Profile.Nickname.StartsWith("headless_"))
+                if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
                 {
                     FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
                 }

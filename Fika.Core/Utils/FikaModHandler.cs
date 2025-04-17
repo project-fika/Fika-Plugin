@@ -6,6 +6,7 @@ using EFT;
 using EFT.UI;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Networking.Http;
+using Fika.Core.Patching;
 using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
@@ -38,7 +39,7 @@ namespace Fika.Core.Utils
             SPTCoreVersion = pluginInfo.Metadata.Version;
         }
 
-        public void VerifyMods()
+        public void VerifyMods(PatchManager manager)
         {
             PluginInfo[] pluginInfos = [.. Chainloader.PluginInfos.Values];
 
@@ -101,16 +102,16 @@ namespace Fika.Core.Utils
                 StaticManager.BeginCoroutine(InformInstallationError());
             }
 
-            HandleModSpecificPatches();
+            HandleModSpecificPatches(manager);
         }
 
-        private void HandleModSpecificPatches()
+        private void HandleModSpecificPatches(PatchManager manager)
         {
             // We only want to load this if UI Fixes is not loaded
             if (!UIFixesLoaded)
             {
                 logger.LogInfo("UI Fixes is not loaded, enabling PartyInfoPanel fix");
-                new PartyInfoPanel_method_3_Patch().Enable();
+                manager.EnablePatch(new PartyInfoPanel_method_3_Patch());
             }
         }
 

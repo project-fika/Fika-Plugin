@@ -12,6 +12,7 @@ namespace Fika.Core.Coop.PacketHandlers
     public class BotPacketSender : MonoBehaviour, IPacketSender
     {
         public bool Enabled { get; set; }
+        public bool SendState { get; set; }
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
@@ -35,6 +36,7 @@ namespace Fika.Core.Coop.PacketHandlers
             sender.Server = Singleton<FikaServer>.Instance;
             sender.state = new(bot.NetId);
             sender.Enabled = true;
+            sender.SendState = true;
             return sender;
         }
 

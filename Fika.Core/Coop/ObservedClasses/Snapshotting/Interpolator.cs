@@ -1,6 +1,4 @@
-﻿using Fika.Core.Coop.Utils;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotting

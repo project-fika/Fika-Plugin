@@ -17,6 +17,7 @@ using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
+using Fika.Core.Patching;
 using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
@@ -31,7 +32,6 @@ using SPT.SinglePlayer.Patches.ScavMode;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -55,7 +55,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.5";
+        public const string FikaVersion = "1.2.6";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -66,8 +66,7 @@ namespace Fika.Core
                 return Logger;
             }
         }
-        public bool LocalesLoaded { get; internal set;
-        }
+        public bool LocalesLoaded { get; internal set; }
         public BotDifficulties BotDifficulties;
         public FikaModHandler ModHandler = new();
         public string[] LocalIPs;
@@ -77,7 +76,8 @@ namespace Fika.Core
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
-        private static readonly Version RequiredServerVersion = new("2.4.3");
+        private static readonly Version RequiredServerVersion = new("2.4.6");
+        private PatchManager _patchManager;
 
         public static HeadlessRequesterWebSocket HeadlessRequesterWebSocket { get; set; }
 
@@ -235,13 +235,12 @@ namespace Fika.Core
         protected void Awake()
         {
             Instance = this;
+            _patchManager = new(this, true);
 
             GetNatPunchServerConfig();
             EnableFikaPatches();
-            EnableTranspilers();
             DisableSPTPatches();
             FixSPTBugPatches();
-            EnableOverridePatches();
 
             GetClientConfig();
 
@@ -258,10 +257,10 @@ namespace Fika.Core
 
             if (AllowItemSending)
             {
-                new ItemContext_Patch().Enable();
+                _patchManager.EnablePatch(new ItemContext_Patch());
             }
 
-            StartCoroutine(RunChecks());
+            _ = Task.Run(RunChecks);
         }
 
         private void SetupConfigEventHandlers()
@@ -269,101 +268,9 @@ namespace Fika.Core
             OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
         }
 
-        private static void EnableFikaPatches()
+        private void EnableFikaPatches()
         {
-            new FikaVersionLabel_Patch().Enable();
-            new TarkovApplication_method_18_Patch().Enable();
-            new DisableReadyButton_Patch().Enable();
-            new DisableInsuranceReadyButton_Patch().Enable();
-            new DisableMatchSettingsReadyButton_Patch().Enable();
-            new TarkovApplication_LocalGamePreparer_Patch().Enable();
-            new TarkovApplication_LocalGameCreator_Patch().Enable();
-            new DeathFade_Patch().Enable();
-            new NonWaveSpawnScenario_Patch().Enable();
-            new WaveSpawnScenario_Patch().Enable();
-            new MatchmakerAcceptScreen_Awake_Patch().Enable();
-            new MatchmakerAcceptScreen_Show_Patch().Enable();
-            new Minefield_method_2_Patch().Enable();
-            new MineDirectional_OnTriggerEnter_Patch().Enable();
-            new BotCacher_Patch().Enable();
-            new AbstractGame_InRaid_Patch().Enable();
-            new DisconnectButton_Patch().Enable();
-            new ChangeGameModeButton_Patch().Enable();
-            new MenuTaskBar_Patch().Enable();
-            new GameWorld_Create_Patch().Enable();
-            new BTRControllerClass_Init_Patch().Enable();
-            new BTRView_SyncViewFromServer_Patch().Enable();
-            new BTRView_GoIn_Patch().Enable();
-            new BTRView_GoOut_Patch().Enable();
-            new BTRVehicle_method_38_Patch().Enable();
-            new Player_Hide_Patch().Enable();
-            new Player_UpdateBtrTraderServiceData_Patch().Enable();
-            BTRSide_Patches.Enable();
-            new GClass2461_UpdateOfflineClientLogic_Patch().Enable();
-            new GClass2462_UpdateOfflineClientLogic_Patch().Enable();
-            new SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch().Enable();
-            LighthouseTraderZone_Patches.Enable();
-            Zyriachy_Patches.Enable();
-            new BufferZoneControllerClass_method_1_Patch().Enable();
-            new BufferZoneControllerClass_SetPlayerInZoneStatus_Patch().Enable();
-            new BufferInnerZone_ChangeZoneInteractionAvailability_Patch().Enable();
-            new BufferInnerZone_ChangePlayerAccessStatus_Patch().Enable();
-            new TripwireSynchronizableObject_method_6_Patch().Enable();
-            new TripwireSynchronizableObject_method_11_Patch().Enable();
-            new BaseLocalGame_method_13_Patch().Enable();
-            new Player_OnDead_Patch().Enable();
-            new Player_ManageAggressor_Patch().Enable();
-            new Player_SetDogtagInfo_Patch().Enable();
-            new WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch().Enable();
-            new WeaponManagerClass_method_13_Patch().Enable();
-            //new OpticRetrice_UpdateTransform_Patch().Enable();
-            new MatchmakerOfflineRaidScreen_Close_Patch().Enable();
-            new BodyPartCollider_SetUpPlayer_Patch().Enable();
-            new MatchmakerOfflineRaidScreen_Show_Patch().Enable();
-            new RaidSettingsWindow_method_8_Patch().Enable();
-            new AIPlaceLogicPartisan_Dispose_Patch().Enable();
-            new Player_SpawnInHands_Patch().Enable();
-            new GClass622_method_0_Patch().Enable();
-            new GClass622_method_28_Patch().Enable();
-            new GClass1395_Constructor_Patch().Enable();
-            new AchievementsScreen_Show_Patch().Enable();
-            new AchievementView_Show_Patch().Enable();
-            new GClass3371_ExceptAI_Patch().Enable();
-            new GClass1675_method_9_Patch().Enable();
-            new GrenadeClass_Init_Patch().Enable();
-            new SessionResultExitStatus_Show_Patch().Enable();
-            new PlayUISound_Patch().Enable();
-            new PlayEndGameSound_Patch().Enable();
-            new MenuScreen_Awake_Patch().Enable();
-            new GClass3581_ShowAction_Patch().Enable();
-            new MenuScreen_method_9_Patch().Enable();
-            new HideoutPlayerOwner_SetPointOfView_Patch().Enable();
-            new RagfairScreen_Show_Patch().Enable();
-            new MatchmakerPlayerControllerClass_GetCoopBlockReason_Patch().Enable();
-            new CoopSettingsWindow_Show_Patch().Enable();
-            new MainMenuControllerClass_method_52_Patch().Enable();
-            new GameWorld_ThrowItem_Patch().Enable();
-            new RaidSettingsWindow_Show_Patch().Enable();
-            new TransitControllerAbstractClass_Exist_Patch().Enable();
-            new BotReload_method_1_Patch().Enable();
-            new Class1391_ReloadBackendLocale_Patch().Enable();
-            new GClass2054_method_0_Patch().Enable();
-            new PartyInfoPanel_Show_Patch().Enable();
-            new PlayerCameraController_LateUpdate_Transpiler().Enable();
-            new DissonanceComms_Start_Patch().Enable();
-            new Player_IDissonancePlayerType_Patch().Enable();
-            new BasicMicrophoneCapture_UpdateSubscribers_Transpiler().Enable();
-            new Player_HasMarkOfUnknown_Patch().Enable();
-#if DEBUG
-            TasksExtensions_HandleFinishedTask_Patches.Enable();
-            new GClass1640_method_0_Patch().Enable();
-            new TestHalloweenPatch().Enable();
-#endif
-        }
-
-        private void EnableTranspilers()
-        {
-
+            _patchManager.EnablePatches();
         }
 
         private void VerifyServerVersion()
@@ -395,41 +302,29 @@ namespace Fika.Core
         /// Coroutine to ensure all mods are loaded by waiting 5 seconds
         /// </summary>
         /// <returns></returns>
-        private IEnumerator RunChecks()
+        private async Task RunChecks()
         {
-            Task<IPAddress> addressTask;
             try
             {
-                addressTask = FikaRequestHandler.GetPublicIP();
+                WanIP = await FikaRequestHandler.GetPublicIP();
             }
             catch (Exception ex)
             {
-                NotificationManagerClass.DisplayWarningNotification("Failed to get external IP address");
                 Logger.LogError($"RunChecks: {ex.Message}");
-                addressTask = null;
             }
 
-            if (addressTask != null)
-            {
-                while (!addressTask.IsCompleted)
-                {
-                    yield return null;
-                }
-
-                WanIP = addressTask.Result;
-            }
-
-            yield return new WaitForSeconds(5);
+            await Task.Delay(5000);
 #if !DEBUG
-            VerifyServerVersion(); 
+            VerifyServerVersion();
 #endif
-            ModHandler.VerifyMods();
+            ModHandler.VerifyMods(_patchManager);
 
             if (Crc32 == 0)
             {
-                MonoBehaviourSingleton<PreloaderUI>.Instance.ShowErrorScreen("CRC32 ERROR", LocaleUtils.UI_MOD_VERIFY_FAIL.Localized());
                 Logger.LogError($"RunChecks: {LocaleUtils.UI_MOD_VERIFY_FAIL.Localized()}");
             }
+
+            _patchManager = null;
         }
 
         private void GetClientConfig()
@@ -543,9 +438,7 @@ namespace Fika.Core
                     {
                         LastVersion.Value = FikaVersion;
                     });
-
-                
-            } 
+            }
 #endif
 
             // Advanced
@@ -1407,14 +1300,6 @@ namespace Fika.Core
             }
         }
 
-        private void EnableOverridePatches()
-        {
-            new ScavProfileLoad_Override().Enable();
-            new OfflineRaidSettingsMenuPatch_Override().Enable();
-            new GetProfileAtEndOfRaidPatch_Override().Enable();
-            new FixSavageInventoryScreenPatch_Override().Enable();
-        }
-
         public enum EDynamicAIRates
         {
             Low,
@@ -1444,7 +1329,7 @@ namespace Fika.Core
             Low,
             Medium,
             High
-        }        
+        }
 
         [Flags]
         public enum EQuestSharingTypes

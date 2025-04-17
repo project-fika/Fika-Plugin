@@ -2,7 +2,7 @@
 
 using EFT.UI;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches
@@ -10,7 +10,7 @@ namespace Fika.Core.UI.Patches
     /// <summary>
     /// Created by: Lacyway
     /// </summary>
-    public class DisableInsuranceReadyButton_Patch : ModulePatch
+    public class DisableInsuranceReadyButton_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             player.CurrentPlayerState.PoseLevel = from.PoseLevel + (to.PoseLevel - from.PoseLevel);
             player.CurrentPlayerState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
             player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
-            player.CurrentPlayerState.MovementDirection = to.MovementDirection;
+            player.CurrentPlayerState.MovementDirection = Vector2.Lerp(from.MovementDirection, to.MovementDirection, ratio);
             player.CurrentPlayerState.State = to.State;
             player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
             player.CurrentPlayerState.Step = to.Step;

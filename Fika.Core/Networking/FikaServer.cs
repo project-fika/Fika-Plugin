@@ -27,6 +27,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -400,8 +401,21 @@ namespace Fika.Core.Networking
             RegisterPacket<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket, NetPeer>(OnRequestPacketReceived);
             RegisterPacket<NetworkSettingsPacket, NetPeer>(OnNetworkSettingsPacketReceived);
+            RegisterPacket<InraidQuestPacket, NetPeer>(OnInraidQuestPacketReceived);
 
             RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
+        }
+
+        private void OnInraidQuestPacketReceived(InraidQuestPacket packet, NetPeer peer)
+        {
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+            if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            {
+                if (player.AbstractQuestControllerClass is ObservedQuestController controller)
+                {
+                    controller.HandleInraidQuestPacket(packet);
+                }
+            }
         }
 
         private void OnNetworkSettingsPacketReceived(NetworkSettingsPacket packet, NetPeer peer)
@@ -1184,8 +1198,8 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             netServer?.PollEvents();
-            stateHandle = new UpdateInterpolators().Schedule(ObservedCoopPlayers.Count, 16,
-                new HandlePlayerStates().Schedule(Snapshots.Count, 16));
+            stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 16,
+                new HandlePlayerStates(NetworkTimeSync.NetworkTime).Schedule(Snapshots.Count, 16));
 
             statisticsCounter++;
             if (statisticsCounter > 600)

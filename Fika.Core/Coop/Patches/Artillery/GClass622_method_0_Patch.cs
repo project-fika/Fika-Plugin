@@ -2,7 +2,7 @@
 using CommonAssets.Scripts.ArtilleryShelling;
 using EFT;
 using Fika.Core.Coop.GameMode;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass622_method_0_Patch : ModulePatch
+    public class GClass622_method_0_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {

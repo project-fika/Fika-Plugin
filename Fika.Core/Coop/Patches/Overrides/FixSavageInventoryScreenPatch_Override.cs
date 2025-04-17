@@ -3,13 +3,13 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using SPT.Common.Http;
-using SPT.Reflection.Patching;
+using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
+    public class GetProfileAtEndOfRaidPatch_Override : FikaPatch
     {
         public static GClass1998 ProfileDescriptor { get; private set; }
 
@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Patches
     /// Get profile from other patch (GetProfileAtEndOfRaidPatch)
     /// if our profile is savage Create new Session.AllProfiles and pass in our own profile to allow us to use the ScavengerInventoryScreen
     /// </summary>
-    public class FixSavageInventoryScreenPatch_Override : ModulePatch
+    public class FixSavageInventoryScreenPatch_Override : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
