@@ -7,9 +7,13 @@ using UnityEngine.UI;
 
 namespace Fika.Core.Coop.FreeCamera.Patches
 {
+    [IgnoreAutoPatch]
     internal class FadeBlackScreen_Patch : FikaPatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.FadeBlackScreen));
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.FadeBlackScreen));
+        }
 
         [PatchPrefix]
         public static bool Prefix()
@@ -18,9 +22,13 @@ namespace Fika.Core.Coop.FreeCamera.Patches
         }
     }
 
+    [IgnoreAutoPatch]
     internal class StartBlackScreenShow_Patch : FikaPatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.StartBlackScreenShow));
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.StartBlackScreenShow));
+        }
 
         [PatchPrefix]
         public static bool Prefix()
@@ -35,9 +43,13 @@ namespace Fika.Core.Coop.FreeCamera.Patches
         }
     }
 
+    [IgnoreAutoPatch]
     internal class SetBlackImageAlpha_Patch : FikaPatch
     {
-        protected override MethodBase GetTargetMethod() => typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.SetBlackImageAlpha));
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.SetBlackImageAlpha));
+        }
 
         [PatchPrefix]
         public static bool Prefix()
