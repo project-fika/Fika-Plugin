@@ -220,7 +220,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
         {
-            if (Item is RevolverItemClass)
+            if (IsRevolver)
             {
                 CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, false);
                 return;
