@@ -1199,7 +1199,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             // TODO: Add christmas event
-            /*bool runddansActive;
+            bool runddansActive;
             if (instance == null)
             {
                 runddansActive = false;
@@ -1211,14 +1211,14 @@ namespace Fika.Core.Coop.GameMode
             }
             if (runddansActive)
             {
-                gameWorld.RunddansController = new GClass2052 (instance.runddansSettings, Location_0);
+                gameWorld.RunddansController = isServer ? new HostRunddansController(instance.runddansSettings, Location_0)
+                    : new ClientRunddansController(instance.runddansSettings, Location_0);
             }
             else
             {
                 GClass2050.ToggleEventEnvironment(false);
-            }*/
+            }
 
-            GClass2050.ToggleEventEnvironment(false);
             gameWorld.ClientBroadcastSyncController = new GClass1098();
 
             ApplicationConfigClass config = BackendConfigAbstractClass.Config;
