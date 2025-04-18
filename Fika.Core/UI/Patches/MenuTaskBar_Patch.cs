@@ -2,9 +2,9 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Networking.Http;
+using Fika.Core.Patching;
 using Fika.Core.Utils;
 using Newtonsoft.Json.Linq;
-using Fika.Core.Patching;
 using System;
 using System.Collections.Generic;
 using System.IO;

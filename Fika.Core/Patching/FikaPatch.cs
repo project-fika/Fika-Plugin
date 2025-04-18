@@ -2,10 +2,7 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Patching
 {
@@ -63,7 +60,7 @@ namespace Fika.Core.Patching
         private List<HarmonyMethod> GetPatchMethods(Type attributeType)
         {
             Type T = GetType();
-            List<HarmonyMethod> methods = new List<HarmonyMethod>();
+            List<HarmonyMethod> methods = new();
 
             foreach (MethodInfo method in T.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly))
             {

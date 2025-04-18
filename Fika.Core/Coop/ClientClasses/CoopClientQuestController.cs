@@ -68,13 +68,13 @@ namespace Fika.Core.Coop.ClientClasses
                     }
 
                     itemIds.Add(item.Id);
-                } 
+                }
             }
 
             IResult handoverResult = await base.HandoverItem(quest, condition, items, runNetworkTransaction);
             if (handoverResult.Succeed && hasNonQuestItem)
             {
-                
+
                 InraidQuestPacket packet = new()
                 {
                     NetId = player.NetId,

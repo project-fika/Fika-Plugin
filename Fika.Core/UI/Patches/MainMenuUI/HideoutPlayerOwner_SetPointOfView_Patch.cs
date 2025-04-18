@@ -1,6 +1,6 @@
 ﻿using EFT;
-using Fika.Core.UI.Custom;
 using Fika.Core.Patching;
+using Fika.Core.UI.Custom;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches

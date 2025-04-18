@@ -1,9 +1,9 @@
 ﻿using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
+using Fika.Core.Patching;
 using Fika.Core.Utils;
 using HarmonyLib;
-using Fika.Core.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;

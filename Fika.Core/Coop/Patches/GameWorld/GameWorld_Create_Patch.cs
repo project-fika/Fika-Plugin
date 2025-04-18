@@ -2,8 +2,8 @@
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Utils;
-using HarmonyLib;
 using Fika.Core.Patching;
+using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
 

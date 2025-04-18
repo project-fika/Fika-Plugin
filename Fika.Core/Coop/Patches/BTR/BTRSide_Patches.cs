@@ -1,7 +1,7 @@
 ﻿using EFT;
 using EFT.Vehicle;
-using HarmonyLib;
 using Fika.Core.Patching;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

@@ -2,8 +2,8 @@
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using RootMotion.FinalIK;
 using Fika.Core.Patching;
+using RootMotion.FinalIK;
 using System.Reflection;
 using UnityEngine;
 

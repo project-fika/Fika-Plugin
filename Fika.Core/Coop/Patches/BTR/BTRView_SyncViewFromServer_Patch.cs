@@ -2,8 +2,8 @@
 using EFT.Vehicle;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using LiteNetLib;
 using Fika.Core.Patching;
+using LiteNetLib;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches

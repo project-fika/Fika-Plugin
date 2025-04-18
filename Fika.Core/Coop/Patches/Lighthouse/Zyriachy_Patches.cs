@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using Fika.Core.Patching;
 using System.Reflection;
 
