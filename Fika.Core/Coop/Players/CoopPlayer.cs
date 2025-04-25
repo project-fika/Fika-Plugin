@@ -8,7 +8,6 @@ using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using EFT.UI;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
@@ -641,7 +640,7 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
-                ConsoleScreen.Log(message);
+                EFT.UI.ConsoleScreen.Log(message);
                 FikaPlugin.Instance.FikaLogger.LogInfo(message);
             }
         }
@@ -981,6 +980,25 @@ namespace Fika.Core.Coop.Players
             }
 
             Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+        }
+
+        public override void vmethod_5(GClass2049 controller, int objectId, EventObject.EInteraction interaction)
+        {
+            GStruct183 packet = controller.GetInteractPacket(objectId, interaction);
+            if (FikaBackendUtils.IsServer)
+            {
+                controller.InteractWithEventObject(this, packet);
+            }
+            else
+            {
+                EventControllerInteractPacket interactPacket = new()
+                {
+                    NetId = NetId,
+                    Data = packet
+                };
+                PacketSender.SendPacket(ref interactPacket, true);
+            }
+            UpdateInteractionCast();
         }
 
         public override void ApplyCorpseImpulse()

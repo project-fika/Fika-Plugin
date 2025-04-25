@@ -1,7 +1,7 @@
 ﻿using Dissonance;
 using EFT;
-using HarmonyLib;
 using Fika.Core.Patching;
+using HarmonyLib;
 using System.Reflection;
 
 namespace Fika.Core.Coop.Patches.VOIP

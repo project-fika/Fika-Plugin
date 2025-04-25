@@ -2,8 +2,8 @@
 using EFT.Interactive;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Utils;
-using HarmonyLib;
 using Fika.Core.Patching;
+using HarmonyLib;
 using System.Linq;
 using System.Reflection;
 

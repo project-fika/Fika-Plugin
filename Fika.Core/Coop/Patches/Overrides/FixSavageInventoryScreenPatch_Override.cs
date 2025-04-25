@@ -1,9 +1,9 @@
 ﻿using EFT;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Patching;
 using HarmonyLib;
 using SPT.Common.Http;
-using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 

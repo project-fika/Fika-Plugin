@@ -6,22 +6,14 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
 using Fika.Core.Coop.Custom;
-using Fika.Core.Coop.FreeCamera.Patches;
-using Fika.Core.Coop.Patches;
-using Fika.Core.Coop.Patches.Camera;
-using Fika.Core.Coop.Patches.Lighthouse;
-using Fika.Core.Coop.Patches.PlayerPatches;
-using Fika.Core.Coop.Patches.VOIP;
 using Fika.Core.Coop.Utils;
 using Fika.Core.EssentialPatches;
 using Fika.Core.Models;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
 using Fika.Core.Patching;
-using Fika.Core.UI;
 using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
-using Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 using Fika.Core.Utils;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
@@ -55,7 +47,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.6";
+        public const string FikaVersion = "1.2.7";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -76,7 +68,7 @@ namespace Fika.Core
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
-        private static readonly Version RequiredServerVersion = new("2.4.6");
+        private static readonly Version RequiredServerVersion = new("2.4.7");
         private PatchManager _patchManager;
 
         public static HeadlessRequesterWebSocket HeadlessRequesterWebSocket { get; set; }

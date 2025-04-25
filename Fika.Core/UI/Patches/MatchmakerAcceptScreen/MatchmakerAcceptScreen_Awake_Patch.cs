@@ -1,7 +1,7 @@
 ﻿using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
-using Newtonsoft.Json;
 using Fika.Core.Patching;
+using Newtonsoft.Json;
 using System;
 using System.Reflection;
 

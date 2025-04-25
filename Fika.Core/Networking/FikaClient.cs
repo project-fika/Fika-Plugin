@@ -271,8 +271,32 @@ namespace Fika.Core.Networking
             RegisterPacket<RequestPacket>(OnRequestPacketReceived);
             RegisterPacket<CharacterSyncPacket>(OnCharacterSyncPacketReceived);
             RegisterPacket<InraidQuestPacket>(OnInraidQuestPacketReceived);
+            RegisterPacket<EventControllerEventPacket>(OnEventControllerEventPacketReceived);
+            RegisterPacket<EventControllerInteractPacket>(OnEventControllerInteractPacketReceived);
 
             RegisterReusable<WorldPacket>(OnWorldPacketReceived);
+        }
+
+        private void OnEventControllerInteractPacketReceived(EventControllerInteractPacket packet)
+        {
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld != null && gameWorld.RunddansController is ClientRunddansController clientController)
+            {
+                if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+                {
+                    clientController.DestroyItem(player);
+                }
+            }
+        }
+
+        private void OnEventControllerEventPacketReceived(EventControllerEventPacket packet)
+        {
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld != null && gameWorld.RunddansController is ClientRunddansController)
+            {
+                (packet.Event as RunddansStateEvent).PlayerId = MyPlayer.NetId;
+                packet.Event.Invoke();
+            }
         }
 
         private void OnInraidQuestPacketReceived(InraidQuestPacket packet)

@@ -2,8 +2,8 @@
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
-using Fika.Core.UI.Custom;
 using Fika.Core.Patching;
+using Fika.Core.UI.Custom;
 using System.Linq;
 using System.Reflection;
 

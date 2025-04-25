@@ -2,8 +2,8 @@
 using EFT.UI;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Utils;
 using Fika.Core.Patching;
+using Fika.Core.Utils;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches

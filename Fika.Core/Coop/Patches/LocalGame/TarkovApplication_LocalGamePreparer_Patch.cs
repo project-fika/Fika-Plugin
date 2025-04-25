@@ -2,8 +2,8 @@
 using EFT.Communications;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
-using Fika.Core.UI.Models;
 using Fika.Core.Patching;
+using Fika.Core.UI.Models;
 using System.Linq;
 using System.Reflection;
 

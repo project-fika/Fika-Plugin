@@ -1,6 +1,6 @@
 ﻿using EFT;
-using HarmonyLib;
 using Fika.Core.Patching;
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;

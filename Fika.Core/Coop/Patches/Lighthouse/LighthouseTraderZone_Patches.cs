@@ -11,17 +11,9 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Patches
 {
-    class LighthouseTraderZone_Patches
+    public class LighthouseTraderZone_Patches
     {
-        public static void Enable()
-        {
-            /*new LighthouseTraderZone_AddPlayer_Patch().Enable();
-            new LighthouseTraderZone_RemovePlayer_Patch().Enable();
-            new LighthouseTraderZone_Awake_Patch().Enable();*/
-        }
-
-        [DebugPatch]
-        internal class LighthouseTraderZone_AddPlayer_Patch : FikaPatch
+        public class LighthouseTraderZone_AddPlayer_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -85,8 +77,7 @@ namespace Fika.Core.Coop.Patches
             }
         }
 
-        [DebugPatch]
-        internal class LighthouseTraderZone_RemovePlayer_Patch : FikaPatch
+        public class LighthouseTraderZone_RemovePlayer_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
@@ -130,8 +121,7 @@ namespace Fika.Core.Coop.Patches
             }
         }
 
-        [DebugPatch]
-        internal class LighthouseTraderZone_Awake_Patch : FikaPatch
+        public class LighthouseTraderZone_Awake_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
