@@ -2367,23 +2367,10 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaPlugin.AutoExtract.Value)
             {
-                if (localPlayer?.ActiveHealthController == null)
-                {
-                    Logger.LogError("localPlayer or ActiveHealthController is null.");
-                    return;
-                }
-
                 int connectedPeersCount = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount;
-                if (!isServer || connectedPeersCount == 0)
+                if (!isServer)
                 {
-                    try
-                    {
-                        Stop(localPlayer.ProfileId, ExitStatus, localPlayer.ActiveHealthController.IsAlive ? ExitLocation : null, 0);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError($"Failed to stop the game: {ex.Message}");
-                    }
+                    Stop(localPlayer.ProfileId, ExitStatus, ExitLocation, 0);
                 }
             }
         }
