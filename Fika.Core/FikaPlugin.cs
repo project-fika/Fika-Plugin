@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
@@ -48,7 +49,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.7";
+        public const string FikaVersion = "1.2.8";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -281,14 +282,19 @@ namespace Fika.Core
             if (failed)
             {
                 FikaLogger.LogError($"Server version check failed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
-                MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {RequiredServerVersion}",
-                    "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
-                Application.Quit();
+                AsyncWorker.RunInMainTread(ShowServerCheckFailMessage);
             }
             else
             {
                 FikaLogger.LogInfo($"Server version check passed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
             }
+        }
+
+        private void ShowServerCheckFailMessage()
+        {
+            MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {RequiredServerVersion}",
+                    "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
+            Application.Quit();
         }
 
         /// <summary>

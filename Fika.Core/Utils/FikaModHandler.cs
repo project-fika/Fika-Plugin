@@ -2,6 +2,7 @@
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT;
 using EFT.UI;
 using Fika.Core.Coop.Patches;
@@ -15,6 +16,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 using Logger = BepInEx.Logging.Logger;
 
@@ -72,7 +74,7 @@ namespace Fika.Core.Utils
             {
                 FikaPlugin.Instance.FikaLogger.LogError("FikaModHandler::VerifyMods: Response was invalid!");
                 MessageBoxHelper.Show($"Failed to verify mods with server.\nMake sure that the server mod is installed!", "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
-                Application.Quit();
+                AsyncWorker.RunInMainTread(Application.Quit);
                 return;
             }
 
@@ -99,7 +101,7 @@ namespace Fika.Core.Utils
 
             if (installationError)
             {
-                StaticManager.BeginCoroutine(InformInstallationError());
+                _ = Task.Run(InformInstallationError);
             }
 
             HandleModSpecificPatches(manager);
@@ -115,19 +117,29 @@ namespace Fika.Core.Utils
             }
         }
 
-        private IEnumerator InformInstallationError()
+        private async Task InformInstallationError()
         {
             while (!Singleton<PreloaderUI>.Instantiated)
             {
-                yield return null;
-            }
+                await Task.Delay(250);
+            }            
 
+            AsyncWorker.RunInMainTread(ShowModErrorMessage);
+        }
+
+        private void ShowModErrorMessage()
+        {
             string message = "Your client doesn't meet server requirements, check logs for more details";
 
             // -1f time makes the message permanent
             GClass3547 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
                 ErrorScreen.EButtonType.QuitButton, -1f);
-            errorScreen.OnAccept += Application.Quit;
+
+            Action quitAction = Application.Quit;
+            errorScreen.OnAccept += quitAction;
+            errorScreen.OnDecline += quitAction;
+            errorScreen.OnClose += quitAction;
+            errorScreen.OnCloseSilent += quitAction;
         }
 
         private void CheckSpecialMods(string key)
