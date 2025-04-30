@@ -6,6 +6,7 @@ using Fika.Core.Coop.Players;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using UnityEngine;
 using static EFT.Player;
 using static Fika.Core.Networking.SubPacket;
@@ -613,7 +614,7 @@ namespace Fika.Core.Networking
                     MagazineItemClass magazine = null;
                     try
                     {
-                        GStruct457<Item> result = player.FindItemById(MagId);
+                        GStruct442<Item> result = player.FindItemById(MagId);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -639,10 +640,10 @@ namespace Fika.Core.Networking
                     {
                         try
                         {
-                            using GClass1212 eftReader = GClass1215.Get(LocationDescription);
+                            using GClass1249 eftReader = GClass1252.Get(LocationDescription);
                             if (LocationDescription.Length != 0)
                             {
-                                GClass1721 descriptor = eftReader.ReadPolymorph<GClass1721>();
+                                GClass1755 descriptor = eftReader.ReadPolymorph<GClass1755>();
                                 gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                             }
                         }
@@ -694,7 +695,7 @@ namespace Fika.Core.Networking
                 {
                     try
                     {
-                        GStruct457<Item> result = player.FindItemById(MagId);
+                        GStruct442<Item> result = player.FindItemById(MagId);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -925,12 +926,12 @@ namespace Fika.Core.Networking
                     AmmoPackReloadingClass ammoPack = new(ammo);
                     ItemAddress gridItemAddress = null;
 
-                    using GClass1212 eftReader = GClass1215.Get(LocationDescription);
+                    using GClass1249 eftReader = GClass1252.Get(LocationDescription);
                     try
                     {
                         if (LocationDescription.Length > 0)
                         {
-                            GClass1721 descriptor = eftReader.ReadPolymorph<GClass1721>();
+                            GClass1755 descriptor = eftReader.ReadPolymorph<GClass1755>();
                             gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                         }
                     }

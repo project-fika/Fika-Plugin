@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class ClientRunddansController : GClass2053
+    public class ClientRunddansController : GClass2088
     {
-        public ClientRunddansController(BackendConfigSettingsClass.GClass1510 settings, LocationSettingsClass.Location location) : base(settings, location)
+        public ClientRunddansController(BackendConfigSettingsClass.GClass1554 settings, LocationSettingsClass.Location location) : base(settings, location)
         {
-            HandleWeather(settings.ApplyFrozenEveryMS, cancellationTokenSource_0.Token).HandleExceptions();
+            HandleWeather(settings.ApplyFrozenEveryMS, CancellationTokenSource_0.Token).HandleExceptions();
         }
 
         public async Task HandleWeather(int delay, CancellationToken token)
@@ -31,14 +31,14 @@ namespace Fika.Core.Coop.ClientClasses
                 {
                     break;
                 }
-                if (gameTimer.PastTime.TotalSeconds >= (double)gclass1510_0.initialFrozenDelaySec)
+                if (gameTimer.PastTime.TotalSeconds >= (double)Gclass1554_0.initialFrozenDelaySec)
                 {
                     Player myPlayer = GamePlayerOwner.MyPlayer;
                     if (myPlayer != null && !myPlayer.IsAI
                         && !myPlayer.AIData.IsInside && !method_0(myPlayer)
                         && !(WeatherController.Instance == null) && WeatherController.Instance.WeatherCurve.Rain
-                        >= gclass1510_0.rainForFrozen &&
-                        (EFTDateTimeClass.UtcNow - myPlayer.AIData.DrinkTimestamp).TotalSeconds >= (double)gclass1510_0.drunkImmunitySec)
+                        >= Gclass1554_0.rainForFrozen &&
+                        (EFTDateTimeClass.UtcNow - myPlayer.AIData.DrinkTimestamp).TotalSeconds >= (double)Gclass1554_0.drunkImmunitySec)
                     {
                         ActiveHealthController activeHealthController = myPlayer.ActiveHealthController;
                         if (activeHealthController != null)

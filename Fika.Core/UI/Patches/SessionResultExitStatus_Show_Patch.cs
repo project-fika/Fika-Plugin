@@ -13,7 +13,7 @@ namespace Fika.Core.UI.Patches
         protected override MethodBase GetTargetMethod()
         {
             return typeof(SessionResultExitStatus).GetMethod(nameof(SessionResultExitStatus.Show), [typeof(Profile),
-                typeof(GClass1952),
+                typeof(LastPlayerStateClass),
                 typeof(ESideType),
                 typeof(ExitStatus),
                 typeof(TimeSpan),

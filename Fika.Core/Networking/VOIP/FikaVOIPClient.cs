@@ -34,8 +34,8 @@ namespace Fika.Core.Networking.VOIP
 
         public override void SendVoiceData(ArraySegment<byte> encodedAudio)
         {
-            GClass1207.SetTalkDateTime();
-            if (!GClass1207.Blocked)
+            GClass1244.SetTalkDateTime();
+            if (!GClass1244.Blocked)
             {
                 base.SendVoiceData(encodedAudio);
             }

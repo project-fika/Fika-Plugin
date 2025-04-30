@@ -16,10 +16,10 @@ namespace Fika.Core.Coop.Patches
         {
             if (__instance.Player != null && !__instance.Player.IsYourPlayer)
             {
-                __instance.tacticalComboVisualController_0 = [.. __instance.transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<TacticalComboVisualController>()];
-                __instance.sightModVisualControllers_0 = [.. __instance.transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<SightModVisualControllers>()];
-                __instance.launcherViauslController_0 = [.. __instance.transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<LauncherViauslController>()];
-                __instance.bipodViewController_0 = __instance.transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<BipodViewController>().FirstOrDefault();
+                __instance.TacticalComboVisualController_0 = [.. __instance.Transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<TacticalComboVisualController>()];
+                __instance.SightModVisualControllers_0 = [.. __instance.Transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<SightModVisualControllers>()];
+                __instance.LauncherViauslController_0 = [.. __instance.Transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<LauncherViauslController>()];
+                __instance.BipodViewController_0 = __instance.Transform_1.GetComponentsInChildrenActiveIgnoreFirstLevel<BipodViewController>().FirstOrDefault();
 
                 return false;
             }

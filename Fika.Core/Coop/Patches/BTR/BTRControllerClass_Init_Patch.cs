@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(BTRControllerClass __instance, ref CancellationToken cancellationToken, ref Task __result, ref GameWorld ___gameWorld_0, ref BackendConfigSettingsClass.BTRGlobalSettings ___btrglobalSettings_0, ref bool ___bool_1)
+        public static bool Prefix(BTRControllerClass __instance, ref CancellationToken cancellationToken, ref Task __result, ref GameWorld ___GameWorld_0, ref BackendConfigSettingsClass.BTRGlobalSettings ___BtrglobalSettings_0, ref bool ___Bool_1)
         {
             if (FikaBackendUtils.IsServer)
             {
@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.Patches
 
             if (Singleton<BackendConfigSettingsClass>.Instance != null && Singleton<BackendConfigSettingsClass>.Instance.BTRSettings != null)
             {
-                ___btrglobalSettings_0 = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings;
+                ___BtrglobalSettings_0 = Singleton<BackendConfigSettingsClass>.Instance.BTRSettings;
             }
             else
             {
@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.Patches
             }
 
             __result = __instance.method_5();
-            __instance.TransferItemsController = new GClass1671(___gameWorld_0, ___btrglobalSettings_0, true);
+            __instance.TransferItemsController = new GClass1705(___GameWorld_0, ___BtrglobalSettings_0, true);
             if (FikaBackendUtils.IsClient)
             {
                 __instance.TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");

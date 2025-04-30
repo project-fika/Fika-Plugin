@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class FikaClientTransitController : GClass1677
+    public class FikaClientTransitController : GClass1711
     {
         public FikaClientTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters)
@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.ClientClasses
         public void Init()
         {
             EnablePoints(true);
-            method_6(dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
+            method_8(Dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
         }
 
         public override void Dispose()
@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            if (!dictionary_0.TryGetValue(transitId, out TransitPoint transitPoint))
+            if (!Dictionary_0.TryGetValue(transitId, out TransitPoint transitPoint))
             {
                 FikaPlugin.Instance.FikaLogger.LogError("FikaClientTransitController::HandleClientExtract: Could not find transit point with id: " + transitId);
                 return;
@@ -86,7 +86,7 @@ namespace Fika.Core.Coop.ClientClasses
                 isSolo = true
             });
 
-            GClass1961 gclass = new()
+            GClass1996 gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,

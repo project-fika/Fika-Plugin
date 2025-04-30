@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.ClientClasses
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
-            operationFactoryDelegates[typeof(GClass1787)] = new OperationFactoryDelegate(Weapon2);
+            operationFactoryDelegates[typeof(GClass1821)] = new OperationFactoryDelegate(Weapon2);
             operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
             return operationFactoryDelegates;
         }
@@ -98,9 +98,9 @@ namespace Fika.Core.Coop.ClientClasses
 
         public Player.BaseAnimationOperationClass Weapon3()
         {
-            if (Item is GClass3118)
+            if (Item is GClass3158)
             {
-                return new GClass1805(this);
+                return new IsOneOffFireOperationClass(this);
             }
             if (Item.IsFlareGun)
             {
@@ -637,7 +637,7 @@ namespace Fika.Core.Coop.ClientClasses
             base.CreateFlareShot(flareItem, shotPosition, forward);
         }
 
-        public override void CreateRocketShot(AmmoItemClass rocketItem, Vector3 shotPosition, Vector3 forward)
+        public override void CreateRocketShot(AmmoItemClass rocketItem, Vector3 shotPosition, Vector3 forward, Transform smokeport = null)
         {
             WeaponPacket packet = new()
             {
@@ -720,21 +720,21 @@ namespace Fika.Core.Coop.ClientClasses
             player.PacketSender.SendPacket(ref packet);
         }
 
-        private class FirearmClass1(Player.FirearmController controller) : GClass1787(controller)
+        private class FirearmClass1(Player.FirearmController controller) : GClass1821(controller)
         {
             public override void SetTriggerPressed(bool pressed)
             {
-                bool bool_ = bool_1;
+                bool bool_ = Bool_1;
                 base.SetTriggerPressed(pressed);
-                if (bool_1 && !bool_)
+                if (Bool_1 && !bool_)
                 {
-                    coopClientFirearmController.SendAbortReloadPacket(int_0);
+                    coopClientFirearmController.SendAbortReloadPacket(Int_0);
                 }
             }
 
             public override void SwitchToIdle()
             {
-                coopClientFirearmController.SendEndReloadPacket(int_0);
+                coopClientFirearmController.SendEndReloadPacket(Int_0);
                 method_13();
                 base.SwitchToIdle();
             }
@@ -746,17 +746,17 @@ namespace Fika.Core.Coop.ClientClasses
         {
             public override void SetTriggerPressed(bool pressed)
             {
-                bool bool_ = bool_1;
+                bool bool_ = Bool_1;
                 base.SetTriggerPressed(pressed);
-                if (bool_1 && !bool_)
+                if (Bool_1 && !bool_)
                 {
-                    coopClientFirearmController.SendAbortReloadPacket(int_0);
+                    coopClientFirearmController.SendAbortReloadPacket(Int_0);
                 }
             }
 
             public override void SwitchToIdle()
             {
-                coopClientFirearmController.SendEndReloadPacket(int_0);
+                coopClientFirearmController.SendEndReloadPacket(Int_0);
                 base.SwitchToIdle();
             }
 
@@ -767,17 +767,17 @@ namespace Fika.Core.Coop.ClientClasses
         {
             public override void SetTriggerPressed(bool pressed)
             {
-                bool bool_ = bool_1;
+                bool bool_ = Bool_1;
                 base.SetTriggerPressed(pressed);
-                if (bool_1 && !bool_)
+                if (Bool_1 && !bool_)
                 {
-                    coopClientFirearmController.SendAbortReloadPacket(int_0);
+                    coopClientFirearmController.SendAbortReloadPacket(Int_0);
                 }
             }
 
             public override void SwitchToIdle()
             {
-                coopClientFirearmController.SendEndReloadPacket(int_0);
+                coopClientFirearmController.SendEndReloadPacket(Int_0);
                 base.SwitchToIdle();
             }
 
@@ -785,18 +785,18 @@ namespace Fika.Core.Coop.ClientClasses
         }
 
         // Check for GClass increments
-        private class FirearmClass4(Player.FirearmController controller) : GClass1800(controller)
+        private class FirearmClass4(Player.FirearmController controller) : GClass1834(controller)
         {
             public override void Start()
             {
                 base.Start();
-                SendBoltActionReloadPacket(!firearmController_0.IsTriggerPressed);
+                SendBoltActionReloadPacket(!FirearmController_0.IsTriggerPressed);
             }
 
             public override void SetTriggerPressed(bool pressed)
             {
                 base.SetTriggerPressed(pressed);
-                SendBoltActionReloadPacket(!firearmController_0.IsTriggerPressed);
+                SendBoltActionReloadPacket(!FirearmController_0.IsTriggerPressed);
             }
 
             public override void SetInventoryOpened(bool opened)
@@ -851,7 +851,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = gridItemAddress;
-                GClass1721 descriptor = itemAddress?.ToDescriptor();
+                GClass1755 descriptor = itemAddress?.ToDescriptor();
                 EFTWriterClass eftWriter = new();
 
                 byte[] locationDescription;
@@ -924,7 +924,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
-                GClass1721 descriptor = itemAddress?.ToDescriptor();
+                GClass1755 descriptor = itemAddress?.ToDescriptor();
                 EFTWriterClass eftWriter = new();
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 

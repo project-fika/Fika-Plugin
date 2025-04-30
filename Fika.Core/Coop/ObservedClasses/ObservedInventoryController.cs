@@ -34,8 +34,8 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
         {
-            mongoID_0 = firstId;
-            ushort_0 = firstOperationId;
+            MongoID_0 = firstId;
+            Ushort_0 = firstOperationId;
             searchController = new AISearchControllerClass();
             coopPlayer = (CoopPlayer)player;
         }
@@ -56,13 +56,13 @@ namespace Fika.Core.Coop.ObservedClasses
             return false;
         }
 
-        public override GStruct457<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
+        public override GStruct442<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
         {
             ThrowItem(item, false, callback);
             return true;
         }
 
-        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3847 error)
+        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3910 error)
         {
             error = null;
             return true;
@@ -114,7 +114,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return null;
         }
 
-        public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface412 operation, Callback callback)
+        public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface416 operation, Callback callback)
         {
             if (!succeed)
             {
@@ -130,9 +130,9 @@ namespace Fika.Core.Coop.ObservedClasses
             coopPlayer.StatisticsManager.OnGrabLoot(item);
         }
 
-        private void HandleInProcess(Item item, ItemAddress to, GInterface412 operation, Callback callback)
+        private void HandleInProcess(Item item, ItemAddress to, GInterface416 operation, Callback callback)
         {
-            Player.Class1230 handler = new()
+            Player.Class1240 handler = new()
             {
                 player_0 = coopPlayer,
                 callback = callback
@@ -168,10 +168,10 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public void SetNewID(MongoID newId)
         {
-            mongoID_0 = newId;
+            MongoID_0 = newId;
         }
 
-        GStruct452 Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+        GStruct437 Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
         {
             method_13(descriptor);
             return descriptor.ToInventoryOperation(coopPlayer);

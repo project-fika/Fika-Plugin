@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.ObservedClasses
         private bool hasFired = false;
         private WeaponPrefab weaponPrefab;
         private WeaponManagerClass weaponManager;
-        private GClass1780 underBarrelManager;
+        private GClass1814 underBarrelManager;
         private bool boltActionReload;
         private bool isThrowingPatron;
 
@@ -81,11 +81,11 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-            operationFactoryDelegates[typeof(GClass1806)] = new OperationFactoryDelegate(Idle1);
-            operationFactoryDelegates[typeof(GClass1790)] = new OperationFactoryDelegate(ThrowPatron1);
-            operationFactoryDelegates[typeof(GClass1791)] = new OperationFactoryDelegate(ThrowPatron2);
-            operationFactoryDelegates[typeof(GClass1817)] = new OperationFactoryDelegate(ThrowPatron3);
-            operationFactoryDelegates[typeof(GClass1820)] = new OperationFactoryDelegate(ThrowPatron4);
+            operationFactoryDelegates[typeof(GClass1840)] = new OperationFactoryDelegate(Idle1);
+            operationFactoryDelegates[typeof(GClass1824)] = new OperationFactoryDelegate(ThrowPatron1);
+            operationFactoryDelegates[typeof(GClass1825)] = new OperationFactoryDelegate(ThrowPatron2);
+            operationFactoryDelegates[typeof(GClass1851)] = new OperationFactoryDelegate(ThrowPatron3);
+            operationFactoryDelegates[typeof(GClass1854)] = new OperationFactoryDelegate(ThrowPatron4);
             return operationFactoryDelegates;
         }
 
@@ -123,7 +123,7 @@ namespace Fika.Core.Coop.ObservedClasses
             weaponManager = weaponPrefab.ObjectInHands as WeaponManagerClass;
             if (UnderbarrelWeapon != null)
             {
-                underBarrelManager = Traverse.Create(this).Field<GClass1780>("gclass1780_0").Value;
+                underBarrelManager = Traverse.Create(this).Field<GClass1814>("gclass1814_0").Value;
             }
             IsRevolver = Weapon is RevolverItemClass;
         }
@@ -166,7 +166,7 @@ namespace Fika.Core.Coop.ObservedClasses
             IsAiming = isAiming;
             _player.ProceduralWeaponAnimation.CheckShouldMoveWeaponCloser();
             _player.ProceduralWeaponAnimation.Shootingg.CurrentRecoilEffect.WeaponRecoilEffect.SetAiming(isAiming);
-            _player.method_58(0.2f, false);
+            _player.method_60(0.2f, false);
             if (isAiming)
             {
                 method_60();
@@ -645,7 +645,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
                     if (cylinderAmmo != null)
                     {
-                        GStruct455<GInterface398> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
+                        GStruct440<GInterface402> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
                         if (removeOperation.Failed)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}, error: {removeOperation.Error}");
@@ -712,7 +712,7 @@ namespace Fika.Core.Coop.ObservedClasses
             _preallocatedAmmoList.Clear();
             foreach (string id in ammoIds)
             {
-                GStruct457<Item> gstruct = _player.FindItemById(id);
+                GStruct442<Item> gstruct = _player.FindItemById(id);
                 if (gstruct.Succeeded && gstruct.Value is AmmoItemClass bulletClass)
                 {
                     _preallocatedAmmoList.Add(bulletClass);
@@ -749,7 +749,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedIdleOperation(FirearmController controller) : GClass1806(controller)
+        private class ObservedIdleOperation(FirearmController controller) : GClass1840(controller)
         {
             public override void ProcessRemoveOneOffWeapon()
             {
@@ -757,29 +757,29 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation1(FirearmController controller) : GClass1790(controller)
+        private class ObservedThrowPatronOperation1(FirearmController controller) : GClass1824(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1777 reloadMultiBarrelResult, Callback callback)
+            public override void Start(GClass1811 reloadMultiBarrelResult, Callback callback)
             {
                 observedController.isThrowingPatron = true;
                 base.Start(reloadMultiBarrelResult, callback);
             }
         }
 
-        private class ObservedThrowPatronOperation2(FirearmController controller) : GClass1791(controller)
+        private class ObservedThrowPatronOperation2(FirearmController controller) : GClass1825(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1778 reloadSingleBarrelResult, Callback callback)
+            public override void Start(GClass1812 reloadSingleBarrelResult, Callback callback)
             {
                 observedController.isThrowingPatron = true;
                 base.Start(reloadSingleBarrelResult, callback);
             }
         }
 
-        private class ObservedThrowPatronOperation3(FirearmController controller) : GClass1817(controller)
+        private class ObservedThrowPatronOperation3(FirearmController controller) : GClass1851(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
@@ -790,7 +790,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation4(FirearmController controller) : GClass1820(controller)
+        private class ObservedThrowPatronOperation4(FirearmController controller) : GClass1854(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 

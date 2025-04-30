@@ -166,7 +166,7 @@ namespace Fika.Core.Networking
                 syncObject.transform.rotation = Rotation;
                 if (syncObject.Logic is AirdropLogicClass airdropLogicClass)
                 {
-                    airdropLogicClass.vector3_0 = Position;
+                    airdropLogicClass.Vector3_0 = Position;
                 }
                 else
                 {

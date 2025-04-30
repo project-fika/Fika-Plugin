@@ -16,9 +16,9 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPostfix]
-        public static void Postfix(BotOwner ___botOwner_0)
+        public static void Postfix(BotOwner ___BotOwner_0)
         {
-            ___botOwner_0.ShootData.BlockFor(0.7f);
+            ___BotOwner_0.ShootData.BlockFor(0.7f);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass598).GetMethod(nameof(GClass598.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+            return typeof(GClass614).GetMethod(nameof(GClass614.LoadInternal), BindingFlags.Static | BindingFlags.Public);
         }
 
         [PatchPrefix]
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
             }
             else
             {
-                string text = GClass598.LoadCoreByString();
+                string text = GClass614.LoadCoreByString();
                 if (text == null)
                 {
                     core = null;
@@ -35,23 +35,25 @@ namespace Fika.Core.Coop.Patches
             {
                 foreach (object difficulty in Enum.GetValues(typeof(BotDifficulty)))
                 {
+                    //Todo (Archangel for Lacyway): Bsg added an additional set here (Gclass619_1) for PVE.
+                    //I switched this over to PVE but this needs to be observed if proper behavior is maintained
                     BotSettingsComponents botSettingsComponents;
                     botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
                     if (botSettingsComponents != null)
                     {
-                        if (!GClass598.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+                        if (!GClass614.Gclass619_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
                         {
-                            GClass598.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                            GClass614.Gclass619_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
                         }
                     }
                     else
                     {
-                        botSettingsComponents = GClass598.smethod_1(GClass598.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false);
+                        botSettingsComponents = GClass614.smethod_4(GClass614.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false, true);
                         if (botSettingsComponents != null)
                         {
-                            if (!GClass598.AllSettings.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+                            if (!GClass614.Gclass619_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
                             {
-                                GClass598.AllSettings.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                GClass614.Gclass619_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
                             }
                         }
                         else

@@ -15,9 +15,9 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             }
 
             [PatchPostfix]
-            public static void Postfix(ref BotOwner ___botOwner_0)
+            public static void Postfix(ref BotOwner ___BotOwner_0)
             {
-                ___botOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
+                ___BotOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
             }
 
             private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)

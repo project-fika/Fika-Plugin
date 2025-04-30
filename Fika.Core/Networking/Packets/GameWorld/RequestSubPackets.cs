@@ -329,7 +329,7 @@ namespace Fika.Core.Networking
 
                 if (Singleton<IFikaNetworkManager>.Instance.CoopHandler.Players.TryGetValue(NetId, out CoopPlayer playerToApply))
                 {
-                    playerToApply.method_160(Services);
+                    playerToApply.method_164(Services);
                 }
             }
 

@@ -6,16 +6,16 @@ using Fika.Core.Networking;
 
 namespace Fika.Core.Coop.HostClasses
 {
-    public class HostRunddansController : GClass2052
+    public class HostRunddansController : GClass2087
     {
-        public HostRunddansController(BackendConfigSettingsClass.GClass1510 settings, LocationSettingsClass.Location location) : base(settings, location)
+        public HostRunddansController(BackendConfigSettingsClass.GClass1554 settings, LocationSettingsClass.Location location) : base(settings, location)
         {
 
         }
 
-        public override void InteractWithEventObject(Player player, GStruct183 packet)
+        public override void InteractWithEventObject(Player player, GStruct187 packet)
         {
-            if (!IsValid(player, out GClass1676 gclass, out TransitDataClass transitDataClass)
+            if (!IsValid(player, out GClass1710 gclass, out TransitDataClass transitDataClass)
                 || !transitDataClass.events)
             {
                 return;

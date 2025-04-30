@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 namespace Fika.Core.Coop.ClientClasses
 {
     public class CoopClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session, CoopPlayer player)
-        : GClass3702(profile, inventoryController, searchController, session)
+        : GClass3765(profile, inventoryController, searchController, session)
     {
         protected readonly CoopPlayer player = player;
 
-        public override async Task<GStruct455<GStruct397<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
+        public override async Task<GStruct440<GStruct400<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
-            List<GClass1319[]> items = [];
+            List<GClass1356[]> items = [];
             bool hasRewards = false;
-            if (quest.Rewards.TryGetValue(EQuestStatus.Success, out IReadOnlyList<GClass3743> list))
+            if (quest.Rewards.TryGetValue(EQuestStatus.Success, out IReadOnlyList<GClass3806> list))
             {
                 hasRewards = true;
-                foreach (GClass3743 item in list)
+                foreach (GClass3806 item in list)
                 {
                     if (item.type != ERewardType.Item)
                     {
@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.ClientClasses
                     items.Add(item.items);
                 }
             }
-            GStruct455<GStruct397<QuestClass>> finishResult = await base.FinishQuest(quest, runNetworkTransaction);
+            GStruct440<GStruct400<QuestClass>> finishResult = await base.FinishQuest(quest, runNetworkTransaction);
             if (finishResult.Succeeded && hasRewards)
             {
                 InraidQuestPacket packet = new()

@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Factories
         public KnifeComponent KnifeComponent = knifeComponent;
         public MedsItemClass MedsItem;
         public FoodDrinkItemClass FoodItem;
-        public GStruct353<EBodyPart> BodyParts;
+        public GStruct356<EBodyPart> BodyParts;
         public float Amount;
         public int AnimationVariant;
 

@@ -135,7 +135,7 @@ namespace Fika.Core.Networking.Websocket
         {
             AsyncWorker.RunInMainTread(() =>
             {
-                Singleton<PreloaderUI>.Instance.NotifierView.method_3(notification);
+                Singleton<PreloaderUI>.Instance.NotifierView.method_5(notification);
             });
         }
 
@@ -182,7 +182,7 @@ namespace Fika.Core.Networking.Websocket
                         Location = "Factory"
                     };
 
-                    Singleton<PreloaderUI>.Instance.NotifierView.method_3(startRaidNotification);
+                    Singleton<PreloaderUI>.Instance.NotifierView.method_5(startRaidNotification);
                     break;
                 case EFikaNotifications.SentItem:
                     ReceivedSentItemNotification SentItemNotification = new()
@@ -191,7 +191,7 @@ namespace Fika.Core.Networking.Websocket
                         ItemName = "LEDX Skin Transilluminator"
                     };
 
-                    Singleton<PreloaderUI>.Instance.NotifierView.method_3(SentItemNotification);
+                    Singleton<PreloaderUI>.Instance.NotifierView.method_5(SentItemNotification);
                     break;
                 case EFikaNotifications.PushNotification:
                     PushNotification PushNotification = new()
@@ -200,7 +200,7 @@ namespace Fika.Core.Networking.Websocket
                         NotificationIcon = EFT.Communications.ENotificationIconType.Note
                     };
 
-                    Singleton<PreloaderUI>.Instance.NotifierView.method_3(PushNotification);
+                    Singleton<PreloaderUI>.Instance.NotifierView.method_5(PushNotification);
                     break;
             }
         }

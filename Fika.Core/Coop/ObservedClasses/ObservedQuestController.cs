@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Fika.Core.Coop.ObservedClasses
 {
     public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
-        : GClass3702(profile, inventoryController, searchController, session)
+        : GClass3765(profile, inventoryController, searchController, session)
     {
         public void HandleInraidQuestPacket(InraidQuestPacket packet)
         {
@@ -17,23 +17,23 @@ namespace Fika.Core.Coop.ObservedClasses
                 case InraidQuestPacket.InraidQuestType.Finish:
                     {
                         FikaGlobals.LogInfo($"Processing {packet.Items.Count} items fom quest reward for {Profile.Info.MainProfileNickname}");
-                        List<GClass3743> readList = [];
-                        foreach (GClass1319[] item in packet.Items)
+                        List<GClass3806> readList = [];
+                        foreach (GClass1356[] item in packet.Items)
                         {
                             readList.Add(new()
                             {
                                 items = item,
-                                mongoID_0 = MongoID.Generate(true),
+                                MongoID_0 = MongoID.Generate(true),
                                 type = EFT.Quests.ERewardType.Item
                             });
                         }
 
                         int generatedItems = 0;
-                        List<GClass3203> results = [];
-                        GStruct454 appendResult = default;
-                        foreach (GClass3743 item in readList)
+                        List<GClass3250> results = [];
+                        GStruct439 appendResult = default;
+                        foreach (GClass3806 item in readList)
                         {
-                            appendResult = item.TryAppendClaimResults(inventoryController_0, results, out int clonedCount);
+                            appendResult = item.TryAppendClaimResults(InventoryController_0, results, out int clonedCount);
                             generatedItems += clonedCount;
                             if (appendResult.Failed)
                             {
@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.ObservedClasses
                             results.RollBack();
                             for (int i = 0; i < generatedItems; i++)
                             {
-                                inventoryController_0.RollBack();
+                                InventoryController_0.RollBack();
                             }
                             return;
                         }
@@ -60,7 +60,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         GameWorld gameWorld = Singleton<GameWorld>.Instance;
                         foreach (string itemId in packet.ItemIdsToRemove)
                         {
-                            GStruct457<Item> result = gameWorld.FindItemById(itemId);
+                            GStruct442<Item> result = gameWorld.FindItemById(itemId);
                             if (result.Failed)
                             {
                                 FikaGlobals.LogError($"Could not find itemId {itemId}: {result.Error}");
@@ -69,11 +69,11 @@ namespace Fika.Core.Coop.ObservedClasses
                             itemsToRemove.Add(result.Value);
                         }
 
-                        List<GStruct454> list = [];
-                        GStruct454 discardResult = default;
+                        List<GStruct439> list = [];
+                        GStruct439 discardResult = default;
                         for (int i = 0; i < itemsToRemove.Count; i++)
                         {
-                            discardResult = InteractionsHandlerClass.Discard(itemsToRemove[i], inventoryController_0, false);
+                            discardResult = InteractionsHandlerClass.Discard(itemsToRemove[i], InventoryController_0, false);
                             if (discardResult.Failed)
                             {
                                 break;

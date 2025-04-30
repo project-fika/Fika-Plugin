@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.ClientClasses
         public override void OnWeightUpdated()
         {
             BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
-            float num = iobserverToPlayerBridge_0.Skills.StrengthBuffElite ? coopPlayer.InventoryController.Inventory.TotalWeightEliteSkill : coopPlayer.InventoryController.Inventory.TotalWeight;
+            float num = IobserverToPlayerBridge_0.Skills.StrengthBuffElite ? coopPlayer.InventoryController.Inventory.TotalWeightEliteSkill : coopPlayer.InventoryController.Inventory.TotalWeight;
             Inertia = 0.0113f;
             SprintAcceleration = 0.9887f;
             PreSprintAcceleration = 2.9853f;
@@ -31,12 +31,12 @@ namespace Fika.Core.Coop.ClientClasses
             Overweight = BaseOverweightLimits.InverseLerp(num);
             WalkOverweight = WalkOverweightLimits.InverseLerp(num);
             WalkSpeedLimit = 1f;
-            float_3 = SprintOverweightLimits.InverseLerp(num);
+            Float_3 = SprintOverweightLimits.InverseLerp(num);
             MoveSideInertia = 1.9887f;
             MoveDiagonalInertia = 1.3955f;
             if (coopPlayer.IsAI)
             {
-                float_3 = 0f;
+                Float_3 = 0f;
             }
             MaxPoseLevel = (Overweight >= 1f) ? 0.9f : 1f;
             Consumptions[EConsumptionType.OverweightIdle].SetActive(this, Overweight >= 1f);

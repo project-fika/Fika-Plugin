@@ -52,7 +52,7 @@ namespace Fika.Core.Coop.HostClasses
             return new HostGrenadeFactory();
         }
 
-        public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2045 config, bool loadBundlesAndCreatePools = true,
+        public override async Task InitLevel(ItemFactoryClass itemFactory, GClass2080 config, bool loadBundlesAndCreatePools = true,
             List<ResourceKey> resources = null, IProgress<LoadingProgressStruct> progress = null, CancellationToken ct = default)
         {
             await base.InitLevel(itemFactory, config, loadBundlesAndCreatePools, resources, progress, ct);
@@ -123,7 +123,7 @@ namespace Fika.Core.Coop.HostClasses
             if (SynchronizableObjectLogicProcessor.TripwireManager == null)
             {
                 FikaPlugin.Instance.FikaLogger.LogError("TripwireManager was null! Creating new...");
-                SynchronizableObjectLogicProcessor.TripwireManager = new GClass2457(this);
+                SynchronizableObjectLogicProcessor.TripwireManager = new GClass2495(this);
             }
 
             TripwireSynchronizableObject tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);

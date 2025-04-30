@@ -312,7 +312,7 @@ namespace Fika.Core.Console
                 return;
             }
 
-            GClass2459 serverAirdropManager = gameWorld.ClientSynchronizableObjectLogicProcessor.ServerAirdropManager;
+            AirdropEventClass serverAirdropManager = gameWorld.ClientSynchronizableObjectLogicProcessor.ServerAirdropManager;
             if (serverAirdropManager == null)
             {
                 ConsoleScreen.LogError("ServerAirdropManager was null!");
@@ -325,13 +325,13 @@ namespace Fika.Core.Console
                 return;
             }
 
-            List<Vector3> dropPoints = serverAirdropManager.list_2;
+            List<Vector3> dropPoints = serverAirdropManager.List_2;
             if (dropPoints != null && dropPoints.Count > 0)
             {
-                string templateId = serverAirdropManager.string_0;
+                string templateId = serverAirdropManager.String_0;
                 serverAirdropManager.method_5(serverAirdropManager.Single_0);
                 gameWorld.InitAirdrop(templateId, true, serverAirdropManager.method_6());
-                serverAirdropManager.string_0 = null;
+                serverAirdropManager.String_0 = null;
                 dropPoints.Clear();
                 ConsoleScreen.Log("Started airdrop");
                 return;

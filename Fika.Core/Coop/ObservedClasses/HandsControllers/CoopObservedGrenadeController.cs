@@ -26,7 +26,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-            operationFactoryDelegates[typeof(Class1159)] = new OperationFactoryDelegate(Grenade1);
+            operationFactoryDelegates[typeof(Class1169)] = new OperationFactoryDelegate(Grenade1);
             return operationFactoryDelegates;
         }
 
@@ -82,13 +82,13 @@ namespace Fika.Core.Coop.ObservedClasses
         }
     }
 
-    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1159(controller)
+    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1169(controller)
     {
         private readonly CoopPlayer coopPlayer = player;
 
         public new void Start()
         {
-            gparam_0.FirearmsAnimator.SetFireMode(Weapon.EFireMode.greanadePlanting, false);
+            Gparam_0.FirearmsAnimator.SetFireMode(Weapon.EFireMode.greanadePlanting, false);
             EPlantOperationState_0 = EPlantOperationState.StateIn;
             State = Player.EOperationState.Executing;
             SetLeftStanceAnimOnStartOperation();
@@ -114,7 +114,7 @@ namespace Fika.Core.Coop.ObservedClasses
             // Do nothing
         }
 
-        public override void Execute(GInterface412 operation, Callback callback)
+        public override void Execute(GInterface416 operation, Callback callback)
         {
             callback.Succeed();
         }
@@ -122,7 +122,7 @@ namespace Fika.Core.Coop.ObservedClasses
         public override void PlantTripwire()
         {
             EPlantOperationState_0 = EPlantOperationState.Planting;
-            gparam_0.FirearmsAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
+            Gparam_0.FirearmsAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
         }
 
         public override void HideGrenade(Action onHidden, bool fastHide)

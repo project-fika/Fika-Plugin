@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_45));
+            return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_49));
         }
 
         [PatchPrefix]
@@ -116,7 +116,7 @@ namespace Fika.Core.Coop.Patches
             raidSettingsToUpdate.selectedLocation.EscapeTimeLimit = escapeTimeLimit;
             raidSettingsToUpdate.transition = FikaBackendUtils.TransitData;
 
-            GClass1325 profileInsurance = localSettings.profileInsurance;
+            GClass1362 profileInsurance = localSettings.profileInsurance;
             if ((profileInsurance?.insuredItems) != null)
             {
                 profile.InsuredItems = localSettings.profileInsurance.insuredItems;
@@ -147,13 +147,13 @@ namespace Fika.Core.Coop.Patches
 
             StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation);
 
-            TimeSpan raidLimits = instance.method_46(raidSettings.SelectedLocation.EscapeTimeLimit);
+            TimeSpan raidLimits = instance.method_50(raidSettings.SelectedLocation.EscapeTimeLimit);
 
             CoopGame coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
-                MonoBehaviourSingleton<MenuUI>.Instance, MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
+                MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
                 timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
                 fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-                new GClass2440(metricsConfig, instance), localRaidSettings, raidSettings);
+                new GClass2478(metricsConfig, instance), localRaidSettings, raidSettings);
 
             startHandler.CoopGame = coopGame;
 
@@ -197,7 +197,7 @@ namespace Fika.Core.Coop.Patches
 
             public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
             {
-                tarkovApplication.method_48(pmcProfile.Id, scavProfile, location, result);
+                tarkovApplication.method_52(pmcProfile.Id, scavProfile, location, result);
             }
 
             public void ReleaseSingleton()

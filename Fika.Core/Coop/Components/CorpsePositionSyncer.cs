@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.Components
 
         public void FixedUpdate()
         {
-            if (corpse.Ragdoll.bool_2)
+            if (corpse.Ragdoll.Bool_2)
             {
                 data.Position = corpse.TrackableTransform.position;
                 data.TransformSyncs = corpse.TransformSyncs;

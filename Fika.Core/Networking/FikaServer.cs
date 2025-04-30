@@ -53,7 +53,7 @@ namespace Fika.Core.Networking
     /// <summary>
     /// Server used to synchronize all <see cref="FikaClient"/>s
     /// </summary>
-    public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface253, IFikaNetworkManager
+    public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface257, IFikaNetworkManager
     {
         public int ReadyClients;
         public DateTime TimeSinceLastPeerDisconnected;
@@ -296,14 +296,14 @@ namespace Fika.Core.Networking
 
         async Task IFikaNetworkManager.InitializeVOIP()
         {
-            GClass2042 voipHandler = FikaGlobals.VOIPHandler;
-            GClass1040 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+            GClass2077 voipHandler = FikaGlobals.VOIPHandler;
+            GClass1065 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
             if (voipHandler.MicrophoneChecked && !FikaBackendUtils.IsHeadless)
             {
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
-                await GClass1578.LoadScene(AssetsManagerSingletonClass.Manager,
-                    GClass2078.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
+                    GClass2113.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
                 do
@@ -322,8 +322,8 @@ namespace Fika.Core.Networking
             }
             else if (FikaBackendUtils.IsHeadless)
             {
-                await GClass1578.LoadScene(AssetsManagerSingletonClass.Manager,
-                    GClass2078.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
+                    GClass2113.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
                 do
@@ -494,7 +494,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            GStruct457<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+            GStruct442<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
             if (gstruct2.Failed)
             {
                 logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
@@ -754,7 +754,7 @@ namespace Fika.Core.Networking
                 GameWorld gameWorld = Singleton<GameWorld>.Instance;
                 Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
-                GClass797<int, Throwable>.GStruct46 grenades = gameWorld.Grenades.GetValuesEnumerator();
+                GClass813<int, Throwable>.GStruct46 grenades = gameWorld.Grenades.GetValuesEnumerator();
                 List<SmokeGrenadeDataPacketStruct> smokeData = [];
                 foreach (Throwable item in grenades)
                 {
@@ -816,7 +816,7 @@ namespace Fika.Core.Networking
                     SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
                 }
 
-                GClass797<int, WindowBreaker>.GStruct46 windows = gameWorld.Windows.GetValuesEnumerator();
+                GClass813<int, WindowBreaker>.GStruct46 windows = gameWorld.Windows.GetValuesEnumerator();
                 Dictionary<int, Vector3> windowData = [];
                 foreach (WindowBreaker window in windows)
                 {
@@ -1117,14 +1117,14 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                using GClass1212 eftReader = GClass1215.Get(packet.OperationBytes);
+                using GClass1249 eftReader = GClass1252.Get(packet.OperationBytes);
                 try
                 {
                     OperationCallbackPacket operationCallbackPacket;
                     if (playerToApply.InventoryController is Interface16 inventoryController)
                     {
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                        GStruct452 result = inventoryController.CreateOperationFromDescriptor(descriptor);
+                        GStruct437 result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
                         ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
 #endif
@@ -1475,7 +1475,7 @@ namespace Fika.Core.Networking
 
                 if (profile.ProfileId == RequestHandler.SessionId)
                 {
-                    foreach (Profile.ProfileHealthClass.GClass1975 bodyPartHealth in profile.Health.BodyParts.Values)
+                    foreach (Profile.ProfileHealthClass.GClass2010 bodyPartHealth in profile.Health.BodyParts.Values)
                     {
                         bodyPartHealth.Effects.Clear();
                         bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
@@ -1563,9 +1563,9 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Packet loss: {netServer.Statistics.PacketLossPercent}%");
         }
 
-        private class InventoryOperationHandler(GStruct452 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
+        private class InventoryOperationHandler(GStruct437 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
         {
-            public GStruct452 OperationResult = operationResult;
+            public GStruct437 OperationResult = operationResult;
             private readonly uint operationId = operationId;
             private readonly int netId = netId;
             private readonly NetPeer peer = peer;

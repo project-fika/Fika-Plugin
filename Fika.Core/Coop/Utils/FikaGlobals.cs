@@ -43,19 +43,19 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                return GClass2007.Instance;
+                return GClass2042.Instance;
             }
         }
 
-        public static GClass2042 VOIPHandler
+        public static GClass2077 VOIPHandler
         {
             get
             {
                 if (voipHandler == null)
                 {
-                    voipHandler = GClass2042.Default;
+                    voipHandler = GClass2077.Default;
                     voipHandler.VoipQualitySettings.Apply();
-                    voipHandler.MicrophoneChecked = GClass1050.CheckMicrophone();
+                    voipHandler.MicrophoneChecked = GClass1075.CheckMicrophone();
                     voipHandler.VoipEnabled = true;
                 }
 
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
-        private static GClass2042 voipHandler;
+        private static GClass2077 voipHandler;
 
         internal static float GetOtherPlayerSensitivity()
         {
@@ -242,7 +242,7 @@ namespace Fika.Core.Coop.Utils
         public static Profile GetLiteProfile(bool scav)
         {
             Profile profile = GetProfile(scav);
-            GClass1998 liteDescriptor = new(profile, SearchControllerSerializer)
+            CompleteProfileDescriptorClass liteDescriptor = new(profile, SearchControllerSerializer)
             {
                 Encyclopedia = [],
                 InsuredItems = [],

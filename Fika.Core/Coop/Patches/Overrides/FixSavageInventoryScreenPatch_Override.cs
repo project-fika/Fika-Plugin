@@ -11,7 +11,7 @@ namespace Fika.Core.Coop.Patches
 {
     public class GetProfileAtEndOfRaidPatch_Override : FikaPatch
     {
-        public static GClass1998 ProfileDescriptor { get; private set; }
+        public static CompleteProfileDescriptorClass ProfileDescriptor { get; private set; }
 
         protected override MethodBase GetTargetMethod()
         {
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
         [PatchPrefix]
         public static void PatchPrefix(CoopGame __instance)
         {
-            ProfileDescriptor = new GClass1998(__instance.Profile_0, FikaGlobals.SearchControllerSerializer);
+            ProfileDescriptor = new CompleteProfileDescriptorClass(__instance.Profile_0, FikaGlobals.SearchControllerSerializer);
         }
     }
     /// <summary>
@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static void PatchPrefix(ref ISession ___iSession)
+        public static void PatchPrefix(ref ISession ___ISession)
         {
             Profile profile = new(GetProfileAtEndOfRaidPatch_Override.ProfileDescriptor);
 
@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.Patches
                 return;
             }
 
-            ProfileEndpointFactoryAbstractClass session = (ProfileEndpointFactoryAbstractClass)___iSession;
+            ProfileEndpointFactoryAbstractClass session = (ProfileEndpointFactoryAbstractClass)___ISession;
             session.AllProfiles =
             [
                 session.AllProfiles.First(x => x.Side != EPlayerSide.Savage),

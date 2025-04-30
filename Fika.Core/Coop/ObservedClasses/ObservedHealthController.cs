@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return false;
         }
 
-        public override bool ApplyItem(Item item, GStruct353<EBodyPart> bodyPart, float? amount = null)
+        public override bool ApplyItem(Item item, GStruct356<EBodyPart> bodyPart, float? amount = null)
         {
             return false;
         }
@@ -38,18 +38,19 @@ namespace Fika.Core.Coop.ObservedClasses
         public void PauseAllEffects()
         {
             EffectHandler handler = new(this);
-            for (int i = list_1.Count - 1; i >= 0; i--)
+            for (int i = List_1.Count - 1; i >= 0; i--)
             {
-                handler.PausedEffects.Add(list_1[i]);
-                PausedEffectsStruct gstruct = gclass814_0.Withdraw();
-                gstruct.SaveInfo(list_1[i].Id, list_1[i].HealthController, list_1[i].Type, list_1[i].BodyPart, list_1[i].Strength,
-                    list_1[i].CurrentStrength, list_1[i].DelayTime, list_1[i].StateTime, list_1[i].WorkStateTime, list_1[i].BuildUpTime,
-                    list_1[i].ResidueTime, list_1[i].State);
-                method_0(list_1[i]);
-                list_1[i].ForceRemove();
+                handler.PausedEffects.Add(List_1[i]);
+                PausedEffectsStruct gstruct = Gclass832_0.Withdraw();
+                gstruct.SaveInfo(List_1[i].Id, List_1[i].HealthController, List_1[i].Type, List_1[i].BodyPart, List_1[i].Strength,
+                    List_1[i].CurrentStrength, List_1[i].DelayTime, List_1[i].StateTime, List_1[i].WorkStateTime, List_1[i].BuildUpTime,
+                    List_1[i].ResidueTime, List_1[i].State);
+                method_0(List_1[i]);
+                List_1[i].ForceRemove();
                 handler.PausedEffectsInfo.Add(gstruct);
             }
-            action_2 = new Action(handler.UnpauseEffects);
+
+            Action_2 = new Action(handler.UnpauseEffects);
         }
 
         public override Profile.ProfileHealthClass Store(Profile.ProfileHealthClass health = null)
@@ -59,32 +60,32 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 Profile.ProfileHealthClass profileHealthClass2 = new()
                 {
-                    BodyParts = GClass845<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass1975>(),
+                    BodyParts = GClass863<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass2010>(),
                     Energy = new Profile.ProfileHealthClass.ValueInfo
                     {
-                        Current = healthValue_0.Current,
-                        Minimum = healthValue_0.Minimum,
-                        Maximum = healthValue_0.Maximum
+                        Current = HealthValue_0.Current,
+                        Minimum = HealthValue_0.Minimum,
+                        Maximum = HealthValue_0.Maximum
                     },
                     Hydration = new Profile.ProfileHealthClass.ValueInfo
                     {
-                        Current = healthValue_1.Current,
-                        Minimum = healthValue_1.Minimum,
-                        Maximum = healthValue_1.Maximum
+                        Current = HealthValue_1.Current,
+                        Minimum = HealthValue_1.Minimum,
+                        Maximum = HealthValue_1.Maximum
                     },
                     Temperature = new Profile.ProfileHealthClass.ValueInfo
                     {
-                        Current = healthValue_2.Current,
-                        Minimum = healthValue_2.Minimum,
-                        Maximum = healthValue_2.Maximum
+                        Current = HealthValue_2.Current,
+                        Minimum = HealthValue_2.Minimum,
+                        Maximum = HealthValue_2.Maximum
                     }
                 };
                 profileHealthClass = profileHealthClass2;
                 profileHealthClass2.Poison = new Profile.ProfileHealthClass.ValueInfo
                 {
-                    Current = healthValue_3.Current,
-                    Minimum = healthValue_3.Minimum,
-                    Maximum = healthValue_3.Maximum
+                    Current = HealthValue_3.Current,
+                    Minimum = HealthValue_3.Minimum,
+                    Maximum = HealthValue_3.Maximum
                 };
             }
             health = profileHealthClass;
@@ -93,9 +94,9 @@ namespace Fika.Core.Coop.ObservedClasses
                 keyValuePair.Deconstruct(out EBodyPart ebodyPart, out BodyPartState bodyPartState);
                 EBodyPart ebodyPart2 = ebodyPart;
                 BodyPartState bodyPartState2 = bodyPartState;
-                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass1975 gclass))
+                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass2010 gclass))
                 {
-                    gclass = new Profile.ProfileHealthClass.GClass1975();
+                    gclass = new Profile.ProfileHealthClass.GClass2010();
                     health.BodyParts.Add(ebodyPart2, gclass);
                 }
                 gclass.Health = new Profile.ProfileHealthClass.ValueInfo
@@ -108,9 +109,9 @@ namespace Fika.Core.Coop.ObservedClasses
 
             foreach (NetworkBodyEffectsAbstractClass gclass in IReadOnlyList_0)
             {
-                if (gclass is GInterface306 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments
+                if (gclass is GInterface310 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments
                 {
-                    Profile.ProfileHealthClass.GClass1975 gclass2 = health.BodyParts[gclass.BodyPart];
+                    Profile.ProfileHealthClass.GClass2010 gclass2 = health.BodyParts[gclass.BodyPart];
                     gclass2.Effects ??= [];
                     gclass2.Effects.Add(gclass.GetType().Name, new()
                     {
@@ -138,7 +139,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         PausedEffectsInfo[i].BuildUpTime, PausedEffectsInfo[i].ResidueStateTime, PausedEffectsInfo[i].State);
                     healthController.AddEffectToList(PausedEffects[i]);
                     PausedEffects[i].UnPauseEffect();
-                    healthController.gclass814_0.Return(PausedEffectsInfo[i]);
+                    healthController.Gclass832_0.Return(PausedEffectsInfo[i]);
                 }
             }
         }

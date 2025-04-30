@@ -15,18 +15,18 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(EGameType gameType, BufferZoneControllerClass __instance, ref bool ___bool_1, ref Action ___action_0)
+        public static bool Prefix(EGameType gameType, BufferZoneControllerClass __instance, ref bool ___Bool_1, ref Action ___action_0)
         {
             AbstractGame.OnGameTypeSetted -= __instance.method_1;
 
-            ___bool_1 = gameType == EGameType.Offline;
+            ___Bool_1 = gameType == EGameType.Offline;
 
             if (FikaBackendUtils.IsClient)
             {
-                ___bool_1 = false;
+                ___Bool_1 = false;
             }
 
-            if (___bool_1)
+            if (___Bool_1)
             {
                 Player.OnPlayerDeadStatic += __instance.method_2;
                 LighthouseTraderZone.OnPlayerAllowStatusChanged += __instance.method_4;

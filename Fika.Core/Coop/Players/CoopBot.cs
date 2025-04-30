@@ -72,18 +72,18 @@ namespace Fika.Core.Coop.Players
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
 
-            player.AIData = new GClass567(null, player)
+            player.AIData = new GClass583(null, player)
             {
                 IsAI = true
             };
 
             Traverse botTraverse = Traverse.Create(player);
-            botTraverse.Field<GClass896>("gclass896_0").Value = new();
-            botTraverse.Field<GClass896>("gclass896_0").Value.Initialize(player, player.PlayerBones);
+            botTraverse.Field<GClass914>("gclass914_0").Value = new();
+            botTraverse.Field<GClass914>("gclass914_0").Value.Initialize(player, player.PlayerBones);
 
             if (FikaBackendUtils.IsHeadless)
             {
-                botTraverse.Field<GClass896>("gclass896_0").Value.SetMode(GClass896.EMode.Disabled);
+                botTraverse.Field<GClass914>("gclass914_0").Value.SetMode(GClass914.EMode.Disabled);
             }
 
             player.AggressorFound = false;
@@ -223,7 +223,7 @@ namespace Fika.Core.Coop.Players
                 if (num > 0f)
                 {
                     num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
-                    method_92(num, armorComponent);
+                    method_95(num, armorComponent);
                 }
             }
 
