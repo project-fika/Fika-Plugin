@@ -347,7 +347,7 @@ namespace Fika.Core.Coop.Custom
                 currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
                 currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
 
-                List<HealthBarEffect> tempList = new(effects);
+                List<HealthBarEffect> tempList = [.. effects];
                 foreach (HealthBarEffect effect in tempList)
                 {
                     effect.Remove();
