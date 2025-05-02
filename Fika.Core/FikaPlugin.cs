@@ -137,6 +137,8 @@ namespace Fika.Core
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
         public static ConfigEntry<bool> ShowEffects { get; set; }
         public static ConfigEntry<bool> UseOcclusion { get; set; }
+        public static ConfigEntry<Color> FullHealthColor { get; set; }
+        public static ConfigEntry<Color> LowHealthColor { get; set; }
 
         // Coop | Quest Sharing
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
@@ -684,6 +686,24 @@ namespace Fika.Core
                     Order = 0
                 }),
                 "Use Occlusion", ref failed, headers);
+
+            FullHealthColor = SetupSetting(coopDefaultNamePlatesHeader, "Full Health Color", Color.green,
+                new ConfigDescription(LocaleUtils.BEPINEX_HEALTHCOLOR_FULL_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = coopNameplatesHeader,
+                    DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_FULL_T.Localized(),
+                    Order = 0
+                }),
+                "Full Health Color", ref failed, headers);
+
+            LowHealthColor = SetupSetting(coopDefaultNamePlatesHeader, "Low Health Color", Color.red,
+                new ConfigDescription(LocaleUtils.BEPINEX_HEALTHCOLOR_LOW_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = coopNameplatesHeader,
+                    DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_LOW_T.Localized(),
+                    Order = 0
+                }),
+                "Low Health Color", ref failed, headers);
 
             // Coop | Quest Sharing
 

@@ -430,7 +430,8 @@ namespace Fika.Core.Coop.Custom
 
         private void UpdateHealthBarColor(float normalizedHealth)
         {
-            Color color = Color.Lerp(Color.red, Color.green, normalizedHealth);
+            Color color = Color.Lerp(FikaPlugin.LowHealthColor.Value,
+                FikaPlugin.FullHealthColor.Value, normalizedHealth);
             color.a = playerPlate.healthBarScreen.color.a; // Keep the alpha value unchanged
             playerPlate.healthBarScreen.color = color;
         }
