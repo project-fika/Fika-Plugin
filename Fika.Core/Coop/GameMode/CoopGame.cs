@@ -205,7 +205,7 @@ namespace Fika.Core.Coop.GameMode
             TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
             Callback<ExitStatus, TimeSpan, MetricsClass> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
             ISession backEndSession, TimeSpan sessionTime, MetricsEventsClass metricsEvents,
-            GClass2478 metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
+            MetricsCollectorClass metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
@@ -1154,9 +1154,9 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (isServer)
                 {
-                    gameWorld.ServerShellingController = new GClass638();
+                    gameWorld.ServerShellingController = new ServerShellingControllerClass();
                 }
-                gameWorld.ClientShellingController = new GClass1445(isServer);
+                gameWorld.ClientShellingController = new ClientShellingControllerClass(isServer);
             }
 
             if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(Location_0.Id))
@@ -1844,7 +1844,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogInfo("Generating and initializing weather...");
                 if (isServer)
                 {
-                    GClass1365 weather = await iSession.WeatherRequest();
+                    WeatherRequestClass weather = await iSession.WeatherRequest();
                     Season = weather.Season;
                     SeasonsSettings = weather.SeasonsSettings;
                     if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
@@ -2384,7 +2384,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (FikaBackendUtils.IsTransit)
             {
-                GClass1405 data = FikaBackendUtils.TransitData;
+                RaidTransitionInfoClass data = FikaBackendUtils.TransitData;
                 data.transitionType = ELocationTransition.Common;
                 data.transitionCount++;
                 data.visitedLocations = [.. data.visitedLocations, Location_0.Id];
@@ -2557,10 +2557,10 @@ namespace Fika.Core.Coop.GameMode
             hasSaved = true;
         }
 
-        public Dictionary<string, GClass1356[]> GetOwnSentItems(string profileId)
+        public Dictionary<string, FlatItemsDataClass[]> GetOwnSentItems(string profileId)
         {
             GameWorld instance = Singleton<GameWorld>.Instance;
-            Dictionary<string, GClass1356[]> dictionary = [];
+            Dictionary<string, FlatItemsDataClass[]> dictionary = [];
             BTRControllerClass btrController = instance.BtrController;
             if ((btrController?.TransferItemsController.Stash) != null)
             {
@@ -2586,7 +2586,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 else
                 {
-                    GClass1704 transferItemsController = controller.TransferItemsController;
+                    TransferItemsControllerAbstractClass transferItemsController = controller.TransferItemsController;
                     flag = (transferItemsController?.Stash) != null;
                 }
                 if (flag)
@@ -2740,7 +2740,7 @@ namespace Fika.Core.Coop.GameMode
                     Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
                 }
             }
-            gclass2478_0.Stop();
+            metricsCollectorClass.Stop();
             return new();
         }
 

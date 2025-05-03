@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.Players
         private Coroutine waitForStartRoutine;
         private bool isServer;
         private VoiceBroadcastTrigger voiceBroadcastTrigger;
-        private GClass1075 soundSettings;
+        private SoundSettingsDataClass soundSettings;
         private bool voipAssigned;
         private int frameSkip;
 
@@ -145,7 +145,7 @@ namespace Fika.Core.Coop.Players
                 return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
             }
         }
-        private GClass914 cullingHandler;
+        private LocalPlayerCullingHandlerClass cullingHandler;
         private readonly List<ObservedSlotViewHandler> observedSlotViewHandlers = [];
         #endregion
 
@@ -194,8 +194,8 @@ namespace Fika.Core.Coop.Players
             player.AIData = new GClass583(null, player);
 
             Traverse observedTraverse = Traverse.Create(player);
-            observedTraverse.Field<GClass914>("gclass914_0").Value = new();
-            player.cullingHandler = observedTraverse.Field<GClass914>("gclass914_0").Value;
+            observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value = new();
+            player.cullingHandler = observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value;
             player.cullingHandler.Initialize(player, player.PlayerBones);
             if (FikaBackendUtils.IsHeadless || profile.IsPlayerProfile())
             {
@@ -1187,7 +1187,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public void SetInventory(GClass1727 inventoryDescriptor)
+        public void SetInventory(InventoryDescriptorClass inventoryDescriptor)
         {
             if (HandsController != null)
             {

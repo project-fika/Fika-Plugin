@@ -216,7 +216,7 @@ namespace Fika.Core.Networking
         public static void PutItem(this NetDataWriter writer, Item item)
         {
             EFTWriterClass eftWriter = new();
-            GClass1727 descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
+            InventoryDescriptorClass descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
         }
@@ -246,14 +246,14 @@ namespace Fika.Core.Networking
             }.ToInventory();
         }
 
-        public static void PutItemDescriptor(this NetDataWriter writer, GClass1727 descriptor)
+        public static void PutItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass descriptor)
         {
             EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTItemDescriptor(descriptor);
             writer.PutByteArray(eftWriter.ToArray());
         }
 
-        public static GClass1727 GetItemDescriptor(this NetDataReader reader)
+        public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
         {
             using GClass1249 eftReader = GClass1252.Get(reader.GetByteArray());
             return eftReader.ReadEFTItemDescriptor();

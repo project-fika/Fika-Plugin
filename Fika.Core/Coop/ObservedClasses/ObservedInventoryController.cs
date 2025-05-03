@@ -171,7 +171,7 @@ namespace Fika.Core.Coop.ObservedClasses
             MongoID_0 = newId;
         }
 
-        GStruct437 Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+        OperationDataStruct Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
         {
             method_13(descriptor);
             return descriptor.ToInventoryOperation(coopPlayer);

@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             // Do not replicate picking up quest items, throws an error on the other clients            
-            if (operation is GClass3314 moveOperation)
+            if (operation is MoveOperationClass moveOperation)
             {
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.QuestItem)

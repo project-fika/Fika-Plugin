@@ -17,8 +17,8 @@ namespace Fika.Core.Coop.ObservedClasses
                 case InraidQuestPacket.InraidQuestType.Finish:
                     {
                         FikaGlobals.LogInfo($"Processing {packet.Items.Count} items fom quest reward for {Profile.Info.MainProfileNickname}");
-                        List<GClass3806> readList = [];
-                        foreach (GClass1356[] item in packet.Items)
+                        List<QuestRewardDataClass> readList = [];
+                        foreach (FlatItemsDataClass[] item in packet.Items)
                         {
                             readList.Add(new()
                             {
@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         int generatedItems = 0;
                         List<GClass3250> results = [];
                         GStruct439 appendResult = default;
-                        foreach (GClass3806 item in readList)
+                        foreach (QuestRewardDataClass item in readList)
                         {
                             appendResult = item.TryAppendClaimResults(InventoryController_0, results, out int clonedCount);
                             generatedItems += clonedCount;

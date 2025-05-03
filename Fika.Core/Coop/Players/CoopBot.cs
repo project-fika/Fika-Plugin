@@ -78,12 +78,12 @@ namespace Fika.Core.Coop.Players
             };
 
             Traverse botTraverse = Traverse.Create(player);
-            botTraverse.Field<GClass914>("gclass914_0").Value = new();
-            botTraverse.Field<GClass914>("gclass914_0").Value.Initialize(player, player.PlayerBones);
+            botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value = new();
+            botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.Initialize(player, player.PlayerBones);
 
             if (FikaBackendUtils.IsHeadless)
             {
-                botTraverse.Field<GClass914>("gclass914_0").Value.SetMode(GClass914.EMode.Disabled);
+                botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.SetMode(LocalPlayerCullingHandlerClass.EMode.Disabled);
             }
 
             player.AggressorFound = false;

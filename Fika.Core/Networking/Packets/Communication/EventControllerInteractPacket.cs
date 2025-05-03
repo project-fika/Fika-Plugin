@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
     public class EventControllerInteractPacket : INetSerializable
     {
         public int NetId;
-        public GStruct187 Data;
+        public InteractPacketStruct Data;
 
         public void Deserialize(NetDataReader reader)
         {

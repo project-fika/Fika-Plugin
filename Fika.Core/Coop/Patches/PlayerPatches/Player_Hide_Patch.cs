@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.Patches
 
         // Check for GClass increments
         [PatchPrefix]
-        public static bool Prefix(GClass914 ___gclass914_0)
+        public static bool Prefix(LocalPlayerCullingHandlerClass ___gclass914_0)
         {
             ___gclass914_0.Hide();
             return false;

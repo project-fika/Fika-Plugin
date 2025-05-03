@@ -13,7 +13,7 @@ namespace Fika.Core.Networking.VOIP
     {
         private static readonly TimeSpan HearingDetectionTime = TimeSpan.FromSeconds(2.0);
 
-        public FikaVOIPController(CoopPlayer localPlayer, GClass1075 soundSettings)
+        public FikaVOIPController(CoopPlayer localPlayer, SoundSettingsDataClass soundSettings)
         {
             EVoipState voipState = localPlayer.VoipState;
             LocalPlayer = localPlayer;
@@ -96,7 +96,7 @@ namespace Fika.Core.Networking.VOIP
                 SetDefaultMicrophone();
                 return;
             }
-            if (GClass1075.IsValidMicrophone(device))
+            if (SoundSettingsDataClass.IsValidMicrophone(device))
             {
                 FikaGlobals.LogInfo($"VoipMicrophone set device: {device}");
                 DissonanceComms.MicrophoneName = device;
@@ -108,7 +108,7 @@ namespace Fika.Core.Networking.VOIP
 
         private void SetDefaultMicrophone()
         {
-            string defaultMicrophone = GClass1075.DefaultMicrophone;
+            string defaultMicrophone = SoundSettingsDataClass.DefaultMicrophone;
             if (defaultMicrophone != null)
             {
                 FikaGlobals.LogInfo($"VoipMicrophone set default: {defaultMicrophone}");
@@ -515,7 +515,7 @@ namespace Fika.Core.Networking.VOIP
 
 
         public CoopPlayer LocalPlayer { get; set; }
-        public GClass1075 SoundSettings { get; set; }
+        public SoundSettingsDataClass SoundSettings { get; set; }
 
         public DissonanceComms DissonanceComms
         {
@@ -630,7 +630,7 @@ namespace Fika.Core.Networking.VOIP
 
         private Struct510 method_10()
         {
-            GClass2013 ban = LocalPlayer.Profile.Info.GetBan(EBanType.Voip);
+            VOIPBanDataClass ban = LocalPlayer.Profile.Info.GetBan(EBanType.Voip);
             if (ban == null)
             {
                 return default;

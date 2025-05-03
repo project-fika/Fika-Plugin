@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.HostClasses
 
         }
 
-        public override void InteractWithEventObject(Player player, GStruct187 packet)
+        public override void InteractWithEventObject(Player player, InteractPacketStruct packet)
         {
             if (!IsValid(player, out GClass1710 gclass, out TransitDataClass transitDataClass)
                 || !transitDataClass.events)

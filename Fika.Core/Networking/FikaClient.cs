@@ -187,7 +187,7 @@ namespace Fika.Core.Networking
 
         async Task IFikaNetworkManager.InitializeVOIP()
         {
-            GClass2077 voipHandler = FikaGlobals.VOIPHandler;
+            VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
 
             GClass1065 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
             if (voipHandler.MicrophoneChecked)
@@ -1262,7 +1262,7 @@ namespace Fika.Core.Networking
                     {
                         using GClass1249 eftReader = GClass1252.Get(packet.OperationBytes);
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                        GStruct437 result = networkController.CreateOperationFromDescriptor(descriptor);
+                        OperationDataStruct result = networkController.CreateOperationFromDescriptor(descriptor);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");

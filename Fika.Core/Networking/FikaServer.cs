@@ -296,7 +296,7 @@ namespace Fika.Core.Networking
 
         async Task IFikaNetworkManager.InitializeVOIP()
         {
-            GClass2077 voipHandler = FikaGlobals.VOIPHandler;
+            VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
             GClass1065 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
             if (voipHandler.MicrophoneChecked && !FikaBackendUtils.IsHeadless)
             {
@@ -1124,7 +1124,7 @@ namespace Fika.Core.Networking
                     if (playerToApply.InventoryController is Interface16 inventoryController)
                     {
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                        GStruct437 result = inventoryController.CreateOperationFromDescriptor(descriptor);
+                        OperationDataStruct result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
                         ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
 #endif
@@ -1563,9 +1563,9 @@ namespace Fika.Core.Networking
             logger.LogInfo($"Packet loss: {netServer.Statistics.PacketLossPercent}%");
         }
 
-        private class InventoryOperationHandler(GStruct437 operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
+        private class InventoryOperationHandler(OperationDataStruct operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
         {
-            public GStruct437 OperationResult = operationResult;
+            public OperationDataStruct OperationResult = operationResult;
             private readonly uint operationId = operationId;
             private readonly int netId = netId;
             private readonly NetPeer peer = peer;

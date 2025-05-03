@@ -8,7 +8,7 @@ namespace Fika.Core.Networking.Packets.Backend
     {
         public int NetId;
         public InraidQuestType Type;
-        public List<GClass1356[]> Items;
+        public List<FlatItemsDataClass[]> Items;
         public List<string> ItemIdsToRemove;
 
         public void Deserialize(NetDataReader reader)
@@ -23,7 +23,7 @@ namespace Fika.Core.Networking.Packets.Backend
                         Items = new(length);
                         for (int i = 0; i < length; i++)
                         {
-                            Items.Add(JsonConvert.DeserializeObject<GClass1356[]>(reader.GetString()));
+                            Items.Add(JsonConvert.DeserializeObject<FlatItemsDataClass[]>(reader.GetString()));
                         }
                     }
                     break;

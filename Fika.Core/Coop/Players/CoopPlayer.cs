@@ -59,7 +59,7 @@ namespace Fika.Core.Coop.Players
 
         protected string lastWeaponId;
         private bool shouldSendSideEffect;
-        private GClass2077 voipHandler;
+        private VoipSettingsClass voipHandler;
         private FikaVOIPController voipController;
 
         public ClientMovementContext ClientMovementContext
@@ -95,7 +95,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = true;
             player.NetId = netId;
-            player.voipHandler = GClass2077.Default;
+            player.voipHandler = VoipSettingsClass.Default;
 
             PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new CoopHostInventoryController(player, profile, false)
                 : new CoopClientInventoryController(player, profile, false);
@@ -133,7 +133,7 @@ namespace Fika.Core.Coop.Players
                 player.PacketSender = ClientPacketSender.Create(player);
             }
 
-            EVoipState voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && GClass1075.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
+            EVoipState voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsDataClass.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
@@ -191,7 +191,7 @@ namespace Fika.Core.Coop.Players
         {
             if (voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
             {
-                GClass1075 settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+                SoundSettingsDataClass settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
                 if (!settings.VoipEnabled)
                 {
                     voipState = EVoipState.Off;
@@ -827,7 +827,7 @@ namespace Fika.Core.Coop.Players
                     InteractiveId = interactiveObject.Id,
                     InteractionType = interactionResult.InteractionType,
                     InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is GClass3472 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                    ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                 }
             };
             PacketSender.SendPacket(ref packet);
@@ -860,7 +860,7 @@ namespace Fika.Core.Coop.Players
                         InteractiveId = door.Id,
                         InteractionType = interactionResult.InteractionType,
                         InteractionStage = EInteractionStage.Execute,
-                        ItemId = (interactionResult is GClass3472 keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
+                        ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
                     }
                 };
                 PacketSender.SendPacket(ref packet);
@@ -984,7 +984,7 @@ namespace Fika.Core.Coop.Players
 
         public override void vmethod_5(GClass2084 controller, int objectId, EventObject.EInteraction interaction)
         {
-            GStruct187 packet = controller.GetInteractPacket(objectId, interaction);
+            InteractPacketStruct packet = controller.GetInteractPacket(objectId, interaction);
             if (FikaBackendUtils.IsServer)
             {
                 controller.InteractWithEventObject(this, packet);
@@ -1020,7 +1020,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            GClass1727 inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
+            InventoryDescriptorClass inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
             HealthSyncPacket syncPacket = new()
             {
@@ -1630,7 +1630,7 @@ namespace Fika.Core.Coop.Players
         public class KeyHandler(CoopPlayer player)
         {
             private readonly CoopPlayer player = player;
-            public GStruct442<GClass3472> unlockResult;
+            public GStruct442<KeyInteractionResultClass> unlockResult;
 
             internal void HandleKeyEvent()
             {

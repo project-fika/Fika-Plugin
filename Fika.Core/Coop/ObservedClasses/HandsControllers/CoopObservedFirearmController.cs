@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.ObservedClasses
         private bool hasFired = false;
         private WeaponPrefab weaponPrefab;
         private WeaponManagerClass weaponManager;
-        private GClass1814 underBarrelManager;
+        private UnderbarrelManagerClass underBarrelManager;
         private bool boltActionReload;
         private bool isThrowingPatron;
 
@@ -123,7 +123,7 @@ namespace Fika.Core.Coop.ObservedClasses
             weaponManager = weaponPrefab.ObjectInHands as WeaponManagerClass;
             if (UnderbarrelWeapon != null)
             {
-                underBarrelManager = Traverse.Create(this).Field<GClass1814>("gclass1814_0").Value;
+                underBarrelManager = Traverse.Create(this).Field<UnderbarrelManagerClass>("gclass1814_0").Value;
             }
             IsRevolver = Weapon is RevolverItemClass;
         }

@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass614).GetMethod(nameof(GClass614.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+            return typeof(LocalBotSettingsProviderClass).GetMethod(nameof(LocalBotSettingsProviderClass.LoadInternal), BindingFlags.Static | BindingFlags.Public);
         }
 
         [PatchPrefix]
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
             }
             else
             {
-                string text = GClass614.LoadCoreByString();
+                string text = LocalBotSettingsProviderClass.LoadCoreByString();
                 if (text == null)
                 {
                     core = null;
@@ -41,19 +41,19 @@ namespace Fika.Core.Coop.Patches
                     botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
                     if (botSettingsComponents != null)
                     {
-                        if (!GClass614.Gclass619_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+                        if (!LocalBotSettingsProviderClass.Gclass619_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
                         {
-                            GClass614.Gclass619_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                            LocalBotSettingsProviderClass.Gclass619_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
                         }
                     }
                     else
                     {
-                        botSettingsComponents = GClass614.smethod_4(GClass614.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false, true);
+                        botSettingsComponents = LocalBotSettingsProviderClass.smethod_4(LocalBotSettingsProviderClass.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false, true);
                         if (botSettingsComponents != null)
                         {
-                            if (!GClass614.Gclass619_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+                            if (!LocalBotSettingsProviderClass.Gclass619_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
                             {
-                                GClass614.Gclass619_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                                LocalBotSettingsProviderClass.Gclass619_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
                             }
                         }
                         else

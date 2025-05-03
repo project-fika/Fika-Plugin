@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
+using static BackendConfigSettingsClass;
 
 namespace Fika.Core.Coop.Utils
 {
@@ -110,7 +111,7 @@ namespace Fika.Core.Coop.Utils
         }
         public static string GroupId { get; internal set; }
         public static string RaidCode { get; internal set; }
-        public static GClass1405 TransitData
+        public static RaidTransitionInfoClass TransitData
         {
             get
             {
@@ -133,7 +134,7 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
-        private static GClass1405 transitData;
+        private static RaidTransitionInfoClass transitData;
 
         internal static void ResetTransitData()
         {

@@ -16,12 +16,12 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override async Task<GStruct440<GStruct400<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
-            List<GClass1356[]> items = [];
+            List<FlatItemsDataClass[]> items = [];
             bool hasRewards = false;
-            if (quest.Rewards.TryGetValue(EQuestStatus.Success, out IReadOnlyList<GClass3806> list))
+            if (quest.Rewards.TryGetValue(EQuestStatus.Success, out IReadOnlyList<QuestRewardDataClass> list))
             {
                 hasRewards = true;
-                foreach (GClass3806 item in list)
+                foreach (QuestRewardDataClass item in list)
                 {
                     if (item.type != ERewardType.Item)
                     {

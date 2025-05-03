@@ -153,7 +153,7 @@ namespace Fika.Core.Coop.Patches
                 MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
                 timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
                 fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-                new GClass2478(metricsConfig, instance), localRaidSettings, raidSettings);
+                new MetricsCollectorClass(metricsConfig, instance), localRaidSettings, raidSettings);
 
             startHandler.CoopGame = coopGame;
 
