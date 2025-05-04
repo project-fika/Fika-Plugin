@@ -123,7 +123,7 @@ namespace Fika.Core.Coop.ObservedClasses
             weaponManager = weaponPrefab.ObjectInHands as WeaponManagerClass;
             if (UnderbarrelWeapon != null)
             {
-                underBarrelManager = Traverse.Create(this).Field<UnderbarrelManagerClass>("gclass1814_0").Value;
+                underBarrelManager = Traverse.Create(this).Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
             }
             IsRevolver = Weapon is RevolverItemClass;
         }

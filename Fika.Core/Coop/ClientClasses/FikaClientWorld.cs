@@ -56,12 +56,12 @@ namespace Fika.Core.Coop.ClientClasses
         {
             for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
             {
-                LootSyncStruct gstruct = LootSyncPackets[i];
-                if (lootItems.TryGetByKey(gstruct.Id, out LootItem lootItem))
+                LootSyncStruct lootSyncData = LootSyncPackets[i];
+                if (lootItems.TryGetByKey(lootSyncData.Id, out LootItem lootItem))
                 {
                     if (lootItem is ObservedLootItem observedLootItem)
                     {
-                        observedLootItem.ApplyNetPacket(gstruct);
+                        observedLootItem.ApplyNetPacket(lootSyncData);
                     }
                     LootSyncPackets.RemoveAt(i);
                 }
