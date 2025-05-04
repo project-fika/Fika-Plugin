@@ -365,23 +365,20 @@ namespace Fika.Core
         /// <summary>
         /// This is required for the locales to be properly loaded, for some reason they are still unavailable for a few seconds after getting populated
         /// </summary>
-        /// <param name="__result">The <see cref="Task"/> that populates the locales</param>
+        /// <param name="localesTask">The <see cref="Task"/> that populates the locales</param>
         /// <returns></returns>
-        public IEnumerator WaitForLocales(Task __result)
+        public async void WaitForLocales(Task localesTask)
         {
             Logger.LogInfo("Waiting for locales to be ready...");
-            while (!__result.IsCompleted)
-            {
-                yield return null;
-            }
+            await localesTask;
             while (LocaleUtils.BEPINEX_H_ADVANCED.Localized() == "F_BepInEx_H_Advanced")
             {
-                yield return new WaitForSeconds(1);
+                await Task.Delay(TimeSpan.FromSeconds(1));
             }
             LocalesLoaded = true;
             Logger.LogInfo("Locales are ready!");
             SetupConfig();
-            FikaVersionLabel_Patch.UpdateVersionLabel();
+            AsyncWorker.RunInMainTread(FikaVersionLabel_Patch.UpdateVersionLabel);
         }
 
         private string CleanConfigString(string header)
