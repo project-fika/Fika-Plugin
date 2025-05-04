@@ -147,7 +147,7 @@ namespace Fika.Core.Coop.Patches
 
             StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation);
 
-            TimeSpan raidLimits = instance.method_50(raidSettings.SelectedLocation.EscapeTimeLimit);
+            TimeSpan raidLimits = GetRaidMinutes(raidSettings.SelectedLocation.EscapeTimeLimit);
 
             CoopGame coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
                 MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
@@ -184,6 +184,11 @@ namespace Fika.Core.Coop.Patches
                 Logger.LogInfo("Starting game as spectator");
                 await HandleJoinAsSpectator();
             }
+        }
+
+        private static TimeSpan GetRaidMinutes(int defaultMinutes)
+        {
+            return TimeSpan.FromSeconds((double)(60 * defaultMinutes));
         }
 
         private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile,
