@@ -38,7 +38,6 @@ namespace Fika.Core.Coop.ObservedClasses
         private bool needsReset;
         private float lastFireTime = 0f;
         private float overlapCounter = 0f;
-        private float aimMovementSpeed = 1f;
         private bool hasFired = false;
         private WeaponPrefab weaponPrefab;
         private WeaponManagerClass weaponManager;
@@ -117,7 +116,6 @@ namespace Fika.Core.Coop.ObservedClasses
         protected void Start()
         {
             _objectInHandsAnimator.SetAiming(false);
-            aimMovementSpeed = coopPlayer.Skills.GetWeaponInfo(Item).AimMovementSpeed;
             WeaponPrefab prefab = ControllerGameObject.GetComponent<WeaponPrefab>();
             weaponPrefab = prefab;
             weaponManager = weaponPrefab.ObjectInHands as WeaponManagerClass;
