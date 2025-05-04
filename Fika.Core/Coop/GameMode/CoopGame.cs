@@ -2865,8 +2865,6 @@ namespace Fika.Core.Coop.GameMode
                 {
                     MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
                 }
-                MonoBehaviour instance2 = StaticManager.Instance;
-                float num = delay;
                 baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
             }
         }
