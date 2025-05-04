@@ -290,7 +290,6 @@ namespace Fika.Core.Coop.GameMode
             coopGame.RaidSettings = raidSettings;
             coopGame.ThrownGrenades = [];
 
-
             return coopGame;
         }
 
@@ -1415,10 +1414,10 @@ namespace Fika.Core.Coop.GameMode
             do
             {
                 client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                await Task.Delay(1000);
+                await Task.Delay(TimeSpan.FromSeconds(1));
                 if (!HasReceivedLoot && LootItems.Count < 1)
                 {
-                    await Task.Delay(2000);
+                    await Task.Delay(TimeSpan.FromSeconds(2));
                 }
             } while (!HasReceivedLoot);
 
