@@ -87,7 +87,8 @@ namespace Fika.Core
             { "nimbul",       "Sat with Lacy many night and is loved by both Lacy & me. We miss you <3 ~ SSH"               },
             { "vox",          "My favourite american. ~ Lacyway"                                                            },
             { "rairai",       "Very nice and caring person, someone I've appreciated getting to know. ~ Lacyway"            },
-            { "cwx",          "Active and dedicated tester who has contributed a lot of good ideas to Fika. ~ Lacyway"      }
+            { "cwx",          "Active and dedicated tester who has contributed a lot of good ideas to Fika. ~ Lacyway"      },
+            { "shynd",        "Active contributor and resident helper of Fika ~ Archangel"                                  }
         };
 
         public static Dictionary<string, string> DevelopersList = new()
