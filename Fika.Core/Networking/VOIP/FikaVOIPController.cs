@@ -18,7 +18,7 @@ namespace Fika.Core.Networking.VOIP
             EVoipState voipState = localPlayer.VoipState;
             LocalPlayer = localPlayer;
             SoundSettings = soundSettings;
-            GClass2079 pushToTalkSettings = FikaGlobals.VOIPHandler.PushToTalkSettings;
+            PushToTalkSettingsClass pushToTalkSettings = FikaGlobals.VOIPHandler.PushToTalkSettings;
             BlockingTime = TimeSpan.FromSeconds(pushToTalkSettings.BlockingTime);
             SpeakingSecondsInterval = TimeSpan.FromSeconds(pushToTalkSettings.SpeakingSecondsInterval);
             SpeakingSecondsLimit = TimeSpan.FromSeconds(pushToTalkSettings.SpeakingSecondsLimit);

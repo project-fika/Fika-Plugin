@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(ArtilleryServerProjectileClass __instance, ref GClass1438 ___Gclass1438_0)
+        public static bool Prefix(ArtilleryServerProjectileClass __instance)
         {
             __instance.speed = 50f;
             __instance.arcHeight = -150f;
@@ -21,7 +21,7 @@ namespace Fika.Core.Coop.Patches
             __instance.zoneID = "";
             CoopGame coopGame = CoopGame.Instance;
             coopGame.UpdateByUnity += __instance.OnUpdate;
-            ___Gclass1438_0 = new();
+            __instance.MineDataClass = new();
             return false;
         }
     }

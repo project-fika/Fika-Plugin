@@ -341,7 +341,7 @@ namespace Fika.Core.Coop.HostClasses
                     tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
                 }
                 string profileId = player.ProfileId;
-                GClass1996 gclass = new()
+                AlreadyTransitDataClass gclass = new()
                 {
                     hash = hash,
                     playersCount = playersCount,
@@ -403,7 +403,7 @@ namespace Fika.Core.Coop.HostClasses
                 _id = profileId,
             });
 
-            GClass1996 gclass = new()
+            AlreadyTransitDataClass gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,
@@ -421,7 +421,7 @@ namespace Fika.Core.Coop.HostClasses
             CoopGame coopGame = CoopGame.Instance;
             if (transitController != null && coopGame != null)
             {
-                if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out GClass1996 _))
+                if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out AlreadyTransitDataClass _))
                 {
                     coopGame.ExitStatus = ExitStatus.Transit;
                     coopGame.ExitLocation = point.parameters.name;

@@ -640,7 +640,7 @@ namespace Fika.Core.Networking
                     {
                         try
                         {
-                            using GClass1249 eftReader = GClass1252.Get(LocationDescription);
+                            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                             if (LocationDescription.Length != 0)
                             {
                                 GClass1755 descriptor = eftReader.ReadPolymorph<GClass1755>();
@@ -926,7 +926,7 @@ namespace Fika.Core.Networking
                     AmmoPackReloadingClass ammoPack = new(ammo);
                     ItemAddress gridItemAddress = null;
 
-                    using GClass1249 eftReader = GClass1252.Get(LocationDescription);
+                    using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                     try
                     {
                         if (LocationDescription.Length > 0)

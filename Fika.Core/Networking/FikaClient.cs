@@ -195,7 +195,7 @@ namespace Fika.Core.Networking
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
                 await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
-                    GClass2113.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                    SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
                 do
@@ -807,7 +807,7 @@ namespace Fika.Core.Networking
             CoopGame coopGame = CoopGame.Instance;
             if (coopGame != null)
             {
-                using GClass1249 eftReader = GClass1252.Get(packet.Data);
+                using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
                 GClass1752 lootData = eftReader.ReadEFTLootDataDescriptor();
                 GClass1370 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
                 if (lootItems.Count < 1)
@@ -1260,7 +1260,7 @@ namespace Fika.Core.Networking
                 {
                     if (controller is Interface16 networkController)
                     {
-                        using GClass1249 eftReader = GClass1252.Get(packet.OperationBytes);
+                        using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                         OperationDataStruct result = networkController.CreateOperationFromDescriptor(descriptor);
                         if (!result.Succeeded)

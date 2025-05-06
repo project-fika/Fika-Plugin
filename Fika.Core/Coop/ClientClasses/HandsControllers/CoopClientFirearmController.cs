@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.ClientClasses
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
-            operationFactoryDelegates[typeof(GClass1821)] = new OperationFactoryDelegate(Weapon2);
+            operationFactoryDelegates[typeof(CylinderReloadOperationClass)] = new OperationFactoryDelegate(Weapon2);
             operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
             return operationFactoryDelegates;
         }
@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public Player.BaseAnimationOperationClass Weapon3()
         {
-            if (Item is GClass3158)
+            if (Item is RocketLauncherItemClass)
             {
                 return new IsOneOffFireOperationClass(this);
             }
@@ -720,7 +720,7 @@ namespace Fika.Core.Coop.ClientClasses
             player.PacketSender.SendPacket(ref packet);
         }
 
-        private class FirearmClass1(Player.FirearmController controller) : GClass1821(controller)
+        private class FirearmClass1(Player.FirearmController controller) : CylinderReloadOperationClass(controller)
         {
             public override void SetTriggerPressed(bool pressed)
             {

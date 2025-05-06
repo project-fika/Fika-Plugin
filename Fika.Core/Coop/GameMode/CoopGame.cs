@@ -1215,10 +1215,10 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                GClass2085.ToggleEventEnvironment(false);
+                RunddansControllerAbstractClass.ToggleEventEnvironment(false);
             }
 
-            gameWorld.ClientBroadcastSyncController = new GClass1103();
+            gameWorld.ClientBroadcastSyncController = new ClientBroadcastSyncControllerClass();
 
             ApplicationConfigClass config = BackendConfigAbstractClass.Config;
             if (config.FixedFrameRate > 0f)
@@ -2209,7 +2209,7 @@ namespace Fika.Core.Coop.GameMode
             TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
             if (transitController != null)
             {
-                if (transitController.alreadyTransits.TryGetValue(player.ProfileId, out GClass1996 data))
+                if (transitController.alreadyTransits.TryGetValue(player.ProfileId, out AlreadyTransitDataClass data))
                 {
                     ExitStatus = ExitStatus.Transit;
                     ExitLocation = transitPoint.parameters.name;

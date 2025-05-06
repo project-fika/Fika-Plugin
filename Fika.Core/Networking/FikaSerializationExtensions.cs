@@ -228,7 +228,7 @@ namespace Fika.Core.Networking
         /// <returns>An <see cref="Item"/> (cast to type inside packet)</returns>
         public static Item GetItem(this NetDataReader reader)
         {
-            using GClass1249 eftReader = GClass1252.Get(reader.GetByteArray());
+            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
         }
 
@@ -239,7 +239,7 @@ namespace Fika.Core.Networking
         /// <returns>An <see cref="Inventory"/></returns>
         public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
         {
-            using GClass1249 eftReader = GClass1252.Get(reader.GetByteArray());
+            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return new GClass1719()
             {
                 Equipment = eftReader.ReadEFTItemDescriptor()
@@ -255,13 +255,13 @@ namespace Fika.Core.Networking
 
         public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
         {
-            using GClass1249 eftReader = GClass1252.Get(reader.GetByteArray());
+            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return eftReader.ReadEFTItemDescriptor();
         }
 
         public static Item GetAirdropItem(this NetDataReader reader)
         {
-            using GClass1249 eftReader = GClass1252.Get(reader.GetByteArray());
+            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             Item item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
             GClass1370 enumerable = [new LootItemPositionClass()];
@@ -314,7 +314,7 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Profile"/></returns>
         public static Profile GetProfile(this NetDataReader reader)
         {
-            using GClass1249 eftReader = GClass1252.Get(reader.GetByteArray());
+            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return new(eftReader.ReadEFTProfileDescriptor());
         }
 

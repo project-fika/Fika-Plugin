@@ -86,7 +86,7 @@ namespace Fika.Core.Coop.ClientClasses
                 isSolo = true
             });
 
-            GClass1996 gclass = new()
+            AlreadyTransitDataClass gclass = new()
             {
                 hash = Guid.NewGuid().ToString(),
                 playersCount = 1,

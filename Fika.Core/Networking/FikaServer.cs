@@ -303,7 +303,7 @@ namespace Fika.Core.Networking
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
                 await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
-                    GClass2113.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                    SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
                 do
@@ -323,7 +323,7 @@ namespace Fika.Core.Networking
             else if (FikaBackendUtils.IsHeadless)
             {
                 await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
-                    GClass2113.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+                    SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
                 do
@@ -1117,7 +1117,7 @@ namespace Fika.Core.Networking
         {
             if (coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                using GClass1249 eftReader = GClass1252.Get(packet.OperationBytes);
+                using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
                 try
                 {
                     OperationCallbackPacket operationCallbackPacket;
