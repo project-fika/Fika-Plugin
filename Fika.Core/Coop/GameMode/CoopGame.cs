@@ -2088,17 +2088,17 @@ namespace Fika.Core.Coop.GameMode
 
             if (isServer)
             {
-                if (TransitControllerAbstractClass.Exist(out FikaHostTransitController gclass))
+                if (TransitControllerAbstractClass.Exist(out FikaHostTransitController transitController))
                 {
-                    gclass.Init();
+                    transitController.Init();
                     // TODO: Sync to clients!!!
                 }
             }
             else
             {
-                if (TransitControllerAbstractClass.Exist(out FikaClientTransitController gclass))
+                if (TransitControllerAbstractClass.Exist(out FikaClientTransitController transitController))
                 {
-                    gclass.Init();
+                    transitController.Init();
                 }
             }
 
