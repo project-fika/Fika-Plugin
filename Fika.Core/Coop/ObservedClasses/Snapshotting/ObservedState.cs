@@ -10,6 +10,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             Position = position;
             Rotation = rotation;
             PoseLevel = 1f;
+            IsGrounded = true;
+            HasGround = true;
         }
 
         public Vector3 Position;
