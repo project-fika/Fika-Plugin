@@ -2,6 +2,7 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Utils;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
@@ -48,7 +49,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.2.7";
+        public const string FikaVersion = "1.2.8";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -136,6 +137,9 @@ namespace Fika.Core
         public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
         public static ConfigEntry<bool> ShowEffects { get; set; }
         public static ConfigEntry<bool> UseOcclusion { get; set; }
+        public static ConfigEntry<Color> FullHealthColor { get; set; }
+        public static ConfigEntry<Color> LowHealthColor { get; set; }
+        public static ConfigEntry<Color> NamePlateTextColor { get; set; }
 
         // Coop | Quest Sharing
         public static ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
@@ -281,14 +285,19 @@ namespace Fika.Core
             if (failed)
             {
                 FikaLogger.LogError($"Server version check failed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
-                MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {RequiredServerVersion}",
-                    "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
-                Application.Quit();
+                AsyncWorker.RunInMainTread(ShowServerCheckFailMessage);
             }
             else
             {
                 FikaLogger.LogInfo($"Server version check passed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
             }
+        }
+
+        private void ShowServerCheckFailMessage()
+        {
+            MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {RequiredServerVersion}",
+                    "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
+            Application.Quit();
         }
 
         /// <summary>
@@ -552,7 +561,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_USE_NAME_PLATES_T.Localized(),
-                    Order = 13
+                    Order = 16
                 }),
                 "Show Player Name Plates", ref failed, headers);
 
@@ -561,7 +570,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_HIDE_HEALTH_BAR_T.Localized(),
-                    Order = 12
+                    Order = 15
                 }),
                 "Hide Health Bar", ref failed, headers);
 
@@ -570,7 +579,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_USE_PERCENT_T.Localized(),
-                    Order = 11
+                    Order = 14
                 }),
                 "Show HP% instead of bar", ref failed, headers);
 
@@ -579,7 +588,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_SHOW_EFFECTS_T.Localized(),
-                    Order = 10
+                    Order = 13
                 }),
                 "Show Effects", ref failed, headers);
 
@@ -588,7 +597,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_SHOW_FACTION_ICON_T.Localized(),
-                    Order = 9
+                    Order = 12
                 }),
                 "Show Player Faction Icon", ref failed, headers);
 
@@ -597,7 +606,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_HIDE_IN_OPTIC_T.Localized(),
-                    Order = 8
+                    Order = 11
                 }),
                 "Hide Name Plate in Optic", ref failed, headers);
 
@@ -606,7 +615,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_OPTIC_USE_ZOOM_T.Localized(),
-                    Order = 7,
+                    Order = 10,
                     IsAdvanced = true
                 }),
                 "Name Plates Use Optic Zoom", ref failed, headers);
@@ -616,7 +625,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_DEC_OPAC_PERI_T.Localized(),
-                    Order = 6
+                    Order = 9
                 }),
                 "Decrease Opacity In Peripheral", ref failed, headers);
 
@@ -626,7 +635,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_NAME_PLATE_SCALE_T.Localized(),
-                    Order = 5
+                    Order = 8
                 }),
                 "Name Plate Scale", ref failed, headers);
 
@@ -636,7 +645,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_ADS_OPAC_T.Localized(),
-                    Order = 4
+                    Order = 7
                 }),
                 "Opacity in ADS", ref failed, headers);
 
@@ -646,7 +655,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_MAX_DISTANCE_T.Localized(),
-                    Order = 3
+                    Order = 6
                 }),
                 "Max Distance to Show", ref failed, headers);
 
@@ -656,7 +665,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_MIN_OPAC_T.Localized(),
-                    Order = 2
+                    Order = 5
                 }),
                 "Minimum Opacity", ref failed, headers);
 
@@ -666,7 +675,7 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_MIN_PLATE_SCALE_T.Localized(),
-                    Order = 1
+                    Order = 4
                 }),
                 "Minimum Name Plate Scale", ref failed, headers);
 
@@ -675,9 +684,36 @@ namespace Fika.Core
                 {
                     Category = coopNameplatesHeader,
                     DispName = LocaleUtils.BEPINEX_USE_OCCLUSION_T.Localized(),
-                    Order = 0
+                    Order = 3
                 }),
                 "Use Occlusion", ref failed, headers);
+
+            FullHealthColor = SetupSetting(coopDefaultNamePlatesHeader, "Full Health Color", Color.green,
+                new ConfigDescription(LocaleUtils.BEPINEX_HEALTHCOLOR_FULL_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = coopNameplatesHeader,
+                    DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_FULL_T.Localized(),
+                    Order = 2
+                }),
+                "Full Health Color", ref failed, headers);
+
+            LowHealthColor = SetupSetting(coopDefaultNamePlatesHeader, "Low Health Color", Color.red,
+                new ConfigDescription(LocaleUtils.BEPINEX_HEALTHCOLOR_LOW_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = coopNameplatesHeader,
+                    DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_LOW_T.Localized(),
+                    Order = 1
+                }),
+                "Low Health Color", ref failed, headers);
+
+            NamePlateTextColor = SetupSetting(coopDefaultNamePlatesHeader, "Name Plate Text Color", Color.white,
+                new ConfigDescription(LocaleUtils.BEPINEX_NAMEPLATECOLOR_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = coopNameplatesHeader,
+                    DispName = LocaleUtils.BEPINEX_NAMEPLATECOLOR_T.Localized(),
+                    Order = 0
+                }),
+                "Name Plate Text Color", ref failed, headers);
 
             // Coop | Quest Sharing
 

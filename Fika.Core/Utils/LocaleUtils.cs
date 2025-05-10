@@ -274,6 +274,12 @@ namespace Fika.Core.Utils
         public const string BEPINEX_MIN_PLATE_SCALE_D = "F_BepInEx_MinPlateScale_D";
         public const string BEPINEX_USE_OCCLUSION_T = "F_BepInEx_UseOcclusion_T";
         public const string BEPINEX_USE_OCCLUSION_D = "F_BepInEx_UseOcclusion_D";
+        public const string BEPINEX_HEALTHCOLOR_FULL_T = "F_BepInEx_HealthColorFull_T";
+        public const string BEPINEX_HEALTHCOLOR_FULL_D = "F_BepInEx_HealthColorFull_D";
+        public const string BEPINEX_HEALTHCOLOR_LOW_T = "F_BepInEx_HealthColorLow_T";
+        public const string BEPINEX_HEALTHCOLOR_LOW_D = "F_BepInEx_HealthColorLow_D";
+        public const string BEPINEX_NAMEPLATECOLOR_T = "F_BepInEx_NamePlateColor_T";
+        public const string BEPINEX_NAMEPLATECOLOR_D = "F_BepInEx_NamePlateColor_D";
 
         public const string BEPINEX_QUEST_TYPES_T = "F_BepInEx_QuestTypes_T";
         public const string BEPINEX_QUEST_TYPES_D = "F_BepInEx_QuestTypes_D";

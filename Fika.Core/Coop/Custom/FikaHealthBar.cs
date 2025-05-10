@@ -222,7 +222,7 @@ namespace Fika.Core.Coop.Custom
             playerPlate.SetNameText(currentPlayer.Profile.Info.MainProfileNickname);
             if (FikaPlugin.DevelopersList.ContainsKey(currentPlayer.Profile.Nickname.ToLower()))
             {
-                playerPlate.playerNameScreen.color = new Color(0, 0.6091f, 1, 1);
+                playerPlate.playerNameScreen.color = new Color(0, 6f, 1, 1);
                 ChatSpecialIconSettings specialIcons = Resources.Load<ChatSpecialIconSettings>("ChatSpecialIconSettings");
                 playerPlate.bearPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[1].IconSprite;
                 playerPlate.bearPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
@@ -237,6 +237,10 @@ namespace Fika.Core.Coop.Custom
                 playerPlate.bearPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
                 playerPlate.usecPlateScreen.GetComponent<Image>().sprite = specialIcons.IconsSettings[2].IconSprite;
                 playerPlate.usecPlateScreen.transform.localPosition = new Vector3(0f, 24.9f, 0);
+            }
+            else
+            {
+                playerPlate.playerNameScreen.color = FikaPlugin.NamePlateTextColor.Value;
             }
             // Start the plates both disabled, the visibility will be set in the update loop
             playerPlate.usecPlateScreen.gameObject.SetActive(false);
@@ -343,7 +347,7 @@ namespace Fika.Core.Coop.Custom
                 currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
                 currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
 
-                List<HealthBarEffect> tempList = new(effects);
+                List<HealthBarEffect> tempList = [.. effects];
                 foreach (HealthBarEffect effect in tempList)
                 {
                     effect.Remove();
@@ -430,7 +434,8 @@ namespace Fika.Core.Coop.Custom
 
         private void UpdateHealthBarColor(float normalizedHealth)
         {
-            Color color = Color.Lerp(Color.red, Color.green, normalizedHealth);
+            Color color = Color.Lerp(FikaPlugin.LowHealthColor.Value,
+                FikaPlugin.FullHealthColor.Value, normalizedHealth);
             color.a = playerPlate.healthBarScreen.color.a; // Keep the alpha value unchanged
             playerPlate.healthBarScreen.color = color;
         }
@@ -445,7 +450,7 @@ namespace Fika.Core.Coop.Custom
             }
         }
 
-        private void UpdateColorTextMeshProUGUI(TMPro.TextMeshProUGUI screenObject, float alpha)
+        private void UpdateColorTextMeshProUGUI(TextMeshProUGUI screenObject, float alpha)
         {
             if (screenObject.gameObject.activeInHierarchy)
             {
