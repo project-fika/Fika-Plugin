@@ -205,7 +205,7 @@ namespace Fika.Core.Coop.Custom
             UpdateColorImage(playerPlate.healthBarScreen, alpha * healthAlphaMultiplier);
             foreach (HealthBarEffect effect in effects)
             {
-                UpdateColorImage(effect.EffectImage, alpha * healthAlphaMultiplier);
+                UpdateColorImage(effect.EffectImage, alpha);
             }
             UpdateColorTextMeshProUGUI(playerPlate.healthNumberScreen, alpha * healthAlphaMultiplier);
             UpdateColorImage(playerPlate.healthBarBackgroundScreen, backgroundOpacity * healthAlphaMultiplier);
