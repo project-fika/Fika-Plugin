@@ -80,12 +80,16 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             {
                 if (buffer.Count >= 2)
                 {
-                    double previousLocalTime = buffer.Values[buffer.Count - 2].LocalTime;
-                    double lastestLocalTime = buffer.Values[buffer.Count - 1].LocalTime;
+                    if (buffer.TryGetValue(buffer.Count - 2, out T snapshot1)
+                        && buffer.TryGetValue(buffer.Count - 1, out T snapshot2))
+                    {
+                        double previousLocalTime = snapshot1.LocalTime;
+                        double lastestLocalTime = snapshot2.LocalTime;
 
-                    double localDeliveryTime = lastestLocalTime - previousLocalTime;
+                        double localDeliveryTime = lastestLocalTime - previousLocalTime;
 
-                    deliveryTimeEma.Add(localDeliveryTime);
+                        deliveryTimeEma.Add(localDeliveryTime);
+                    }
                 }
 
                 double latestRemoteTime = snapshot.RemoteTime;
