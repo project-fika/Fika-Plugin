@@ -250,6 +250,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (!HasQuestForItem(itemId, zoneId, out string questName))
             {
+                isItemBeingDropped = false;
                 return;
             }
 
