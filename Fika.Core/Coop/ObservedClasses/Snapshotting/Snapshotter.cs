@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         private readonly int _sendRate;
         private readonly float _sendInterval;
         private double _bufferTimeMultiplier;
-        private object _bufferLock;
+        private readonly object _bufferLock;
 
         protected Snapshotter()
         {
