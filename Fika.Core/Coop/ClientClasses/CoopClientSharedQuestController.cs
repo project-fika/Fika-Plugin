@@ -283,6 +283,11 @@ namespace Fika.Core.Coop.ClientClasses
         {
             foreach (QuestClass quest in Quests)
             {
+                if (quest.IsDone())
+                {
+                    continue;
+                }
+
                 foreach (ConditionPlaceBeacon conditionPlaceBeacon in quest.GetConditions<ConditionPlaceBeacon>(EQuestStatus.AvailableForFinish))
                 {
                     if (conditionPlaceBeacon.target.Contains(itemId) && conditionPlaceBeacon.zoneId == zoneId)
