@@ -172,6 +172,12 @@ namespace Fika.Core.Coop.ClientClasses
             AddNetworkId(packet.Id);
             foreach (QuestClass quest in Quests)
             {
+                // Extra check to prevent redundant notifications
+                if (quest.IsDone())
+                {
+                    continue;
+                }
+
                 if (quest.Id == packet.SourceId && quest.QuestStatus == EQuestStatus.Started)
                 {
                     TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(packet.Id);
