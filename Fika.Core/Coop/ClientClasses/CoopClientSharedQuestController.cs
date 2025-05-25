@@ -185,9 +185,9 @@ namespace Fika.Core.Coop.ClientClasses
                         counter.Value++;
                         if (FikaPlugin.QuestSharingNotifications.Value)
                         {
-                            NotificationManagerClass.DisplayMessageNotification(
-                                $"Received shared quest progression from {ColorizeText(EColor.GREEN, packet.Nickname)} for the quest {ColorizeText(EColor.BROWN, quest.Template.Name)}",
-                                                iconType: EFT.Communications.ENotificationIconType.Quest);
+                            NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_QUEST_PROGRESS.Localized(),
+                                [ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BROWN, quest.Template.Name)]),
+                                iconType: EFT.Communications.ENotificationIconType.Quest);
                         }
                     }
                 }
