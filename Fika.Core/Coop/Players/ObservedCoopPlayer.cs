@@ -46,7 +46,7 @@ namespace Fika.Core.Coop.Players
         {
             get
             {
-                return healthBar;
+                return _healthBar;
             }
         }
         public bool ShouldOverlap { get; internal set; }
@@ -54,29 +54,29 @@ namespace Fika.Core.Coop.Players
         {
             get
             {
-                return leftStancedDisabled;
+                return _leftStancedDisabled;
             }
             internal set
             {
-                if (leftStancedDisabled == value)
+                if (_leftStancedDisabled == value)
                 {
                     return;
                 }
-                leftStancedDisabled = value;
+                _leftStancedDisabled = value;
                 ShouldOverlap = true;
             }
         }
         public BetterSource VoipEftSource { get; set; }
         internal ObservedState CurrentPlayerState;
 
-        private bool leftStancedDisabled;
-        private FikaHealthBar healthBar = null;
-        private Coroutine waitForStartRoutine;
-        private bool isServer;
-        private VoiceBroadcastTrigger voiceBroadcastTrigger;
-        private SoundSettingsDataClass soundSettings;
-        private bool voipAssigned;
-        private int frameSkip;
+        private bool _leftStancedDisabled;
+        private FikaHealthBar _healthBar;
+        private Coroutine _waitForStartRoutine;
+        private bool _isServer;
+        private VoiceBroadcastTrigger _voiceBroadcastTrigger;
+        private SoundSettingsDataClass _soundSettings;
+        private bool _voipAssigned;
+        private int _frameSkip;
 
         public ObservedHealthController NetworkHealthController
         {
@@ -145,8 +145,8 @@ namespace Fika.Core.Coop.Players
                 return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
             }
         }
-        private LocalPlayerCullingHandlerClass cullingHandler;
-        private readonly List<ObservedSlotViewHandler> observedSlotViewHandlers = [];
+        private LocalPlayerCullingHandlerClass _cullingHandler;
+        private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
         #endregion
 
         public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -195,11 +195,11 @@ namespace Fika.Core.Coop.Players
 
             Traverse observedTraverse = Traverse.Create(player);
             observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value = new();
-            player.cullingHandler = observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value;
-            player.cullingHandler.Initialize(player, player.PlayerBones);
+            player._cullingHandler = observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value;
+            player._cullingHandler.Initialize(player, player.PlayerBones);
             if (FikaBackendUtils.IsHeadless || profile.IsPlayerProfile())
             {
-                player.cullingHandler.Disable();
+                player._cullingHandler.Disable();
             }
 
             if (!aiControl)
@@ -213,19 +213,19 @@ namespace Fika.Core.Coop.Players
 
             player.AggressorFound = false;
             player._animators[0].enabled = true;
-            player.isServer = FikaBackendUtils.IsServer;
+            player._isServer = FikaBackendUtils.IsServer;
             player.Snapshotter = new(player);
             player.CurrentPlayerState = new(position, player.Rotation);
 
             if (GClass2800.Int_1 == 0)
             {
                 GClass2800.Int_1 = 1;
-                player.frameSkip = 1;
+                player._frameSkip = 1;
             }
             else
             {
                 GClass2800.Int_1 = 0;
-                player.frameSkip = 0;
+                player._frameSkip = 0;
             }
 
             return player;
@@ -259,7 +259,7 @@ namespace Fika.Core.Coop.Players
 
         private void SourceBindingCreated()
         {
-            if (voipAssigned)
+            if (_voipAssigned)
             {
                 return;
             }
@@ -273,21 +273,21 @@ namespace Fika.Core.Coop.Players
             VoipEftSource.SetMixerGroup(MonoBehaviourSingleton<BetterAudio>.Instance.ObservedPlayerSpeechMixer);
             VoipEftSource.SetRolloff(60f);
             MonoBehaviourSingleton<SpatialAudioSystem>.Instance.ProcessSourceOcclusion(this, VoipEftSource, false);
-            voipAssigned = true;
+            _voipAssigned = true;
         }
 
         private void SetupVoiceBroadcastTrigger()
         {
-            voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
-            voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
-            soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
-            CompositeDisposable.BindState(soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);
+            _voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
+            _voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
+            _soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+            CompositeDisposable.BindState(_soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);
         }
 
         private void ChangeVoipDeviceSensitivity(int value)
         {
             float num = (float)value / 100f;
-            voiceBroadcastTrigger.ActivationFader.Volume = num;
+            _voiceBroadcastTrigger.ActivationFader.Volume = num;
         }
 
         public override BasePhysicalClass CreatePhysical()
@@ -570,7 +570,7 @@ namespace Fika.Core.Coop.Players
 
         public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct DamageInfo)
         {
-            if (isServer)
+            if (_isServer)
             {
                 _preAllocatedArmorComponents.Clear();
                 List<ArmorComponent> listToCheck = [];
@@ -674,7 +674,7 @@ namespace Fika.Core.Coop.Players
 
         public override void ApplyCorpseImpulse()
         {
-            if (cullingHandler.IsVisible || isServer)
+            if (_cullingHandler.IsVisible || _isServer)
             {
                 if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
                         && PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
@@ -823,7 +823,7 @@ namespace Fika.Core.Coop.Players
             if (newState == EPlayerState.Jump)
             {
                 MovementContext.PlayerAnimatorEnableJump(true);
-                if (isServer)
+                if (_isServer)
                 {
                     MovementContext.method_2(1f);
                 }
@@ -873,7 +873,7 @@ namespace Fika.Core.Coop.Players
             if (!IsInventoryOpened && isGrounded)
             {
                 Move(to.MovementDirection);
-                if (isServer)
+                if (_isServer)
                 {
                     MovementContext.method_1(to.MovementDirection);
                 }
@@ -915,7 +915,7 @@ namespace Fika.Core.Coop.Players
             if (newState == EPlayerState.Jump)
             {
                 MovementContext.PlayerAnimatorEnableJump(true);
-                if (isServer)
+                if (_isServer)
                 {
                     MovementContext.method_2(1f);
                 }
@@ -965,7 +965,7 @@ namespace Fika.Core.Coop.Players
             if (!IsInventoryOpened && isGrounded)
             {
                 Move(CurrentPlayerState.MovementDirection);
-                if (isServer)
+                if (_isServer)
                 {
                     MovementContext.method_1(CurrentPlayerState.MovementDirection);
                 }
@@ -1070,9 +1070,9 @@ namespace Fika.Core.Coop.Players
             }
             Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateSoundRolloff;
             base.OnDead(damageType);
-            if (cullingHandler != null)
+            if (_cullingHandler != null)
             {
-                cullingHandler.DisableCullingOnDead();
+                _cullingHandler.DisableCullingOnDead();
             }
             if (CorpseSyncPacket.ItemInHands != null)
             {
@@ -1221,14 +1221,14 @@ namespace Fika.Core.Coop.Players
             {
                 Slot slot = Inventory.Equipment.GetSlot(equipmentSlot);
                 ObservedSlotViewHandler handler = new(slot, this, equipmentSlot);
-                observedSlotViewHandlers.Add(handler);
+                _observedSlotViewHandlers.Add(handler);
             }
 
             if (PlayerBody.HaveHolster && PlayerBody.SlotViews.ContainsKey(EquipmentSlot.Holster))
             {
                 Slot slot = Inventory.Equipment.GetSlot(EquipmentSlot.Holster);
                 ObservedSlotViewHandler handler = new(slot, this, EquipmentSlot.Holster);
-                observedSlotViewHandlers.Add(handler);
+                _observedSlotViewHandlers.Add(handler);
             }
 
             if (HandsController != null && HandsController is CoopObservedFirearmController controller)
@@ -1355,7 +1355,7 @@ namespace Fika.Core.Coop.Players
                 {
                     Profile.Info.GroupId = "Fika";
                     Profile.Info.TeamId = "Fika";
-                    waitForStartRoutine = StartCoroutine(CreateHealthBar());
+                    _waitForStartRoutine = StartCoroutine(CreateHealthBar());
                 }
 
                 IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
@@ -1392,7 +1392,7 @@ namespace Fika.Core.Coop.Players
                 yield return null;
             }
 
-            healthBar = FikaHealthBar.Create(this);
+            _healthBar = FikaHealthBar.Create(this);
 
             while (Singleton<GameWorld>.Instance.MainPlayer == null)
             {
@@ -1512,11 +1512,11 @@ namespace Fika.Core.Coop.Players
 
             method_13(deltaTime);
 
-            if (Time.frameCount % 2 == frameSkip)
+            if (Time.frameCount % 2 == _frameSkip)
             {
-                UpdateTriggerColliderSearcher(deltaTime, cullingHandler.IsCloseToMyPlayerCamera);
+                UpdateTriggerColliderSearcher(deltaTime, _cullingHandler.IsCloseToMyPlayerCamera);
             }
-            cullingHandler.ManualUpdate(deltaTime);
+            _cullingHandler.ManualUpdate(deltaTime);
         }
 
         public override void InitAudioController()
@@ -1565,11 +1565,11 @@ namespace Fika.Core.Coop.Players
             {
                 Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateSoundRolloff;
             }
-            foreach (ObservedSlotViewHandler slotViewHandler in observedSlotViewHandlers)
+            foreach (ObservedSlotViewHandler slotViewHandler in _observedSlotViewHandlers)
             {
                 slotViewHandler.Dispose();
             }
-            observedSlotViewHandlers.Clear();
+            _observedSlotViewHandlers.Clear();
             if (HealthController.IsAlive)
             {
                 if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
