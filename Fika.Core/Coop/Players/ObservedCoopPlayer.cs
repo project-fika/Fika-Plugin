@@ -1267,7 +1267,7 @@ namespace Fika.Core.Coop.Players
                                     Transform transform = GClass837.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
                                     if (transform == null)
                                     {
-                                        FikaPlugin.Instance.FikaLogger.LogWarning("RefreshSlotViews::Transform was missing: " + slot.ID);
+                                        FikaPlugin.Instance.FikaLogger.LogWarning($"RefreshSlotViews::Transform was missing: {slot.ID}, this is harmless");
                                         continue;
                                     }
                                     controller.CCV.AddBone(slot, transform);
