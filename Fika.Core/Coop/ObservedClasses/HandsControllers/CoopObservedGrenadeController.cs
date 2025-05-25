@@ -124,10 +124,5 @@ namespace Fika.Core.Coop.ObservedClasses
             EPlantOperationState_0 = EPlantOperationState.Planting;
             Gparam_0.FirearmsAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
         }
-
-        public override void HideGrenade(Action onHidden, bool fastHide)
-        {
-            base.HideGrenade(onHidden, fastHide);
-        }
     }
 }
