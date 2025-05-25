@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
-using static BackendConfigSettingsClass;
 
 namespace Fika.Core.Coop.Utils
 {

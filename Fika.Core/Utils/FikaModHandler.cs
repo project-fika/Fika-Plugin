@@ -3,7 +3,6 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using Comfort.Common;
 using Diz.Utils;
-using EFT;
 using EFT.UI;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Networking.Http;
@@ -13,7 +12,6 @@ using Newtonsoft.Json;
 using SPT.Common.Http;
 using SPT.Custom.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -122,7 +120,7 @@ namespace Fika.Core.Utils
             while (!Singleton<PreloaderUI>.Instantiated)
             {
                 await Task.Delay(250);
-            }            
+            }
 
             AsyncWorker.RunInMainTread(ShowModErrorMessage);
         }

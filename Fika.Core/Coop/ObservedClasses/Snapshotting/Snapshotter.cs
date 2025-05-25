@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 
                 SnapshotInterpolation.InsertAndAdjust(_buffer, _interpolationSettings.bufferLimit, snapshot, ref _localTimeline, ref _localTimeScale,
                     _sendInterval, BufferTime, _interpolationSettings.catchupSpeed, _interpolationSettings.slowdownSpeed, ref _driftEma,
-                    _interpolationSettings.catchupNegativeThreshold, _interpolationSettings.catchupPositiveThreshold, ref _deliveryTimeEma); 
+                    _interpolationSettings.catchupNegativeThreshold, _interpolationSettings.catchupPositiveThreshold, ref _deliveryTimeEma);
             }
         }
 
