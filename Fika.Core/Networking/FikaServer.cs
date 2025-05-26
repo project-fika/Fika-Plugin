@@ -1491,7 +1491,9 @@ namespace Fika.Core.Networking
         {
             if (channelNumber == 1)
             {
-                VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(reader.GetBytesWithLength()));
+                VOIPServer.NetworkReceivedPacket(
+                    new(new RemotePeer(peer)),
+                    new(reader.GetBytesWithLength()));
             }
             else
             {
