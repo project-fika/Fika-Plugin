@@ -1484,7 +1484,10 @@ namespace Fika.Core.Networking
             }
 
             // End the raid
-            CoopGame.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, CoopGame.Instance.ExitStatus, CoopGame.Instance.ExitLocation, 0);
+            CoopGame.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId,
+                CoopGame.Instance.ExitStatus,
+                CoopGame.Instance.ExitLocation,
+                0);
         }
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
