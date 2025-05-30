@@ -90,12 +90,12 @@ namespace Fika.Core.Patching
             if (_autoPatch)
             {
 #if DEBUG
-                List<Type> query = [.. Assembly.GetExecutingAssembly()
+                List<Type> query = [.. Assembly.GetCallingAssembly()
                     .GetTypes()
                     .Where(t => t.BaseType == typeof(FikaPatch)
                                 && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null)];
 #else
-                List<Type> query = [.. Assembly.GetExecutingAssembly()
+                List<Type> query = [.. Assembly.GetCallingAssembly()
                     .GetTypes()
                     .Where(t => t.BaseType == typeof(FikaPatch)
                                 && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null
@@ -137,12 +137,12 @@ namespace Fika.Core.Patching
             if (_autoPatch)
             {
 #if DEBUG
-                List<Type> query = [.. Assembly.GetExecutingAssembly()
+                List<Type> query = [.. Assembly.GetCallingAssembly()
                     .GetTypes()
                     .Where(t => t.BaseType == typeof(FikaPatch)
                                 && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null)];
 #else
-                List<Type> query = [.. Assembly.GetExecutingAssembly()
+                List<Type> query = [.. Assembly.GetCallingAssembly()
                     .GetTypes()
                     .Where(t => t.BaseType == typeof(FikaPatch)
                                 && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null
