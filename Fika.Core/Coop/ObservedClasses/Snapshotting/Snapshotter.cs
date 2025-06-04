@@ -41,7 +41,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         }
 
         /// <summary>
-        /// Checks the <see cref="_buffer"/> and <see cref="ObservedCoopPlayer.Interpolate(ref PlayerStatePacket, ref PlayerStatePacket, double)"/>s any snapshots
+        /// Checks the <see cref="_buffer"/> and <see cref="Interpolate(in T, in T, float)"/>s any snapshots
         /// </summary>
         public void ManualUpdate(float unscaledDeltaTime)
         {

@@ -21,7 +21,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         public EPlayerState State;
         public float Tilt;
         public int Step;
-        public int AnimatorStateIndex;
         public float CharacterMovementSpeed;
         public bool IsProne;
         public float PoseLevel;

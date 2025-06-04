@@ -862,7 +862,6 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetPoseLevel(from.PoseLevel + (to.PoseLevel - from.PoseLevel));
             }
 
-            MovementContext.SetCurrentClientAnimatorStateIndex(to.AnimatorStateIndex);
             MovementContext.SetCharacterMovementSpeed(to.CharacterMovementSpeed, true);
 
             if (MovementContext.BlindFire != to.Blindfire)
@@ -954,7 +953,6 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetPoseLevel(CurrentPlayerState.PoseLevel);
             }
 
-            MovementContext.SetCurrentClientAnimatorStateIndex(CurrentPlayerState.AnimatorStateIndex);
             MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.CharacterMovementSpeed, true);
 
             if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)

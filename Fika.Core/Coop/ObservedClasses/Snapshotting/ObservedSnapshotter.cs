@@ -20,7 +20,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             player.CurrentPlayerState.State = to.State;
             player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
             player.CurrentPlayerState.Step = to.Step;
-            player.CurrentPlayerState.AnimatorStateIndex = to.AnimatorStateIndex;
             player.CurrentPlayerState.CharacterMovementSpeed = to.CharacterMovementSpeed;
             player.CurrentPlayerState.IsProne = to.IsProne;
             player.CurrentPlayerState.PoseLevel = Mathf.LerpUnclamped(from.PoseLevel, to.PoseLevel, ratio);

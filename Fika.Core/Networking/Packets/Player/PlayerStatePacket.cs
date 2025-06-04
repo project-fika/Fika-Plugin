@@ -16,7 +16,6 @@ namespace Fika.Core.Networking
         public EPlayerState State;
         public float Tilt;
         public int Step;
-        public int AnimatorStateIndex;
         public float CharacterMovementSpeed;
         public bool IsProne;
         public float PoseLevel;
@@ -76,7 +75,6 @@ namespace Fika.Core.Networking
             writer.Put((byte)State);
             writer.Put(Tilt);
             writer.Put(Step);
-            writer.Put(AnimatorStateIndex);
             writer.Put(CharacterMovementSpeed);
             writer.Put(IsProne);
             writer.Put(PoseLevel);
@@ -101,7 +99,6 @@ namespace Fika.Core.Networking
             State = (EPlayerState)reader.GetByte();
             Tilt = reader.GetFloat();
             Step = reader.GetInt();
-            AnimatorStateIndex = reader.GetInt();
             CharacterMovementSpeed = reader.GetFloat();
             IsProne = reader.GetBool();
             PoseLevel = reader.GetFloat();
@@ -125,7 +122,6 @@ namespace Fika.Core.Networking
             State = player.CurrentManagedState.Name;
             Tilt = player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt;
             Step = player.MovementContext.Step;
-            AnimatorStateIndex = player.CurrentAnimatorStateIndex;
             CharacterMovementSpeed = player.MovementContext.SmoothedCharacterMovementSpeed;
             IsProne = player.IsInPronePose;
             PoseLevel = player.PoseLevel;
