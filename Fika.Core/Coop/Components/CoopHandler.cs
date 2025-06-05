@@ -38,7 +38,7 @@ namespace Fika.Core.Coop.Components
         /// <summary>
         /// If the <see cref="CoopHandler"/> should sync and spawn profiles during <see cref="Update"/>
         /// </summary>
-        public bool ShouldSync { get; internal set; }
+        public bool ShouldSync { get; set; }
 
         /// <summary>
         /// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>

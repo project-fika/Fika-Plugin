@@ -53,6 +53,42 @@ namespace Fika.Core.Coop.GameMode
             LootItems = null;
         }
 
+        public override async Task WaitForHostToStart()
+        {
+            await base.WaitForHostToStart();
+
+            GameObject startButton = null;
+            if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.AnyoneCanStartRaid)
+            {
+                startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
+                if (FikaPlugin.DevMode.Value)
+                {
+                    Logger.LogWarning("DevMode is enabled, skipping wait...");
+                    NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
+                    FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
+                    InformationPacket devModePacket = new()
+                    {
+                        RequestStart = true
+                    };
+                    fikaClient.SendData(ref devModePacket, DeliveryMethod.ReliableOrdered);
+                }
+            }
+            FikaClient client = Singleton<FikaClient>.Instance;
+            InformationPacket packet = new();
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            do
+            {
+                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                await Task.Delay(250);
+            }
+            while (!RaidStarted);
+
+            if (startButton != null)
+            {
+                GameObject.Destroy(startButton);
+            }
+        }
+
         public override async Task WaitForOtherPlayersToLoad()
         {
             float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;

@@ -17,6 +17,8 @@ using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Http;
+using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using LiteNetLib;
 using System;
@@ -414,6 +416,46 @@ namespace Fika.Core.Coop.GameMode
             WeatherClass[] weatherClasses = [weather, weather2];
             WeatherClasses = weatherClasses;
             WeatherController.Instance.method_0(weatherClasses);
+        }
+
+        public override async Task WaitForHostToStart()
+        {
+            await base.WaitForHostToStart();
+
+            GameObject startButton = null;
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
+            }
+            FikaServer server = Singleton<FikaServer>.Instance;
+            server.RaidInitialized = true;
+
+            if (FikaPlugin.DevMode.Value)
+            {
+                Logger.LogWarning("DevMode is enabled, skipping wait...");
+                NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
+                RaidStarted = true;
+            }
+
+            while (!RaidStarted)
+            {
+                await Task.Yield();
+            }
+
+            FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount + 1;
+
+            if (startButton != null)
+            {
+                GameObject.Destroy(startButton);
+            }
+
+            InformationPacket continuePacket = new()
+            {
+                AmountOfPeers = server.NetServer.ConnectedPeersCount + 1
+            };
+            server.SendDataToAll(ref continuePacket, DeliveryMethod.ReliableOrdered);
+            SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
+            await FikaRequestHandler.UpdateSetStatus(status);
         }
 
         public override async Task WaitForOtherPlayersToLoad()

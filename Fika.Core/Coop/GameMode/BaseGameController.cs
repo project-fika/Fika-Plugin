@@ -31,6 +31,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 using static Fika.Core.Networking.GenericSubPackets;
 using static Fika.Core.Networking.SubPacket;
 using static LocationSettingsClass;
@@ -116,7 +117,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
         protected SpawnPointManagerClass _spawnPoints;
-        protected ISpawnPoint _spawnPoint;        
+        protected ISpawnPoint _spawnPoint;
 
         private CoopHalloweenEventManager _halloweenEventManager;
         private FikaDebug _fikaDebug;
@@ -134,6 +135,63 @@ namespace Fika.Core.Coop.GameMode
         {
             _localPlayer = player;
             _coopHandler.MyPlayer = player;
+        }
+
+        /// <summary>
+        /// <see cref="Task"/> used to wait for host to start the raid
+        /// </summary>
+        /// <returns></returns>
+        public virtual Task WaitForHostToStart()
+        {
+            Logger.LogInfo("Starting task to wait for host to start the raid.");
+            _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_START_RAID.Localized());
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// This creates a "custom" Back button so that we can back out if we get stuck
+        /// </summary>
+        /// <param name="myPlayer"></param>
+        /// <param name="coopPlayer"></param>
+        /// <param name="customButton"></param>
+        /// <returns></returns>
+        protected GameObject CreateStartButton()
+        {
+            if (MenuUI.Instantiated)
+            {
+                MenuUI menuUI = MenuUI.Instance;
+                DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
+                GameObject customButton = GameObject.Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
+                customButton.gameObject.name = "FikaStartButton";
+                customButton.gameObject.SetActive(true);
+                DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
+                backButtonComponent.SetHeaderText(LocaleUtils.UI_START_RAID.Localized(), 32);
+                backButtonComponent.SetEnabledTooltip(LocaleUtils.UI_START_RAID_DESCRIPTION.Localized());
+                UnityEvent newEvent = new();
+                newEvent.AddListener(() =>
+                {
+                    if (IsServer)
+                    {
+                        RaidStarted = true;
+                        return;
+                    }
+
+                    FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
+                    InformationPacket packet = new()
+                    {
+                        RequestStart = true
+                    };
+                    fikaClient.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                });
+                Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
+
+                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestStarted);
+
+                return customButton;
+            }
+
+            return null;
         }
 
         public virtual IEnumerator WaitForHostInit(int timeBeforeDeployLocal)
@@ -482,6 +540,14 @@ namespace Fika.Core.Coop.GameMode
             Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
+        /// <summary>
+        /// Initializes the transit system TODO: Add headless variant
+        /// </summary>
+        /// <param name="gameWorld"></param>
+        /// <param name="instance"></param>
+        /// <param name="profile"></param>
+        /// <param name="localRaidSettings"></param>
+        /// <param name="location"></param>
         public void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass instance, Profile profile,
             LocalRaidSettings localRaidSettings, LocationSettingsClass.Location location)
         {
@@ -623,7 +689,7 @@ namespace Fika.Core.Coop.GameMode
             if (_extractRoutine != null)
             {
                 _abstractGame.StopCoroutine(_extractRoutine);
-            }            
+            }
         }
     }
 }

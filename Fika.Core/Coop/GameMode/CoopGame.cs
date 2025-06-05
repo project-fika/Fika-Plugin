@@ -358,52 +358,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             return coopPlayer;
-        }
-
-        /// <summary>
-        /// This creates a "custom" Back button so that we can back out if we get stuck
-        /// </summary>
-        /// <param name="myPlayer"></param>
-        /// <param name="coopPlayer"></param>
-        /// <param name="customButton"></param>
-        /// <returns></returns>
-        private GameObject CreateStartButton()
-        {
-            if (MenuUI.Instantiated)
-            {
-                MenuUI menuUI = MenuUI.Instance;
-                DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
-                GameObject customButton = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
-                customButton.gameObject.name = "FikaStartButton";
-                customButton.gameObject.SetActive(true);
-                DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
-                backButtonComponent.SetHeaderText(LocaleUtils.UI_START_RAID.Localized(), 32);
-                backButtonComponent.SetEnabledTooltip(LocaleUtils.UI_START_RAID_DESCRIPTION.Localized());
-                UnityEvent newEvent = new();
-                newEvent.AddListener(() =>
-                {
-                    if (GameController.IsServer)
-                    {
-                        GameController.RaidStarted = true;
-                        return;
-                    }
-
-                    FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
-                    InformationPacket packet = new()
-                    {
-                        RequestStart = true
-                    };
-                    fikaClient.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                });
-                Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
-
-                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestStarted);
-
-                return customButton;
-            }
-
-            return null;
-        }
+        }        
 
         /// <summary>
         /// This creates a "custom" Back button so that we can back out if we get stuck
@@ -524,7 +479,7 @@ namespace Fika.Core.Coop.GameMode
                 throw;
             }
 
-            await WaitForHostToStart();
+            await GameController.WaitForHostToStart();
 
             LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
 
@@ -562,15 +517,6 @@ namespace Fika.Core.Coop.GameMode
             await method_6();
             FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
         }
-
-
-
-        private void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass backendConfig)
-        {
-
-        }
-
-
 
         private async Task GetReconnectProfile(string profileId)
         {
@@ -737,86 +683,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        /// <summary>
-        /// <see cref="Task"/> used to wait for host to start the raid
-        /// </summary>
-        /// <returns></returns>
-        private async Task WaitForHostToStart()
-        {
-            Logger.LogInfo("Starting task to wait for host to start the raid.");
-
-            SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_START_RAID.Localized());
-
-            GameObject startButton = null;
-            if (GameController.IsServer)
-            {
-                if (!FikaBackendUtils.IsHeadless)
-                {
-                    startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
-                }
-                FikaServer server = Singleton<FikaServer>.Instance;
-                server.RaidInitialized = true;
-
-                if (FikaPlugin.DevMode.Value)
-                {
-                    Logger.LogWarning("DevMode is enabled, skipping wait...");
-                    NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
-                    GameController.RaidStarted = true;
-                }
-
-                while (!GameController.RaidStarted)
-                {
-                    await Task.Yield();
-                }
-
-                FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount + 1;
-
-                if (startButton != null)
-                {
-                    Destroy(startButton);
-                }
-
-                InformationPacket continuePacket = new()
-                {
-                    AmountOfPeers = server.NetServer.ConnectedPeersCount + 1
-                };
-                server.SendDataToAll(ref continuePacket, DeliveryMethod.ReliableOrdered);
-                SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
-                await FikaRequestHandler.UpdateSetStatus(status);
-
-                return;
-            }
-
-            if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.AnyoneCanStartRaid)
-            {
-                startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
-                if (FikaPlugin.DevMode.Value)
-                {
-                    Logger.LogWarning("DevMode is enabled, skipping wait...");
-                    NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
-                    FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
-                    InformationPacket devModePacket = new()
-                    {
-                        RequestStart = true
-                    };
-                    fikaClient.SendData(ref devModePacket, DeliveryMethod.ReliableOrdered);
-                }
-            }
-            FikaClient client = Singleton<FikaClient>.Instance;
-            InformationPacket packet = new();
-            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-            do
-            {
-                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                await Task.Delay(250);
-            }
-            while (!GameController.RaidStarted);
-
-            if (startButton != null)
-            {
-                Destroy(startButton);
-            }
-        }
+        
 
         /// <summary>
         /// Sets the status of the game on the backend
