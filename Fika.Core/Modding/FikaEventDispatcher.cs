@@ -10,7 +10,7 @@ namespace Fika.Core.Modding
         // I'm leaving this here but consumers should definitely subscribe to individual events
         public static event FikaEventHandler OnFikaEvent;
 
-        internal static void DispatchEvent<TEvent>(TEvent e) where TEvent : FikaEvent
+        public static void DispatchEvent<TEvent>(TEvent e) where TEvent : FikaEvent
         {
             OnFikaEvent?.Invoke(e);
         }
