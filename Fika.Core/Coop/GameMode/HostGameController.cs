@@ -35,11 +35,12 @@ namespace Fika.Core.Coop.GameMode
     public class HostGameController : BaseGameController, IBotGame
     {
         public HostGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, ISession session,
-            LocationSettingsClass.Location location, WavesSettings wavesSettings)
+            LocationSettingsClass.Location location, WavesSettings wavesSettings, GameDateTime gameDateTime)
             : base(game, updateQueue, gameWorld, session)
         {
             _botsController = new();
-            _botStateManager = BotStateManager.Create(_fikaGame, Singleton<FikaServer>.Instance, UpdateByUnity);
+            _botStateManager = BotStateManager.Create(_abstractGame, Singleton<FikaServer>.Instance, this);
+            _gameDateTime = gameDateTime;
 
             if (game is not AbstractGame abstractGame)
             {
@@ -68,6 +69,7 @@ namespace Fika.Core.Coop.GameMode
         private readonly WavesSpawnScenario _wavesSpawnScenario;
         private readonly BossSpawnScenario _bossSpawnScenario;
         private readonly Dictionary<int, int> botQueue = [];
+        private readonly GameDateTime _gameDateTime;
 
         public GameStatus Status
         {
@@ -81,7 +83,7 @@ namespace Fika.Core.Coop.GameMode
         {
             get
             {
-                throw new NotImplementedException();
+                return _gameDateTime;
             }
         }
 
@@ -97,7 +99,7 @@ namespace Fika.Core.Coop.GameMode
         {
             get
             {
-                throw new NotImplementedException();
+                return WeatherController.Instance.WeatherCurve;
             }
         }
 
@@ -110,6 +112,14 @@ namespace Fika.Core.Coop.GameMode
         }
 
         public event Action UpdateByUnity;
+
+        public Action Update
+        {
+            get
+            {
+                return UpdateByUnity;
+            }
+        }
 
         public void BotDespawn(BotOwner bot)
         {
@@ -492,12 +502,11 @@ namespace Fika.Core.Coop.GameMode
             SpawnSettingsStruct settings = new(Location.MinDistToFreePoint, Location.MaxDistToFreePoint, Location.MaxBotPerZone, spawnSafeDistance, Location.NoGroupSpawn, Location.OneTimeSpawn);
             SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, _botsController, _spawnPoints);
             _spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, profile.Info.Side, null, null, null, null, profile.Id);
-            InfiltrationPoint = string.IsNullOrEmpty(HostSpawnPoint.Infiltration) ? "MissingInfiltration" : _spawnPoint.Infiltration;
+            InfiltrationPoint = string.IsNullOrEmpty(_spawnPoint.Infiltration) ? "MissingInfiltration" : _spawnPoint.Infiltration;
         }
 
         public async Task InitializeBotsSystem(LocationSettingsClass.Location location,
-            BotControllerSettings controllerSettings, ISpawnSystem spawnSystem,
-            GameWorld gameWorld, Player player)
+            BotControllerSettings controllerSettings, GameWorld gameWorld, Player player)
         {
             BotsPresets botsPresets = new(_backendSession, _wavesSpawnScenario.SpawnWaves,
                     _bossSpawnScenario.BossSpawnWaves, _nonWavesSpawnScenario.GClass1684_0, false);
@@ -513,9 +522,11 @@ namespace Fika.Core.Coop.GameMode
 
             bool useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
-            _botsController.Init(this, botCreator, botZones, spawnSystem, _wavesSpawnScenario.BotLocationModifier,
+            _botsController.Init(this, botCreator, botZones, SpawnSystem, _wavesSpawnScenario.BotLocationModifier,
                 controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
             _bossSpawnScenario.HaveSectants, gameWorld, location.OpenZones, location.Events);
+            UpdateByUnity -= _botsController.method_0;
+            _botStateManager.AssignBotsController(_botsController);
 
             int numberOfBots = controllerSettings.BotAmount switch
             {
@@ -848,6 +859,16 @@ namespace Fika.Core.Coop.GameMode
             FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
         }
 
+        public override Task InitializeLoot(LocationSettingsClass.Location location)
+        {
+            GClass1752 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
+            EFTWriterClass eftWriter = new();
+            eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
+            LootData = eftWriter.ToArray();
+
+            return Task.CompletedTask;
+        }
+
         public byte[] GetHostLootItems()
         {
             if (LootData == null || LootData.Length == 0)
@@ -960,7 +981,8 @@ namespace Fika.Core.Coop.GameMode
                 {
                     UpdateByUnity -= gameWorld.ServerShellingController.OnUpdate;
                 }
-                _botsController.StopGettingInfo();
+                _botStateManager.UnassignBotsController();
+                _botsController.StopGettingInfo();                
                 _botsController.DestroyInfo(_localPlayer);
             }
 

@@ -48,8 +48,6 @@ namespace Fika.Core.Coop.GameMode
             _backendSession = session;
             IsServer = FikaBackendUtils.IsServer;
 
-            
-
             Logger = new(GetType().Name);
         }
 
@@ -110,7 +108,6 @@ namespace Fika.Core.Coop.GameMode
         public Quaternion ClientSpawnRotation { get; set; }
         public ISpawnSystem SpawnSystem { get; set; }
         public string InfiltrationPoint { get; set; }
-        public ISpawnPoint HostSpawnPoint { get; set; }
         public ISpawnPoint SpawnPoint
         {
             get
@@ -133,6 +130,12 @@ namespace Fika.Core.Coop.GameMode
         protected ISession _backendSession;
         protected Coroutine _extractRoutine;
 
+        public void SetLocalPlayer(CoopPlayer player)
+        {
+            _localPlayer = player;
+            _coopHandler.MyPlayer = player;
+        }
+
         public virtual IEnumerator WaitForHostInit(int timeBeforeDeployLocal)
         {
             throw new NotImplementedException("Use derived classes");
@@ -153,12 +156,15 @@ namespace Fika.Core.Coop.GameMode
             _fikaDebug = _abstractGame.gameObject.AddComponent<FikaDebug>();
         }
 
-        public Task SetupCoopHandler()
+        public Task SetupCoopHandler(CoopGame coopGame = null)
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
                 _coopHandler = coopHandler;
-                //coopHandler.LocalGameInstance = this;
+                if (coopGame != null)
+                {
+                    _coopHandler.LocalGameInstance = coopGame;
+                }
                 if (IsServer && FikaBackendUtils.IsTransit)
                 {
                     coopHandler.ReInitInteractables();

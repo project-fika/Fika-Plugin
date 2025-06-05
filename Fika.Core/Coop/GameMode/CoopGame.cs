@@ -72,16 +72,7 @@ namespace Fika.Core.Coop.GameMode
         public BaseGameController GameController { get; set; }
         public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
         public string ExitLocation { get; set; }
-        public ISpawnSystem SpawnSystem { get; internal set; }
         public List<int> ExtractedPlayers { get; } = [];
-
-        public bool WeatherReady
-        {
-            get
-            {
-                return GameController.WeatherReady;
-            }
-        }
 
         public ESeason Season
         {
@@ -161,7 +152,7 @@ namespace Fika.Core.Coop.GameMode
             CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, gameUI,
                 location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
                 new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
-            coopGame.GameController = FikaBackendUtils.IsServer ? new HostGameController(coopGame, updateQueue, gameWorld, backEndSession, location, wavesSettings)
+            coopGame.GameController = FikaBackendUtils.IsServer ? new HostGameController(coopGame, updateQueue, gameWorld, backEndSession, location, wavesSettings, coopGame.GameDateTime)
                 : new ClientGameController(coopGame, updateQueue, gameWorld, backEndSession);
             coopGame.GameController.Location = location;
 
@@ -242,10 +233,10 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public override void vmethod_0()
+        /*public override void vmethod_0()
         {
             localGameLoggerClass = new(LoggerMode.None, dictionary_0, GameController.Bots);
-        }
+        }*/
 
         public override void SetMatchmakerStatus(string status, float? progress = null)
         {
@@ -483,7 +474,7 @@ namespace Fika.Core.Coop.GameMode
                 await (GameController as ClientGameController).WaitForHostToLoad();
             }
 
-            await GameController.SetupCoopHandler();
+            await GameController.SetupCoopHandler(this);
 
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             gameWorld.LocationId = Location_0.Id;
@@ -554,7 +545,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            await vmethod_1(botsSettings, SpawnSystem);
+            await vmethod_1(botsSettings, null);
 
             if (GameController.IsServer)
             {
@@ -721,7 +712,7 @@ namespace Fika.Core.Coop.GameMode
             myPlayer.OnEpInteraction += OnEpInteraction;
 
             _localPlayer = myPlayer as CoopPlayer;
-            GameController.CoopHandler.MyPlayer = _localPlayer;
+            GameController.SetLocalPlayer(_localPlayer);
 
             Logger.LogInfo("Local player created");
             return myPlayer;
@@ -865,7 +856,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (GameController.IsServer)
             {
-                await (GameController as HostGameController).InitializeBotsSystem(Location_0, controllerSettings, spawnSystem, gameWorld, PlayerOwner.Player);
+                await (GameController as HostGameController).InitializeBotsSystem(Location_0, controllerSettings, gameWorld, PlayerOwner.Player);
             }
 
 #if DEBUG

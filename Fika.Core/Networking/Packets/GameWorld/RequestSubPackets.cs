@@ -44,13 +44,13 @@ namespace Fika.Core.Networking
                 CoopGame coopGame = CoopGame.Instance;
                 if (coopGame != null)
                 {
-                    if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(coopGame.GameController.InfiltrationPoint) && coopGame.GameController.HostSpawnPoint != null)
+                    if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(coopGame.GameController.InfiltrationPoint) && coopGame.GameController.SpawnPoint != null)
                     {
                         RequestPacket response = new()
                         {
                             PacketType = ERequestSubPacketType.SpawnPoint,
                             RequestSubPacket = new SpawnPointRequest(coopGame.GameController.InfiltrationPoint,
-                            coopGame.GameController.HostSpawnPoint.Position, coopGame.GameController.HostSpawnPoint.Rotation)
+                            coopGame.GameController.SpawnPoint.Position, coopGame.GameController.SpawnPoint.Rotation)
                         };
 
                         server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);

@@ -1,4 +1,5 @@
-﻿using Fika.Core.Coop.GameMode;
+﻿using EFT;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using System;
@@ -10,7 +11,8 @@ namespace Fika.Core.Coop.Components
     public class BotStateManager : MonoBehaviour
     {
         private List<CoopBot> _bots;
-        private Action _onUpdate;
+        private HostGameController _controller;
+        private BotsController _botsController;
 
         private float _updateCount;
         private float _updatesPerTick;
@@ -31,15 +33,10 @@ namespace Fika.Core.Coop.Components
             return _bots.Remove(bot);
         }
 
-        public static BotStateManager Create(IFikaGame game, FikaServer server, Action onUpdate)
+        public static BotStateManager Create(AbstractGame game, FikaServer server, HostGameController hostGameController)
         {
-            if (game is not MonoBehaviour mono)
-            {
-                throw new NullReferenceException("Mono missing");
-            }
-
-            BotStateManager component = mono.gameObject.AddComponent<BotStateManager>();
-            component._onUpdate = onUpdate;
+            BotStateManager component = game.gameObject.AddComponent<BotStateManager>();
+            component._controller = hostGameController;
             component._updateCount = 0;
             component._updatesPerTick = 1f / server.SendRate;
             component._bots = [];
@@ -48,7 +45,8 @@ namespace Fika.Core.Coop.Components
 
         protected void Update()
         {
-            _onUpdate?.Invoke();
+            _controller.Update?.Invoke();
+            _botsController?.method_0();
 
             _updateCount += Time.unscaledDeltaTime;
             if (_updateCount >= _updatesPerTick)
@@ -70,6 +68,16 @@ namespace Fika.Core.Coop.Components
         protected void OnDestroy()
         {
             _bots.Clear();
+        }
+
+        public void AssignBotsController(BotsController botsController)
+        {
+            _botsController = botsController;
+        }
+
+        public void UnassignBotsController()
+        {
+            _botsController = null;
         }
     }
 }
