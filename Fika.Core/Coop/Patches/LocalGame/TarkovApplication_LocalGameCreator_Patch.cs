@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.Patches
     /// Created by: Paulov
     /// Paulov: Overwrite and use our own CoopGame instance instead
     /// </summary>
-    internal class TarkovApplication_LocalGameCreator_Patch : FikaPatch
+    public class TarkovApplication_LocalGameCreator_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
