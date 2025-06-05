@@ -1,9 +1,11 @@
 ﻿using Audio.AmbientSubsystem;
 using BepInEx.Logging;
+using ChatShared;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio.RadioSystem;
 using Dissonance;
 using EFT;
+using EFT.Bots;
 using EFT.Game.Spawning;
 using EFT.GameTriggers;
 using EFT.GlobalEvents;
@@ -690,6 +692,12 @@ namespace Fika.Core.Coop.GameMode
             {
                 _abstractGame.StopCoroutine(_extractRoutine);
             }
+        }
+
+        public virtual async Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld)
+        {
+            await Task.Yield();
+            throw new NotImplementedException();
         }
     }
 }

@@ -15,7 +15,6 @@ using EFT.UI.Screens;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
-using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Players;
@@ -35,7 +34,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Fika.Core.Coop.GameMode
 {
@@ -358,7 +356,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             return coopPlayer;
-        }        
+        }
 
         /// <summary>
         /// This creates a "custom" Back button so that we can back out if we get stuck
@@ -683,8 +681,6 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        
-
         /// <summary>
         /// Sets the status of the game on the backend
         /// </summary>
@@ -706,46 +702,7 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         public override async Task vmethod_1(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem)
         {
-            if (Location_0.Id == "laboratory")
-            {
-                Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
-                Season = ESeason.Summer;
-                OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
-            }
-            else
-            {
-                await GameController.GenerateWeathers();
-            }
-
-            GameWorld gameWorld = GameWorld_0;
-            gameWorld.RegisterRestrictableZones();
-            gameWorld.RegisterBorderZones();
-
-            if (GameController.IsServer)
-            {
-                await (GameController as HostGameController).InitializeBotsSystem(Location_0, controllerSettings, gameWorld, PlayerOwner.Player);
-            }
-
-#if DEBUG
-            Logger.LogWarning("Starting " + nameof(BaseGameController.WaitForOtherPlayersToLoad));
-#endif
-            await GameController.WaitForOtherPlayersToLoad();
-
-            SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
-            Logger.LogInfo("All players are loaded, continuing...");
-
-            if (GameController.IsServer)
-            {
-                await (GameController as HostGameController).StartBotsSystem(Location_0);
-            }
-
-            // Add FreeCamController to GameWorld GameObject
-            FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
-            Singleton<FreeCameraController>.Create(freeCamController);
-
-            await GameController.SetupRaidCode();
-
-            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
+            await GameController.StartBotSystemsAndCountdown(controllerSettings, GameWorld_0);
         }
 
         public override IEnumerator vmethod_5(Action runCallback)

@@ -12,6 +12,7 @@ using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
+using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Players;
@@ -418,6 +419,43 @@ namespace Fika.Core.Coop.GameMode
             WeatherController.Instance.method_0(weatherClasses);
         }
 
+        public override async Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld)
+        {
+            if (Location.Id == "laboratory")
+            {
+                Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
+                Season = ESeason.Summer;
+                OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+            }
+            else
+            {
+                await GenerateWeathers();
+            }
+
+            gameWorld.RegisterRestrictableZones();
+            gameWorld.RegisterBorderZones();
+
+            await InitializeBotsSystem(Location, controllerSettings, gameWorld);
+
+#if DEBUG
+            Logger.LogWarning("Starting " + nameof(BaseGameController.WaitForOtherPlayersToLoad));
+#endif
+            await WaitForOtherPlayersToLoad();
+
+            _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+            Logger.LogInfo("All players are loaded, continuing...");
+
+            await StartBotsSystem(Location);
+
+            // Add FreeCamController to GameWorld GameObject
+            FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
+            Singleton<FreeCameraController>.Create(freeCamController);
+
+            await SetupRaidCode();
+
+            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
+        }
+
         public override async Task WaitForHostToStart()
         {
             await base.WaitForHostToStart();
@@ -548,7 +586,7 @@ namespace Fika.Core.Coop.GameMode
         }
 
         public async Task InitializeBotsSystem(LocationSettingsClass.Location location,
-            BotControllerSettings controllerSettings, GameWorld gameWorld, Player player)
+            BotControllerSettings controllerSettings, GameWorld gameWorld)
         {
             BotsPresets botsPresets = new(_backendSession, _wavesSpawnScenario.SpawnWaves,
                     _bossSpawnScenario.BossSpawnWaves, _nonWavesSpawnScenario.GClass1684_0, false);
@@ -584,7 +622,10 @@ namespace Fika.Core.Coop.GameMode
             _botsController.SetSettings(numberOfBots, _backendSession.BackEndConfig.BotPresets, _backendSession.BackEndConfig.BotWeaponScatterings);
             if (!FikaBackendUtils.IsHeadless)
             {
-                _botsController.AddActivePLayer(player);
+                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
+                {
+                    _botsController.AddActivePLayer(coopGame.LocalPlayer_0);
+                }
             }
 
             if (FikaPlugin.EnforcedSpawnLimits.Value)
@@ -695,19 +736,19 @@ namespace Fika.Core.Coop.GameMode
             bool isScav = player.Side is EPlayerSide.Savage;
             ExfiltrationPoint[] exfilPoints;
             SecretExfiltrationPoint[] secretExfilPoints;
-            ExfiltrationControllerClass.Instance.InitSecretExfils(player);
+            exfilController.InitSecretExfils(player);
 
             if (isScav)
             {
                 exfilController.ScavExfiltrationClaim(player.Position, player.ProfileId, player.Profile.FenceInfo.AvailableExitsCount);
                 int mask = exfilController.GetScavExfiltrationMask(player.ProfileId);
                 exfilPoints = exfilController.ScavExfiltrationClaim(mask, player.ProfileId);
-                secretExfilPoints = ExfiltrationControllerClass.Instance.GetScavSecretExits();
+                secretExfilPoints = exfilController.GetScavSecretExits();
             }
             else
             {
                 exfilPoints = exfilController.EligiblePoints(coopGame.Profile_0);
-                secretExfilPoints = ExfiltrationControllerClass.Instance.SecretEligiblePoints();
+                secretExfilPoints = exfilController.SecretEligiblePoints();
             }
 
             coopGame.GameUi.TimerPanel.SetTime(EFTDateTimeClass.UtcNow,
