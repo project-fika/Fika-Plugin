@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Components
 {
-    internal class CoopTimeManager : MonoBehaviour
+    public class CoopTimeManager : MonoBehaviour
     {
         public CoopGame CoopGame;
         public GameTimerClass GameTimer;

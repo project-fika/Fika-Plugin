@@ -163,7 +163,7 @@ namespace Fika.Core.Coop.Custom
                 return;
             }
 
-            foreach (CoopBot otherBot in coopGame.Bots.Values)
+            foreach (CoopBot otherBot in coopGame.GameController.Bots.Values)
             {
                 if (otherBot == bot)
                 {

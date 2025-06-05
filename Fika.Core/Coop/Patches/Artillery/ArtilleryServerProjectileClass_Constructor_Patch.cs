@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.Patches
             __instance.explosionDistnaceRange = new(3f, 5f);
             __instance.zoneID = "";
             CoopGame coopGame = CoopGame.Instance;
-            coopGame.UpdateByUnity += __instance.OnUpdate;
+            (coopGame.GameController as HostGameController).UpdateByUnity += __instance.OnUpdate;
             __instance.MineDataClass = new();
             return false;
         }

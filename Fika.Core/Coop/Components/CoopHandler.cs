@@ -323,7 +323,7 @@ namespace Fika.Core.Coop.Components
             {
                 if (LocalGameInstance != null)
                 {
-                    BotsController botController = LocalGameInstance.BotsController;
+                    BotsController botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
                     if (botController != null)
                     {
                         // Start Coroutine as botController might need a while to start sometimes...
@@ -518,7 +518,7 @@ namespace Fika.Core.Coop.Components
                 yield return null;
             }
 
-            while (coopGame.BotsController.BotSpawner == null)
+            while (botController.BotSpawner == null)
             {
                 yield return null;
             }

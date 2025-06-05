@@ -20,7 +20,7 @@ namespace Fika.Core.Coop.Patches
             CoopGame coopGame = CoopGame.Instance;
             if (coopGame != null)
             {
-                coopGame.ThrownGrenades.Add(item);
+                coopGame.GameController.ThrownGrenades.Add(item);
             }
         }
     }

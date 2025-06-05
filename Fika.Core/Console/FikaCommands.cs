@@ -117,7 +117,7 @@ namespace Fika.Core.Console
 
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    foreach (Player bot in coopGame.Bots.Values)
+                    foreach (Player bot in coopGame.GameController.Bots.Values)
                     {
                         if (bot.AIData.BotOwner == null)
                         {
@@ -126,7 +126,7 @@ namespace Fika.Core.Console
 
                         ConsoleScreen.Log($"Despawning: {bot.Profile.Nickname}");
 
-                        coopGame.DespawnBot(coopHandler, bot);
+                        (coopGame.GameController as HostGameController).DespawnBot(coopHandler, bot);
                     }
                     return;
                 }

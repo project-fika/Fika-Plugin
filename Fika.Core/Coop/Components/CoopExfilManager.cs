@@ -14,7 +14,7 @@ using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Coop.Components
 {
-    internal class CoopExfilManager : MonoBehaviour
+    public class CoopExfilManager : MonoBehaviour
     {
         private CoopGame game;
         private List<ExtractionPlayerHandler> playerHandlers;

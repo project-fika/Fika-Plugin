@@ -1,6 +1,8 @@
-﻿using Fika.Core.Coop.GameMode;
+﻿using EFT;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,58 +10,74 @@ namespace Fika.Core.Coop.Components
 {
     public class BotStateManager : MonoBehaviour
     {
-        private List<CoopBot> bots;
+        private List<CoopBot> _bots;
+        private HostGameController _controller;
+        private BotsController _botsController;
 
-        private float updateCount;
-        private float updatesPerTick;
+        private float _updateCount;
+        private float _updatesPerTick;
 
         public bool AddBot(CoopBot bot)
         {
-            if (bots.Contains(bot))
+            if (_bots.Contains(bot))
             {
                 return false;
             }
 
-            bots.Add(bot);
+            _bots.Add(bot);
             return true;
         }
 
         public bool RemoveBot(CoopBot bot)
         {
-            return bots.Remove(bot);
+            return _bots.Remove(bot);
         }
 
-        public static BotStateManager Create(CoopGame game, FikaServer server)
+        public static BotStateManager Create(AbstractGame game, FikaServer server, HostGameController hostGameController)
         {
             BotStateManager component = game.gameObject.AddComponent<BotStateManager>();
-            component.updateCount = 0;
-            component.updatesPerTick = 1f / server.SendRate;
-            component.bots = [];
+            component._controller = hostGameController;
+            component._updateCount = 0;
+            component._updatesPerTick = 1f / server.SendRate;
+            component._bots = [];
             return component;
         }
 
         protected void Update()
         {
-            updateCount += Time.unscaledDeltaTime;
-            if (updateCount >= updatesPerTick)
+            _controller.Update?.Invoke();
+            _botsController?.method_0();
+
+            _updateCount += Time.unscaledDeltaTime;
+            if (_updateCount >= _updatesPerTick)
             {
-                for (int i = bots.Count - 1; i >= 0; i--)
+                for (int i = _bots.Count - 1; i >= 0; i--)
                 {
-                    CoopBot bot = bots[i];
+                    CoopBot bot = _bots[i];
                     if (!bot.HealthController.IsAlive)
                     {
-                        bots.Remove(bot);
+                        _bots.Remove(bot);
                         continue;
                     }
                     bot.BotPacketSender.SendPlayerState();
                 }
-                updateCount -= updatesPerTick;
+                _updateCount -= _updatesPerTick;
             }
         }
 
         protected void OnDestroy()
         {
-            bots.Clear();
+            _bots.Clear();
+        }
+
+        public void AssignBotsController(BotsController botsController)
+        {
+            _botsController = botsController;
+        }
+
+        public void UnassignBotsController()
+        {
+            _botsController = null;
         }
     }
 }
