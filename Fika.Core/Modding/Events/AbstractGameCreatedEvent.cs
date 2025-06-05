@@ -2,13 +2,8 @@
 
 namespace Fika.Core.Modding.Events
 {
-    public class AbstractGameCreatedEvent : FikaEvent
+    public class AbstractGameCreatedEvent(AbstractGame game) : FikaEvent
     {
-        public AbstractGame Game { get; }
-
-        internal AbstractGameCreatedEvent(AbstractGame game)
-        {
-            this.Game = game;
-        }
+        public AbstractGame Game { get; } = game;
     }
 }

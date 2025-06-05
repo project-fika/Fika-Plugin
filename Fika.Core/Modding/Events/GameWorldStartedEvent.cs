@@ -2,13 +2,8 @@
 
 namespace Fika.Core.Modding.Events
 {
-    public class GameWorldStartedEvent : FikaEvent
+    public class GameWorldStartedEvent(GameWorld gameWorld) : FikaEvent
     {
-        public GameWorld GameWorld { get; }
-
-        internal GameWorldStartedEvent(GameWorld gameWorld)
-        {
-            this.GameWorld = gameWorld;
-        }
+        public GameWorld GameWorld { get; } = gameWorld;
     }
 }

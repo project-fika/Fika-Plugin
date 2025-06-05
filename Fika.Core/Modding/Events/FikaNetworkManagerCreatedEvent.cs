@@ -2,13 +2,8 @@
 
 namespace Fika.Core.Modding.Events
 {
-    public class FikaNetworkManagerCreatedEvent : FikaEvent
+    public class FikaNetworkManagerCreatedEvent(IFikaNetworkManager manager) : FikaEvent
     {
-        public IFikaNetworkManager Manager { get; }
-
-        internal FikaNetworkManagerCreatedEvent(IFikaNetworkManager manager)
-        {
-            Manager = manager;
-        }
+        public IFikaNetworkManager Manager { get; } = manager;
     }
 }
