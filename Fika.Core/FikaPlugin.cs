@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
 using Diz.Utils;
+using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Console;
@@ -70,6 +71,7 @@ namespace Fika.Core
 
         private static readonly Version RequiredServerVersion = new("3.0.0");
         private PatchManager _patchManager;
+        private TarkovApplication _tarkovApp;
 
         public static HeadlessRequesterWebSocket HeadlessRequesterWebSocket { get; set; }
 
@@ -257,6 +259,22 @@ namespace Fika.Core
             }
 
             _ = Task.Run(RunChecks);
+            _ = Task.Run(GetTarkovApp);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="TarkovApplication"/>
+        /// </summary>
+        /// <returns></returns>
+        private async Task GetTarkovApp()
+        {
+            TarkovApplication app;
+            while (!TarkovApplication.Exist(out app))
+            {
+                await Task.Delay(1000);
+            }
+
+            _tarkovApp = app;
         }
 
         private void SetupConfigEventHandlers()
@@ -374,9 +392,9 @@ namespace Fika.Core
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
             }
-            LocalesLoaded = true;
             Logger.LogInfo("Locales are ready!");
             SetupConfig();
+            LocalesLoaded = true;
             AsyncWorker.RunInMainTread(FikaVersionLabel_Patch.UpdateVersionLabel);
         }
 

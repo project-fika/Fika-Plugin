@@ -43,8 +43,8 @@ namespace Fika.Core.Coop.Patches
 
                     if (____raidSettings.LocationId.ToLower() == "sandbox_high" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox")
                     {
-                        LocationSettingsClass.Location sandbox = __instance.Session.LocationSettings.locations.Values.FirstOrDefault
-                            (IsSandbox);
+                        LocationSettingsClass.Location sandbox = __instance.Session.LocationSettings.locations.Values
+                            .FirstOrDefault(IsSandbox);
                         ____raidSettings.SelectedLocation = sandbox;
                     }
                 }
