@@ -33,8 +33,8 @@ namespace Fika.Core.Coop.Patches
                 {
                     if (____raidSettings.LocationId.ToLower() == "sandbox" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox_high")
                     {
-                        LocationSettingsClass.Location sandboxHigh = __instance.Session.LocationSettings.locations.Values.FirstOrDefault
-                            (IsSandboxHigh);
+                        LocationSettingsClass.Location sandboxHigh = __instance.Session.LocationSettings.locations.Values
+                            .FirstOrDefault(IsSandboxHigh);
                         ____raidSettings.SelectedLocation = sandboxHigh;
 
                         NotificationManagerClass.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
@@ -52,7 +52,10 @@ namespace Fika.Core.Coop.Patches
 
             if (!FikaBackendUtils.IsTransit)
             {
-                NetManagerUtils.CreateNetManager(FikaBackendUtils.IsServer);
+#if DEBUG
+                FikaGlobals.LogInfo("Creating net manager"); 
+#endif
+                NetManagerUtils.CreateNetManager(isServer);
                 if (isServer)
                 {
                     NetManagerUtils.StartPinger();
