@@ -39,7 +39,7 @@ namespace Fika.Core.Utils
             SPTCoreVersion = pluginInfo.Metadata.Version;
         }
 
-        public void VerifyMods(PatchManager manager)
+        public async Task VerifyMods(PatchManager manager)
         {
             PluginInfo[] pluginInfos = [.. Chainloader.PluginInfos.Values];
 
@@ -102,10 +102,12 @@ namespace Fika.Core.Utils
                 _ = Task.Run(InformInstallationError);
             }
 
-            HandleModSpecificPatches(manager);
+            await HandleModSpecificPatches(manager);
+
+            return;
         }
 
-        private void HandleModSpecificPatches(PatchManager manager)
+        private Task HandleModSpecificPatches(PatchManager manager)
         {
             // We only want to load this if UI Fixes is not loaded
             if (!UIFixesLoaded)
@@ -113,6 +115,8 @@ namespace Fika.Core.Utils
                 logger.LogInfo("UI Fixes is not loaded, enabling PartyInfoPanel fix");
                 manager.EnablePatch(new PartyInfoPanel_method_3_Patch());
             }
+
+            return Task.CompletedTask;
         }
 
         private async Task InformInstallationError()

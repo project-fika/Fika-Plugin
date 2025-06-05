@@ -318,7 +318,7 @@ namespace Fika.Core
 #if !DEBUG
             VerifyServerVersion();
 #endif
-            ModHandler.VerifyMods(_patchManager);
+            await ModHandler.VerifyMods(_patchManager);
 
             if (Crc32 == 0)
             {
