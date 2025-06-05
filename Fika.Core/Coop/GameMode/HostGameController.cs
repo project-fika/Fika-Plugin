@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.AssetsManager;
 using EFT.Bots;
 using EFT.Counters;
 using EFT.Game.Spawning;
@@ -19,9 +20,11 @@ using Fika.Core.Networking;
 using Fika.Core.Utils;
 using LiteNetLib;
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.SubPacket;
@@ -36,7 +39,7 @@ namespace Fika.Core.Coop.GameMode
             : base(game, updateQueue, gameWorld, session)
         {
             _botsController = new();
-            _botStateManager = BotStateManager.Create(_fikaGame, Singleton<FikaServer>.Instance);
+            _botStateManager = BotStateManager.Create(_fikaGame, Singleton<FikaServer>.Instance, UpdateByUnity);
 
             if (game is not AbstractGame abstractGame)
             {
@@ -70,7 +73,7 @@ namespace Fika.Core.Coop.GameMode
         {
             get
             {
-                throw new NotImplementedException();
+                return _abstractGame.Status;
             }
         }
 
@@ -102,17 +105,18 @@ namespace Fika.Core.Coop.GameMode
         {
             get
             {
-                throw new NotImplementedException();
+                return _bossSpawnScenario;
             }
         }
 
-#pragma warning disable CS0067
         public event Action UpdateByUnity;
-#pragma warning restore CS0067
 
         public void BotDespawn(BotOwner bot)
         {
-            throw new NotImplementedException();
+            Player getPlayer = bot.GetPlayer;
+            _botsController.BotDied(bot);
+            _botsController.DestroyInfo(getPlayer);
+            AssetPoolObject.ReturnToPool(bot.gameObject, true);
         }
 
         public override IEnumerator WaitForHostInit(int timeBeforeDeployLocal)
