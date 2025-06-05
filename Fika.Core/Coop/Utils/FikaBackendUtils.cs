@@ -60,11 +60,11 @@ namespace Fika.Core.Coop.Utils
         public static int LocalPort { get; internal set; } = 0;
         public static string HostLocationId { get; internal set; }
         public static IPAddress VPNIP { get; internal set; }
+        public static RaidSettings CachedRaidSettings { get; set; }
 
         internal static GClass3931<GClass1378> GroupPlayers { get; set; } = [];
         internal static bool RequestFikaWorld;
         internal static Vector3 ReconnectPosition = Vector3.zero;
-        internal static RaidSettings CachedRaidSettings;
         internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         internal static MatchMakerGroupPreview MatchMakerGroupPreview;
 
