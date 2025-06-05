@@ -269,7 +269,7 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            CoopGame.Instance.Bots.Remove(ProfileId);
+            Singleton<IFikaGame>.Instance.GameController.Bots.Remove(ProfileId);
 
             base.OnDead(damageType);
         }
@@ -331,7 +331,7 @@ namespace Fika.Core.Coop.Players
                     };
 
                     server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-                    coopGame.Bots.Remove(ProfileId);
+                    coopGame.GameController.Bots.Remove(ProfileId);
                 }
             }
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))

@@ -44,12 +44,13 @@ namespace Fika.Core.Networking
                 CoopGame coopGame = CoopGame.Instance;
                 if (coopGame != null)
                 {
-                    if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(coopGame.InfiltrationPoint) && coopGame.HostSpawnPoint != null)
+                    if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(coopGame.GameController.InfiltrationPoint) && coopGame.GameController.HostSpawnPoint != null)
                     {
                         RequestPacket response = new()
                         {
                             PacketType = ERequestSubPacketType.SpawnPoint,
-                            RequestSubPacket = new SpawnPointRequest(coopGame.InfiltrationPoint, coopGame.HostSpawnPoint.Position, coopGame.HostSpawnPoint.Rotation)
+                            RequestSubPacket = new SpawnPointRequest(coopGame.GameController.InfiltrationPoint,
+                            coopGame.GameController.HostSpawnPoint.Position, coopGame.GameController.HostSpawnPoint.Rotation)
                         };
 
                         server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
@@ -67,9 +68,9 @@ namespace Fika.Core.Networking
                 {
                     if (!string.IsNullOrEmpty(Infiltration))
                     {
-                        coopGame.InfiltrationPoint = Infiltration;
-                        coopGame.ClientSpawnPosition = Position;
-                        coopGame.ClientSpawnRotation = Rotation;
+                        coopGame.GameController.InfiltrationPoint = Infiltration;
+                        coopGame.GameController.ClientSpawnPosition = Position;
+                        coopGame.GameController.ClientSpawnRotation = Rotation;
                         FikaGlobals.LogInfo($"Received spawn position from host: {Position}, rotation: {Rotation}");
                         return;
                     }
@@ -114,7 +115,7 @@ namespace Fika.Core.Networking
             public void HandleRequest(NetPeer peer, FikaServer server)
             {
                 CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null && coopGame.WeatherClasses != null && coopGame.WeatherClasses.Length > 0)
+                if (coopGame != null && coopGame.GameController.WeatherClasses != null && coopGame.GameController.WeatherClasses.Length > 0)
                 {
                     RequestPacket response = new()
                     {
@@ -123,7 +124,7 @@ namespace Fika.Core.Networking
                         {
                             Season = coopGame.Season,
                             SpringSnowFactor = coopGame.SeasonsSettings != null ? coopGame.SeasonsSettings.SpringSnowFactor : Vector3.zero,
-                            WeatherClasses = coopGame.WeatherClasses
+                            WeatherClasses = coopGame.GameController.WeatherClasses
                         }
                     };
 
@@ -144,7 +145,7 @@ namespace Fika.Core.Networking
                             SpringSnowFactor = SpringSnowFactor
                         };
                     }
-                    coopGame.WeatherClasses = WeatherClasses;
+                    coopGame.GameController.WeatherClasses = WeatherClasses;
                     return;
                 }
 
@@ -258,7 +259,7 @@ namespace Fika.Core.Networking
                 CoopGame coopGame = CoopGame.Instance;
                 if (coopGame != null)
                 {
-                    coopGame.ExfiltrationReceived = true;
+                    (coopGame.GameController as ClientGameController).ExfiltrationReceived = true;
                 }
             }
 

@@ -50,7 +50,7 @@ namespace Fika.Core.Networking
                         if (coopGame != null)
                         {
                             coopGame.ExtractedPlayers.Add(NetId);
-                            coopGame.ClearHostAI(playerToApply);
+                            (coopGame.GameController as HostGameController).ClearHostAI(playerToApply);
 
                             if (FikaPlugin.ShowNotifications.Value)
                             {

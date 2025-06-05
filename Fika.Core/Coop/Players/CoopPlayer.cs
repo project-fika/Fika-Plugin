@@ -11,6 +11,7 @@ using EFT.SynchronizableObjects;
 using EFT.Vehicle;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.ClientClasses.HandsControllers;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.ObservedClasses.Snapshotting;
 using Fika.Core.Coop.PacketHandlers;
@@ -502,7 +503,7 @@ namespace Fika.Core.Coop.Players
             Item item = itemResult.Value;
             if (!itemResult.Succeeded)
             {
-                foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaNetworkManager>.Instance.CoopHandler.LocalGameInstance.ThrownGrenades)
+                foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaGame>.Instance.GameController.ThrownGrenades)
                 {
                     if (grenadeClass.Id == lastWeaponId)
                     {

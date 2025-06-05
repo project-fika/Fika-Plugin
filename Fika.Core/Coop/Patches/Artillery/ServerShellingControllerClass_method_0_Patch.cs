@@ -55,7 +55,7 @@ namespace Fika.Core.Coop.Patches
             instance.method_1();
 
             instance.Bool_3 = true;
-            coopGame.UpdateByUnity += instance.OnUpdate;
+            (coopGame.GameController as HostGameController).UpdateByUnity += instance.OnUpdate;
 
             ArtilleryShellingMapConfiguration mapConfiguration = instance.ArtilleryShellingMapConfiguration_0;
             if (mapConfiguration.PlanedShellingOn)

@@ -565,7 +565,7 @@ namespace Fika.Core.Networking
                         CoopGame coopGame = coopHandler.LocalGameInstance;
                         if (coopGame != null)
                         {
-                            coopGame.IncreaseLoadedPlayers(packet.NetId);
+                            (coopGame.GameController as HostGameController).IncreaseLoadedPlayers(packet.NetId);
                         }
                     }
                     break;
@@ -887,7 +887,7 @@ namespace Fika.Core.Networking
             {
                 WorldLootPacket response = new()
                 {
-                    Data = coopGame.GetHostLootItems()
+                    Data = (coopGame.GameController as HostGameController).GetHostLootItems()
                 };
 
                 SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
@@ -1082,7 +1082,7 @@ namespace Fika.Core.Networking
 
             InformationPacket respondPackage = new()
             {
-                RaidStarted = gameExists && coopHandler.LocalGameInstance.RaidStarted,
+                RaidStarted = gameExists && Singleton<IFikaGame>.Instance.GameController.RaidStarted,
                 ReadyPlayers = ReadyClients,
                 HostReady = HostReady,
                 HostLoaded = RaidInitialized,
@@ -1091,7 +1091,7 @@ namespace Fika.Core.Networking
 
             if (gameExists && packet.RequestStart)
             {
-                coopHandler.LocalGameInstance.RaidStarted = true;
+                Singleton<IFikaGame>.Instance.GameController.RaidStarted = true;
             }
 
             if (gameExists && HostReady)
@@ -1349,7 +1349,7 @@ namespace Fika.Core.Networking
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
         {
             bool started = false;
-            if (coopHandler != null && coopHandler.LocalGameInstance != null && coopHandler.LocalGameInstance.RaidStarted)
+            if (coopHandler != null && coopHandler.LocalGameInstance != null && Singleton<IFikaGame>.Instance.GameController.RaidStarted)
             {
                 started = true;
             }
@@ -1411,7 +1411,7 @@ namespace Fika.Core.Networking
 
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            if (coopHandler != null && coopHandler.LocalGameInstance != null && coopHandler.LocalGameInstance.RaidStarted)
+            if (coopHandler != null && coopHandler.LocalGameInstance != null && Singleton<IFikaGame>.Instance.GameController.RaidStarted)
             {
                 if (request.Data.GetString() == "fika.reconnect")
                 {

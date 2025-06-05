@@ -1,6 +1,7 @@
 ﻿using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -29,9 +30,14 @@ namespace Fika.Core.Coop.Components
             return bots.Remove(bot);
         }
 
-        public static BotStateManager Create(CoopGame game, FikaServer server)
+        public static BotStateManager Create(IFikaGame game, FikaServer server)
         {
-            BotStateManager component = game.gameObject.AddComponent<BotStateManager>();
+            if (game is not MonoBehaviour mono)
+            {
+                throw new NullReferenceException("Mono missing");
+            }
+
+            BotStateManager component = mono.gameObject.AddComponent<BotStateManager>();
             component.updateCount = 0;
             component.updatesPerTick = 1f / server.SendRate;
             component.bots = [];

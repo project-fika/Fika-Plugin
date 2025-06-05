@@ -814,8 +814,8 @@ namespace Fika.Core.Networking
                 {
                     throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
                 }
-                coopGame.LootItems = lootItems;
-                coopGame.HasReceivedLoot = true;
+                coopGame.GameController.LootItems = lootItems;
+                (coopGame.GameController as ClientGameController).HasReceivedLoot = true;
             }
         }
 
@@ -835,7 +835,7 @@ namespace Fika.Core.Networking
                     CoopGame coopGame = CoopGame.Instance;
                     if (coopGame != null)
                     {
-                        coopGame.InteractablesInitialized = true;
+                        (coopGame.GameController as ClientGameController).InteractablesInitialized = true;
                     }
                 }
             }
@@ -954,7 +954,7 @@ namespace Fika.Core.Networking
                 CoopGame coopGame = coopHandler.LocalGameInstance;
                 if (coopGame != null)
                 {
-                    coopGame.RaidStarted = packet.RaidStarted;
+                    coopGame.GameController.RaidStarted = packet.RaidStarted;
                     if (packet.HostReady)
                     {
                         coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
