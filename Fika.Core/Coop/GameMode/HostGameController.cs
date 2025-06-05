@@ -63,13 +63,13 @@ namespace Fika.Core.Coop.GameMode
         public byte[] LootData { get; set; }
         public FikaDynamicAI DynamicAI { get; set; }
 
-        private readonly BotStateManager _botStateManager;
-        private readonly NonWavesSpawnScenario _nonWavesSpawnScenario;
-        private readonly BotsController _botsController;
-        private readonly WavesSpawnScenario _wavesSpawnScenario;
-        private readonly BossSpawnScenario _bossSpawnScenario;
-        private readonly Dictionary<int, int> botQueue = [];
-        private readonly GameDateTime _gameDateTime;
+        protected readonly BotStateManager _botStateManager;
+        protected readonly NonWavesSpawnScenario _nonWavesSpawnScenario;
+        protected readonly BotsController _botsController;
+        protected readonly WavesSpawnScenario _wavesSpawnScenario;
+        protected readonly BossSpawnScenario _bossSpawnScenario;
+        protected readonly Dictionary<int, int> botQueue = [];
+        protected readonly GameDateTime _gameDateTime;
 
         public GameStatus Status
         {
