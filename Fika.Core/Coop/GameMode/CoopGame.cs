@@ -480,8 +480,7 @@ namespace Fika.Core.Coop.GameMode
             await GameController.WaitForHostToStart();
 
             LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
-
-            await GameController.InitializeLoot(Location_0);
+            await GameController.InitializeLoot(location);
             await method_11(location);
 
             GameController.CoopHandler.ShouldSync = true;

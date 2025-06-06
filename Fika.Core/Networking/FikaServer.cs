@@ -1158,6 +1158,9 @@ namespace Fika.Core.Networking
                 catch (Exception exception)
                 {
                     _logger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
+#if DEBUG
+                    _logger.LogError($"STACKTRACE:\n{exception.StackTrace}"); 
+#endif
                     OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Failed)
                     {
                         Error = exception.Message
