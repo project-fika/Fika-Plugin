@@ -120,6 +120,7 @@ namespace Fika.Core.Networking.Websocket
                         PreloaderUI.Instance.ShowErrorScreen("Fika Headless Error", "Received RequesterJoinRaid WS event but there was no matchId");
                     }
 
+                    //TODO: Fix error?
                     //FikaPlugin.HeadlessRequesterWebSocket.Close();
 
                     break;
