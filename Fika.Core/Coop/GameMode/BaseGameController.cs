@@ -56,6 +56,14 @@ namespace Fika.Core.Coop.GameMode
 
         public ManualLogSource Logger { get; set; }
 
+        public AbstractGame GameInstance
+        {
+            get
+            {
+                return _abstractGame;
+            }
+        }
+
         protected IFikaGame _fikaGame;
         protected AbstractGame _abstractGame;
 
@@ -698,6 +706,12 @@ namespace Fika.Core.Coop.GameMode
         {
             await Task.Yield();
             throw new NotImplementedException();
+        }
+
+        public void SetClientTime(DateTime gameTime, TimeSpan sessionTime)
+        {
+            GameTime = gameTime;
+            SessionTime = sessionTime;
         }
     }
 }

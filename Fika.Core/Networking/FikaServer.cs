@@ -562,10 +562,10 @@ namespace Fika.Core.Networking
             {
                 case BotStatePacket.EStateType.LoadBot:
                     {
-                        CoopGame coopGame = coopHandler.LocalGameInstance;
-                        if (coopGame != null)
+                        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                        if (fikaGame != null)
                         {
-                            (coopGame.GameController as HostGameController).IncreaseLoadedPlayers(packet.NetId);
+                            (fikaGame.GameController as HostGameController).IncreaseLoadedPlayers(packet.NetId);
                         }
                     }
                     break;
@@ -882,12 +882,12 @@ namespace Fika.Core.Networking
 
         private void OnWorldLootPacketReceived(WorldLootPacket packet, NetPeer peer)
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame != null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame != null)
             {
                 WorldLootPacket response = new()
                 {
-                    Data = (coopGame.GameController as HostGameController).GetHostLootItems()
+                    Data = (fikaGame.GameController as HostGameController).GetHostLootItems()
                 };
 
                 SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
@@ -1097,7 +1097,7 @@ namespace Fika.Core.Networking
             if (gameExists && HostReady)
             {
                 respondPackage.GameTime = gameStartTime.Value;
-                GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameTimer;
+                GameTimerClass gameTimer = coopHandler.LocalGameInstance.GameController.GameInstance.GameTimer;
                 respondPackage.SessionTime = gameTimer.SessionTime.Value;
             }
 
@@ -1466,28 +1466,7 @@ namespace Fika.Core.Networking
 
         private void DisconnectHeadless()
         {
-            foreach (Profile profile in Singleton<ClientApplication<ISession>>.Instance.Session.AllProfiles)
-            {
-                if (profile is null)
-                {
-                    continue;
-                }
-
-                if (profile.ProfileId == RequestHandler.SessionId)
-                {
-                    foreach (Profile.ProfileHealthClass.GClass2010 bodyPartHealth in profile.Health.BodyParts.Values)
-                    {
-                        bodyPartHealth.Effects.Clear();
-                        bodyPartHealth.Health.Current = bodyPartHealth.Health.Maximum;
-                    }
-                }
-            }
-
-            // End the raid
-            CoopGame.Instance.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId,
-                CoopGame.Instance.ExitStatus,
-                CoopGame.Instance.ExitLocation,
-                0);
+            Singleton<IFikaGame>.Instance.Stop(null, ExitStatus.Survived, "");
         }
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)

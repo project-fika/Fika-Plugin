@@ -1,4 +1,5 @@
-﻿using Fika.Core.Coop.GameMode;
+﻿using Comfort.Common;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Patching;
 using System.Reflection;
 
@@ -17,10 +18,10 @@ namespace Fika.Core.Coop.Patches
         [PatchPostfix]
         public static void Postfix(ThrowWeapItemClass item)
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame != null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame != null)
             {
-                coopGame.GameController.ThrownGrenades.Add(item);
+                fikaGame.GameController.ThrownGrenades.Add(item);
             }
         }
     }

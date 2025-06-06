@@ -281,8 +281,8 @@ namespace Fika.Core.Coop.Players
 
         protected void OnEnable()
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame != null && coopGame.Status == GameStatus.Started)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
             {
                 BotStatePacket packet = new()
                 {
@@ -298,8 +298,8 @@ namespace Fika.Core.Coop.Players
 
         protected void OnDisable()
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame != null && coopGame.Status == GameStatus.Started)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
             {
                 BotStatePacket packet = new()
                 {
@@ -320,8 +320,8 @@ namespace Fika.Core.Coop.Players
 #endif
             if (Singleton<FikaServer>.Instantiated)
             {
-                CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null && coopGame.Status == GameStatus.Started)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
                 {
                     FikaServer server = Singleton<FikaServer>.Instance;
                     BotStatePacket packet = new()
@@ -331,7 +331,7 @@ namespace Fika.Core.Coop.Players
                     };
 
                     server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-                    coopGame.GameController.Bots.Remove(ProfileId);
+                    fikaGame.GameController.Bots.Remove(ProfileId);
                 }
             }
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))

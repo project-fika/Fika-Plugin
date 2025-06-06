@@ -1,4 +1,5 @@
-﻿using Fika.Core.Coop.GameMode;
+﻿using Comfort.Common;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
@@ -19,8 +20,8 @@ namespace Fika.Core.Coop.Patches
             __instance.arcHeight = -150f;
             __instance.explosionDistnaceRange = new(3f, 5f);
             __instance.zoneID = "";
-            CoopGame coopGame = CoopGame.Instance;
-            (coopGame.GameController as HostGameController).UpdateByUnity += __instance.OnUpdate;
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            (fikaGame.GameController as HostGameController).UpdateByUnity += __instance.OnUpdate;
             __instance.MineDataClass = new();
             return false;
         }

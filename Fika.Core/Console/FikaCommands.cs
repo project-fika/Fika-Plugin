@@ -84,11 +84,16 @@ namespace Fika.Core.Console
         [ConsoleCommand("extract", "", null, "Extract from raid", [])]
         public static void Extract()
         {
-            CoopGame coopGame = CoopGame.Instance;
-
-            if (coopGame == null)
+            IFikaGame game = Singleton<IFikaGame>.Instance;
+            if (game == null)
             {
                 ConsoleScreen.LogWarning("You are not in a game.");
+                return;
+            }
+
+            if (game is not CoopGame coopGame)
+            {
+                ConsoleScreen.LogError("Game mode was not CoopGame");
                 return;
             }
 
@@ -106,8 +111,8 @@ namespace Fika.Core.Console
         [ConsoleCommand("despawnallai", "", null, "Despawns all AI bots", [])]
         public static void DespawnAllAI()
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame != null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame != null)
             {
                 if (!FikaBackendUtils.IsServer)
                 {
@@ -117,7 +122,7 @@ namespace Fika.Core.Console
 
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    foreach (Player bot in coopGame.GameController.Bots.Values)
+                    foreach (Player bot in fikaGame.GameController.Bots.Values)
                     {
                         if (bot.AIData.BotOwner == null)
                         {
@@ -126,7 +131,7 @@ namespace Fika.Core.Console
 
                         ConsoleScreen.Log($"Despawning: {bot.Profile.Nickname}");
 
-                        (coopGame.GameController as HostGameController).DespawnBot(coopHandler, bot);
+                        (fikaGame.GameController as HostGameController).DespawnBot(coopHandler, bot);
                     }
                     return;
                 }
@@ -138,7 +143,13 @@ namespace Fika.Core.Console
         [ConsoleCommand("stoptimer", "", null, "Stops the game timer", [])]
         public static void StopTimer()
         {
-            CoopGame coopGame = CoopGame.Instance;
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null || fikaGame is not CoopGame coopGame)
+            {
+                ConsoleScreen.LogError("Game was null or not a CoopGame");
+                return;
+            }
+
             if (coopGame != null)
             {
                 if (coopGame.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
@@ -157,7 +168,13 @@ namespace Fika.Core.Console
         [ConsoleCommand("goToBTR", "", null, "Teleports you to the BTR if active", [])]
         public static void GoToBTR()
         {
-            CoopGame coopGame = CoopGame.Instance;
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null || fikaGame is not CoopGame coopGame)
+            {
+                ConsoleScreen.LogError("Game was null or not a CoopGame");
+                return;
+            }
+
             if (coopGame != null)
             {
                 GameWorld gameWorld = coopGame.GameWorld_0;
@@ -346,10 +363,10 @@ namespace Fika.Core.Console
         [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
         public static void Debug(bool state)
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame == null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null || fikaGame is not CoopGame coopGame)
             {
-                ConsoleScreen.LogWarning("You are not in a game.");
+                ConsoleScreen.LogError("Game was null or not a CoopGame");
                 return;
             }
 
@@ -370,10 +387,10 @@ namespace Fika.Core.Console
 
         private static bool CheckForGame()
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame == null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null || fikaGame is not CoopGame coopGame)
             {
-                ConsoleScreen.LogWarning("You are not in a game.");
+                ConsoleScreen.LogError("Game was null or not a CoopGame");
                 return false;
             }
 

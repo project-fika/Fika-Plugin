@@ -516,7 +516,7 @@ namespace Fika.Core.Networking
 
             if (packet.EventType is TransitEventPacket.ETransitEventType.Init)
             {
-                if (coopHandler.LocalGameInstance.GameWorld_0.TransitController is FikaClientTransitController transitController)
+                if (Singleton<GameWorld>.Instance.TransitController is FikaClientTransitController transitController)
                 {
                     transitController.Init();
                     return;
@@ -525,7 +525,7 @@ namespace Fika.Core.Networking
 
             if (packet.EventType is TransitEventPacket.ETransitEventType.Extract)
             {
-                if (coopHandler.LocalGameInstance.GameWorld_0.TransitController is FikaClientTransitController transitController)
+                if (Singleton<GameWorld>.Instance.TransitController is FikaClientTransitController transitController)
                 {
                     transitController.HandleClientExtract(packet.TransitId, packet.PlayerId);
                     return;
@@ -669,8 +669,8 @@ namespace Fika.Core.Networking
         {
             if (!packet.IsRequest)
             {
-                CoopGame coopGame = CoopGame.Instance;
-                if (coopGame == null)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame == null)
                 {
                     return;
                 }
@@ -684,7 +684,7 @@ namespace Fika.Core.Networking
                             logger.LogWarning("Received reconnect packet for throwables: " + packet.ThrowableData.Count);
 #endif
                             string localizedString = LocaleUtils.UI_SYNC_THROWABLES.Localized();
-                            coopGame.SetMatchmakerStatus(localizedString);
+                            fikaGame.GameController.GameInstance.SetMatchmakerStatus(localizedString);
                             Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
                         }
                         break;
@@ -712,7 +712,7 @@ namespace Fika.Core.Networking
                                     if (netIdDictionary.TryGetValue(item.NetId, out WorldInteractiveObject.WorldInteractiveDataPacketStruct value))
                                     {
                                         progress++;
-                                        coopGame.SetMatchmakerStatus(localizedString, progress / total);
+                                        fikaGame.GameController.GameInstance.SetMatchmakerStatus(localizedString, progress / total);
                                         item.SetInitialSyncState(value);
                                     }
                                 }
@@ -736,7 +736,7 @@ namespace Fika.Core.Networking
                                 foreach (KeyValuePair<int, byte> lampState in packet.LampStates)
                                 {
                                     progress++;
-                                    coopGame.SetMatchmakerStatus(localizedString, progress / total);
+                                    fikaGame.GameController.GameInstance.SetMatchmakerStatus(localizedString, progress / total);
                                     if (lampControllerDictionary.TryGetValue(lampState.Key, out LampController lampController))
                                     {
                                         if (lampController.LampState != (Turnable.EState)lampState.Value)
@@ -767,7 +767,7 @@ namespace Fika.Core.Networking
                                     {
                                         progress++;
 
-                                        coopGame.SetMatchmakerStatus(localizedString, progress / total);
+                                        fikaGame.GameController.GameInstance.SetMatchmakerStatus(localizedString, progress / total);
                                         try
                                         {
                                             DamageInfoStruct damageInfo = default;
@@ -787,13 +787,16 @@ namespace Fika.Core.Networking
 #if DEBUG
                         logger.LogWarning("Received reconnect packet for own player");
 #endif
-                        coopGame.SetMatchmakerStatus(LocaleUtils.UI_RECEIVE_OWN_PLAYERS.Localized());
-                        coopHandler.LocalGameInstance.Profile_0 = packet.Profile;
-                        coopHandler.LocalGameInstance.Profile_0.Health = packet.ProfileHealthClass;
+                        fikaGame.GameController.GameInstance.SetMatchmakerStatus(LocaleUtils.UI_RECEIVE_OWN_PLAYERS.Localized());
+                        if (fikaGame is CoopGame coopGame)
+                        {
+                            coopGame.Profile_0 = packet.Profile;
+                            coopGame.Profile_0.Health = packet.ProfileHealthClass;
+                        }                        
                         FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
                         break;
                     case ReconnectPacket.EReconnectDataType.Finished:
-                        coopGame.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
+                        fikaGame.GameController.GameInstance.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
                         ReconnectDone = true;
                         break;
                     default:
@@ -804,8 +807,8 @@ namespace Fika.Core.Networking
 
         private void OnWorldLootPacketReceived(WorldLootPacket packet)
         {
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame != null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame != null)
             {
                 using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
                 GClass1752 lootData = eftReader.ReadEFTLootDataDescriptor();
@@ -814,8 +817,8 @@ namespace Fika.Core.Networking
                 {
                     throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
                 }
-                coopGame.GameController.LootItems = lootItems;
-                (coopGame.GameController as ClientGameController).HasReceivedLoot = true;
+                fikaGame.GameController.LootItems = lootItems;
+                (fikaGame.GameController as ClientGameController).HasReceivedLoot = true;
             }
         }
 
@@ -832,10 +835,10 @@ namespace Fika.Core.Networking
                 if (world.Interactables == null)
                 {
                     world.method_0(packet.Interactables);
-                    CoopGame coopGame = CoopGame.Instance;
-                    if (coopGame != null)
+                    IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                    if (fikaGame != null)
                     {
-                        (coopGame.GameController as ClientGameController).InteractablesInitialized = true;
+                        (fikaGame.GameController as ClientGameController).InteractablesInitialized = true;
                     }
                 }
             }
@@ -951,13 +954,13 @@ namespace Fika.Core.Networking
         {
             if (coopHandler != null)
             {
-                CoopGame coopGame = coopHandler.LocalGameInstance;
-                if (coopGame != null)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame != null)
                 {
-                    coopGame.GameController.RaidStarted = packet.RaidStarted;
+                    fikaGame.GameController.RaidStarted = packet.RaidStarted;
                     if (packet.HostReady)
                     {
-                        coopGame.SetClientTime(packet.GameTime, packet.SessionTime);
+                        fikaGame.GameController.SetClientTime(packet.GameTime, packet.SessionTime);
                     }
                 }
             }

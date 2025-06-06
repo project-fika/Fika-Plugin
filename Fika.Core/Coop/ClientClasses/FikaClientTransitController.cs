@@ -1,5 +1,7 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.Interactive;
+using EFT.UI;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -100,7 +102,13 @@ namespace Fika.Core.Coop.ClientClasses
             };
 
             alreadyTransits.Add(profileId, gclass);
-            CoopGame coopGame = CoopGame.Instance;
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null || fikaGame is not CoopGame coopGame)
+            {
+                FikaGlobals.LogError("FikaGame was null or not CoopGame");
+                return;
+            }
+
             if (coopGame != null)
             {
                 coopGame.Extract((CoopPlayer)myPlayer, null, transitPoint);

@@ -26,7 +26,7 @@ namespace Fika.Core.Coop.Components
         /// <summary>
         /// Reference to the local <see cref="CoopGame"/> instance
         /// </summary>
-        public CoopGame LocalGameInstance { get; internal set; }
+        public IFikaGame LocalGameInstance { get; internal set; }
         /// <summary>
         /// The ID of the raid session
         /// </summary>
@@ -153,7 +153,7 @@ namespace Fika.Core.Coop.Components
                 if (!isClient)
                 {
                     charSyncCounter += Time.unscaledDeltaTime;
-                    int waitTime = LocalGameInstance.Status == GameStatus.Started ? 20 : 5;
+                    int waitTime = LocalGameInstance.GameController.GameInstance.Status == GameStatus.Started ? 20 : 5;
                     if (charSyncCounter > waitTime)
                     {
                         charSyncCounter = 0f;
@@ -234,14 +234,14 @@ namespace Fika.Core.Coop.Components
                 logger.LogInfo($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
 
                 requestQuitGame = true;
-                CoopGame coopGame = CoopGame.Instance;
+                IFikaGame fikaGame = LocalGameInstance;
 
                 // If you are the server / host
                 if (!isClient)
                 {
-                    if (coopGame.ExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
+                    if (fikaGame.ExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
                     {
-                        coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, coopGame.ExitLocation, 0);
+                        fikaGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, fikaGame.ExitStatus, fikaGame.ExitLocation, 0);
                         return;
                     }
                     // A host needs to wait for the team to extract or die!
@@ -261,12 +261,12 @@ namespace Fika.Core.Coop.Components
                     }
                     else
                     {
-                        coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.ExitLocation : null, 0);
+                        fikaGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, fikaGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? fikaGame.ExitLocation : null, 0);
                     }
                 }
                 else
                 {
-                    coopGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, coopGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? coopGame.ExitLocation : null, 0);
+                    fikaGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, fikaGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? fikaGame.ExitLocation : null, 0);
                 }
                 return;
             }
@@ -288,8 +288,6 @@ namespace Fika.Core.Coop.Components
                     return;
                 }
             }
-
-            int playerId = LocalGameInstance.method_15();
 
             ResourceKey[] allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths(!spawnObject.IsAI).ToArray();
             if (allPrefabPaths.Length == 0)
@@ -406,8 +404,10 @@ namespace Fika.Core.Coop.Components
                 healthBytes = profile.Health.SerializeHealthInfo();
             }
 
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+
             // Check for GClass increments on filter
-            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(LocalGameInstance.GameWorld_0, netId, position, Quaternion.identity, "Player",
+            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
                 isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
                 EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode, FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
@@ -509,11 +509,9 @@ namespace Fika.Core.Coop.Components
 
         private IEnumerator AddClientToBotEnemies(BotsController botController, LocalPlayer playerToAdd)
         {
-            CoopGame coopGame = LocalGameInstance;
-
+            IFikaGame coopGame = LocalGameInstance;
             logger.LogInfo($"AddClientToBotEnemies: " + playerToAdd.Profile.Nickname);
-
-            while (coopGame.Status != GameStatus.Running && !botController.IsEnable)
+            while (coopGame.GameController.GameInstance.Status != GameStatus.Running && !botController.IsEnable)
             {
                 yield return null;
             }

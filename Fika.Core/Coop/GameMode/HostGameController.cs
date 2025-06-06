@@ -448,8 +448,11 @@ namespace Fika.Core.Coop.GameMode
             await StartBotsSystem(Location);
 
             // Add FreeCamController to GameWorld GameObject
-            FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
-            Singleton<FreeCameraController>.Create(freeCamController);
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
+                Singleton<FreeCameraController>.Create(freeCamController); 
+            }
 
             await SetupRaidCode();
 

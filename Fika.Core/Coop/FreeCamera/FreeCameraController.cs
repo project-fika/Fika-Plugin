@@ -205,8 +205,8 @@ namespace Fika.Core.Coop.FreeCamera
             if (quitState == CoopHandler.EQuitState.Extracted && !extracted)
             {
                 FikaPlugin.Instance.FikaLogger.LogDebug($"Freecam: player has extracted");
-                CoopGame coopGame = coopHandler.LocalGameInstance;
-                if (coopGame.ExtractedPlayers.Contains(Player.NetId))
+                IFikaGame fikaGame = coopHandler.LocalGameInstance;
+                if (fikaGame.ExtractedPlayers.Contains(Player.NetId))
                 {
                     extracted = true;
                     ShowExtractMessage();

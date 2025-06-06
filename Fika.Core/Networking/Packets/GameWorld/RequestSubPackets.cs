@@ -41,16 +41,16 @@ namespace Fika.Core.Networking
 
             public void HandleRequest(NetPeer peer, FikaServer server)
             {
-                CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame != null)
                 {
-                    if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(coopGame.GameController.InfiltrationPoint) && coopGame.GameController.SpawnPoint != null)
+                    if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(fikaGame.GameController.InfiltrationPoint) && fikaGame.GameController.SpawnPoint != null)
                     {
                         RequestPacket response = new()
                         {
                             PacketType = ERequestSubPacketType.SpawnPoint,
-                            RequestSubPacket = new SpawnPointRequest(coopGame.GameController.InfiltrationPoint,
-                            coopGame.GameController.SpawnPoint.Position, coopGame.GameController.SpawnPoint.Rotation)
+                            RequestSubPacket = new SpawnPointRequest(fikaGame.GameController.InfiltrationPoint,
+                            fikaGame.GameController.SpawnPoint.Position, fikaGame.GameController.SpawnPoint.Rotation)
                         };
 
                         server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
@@ -63,14 +63,14 @@ namespace Fika.Core.Networking
 
             public void HandleResponse()
             {
-                CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame != null)
                 {
                     if (!string.IsNullOrEmpty(Infiltration))
                     {
-                        coopGame.GameController.InfiltrationPoint = Infiltration;
-                        coopGame.GameController.ClientSpawnPosition = Position;
-                        coopGame.GameController.ClientSpawnRotation = Rotation;
+                        fikaGame.GameController.InfiltrationPoint = Infiltration;
+                        fikaGame.GameController.ClientSpawnPosition = Position;
+                        fikaGame.GameController.ClientSpawnRotation = Rotation;
                         FikaGlobals.LogInfo($"Received spawn position from host: {Position}, rotation: {Rotation}");
                         return;
                     }
@@ -114,17 +114,17 @@ namespace Fika.Core.Networking
 
             public void HandleRequest(NetPeer peer, FikaServer server)
             {
-                CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null && coopGame.GameController.WeatherClasses != null && coopGame.GameController.WeatherClasses.Length > 0)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame != null && fikaGame.GameController.WeatherClasses != null && fikaGame.GameController.WeatherClasses.Length > 0)
                 {
                     RequestPacket response = new()
                     {
                         PacketType = ERequestSubPacketType.Weather,
                         RequestSubPacket = new WeatherRequest()
                         {
-                            Season = coopGame.Season,
-                            SpringSnowFactor = coopGame.SeasonsSettings != null ? coopGame.SeasonsSettings.SpringSnowFactor : Vector3.zero,
-                            WeatherClasses = coopGame.GameController.WeatherClasses
+                            Season = fikaGame.Season,
+                            SpringSnowFactor = fikaGame.SeasonsSettings != null ? fikaGame.SeasonsSettings.SpringSnowFactor : Vector3.zero,
+                            WeatherClasses = fikaGame.GameController.WeatherClasses
                         }
                     };
 
@@ -134,18 +134,18 @@ namespace Fika.Core.Networking
 
             public void HandleResponse()
             {
-                CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame != null)
                 {
-                    coopGame.Season = Season;
+                    fikaGame.Season = Season;
                     if (SpringSnowFactor != Vector3.zero)
                     {
-                        coopGame.SeasonsSettings = new()
+                        fikaGame.SeasonsSettings = new()
                         {
                             SpringSnowFactor = SpringSnowFactor
                         };
                     }
-                    coopGame.GameController.WeatherClasses = WeatherClasses;
+                    fikaGame.GameController.WeatherClasses = WeatherClasses;
                     return;
                 }
 
@@ -256,10 +256,10 @@ namespace Fika.Core.Networking
                     }
                 }
 
-                CoopGame coopGame = CoopGame.Instance;
-                if (coopGame != null)
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame != null)
                 {
-                    (coopGame.GameController as ClientGameController).ExfiltrationReceived = true;
+                    (fikaGame.GameController as ClientGameController).ExfiltrationReceived = true;
                 }
             }
 

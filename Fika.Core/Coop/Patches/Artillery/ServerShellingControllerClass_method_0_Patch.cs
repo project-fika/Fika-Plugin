@@ -31,13 +31,13 @@ namespace Fika.Core.Coop.Patches
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             instance.GameWorld_0 = gameWorld;
 
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame == null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null)
             {
                 throw new NullReferenceException("ServerShellingControllerClass_method_0_Patch: CoopGame was null!");
             }
 
-            while (coopGame.Status != GameStatus.Started)
+            while (fikaGame.GameController.GameInstance.Status != GameStatus.Started)
             {
                 await Task.Yield();
             }
@@ -55,7 +55,7 @@ namespace Fika.Core.Coop.Patches
             instance.method_1();
 
             instance.Bool_3 = true;
-            (coopGame.GameController as HostGameController).UpdateByUnity += instance.OnUpdate;
+            (fikaGame.GameController as HostGameController).UpdateByUnity += instance.OnUpdate;
 
             ArtilleryShellingMapConfiguration mapConfiguration = instance.ArtilleryShellingMapConfiguration_0;
             if (mapConfiguration.PlanedShellingOn)

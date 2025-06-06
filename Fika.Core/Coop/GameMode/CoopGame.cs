@@ -42,7 +42,7 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, IClientHearingTable
     {
-        public static CoopGame Instance
+        /*public static CoopGame Instance
         {
             get
             {
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 localInstance = value;
             }
-        }
+        }*/
 
         private static CoopGame localInstance;
 
@@ -1251,13 +1251,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
             }
-        }
-
-        public void SetClientTime(DateTime gameTime, TimeSpan sessionTime)
-        {
-            GameController.GameTime = gameTime;
-            GameController.SessionTime = sessionTime;
-        }
+        }        
 
         public bool IsHeard()
         {

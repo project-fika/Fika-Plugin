@@ -354,7 +354,12 @@ namespace Fika.Core.Coop.HostClasses
                     dayTime = localRaidSettings.timeVariant
                 };
                 alreadyTransits.Add(profileId, gclass);
-                CoopGame coopGame = CoopGame.Instance;
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                if (fikaGame is not CoopGame coopGame)
+                {
+                    FikaGlobals.LogError("FikaGame was not a CoopGame!");
+                    return;
+                }
                 if (coopGame != null)
                 {
                     coopGame.Extract((CoopPlayer)player, null, point);
@@ -418,7 +423,12 @@ namespace Fika.Core.Coop.HostClasses
             alreadyTransits.Add(profileId, gclass);
 
             TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
-            CoopGame coopGame = CoopGame.Instance;
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame is not CoopGame coopGame)
+            {
+                FikaGlobals.LogError("FikaGame was not a CoopGame!");
+                return;
+            }
             if (transitController != null && coopGame != null)
             {
                 if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out AlreadyTransitDataClass _))

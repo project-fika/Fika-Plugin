@@ -46,11 +46,11 @@ namespace Fika.Core.Networking
                     if (!coopHandler.ExtractedPlayers.Contains(NetId))
                     {
                         coopHandler.ExtractedPlayers.Add(NetId);
-                        CoopGame coopGame = coopHandler.LocalGameInstance;
-                        if (coopGame != null)
+                        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                        if (fikaGame != null)
                         {
-                            coopGame.ExtractedPlayers.Add(NetId);
-                            (coopGame.GameController as HostGameController).ClearHostAI(playerToApply);
+                            fikaGame.ExtractedPlayers.Add(NetId);
+                            (fikaGame.GameController as HostGameController).ClearHostAI(playerToApply);
 
                             if (FikaPlugin.ShowNotifications.Value)
                             {
@@ -153,14 +153,20 @@ namespace Fika.Core.Networking
 
                 if (ExfiltrationControllerClass.Instance != null)
                 {
-                    CoopGame game = coopHandler.LocalGameInstance;
+                    IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                    if (fikaGame == null)
+                    {
+                        FikaGlobals.LogError("ExfilCountdown: FikaGame was null");
+                        return;
+                    }
+
                     ExfiltrationControllerClass exfilController = ExfiltrationControllerClass.Instance;
                     foreach (ExfiltrationPoint exfiltrationPoint in exfilController.ExfiltrationPoints)
                     {
                         if (exfiltrationPoint.Settings.Name == ExfilName)
                         {
 
-                            exfiltrationPoint.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
+                            exfiltrationPoint.ExfiltrationStartTime = fikaGame != null ? fikaGame.GameController.GameInstance.PastTime : ExfilStartTime;
 
                             if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
                             {
@@ -176,7 +182,7 @@ namespace Fika.Core.Networking
                         {
                             if (secretExfiltration.Settings.Name == ExfilName)
                             {
-                                secretExfiltration.ExfiltrationStartTime = game != null ? game.PastTime : ExfilStartTime;
+                                secretExfiltration.ExfiltrationStartTime = fikaGame != null ? fikaGame.GameController.GameInstance.PastTime : ExfilStartTime;
 
                                 if (secretExfiltration.Status != EExfiltrationStatus.Countdown)
                                 {

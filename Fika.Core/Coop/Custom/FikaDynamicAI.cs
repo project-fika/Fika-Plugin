@@ -157,13 +157,13 @@ namespace Fika.Core.Coop.Custom
                 logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
             }
 
-            CoopGame coopGame = CoopGame.Instance;
-            if (coopGame == null)
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null)
             {
                 return;
             }
 
-            foreach (CoopBot otherBot in coopGame.GameController.Bots.Values)
+            foreach (CoopBot otherBot in fikaGame.GameController.Bots.Values)
             {
                 if (otherBot == bot)
                 {
