@@ -483,7 +483,9 @@ namespace Fika.Core.Coop.GameMode
                 await Task.Yield();
             }
 
-            FikaBackendUtils.HostExpectedNumberOfPlayers = Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount + 1;
+            Logger.LogInfo("Raid has been started...");
+
+            FikaBackendUtils.HostExpectedNumberOfPlayers = server.NetServer.ConnectedPeersCount + 1;
 
             if (startButton != null)
             {
@@ -511,6 +513,11 @@ namespace Fika.Core.Coop.GameMode
 
                 Singleton<FikaServer>.Instance.ReadyClients++;
                 return;
+            }
+
+            if (FikaBackendUtils.IsHeadless)
+            {
+                expectedPlayers--;
             }
 #if DEBUG
             Logger.LogWarning("Server: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);

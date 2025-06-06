@@ -7,9 +7,11 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Websocket.Headless;
 using Fika.Core.UI.Custom;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System;
+using System.Net.Configuration;
 using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket
@@ -25,11 +27,11 @@ namespace Fika.Core.Networking.Websocket
         {
             get
             {
-                return webSocket.ReadyState == WebSocketState.Open;
+                return _webSocket.ReadyState == WebSocketState.Open;
             }
         }
 
-        private WebSocket webSocket;
+        private readonly WebSocket _webSocket;
 
         public HeadlessRequesterWebSocket()
         {
@@ -37,17 +39,17 @@ namespace Fika.Core.Networking.Websocket
             SessionId = RequestHandler.SessionId;
             Url = $"{Host}/fika/headless/requester";
 
-            webSocket = new WebSocket(Url)
+            _webSocket = new WebSocket(Url)
             {
                 WaitTime = TimeSpan.FromMinutes(1),
                 EmitOnPing = true
             };
 
-            webSocket.SetCredentials(SessionId, "", true);
+            _webSocket.SetCredentials(SessionId, "", true);
 
-            webSocket.OnOpen += WebSocket_OnOpen;
-            webSocket.OnError += WebSocket_OnError;
-            webSocket.OnMessage += (sender, args) =>
+            _webSocket.OnOpen += WebSocket_OnOpen;
+            _webSocket.OnError += WebSocket_OnError;
+            _webSocket.OnMessage += (sender, args) =>
             {
                 // Run the OnMessage event on main thread
                 AsyncWorker.RunInMainTread(() => WebSocket_OnMessage(sender, args));
@@ -61,12 +63,12 @@ namespace Fika.Core.Networking.Websocket
 
         public void Connect()
         {
-            webSocket.Connect();
+            _webSocket.Connect();
         }
 
         public void Close()
         {
-            webSocket.Close();
+            _webSocket.Close();
         }
 
         private void WebSocket_OnOpen(object sender, EventArgs e)
@@ -87,20 +89,19 @@ namespace Fika.Core.Networking.Websocket
             }
 
             JObject jsonObject = JObject.Parse(e.Data);
-
-            if (!jsonObject.ContainsKey("type"))
+            if (!jsonObject.ContainsKey("Type"))
             {
                 return;
             }
 
-            EFikaHeadlessWSMessageTypes type = (EFikaHeadlessWSMessageTypes)Enum.Parse(typeof(EFikaHeadlessWSMessageTypes), jsonObject.Value<string>("type"));
+            EFikaHeadlessWSMessageTypes type = (EFikaHeadlessWSMessageTypes)Enum.Parse(typeof(EFikaHeadlessWSMessageTypes), jsonObject.Value<string>("Type"));
 
             switch (type)
             {
                 case EFikaHeadlessWSMessageTypes.RequesterJoinRaid:
-                    RequesterJoinRaid data = e.Data.ParseJsonTo<RequesterJoinRaid>();
 
-                    MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;
+                    RequesterJoinRaid data = e.Data.ParseJsonTo<RequesterJoinRaid>();
+                    MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;                    
 
                     if (!string.IsNullOrEmpty(data.MatchId))
                     {
@@ -110,7 +111,7 @@ namespace Fika.Core.Networking.Websocket
                             if (success)
                             {
                                 // Matchmaker next screen (accept)
-                                matchMakerAcceptScreen.method_20().HandleExceptions();
+                                matchMakerAcceptScreen.method_20().HandleExceptions();                                
                             }
                         }, false));
                     }
@@ -119,7 +120,7 @@ namespace Fika.Core.Networking.Websocket
                         PreloaderUI.Instance.ShowErrorScreen("Fika Headless Error", "Received RequesterJoinRaid WS event but there was no matchId");
                     }
 
-                    FikaPlugin.HeadlessRequesterWebSocket.Close();
+                    //FikaPlugin.HeadlessRequesterWebSocket.Close();
 
                     break;
             }

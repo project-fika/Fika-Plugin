@@ -1317,7 +1317,7 @@ namespace Fika.Core.Coop.Players
             MovementContext.PlayerAnimator.SetIsGrounded(true);
         }
 
-        public void InitObservedPlayer(bool isHeadlessClient)
+        public void InitObservedPlayer()
         {
             PacketSender = gameObject.AddComponent<ObservedPacketSender>();
             Traverse playerTraverse = Traverse.Create(this);
@@ -1349,11 +1349,11 @@ namespace Fika.Core.Coop.Players
 
             if (!IsObservedAI)
             {
-                if (!isHeadlessClient)
+                Profile.Info.GroupId = "Fika";
+                Profile.Info.TeamId = "Fika";
+                if (!FikaBackendUtils.IsHeadless)
                 {
-                    Profile.Info.GroupId = "Fika";
-                    Profile.Info.TeamId = "Fika";
-                    _waitForStartRoutine = StartCoroutine(CreateHealthBar());
+                    _waitForStartRoutine = StartCoroutine(CreateHealthBar()); 
                 }
 
                 IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
@@ -1368,7 +1368,7 @@ namespace Fika.Core.Coop.Players
 
                 InitVaultingAudioControllers(ObservedVaultingParameters);
 
-                if (FikaPlugin.ShowNotifications.Value && !isHeadlessClient)
+                if (FikaPlugin.ShowNotifications.Value)
                 {
                     NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
                         ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),

@@ -484,7 +484,7 @@ namespace Fika.Core.Coop.Components
                 profile.SetSpawnedInSession(false);
             }
 
-            otherPlayer.InitObservedPlayer(isHeadlessProfile);
+            otherPlayer.InitObservedPlayer();
 
 #if DEBUG
             logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");

@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Bots;
 using EFT.Counters;
 using EFT.Game.Spawning;
 using EFT.Interactive;
@@ -8,6 +9,7 @@ using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
+using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.HostClasses;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Players;
@@ -92,6 +94,10 @@ namespace Fika.Core.Coop.GameMode
         public override async Task WaitForOtherPlayersToLoad()
         {
             float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+            if (FikaBackendUtils.IsHeadlessGame)
+            {
+                expectedPlayers--;
+            }
 #if DEBUG
             Logger.LogWarning("Client: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
 #endif
@@ -101,7 +107,6 @@ namespace Fika.Core.Coop.GameMode
                 await Task.Yield();
                 _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
             } while (_coopHandler.AmountOfHumans < expectedPlayers);
-
 
             InformationPacket packet = new()
             {
@@ -473,6 +478,37 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        
+        public override async Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld)
+        {
+            if (Location.Id == "laboratory")
+            {
+                Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
+                Season = ESeason.Summer;
+                OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+            }
+            else
+            {
+                await GenerateWeathers();
+            }
+
+            gameWorld.RegisterRestrictableZones();
+            gameWorld.RegisterBorderZones();
+
+#if DEBUG
+            Logger.LogWarning("Starting " + nameof(BaseGameController.WaitForOtherPlayersToLoad));
+#endif
+            await WaitForOtherPlayersToLoad();
+
+            _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+            Logger.LogInfo("All players are loaded, continuing...");
+
+            // Add FreeCamController to GameWorld GameObject
+            FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
+            Singleton<FreeCameraController>.Create(freeCamController);
+
+            await SetupRaidCode();
+
+            Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
+        }
     }
 }

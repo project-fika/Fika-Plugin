@@ -224,15 +224,12 @@ namespace Fika.Core.Coop.GameMode
             _fikaDebug = _abstractGame.gameObject.AddComponent<FikaDebug>();
         }
 
-        public Task SetupCoopHandler(CoopGame coopGame = null)
+        public Task SetupCoopHandler(IFikaGame fikaGame)
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
                 _coopHandler = coopHandler;
-                if (coopGame != null)
-                {
-                    _coopHandler.LocalGameInstance = coopGame;
-                }
+                _coopHandler.LocalGameInstance = fikaGame;
                 if (IsServer && FikaBackendUtils.IsTransit)
                 {
                     coopHandler.ReInitInteractables();
