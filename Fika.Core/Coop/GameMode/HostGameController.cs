@@ -921,10 +921,13 @@ namespace Fika.Core.Coop.GameMode
         {
             base.CleanUp();
 
-            CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            if (coopPlayer.PacketSender != null)
+            if (!FikaBackendUtils.IsHeadless)
             {
-                coopPlayer.PacketSender.DestroyThis();
+                CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                if (coopPlayer.PacketSender != null)
+                {
+                    coopPlayer.PacketSender.DestroyThis();
+                } 
             }
 
             if (DynamicAI != null)
@@ -1068,8 +1071,11 @@ namespace Fika.Core.Coop.GameMode
                     UpdateByUnity -= gameWorld.ServerShellingController.OnUpdate;
                 }
                 _botStateManager.UnassignBotsController();
-                _botsController.StopGettingInfo();                
-                _botsController.DestroyInfo(_localPlayer);
+                _botsController.StopGettingInfo();
+                if (!FikaBackendUtils.IsHeadless)
+                {
+                    _botsController.DestroyInfo(_localPlayer); 
+                }
             }
 
             _bossSpawnScenario?.Stop();

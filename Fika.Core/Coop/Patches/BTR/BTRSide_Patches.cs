@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Fika.Core.Coop.Patches
 {
-    class BTRSide_Patches
+    public class BTRSide_Patches
     {
         public static List<ValueTuple<BTRSide, Player, int>> Passengers = [];
 

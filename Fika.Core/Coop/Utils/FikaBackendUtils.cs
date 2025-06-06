@@ -51,7 +51,7 @@ namespace Fika.Core.Coop.Utils
         public static bool IsReconnect { get; internal set; }
         public static bool IsHeadlessGame { get; set; }
         public static bool IsHeadlessRequester { get; set; }
-        public static bool IsTransit { get; internal set; }
+        public static bool IsTransit { get; set; }
         public static bool IsSpectator { get; internal set; }
         public static bool IsHostNatPunch { get; internal set; }
         public static int HostExpectedNumberOfPlayers { get; set; } = 1;
@@ -70,7 +70,7 @@ namespace Fika.Core.Coop.Utils
 
         private static Profile profile;
 
-        internal static void CleanUpVariables()
+        public static void CleanUpVariables()
         {
             if (!IsTransit)
             {
@@ -127,7 +127,7 @@ namespace Fika.Core.Coop.Utils
 
                 return transitData;
             }
-            internal set
+            set
             {
                 transitData = value;
             }
@@ -135,7 +135,7 @@ namespace Fika.Core.Coop.Utils
 
         private static RaidTransitionInfoClass transitData;
 
-        internal static void ResetTransitData()
+        public static void ResetTransitData()
         {
             TransitData = null;
         }
