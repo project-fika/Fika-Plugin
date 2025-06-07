@@ -160,7 +160,7 @@ namespace Fika.Core.Coop.Utils
         /// <returns></returns>
         public static bool IsInRaid()
         {
-            return Singleton<AbstractGame>.Instance is CoopGame coopGame && coopGame.InRaid;
+            return Singleton<IFikaGame>.Instantiated;
         }
 
         /// <summary>
