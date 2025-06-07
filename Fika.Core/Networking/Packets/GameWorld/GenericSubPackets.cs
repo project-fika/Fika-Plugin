@@ -50,7 +50,10 @@ namespace Fika.Core.Networking
                         if (fikaGame != null)
                         {
                             fikaGame.ExtractedPlayers.Add(NetId);
-                            (fikaGame.GameController as HostGameController).ClearHostAI(playerToApply);
+                            if (FikaBackendUtils.IsServer)
+                            {
+                                (fikaGame.GameController as HostGameController).ClearHostAI(playerToApply); 
+                            }
 
                             if (FikaPlugin.ShowNotifications.Value)
                             {
