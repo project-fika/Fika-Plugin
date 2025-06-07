@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.BufferZone;
 using Fika.Core.Patching;
 using System.Reflection;
 
@@ -7,11 +8,11 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 {
     internal class Zyriachy_Patches
     {
-        internal class GClass436_Activate_Patch : FikaPatch
+        internal class GClass449_Activate_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
-                return typeof(GClass437).GetMethod(nameof(GClass437.Activate));
+                return typeof(GClass449).GetMethod(nameof(GClass449.Activate));
             }
 
             [PatchPostfix]
@@ -23,8 +24,7 @@ namespace Fika.Core.Coop.Patches.Lighthouse
             private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
             {
                 player.OnPlayerDead -= OnZryachiyDead;
-
-                Singleton<GameWorld>.Instance.BufferZoneController.SetInnerZoneAvailabilityStatus(false, EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead);
+                Singleton<GameWorld>.Instance.BufferZoneController.SetInnerZoneAvailabilityStatus(false, EBufferZoneData.DisableByZryachiyDead);
             }
         }
 
