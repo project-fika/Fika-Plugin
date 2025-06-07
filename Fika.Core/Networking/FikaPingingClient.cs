@@ -4,6 +4,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using System;
 using System.Collections;
 using System.Net;
 using System.Net.Sockets;
@@ -82,7 +83,7 @@ namespace Fika.Core.Networking
                     return false;
                 }
 
-                _remoteEndPoint = new(IPAddress.Parse(ip), port);
+                _remoteEndPoint = ResolveRemoteAddress(ip, port);
                 if (!string.IsNullOrEmpty(localIp))
                 {
                     _localEndPoint = new(IPAddress.Parse(localIp), port);
@@ -90,6 +91,22 @@ namespace Fika.Core.Networking
             }
 
             return true;
+        }
+
+        private IPEndPoint ResolveRemoteAddress(string ip, int port)
+        {
+            if (IPAddress.TryParse(ip, out IPAddress address))
+            {
+                return new(address, port);
+            }
+
+            IPHostEntry hostEntry = Dns.GetHostEntry(ip);
+            if (hostEntry != null & hostEntry.AddressList.Length > 0)
+            {
+                return new(hostEntry.AddressList[0], port);
+            }
+
+            throw new ParseException($"ResolveRemoteAddress::Could not parse the address {ip}");
         }
 
         public void PingEndPoint(string message)
