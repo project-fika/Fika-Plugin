@@ -11,6 +11,7 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
+using Fika.Core.Console;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
@@ -44,6 +45,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Unity.Jobs;
 using UnityEngine;
+using static Fika.Core.Networking.CommandPacket;
 using static Fika.Core.Networking.GenericSubPackets;
 using static Fika.Core.Networking.ReconnectPacket;
 using static Fika.Core.Networking.SubPacket;
@@ -607,8 +609,29 @@ namespace Fika.Core.Networking
         private void AddDebugPackets()
         {
             RegisterPacket<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
+            RegisterPacket<CommandPacket, NetPeer>(OnCommandPacketReceived);
         }
-#endif
+
+        private void OnCommandPacketReceived(CommandPacket packet, NetPeer peer)
+        {
+            switch (packet.CommandType)
+            {
+                case ECommandType.SpawnAI:
+                    FikaCommands.SpawnNPC(packet.SpawnType, packet.SpawnAmount);
+                    break;
+                case ECommandType.DespawnAI:
+                    FikaCommands.DespawnAllAI();
+                    break;
+                case ECommandType.Bring:
+                    FikaCommands.BringReplicated(packet.NetId);
+                    break;
+                case ECommandType.SpawnAirdrop:
+                    FikaCommands.SpawnAirdrop();
+                    break;
+                default:
+                    break;
+            }
+        }
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet, NetPeer peer)
         {
@@ -619,6 +642,8 @@ namespace Fika.Core.Networking
                 FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
             }
         }
+#endif
+
         private void OnUsableItemPacketReceived(UsableItemPacket packet, NetPeer peer)
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
