@@ -20,7 +20,7 @@ namespace Fika.Core.UI.Patches
     [IgnoreAutoPatch]
     public class ItemContext_Patch : FikaPatch
     {
-        private static int lastIndex = 0;
+        private static int _lastIndex = 0;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -133,9 +133,9 @@ namespace Fika.Core.UI.Patches
                     sendItemUI.PlayersDropdown.ClearOptions();
                     sendItemUI.PlayersDropdown.AddOptions(optionDatas);
 
-                    if (sendItemUI.PlayersDropdown.options.Count >= lastIndex)
+                    if (sendItemUI.PlayersDropdown.options.Count >= _lastIndex)
                     {
-                        sendItemUI.PlayersDropdown.value = lastIndex;
+                        sendItemUI.PlayersDropdown.value = _lastIndex;
                     }
 
                     sendItemUI.PlayersDropdown.onValueChanged.AddListener((value) =>
@@ -158,11 +158,13 @@ namespace Fika.Core.UI.Patches
                         if (sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text != null)
                         {
                             string player = sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text;
-                            lastIndex = sendItemUI.PlayersDropdown.value;
+                            _lastIndex = sendItemUI.PlayersDropdown.value;
                             if (Singleton<ClientApplication<ISession>>.Instantiated)
                             {
                                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);
-                                Singleton<ClientApplication<ISession>>.Instance.GetClientBackEndSession().SendOperationRightNow(new { Action = "SendToPlayer", id = itemContext.Item.Id, target = availableUsers[player] }, ar =>
+                                Singleton<ClientApplication<ISession>>.Instance
+                                .GetClientBackEndSession()
+                                .SendOperationRightNow(new { Action = "SendToPlayer", id = itemContext.Item.Id, target = availableUsers[player] }, ar =>
                                 {
                                     if (ar.Failed)
                                     {
