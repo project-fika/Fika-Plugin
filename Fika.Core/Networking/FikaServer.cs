@@ -552,7 +552,7 @@ namespace Fika.Core.Networking
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
-            if (FikaPlugin.UsePingSystem.Value)
+            if (FikaPlugin.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
             {
                 PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
             }
