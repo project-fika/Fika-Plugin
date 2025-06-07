@@ -108,7 +108,7 @@ namespace Fika.Core.Coop.GameMode
         {
             Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
-            Singleton<IFikaNetworkManager>.Instance.RaidSide = profile.Side;
+            Singleton<IFikaNetworkManager>.Instance.RaidSide = localRaidSettings.playerSide;
 
             GameDateTime gameTime = backendDateTime;
             if (timeAndWeather.HourOfDay != -1)

@@ -111,7 +111,7 @@ namespace Fika.Core.Networking
         }
 
         public int NetId { get; set; }
-        public EPlayerSide RaidSide { get; set; }
+        public ESideType RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
         public List<PlayerStatePacket> Snapshots { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
@@ -301,7 +301,7 @@ namespace Fika.Core.Networking
             if (voipHandler.MicrophoneChecked && !FikaBackendUtils.IsHeadless)
             {
                 controller.ResetVoipDisabledReason();
-                DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == EPlayerSide.Savage).ProfileId;
+                DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == ESideType.Savage).ProfileId;
                 await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
                     SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 

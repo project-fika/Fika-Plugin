@@ -14,7 +14,7 @@ namespace Fika.Core.Networking
     {
         public int NetId { get; set; }
         public CoopHandler CoopHandler { get; set; }
-        public EPlayerSide RaidSide { get; set; }
+        public ESideType RaidSide { get; set; }
         public int SendRate { get; }
         public bool AllowVOIP { get; set; }
         public List<PlayerStatePacket> Snapshots { get; set; }
