@@ -46,15 +46,15 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 return FikaPlugin.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                     && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
-                    && lastPingTime < DateTime.Now.AddSeconds(-3) && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started
+                    && _lastPingTime < DateTime.Now.AddSeconds(-3) && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started
                     && !_player.IsInventoryOpened;
             }
         }
 
-        private DateTime lastPingTime;
-        private float updateRate;
-        private float updateCount;
-        private float updatesPerTick;
+        private DateTime _lastPingTime;
+        private float _updateRate;
+        private float _updateCount;
+        private float _updatesPerTick;
 
         public static ClientPacketSender Create(CoopPlayer player)
         {
@@ -62,10 +62,10 @@ namespace Fika.Core.Coop.PacketHandlers
             sender._player = player;
             sender.Client = Singleton<FikaClient>.Instance;
             sender.enabled = false;
-            sender.lastPingTime = DateTime.Now;
-            sender.updateRate = sender.Client.SendRate;
-            sender.updateCount = 0;
-            sender.updatesPerTick = 1f / sender.updateRate;
+            sender._lastPingTime = DateTime.Now;
+            sender._updateRate = sender.Client.SendRate;
+            sender._updateCount = 0;
+            sender._updatesPerTick = 1f / sender._updateRate;
             sender._state = new(player.NetId);
             return sender;
         }
@@ -98,11 +98,11 @@ namespace Fika.Core.Coop.PacketHandlers
                 return;
             }
 
-            updateCount += Time.unscaledDeltaTime;
-            if (updateCount >= updatesPerTick)
+            _updateCount += Time.unscaledDeltaTime;
+            if (_updateCount >= _updatesPerTick)
             {
                 SendPlayerState();
-                updateCount -= updatesPerTick;
+                _updateCount -= _updatesPerTick;
             }
         }
 
@@ -149,7 +149,7 @@ namespace Fika.Core.Coop.PacketHandlers
             int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
             if (Physics.Raycast(sourceRaycast, out RaycastHit hit, FikaGlobals.PingRange, layer))
             {
-                lastPingTime = DateTime.Now;
+                _lastPingTime = DateTime.Now;
                 //GameObject gameObject = new("Ping", typeof(FikaPing));
                 //gameObject.transform.localPosition = hit.point;
                 Singleton<GUISounds>.Instance.PlayUISound(PingFactory.GetPingSound());

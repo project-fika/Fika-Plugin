@@ -49,9 +49,15 @@ namespace Fika.Core.Coop.Components
         /// </summary>
         public List<CoopPlayer> HumanPlayers { get; internal set; }
         /// <summary>
-        /// The amount of human players (including headless)
+        /// The amount of human players
         /// </summary>
-        public int AmountOfHumans { get; internal set; }
+        public int AmountOfHumans
+        {
+            get
+            {
+                return HumanPlayers.Count;
+            }
+        }
         /// <summary>
         /// List of <see cref="CoopPlayer.NetId"/>s that have extracted
         /// </summary>
@@ -100,7 +106,6 @@ namespace Fika.Core.Coop.Components
             ShouldSync = false;
             Players.Clear();
             HumanPlayers.Clear();
-            AmountOfHumans = 1;
             ExtractedPlayers.Clear();
             _queuedPlayers.Clear();
             _spawnQueue.Clear();
@@ -119,7 +124,6 @@ namespace Fika.Core.Coop.Components
             _queuedPlayers = [];
             Players = [];
             HumanPlayers = [];
-            AmountOfHumans = 1;
             ExtractedPlayers = [];
             ShouldSync = false;
         }
@@ -423,10 +427,6 @@ namespace Fika.Core.Coop.Components
 #if DEBUG
             _logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
 #endif
-            if (!isAi)
-            {
-                AmountOfHumans++;
-            }
 
             if (!Players.ContainsKey(netId))
             {

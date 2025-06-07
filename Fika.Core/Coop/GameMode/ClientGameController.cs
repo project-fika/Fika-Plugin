@@ -99,7 +99,7 @@ namespace Fika.Core.Coop.GameMode
             FikaClient client = Singleton<FikaClient>.Instance;
             do
             {
-                await Task.Yield();
+                await Task.Delay(100);
                 _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
             } while (_coopHandler.AmountOfHumans < expectedPlayers);
 
@@ -112,9 +112,14 @@ namespace Fika.Core.Coop.GameMode
 #if DEBUG
             Logger.LogWarning("Client: Waiting for client.ReadyClients < expected players, expected: " + expectedPlayers);
 #endif
+            if (FikaBackendUtils.IsHeadlessGame)
+            {
+                expectedPlayers++;
+            }
+
             do
             {
-                await Task.Yield();
+                await Task.Delay(100);
                 _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
             } while (client.ReadyClients < expectedPlayers);
         }
