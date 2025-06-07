@@ -27,9 +27,9 @@ namespace Fika.Core.Utils
     {
         private readonly ManualLogSource logger = Logger.CreateLogSource("FikaModHandler");
 
-        public bool QuestingBotsLoaded = false;
-        public bool SAINLoaded = false;
-        public bool UIFixesLoaded = false;
+        public bool QuestingBotsLoaded;
+        public bool SAINLoaded;
+        public bool UIFixesLoaded;
 
         public Version SPTCoreVersion { get; private set; }
 
