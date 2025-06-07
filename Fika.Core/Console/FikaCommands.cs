@@ -388,13 +388,13 @@ namespace Fika.Core.Console
         private static bool CheckForGame()
         {
             IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
-            if (fikaGame == null || fikaGame is not CoopGame coopGame)
+            if (fikaGame == null)
             {
-                ConsoleScreen.LogError("Game was null or not a CoopGame");
+                ConsoleScreen.LogError("Game was null");
                 return false;
             }
 
-            if (coopGame.Status != GameStatus.Started)
+            if (fikaGame.GameController.GameInstance.Status != GameStatus.Started)
             {
                 ConsoleScreen.LogWarning("Game is not running.");
                 return false;
