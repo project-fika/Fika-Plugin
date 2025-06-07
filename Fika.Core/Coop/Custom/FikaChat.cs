@@ -13,40 +13,40 @@ namespace Fika.Core.Coop.Custom
 {
     internal class FikaChat : MonoBehaviour
     {
-        private Rect windowRect;
-        private string nickname;
-        private string chatText;
-        private string textField;
-        private string textFieldName;
-        private bool show;
-        private bool selectText;
-        private bool isServer;
-        private NetDataWriter writer;
-        private UISoundsWrapper soundsWrapper;
-        private InputManager manager;
+        private Rect _windowRect;
+        private string _nickname;
+        private string _chatText;
+        private string _textField;
+        private string _textFieldName;
+        private bool _show;
+        private bool _selectText;
+        private bool _isServer;
+        private NetDataWriter _writer;
+        private UISoundsWrapper _soundsWrapper;
+        private InputManager _manager;
 
         private static readonly FieldInfo showMouseField = typeof(InputManager).GetField("bool_2",
             BindingFlags.Instance | BindingFlags.NonPublic);
 
         protected void Awake()
         {
-            windowRect = new(20, Screen.height - 260, 600, 250);
-            nickname = FikaBackendUtils.PMCName;
-            chatText = string.Empty;
-            textField = string.Empty;
-            textFieldName = "TextField";
-            show = false;
-            isServer = FikaBackendUtils.IsServer;
-            writer = new();
+            _windowRect = new(20, Screen.height - 260, 600, 250);
+            _nickname = FikaBackendUtils.PMCName;
+            _chatText = string.Empty;
+            _textField = string.Empty;
+            _textFieldName = "TextField";
+            _show = false;
+            _isServer = FikaBackendUtils.IsServer;
+            _writer = new();
             GUISounds guiSounds = Singleton<GUISounds>.Instance;
-            soundsWrapper = Traverse.Create(guiSounds).Field<UISoundsWrapper>("uisoundsWrapper_0").Value;
+            _soundsWrapper = Traverse.Create(guiSounds).Field<UISoundsWrapper>("uisoundsWrapper_0").Value;
             GameObject managerObj = GameObject.Find("___Input");
             if (managerObj != null)
             {
                 InputManager inputManager = managerObj.GetComponent<InputManager>();
                 if (inputManager != null)
                 {
-                    manager = inputManager;
+                    _manager = inputManager;
                 }
                 else
                 {
@@ -67,18 +67,18 @@ namespace Fika.Core.Coop.Custom
 
         protected void OnGUI()
         {
-            if (!show)
+            if (!_show)
             {
                 return;
             }
 
             GUI.skin.label.alignment = TextAnchor.LowerLeft;
             GUI.skin.window.alignment = TextAnchor.UpperLeft;
-            GUI.Window(0, windowRect, DrawWindow, "Fika Chat");
+            GUI.Window(0, _windowRect, DrawWindow, "Fika Chat");
 
             if (Event.current.isKey)
             {
-                if (Event.current.keyCode is KeyCode.Return or KeyCode.KeypadEnter && show)
+                if (Event.current.keyCode is KeyCode.Return or KeyCode.KeypadEnter && _show)
                 {
                     SendMessage();
                     GUI.UnfocusWindow();
@@ -89,49 +89,49 @@ namespace Fika.Core.Coop.Custom
 
         private void ToggleVisibility()
         {
-            show = !show;
+            _show = !_show;
 
-            if (show)
+            if (_show)
             {
-                if (manager != null)
+                if (_manager != null)
                 {
                     GamePlayerOwner.SetIgnoreInput(true);
-                    showMouseField.SetValue(manager, true);
+                    showMouseField.SetValue(_manager, true);
                 }
-                selectText = true;
+                _selectText = true;
             }
             else
             {
-                if (manager != null)
+                if (_manager != null)
                 {
                     GamePlayerOwner.SetIgnoreInput(false);
                     GamePlayerOwner.MyPlayer.MovementContext.IsAxesIgnored = false;
                 }
-                showMouseField.SetValue(manager, false);
+                showMouseField.SetValue(_manager, false);
             }
         }
 
         private void SendMessage()
         {
-            if (!show)
+            if (!_show)
             {
                 return;
             }
 
-            if (!string.IsNullOrEmpty(textField))
+            if (!string.IsNullOrEmpty(_textField))
             {
-                string message = textField;
-                textField = string.Empty;
+                string message = _textField;
+                _textField = string.Empty;
 
                 if (message.Length > 100)
                 {
                     message = message.Substring(0, 100);
                 }
 
-                TextMessagePacket packet = new(nickname, message);
-                writer.Reset();
+                TextMessagePacket packet = new(_nickname, message);
+                _writer.Reset();
 
-                if (isServer)
+                if (_isServer)
                 {
                     Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 }
@@ -139,40 +139,40 @@ namespace Fika.Core.Coop.Custom
                 {
                     Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
                 }
-                AudioClip outgoingClip = soundsWrapper.GetSocialNetworkClip(ESocialNetworkSoundType.OutgoingMessage);
+                AudioClip outgoingClip = _soundsWrapper.GetSocialNetworkClip(ESocialNetworkSoundType.OutgoingMessage);
                 Singleton<GUISounds>.Instance.PlaySound(outgoingClip);
-                AddMessage(nickname + ": " + message);
+                AddMessage(_nickname + ": " + message);
             }
         }
 
         public void ReceiveMessage(string nickname, string message)
         {
-            AudioClip incomingClip = soundsWrapper.GetSocialNetworkClip(ESocialNetworkSoundType.IncomingMessage);
+            AudioClip incomingClip = _soundsWrapper.GetSocialNetworkClip(ESocialNetworkSoundType.IncomingMessage);
             Singleton<GUISounds>.Instance.PlaySound(incomingClip);
             AddMessage(nickname + ": " + message);
         }
 
         private void AddMessage(string message)
         {
-            chatText = string.Concat(chatText, message, "\n");
-            if (chatText.Length > 1000)
+            _chatText = string.Concat(_chatText, message, "\n");
+            if (_chatText.Length > 1000)
             {
-                chatText = chatText.Substring(500);
+                _chatText = _chatText.Substring(500);
             }
         }
 
         private void DrawWindow(int windowId)
         {
             Rect rect = new(5, 15, 580, 200);
-            GUI.Label(rect, chatText);
+            GUI.Label(rect, _chatText);
             rect.y += rect.height;
             Rect textRect = new(rect.x, rect.y, rect.width - 55, 25);
-            GUI.SetNextControlName(textFieldName);
-            textField = GUI.TextField(textRect, textField);
-            if (selectText)
+            GUI.SetNextControlName(_textFieldName);
+            _textField = GUI.TextField(textRect, _textField);
+            if (_selectText)
             {
-                GUI.FocusControl(textFieldName);
-                selectText = false;
+                GUI.FocusControl(_textFieldName);
+                _selectText = false;
             }
             rect.x += 535;
             Rect buttonRect = new(rect.x, rect.y, 50, 25);

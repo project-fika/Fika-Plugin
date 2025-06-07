@@ -7,11 +7,11 @@ namespace Fika.Core.Coop.Custom
 {
     internal class FikaPing : MonoBehaviour
     {
-        Image image;
+        Image _image;
 
         private void Awake()
         {
-            image = GetComponent<Image>();
+            _image = GetComponent<Image>();
         }
 
         private void Update()

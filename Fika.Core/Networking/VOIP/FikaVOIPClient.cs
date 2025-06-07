@@ -6,7 +6,7 @@ namespace Fika.Core.Networking.VOIP
 {
     public class FikaVOIPClient(ICommsNetworkState network) : BaseClient<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>(network)
     {
-        private readonly FikaCommsNetwork commsNet = (FikaCommsNetwork)network;
+        private readonly FikaCommsNetwork _commsNet = (FikaCommsNetwork)network;
 
         public override void Connect()
         {
@@ -20,7 +20,7 @@ namespace Fika.Core.Networking.VOIP
 
         public override void Disconnect()
         {
-            if (!commsNet.Mode.IsServerEnabled())
+            if (!_commsNet.Mode.IsServerEnabled())
             {
                 Singleton<IFikaNetworkManager>.Instance.RegisterPacket<VOIPPacket>(OnVoicePacketReceived);
             }
@@ -43,7 +43,7 @@ namespace Fika.Core.Networking.VOIP
 
         protected override void SendReliable(ArraySegment<byte> packet)
         {
-            if (commsNet.PreprocessPacketToServer(packet))
+            if (_commsNet.PreprocessPacketToServer(packet))
             {
                 return;
             }
@@ -58,7 +58,7 @@ namespace Fika.Core.Networking.VOIP
 
         protected override void SendUnreliable(ArraySegment<byte> packet)
         {
-            if (commsNet.PreprocessPacketToServer(packet))
+            if (_commsNet.PreprocessPacketToServer(packet))
             {
                 return;
             }

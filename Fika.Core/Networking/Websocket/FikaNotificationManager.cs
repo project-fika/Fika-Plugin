@@ -15,7 +15,7 @@ namespace Fika.Core.Networking.Websocket
 {
     internal class FikaNotificationManager
     {
-        private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaNotificationManager");
+        private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("FikaNotificationManager");
         public static FikaNotificationManager Instance;
         public static bool Exists
         {
@@ -31,13 +31,13 @@ namespace Fika.Core.Networking.Websocket
         {
             get
             {
-                return webSocket.ReadyState == WebSocketState.Open;
+                return _webSocket.ReadyState == WebSocketState.Open;
             }
         }
 
         public bool reconnecting;
 
-        private WebSocket webSocket;
+        private WebSocket _webSocket;
 
         public FikaNotificationManager()
         {
@@ -46,17 +46,17 @@ namespace Fika.Core.Networking.Websocket
             SessionId = RequestHandler.SessionId;
             Url = $"{Host}/fika/notification/";
 
-            webSocket = new WebSocket(Url)
+            _webSocket = new WebSocket(Url)
             {
                 WaitTime = TimeSpan.FromMinutes(1),
                 EmitOnPing = true
             };
 
-            webSocket.SetCredentials(SessionId, "", true);
+            _webSocket.SetCredentials(SessionId, "", true);
 
-            webSocket.OnError += WebSocket_OnError;
-            webSocket.OnMessage += WebSocket_OnMessage;
-            webSocket.OnClose += (sender, e) =>
+            _webSocket.OnError += WebSocket_OnError;
+            _webSocket.OnMessage += WebSocket_OnMessage;
+            _webSocket.OnClose += (sender, e) =>
             {
                 if (reconnecting)
                 {
@@ -71,17 +71,17 @@ namespace Fika.Core.Networking.Websocket
 
         private void WebSocket_OnError(object sender, ErrorEventArgs e)
         {
-            logger.LogInfo($"WS error: {e.Message}");
+            _logger.LogInfo($"WS error: {e.Message}");
         }
 
         public void Connect()
         {
-            webSocket.Connect();
+            _webSocket.Connect();
         }
 
         public void Close()
         {
-            webSocket.Close();
+            _webSocket.Close();
         }
 
         private void WebSocket_OnMessage(object sender, MessageEventArgs e)
@@ -106,7 +106,7 @@ namespace Fika.Core.Networking.Websocket
             EFikaNotifications type = (EFikaNotifications)Enum.Parse(typeof(EFikaNotifications), jsonObject.Value<string>("type"));
 
 #if DEBUG
-            logger.LogDebug($"Received type: {type}");
+            _logger.LogDebug($"Received type: {type}");
 #endif
             NotificationAbstractClass notification = null;
             switch (type)
@@ -145,20 +145,20 @@ namespace Fika.Core.Networking.Websocket
 
             while (reconnecting)
             {
-                if (webSocket.ReadyState == WebSocketState.Open)
+                if (_webSocket.ReadyState == WebSocketState.Open)
                 {
                     break;
                 }
 
                 // Don't attempt to reconnect if we're still attempting to connect.
-                if (webSocket.ReadyState != WebSocketState.Connecting)
+                if (_webSocket.ReadyState != WebSocketState.Connecting)
                 {
-                    webSocket.Connect();
+                    _webSocket.Connect();
                 }
 
                 await Task.Delay(10 * 1000);
 
-                if (webSocket.ReadyState == WebSocketState.Open)
+                if (_webSocket.ReadyState == WebSocketState.Open)
                 {
                     break;
                 }

@@ -10,9 +10,9 @@ namespace Fika.Core.Coop.Custom
 {
     internal class FikaDebug : MonoBehaviour
     {
-        private CoopHandler coopHandler;
-        private Rect windowRect = new(20, 20, 200, 10);
-        private int frameCounter = 0;
+        private CoopHandler _coopHandler;
+        private Rect _windowRect = new(20, 20, 200, 10);
+        private int _frameCounter = 0;
 
         private int Ping
         {
@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.Custom
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                this.coopHandler = coopHandler;
+                this._coopHandler = coopHandler;
 
                 if (FikaBackendUtils.IsServer)
                 {
@@ -68,10 +68,10 @@ namespace Fika.Core.Coop.Custom
 
         protected void Update()
         {
-            frameCounter++;
-            if (frameCounter % 300 == 0)
+            _frameCounter++;
+            if (_frameCounter % 300 == 0)
             {
-                frameCounter = 0;
+                _frameCounter = 0;
 
                 CheckAndAdd();
             }
@@ -79,7 +79,7 @@ namespace Fika.Core.Coop.Custom
 
         private void CheckAndAdd()
         {
-            foreach (CoopPlayer player in coopHandler.HumanPlayers)
+            foreach (CoopPlayer player in _coopHandler.HumanPlayers)
             {
                 if (!alivePlayers.Contains(player) && player.HealthController.IsAlive)
                 {
@@ -87,7 +87,7 @@ namespace Fika.Core.Coop.Custom
                 }
             }
 
-            foreach (CoopPlayer player in coopHandler.Players.Values)
+            foreach (CoopPlayer player in _coopHandler.Players.Values)
             {
                 if (!player.gameObject.name.StartsWith("Player_") && !player.IsYourPlayer)
                 {
@@ -148,10 +148,10 @@ namespace Fika.Core.Coop.Custom
             GUI.skin.label.alignment = TextAnchor.MiddleLeft;
             GUI.skin.window.alignment = TextAnchor.UpperCenter;
 
-            GUILayout.BeginArea(windowRect);
+            GUILayout.BeginArea(_windowRect);
             GUILayout.BeginVertical();
 
-            windowRect = GUILayout.Window(1, windowRect, DrawWindow, "Fika Debug");
+            _windowRect = GUILayout.Window(1, _windowRect, DrawWindow, "Fika Debug");
 
             GUILayout.EndVertical();
             GUILayout.EndArea();

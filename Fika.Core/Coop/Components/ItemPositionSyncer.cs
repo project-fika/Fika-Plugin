@@ -8,34 +8,34 @@ namespace Fika.Core.Coop.Components
 {
     public class ItemPositionSyncer : MonoBehaviour
     {
-        private FikaServer server;
-        private FikaClient client;
-        private bool isServer;
-        private ObservedLootItem lootItem;
-        private LootSyncStruct data;
+        private FikaServer _server;
+        private FikaClient _client;
+        private bool _isServer;
+        private ObservedLootItem _lootItem;
+        private LootSyncStruct _data;
 
         private Rigidbody Rigidbody
         {
             get
             {
-                return lootItem.RigidBody;
+                return _lootItem.RigidBody;
             }
         }
 
         public static void Create(GameObject gameObject, bool isServer, ObservedLootItem lootItem)
         {
             ItemPositionSyncer posSync = gameObject.AddComponent<ItemPositionSyncer>();
-            posSync.isServer = isServer;
+            posSync._isServer = isServer;
             if (isServer)
             {
-                posSync.server = Singleton<FikaServer>.Instance;
+                posSync._server = Singleton<FikaServer>.Instance;
             }
             else
             {
-                posSync.client = Singleton<FikaClient>.Instance;
+                posSync._client = Singleton<FikaClient>.Instance;
             }
-            posSync.lootItem = lootItem;
-            posSync.data = new()
+            posSync._lootItem = lootItem;
+            posSync._data = new()
             {
                 Id = lootItem.GetNetId()
             };
@@ -43,7 +43,7 @@ namespace Fika.Core.Coop.Components
 
         public void Start()
         {
-            if (lootItem == null)
+            if (_lootItem == null)
             {
                 FikaGlobals.LogError("HostItemPositionSync::Start: LootItem was null!");
                 Destroy(this);
@@ -55,36 +55,36 @@ namespace Fika.Core.Coop.Components
                 Destroy(this);
             }
 
-            data.Position = lootItem.transform.position;
-            data.Rotation = lootItem.transform.rotation;
-            data.Velocity = Rigidbody.velocity;
-            data.AngularVelocity = Rigidbody.angularVelocity;
-            if (isServer)
+            _data.Position = _lootItem.transform.position;
+            _data.Rotation = _lootItem.transform.rotation;
+            _data.Velocity = Rigidbody.velocity;
+            _data.AngularVelocity = Rigidbody.angularVelocity;
+            if (_isServer)
             {
-                server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(data);
+                _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
                 return;
             }
 
-            client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(data);
+            _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
         }
 
         public void Update()
         {
             if (Rigidbody == null)
             {
-                data.Position = lootItem.transform.position;
-                data.Rotation = lootItem.transform.rotation;
-                data.Velocity = Vector3.zero;
-                data.AngularVelocity = Vector3.zero;
-                data.Done = true;
-                if (isServer)
+                _data.Position = _lootItem.transform.position;
+                _data.Rotation = _lootItem.transform.rotation;
+                _data.Velocity = Vector3.zero;
+                _data.AngularVelocity = Vector3.zero;
+                _data.Done = true;
+                if (_isServer)
                 {
-                    server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(data);
+                    _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
                     Destroy(this);
                     return;
                 }
 
-                client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(data);
+                _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
                 Destroy(this);
                 return;
             }

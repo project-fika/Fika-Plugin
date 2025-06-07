@@ -14,31 +14,31 @@ namespace Fika.Core.Coop.Custom
 {
     public class FikaDynamicAI : MonoBehaviour
     {
-        private readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("DynamicAI");
-        private CoopHandler coopHandler;
-        private int frameCounter;
-        private int resetCounter;
-        private readonly List<CoopPlayer> humanPlayers = [];
-        private readonly List<CoopBot> bots = [];
-        private readonly HashSet<CoopBot> disabledBots = [];
-        private BotSpawner spawner;
+        private readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("DynamicAI");
+        private CoopHandler _coopHandler;
+        private int _frameCounter;
+        private int _resetCounter;
+        private readonly List<CoopPlayer> _humanPlayers = [];
+        private readonly List<CoopBot> _bots = [];
+        private readonly HashSet<CoopBot> _disabledBots = [];
+        private BotSpawner _spawner;
 
         protected void Awake()
         {
             if (FikaPlugin.Instance.ModHandler.QuestingBotsLoaded)
             {
-                logger.LogWarning("QuestingBots detected, destroying DynamicAI component. Use QuestingBots AI limiter instead!");
+                _logger.LogWarning("QuestingBots detected, destroying DynamicAI component. Use QuestingBots AI limiter instead!");
                 Destroy(this);
             }
 
-            if (!CoopHandler.TryGetCoopHandler(out coopHandler))
+            if (!CoopHandler.TryGetCoopHandler(out _coopHandler))
             {
-                logger.LogError("Could not find CoopHandler! Destroying self");
+                _logger.LogError("Could not find CoopHandler! Destroying self");
                 Destroy(this);
                 return;
             }
 
-            resetCounter = FikaPlugin.DynamicAIRate.Value switch
+            _resetCounter = FikaPlugin.DynamicAIRate.Value switch
             {
                 FikaPlugin.EDynamicAIRates.Low => 600,
                 FikaPlugin.EDynamicAIRates.Medium => 300,
@@ -46,29 +46,29 @@ namespace Fika.Core.Coop.Custom
                 _ => 300,
             };
 
-            spawner = Singleton<IBotGame>.Instance.BotsController.BotSpawner;
-            if (spawner == null)
+            _spawner = Singleton<IBotGame>.Instance.BotsController.BotSpawner;
+            if (_spawner == null)
             {
-                logger.LogError("Could not find BotSpawner! Destroying self");
+                _logger.LogError("Could not find BotSpawner! Destroying self");
                 Destroy(this);
                 return;
             }
 
-            spawner.OnBotCreated += Spawner_OnBotCreated;
-            spawner.OnBotRemoved += Spawner_OnBotRemoved;
+            _spawner.OnBotCreated += Spawner_OnBotCreated;
+            _spawner.OnBotRemoved += Spawner_OnBotRemoved;
         }
 
         private void Spawner_OnBotRemoved(BotOwner botOwner)
         {
             CoopBot bot = (CoopBot)botOwner.GetPlayer;
-            if (!bots.Remove(bot) && !FikaPlugin.DynamicAI.Value)
+            if (!_bots.Remove(bot) && !FikaPlugin.DynamicAI.Value)
             {
-                logger.LogWarning($"Could not remove {botOwner.gameObject.name} from bots list.");
+                _logger.LogWarning($"Could not remove {botOwner.gameObject.name} from bots list.");
             }
 
-            if (disabledBots.Contains(bot))
+            if (_disabledBots.Contains(bot))
             {
-                disabledBots.Remove(bot);
+                _disabledBots.Remove(bot);
             }
         }
 
@@ -97,7 +97,7 @@ namespace Fika.Core.Coop.Custom
                 }
             }
 
-            bots.Add((CoopBot)botOwner.GetPlayer);
+            _bots.Add((CoopBot)botOwner.GetPlayer);
         }
 
         protected void Update()
@@ -107,12 +107,12 @@ namespace Fika.Core.Coop.Custom
                 return;
             }
 
-            frameCounter++;
+            _frameCounter++;
 
-            if (frameCounter % resetCounter == 0)
+            if (_frameCounter % _resetCounter == 0)
             {
-                frameCounter = 0;
-                foreach (CoopBot bot in bots)
+                _frameCounter = 0;
+                foreach (CoopBot bot in _bots)
                 {
                     CheckForPlayers(bot);
                 }
@@ -121,14 +121,14 @@ namespace Fika.Core.Coop.Custom
 
         public void AddHumans()
         {
-            foreach (CoopPlayer player in coopHandler.HumanPlayers)
+            foreach (CoopPlayer player in _coopHandler.HumanPlayers)
             {
                 // Do not count the headless client profile as an active player
                 if (player.Profile.IsHeadlessProfile())
                 {
                     continue;
                 }
-                humanPlayers.Add(player);
+                _humanPlayers.Add(player);
             }
         }
 
@@ -140,7 +140,7 @@ namespace Fika.Core.Coop.Custom
             }
 
 #if DEBUG
-            logger.LogWarning($"Disabling {bot.gameObject.name}");
+            _logger.LogWarning($"Disabling {bot.gameObject.name}");
 #endif
             bot.AIData.BotOwner.DecisionQueue.Clear();
             bot.AIData.BotOwner.Memory.GoalEnemy = null;
@@ -152,9 +152,9 @@ namespace Fika.Core.Coop.Custom
             bot.AIData.BotOwner.StandBy.CanDoStandBy = false;
             bot.gameObject.SetActive(false);
 
-            if (!disabledBots.Add(bot))
+            if (!_disabledBots.Add(bot))
             {
-                logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
+                _logger.LogError($"{bot.gameObject.name} was already in the disabled bots list when adding!");
             }
 
             IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
@@ -185,7 +185,7 @@ namespace Fika.Core.Coop.Custom
         private void ActivateBot(CoopBot bot)
         {
 #if DEBUG
-            logger.LogWarning($"Enabling {bot.gameObject.name}");
+            _logger.LogWarning($"Enabling {bot.gameObject.name}");
 #endif
             bot.gameObject.SetActive(true);
             bot.AIData.BotOwner.PatrollingData.Unpause();
@@ -194,7 +194,7 @@ namespace Fika.Core.Coop.Custom
             bot.AIData.BotOwner.StandBy.CanDoStandBy = true;
             bot.AIData.BotOwner.ShootData.CanShootByState = true;
             bot.AIData.BotOwner.ShootData.BlockFor(1f);
-            disabledBots.Remove(bot);
+            _disabledBots.Remove(bot);
         }
 
         private void CheckForPlayers(CoopBot bot)
@@ -208,7 +208,7 @@ namespace Fika.Core.Coop.Custom
             int notInRange = 0;
             float range = FikaPlugin.DynamicAIRange.Value;
 
-            foreach (CoopPlayer humanPlayer in humanPlayers)
+            foreach (CoopPlayer humanPlayer in _humanPlayers)
             {
                 if (humanPlayer == null)
                 {
@@ -230,11 +230,11 @@ namespace Fika.Core.Coop.Custom
                 }
             }
 
-            if (notInRange >= humanPlayers.Count && bot.gameObject.activeSelf)
+            if (notInRange >= _humanPlayers.Count && bot.gameObject.activeSelf)
             {
                 DeactivateBot(bot);
             }
-            else if (notInRange < humanPlayers.Count && !bot.gameObject.activeSelf)
+            else if (notInRange < _humanPlayers.Count && !bot.gameObject.activeSelf)
             {
                 ActivateBot(bot);
             }
@@ -244,19 +244,19 @@ namespace Fika.Core.Coop.Custom
         {
             if (!value)
             {
-                CoopBot[] disabledBotsArray = [.. disabledBots];
+                CoopBot[] disabledBotsArray = [.. _disabledBots];
                 for (int i = 0; i < disabledBotsArray.Length; i++)
                 {
                     ActivateBot(disabledBotsArray[i]);
                 }
 
-                disabledBots.Clear();
+                _disabledBots.Clear();
             }
         }
 
         internal void RateChanged(FikaPlugin.EDynamicAIRates value)
         {
-            resetCounter = value switch
+            _resetCounter = value switch
             {
                 FikaPlugin.EDynamicAIRates.Low => 600,
                 FikaPlugin.EDynamicAIRates.Medium => 300,

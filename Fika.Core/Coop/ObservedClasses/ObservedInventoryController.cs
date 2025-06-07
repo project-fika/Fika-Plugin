@@ -14,8 +14,8 @@ namespace Fika.Core.Coop.ObservedClasses
 {
     public class ObservedInventoryController : Player.PlayerInventoryController, Interface16
     {
-        private readonly IPlayerSearchController searchController;
-        private readonly CoopPlayer coopPlayer;
+        private readonly IPlayerSearchController _searchController;
+        private readonly CoopPlayer _coopPlayer;
         public override bool HasDiscardLimits
         {
             get
@@ -28,7 +28,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             get
             {
-                return searchController;
+                return _searchController;
             }
         }
 
@@ -36,8 +36,8 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             MongoID_0 = firstId;
             Ushort_0 = firstOperationId;
-            searchController = new AISearchControllerClass();
-            coopPlayer = (CoopPlayer)player;
+            _searchController = new AISearchControllerClass();
+            _coopPlayer = (CoopPlayer)player;
         }
 
         public override void AddDiscardLimits(Item rootItem, IEnumerable<DestroyedItemsStruct> destroyedItems)
@@ -127,18 +127,18 @@ namespace Fika.Core.Coop.ObservedClasses
                 return;
             }
             HandleInProcess(item, to, operation, callback);
-            coopPlayer.StatisticsManager.OnGrabLoot(item);
+            _coopPlayer.StatisticsManager.OnGrabLoot(item);
         }
 
         private void HandleInProcess(Item item, ItemAddress to, GInterface416 operation, Callback callback)
         {
             Player.Class1240 handler = new()
             {
-                player_0 = coopPlayer,
+                player_0 = _coopPlayer,
                 callback = callback
             };
 
-            if (!coopPlayer.HealthController.IsAlive)
+            if (!_coopPlayer.HealthController.IsAlive)
             {
                 handler.callback.Succeed();
                 return;
@@ -174,7 +174,7 @@ namespace Fika.Core.Coop.ObservedClasses
         OperationDataStruct Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
         {
             method_13(descriptor);
-            return descriptor.ToInventoryOperation(coopPlayer);
+            return descriptor.ToInventoryOperation(_coopPlayer);
         }
     }
 }

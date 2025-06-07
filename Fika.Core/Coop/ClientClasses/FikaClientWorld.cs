@@ -16,13 +16,13 @@ namespace Fika.Core.Coop.ClientClasses
         public List<AirplaneDataPacketStruct> SyncObjectPackets;
         public WorldPacket WorldPacket;
 
-        private CoopClientGameWorld clientGameWorld;
-        private FikaClient client;
+        private CoopClientGameWorld _clientGameWorld;
+        private FikaClient _client;
 
         public static FikaClientWorld Create(CoopClientGameWorld gameWorld)
         {
             FikaClientWorld clientWorld = gameWorld.gameObject.AddComponent<FikaClientWorld>();
-            clientWorld.clientGameWorld = gameWorld;
+            clientWorld._clientGameWorld = gameWorld;
             clientWorld.LootSyncPackets = new(8);
             clientWorld.SyncObjectPackets = new(16);
             clientWorld.WorldPacket = new()
@@ -33,22 +33,22 @@ namespace Fika.Core.Coop.ClientClasses
                 LootSyncStructs = [],
                 RagdollPackets = []
             };
-            clientWorld.client = Singleton<FikaClient>.Instance;
-            clientWorld.client.FikaClientWorld = clientWorld;
+            clientWorld._client = Singleton<FikaClient>.Instance;
+            clientWorld._client.FikaClientWorld = clientWorld;
             return clientWorld;
         }
 
         public void Update()
         {
-            UpdateLootItems(clientGameWorld.LootItems);
-            clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
+            UpdateLootItems(_clientGameWorld.LootItems);
+            _clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
         }
 
         protected void LateUpdate()
         {
             if (WorldPacket.HasData)
             {
-                client.SendReusable(WorldPacket, DeliveryMethod.ReliableOrdered);
+                _client.SendReusable(WorldPacket, DeliveryMethod.ReliableOrdered);
             }
         }
 

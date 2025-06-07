@@ -8,18 +8,18 @@ namespace Fika.Core.Coop.Components
 {
     internal class CorpsePositionSyncer : MonoBehaviour
     {
-        private Corpse corpse;
-        private RagdollPacketStruct data;
-        private FikaHostWorld world;
-        private int counter;
+        private Corpse _corpse;
+        private RagdollPacketStruct _data;
+        private FikaHostWorld _world;
+        private int _counter;
 
         public static void Create(GameObject gameObject, Corpse corpse, int netId)
         {
             CorpsePositionSyncer corpsePositionSyncer = gameObject.AddComponent<CorpsePositionSyncer>();
-            corpsePositionSyncer.corpse = corpse;
-            corpsePositionSyncer.world = (FikaHostWorld)Singleton<GameWorld>.Instance.World_0;
-            corpsePositionSyncer.counter = 0;
-            corpsePositionSyncer.data = new()
+            corpsePositionSyncer._corpse = corpse;
+            corpsePositionSyncer._world = (FikaHostWorld)Singleton<GameWorld>.Instance.World_0;
+            corpsePositionSyncer._counter = 0;
+            corpsePositionSyncer._data = new()
             {
                 Id = netId
             };
@@ -27,13 +27,13 @@ namespace Fika.Core.Coop.Components
 
         public void Start()
         {
-            if (corpse == null)
+            if (_corpse == null)
             {
                 FikaPlugin.Instance.FikaLogger.LogError("CorpsePositionSyncer::Start: Corpse was null!");
                 Destroy(this);
             }
 
-            if (!corpse.HasRagdoll)
+            if (!_corpse.HasRagdoll)
             {
                 FikaPlugin.Instance.FikaLogger.LogError("CorpsePositionSyncer::Start: Ragdoll was null!");
                 Destroy(this);
@@ -42,22 +42,22 @@ namespace Fika.Core.Coop.Components
 
         public void FixedUpdate()
         {
-            if (corpse.Ragdoll.Bool_2)
+            if (_corpse.Ragdoll.Bool_2)
             {
-                data.Position = corpse.TrackableTransform.position;
-                data.TransformSyncs = corpse.TransformSyncs;
-                data.Done = true;
-                world.WorldPacket.RagdollPackets.Add(data);
+                _data.Position = _corpse.TrackableTransform.position;
+                _data.TransformSyncs = _corpse.TransformSyncs;
+                _data.Done = true;
+                _world.WorldPacket.RagdollPackets.Add(_data);
                 Destroy(this);
                 return;
             }
 
-            counter++;
-            if (counter % 4 == 0)
+            _counter++;
+            if (_counter % 4 == 0)
             {
-                counter = 0;
-                data.Position = corpse.TrackableTransform.position;
-                world.WorldPacket.RagdollPackets.Add(data);
+                _counter = 0;
+                _data.Position = _corpse.TrackableTransform.position;
+                _world.WorldPacket.RagdollPackets.Add(_data);
             }
         }
     }

@@ -8,16 +8,16 @@ namespace Fika.Core.Coop.Custom
     public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
     {
         [JsonIgnore]
-        private readonly CoreBotSettingsClass coreSettings;
+        private readonly CoreBotSettingsClass _coreSettings;
 
         public BotDifficulties()
         {
             string coreString = RequestHandler.GetJson("/singleplayer/settings/bot/difficulty/core/core");
-            coreSettings = JsonConvert.DeserializeObject<CoreBotSettingsClass>(coreString);
+            _coreSettings = JsonConvert.DeserializeObject<CoreBotSettingsClass>(coreString);
 
             // Adjust wave coefs so that wave settings do something
-            coreSettings.WAVE_COEF_LOW = 0.5f;
-            coreSettings.WAVE_COEF_HIGH = 1.5f;
+            _coreSettings.WAVE_COEF_LOW = 0.5f;
+            _coreSettings.WAVE_COEF_HIGH = 1.5f;
         }
 
         public BotSettingsComponents GetComponent(BotDifficulty botDifficulty, WildSpawnType role)
@@ -40,9 +40,9 @@ namespace Fika.Core.Coop.Custom
         public CoreBotSettingsClass GetCoreSettings()
         {
             FikaPlugin.Instance.FikaLogger.LogInfo("Retrieving Core settings");
-            if (coreSettings != null)
+            if (_coreSettings != null)
             {
-                return coreSettings;
+                return _coreSettings;
             }
 
             return null;

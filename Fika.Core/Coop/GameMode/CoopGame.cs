@@ -42,31 +42,6 @@ namespace Fika.Core.Coop.GameMode
     /// </summary>
     public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, IClientHearingTable
     {
-        /*public static CoopGame Instance
-        {
-            get
-            {
-                if (localInstance != null)
-                {
-                    return localInstance;
-                }
-
-                if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
-                {
-                    localInstance = coopGame;
-                    return coopGame;
-                }
-
-                return null;
-            }
-            internal set
-            {
-                localInstance = value;
-            }
-        }*/
-
-        private static CoopGame localInstance;
-
         public BaseGameController GameController { get; set; }
         public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
         public string ExitLocation { get; set; }
@@ -156,8 +131,6 @@ namespace Fika.Core.Coop.GameMode
 
             float hearingDistance = FikaGlobals.VOIPHandler.PushToTalkSettings.HearingDistance;
             coopGame._voipDistance = hearingDistance * hearingDistance + 9;
-
-            localInstance = coopGame;
 
             ClientHearingTable.Instance = coopGame;
 

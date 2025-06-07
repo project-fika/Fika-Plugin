@@ -8,3 +8,30 @@ tab_width = 4
 indent_size = 4
 end_of_line = crlf
 indent_style = space
+
+[*.{cs,vb}]
+#### Naming styles ####
+
+# Naming rules
+
+# Start underscores for private fields
+dotnet_naming_rule.private_fields_with_underscore.symbols  = private_fields
+dotnet_naming_rule.private_fields_with_underscore.style    = prefix_underscore
+dotnet_naming_rule.private_fields_with_underscore.severity = suggestion
+# End underscores for private fields
+
+
+# Symbol specifications
+
+# Start underscores for private fields
+dotnet_naming_symbols.private_fields.applicable_kinds           = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private, protected
+# End underscores for private fields
+
+
+# Naming styles
+
+# Start underscores for private fields
+dotnet_naming_style.prefix_underscore.capitalization = camel_case
+dotnet_naming_style.prefix_underscore.required_prefix = _
+# End underscores for private fields

@@ -8,13 +8,13 @@ namespace Fika.Core.Coop.ObservedClasses
 {
     public class ObservedClientBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.IPlayerBridge
     {
-        private readonly ObservedCoopPlayer observedPlayer = observedPlayer;
+        private readonly ObservedCoopPlayer _observedPlayer = observedPlayer;
 
         public IPlayer iPlayer
         {
             get
             {
-                return observedPlayer;
+                return _observedPlayer;
             }
         }
 
@@ -30,7 +30,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             get
             {
-                return observedPlayer.UsedSimplifiedSkeleton;
+                return _observedPlayer.UsedSimplifiedSkeleton;
             }
         }
 
@@ -43,7 +43,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer)
             {
-                observedPlayer.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
+                _observedPlayer.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
             }
         }
 
@@ -51,11 +51,11 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer)
             {
-                return observedPlayer.ApplyClientShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
+                return _observedPlayer.ApplyClientShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
             }
 
-            observedPlayer.ShotReactions(damageInfo, bodyPart);
-            observedPlayer.ApplyHitDebuff(damageInfo.Damage, 0f, bodyPart, damageInfo.DamageType);
+            _observedPlayer.ShotReactions(damageInfo, bodyPart);
+            _observedPlayer.ApplyHitDebuff(damageInfo.Damage, 0f, bodyPart, damageInfo.DamageType);
             return new()
             {
                 PoV = EPointOfView.ThirdPerson,
@@ -66,22 +66,22 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public bool CheckArmorHitByDirection(BodyPartCollider bodypart, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
         {
-            return observedPlayer.CheckArmorHitByDirection(bodypart);
+            return _observedPlayer.CheckArmorHitByDirection(bodypart);
         }
 
         public bool IsShotDeflectedByHeavyArmor(EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, int shotSeed)
         {
-            return observedPlayer.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
+            return _observedPlayer.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
         }
 
         public bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
         {
-            return observedPlayer.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
+            return _observedPlayer.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
         }
 
         public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceStruct armorResistanceData)
         {
-            return observedPlayer.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
+            return _observedPlayer.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
         }
     }
 }

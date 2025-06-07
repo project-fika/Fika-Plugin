@@ -10,19 +10,19 @@ namespace Fika.Core.Coop.Components
     /// </summary>
     public class FikaPinger : MonoBehaviour
     {
-        private Coroutine pingRoutine;
+        private Coroutine _pingRoutine;
 
         public void StartPingRoutine()
         {
-            pingRoutine = StartCoroutine(PingServer());
+            _pingRoutine = StartCoroutine(PingServer());
         }
 
         public void StopPingRoutine()
         {
-            if (pingRoutine != null)
+            if (_pingRoutine != null)
             {
-                StopCoroutine(pingRoutine);
-                pingRoutine = null;
+                StopCoroutine(_pingRoutine);
+                _pingRoutine = null;
             }
         }
 

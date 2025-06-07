@@ -16,14 +16,14 @@ namespace Fika.Core.Coop.PacketHandlers
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
-        private CoopPlayer player;
-        private bool sendPackets;
-        private PlayerStatePacket state;
+        private CoopPlayer _player;
+        private bool _sendPackets;
+        private PlayerStatePacket _state;
         private bool IsMoving
         {
             get
             {
-                return player.CurrentManagedState.Name is not (EPlayerState.Idle
+                return _player.CurrentManagedState.Name is not (EPlayerState.Idle
                     or EPlayerState.IdleWeaponMounting
                     or EPlayerState.ProneIdle);
             }
@@ -32,9 +32,9 @@ namespace Fika.Core.Coop.PacketHandlers
         public static BotPacketSender Create(CoopBot bot)
         {
             BotPacketSender sender = bot.gameObject.AddComponent<BotPacketSender>();
-            sender.player = bot;
+            sender._player = bot;
             sender.Server = Singleton<FikaServer>.Instance;
-            sender.state = new(bot.NetId);
+            sender._state = new(bot.NetId);
             sender.Enabled = true;
             sender.SendState = true;
             return sender;
@@ -47,12 +47,12 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void OnEnable()
         {
-            sendPackets = true;
+            _sendPackets = true;
         }
 
         public void OnDisable()
         {
-            sendPackets = false;
+            _sendPackets = false;
         }
 
         public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
@@ -65,13 +65,13 @@ namespace Fika.Core.Coop.PacketHandlers
 
         public void SendPlayerState()
         {
-            if (!sendPackets)
+            if (!_sendPackets)
             {
                 return;
             }
 
-            state.UpdateData(player, IsMoving);
-            Server.SendDataToAll(ref state, DeliveryMethod.Unreliable);
+            _state.UpdateData(_player, IsMoving);
+            Server.SendDataToAll(ref _state, DeliveryMethod.Unreliable);
         }
 
         public void DestroyThis()

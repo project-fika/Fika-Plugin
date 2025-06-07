@@ -71,7 +71,7 @@ namespace Fika.Core.Coop.GameMode
         protected readonly BotsController _botsController;
         protected readonly WavesSpawnScenario _wavesSpawnScenario;
         protected readonly BossSpawnScenario _bossSpawnScenario;
-        protected readonly Dictionary<int, int> botQueue = [];
+        protected readonly Dictionary<int, int> _botQueue = [];
         protected readonly GameDateTime _gameDateTime;
 
         public GameStatus Status
@@ -283,9 +283,9 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="netId"></param>
         public void IncreaseLoadedPlayers(int netId)
         {
-            if (botQueue.ContainsKey(netId))
+            if (_botQueue.ContainsKey(netId))
             {
-                botQueue[netId]++;
+                _botQueue[netId]++;
             }
             else
             {
@@ -300,17 +300,17 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         private async Task WaitForPlayersToLoadBotProfile(int netId)
         {
-            botQueue.Add(netId, 0);
+            _botQueue.Add(netId, 0);
             DateTime start = DateTime.Now;
             FikaServer server = Singleton<FikaServer>.Instance;
             int connectedPeers = server.NetServer.ConnectedPeersCount;
 
-            while (botQueue[netId] < connectedPeers)
+            while (_botQueue[netId] < connectedPeers)
             {
                 if (start.Subtract(DateTime.Now).TotalSeconds >= 30) // ~30 second failsafe
                 {
                     Logger.LogWarning("WaitForPlayersToLoadBotProfile: Took too long to receive all packets!");
-                    botQueue.Remove(netId);
+                    _botQueue.Remove(netId);
                     return;
                 }
 
@@ -318,7 +318,7 @@ namespace Fika.Core.Coop.GameMode
                 connectedPeers = server.NetServer.ConnectedPeersCount;
             }
 
-            botQueue.Remove(netId);
+            _botQueue.Remove(netId);
         }
 
         /// <summary>

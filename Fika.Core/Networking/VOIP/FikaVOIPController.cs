@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.VOIP
 {
     class FikaVOIPController : IPlayerVoipController, IDisposable
     {
-        private static readonly TimeSpan HearingDetectionTime = TimeSpan.FromSeconds(2.0);
+        private static readonly TimeSpan _hearingDetectionTime = TimeSpan.FromSeconds(2.0);
 
         public FikaVOIPController(CoopPlayer localPlayer, SoundSettingsDataClass soundSettings)
         {
@@ -655,13 +655,13 @@ namespace Fika.Core.Networking.VOIP
         public void method_12()
         {
             TimeSpan timeSpan = EFTDateTimeClass.UtcNow - LocalPlayer.HearingDateTime;
-            bool flag = timeSpan <= HearingDetectionTime;
+            bool flag = timeSpan <= _hearingDetectionTime;
             TalkDetected.Value = flag;
             if (!flag)
             {
                 return;
             }
-            TimeSpan timeSpan2 = HearingDetectionTime - timeSpan;
+            TimeSpan timeSpan2 = _hearingDetectionTime - timeSpan;
             nullable_0 = new DateTime?(EFTDateTimeClass.UtcNow + timeSpan2);
             HasInteraction.Value = true;
         }

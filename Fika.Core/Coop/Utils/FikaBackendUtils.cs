@@ -32,13 +32,13 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                profile ??= FikaGlobals.GetProfile(false);
-                return profile;
+                _profile ??= FikaGlobals.GetProfile(false);
+                return _profile;
             }
 
             internal set
             {
-                profile = value;
+                _profile = value;
             }
         }
         /// <summary>
@@ -68,7 +68,7 @@ namespace Fika.Core.Coop.Utils
         internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
         internal static MatchMakerGroupPreview MatchMakerGroupPreview;
 
-        private static Profile profile;
+        private static Profile _profile;
 
         public static void CleanUpVariables()
         {

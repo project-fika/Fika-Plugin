@@ -11,8 +11,8 @@ namespace Fika.Core.Networking.VOIP
 {
     public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer, Unit, Unit>
     {
-        private readonly ConcurrentPool<byte[]> loopbackBuffers = new(8, () => new byte[1024]);
-        private readonly List<ArraySegment<byte>> loopbackQueue = [];
+        private readonly ConcurrentPool<byte[]> _loopbackBuffers = new(8, () => new byte[1024]);
+        private readonly List<ArraySegment<byte>> _loopbackQueue = [];
 
         protected override FikaVOIPClient CreateClient(Unit connectionParameters)
         {
@@ -52,7 +52,7 @@ namespace Fika.Core.Networking.VOIP
             }
             if (Client != null)
             {
-                loopbackQueue.Add(packet.CopyToSegment(loopbackBuffers.Get(), 0));
+                _loopbackQueue.Add(packet.CopyToSegment(_loopbackBuffers.Get(), 0));
             }
             return true;
         }
@@ -95,16 +95,16 @@ namespace Fika.Core.Networking.VOIP
             else if (Mode != NetworkMode.None)
             {
                 Stop();
-                loopbackQueue.Clear();
+                _loopbackQueue.Clear();
             }
-            for (int i = 0; i < loopbackQueue.Count; i++)
+            for (int i = 0; i < _loopbackQueue.Count; i++)
             {
-                ArraySegment<byte> segment = loopbackQueue[i];
+                ArraySegment<byte> segment = _loopbackQueue[i];
                 if (Client != null)
                 {
                     Client.NetworkReceivedPacket(segment);
                 }
-                loopbackBuffers.Put(segment.Array);
+                _loopbackBuffers.Put(segment.Array);
             }
             base.Update();
         }

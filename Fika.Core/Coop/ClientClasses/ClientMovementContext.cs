@@ -6,7 +6,7 @@ namespace Fika.Core.Coop.ClientClasses
 {
     public class ClientMovementContext : MovementContext
     {
-        private bool doGravity;
+        private bool _doGravity;
 
         public new static ClientMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
         {
@@ -16,13 +16,13 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void Init()
         {
-            doGravity = true;
+            _doGravity = true;
             base.Init();
         }
 
         public override void ApplyGravity(ref Vector3 motion, float deltaTime, bool stickToGround)
         {
-            if (!doGravity)
+            if (!_doGravity)
             {
                 return;
             }
@@ -32,7 +32,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public void SetGravity(bool enabled)
         {
-            doGravity = enabled;
+            _doGravity = enabled;
         }
     }
 }

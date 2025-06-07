@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.ClientClasses
     public class CoopClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session, CoopPlayer player)
         : GClass3765(profile, inventoryController, searchController, session)
     {
-        protected readonly CoopPlayer player = player;
+        protected readonly CoopPlayer _player = player;
 
         public override async Task<GStruct440<GStruct400<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
         {
@@ -35,12 +35,12 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 InraidQuestPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = InraidQuestPacket.InraidQuestType.Finish,
                     Items = items
                 };
 
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return finishResult;
         }
@@ -77,12 +77,12 @@ namespace Fika.Core.Coop.ClientClasses
 
                 InraidQuestPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = InraidQuestPacket.InraidQuestType.Handover,
                     ItemIdsToRemove = itemIds
                 };
 
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return handoverResult;
         }

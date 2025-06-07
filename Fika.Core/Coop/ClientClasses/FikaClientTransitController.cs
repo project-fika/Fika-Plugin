@@ -22,12 +22,12 @@ namespace Fika.Core.Coop.ClientClasses
             summonedTransits[profile.Id] = new TransitDataClass(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
                 localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
             TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
-            this.localRaidSettings = localRaidSettings;
+            _localRaidSettings = localRaidSettings;
         }
 
         public TransitInteractionPacketStruct InteractPacket { get; set; }
 
-        private readonly LocalRaidSettings localRaidSettings;
+        private readonly LocalRaidSettings _localRaidSettings;
 
         private void OnClientPlayerEnter(TransitPoint point, Player player)
         {
@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.ClientClasses
             if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
             {
                 eraidMode = ERaidMode.Local;
-                tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+                tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
             }
             string profileId = myPlayer.ProfileId;
             Dictionary<string, ProfileKey> profileKeys = [];
@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.ClientClasses
                 transitionRaidId = summonedTransits[profileId].raidId,
                 raidMode = eraidMode,
                 side = myPlayer.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
-                dayTime = localRaidSettings.timeVariant
+                dayTime = _localRaidSettings.timeVariant
             };
 
             alreadyTransits.Add(profileId, gclass);

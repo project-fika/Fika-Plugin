@@ -26,24 +26,24 @@ namespace Fika.Core.Coop.HostClasses
                 return false;
             }
         }
-        private readonly ManualLogSource logger;
-        private readonly Player player;
-        private readonly CoopPlayer coopPlayer;
-        private readonly IPlayerSearchController searchController;
+        private readonly ManualLogSource _logger;
+        private readonly Player _player;
+        private readonly CoopPlayer _coopPlayer;
+        private readonly IPlayerSearchController _searchController;
 
         public CoopHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
         {
-            this.player = player;
-            coopPlayer = (CoopPlayer)player;
-            searchController = new PlayerSearchControllerClass(profile, this);
-            logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopHostInventoryController));
+            _player = player;
+            _coopPlayer = (CoopPlayer)player;
+            _searchController = new PlayerSearchControllerClass(profile, this);
+            _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopHostInventoryController));
         }
 
         public override IPlayerSearchController PlayerSearchController
         {
             get
             {
-                return searchController;
+                return _searchController;
             }
         }
 
@@ -56,7 +56,7 @@ namespace Fika.Core.Coop.HostClasses
                     PacketType = SubPacket.ERequestSubPacketType.TraderServices,
                     RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                     {
-                        NetId = coopPlayer.NetId,
+                        NetId = _coopPlayer.NetId,
                         TraderId = traderId
                     }
                 };
@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.HostClasses
                 return;
             }
 
-            coopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
+            _coopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
         }
 
         public override void CallMalfunctionRepaired(Weapon weapon)
@@ -82,7 +82,7 @@ namespace Fika.Core.Coop.HostClasses
 
         private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
         {
-            if (player.HealthController.IsAlive)
+            if (_player.HealthController.IsAlive)
             {
                 await Task.Yield();
             }
@@ -97,7 +97,7 @@ namespace Fika.Core.Coop.HostClasses
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.QuestItem)
                 {
-                    if (coopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                    if (_coopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
                     {
                         if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                         {
@@ -106,10 +106,10 @@ namespace Fika.Core.Coop.HostClasses
                             // We use templateId because each client gets a unique itemId
                             QuestItemPacket packet = new()
                             {
-                                Nickname = coopPlayer.Profile.Info.MainProfileNickname,
+                                Nickname = _coopPlayer.Profile.Info.MainProfileNickname,
                                 ItemId = lootedItem.TemplateId,
                             };
-                            coopPlayer.PacketSender.SendPacket(ref packet);
+                            _coopPlayer.PacketSender.SendPacket(ref packet);
                         }
                     }
                     base.vmethod_1(operation, callback);
@@ -154,12 +154,12 @@ namespace Fika.Core.Coop.HostClasses
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = _coopPlayer.NetId,
                     CallbackId = operation.Id,
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                _coopPlayer.PacketSender.SendPacket(ref packet);
                 return;
             }
             handler.operation.Dispose();
@@ -184,7 +184,7 @@ namespace Fika.Core.Coop.HostClasses
         private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
         {
             ushort id = operation.Id;
-            coopPlayer.OperationCallbacks.Add(id, callback);
+            _coopPlayer.OperationCallbacks.Add(id, callback);
             return id;
         }
 
@@ -203,7 +203,7 @@ namespace Fika.Core.Coop.HostClasses
             {
                 if (!result.Succeed)
                 {
-                    inventoryController.logger.LogError($"[{Time.frameCount}][{inventoryController.Name}] {inventoryController.ID} - Local operation failed: {operation.Id} - {operation}\r\nError: {result.Error}");
+                    inventoryController._logger.LogError($"[{Time.frameCount}][{inventoryController.Name}] {inventoryController.ID} - Local operation failed: {operation.Id} - {operation}\r\nError: {result.Error}");
                 }
                 callback?.Invoke(result);
             }

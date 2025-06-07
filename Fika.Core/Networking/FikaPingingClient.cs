@@ -21,14 +21,14 @@ namespace Fika.Core.Networking
         public bool Received;
         public bool Rejected;
 
-        private ManualLogSource logger;
-        private IPEndPoint remoteEndPoint;
-        private IPEndPoint localEndPoint;
+        private ManualLogSource _logger;
+        private IPEndPoint _remoteEndPoint;
+        private IPEndPoint _localEndPoint;
         private Coroutine _keepAliveRoutine;
 
         public void Awake()
         {
-            logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
+            _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
         }
 
         public bool Init(string serverId)
@@ -41,7 +41,7 @@ namespace Fika.Core.Networking
 
             GetHostRequest body = new(serverId);
             GetHostResponse result = FikaRequestHandler.GetHost(body);
-            logger.LogInfo(result.ToString());
+            _logger.LogInfo(result.ToString());
 
             FikaBackendUtils.IsHostNatPunch = result.NatPunch;
             FikaBackendUtils.IsHeadlessGame = result.IsHeadless;
@@ -58,7 +58,7 @@ namespace Fika.Core.Networking
 
                 NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
-                logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+                _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
             }
             else
             {
@@ -72,20 +72,20 @@ namespace Fika.Core.Networking
 
                 if (string.IsNullOrEmpty(ip))
                 {
-                    logger.LogError("IP was empty when pinging!");
+                    _logger.LogError("IP was empty when pinging!");
                     return false;
                 }
 
                 if (port == default)
                 {
-                    logger.LogError("Port was empty when pinging!");
+                    _logger.LogError("Port was empty when pinging!");
                     return false;
                 }
 
-                remoteEndPoint = new(IPAddress.Parse(ip), port);
+                _remoteEndPoint = new(IPAddress.Parse(ip), port);
                 if (!string.IsNullOrEmpty(localIp))
                 {
-                    localEndPoint = new(IPAddress.Parse(localIp), port);
+                    _localEndPoint = new(IPAddress.Parse(localIp), port);
                 }
             }
 
@@ -98,13 +98,13 @@ namespace Fika.Core.Networking
             writer.Put(message);
 
 
-            if (localEndPoint != null)
+            if (_localEndPoint != null)
             {
-                NetClient.SendUnconnectedMessage(writer, localEndPoint);
+                NetClient.SendUnconnectedMessage(writer, _localEndPoint);
             }
-            if (remoteEndPoint != null)
+            if (_remoteEndPoint != null)
             {
-                NetClient.SendUnconnectedMessage(writer, remoteEndPoint);
+                NetClient.SendUnconnectedMessage(writer, _remoteEndPoint);
             }
         }
 
@@ -169,7 +169,7 @@ namespace Fika.Core.Networking
                         FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
                         FikaBackendUtils.RemotePort = remoteEndPoint.Port;
                         FikaBackendUtils.LocalPort = NetClient.LocalPort;
-                        logger.LogInfo($"Got response from {FikaBackendUtils.RemoteIp}:{FikaBackendUtils.RemotePort}, using LocalPort: {NetClient.LocalPort}");
+                        _logger.LogInfo($"Got response from {FikaBackendUtils.RemoteIp}:{FikaBackendUtils.RemotePort}, using LocalPort: {NetClient.LocalPort}");
                         break;
                     case "fika.keepalive":
                         // Do nothing
@@ -178,13 +178,13 @@ namespace Fika.Core.Networking
                         Rejected = true;
                         break;
                     default:
-                        logger.LogError("Data was not as expected");
+                        _logger.LogError("Data was not as expected");
                         break;
                 }
             }
             else
             {
-                logger.LogError("Could not parse string");
+                _logger.LogError("Could not parse string");
             }
         }
 
@@ -210,10 +210,10 @@ namespace Fika.Core.Networking
 
         public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
         {
-            logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+            _logger.LogInfo($"OnNatIntroductionResponse: {_remoteEndPoint}");
 
-            localEndPoint = natLocalEndPoint;
-            remoteEndPoint = natRemoteEndPoint;
+            _localEndPoint = natLocalEndPoint;
+            _remoteEndPoint = natRemoteEndPoint;
 
             Task.Run(async () =>
             {
@@ -222,8 +222,8 @@ namespace Fika.Core.Networking
 
                 for (int i = 0; i < 20; i++)
                 {
-                    NetClient.SendUnconnectedMessage(data, localEndPoint);
-                    NetClient.SendUnconnectedMessage(data, remoteEndPoint);
+                    NetClient.SendUnconnectedMessage(data, _localEndPoint);
+                    NetClient.SendUnconnectedMessage(data, _remoteEndPoint);
                     await Task.Delay(250);
                 }
             });

@@ -16,15 +16,15 @@ namespace Fika.Core.Coop.HostClasses
         public List<LootSyncStruct> LootSyncPackets;
         public WorldPacket WorldPacket;
 
-        private FikaServer server;
-        private GameWorld gameWorld;
+        private FikaServer _server;
+        private GameWorld _gameWorld;
 
         public static FikaHostWorld Create(CoopHostGameWorld gameWorld)
         {
             FikaHostWorld hostWorld = gameWorld.gameObject.AddComponent<FikaHostWorld>();
-            hostWorld.server = Singleton<FikaServer>.Instance;
-            hostWorld.server.FikaHostWorld = hostWorld;
-            hostWorld.gameWorld = gameWorld;
+            hostWorld._server = Singleton<FikaServer>.Instance;
+            hostWorld._server.FikaHostWorld = hostWorld;
+            hostWorld._gameWorld = gameWorld;
             hostWorld.LootSyncPackets = new List<LootSyncStruct>(8);
             hostWorld.WorldPacket = new()
             {
@@ -39,28 +39,28 @@ namespace Fika.Core.Coop.HostClasses
 
         protected void Update()
         {
-            UpdateLootItems(gameWorld.LootItems);
+            UpdateLootItems(_gameWorld.LootItems);
         }
 
         protected void LateUpdate()
         {
-            int grenadesCount = gameWorld.Grenades.Count;
+            int grenadesCount = _gameWorld.Grenades.Count;
             for (int i = 0; i < grenadesCount; i++)
             {
-                Throwable throwable = gameWorld.Grenades.GetByIndex(i);
-                gameWorld.method_2(throwable);
+                Throwable throwable = _gameWorld.Grenades.GetByIndex(i);
+                _gameWorld.method_2(throwable);
             }
 
-            WorldPacket.GrenadePackets.AddRange(gameWorld.GrenadesCriticalStates);
-            WorldPacket.ArtilleryPackets.AddRange(gameWorld.ArtilleryProjectilesStates);
+            WorldPacket.GrenadePackets.AddRange(_gameWorld.GrenadesCriticalStates);
+            WorldPacket.ArtilleryPackets.AddRange(_gameWorld.ArtilleryProjectilesStates);
 
             if (WorldPacket.HasData)
             {
-                server.SendReusableToAll(WorldPacket, DeliveryMethod.ReliableOrdered);
+                _server.SendReusableToAll(WorldPacket, DeliveryMethod.ReliableOrdered);
             }
 
-            gameWorld.GrenadesCriticalStates.Clear();
-            gameWorld.ArtilleryProjectilesStates.Clear();
+            _gameWorld.GrenadesCriticalStates.Clear();
+            _gameWorld.ArtilleryProjectilesStates.Clear();
         }
 
         public void UpdateLootItems(GClass813<int, LootItem> lootItems)
@@ -106,7 +106,7 @@ namespace Fika.Core.Coop.HostClasses
                 SubPacket = new BorderZoneEvent(player.iPlayer.ProfileId, zone.Id)
             };
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
     }
 }

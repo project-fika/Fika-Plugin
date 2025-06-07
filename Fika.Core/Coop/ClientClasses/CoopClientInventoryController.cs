@@ -23,25 +23,25 @@ namespace Fika.Core.Coop.ClientClasses
                 return false;
             }
         }
-        private readonly ManualLogSource logger;
-        private readonly Player player;
-        private readonly CoopPlayer coopPlayer;
-        private readonly IPlayerSearchController searchController;
+        private readonly ManualLogSource _logger;
+        private readonly Player _player;
+        private readonly CoopPlayer _coopPlayer;
+        private readonly IPlayerSearchController _searchController;
 
         public CoopClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
         {
-            this.player = player;
-            coopPlayer = (CoopPlayer)player;
+            this._player = player;
+            _coopPlayer = (CoopPlayer)player;
             MongoID_0 = MongoID.Generate(true);
-            searchController = new PlayerSearchControllerClass(profile, this);
-            logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
+            _searchController = new PlayerSearchControllerClass(profile, this);
+            _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CoopClientInventoryController));
         }
 
         public override IPlayerSearchController PlayerSearchController
         {
             get
             {
-                return searchController;
+                return _searchController;
             }
         }
 
@@ -54,7 +54,7 @@ namespace Fika.Core.Coop.ClientClasses
                     PacketType = SubPacket.ERequestSubPacketType.TraderServices,
                     RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                     {
-                        NetId = coopPlayer.NetId,
+                        NetId = _coopPlayer.NetId,
                         TraderId = traderId
                     }
                 };
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            coopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
+            _coopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
         }
 
         public override void CallMalfunctionRepaired(Weapon weapon)
@@ -81,7 +81,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
         {
-            if (player.HealthController.IsAlive)
+            if (_player.HealthController.IsAlive)
             {
                 await Task.Yield();
             }
@@ -103,7 +103,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.QuestItem)
                 {
-                    if (coopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                    if (_coopPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
                     {
                         if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                         {
@@ -112,10 +112,10 @@ namespace Fika.Core.Coop.ClientClasses
                             // We use templateId because each client gets a unique itemId
                             QuestItemPacket questPacket = new()
                             {
-                                Nickname = coopPlayer.Profile.Info.MainProfileNickname,
+                                Nickname = _coopPlayer.Profile.Info.MainProfileNickname,
                                 ItemId = lootedItem.TemplateId
                             };
-                            coopPlayer.PacketSender.SendPacket(ref questPacket);
+                            _coopPlayer.PacketSender.SendPacket(ref questPacket);
                         }
                     }
                     base.vmethod_1(operation, callback);
@@ -153,7 +153,7 @@ namespace Fika.Core.Coop.ClientClasses
             eftWriter.WritePolymorph(operation.ToDescriptor());
             InventoryPacket packet = new()
             {
-                NetId = coopPlayer.NetId,
+                NetId = _coopPlayer.NetId,
                 CallbackId = operationNum,
                 OperationBytes = eftWriter.ToArray()
             };
@@ -162,7 +162,7 @@ namespace Fika.Core.Coop.ClientClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
 
-            coopPlayer.PacketSender.SendPacket(ref packet);
+            _coopPlayer.PacketSender.SendPacket(ref packet);
         }
 
         public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
@@ -183,7 +183,7 @@ namespace Fika.Core.Coop.ClientClasses
         private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
         {
             ushort id = operation.Id;
-            coopPlayer.OperationCallbacks.Add(id, callback);
+            _coopPlayer.OperationCallbacks.Add(id, callback);
             return id;
         }
 
@@ -212,11 +212,11 @@ namespace Fika.Core.Coop.ClientClasses
                         HandleFinalResult(SuccessfulResult.New);
                         return;
                     case EOperationStatus.Failed:
-                        InventoryController.logger.LogError($"{InventoryController.ID} - Client operation rejected by server: {Operation.Id} - {Operation}\r\nReason: {serverStatus.Error}");
+                        InventoryController._logger.LogError($"{InventoryController.ID} - Client operation rejected by server: {Operation.Id} - {Operation}\r\nReason: {serverStatus.Error}");
                         HandleFinalResult(new FailedResult(serverStatus.Error));
                         break;
                     default:
-                        InventoryController.logger.LogError("ReceiveStatusFromServer: Status was missing?");
+                        InventoryController._logger.LogError("ReceiveStatusFromServer: Status was missing?");
                         break;
                 }
             }
@@ -225,7 +225,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 if (!executeResult.Succeed)
                 {
-                    InventoryController.logger.LogError($"{InventoryController.ID} - Client operation critical failure: {Operation.Id} server status: {"SERVERRESULT"} - {Operation}\r\nError: {executeResult.Error}");
+                    InventoryController._logger.LogError($"{InventoryController.ID} - Client operation critical failure: {Operation.Id} server status: {"SERVERRESULT"} - {Operation}\r\nError: {executeResult.Error}");
                 }
                 HandleFinalResult(executeResult);
             }
@@ -256,7 +256,7 @@ namespace Fika.Core.Coop.ClientClasses
                 {
                     if (localStatus.Finished())
                     {
-                        InventoryController.logger.LogError($"{InventoryController.ID} - Operation critical failure - status mismatch: {Operation.Id} server status: {serverStatus} client status: {localStatus} - {Operation}");
+                        InventoryController._logger.LogError($"{InventoryController.ID} - Operation critical failure - status mismatch: {Operation.Id} server status: {serverStatus} client status: {localStatus} - {Operation}");
                     }
                 }
                 Callback?.Invoke(OperationResult);

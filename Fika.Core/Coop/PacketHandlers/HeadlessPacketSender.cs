@@ -16,12 +16,12 @@ namespace Fika.Core.Coop.PacketHandlers
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
-        private CoopPlayer player;
+        private CoopPlayer _player;
 
         public static HeadlessPacketSender Create(CoopPlayer player)
         {
             HeadlessPacketSender sender = player.gameObject.AddComponent<HeadlessPacketSender>();
-            sender.player = player;
+            sender._player = player;
             sender.Server = Singleton<FikaServer>.Instance;
             sender.enabled = false;
             sender.Enabled = false;

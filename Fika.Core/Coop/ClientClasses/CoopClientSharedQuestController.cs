@@ -15,11 +15,11 @@ namespace Fika.Core.Coop.ClientClasses
     public sealed class CoopClientSharedQuestController(Profile profile, InventoryController inventoryController,
         IPlayerSearchController searchController, IQuestActions session, CoopPlayer player) : CoopClientQuestController(profile, inventoryController, searchController, session, player)
     {
-        private readonly List<string> lastFromNetwork = [];
-        private readonly HashSet<string> acceptedTypes = [];
-        private readonly HashSet<string> lootedTemplateIds = [];
-        private bool canSendAndReceive = true;
-        private bool isItemBeingDropped = false;
+        private readonly List<string> _lastFromNetwork = [];
+        private readonly HashSet<string> _acceptedTypes = [];
+        private readonly HashSet<string> _lootedTemplateIds = [];
+        private bool _canSendAndReceive = true;
+        private bool _isItemBeingDropped = false;
 
         public override void Init()
         {
@@ -33,21 +33,21 @@ namespace Fika.Core.Coop.ClientClasses
                         case FikaPlugin.EQuestSharingTypes.Kills:
                             if (!FikaPlugin.EasyKillConditions.Value)
                             {
-                                acceptedTypes.Add("Elimination");
-                                acceptedTypes.Add(shareType.ToString());
+                                _acceptedTypes.Add("Elimination");
+                                _acceptedTypes.Add(shareType.ToString());
                             }
                             break;
                         case FikaPlugin.EQuestSharingTypes.Item:
-                            acceptedTypes.Add("FindItem");
+                            _acceptedTypes.Add("FindItem");
                             break;
                         case FikaPlugin.EQuestSharingTypes.Location:
-                            acceptedTypes.Add("Exploration");
-                            acceptedTypes.Add("Discover");
-                            acceptedTypes.Add("VisitPlace");
-                            acceptedTypes.Add(shareType.ToString());
+                            _acceptedTypes.Add("Exploration");
+                            _acceptedTypes.Add("Discover");
+                            _acceptedTypes.Add("VisitPlace");
+                            _acceptedTypes.Add(shareType.ToString());
                             break;
                         case FikaPlugin.EQuestSharingTypes.PlaceBeacon:
-                            acceptedTypes.Add(shareType.ToString());
+                            _acceptedTypes.Add(shareType.ToString());
                             break;
                     }
                 }
@@ -59,42 +59,42 @@ namespace Fika.Core.Coop.ClientClasses
         /// </summary>
         public void LateInit()
         {
-            if (acceptedTypes.Contains("PlaceBeacon"))
+            if (_acceptedTypes.Contains("PlaceBeacon"))
             {
-                player.Profile.OnItemZoneDropped += Profile_OnItemZoneDropped;
+                _player.Profile.OnItemZoneDropped += Profile_OnItemZoneDropped;
             }
         }
 
         private void Profile_OnItemZoneDropped(string itemId, string zoneId)
         {
-            if (!canSendAndReceive)
+            if (!_canSendAndReceive)
             {
                 return;
             }
 
-            if (isItemBeingDropped)
+            if (_isItemBeingDropped)
             {
                 return;
             }
 
-            QuestDropItemPacket packet = new(player.Profile.Info.MainProfileNickname, itemId, zoneId);
+            QuestDropItemPacket packet = new(_player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
 #endif
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void OnConditionValueChanged(QuestClass conditional, EQuestStatus status, Condition condition, bool notify = true)
         {
             base.OnConditionValueChanged(conditional, status, condition, notify);
-            if (!canSendAndReceive)
+            if (!_canSendAndReceive)
             {
                 return;
             }
 
-            if (lastFromNetwork.Contains(condition.id))
+            if (_lastFromNetwork.Contains(condition.id))
             {
-                lastFromNetwork.Remove(condition.id);
+                _lastFromNetwork.Remove(condition.id);
                 return;
             }
             SendQuestPacket(conditional, condition);
@@ -102,38 +102,38 @@ namespace Fika.Core.Coop.ClientClasses
 
         public bool ContainsAcceptedType(string type)
         {
-            return acceptedTypes.Contains(type);
+            return _acceptedTypes.Contains(type);
         }
 
         public void AddNetworkId(string id)
         {
-            if (!lastFromNetwork.Contains(id))
+            if (!_lastFromNetwork.Contains(id))
             {
-                lastFromNetwork.Add(id);
+                _lastFromNetwork.Add(id);
             }
         }
 
         public void AddLootedTemplateId(string templateId)
         {
-            if (!lootedTemplateIds.Contains(templateId))
+            if (!_lootedTemplateIds.Contains(templateId))
             {
-                lootedTemplateIds.Add(templateId);
+                _lootedTemplateIds.Add(templateId);
             }
         }
 
         public bool CheckForTemplateId(string templateId)
         {
-            return lootedTemplateIds.Contains(templateId);
+            return _lootedTemplateIds.Contains(templateId);
         }
 
         public void ToggleQuestSharing(bool state)
         {
-            canSendAndReceive = state;
+            _canSendAndReceive = state;
         }
 
         private void SendQuestPacket(IConditional conditional, Condition condition)
         {
-            if (!canSendAndReceive)
+            if (!_canSendAndReceive)
             {
                 return;
             }
@@ -150,21 +150,21 @@ namespace Fika.Core.Coop.ClientClasses
 
                     QuestConditionPacket packet = new()
                     {
-                        Nickname = player.Profile.Info.MainProfileNickname,
+                        Nickname = _player.Profile.Info.MainProfileNickname,
                         Id = counter.Id,
                         SourceId = counter.SourceId
                     };
 #if DEBUG
                     FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
 #endif
-                    player.PacketSender.SendPacket(ref packet);
+                    _player.PacketSender.SendPacket(ref packet);
                 }
             }
         }
 
         internal void ReceiveQuestPacket(ref QuestConditionPacket packet)
         {
-            if (!canSendAndReceive)
+            if (!_canSendAndReceive)
             {
                 return;
             }
@@ -202,17 +202,17 @@ namespace Fika.Core.Coop.ClientClasses
 
         internal void ReceiveQuestItemPacket(ref QuestItemPacket packet)
         {
-            if (!canSendAndReceive)
+            if (!_canSendAndReceive)
             {
                 return;
             }
 
             if (!string.IsNullOrEmpty(packet.ItemId))
             {
-                Item item = player.FindQuestItem(packet.ItemId);
+                Item item = _player.FindQuestItem(packet.ItemId);
                 if (item != null)
                 {
-                    InventoryController playerInventory = player.InventoryController;
+                    InventoryController playerInventory = _player.InventoryController;
                     GStruct440<GInterface402> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
                         playerInventory.Inventory.Equipment.ToEnumerable(),
                         InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
@@ -234,23 +234,23 @@ namespace Fika.Core.Coop.ClientClasses
 
         internal void ReceiveQuestDropItemPacket(ref QuestDropItemPacket packet)
         {
-            if (!canSendAndReceive)
+            if (!_canSendAndReceive)
             {
                 return;
             }
 
-            if (!acceptedTypes.Contains("PlaceBeacon"))
+            if (!_acceptedTypes.Contains("PlaceBeacon"))
             {
                 return;
             }
 
-            isItemBeingDropped = true;
+            _isItemBeingDropped = true;
             string itemId = packet.ItemId;
             string zoneId = packet.ZoneId;
 
             if (!HasQuestForItem(itemId, zoneId, out string questName))
             {
-                isItemBeingDropped = false;
+                _isItemBeingDropped = false;
                 return;
             }
 
@@ -261,12 +261,12 @@ namespace Fika.Core.Coop.ClientClasses
                                     iconType: EFT.Communications.ENotificationIconType.Quest);
             }
 
-            foreach (Item questItem in player.Inventory.QuestRaidItems.GetAllItems())
+            foreach (Item questItem in _player.Inventory.QuestRaidItems.GetAllItems())
             {
                 if (questItem.TemplateId == itemId && questItem.QuestItem)
                 {
-                    GStruct440<GClass3249> removeResult = InteractionsHandlerClass.Remove(questItem, player.InventoryController, true);
-                    player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
+                    GStruct440<GClass3249> removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
+                    _player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
                     {
                         if (!result.Succeed)
                         {
@@ -275,8 +275,8 @@ namespace Fika.Core.Coop.ClientClasses
                     });
                 }
             }
-            player.Profile.ItemDroppedAtPlace(itemId, zoneId);
-            isItemBeingDropped = false;
+            _player.Profile.ItemDroppedAtPlace(itemId, zoneId);
+            _isItemBeingDropped = false;
         }
 
         private bool HasQuestForItem(string itemId, string zoneId, out string questName)
@@ -345,7 +345,7 @@ namespace Fika.Core.Coop.ClientClasses
         /// <returns>Returns true if the quest type is valid, returns false if not</returns>
         internal bool ValidateQuestType(TaskConditionCounterClass counter)
         {
-            if (acceptedTypes.Contains(counter.Type))
+            if (_acceptedTypes.Contains(counter.Type))
             {
                 return true;
             }
@@ -358,7 +358,7 @@ namespace Fika.Core.Coop.ClientClasses
                 FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: CounterCreator Type {CounterCreator.type}");
 #endif
 
-                if (acceptedTypes.Contains(CounterCreator.type.ToString()))
+                if (_acceptedTypes.Contains(CounterCreator.type.ToString()))
                 {
                     return true;
                 }

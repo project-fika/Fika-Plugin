@@ -10,17 +10,17 @@ namespace Fika.Core.Networking.VOIP
 {
     public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>
     {
-        private readonly List<NetPeer> peers = [];
-        private readonly FikaCommsNetwork fikaComms = commsNetwork;
+        private readonly List<NetPeer> _peers = [];
+        private readonly FikaCommsNetwork _fikaComms = commsNetwork;
 
         protected override void AddClient(ClientInfo<FikaVOIPPeer> client)
         {
             base.AddClient(client);
-            if (client.PlayerName != fikaComms.PlayerName)
+            if (client.PlayerName != _fikaComms.PlayerName)
             {
                 if (client.Connection.Peer is RemotePeer peer)
                 {
-                    peers.Add(peer.Peer);
+                    _peers.Add(peer.Peer);
                     return;
                 }
                 FikaGlobals.LogError($"FikaVOIPServer::AddClient: Connection.Peer was not a RemotePeer!");
@@ -29,14 +29,14 @@ namespace Fika.Core.Networking.VOIP
 
         public override ServerState Update()
         {
-            for (int i = peers.Count - 1; i >= 0; i--)
+            for (int i = _peers.Count - 1; i >= 0; i--)
             {
-                if (peers[i].ConnectionState != ConnectionState.Connected)
+                if (_peers[i].ConnectionState != ConnectionState.Connected)
                 {
-                    NetPeer peer = peers[i];
+                    NetPeer peer = _peers[i];
                     FikaGlobals.LogInfo($"FikaVOIPServer::Update: Peer {peer} disconnected from VOIP service");
                     ClientDisconnected(new(new RemotePeer(peer)));
-                    peers.RemoveAt(i);
+                    _peers.RemoveAt(i);
                 }
             }
             return base.Update();

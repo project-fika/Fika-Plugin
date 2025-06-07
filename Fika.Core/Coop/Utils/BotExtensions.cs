@@ -9,7 +9,7 @@ namespace Fika.Core.Coop.Utils
 {
     public static class BotExtensions
     {
-        private static readonly ManualLogSource logger = new("BotExtensions");
+        private static readonly ManualLogSource _logger = new("BotExtensions");
 
         /// <summary>
         /// Returns all human players
@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.Utils
             if (kvp.Value == null || kvp.Value == null || kvp.Value.Position == null)
             {
 #if DEBUG
-                logger.LogWarning("Bot is null, skipping");
+                _logger.LogWarning("Bot is null, skipping");
 #endif
                 return true;
             }
@@ -103,7 +103,7 @@ namespace Fika.Core.Coop.Utils
             if (coopBot != null)
             {
 #if DEBUG
-                logger.LogWarning("Bot is not started, skipping");
+                _logger.LogWarning("Bot is not started, skipping");
 #endif
                 return true;
             }

@@ -19,15 +19,15 @@ namespace Fika.Core.Coop.HostClasses
         public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
             : base(settings, parameters, profile, localRaidSettings)
         {
-            this.localRaidSettings = localRaidSettings;
+            _localRaidSettings = localRaidSettings;
             string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
             summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
                 localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
             TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
-            server = Singleton<FikaServer>.Instance;
-            playersInTransitZone = [];
-            dediTransit = false;
-            transittedPlayers = [];
+            _server = Singleton<FikaServer>.Instance;
+            _playersInTransitZone = [];
+            _dediTransit = false;
+            _transittedPlayers = [];
         }
 
         public void PostConstruct()
@@ -44,16 +44,17 @@ namespace Fika.Core.Coop.HostClasses
             player.UpdateBtrTraderServiceData().HandleExceptions();
         }
 
-        private readonly LocalRaidSettings localRaidSettings;
-        private readonly FikaServer server;
-        private readonly Dictionary<Player, int> playersInTransitZone;
-        private bool dediTransit;
-        private readonly List<int> transittedPlayers;
+        private readonly LocalRaidSettings _localRaidSettings;
+        private readonly FikaServer _server;
+        private readonly Dictionary<Player, int> _playersInTransitZone;
+        private bool _dediTransit;
+        private readonly List<int> _transittedPlayers;
+
         public int AliveTransitPlayers
         {
             get
             {
-                return transittedPlayers.Count;
+                return _transittedPlayers.Count;
             }
         }
 
@@ -75,9 +76,9 @@ namespace Fika.Core.Coop.HostClasses
                 }
             }
 
-            if (!playersInTransitZone.ContainsKey(player))
+            if (!_playersInTransitZone.ContainsKey(player))
             {
-                playersInTransitZone.Add(player, point.parameters.id);
+                _playersInTransitZone.Add(player, point.parameters.id);
             }
 
             if (!transitPlayers.ContainsKey(player.ProfileId))
@@ -103,7 +104,7 @@ namespace Fika.Core.Coop.HostClasses
                     }
                 };
 
-                server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+                _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
                 return;
             }
             Dictionary_0[point.parameters.id].GroupEnter(player);
@@ -111,11 +112,11 @@ namespace Fika.Core.Coop.HostClasses
 
         private void OnHostPlayerExit(TransitPoint point, Player player)
         {
-            if (playersInTransitZone.TryGetValue(player, out int value))
+            if (_playersInTransitZone.TryGetValue(player, out int value))
             {
                 if (value == point.parameters.id)
                 {
-                    playersInTransitZone.Remove(player);
+                    _playersInTransitZone.Remove(player);
                 }
             }
 
@@ -140,7 +141,7 @@ namespace Fika.Core.Coop.HostClasses
                 }
             };
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void Sizes(Dictionary<int, byte> sizes)
@@ -170,7 +171,7 @@ namespace Fika.Core.Coop.HostClasses
                 }
             };
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void Timers(int pointId, Dictionary<int, ushort> timers)
@@ -202,7 +203,7 @@ namespace Fika.Core.Coop.HostClasses
                 }
             };
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void InactivePointNotification(int playerId, int pointId)
@@ -225,7 +226,7 @@ namespace Fika.Core.Coop.HostClasses
                 }
             };
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void InteractWithTransit(Player player, TransitInteractionPacketStruct packet)
@@ -270,7 +271,7 @@ namespace Fika.Core.Coop.HostClasses
                 }
             };
 
-            server.SendDataToAll(ref eventPacket, DeliveryMethod.ReliableOrdered);
+            _server.SendDataToAll(ref eventPacket, DeliveryMethod.ReliableOrdered);
         }
 
         private bool CheckForPlayers(Player player, int pointId)
@@ -290,7 +291,7 @@ namespace Fika.Core.Coop.HostClasses
             }
 
             int playersInPoint = 0;
-            foreach (KeyValuePair<Player, int> item in playersInTransitZone)
+            foreach (KeyValuePair<Player, int> item in _playersInTransitZone)
             {
                 if (item.Key.HealthController.IsAlive)
                 {
@@ -321,7 +322,7 @@ namespace Fika.Core.Coop.HostClasses
                     }
                 };
 
-                server.SendDataToAll(ref messagePacket, DeliveryMethod.ReliableOrdered);
+                _server.SendDataToAll(ref messagePacket, DeliveryMethod.ReliableOrdered);
                 return false;
             }
 
@@ -332,13 +333,13 @@ namespace Fika.Core.Coop.HostClasses
         {
             if (player.IsYourPlayer)
             {
-                dediTransit = true;
+                _dediTransit = true;
                 string location = point.parameters.location;
                 ERaidMode eraidMode = ERaidMode.Local;
                 if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
                 {
                     eraidMode = ERaidMode.Local;
-                    tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+                    tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
                 }
                 string profileId = player.ProfileId;
                 AlreadyTransitDataClass gclass = new()
@@ -351,7 +352,7 @@ namespace Fika.Core.Coop.HostClasses
                     transitionRaidId = summonedTransits[profileId].raidId,
                     raidMode = eraidMode,
                     side = player.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
-                    dayTime = localRaidSettings.timeVariant
+                    dayTime = _localRaidSettings.timeVariant
                 };
                 alreadyTransits.Add(profileId, gclass);
                 IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
@@ -364,7 +365,7 @@ namespace Fika.Core.Coop.HostClasses
                 {
                     coopGame.Extract((CoopPlayer)player, null, point);
                 }
-                transittedPlayers.Add(player.Id);
+                _transittedPlayers.Add(player.Id);
                 return;
             }
 
@@ -375,11 +376,11 @@ namespace Fika.Core.Coop.HostClasses
                 TransitId = point.parameters.id
             };
 
-            transittedPlayers.Add(player.Id);
+            _transittedPlayers.Add(player.Id);
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
-            if (FikaBackendUtils.IsHeadless && !dediTransit)
+            if (FikaBackendUtils.IsHeadless && !_dediTransit)
             {
                 ExtractHeadlessClient(point);
             }
@@ -388,7 +389,7 @@ namespace Fika.Core.Coop.HostClasses
         private void ExtractHeadlessClient(TransitPoint point)
         {
             Dictionary<string, ProfileKey> keys;
-            dediTransit = true;
+            _dediTransit = true;
 
             CoopPlayer dediPlayer = (CoopPlayer)GamePlayerOwner.MyPlayer;
 
@@ -397,7 +398,7 @@ namespace Fika.Core.Coop.HostClasses
             if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
             {
                 eraidMode = ERaidMode.Local;
-                tarkovApplication.transitionStatus = new(location, false, localRaidSettings.playerSide, eraidMode, localRaidSettings.timeVariant);
+                tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
             }
             string profileId = dediPlayer.ProfileId;
             keys = [];
@@ -418,7 +419,7 @@ namespace Fika.Core.Coop.HostClasses
                 transitionRaidId = summonedTransits[profileId].raidId,
                 raidMode = eraidMode,
                 side = dediPlayer.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
-                dayTime = localRaidSettings.timeVariant
+                dayTime = _localRaidSettings.timeVariant
             };
             alreadyTransits.Add(profileId, gclass);
 

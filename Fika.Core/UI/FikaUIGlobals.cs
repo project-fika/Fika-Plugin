@@ -16,7 +16,7 @@ namespace Fika.Core.UI
 {
     public static class FikaUIGlobals
     {
-        private static readonly Dictionary<EColor, string> keyValuePairs = new()
+        private static readonly Dictionary<EColor, string> _keyValuePairs = new()
         {
             { EColor.WHITE, "ffffff" },
             { EColor.BLACK, "000000" },
@@ -148,7 +148,7 @@ namespace Fika.Core.UI
 
         private static string GetHexByColor(EColor color)
         {
-            return keyValuePairs.TryGetValue(color, out string value) ? value : "ffffff";
+            return _keyValuePairs.TryGetValue(color, out string value) ? value : "ffffff";
         }
 
         /// <summary>

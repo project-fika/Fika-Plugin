@@ -4,8 +4,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
     public struct ExponentialMovingAverage(int n)
     {
-        private readonly double alpha = 2.0 / (n + 1);
-        private bool initialized = false;
+        private readonly double _alpha = 2.0 / (n + 1);
+        private bool _initialized = false;
 
         public double Value = 0;
         public double Variance = 0;
@@ -13,22 +13,22 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 
         public void Add(double newValue)
         {
-            if (initialized)
+            if (_initialized)
             {
                 double delta = newValue - Value;
-                Value += alpha * delta;
-                Variance = (1 - alpha) * (Variance + alpha * delta * delta);
+                Value += _alpha * delta;
+                Variance = (1 - _alpha) * (Variance + _alpha * delta * delta);
                 StandardDeviation = Math.Sqrt(Variance);
                 return;
             }
 
             Value = newValue;
-            initialized = true;
+            _initialized = true;
         }
 
         public void Reset()
         {
-            initialized = false;
+            _initialized = false;
             Value = 0;
             Variance = 0;
             StandardDeviation = 0;

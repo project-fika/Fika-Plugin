@@ -20,30 +20,30 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             get
             {
-                return weaponManager;
+                return _weaponManager;
             }
         }
         public override bool IsTriggerPressed
         {
             get
             {
-                return triggerPressed;
+                return _triggerPressed;
             }
         }
 
         public bool IsRevolver { get; internal set; }
 
-        private ObservedCoopPlayer coopPlayer;
-        private bool triggerPressed;
-        private bool needsReset;
-        private float lastFireTime = 0f;
-        private float overlapCounter = 0f;
-        private bool hasFired = false;
-        private WeaponPrefab weaponPrefab;
-        private WeaponManagerClass weaponManager;
-        private UnderbarrelManagerClass underBarrelManager;
-        private bool boltActionReload;
-        private bool isThrowingPatron;
+        private ObservedCoopPlayer _coopPlayer;
+        private bool _triggerPressed;
+        private bool _needsReset;
+        private float _lastFireTime = 0f;
+        private float _overlapCounter = 0f;
+        private bool _hasFired = false;
+        private WeaponPrefab _weaponPrefab;
+        private WeaponManagerClass _weaponManager;
+        private UnderbarrelManagerClass _underBarrelManager;
+        private bool _boltActionReload;
+        private bool _isThrowingPatron;
 
         public override bool IsAiming
         {
@@ -64,7 +64,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 _isAiming = value;
                 _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
                 method_63(_isAiming); // Set animator flags
-                coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
+                _coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
             }
         }
 
@@ -117,11 +117,11 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             _objectInHandsAnimator.SetAiming(false);
             WeaponPrefab prefab = ControllerGameObject.GetComponent<WeaponPrefab>();
-            weaponPrefab = prefab;
-            weaponManager = weaponPrefab.ObjectInHands as WeaponManagerClass;
+            _weaponPrefab = prefab;
+            _weaponManager = _weaponPrefab.ObjectInHands as WeaponManagerClass;
             if (UnderbarrelWeapon != null)
             {
-                underBarrelManager = Traverse.Create(this).Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
+                _underBarrelManager = Traverse.Create(this).Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
             }
             IsRevolver = Weapon is RevolverItemClass;
         }
@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.ObservedClasses
         public static CoopObservedFirearmController Create(ObservedCoopPlayer player, Weapon weapon)
         {
             CoopObservedFirearmController controller = smethod_6<CoopObservedFirearmController>(player, weapon);
-            controller.coopPlayer = player;
+            controller._coopPlayer = player;
             return controller;
         }
 
@@ -174,16 +174,16 @@ namespace Fika.Core.Coop.ObservedClasses
         public override void ManualUpdate(float deltaTime)
         {
             base.ManualUpdate(deltaTime);
-            if (hasFired)
+            if (_hasFired)
             {
-                lastFireTime += deltaTime;
-                if (lastFireTime > 0.1f)
+                _lastFireTime += deltaTime;
+                if (_lastFireTime > 0.1f)
                 {
                     FirearmsAnimator.SetFire(false);
-                    hasFired = false;
-                    if (needsReset)
+                    _hasFired = false;
+                    if (_needsReset)
                     {
-                        needsReset = false;
+                        _needsReset = false;
                         WeaponSoundPlayer.OnBreakLoop();
                     }
                 }
@@ -237,45 +237,45 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void WeaponOverlapping()
         {
-            if (!coopPlayer.ShouldOverlap)
+            if (!_coopPlayer.ShouldOverlap)
             {
                 return;
             }
 
-            SetWeaponOverlapValue(coopPlayer.ObservedOverlap);
+            SetWeaponOverlapValue(_coopPlayer.ObservedOverlap);
             ObservedOverlapView();
-            if (overlapCounter <= 1f)
+            if (_overlapCounter <= 1f)
             {
-                overlapCounter += Time.deltaTime / 1f;
+                _overlapCounter += Time.deltaTime / 1f;
             }
-            if (coopPlayer.LeftStanceDisabled && coopPlayer.MovementContext.LeftStanceEnabled && overlapCounter > 1f)
+            if (_coopPlayer.LeftStanceDisabled && _coopPlayer.MovementContext.LeftStanceEnabled && _overlapCounter > 1f)
             {
-                coopPlayer.MovementContext.LeftStanceController.DisableLeftStanceAnimFromHandsAction();
-                overlapCounter = 0f;
+                _coopPlayer.MovementContext.LeftStanceController.DisableLeftStanceAnimFromHandsAction();
+                _overlapCounter = 0f;
             }
-            if (!coopPlayer.MovementContext.LeftStanceController.LastAnimValue && !coopPlayer.LeftStanceDisabled && coopPlayer.MovementContext.LeftStanceEnabled && overlapCounter > 1f)
+            if (!_coopPlayer.MovementContext.LeftStanceController.LastAnimValue && !_coopPlayer.LeftStanceDisabled && _coopPlayer.MovementContext.LeftStanceEnabled && _overlapCounter > 1f)
             {
-                coopPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
-                overlapCounter = 0f;
+                _coopPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
+                _overlapCounter = 0f;
             }
 
-            coopPlayer.ShouldOverlap = false;
+            _coopPlayer.ShouldOverlap = false;
         }
 
         private void ObservedOverlapView()
         {
-            if (coopPlayer.ObservedOverlap < 0.02f)
+            if (_coopPlayer.ObservedOverlap < 0.02f)
             {
-                _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
+                _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = _coopPlayer.ObservedOverlap;
                 _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = true;
-                coopPlayer.ShouldOverlap = false;
+                _coopPlayer.ShouldOverlap = false;
                 return;
             }
 
             Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
             _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
             _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
-            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = coopPlayer.ObservedOverlap;
+            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = _coopPlayer.ObservedOverlap;
         }
 
         public override void OnPlayerDead()
@@ -283,13 +283,13 @@ namespace Fika.Core.Coop.ObservedClasses
             try
             {
                 base.OnPlayerDead();
-                triggerPressed = false;
+                _triggerPressed = false;
                 SetTriggerPressed(false);
 
-                needsReset = false;
+                _needsReset = false;
                 WeaponSoundPlayer.OnBreakLoop();
 
-                coopPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
+                _coopPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
                 ManualUpdate(Time.fixedDeltaTime);
                 if (CurrentOperation.State != EOperationState.Finished)
                 {
@@ -306,27 +306,27 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override void IEventsConsumerOnShellEject()
         {
-            if (isThrowingPatron)
+            if (_isThrowingPatron)
             {
-                isThrowingPatron = false;
+                _isThrowingPatron = false;
                 CurrentOperation.OnShellEjectEvent();
                 return;
             }
 
-            weaponManager.StartSpawnShell(coopPlayer.Velocity * 0.66f, 0);
-            if (boltActionReload)
+            _weaponManager.StartSpawnShell(_coopPlayer.Velocity * 0.66f, 0);
+            if (_boltActionReload)
             {
                 MagazineItemClass magazine = Item.GetCurrentMagazine();
                 Weapon weapon = Weapon;
                 if (magazine != null && magazine is not CylinderMagazineItemClass && weapon.HasChambers)
                 {
-                    magazine.Cartridges.PopTo(coopPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
+                    magazine.Cartridges.PopTo(_coopPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
                 }
 
                 FirearmsAnimator.SetBoltActionReload(false);
                 FirearmsAnimator.SetFire(false);
 
-                boltActionReload = false;
+                _boltActionReload = false;
             }
         }
 
@@ -389,8 +389,8 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 FirearmsAnimator.SetFire(true);
                 DryShot();
-                hasFired = true;
-                lastFireTime = 0f;
+                _hasFired = true;
+                _lastFireTime = 0f;
                 return;
             }
 
@@ -426,7 +426,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 Weapon.MalfState.AmmoToFire = ammo;
 
                 FirearmsAnimator.MisfireSlideUnknown(false);
-                weaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
+                _weaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
                 FirearmsAnimator.Malfunction((int)Weapon.MalfState.State);
 
                 switch (Weapon.MalfState.State)
@@ -460,8 +460,8 @@ namespace Fika.Core.Coop.ObservedClasses
                     }
 
                     FirearmsAnimator.SetFire(true);
-                    hasFired = true;
-                    lastFireTime = 0f;
+                    _hasFired = true;
+                    _lastFireTime = 0f;
                     return;
                 }
 
@@ -478,7 +478,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         MagazineItemClass currentMagazine = Weapon.GetCurrentMagazine();
                         if (currentMagazine != null)
                         {
-                            AmmoItemClass fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(coopPlayer.InventoryController).Value.ResultItem;
+                            AmmoItemClass fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(_coopPlayer.InventoryController).Value.ResultItem;
                             if (fedAmmo != null)
                             {
                                 Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
@@ -494,7 +494,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     }
                     else
                     {
-                        weaponManager.MoveAmmoFromChamberToShellPort(true, 0);
+                        _weaponManager.MoveAmmoFromChamberToShellPort(true, 0);
                     }
                 }
             }
@@ -532,7 +532,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
             {
-                triggerPressed = true;
+                _triggerPressed = true;
             }
 
             float pitchMult = method_61();
@@ -543,12 +543,12 @@ namespace Fika.Core.Coop.ObservedClasses
             Weapon.MalfState.LastShotTime = packet.LastShotTime;
             Weapon.MalfState.SlideOnOverheatReached = packet.SlideOnOverheatReached;
 
-            triggerPressed = false;
-            hasFired = true;
-            lastFireTime = 0f;
+            _triggerPressed = false;
+            _hasFired = true;
+            _lastFireTime = 0f;
             if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
             {
-                needsReset = true;
+                _needsReset = true;
             }
 
             MagazineItemClass magazine = Weapon.GetCurrentMagazine();
@@ -579,7 +579,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     {
                         grenadeBullet.IsUsed = true;
                         UnderbarrelWeapon.Chamber.RemoveItem();
-                        underBarrelManager?.DestroyPatronInWeapon();
+                        _underBarrelManager?.DestroyPatronInWeapon();
                     }
                     FirearmsAnimator.SetFire(false);
                     return;
@@ -593,7 +593,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     {
                         grenadeBullet.IsUsed = true;
                         slot.RemoveItem();
-                        weaponManager.MoveAmmoFromChamberToShellPort(true, index);
+                        _weaponManager.MoveAmmoFromChamberToShellPort(true, index);
                         Weapon.ShellsInChambers[index] = grenadeBullet.AmmoTemplate;
                         FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
                         FirearmsAnimator.SetShellsInWeapon(Weapon.ShellsInWeaponCount);
@@ -613,11 +613,11 @@ namespace Fika.Core.Coop.ObservedClasses
                             bClass.IsUsed = true;
                             if (!bClass.AmmoTemplate.RemoveShellAfterFire)
                             {
-                                weaponManager.MoveAmmoFromChamberToShellPort(bClass.IsUsed, i);
+                                _weaponManager.MoveAmmoFromChamberToShellPort(bClass.IsUsed, i);
                             }
                             else
                             {
-                                weaponManager.DestroyPatronInWeapon();
+                                _weaponManager.DestroyPatronInWeapon();
                             }
                             if (!bClass.AmmoTemplate.RemoveShellAfterFire)
                             {
@@ -629,7 +629,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 else
                 {
                     Weapon.Chambers[0].RemoveItem(false);
-                    HandleShellEvent(weaponManager, packet.ChamberIndex, ammo, magazine);
+                    HandleShellEvent(_weaponManager, packet.ChamberIndex, ammo, magazine);
                 }
                 FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
             }
@@ -646,7 +646,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         GStruct440<GInterface402> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
                         if (removeOperation.Failed)
                         {
-                            FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {coopPlayer.NetId}, error: {removeOperation.Error}");
+                            FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {_coopPlayer.NetId}, error: {removeOperation.Error}");
                         }
                         inventoryController.CheckChamber(Weapon, false);
                         cylinderAmmo.IsUsed = true;
@@ -659,7 +659,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
                     FirearmsAnimator.SetDoubleAction(Convert.ToSingle(Weapon.CylinderHammerClosed));
                     FirearmsAnimator.SetHammerArmed(!Weapon.CylinderHammerClosed);
-                    weaponManager.MoveAmmoFromChamberToShellPort(true, firstIndex);
+                    _weaponManager.MoveAmmoFromChamberToShellPort(true, firstIndex);
 
                     FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
 
@@ -702,7 +702,7 @@ namespace Fika.Core.Coop.ObservedClasses
             FirearmsAnimator.SetBoltActionReload(true);
             FirearmsAnimator.SetFire(true);
 
-            boltActionReload = true;
+            _boltActionReload = true;
         }
 
         public List<AmmoItemClass> FindAmmoByIds(string[] ammoIds)
@@ -761,7 +761,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             public override void Start(GClass1811 reloadMultiBarrelResult, Callback callback)
             {
-                observedController.isThrowingPatron = true;
+                observedController._isThrowingPatron = true;
                 base.Start(reloadMultiBarrelResult, callback);
             }
         }
@@ -772,7 +772,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             public override void Start(GClass1812 reloadSingleBarrelResult, Callback callback)
             {
-                observedController.isThrowingPatron = true;
+                observedController._isThrowingPatron = true;
                 base.Start(reloadSingleBarrelResult, callback);
             }
         }
@@ -783,7 +783,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             public override void Start()
             {
-                observedController.isThrowingPatron = true;
+                observedController._isThrowingPatron = true;
                 base.Start();
             }
         }
@@ -794,7 +794,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
             public override void Start(AmmoItemClass ammo, Callback callback)
             {
-                observedController.isThrowingPatron = true;
+                observedController._isThrowingPatron = true;
                 base.Start(ammo, callback);
             }
         }

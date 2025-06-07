@@ -21,22 +21,22 @@ namespace Fika.Core.Coop.BotClasses
                 return false;
             }
         }
-        private readonly CoopBot coopBot;
-        private readonly IPlayerSearchController searchController;
+        private readonly CoopBot _coopBot;
+        private readonly IPlayerSearchController _searchController;
 
         public CoopBotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
         {
-            coopBot = (CoopBot)player;
+            _coopBot = (CoopBot)player;
             MongoID_0 = currentId;
             Ushort_0 = nextOperationId;
-            searchController = new BotSearchControllerClass(profile);
+            _searchController = new BotSearchControllerClass(profile);
         }
 
         public override IPlayerSearchController PlayerSearchController
         {
             get
             {
-                return searchController;
+                return _searchController;
             }
         }
 
@@ -52,25 +52,25 @@ namespace Fika.Core.Coop.BotClasses
             if (operation is not GClass3329)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {coopBot.Profile.Nickname}");
+                FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_coopBot.Profile.Nickname}");
 #endif
                 EFTWriterClass eftWriter = new();
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
-                    NetId = coopBot.NetId,
+                    NetId = _coopBot.NetId,
                     CallbackId = operation.Id,
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                coopBot.PacketSender.SendPacket(ref packet);
+                _coopBot.PacketSender.SendPacket(ref packet);
             }
             HandleOperation(operation, callback).HandleExceptions();
         }
 
         private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
         {
-            if (coopBot.HealthController.IsAlive)
+            if (_coopBot.HealthController.IsAlive)
             {
                 await Task.Yield();
             }

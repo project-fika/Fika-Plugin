@@ -10,7 +10,7 @@ namespace Fika.Core.Coop.ClientClasses
     public sealed class CoopClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth)
         : GClass2853(healthInfo, player, inventoryController, skillManager, aiHealth)
     {
-        private readonly CoopPlayer coopPlayer = (CoopPlayer)player;
+        private readonly CoopPlayer _coopPlayer = (CoopPlayer)player;
         public override bool _sendNetworkSyncPackets
         {
             get
@@ -23,17 +23,17 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
-                HealthSyncPacket deathPacket = coopPlayer.SetupCorpseSyncPacket(packet);
-                coopPlayer.PacketSender.SendPacket(ref deathPacket);
+                HealthSyncPacket deathPacket = _coopPlayer.SetupCorpseSyncPacket(packet);
+                _coopPlayer.PacketSender.SendPacket(ref deathPacket);
                 return;
             }
 
             HealthSyncPacket netPacket = new()
             {
-                NetId = coopPlayer.NetId,
+                NetId = _coopPlayer.NetId,
                 Packet = packet
             };
-            coopPlayer.PacketSender.SendPacket(ref netPacket);
+            _coopPlayer.PacketSender.SendPacket(ref netPacket);
         }
     }
 }

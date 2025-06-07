@@ -12,8 +12,8 @@ namespace Fika.Core.Coop.ObservedClasses
 {
     internal class CoopObservedMedsController : Player.MedsController
     {
-        private CoopPlayer coopPlayer;
-        private GStruct356<EBodyPart> healParts;
+        private CoopPlayer _coopPlayer;
+        private GStruct356<EBodyPart> _healParts;
 
         private ObservedMedsOperation ObservedOperation
         {
@@ -26,8 +26,8 @@ namespace Fika.Core.Coop.ObservedClasses
         public static CoopObservedMedsController Create(CoopPlayer player, Item item, GStruct356<EBodyPart> bodyParts, float amount, int animationVariant)
         {
             CoopObservedMedsController controller = smethod_6<CoopObservedMedsController>(player, item, bodyParts, amount, animationVariant);
-            controller.coopPlayer = player;
-            controller.healParts = bodyParts;
+            controller._coopPlayer = player;
+            controller._healParts = bodyParts;
             return controller;
         }
 
@@ -56,7 +56,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             if (ObservedOperation != null)
             {
-                coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
+                _coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
                 OnOutUseEvent -= ObservedOperation.ObservedMedsController_OnOutUseEvent;
             }
             base.Destroy();
@@ -66,7 +66,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             if (ObservedOperation != null)
             {
-                coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
+                _coopPlayer.HealthController.EffectRemovedEvent -= ObservedOperation.HealthController_EffectRemovedEvent;
                 OnOutUseEvent -= ObservedOperation.ObservedMedsController_OnOutUseEvent;
             }
             base.OnPlayerDead();
@@ -133,7 +133,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     animation = 0;
                 }
                 observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
-                observedMedsController.coopPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
+                observedMedsController._coopPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
                 observedMedsController.OnOutUseEvent += ObservedMedsController_OnOutUseEvent;
             }
 
@@ -163,7 +163,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         animator.SetNextLimb(true);
                     }
 
-                    float mult = observedMedsController.coopPlayer.Skills.SurgerySpeed.Value / 100f;
+                    float mult = observedMedsController._coopPlayer.Skills.SurgerySpeed.Value / 100f;
                     animator.SetUseTimeMultiplier(1f + mult);
 
                     int variant = 0;

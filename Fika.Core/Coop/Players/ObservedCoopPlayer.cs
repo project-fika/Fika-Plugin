@@ -1127,7 +1127,7 @@ namespace Fika.Core.Coop.Players
 				{
 					DamageInfo.Weapon = weapon;
 				}*/
-                lastWeaponId = packet.WeaponId;
+                _lastWeaponId = packet.WeaponId;
             }
 
             ShotReactions(DamageInfo, packet.BodyPartType);
@@ -1928,9 +1928,9 @@ namespace Fika.Core.Coop.Players
                 LastAggressor = killer;
             }
             LastBodyPart = bodyPart;
-            lastWeaponId = weaponId;
+            _lastWeaponId = weaponId;
 
-            if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(lastWeaponId))
+            if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(_lastWeaponId))
             {
                 FindKillerWeapon();
             }

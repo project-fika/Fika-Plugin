@@ -58,10 +58,10 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        protected string lastWeaponId;
-        private bool shouldSendSideEffect;
-        private VoipSettingsClass voipHandler;
-        private FikaVOIPController voipController;
+        protected string _lastWeaponId;
+        private bool _shouldSendSideEffect;
+        private VoipSettingsClass _voipHandler;
+        private FikaVOIPController _voipController;
 
         public ClientMovementContext ClientMovementContext
         {
@@ -96,7 +96,7 @@ namespace Fika.Core.Coop.Players
 
             player.IsYourPlayer = true;
             player.NetId = netId;
-            player.voipHandler = VoipSettingsClass.Default;
+            player._voipHandler = VoipSettingsClass.Default;
 
             PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new CoopHostInventoryController(player, profile, false)
                 : new CoopClientInventoryController(player, profile, false);
@@ -179,7 +179,7 @@ namespace Fika.Core.Coop.Players
         {
             if (IsYourPlayer)
             {
-                voipController?.ReceiveAbuseNotification(reporterId);
+                _voipController?.ReceiveAbuseNotification(reporterId);
             }
         }
 
@@ -190,20 +190,20 @@ namespace Fika.Core.Coop.Players
 
         public override void InitVoip(EVoipState voipState)
         {
-            if (voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
+            if (_voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
             {
                 SoundSettingsDataClass settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
                 if (!settings.VoipEnabled)
                 {
                     voipState = EVoipState.Off;
                 }
-                if (!voipHandler.MicrophoneChecked)
+                if (!_voipHandler.MicrophoneChecked)
                 {
                     voipState = EVoipState.MicrophoneFail;
                 }
                 base.InitVoip(voipState);
-                voipController = new(this, settings);
-                VoipController = voipController;
+                _voipController = new(this, settings);
+                VoipController = _voipController;
             }
         }
 
@@ -270,7 +270,7 @@ namespace Fika.Core.Coop.Players
 
             if (damageInfo.Weapon != null)
             {
-                lastWeaponId = damageInfo.Weapon.Id;
+                _lastWeaponId = damageInfo.Weapon.Id;
             }
 
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
@@ -287,7 +287,7 @@ namespace Fika.Core.Coop.Players
             {
                 if (damageInfo.Weapon != null)
                 {
-                    lastWeaponId = damageInfo.Weapon.Id;
+                    _lastWeaponId = damageInfo.Weapon.Id;
                 }
                 return SimulatedApplyShot(damageInfo, bodyPartType, colliderType, armorPlateCollider);
             }
@@ -497,15 +497,15 @@ namespace Fika.Core.Coop.Players
         protected Item FindWeapon()
         {
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{lastWeaponId}'!");
+            FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{_lastWeaponId}'!");
 #endif
-            GStruct442<Item> itemResult = FindItemById(lastWeaponId, false, false);
+            GStruct442<Item> itemResult = FindItemById(_lastWeaponId, false, false);
             Item item = itemResult.Value;
             if (!itemResult.Succeeded)
             {
                 foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaGame>.Instance.GameController.ThrownGrenades)
                 {
-                    if (grenadeClass.Id == lastWeaponId)
+                    if (grenadeClass.Id == _lastWeaponId)
                     {
                         item = grenadeClass;
                         break;
@@ -515,7 +515,7 @@ namespace Fika.Core.Coop.Players
 
             if (item == null)
             {
-                StationaryWeapon stationaryWeapon = GameWorld.FindStationaryWeaponByItemId(lastWeaponId);
+                StationaryWeapon stationaryWeapon = GameWorld.FindStationaryWeaponByItemId(_lastWeaponId);
                 if (stationaryWeapon != null)
                 {
                     item = stationaryWeapon.Item;
@@ -544,7 +544,7 @@ namespace Fika.Core.Coop.Players
             Item item = FindWeapon();
             if (item == null)
             {
-                FikaGlobals.LogError($"Could not find killer weapon: {lastWeaponId}!");
+                FikaGlobals.LogError($"Could not find killer weapon: {_lastWeaponId}!");
                 return;
             }
             LastDamageInfo.Weapon = item;
@@ -1029,7 +1029,7 @@ namespace Fika.Core.Coop.Players
                 Packet = packet,
                 KillerId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty,
                 BodyPart = LastBodyPart,
-                WeaponId = lastWeaponId,
+                WeaponId = _lastWeaponId,
                 CorpseSyncPacket = new()
                 {
                     BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
@@ -1062,7 +1062,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnDead(EDamageType damageType)
         {
-            if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(lastWeaponId))
+            if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(_lastWeaponId))
             {
                 FindKillerWeapon();
 #if DEBUG
@@ -1082,7 +1082,7 @@ namespace Fika.Core.Coop.Players
 
         private void GenerateDogtagDetails()
         {
-            if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(lastWeaponId))
+            if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(_lastWeaponId))
             {
                 FindKillerWeapon();
 #if DEBUG
@@ -1452,16 +1452,16 @@ namespace Fika.Core.Coop.Players
                         }
                     }
                 }
-                lastWeaponId = packet.WeaponId;
+                _lastWeaponId = packet.WeaponId;
             }
 
-            if (damageInfo.DamageType == EDamageType.Melee && !string.IsNullOrEmpty(lastWeaponId))
+            if (damageInfo.DamageType == EDamageType.Melee && !string.IsNullOrEmpty(_lastWeaponId))
             {
                 Item item = FindWeapon();
                 if (item != null)
                 {
                     damageInfo.Weapon = item;
-                    (damageInfo.Player.iPlayer as CoopPlayer).shouldSendSideEffect = true;
+                    (damageInfo.Player.iPlayer as CoopPlayer)._shouldSendSideEffect = true;
 #if DEBUG
                     FikaPlugin.Instance.FikaLogger.LogWarning("Found weapon for knife damage: " + item.Name.Localized());
 #endif
@@ -1475,7 +1475,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnSideEffectApplied(SideEffectComponent sideEffect)
         {
-            if (!shouldSendSideEffect)
+            if (!_shouldSendSideEffect)
             {
                 return;
             }
@@ -1487,7 +1487,7 @@ namespace Fika.Core.Coop.Players
             };
 
             PacketSender.SendPacket(ref packet, true);
-            shouldSendSideEffect = false;
+            _shouldSendSideEffect = false;
         }
 
         public void HandleArmorDamagePacket(ArmorDamagePacket packet)
@@ -1524,7 +1524,7 @@ namespace Fika.Core.Coop.Players
 
         public override void UpdateTick()
         {
-            voipController?.Update();
+            _voipController?.Update();
             base.UpdateTick();
         }
 
@@ -1545,7 +1545,7 @@ namespace Fika.Core.Coop.Players
                 PacketSender.DestroyThis();
                 PacketSender = null;
             }
-            voipController?.Dispose();
+            _voipController?.Dispose();
             base.Dispose();
         }
 

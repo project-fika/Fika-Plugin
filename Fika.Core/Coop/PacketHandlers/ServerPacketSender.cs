@@ -30,23 +30,23 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             get
             {
-                return player.CurrentManagedState.Name is not (EPlayerState.Idle
+                return _player.CurrentManagedState.Name is not (EPlayerState.Idle
                     or EPlayerState.IdleWeaponMounting
                     or EPlayerState.ProneIdle);
             }
         }
 
-        private CoopPlayer player;
-        private PlayerStatePacket state;
+        private CoopPlayer _player;
+        private PlayerStatePacket _state;
 
         private bool CanPing
         {
             get
             {
-                return FikaPlugin.UsePingSystem.Value && player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
+                return FikaPlugin.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                     && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
                     && lastPingTime < DateTime.Now.AddSeconds(-3) && Singleton<IFikaGame>.Instantiated &&
-                    Singleton<IFikaGame>.Instance.GameController.GameInstance.Status is GameStatus.Started && !player.IsInventoryOpened;
+                    Singleton<IFikaGame>.Instance.GameController.GameInstance.Status is GameStatus.Started && !_player.IsInventoryOpened;
             }
         }
 
@@ -58,14 +58,14 @@ namespace Fika.Core.Coop.PacketHandlers
         public static ServerPacketSender Create(CoopPlayer player)
         {
             ServerPacketSender sender = player.gameObject.AddComponent<ServerPacketSender>();
-            sender.player = player;
+            sender._player = player;
             sender.Server = Singleton<FikaServer>.Instance;
             sender.enabled = false;
             sender.lastPingTime = DateTime.Now;
             sender.updateRate = sender.Server.SendRate;
             sender.updateCount = 0;
             sender.updatesPerTick = 1f / sender.updateRate;
-            sender.state = new(player.NetId);
+            sender._state = new(player.NetId);
             return sender;
         }
 
@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.PacketHandlers
             enabled = true;
             Enabled = true;
             SendState = true;
-            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            if (_player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.LateInit();
             }
@@ -107,8 +107,8 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private void SendPlayerState()
         {
-            state.UpdateData(player, IsMoving);
-            Server.SendDataToAll(ref state, DeliveryMethod.Unreliable);
+            _state.UpdateData(_player, IsMoving);
+            Server.SendDataToAll(ref _state, DeliveryMethod.Unreliable);
         }
 
         protected void LateUpdate()
@@ -129,16 +129,16 @@ namespace Fika.Core.Coop.PacketHandlers
                 originTransform = freeCamController.CameraMain.gameObject.transform;
                 sourceRaycast = new(originTransform.position + originTransform.forward / 2f, originTransform.forward);
             }
-            else if (player.HealthController.IsAlive)
+            else if (_player.HealthController.IsAlive)
             {
-                if (player.HandsController is CoopClientFirearmController controller && controller.IsAiming)
+                if (_player.HandsController is CoopClientFirearmController controller && controller.IsAiming)
                 {
                     sourceRaycast = new(controller.FireportPosition, controller.WeaponDirection);
                 }
                 else
                 {
-                    originTransform = player.CameraPosition;
-                    sourceRaycast = new(originTransform.position + originTransform.forward / 2f, player.LookDirection);
+                    originTransform = _player.CameraPosition;
+                    sourceRaycast = new(originTransform.position + originTransform.forward / 2f, _player.LookDirection);
                 }
             }
             else
@@ -213,15 +213,15 @@ namespace Fika.Core.Coop.PacketHandlers
                     PingLocation = hitPoint,
                     PingType = pingType,
                     PingColor = pingColor,
-                    Nickname = player.Profile.Info.MainProfileNickname,
+                    Nickname = _player.Profile.Info.MainProfileNickname,
                     LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                 };
 
                 SendPacket(ref packet, true);
 
-                if (FikaPlugin.PlayPingAnimation.Value && player.HealthController.IsAlive)
+                if (FikaPlugin.PlayPingAnimation.Value && _player.HealthController.IsAlive)
                 {
-                    player.vmethod_7(EInteraction.ThereGesture);
+                    _player.vmethod_7(EInteraction.ThereGesture);
                 }
             }
         }

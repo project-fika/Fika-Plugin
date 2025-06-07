@@ -31,14 +31,9 @@ using static LocationSettingsClass;
 
 namespace Fika.Core.Coop.GameMode
 {
-    public class ClientGameController : BaseGameController
+    public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, ISession session)
+        : BaseGameController(game, updateQueue, gameWorld, session)
     {
-        public ClientGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, ISession session)
-            : base(game, updateQueue, gameWorld, session)
-        {
-
-        }
-
         public bool ExfiltrationReceived { get; set; }
         public bool HasReceivedLoot { get; set; }
         public bool InteractablesInitialized { get; set; }

@@ -189,7 +189,7 @@ namespace Fika.Core.Coop.Players
 
             if (damageInfo.Weapon != null)
             {
-                lastWeaponId = damageInfo.Weapon.Id;
+                _lastWeaponId = damageInfo.Weapon.Id;
             }
 
             return hitInfo;
@@ -199,7 +199,7 @@ namespace Fika.Core.Coop.Players
         {
             if (damageInfo.Weapon != null)
             {
-                lastWeaponId = damageInfo.Weapon.Id;
+                _lastWeaponId = damageInfo.Weapon.Id;
             }
             base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
         }

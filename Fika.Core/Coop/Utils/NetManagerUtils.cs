@@ -16,13 +16,13 @@ namespace Fika.Core.Coop.Utils
     {
         public static GameObject FikaGameObject;
 
-        private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
+        private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
 
         public static void CreateFikaGameObject()
         {
             FikaGameObject = new GameObject("FikaGameObject");
             GameObject.DontDestroyOnLoad(FikaGameObject);
-            logger.LogInfo("FikaGameObject has been created!");
+            _logger.LogInfo("FikaGameObject has been created!");
         }
 
         public static void CreateNetManager(bool isServer)
@@ -39,14 +39,14 @@ namespace Fika.Core.Coop.Utils
             {
                 FikaServer server = FikaGameObject.AddComponent<FikaServer>();
                 Singleton<FikaServer>.Create(server);
-                logger.LogInfo("FikaServer has started!");
+                _logger.LogInfo("FikaServer has started!");
                 Singleton<IFikaNetworkManager>.Create(server);
                 return;
             }
 
             FikaClient client = FikaGameObject.AddComponent<FikaClient>();
             Singleton<FikaClient>.Create(client);
-            logger.LogInfo("FikaClient has started!");
+            _logger.LogInfo("FikaClient has started!");
             Singleton<IFikaNetworkManager>.Create(client);
 
         }
@@ -60,7 +60,7 @@ namespace Fika.Core.Coop.Utils
 
             FikaPingingClient pingingClient = FikaGameObject.AddComponent<FikaPingingClient>();
             Singleton<FikaPingingClient>.Create(pingingClient);
-            logger.LogInfo("FikaPingingClient has started!");
+            _logger.LogInfo("FikaPingingClient has started!");
         }
 
         public static void DestroyNetManager(bool isServer)
@@ -98,7 +98,7 @@ namespace Fika.Core.Coop.Utils
                     FikaServer server = Singleton<FikaServer>.Instance;
                     if (!Singleton<IFikaNetworkManager>.TryRelease(server))
                     {
-                        logger.LogError("Unable to release Server from Singleton!");
+                        _logger.LogError("Unable to release Server from Singleton!");
                     }
                     try
                     {
@@ -107,18 +107,18 @@ namespace Fika.Core.Coop.Utils
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError("DestroyNetManager: " + ex.Message);
+                        _logger.LogError("DestroyNetManager: " + ex.Message);
                     }
                     Singleton<FikaServer>.TryRelease(server);
                     GameObject.Destroy(server);
-                    logger.LogInfo("Destroyed FikaServer");
+                    _logger.LogInfo("Destroyed FikaServer");
                     return;
                 }
 
                 FikaClient client = Singleton<FikaClient>.Instance;
                 if (!Singleton<IFikaNetworkManager>.TryRelease(client))
                 {
-                    logger.LogError("Unable to release Client from Singleton!");
+                    _logger.LogError("Unable to release Client from Singleton!");
                 }
                 try
                 {
@@ -127,11 +127,11 @@ namespace Fika.Core.Coop.Utils
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError("DestroyNetManager: " + ex.Message);
+                    _logger.LogError("DestroyNetManager: " + ex.Message);
                 }
                 Singleton<FikaClient>.TryRelease(client);
                 GameObject.Destroy(client);
-                logger.LogInfo("Destroyed FikaClient");
+                _logger.LogInfo("Destroyed FikaClient");
             }
         }
 
@@ -144,7 +144,7 @@ namespace Fika.Core.Coop.Utils
                 pingingClient.NetClient.Stop();
                 Singleton<FikaPingingClient>.TryRelease(pingingClient);
                 GameObject.Destroy(pingingClient);
-                logger.LogInfo("Destroyed FikaPingingClient");
+                _logger.LogInfo("Destroyed FikaPingingClient");
             }
         }
 
@@ -172,13 +172,13 @@ namespace Fika.Core.Coop.Utils
                 return Task.CompletedTask;
             }
 
-            logger.LogError("InitNetManager: FikaGameObject was null!");
+            _logger.LogError("InitNetManager: FikaGameObject was null!");
             throw new NullReferenceException("FikaGameObject was null");
         }
 
         public static Task SetupGameVariables(CoopPlayer coopPlayer)
         {
-            logger.LogInfo("Setting up game variables...");
+            _logger.LogInfo("Setting up game variables...");
             Singleton<IFikaNetworkManager>.Instance.SetupGameVariables(coopPlayer);
             return Task.CompletedTask;
         }
@@ -203,7 +203,7 @@ namespace Fika.Core.Coop.Utils
                     return;
                 }
 
-                logger.LogError("StopPinger: Could not find FikaPinger!");
+                _logger.LogError("StopPinger: Could not find FikaPinger!");
             }
         }
 
@@ -214,7 +214,7 @@ namespace Fika.Core.Coop.Utils
                 return Task.CompletedTask;
             }
 
-            logger.LogInfo("Creating CoopHandler...");
+            _logger.LogInfo("Creating CoopHandler...");
             IFikaNetworkManager networkManager = Singleton<IFikaNetworkManager>.Instance;
             if (networkManager != null)
             {
@@ -230,7 +230,7 @@ namespace Fika.Core.Coop.Utils
                     }
 
                     GameObject.Destroy(coopHandler);
-                    logger.LogError("No ServerId found, deleting CoopHandler!");
+                    _logger.LogError("No ServerId found, deleting CoopHandler!");
                     throw new MissingReferenceException("No Server Id found");
                 }
             }
