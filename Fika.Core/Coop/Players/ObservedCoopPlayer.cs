@@ -181,8 +181,8 @@ namespace Fika.Core.Coop.Players
                 observedQuestController.Run();
             }
 
-            player.VoipState = (!FikaBackendUtils.IsHeadless && !aiControl &&
-                !profile.IsHeadlessProfile() && Singleton<IFikaNetworkManager>.Instance.AllowVOIP) ? EVoipState.Available : EVoipState.NotAvailable;
+            player.VoipState = (!FikaBackendUtils.IsHeadless && !aiControl && Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
+                ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
                 statisticsManager, observedQuestController, null,

@@ -164,16 +164,6 @@ namespace Fika.Core.Coop.Utils
         }
 
         /// <summary>
-        /// Returns true if the profile is a headless user in game
-        /// </summary>
-        /// <param name="profile"></param>
-        /// <returns><see cref="bool"/></returns>
-        public static bool IsHeadlessProfile(this Profile profile)
-        {
-            return profile.Info != null && !string.IsNullOrEmpty(profile.Info.Nickname) && profile.Info.Nickname.ToLower().StartsWith("headless_");
-        }
-
-        /// <summary>
         /// Forces the <see cref="InfoClass.MainProfileNickname"/> to be set on a profile
         /// </summary>
         /// <param name="infoClass"></param>
@@ -294,17 +284,6 @@ namespace Fika.Core.Coop.Utils
         public static bool IsGroupMember(this Player player)
         {
             return player.GroupId == "Fika";
-        }
-
-        /// <summary>
-        /// Checks whether a corpse is visible for the camera
-        /// </summary>
-        /// <param name="corpse"></param>
-        /// <returns>True if the corpse is visible</returns>
-        public static bool IsVisible(this ObservedCorpse corpse)
-        {
-            return corpse.IsVisible();
-            //return Traverse.Create(corpse).Field<PlayerBody>("PlayerBody").Value.IsVisible();
         }
 
         /// <summary>

@@ -394,7 +394,6 @@ namespace Fika.Core.Coop.Components
             int netId = spawnObject.NetId;
             MongoID firstId = spawnObject.CurrentId;
             ushort firstOperationId = spawnObject.FirstOperationId;
-            bool isHeadlessProfile = !isAi && profile.IsHeadlessProfile();
             byte[] healthBytes = spawnObject.HealthBytes;
             bool isZombie = spawnObject.IsZombie;
 
@@ -418,10 +417,7 @@ namespace Fika.Core.Coop.Components
                 return null;
             }
 
-            if (!isHeadlessProfile)
-            {
-                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer);
-            }
+            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer);
 
             otherPlayer.NetId = netId;
 #if DEBUG
@@ -441,7 +437,7 @@ namespace Fika.Core.Coop.Components
                 _logger.LogError($"Trying to add {otherPlayer.Profile.Nickname} to list of players but it was already there!");
             }
 
-            if (!isAi && !isHeadlessProfile && !HumanPlayers.Contains(otherPlayer))
+            if (!isAi && !HumanPlayers.Contains(otherPlayer))
             {
                 HumanPlayers.Add(otherPlayer);
             }

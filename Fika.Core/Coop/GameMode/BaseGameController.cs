@@ -407,7 +407,7 @@ namespace Fika.Core.Coop.GameMode
             for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
             {
                 CoopPlayer player = _coopHandler.HumanPlayers[i];
-                if (player.IsYourPlayer || player.Profile.IsHeadlessProfile())
+                if (player.IsYourPlayer)
                 {
                     continue;
                 }
@@ -424,7 +424,7 @@ namespace Fika.Core.Coop.GameMode
             for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
             {
                 CoopPlayer player = _coopHandler.HumanPlayers[i];
-                if (player.IsYourPlayer || player.Profile.IsHeadlessProfile())
+                if (player.IsYourPlayer)
                 {
                     continue;
                 }

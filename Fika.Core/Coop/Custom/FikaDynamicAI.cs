@@ -123,11 +123,6 @@ namespace Fika.Core.Coop.Custom
         {
             foreach (CoopPlayer player in _coopHandler.HumanPlayers)
             {
-                // Do not count the headless client profile as an active player
-                if (player.Profile.IsHeadlessProfile())
-                {
-                    continue;
-                }
                 _humanPlayers.Add(player);
             }
         }
