@@ -69,6 +69,8 @@ namespace Fika.Core.Console
         /// <param name="netId"></param>
         public static void BringReplicated(int netId)
         {
+            LogInfo($"Received bring request from {netId}");
+
             if (!CheckForGame())
             {
                 return;
