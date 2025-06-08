@@ -842,7 +842,7 @@ namespace Fika.Core.Coop.GameMode
             }
 
             TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
-            if (transitController != null)
+            if (transitController != null && transitPoint != null)
             {
                 if (transitController.alreadyTransits.TryGetValue(player.ProfileId, out AlreadyTransitDataClass data))
                 {

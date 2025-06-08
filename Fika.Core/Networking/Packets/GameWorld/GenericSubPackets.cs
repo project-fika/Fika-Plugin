@@ -65,8 +65,11 @@ namespace Fika.Core.Networking
                         }
                     }
 
-                    playerToApply.Dispose();
-                    AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
+                    if (playerToApply != null)
+                    {
+                        playerToApply.Dispose();
+                        AssetPoolObject.ReturnToPool(playerToApply.gameObject, true); 
+                    }
                 }
             }
 

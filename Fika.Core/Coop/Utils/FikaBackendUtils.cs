@@ -114,7 +114,7 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                if (transitData == null)
+                if (_transitData == null)
                 {
                     return new()
                     {
@@ -125,15 +125,15 @@ namespace Fika.Core.Coop.Utils
                     };
                 }
 
-                return transitData;
+                return _transitData;
             }
             set
             {
-                transitData = value;
+                _transitData = value;
             }
         }
 
-        private static RaidTransitionInfoClass transitData;
+        private static RaidTransitionInfoClass _transitData;
 
         public static void ResetTransitData()
         {
