@@ -659,7 +659,10 @@ namespace Fika.Core.Networking
                             GlobalEventHandlerClass.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(playerToApply.PlayerId, packet.Status);
                             return;
                         }
+
+                        return;
                     }
+
                     gameWorld.BtrController.BtrView.Interaction(playerToApply, packet.Data);
                 }
             }
