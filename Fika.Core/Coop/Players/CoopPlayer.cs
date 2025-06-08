@@ -1237,17 +1237,8 @@ namespace Fika.Core.Coop.Players
 
         public void SetupMainPlayer()
         {
-            // Set own group id, set different group to headless client
-            if (FikaBackendUtils.IsHeadless)
-            {
-                Profile.Info.GroupId = "HEADLESS";
-                Profile.Info.GroupId = "HEADLESS";
-            }
-            else
-            {
-                Profile.Info.GroupId = "Fika";
-                Profile.Info.TeamId = "Fika";
-            }
+            Profile.Info.GroupId = "Fika";
+            Profile.Info.TeamId = "Fika";
         }
 
         public void HandleHeadLightsPacket(HeadLightsPacket packet)
