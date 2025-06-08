@@ -373,7 +373,7 @@ namespace Fika.Core.Console
             }
 
             botController.BotSpawner.ActivateBotsByWave(newBotData);
-            LogInfo($"SpawnNPC completed. {amount} bots spawned.");
+            LogInfo($"SpawnNPC completed, requested {amount} of {wildSpawnType}");
         }
 
         [ConsoleCommand("spawnAirdrop", "", null, "Spawns an airdrop")]
