@@ -528,9 +528,11 @@ namespace Fika.Core.Coop.GameMode
 #if DEBUG
                 Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
                 JsonType.BTRServerSettings settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
-                GStruct118 mapSettings = settings.ServerMapBTRSettings.Values.First(x => x.MapID == gameWorld.LocationId);
-                mapSettings.ChanceSpawn = 100;
-                mapSettings.SpawnPeriod = new(5, 10);
+                KeyValuePair<string, GStruct118> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
+                GStruct118 btrSettings = mapSettings.Value;
+                btrSettings.ChanceSpawn = 100;
+                btrSettings.SpawnPeriod = new(5, 10);
+                settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
 #endif
                 gameWorld.BtrController = new BTRControllerClass(gameWorld);
                 if (IsServer)
