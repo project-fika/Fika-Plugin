@@ -335,9 +335,10 @@ namespace Fika.Core.Coop.ObservedClasses
             WeaponSoundPlayer.Release();
             Traverse<bool> isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
             int attempts = 0;
+            WaitForEndOfFrame waitForEndOfFrame = new();
             while (isFiring.Value && attempts < 10)
             {
-                yield return new WaitForEndOfFrame();
+                yield return waitForEndOfFrame;
                 WeaponSoundPlayer.StopFiringLoop();
                 attempts++;
             }

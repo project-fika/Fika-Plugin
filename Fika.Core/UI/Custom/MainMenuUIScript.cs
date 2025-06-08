@@ -149,11 +149,13 @@ namespace Fika.Core.UI.Custom
 
         private IEnumerator QueryPlayers()
         {
+            WaitForEndOfFrame waitForEndOfFrame = new();
+            WaitForSeconds waitForSeconds = new(10);
             while (true)
             {
-                yield return new WaitForEndOfFrame();
+                yield return waitForEndOfFrame;
                 ClearAndQueryPlayers();
-                yield return new WaitForSeconds(10);
+                yield return waitForSeconds;
             }
         }
 

@@ -650,6 +650,7 @@ namespace Fika.Core.Coop.GameMode
         /// <returns></returns>
         protected IEnumerator ExtractRoutine(CoopPlayer player, CoopGame coopGame)
         {
+            WaitForEndOfFrame waitForEndOfFrame = new();
             while (coopGame.Status != GameStatus.Stopping)
             {
                 if (player != null && player.ActiveHealthController != null)
@@ -663,7 +664,7 @@ namespace Fika.Core.Coop.GameMode
                 {
                     yield break;
                 }
-                yield return new WaitForEndOfFrame();
+                yield return waitForEndOfFrame;
             }
         }
 

@@ -1136,9 +1136,10 @@ namespace Fika.Core.Coop.Players
         {
             AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId, FikaBackendUtils.IsSpectator);
             Task diedTask = FikaRequestHandler.PlayerDied(request);
+            WaitForEndOfFrame waitForEndOfFrame = new();
             while (!diedTask.IsCompleted)
             {
-                yield return new WaitForEndOfFrame();
+                yield return waitForEndOfFrame;
             }
         }
 

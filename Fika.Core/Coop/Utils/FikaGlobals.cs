@@ -138,9 +138,10 @@ namespace Fika.Core.Coop.Utils
             Task loadTask = Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
                 [.. collection], JobPriorityClass.Immediate, null, default);
 
+            WaitForEndOfFrame waitForEndOfFrame = new();
             while (!loadTask.IsCompleted)
             {
-                yield return new WaitForEndOfFrame();
+                yield return waitForEndOfFrame;
             }
 
             Singleton<GameWorld>.Instance.SetupItem(item, player,

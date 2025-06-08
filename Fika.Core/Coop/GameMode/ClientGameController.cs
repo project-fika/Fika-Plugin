@@ -43,9 +43,10 @@ namespace Fika.Core.Coop.GameMode
             _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_FINISH_INIT.Localized());
 
             FikaClient client = Singleton<FikaClient>.Instance;
+            WaitForEndOfFrame waitForEndOfFrame = new();
             do
             {
-                yield return new WaitForEndOfFrame();
+                yield return waitForEndOfFrame;
             } while (!client.HostReady);
             LootItems = null;
         }
