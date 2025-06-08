@@ -9,7 +9,6 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
-using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Coop.HostClasses
@@ -347,8 +346,8 @@ namespace Fika.Core.Coop.HostClasses
                     dayTime = _localRaidSettings.timeVariant
                 };
                 alreadyTransits.Add(profileId, gclass);
-                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
 
+                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
                 if (fikaGame is not CoopGame coopGame)
                 {
                     FikaGlobals.LogError("FikaGame was not a CoopGame!");

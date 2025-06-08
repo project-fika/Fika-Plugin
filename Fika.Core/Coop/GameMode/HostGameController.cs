@@ -908,12 +908,7 @@ namespace Fika.Core.Coop.GameMode
                 if (coopGame.GameUi.TimerPanel.enabled)
                 {
                     coopGame.GameUi.TimerPanel.Close();
-                }
-
-                if (FikaPlugin.AutoExtract.Value || FikaBackendUtils.IsTransit)
-                {
-                    coopGame.Stop(_localPlayer.ProfileId, coopGame.ExitStatus, _localPlayer.ActiveHealthController.IsAlive ? coopGame.ExitLocation : null, 0);
-                }
+                }     
             }
             else
             {
