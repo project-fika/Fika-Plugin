@@ -447,6 +447,11 @@ namespace Fika.Core.Networking
 
         private void OnBotStatePacketReceived(BotStatePacket packet)
         {
+            if (_coopHandler == null)
+            {
+                return;
+            }
+
             if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer bot))
             {
                 switch (packet.Type)
