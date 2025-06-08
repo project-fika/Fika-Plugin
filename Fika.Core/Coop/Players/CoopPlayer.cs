@@ -1232,6 +1232,7 @@ namespace Fika.Core.Coop.Players
                 Data = btr.GetInteractWithBtrPacket(placeId, interaction)
             };
             client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            UpdateInteractionCast();
         }
 
         public void SetupMainPlayer()
