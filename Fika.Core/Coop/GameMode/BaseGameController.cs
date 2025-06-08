@@ -51,7 +51,7 @@ namespace Fika.Core.Coop.GameMode
             _backendSession = session;
             IsServer = FikaBackendUtils.IsServer;
 
-            Logger = new(GetType().Name);
+            Logger = BepInEx.Logging.Logger.CreateLogSource(GetType().Name);
         }
 
         public ManualLogSource Logger { get; set; }
