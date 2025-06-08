@@ -26,7 +26,6 @@ namespace Fika.Core.Coop.HostClasses
             TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
             _server = Singleton<FikaServer>.Instance;
             _playersInTransitZone = [];
-            _dediTransit = false;
             _transittedPlayers = [];
         }
 
@@ -47,7 +46,7 @@ namespace Fika.Core.Coop.HostClasses
         private readonly LocalRaidSettings _localRaidSettings;
         private readonly FikaServer _server;
         private readonly Dictionary<Player, int> _playersInTransitZone;
-        private bool _dediTransit;
+        private bool _headlessTransit;
         private readonly List<int> _transittedPlayers;
 
         public int AliveTransitPlayers
@@ -333,7 +332,7 @@ namespace Fika.Core.Coop.HostClasses
         {
             if (player.IsYourPlayer)
             {
-                _dediTransit = true;
+                _headlessTransit = true;
                 string location = point.parameters.location;
                 ERaidMode eraidMode = ERaidMode.Local;
                 if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
@@ -380,7 +379,7 @@ namespace Fika.Core.Coop.HostClasses
 
             _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
 
-            if (FikaBackendUtils.IsHeadless && !_dediTransit)
+            if (FikaBackendUtils.IsHeadless && !_headlessTransit)
             {
                 ExtractHeadlessClient(point);
             }
@@ -389,7 +388,7 @@ namespace Fika.Core.Coop.HostClasses
         private void ExtractHeadlessClient(TransitPoint point)
         {
             Dictionary<string, ProfileKey> keys;
-            _dediTransit = true;
+            _headlessTransit = true;
 
             CoopPlayer dediPlayer = (CoopPlayer)GamePlayerOwner.MyPlayer;
 

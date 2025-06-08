@@ -555,7 +555,7 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="profile"></param>
         /// <param name="localRaidSettings"></param>
         /// <param name="location"></param>
-        public void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass instance, Profile profile,
+        public virtual void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass instance, Profile profile,
             LocalRaidSettings localRaidSettings, LocationSettingsClass.Location location)
         {
             bool transitActive;
