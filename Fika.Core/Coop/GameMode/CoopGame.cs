@@ -415,7 +415,7 @@ namespace Fika.Core.Coop.GameMode
             GameController.InitHalloweenEvent(instance, gameWorld, Location_0);
             GameController.InitBTRController(instance, gameWorld, Location_0);
 
-            if ((FikaBackendUtils.IsHeadless || FikaBackendUtils.IsHeadlessGame) && FikaPlugin.Instance.EnableTransits)
+            if (FikaPlugin.Instance.EnableTransits)
             {
                 GameController.InitializeTransitSystem(gameWorld, instance, Profile_0, localRaidSettings_0, Location_0);
             }

@@ -120,14 +120,7 @@ namespace Fika.Core.Coop.Players
 
             if (FikaBackendUtils.IsServer)
             {
-                if (FikaBackendUtils.IsHeadless)
-                {
-                    player.PacketSender = HeadlessPacketSender.Create(player);
-                }
-                else
-                {
-                    player.PacketSender = ServerPacketSender.Create(player);
-                }
+                player.PacketSender = ServerPacketSender.Create(player);
             }
             else if (FikaBackendUtils.IsClient)
             {

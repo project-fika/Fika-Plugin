@@ -37,16 +37,9 @@ namespace Fika.Core.Coop.HostClasses
             OnPlayerExit += OnHostPlayerExit;
         }
 
-        public void SetupHeadlessPlayerTransitStash(LocalPlayer player)
-        {
-            TransferItemsController.InitPlayerStash(player);
-            player.UpdateBtrTraderServiceData().HandleExceptions();
-        }
-
         private readonly LocalRaidSettings _localRaidSettings;
         private readonly FikaServer _server;
         private readonly Dictionary<Player, int> _playersInTransitZone;
-        private bool _headlessTransit;
         private readonly List<int> _transittedPlayers;
 
         public int AliveTransitPlayers
@@ -82,16 +75,17 @@ namespace Fika.Core.Coop.HostClasses
 
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
-                //TransferItemsController.InitPlayerStash(player);
                 if (player is CoopPlayer coopPlayer)
                 {
                     coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
                 }
+
                 if (player.IsYourPlayer)
                 {
                     method_14(point.parameters.id, player, method_17());
                     return;
                 }
+
                 TransitEventPacket packet = new()
                 {
                     EventType = TransitEventPacket.ETransitEventType.Interaction,
@@ -332,7 +326,6 @@ namespace Fika.Core.Coop.HostClasses
         {
             if (player.IsYourPlayer)
             {
-                _headlessTransit = true;
                 string location = point.parameters.location;
                 ERaidMode eraidMode = ERaidMode.Local;
                 if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
@@ -355,15 +348,18 @@ namespace Fika.Core.Coop.HostClasses
                 };
                 alreadyTransits.Add(profileId, gclass);
                 IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+
                 if (fikaGame is not CoopGame coopGame)
                 {
                     FikaGlobals.LogError("FikaGame was not a CoopGame!");
                     return;
                 }
+
                 if (coopGame != null)
                 {
                     coopGame.Extract((CoopPlayer)player, null, point);
                 }
+
                 _transittedPlayers.Add(player.Id);
                 return;
             }
@@ -378,69 +374,6 @@ namespace Fika.Core.Coop.HostClasses
             _transittedPlayers.Add(player.Id);
 
             _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-
-            if (FikaBackendUtils.IsHeadless && !_headlessTransit)
-            {
-                ExtractHeadlessClient(point);
-            }
-        }
-
-        private void ExtractHeadlessClient(TransitPoint point)
-        {
-            Dictionary<string, ProfileKey> keys;
-            _headlessTransit = true;
-
-            CoopPlayer dediPlayer = (CoopPlayer)GamePlayerOwner.MyPlayer;
-
-            string location = point.parameters.location;
-            ERaidMode eraidMode = ERaidMode.Local;
-            if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
-            {
-                eraidMode = ERaidMode.Local;
-                tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
-            }
-            string profileId = dediPlayer.ProfileId;
-            keys = [];
-            keys.Add(profileId, new()
-            {
-                isSolo = true,
-                keyId = "",
-                _id = profileId,
-            });
-
-            AlreadyTransitDataClass gclass = new()
-            {
-                hash = Guid.NewGuid().ToString(),
-                playersCount = 1,
-                ip = "",
-                location = location,
-                profiles = keys,
-                transitionRaidId = summonedTransits[profileId].raidId,
-                raidMode = eraidMode,
-                side = dediPlayer.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
-                dayTime = _localRaidSettings.timeVariant
-            };
-            alreadyTransits.Add(profileId, gclass);
-
-            TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
-            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
-            if (fikaGame is not CoopGame coopGame)
-            {
-                FikaGlobals.LogError("FikaGame was not a CoopGame!");
-                return;
-            }
-            if (transitController != null && coopGame != null)
-            {
-                if (transitController.alreadyTransits.TryGetValue(dediPlayer.ProfileId, out AlreadyTransitDataClass _))
-                {
-                    coopGame.ExitStatus = ExitStatus.Transit;
-                    coopGame.ExitLocation = point.parameters.name;
-                    coopGame.ExtractedPlayers.Add(dediPlayer.NetId);
-                    FikaBackendUtils.IsTransit = true;
-
-                    coopGame.Stop(dediPlayer.ProfileId, coopGame.ExitStatus, coopGame.ExitLocation, 0);
-                }
-            }
         }
 
         public override void Dispose()
