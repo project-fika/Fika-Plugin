@@ -251,19 +251,6 @@ namespace Fika.Core.Coop.HostClasses
             Dictionary_0[packet.pointId].GroupEnter(player);
             ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
             ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
-
-            TransitEventPacket eventPacket = new()
-            {
-                EventType = TransitEventPacket.ETransitEventType.Interaction,
-                TransitEvent = new TransitInteractionEvent()
-                {
-                    PlayerId = player.Id,
-                    PointId = packet.pointId,
-                    Type = TransitInteractionEvent.EType.Confirm
-                }
-            };
-
-            _server.SendDataToAll(ref eventPacket, DeliveryMethod.ReliableOrdered);
         }
 
         private bool CheckForPlayers(Player player, int pointId)
