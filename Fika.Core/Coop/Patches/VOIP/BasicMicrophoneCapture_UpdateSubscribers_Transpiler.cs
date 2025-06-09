@@ -10,7 +10,7 @@ namespace Fika.Core.Coop.Patches.VOIP
     /// <summary>
     /// Used to temporarily mitigate a bug that causes log spam until the bug can be resolved
     /// </summary>
-    class BasicMicrophoneCapture_UpdateSubscribers_Transpiler : FikaPatch
+    public class BasicMicrophoneCapture_UpdateSubscribers_Transpiler : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
