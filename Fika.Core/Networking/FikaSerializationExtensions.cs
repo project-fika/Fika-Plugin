@@ -1048,6 +1048,7 @@ namespace Fika.Core.Networking
                 case EFirearmSubPacketType.CompassChange:
                 case EFirearmSubPacketType.Knife:
                 case EFirearmSubPacketType.FlareShot:
+                case EFirearmSubPacketType.RocketShot:
                 case EFirearmSubPacketType.RollCylinder:
                     packet.Serialize(writer);
                     break;

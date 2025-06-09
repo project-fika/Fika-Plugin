@@ -1033,7 +1033,7 @@ namespace Fika.Core.Networking
                 if (player.HandsController is CoopObservedFirearmController controller)
                 {
                     AmmoItemClass rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
-                    controller.CreateRocketShot(rocketClass, ShotPosition, ShotForward);
+                    controller.HandleRocketShot(rocketClass, in ShotPosition, in ShotForward);
                 }
             }
 

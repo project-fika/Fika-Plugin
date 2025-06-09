@@ -380,6 +380,26 @@ namespace Fika.Core.Coop.ObservedClasses
             return HasBipod && CurrentOperation.ToggleBipod();
         }
 
+        /// <summary>
+        /// Fires a replicated rocket
+        /// </summary>
+        /// <param name="rocketClass">The ammo to shoot</param>
+        /// <param name="shotPosition">Start position</param>
+        /// <param name="shotForward">The forward velocity</param>
+        public void HandleRocketShot(AmmoItemClass rocketClass, in Vector3 shotPosition, in Vector3 shotForward)
+        {
+            FirearmsAnimator.SetFire(true);            
+
+            // Handle the rocket shot
+            rocketClass.IsUsed = true;
+            Transform smokePort = GClass837.FindTransformRecursiveContains(WeaponRoot.transform, "smokeport", false);
+            InitiateRocket(rocketClass, shotPosition, shotForward, smokePort);
+            Weapon.FirstLoadedChamberSlot.RemoveItem(false);
+            WeaponManager.MoveAmmoFromChamberToShellPort(true, 0);
+
+            FirearmsAnimator.SetFire(false);
+        }
+
         public void HandleShotInfoPacket(ref ShotInfoPacket packet, InventoryController inventoryController)
         {
             if (packet.ShotType == EShotType.DryFire)

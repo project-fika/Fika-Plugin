@@ -100,7 +100,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (Item is RocketLauncherItemClass)
             {
-                return new IsOneOffFireOperationClass(this);
+                return new GClass1839(this);
             }
             if (Item.IsFlareGun)
             {
