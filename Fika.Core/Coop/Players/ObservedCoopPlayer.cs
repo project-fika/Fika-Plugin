@@ -85,7 +85,7 @@ namespace Fika.Core.Coop.Players
                 return HealthController as ObservedHealthController;
             }
         }
-        private readonly ObservedVaultingParametersClass ObservedVaultingParameters = new();
+        private readonly ObservedVaultingParametersClass _observedVaultingParameters = new();
         public override bool CanBeSnapped
         {
             get
@@ -1301,12 +1301,12 @@ namespace Fika.Core.Coop.Players
                 MovementContext.PlayerAnimator.SetDoVault(true);
             }
 
-            ObservedVaultingParameters.MaxWeightPointPosition = packet.VaultingPoint;
-            ObservedVaultingParameters.VaultingHeight = packet.VaultingHeight;
-            ObservedVaultingParameters.VaultingLength = packet.VaultingLength;
-            ObservedVaultingParameters.VaultingSpeed = packet.VaultingSpeed;
-            ObservedVaultingParameters.AbsoluteForwardVelocity = packet.AbsoluteForwardVelocity;
-            ObservedVaultingParameters.BehindObstacleRatio = packet.BehindObstacleHeight;
+            _observedVaultingParameters.MaxWeightPointPosition = packet.VaultingPoint;
+            _observedVaultingParameters.VaultingHeight = packet.VaultingHeight;
+            _observedVaultingParameters.VaultingLength = packet.VaultingLength;
+            _observedVaultingParameters.VaultingSpeed = packet.VaultingSpeed;
+            _observedVaultingParameters.AbsoluteForwardVelocity = packet.AbsoluteForwardVelocity;
+            _observedVaultingParameters.BehindObstacleRatio = packet.BehindObstacleHeight;
 
             MovementContext.PlayerAnimator.SetVaultingSpeed(packet.VaultingSpeed);
             MovementContext.PlayerAnimator.SetVaultingHeight(packet.VaultingHeight);
@@ -1366,7 +1366,7 @@ namespace Fika.Core.Coop.Players
                 playerTraverse.Field("_vaultingParameters").SetValue(null);
                 playerTraverse.Field("_vaultingGameplayRestrictions").SetValue(null);
 
-                InitVaultingAudioControllers(ObservedVaultingParameters);
+                InitVaultingAudioControllers(_observedVaultingParameters);
 
                 if (FikaPlugin.ShowNotifications.Value)
                 {
