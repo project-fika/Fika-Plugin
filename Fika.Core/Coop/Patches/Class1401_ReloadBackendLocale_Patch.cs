@@ -18,10 +18,7 @@ namespace Fika.Core.Coop.Patches
         {
             if (!HasBeenSet)
             {
-                _ = Task.Run(() =>
-                {
-                    FikaPlugin.Instance.WaitForLocales(__result);
-                });
+                _ = Task.Run(() => FikaPlugin.Instance.WaitForLocales(__result));
                 HasBeenSet = true;
             }
         }

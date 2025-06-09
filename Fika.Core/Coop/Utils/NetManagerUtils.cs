@@ -6,7 +6,9 @@ using Fika.Core.Coop.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Http;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -17,6 +19,7 @@ namespace Fika.Core.Coop.Utils
         public static GameObject FikaGameObject;
 
         private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
+        private static readonly CancellationTokenSource _pingTokenSource = new();
 
         public static void CreateFikaGameObject()
         {
@@ -185,25 +188,35 @@ namespace Fika.Core.Coop.Utils
 
         public static void StartPinger()
         {
-            if (FikaGameObject != null)
-            {
-                FikaPinger fikaPinger = FikaGameObject.AddComponent<FikaPinger>();
-                fikaPinger.StartPingRoutine();
-            }
+#if DEBUG
+            _logger.LogInfo("Starting pinger");
+#endif
+            _ = Task.Run(() => PingBackend(_pingTokenSource.Token));
         }
 
         public static void StopPinger()
         {
-            if (FikaGameObject != null)
+#if DEBUG
+            _logger.LogInfo("Stopping pinger");
+#endif
+            _pingTokenSource.Cancel();
+        }
+
+        private static async Task PingBackend(CancellationToken token)
+        {
+            PingRequest pingRequest = new();
+            while (true)
             {
-                FikaPinger fikaPinger = FikaGameObject.GetComponent<FikaPinger>();
-                if (fikaPinger != null)
+                if (token.IsCancellationRequested)
                 {
-                    GameObject.Destroy(fikaPinger);
+#if DEBUG
+                    _logger.LogInfo("Pinger stopped successfully");
+#endif
                     return;
                 }
 
-                _logger.LogError("StopPinger: Could not find FikaPinger!");
+                await FikaRequestHandler.UpdatePing(pingRequest);
+                await Task.Delay(TimeSpan.FromSeconds(30));
             }
         }
 
