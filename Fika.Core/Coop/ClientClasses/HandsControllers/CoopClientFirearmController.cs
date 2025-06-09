@@ -651,7 +651,7 @@ namespace Fika.Core.Coop.ClientClasses
                 }
             };
             player.PacketSender.SendPacket(ref packet);
-            base.CreateRocketShot(rocketItem, shotPosition, forward);
+            base.CreateRocketShot(rocketItem, shotPosition, forward, smokeport);
         }
 
         private void SendAbortReloadPacket(int amount)
