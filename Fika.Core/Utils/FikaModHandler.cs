@@ -25,7 +25,7 @@ namespace Fika.Core.Utils
     /// </summary>
     public class FikaModHandler
     {
-        private readonly ManualLogSource logger = Logger.CreateLogSource("FikaModHandler");
+        private readonly ManualLogSource _logger = Logger.CreateLogSource("FikaModHandler");
 
         public bool QuestingBotsLoaded;
         public bool SAINLoaded;
@@ -52,7 +52,7 @@ namespace Fika.Core.Utils
                 byte[] fileBytes = File.ReadAllBytes(location);
                 uint crc32 = CRC32C.Compute(fileBytes, 0, fileBytes.Length);
                 loadedMods.Add(pluginInfo.Metadata.GUID, crc32);
-                logger.LogInfo($"Loaded plugin: [{pluginInfo.Metadata.Name}] with GUID [{pluginInfo.Metadata.GUID}] and crc32 [{crc32}]");
+                _logger.LogInfo($"Loaded plugin: [{pluginInfo.Metadata.Name}] with GUID [{pluginInfo.Metadata.GUID}] and crc32 [{crc32}]");
                 if (pluginInfo.Metadata.GUID == "com.fika.core")
                 {
                     FikaPlugin.Crc32 = crc32;
@@ -62,10 +62,10 @@ namespace Fika.Core.Utils
             }
 
             string modValidationRequestJson = JsonConvert.SerializeObject(loadedMods);
-            logger.LogDebug(modValidationRequestJson);
+            _logger.LogDebug(modValidationRequestJson);
 
             string validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
-            logger.LogDebug(validationJson);
+            _logger.LogDebug(validationJson);
 
             ModValidationResponse validationResult = JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
             if (validationResult.Forbidden == null || validationResult.MissingRequired == null || validationResult.HashMismatch == null)
@@ -84,17 +84,17 @@ namespace Fika.Core.Utils
 
             if (validationResult.Forbidden.Length > 0)
             {
-                logger.LogError($"{validationResult.Forbidden.Length} forbidden mod(s) are loaded, have the server host allow or remove the following mods: {string.Join(", ", validationResult.Forbidden)}");
+                _logger.LogError($"{validationResult.Forbidden.Length} forbidden mod(s) are loaded, have the server host allow or remove the following mods: {string.Join(", ", validationResult.Forbidden)}");
             }
 
             if (validationResult.MissingRequired.Length > 0)
             {
-                logger.LogError($"{validationResult.MissingRequired.Length} missing required mod(s), verify the following mods are present: {string.Join(", ", validationResult.MissingRequired)}");
+                _logger.LogError($"{validationResult.MissingRequired.Length} missing required mod(s), verify the following mods are present: {string.Join(", ", validationResult.MissingRequired)}");
             }
 
             if (validationResult.HashMismatch.Length > 0)
             {
-                logger.LogWarning($"{validationResult.HashMismatch.Length} mismatched mod(s) are loaded, verify the following mods are up to date with the server host: {string.Join(", ", validationResult.HashMismatch)}");
+                _logger.LogWarning($"{validationResult.HashMismatch.Length} mismatched mod(s) are loaded, verify the following mods are up to date with the server host: {string.Join(", ", validationResult.HashMismatch)}");
             }
 
             if (installationError)
@@ -112,7 +112,7 @@ namespace Fika.Core.Utils
             // We only want to load this if UI Fixes is not loaded
             if (!UIFixesLoaded)
             {
-                logger.LogInfo("UI Fixes is not loaded, enabling PartyInfoPanel fix");
+                _logger.LogInfo("UI Fixes is not loaded, enabling PartyInfoPanel fix");
                 manager.EnablePatch(new PartyInfoPanel_method_3_Patch());
             }
 

@@ -49,9 +49,8 @@ namespace Fika.Core
     public class FikaPlugin : BaseUnityPlugin
     {
         public const string FikaVersion = "2.0.0";
-        public static FikaPlugin Instance;
+        public static FikaPlugin Instance { get; private set; }
         public static string EFTVersionMajor { get; internal set; }
-        public static string ServerModVersion { get; private set; }
         public ManualLogSource FikaLogger
         {
             get
@@ -60,10 +59,10 @@ namespace Fika.Core
             }
         }
         public bool LocalesLoaded { get; internal set; }
-        public BotDifficulties BotDifficulties;
+        public BotDifficulties BotDifficulties { get; internal set; }
         public FikaModHandler ModHandler = new();
-        public string[] LocalIPs;
-        public IPAddress WanIP;
+        public string[] LocalIPs { get; internal set; }
+        public IPAddress WanIP { get; internal set; }
 
         internal static uint Crc32 { get; set; }
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
