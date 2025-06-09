@@ -48,7 +48,7 @@ namespace Fika.Core
     [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
     public class FikaPlugin : BaseUnityPlugin
     {
-        public const string FikaVersion = "1.3.0";
+        public const string FikaVersion = "2.0.0";
         public static FikaPlugin Instance;
         public static string EFTVersionMajor { get; internal set; }
         public static string ServerModVersion { get; private set; }
@@ -69,7 +69,7 @@ namespace Fika.Core
         internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
         internal FikaNotificationManager NotificationManager { get; set; }
 
-        private static readonly Version RequiredServerVersion = new("3.0.0");
+        private static readonly Version _requiredServerVersion = new("3.0.0");
         private PatchManager _patchManager;
         private TarkovApplication _tarkovApp;
 
@@ -293,7 +293,7 @@ namespace Fika.Core
             bool failed = true;
             if (Version.TryParse(version, out Version serverVersion))
             {
-                if (serverVersion >= RequiredServerVersion)
+                if (serverVersion >= _requiredServerVersion)
                 {
                     failed = false;
                 }
@@ -301,18 +301,18 @@ namespace Fika.Core
 
             if (failed)
             {
-                FikaLogger.LogError($"Server version check failed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
+                FikaLogger.LogError($"Server version check failed. Expected: >{_requiredServerVersion}, received: {serverVersion}");
                 AsyncWorker.RunInMainTread(ShowServerCheckFailMessage);
             }
             else
             {
-                FikaLogger.LogInfo($"Server version check passed. Expected: >{RequiredServerVersion}, received: {serverVersion}");
+                FikaLogger.LogInfo($"Server version check passed. Expected: >{_requiredServerVersion}, received: {serverVersion}");
             }
         }
 
         private void ShowServerCheckFailMessage()
         {
-            MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {RequiredServerVersion}",
+            MessageBoxHelper.Show($"Failed to verify server mod version.\nMake sure that the server mod is installed and up-to-date!\nRequired Server Version: {_requiredServerVersion}",
                     "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
             Application.Quit();
         }
