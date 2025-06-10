@@ -12,7 +12,8 @@ namespace Fika.Core.UI.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(AchievementView).GetMethod(nameof(AchievementView.Show));
+            return typeof(AchievementView)
+                .GetMethod(nameof(AchievementView.Show), BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         [PatchPostfix]
