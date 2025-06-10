@@ -554,6 +554,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
 
             AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate.Value, null);
+            _coopPlayer.TurnOffFbbikAt = Time.time + 0.6f;
             InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
                 CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 

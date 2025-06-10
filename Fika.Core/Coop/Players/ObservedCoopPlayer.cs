@@ -5,6 +5,7 @@ using Comfort.Common;
 using Dissonance;
 using Diz.Binding;
 using EFT;
+using EFT.AssetsManager;
 using EFT.Ballistics;
 using EFT.Interactive;
 using EFT.InventoryLogic;
@@ -21,6 +22,7 @@ using Fika.Core.Networking;
 using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
+using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -145,7 +147,15 @@ namespace Fika.Core.Coop.Players
                 return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
             }
         }
+        public float TurnOffFbbikAt = 0f;
         private LocalPlayerCullingHandlerClass _cullingHandler;
+        private float _rightHand;
+        private float _leftHand;
+        private float _smoothLV;
+        private float _shoulderVelocity;
+        private LimbIK[] _observedLimbs;
+        private Transform[] _observedMarkers;
+        private bool _shouldCullController;
         private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
         #endregion
 
@@ -189,7 +199,7 @@ namespace Fika.Core.Coop.Players
                 null, filter, player.VoipState, aiControl, false);
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, delegate { });
+            player._handsController.Spawn(1f, FikaGlobals.EmptyAction);
 
             player.AIData = new GClass583(null, player);
 
@@ -197,9 +207,15 @@ namespace Fika.Core.Coop.Players
             observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value = new();
             player._cullingHandler = observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value;
             player._cullingHandler.Initialize(player, player.PlayerBones);
+
             if (FikaBackendUtils.IsHeadless || profile.IsPlayerProfile())
             {
                 player._cullingHandler.Disable();
+            }
+
+            if (FikaBackendUtils.IsHeadless)
+            {
+                player.EnabledAnimators = EAnimatorMask.Thirdperson | EAnimatorMask.Arms;
             }
 
             if (!aiControl)
@@ -210,6 +226,9 @@ namespace Fika.Core.Coop.Players
                     services.Add(etraderServiceType);
                 }
             }
+
+            player._observedLimbs = player.GetComponent<PlayerPoolObject>().LimbIks;
+            player._observedMarkers = observedTraverse.Field<Transform[]>("_markers").Value;
 
             player.AggressorFound = false;
             player._animators[0].enabled = true;
@@ -227,6 +246,8 @@ namespace Fika.Core.Coop.Players
                 GClass2800.Int_1 = 0;
                 player._frameSkip = 0;
             }
+
+            CameraClass.Instance.FoVUpdateAction -= player.OnFovUpdatedEvent;
 
             return player;
         }
@@ -359,6 +380,12 @@ namespace Fika.Core.Coop.Players
         public override void FaceshieldMarkOperation(FaceShieldComponent armor, bool hasServerOrigin)
         {
             // Do nothing
+        }
+
+        public override void ShotReactions(DamageInfoStruct shot, EBodyPart bodyPart)
+        {
+            TurnOffFbbikAt = Time.time + 0.6f;
+            base.ShotReactions(shot, bodyPart);
         }
 
         public override void ManageAggressor(DamageInfoStruct DamageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
@@ -1405,24 +1432,15 @@ namespace Fika.Core.Coop.Players
         {
             DistanceDirty = true;
             OcclusionDirty = true;
-            if (UpdateQueue == EUpdateQueue.FixedUpdate)
-            {
-                return;
-            }
             if (HealthController == null || !HealthController.IsAlive)
             {
                 return;
             }
             Physical.LateUpdate();
-            VisualPass();
+            ObservedVisualPass(Time.deltaTime, 3);
             PropUpdate();
             _armsupdated = false;
             _bodyupdated = false;
-            if (_nFixedFrames > 0)
-            {
-                _nFixedFrames = 0;
-                _fixedTime = 0f;
-            }
         }
 
         public override void UpdateMuffledState()
@@ -1505,9 +1523,6 @@ namespace Fika.Core.Coop.Players
 
         public override void ManualUpdate(float deltaTime, float? platformDeltaTime = null, int loop = 1)
         {
-            _bodyupdated = true;
-            _bodyTime = deltaTime;
-
             method_13(deltaTime);
 
             if (Time.frameCount % 2 == _frameSkip)
@@ -1707,7 +1722,7 @@ namespace Fika.Core.Coop.Players
         {
             CreateHandsControllerHandler handler = new((item != null) ? method_135(item) : null);
 
-            handler.setInHandsOperation?.Confirm(true);
+            handler.SetInHandsOperation?.Confirm(true);
 
             if (HandsController != null)
             {
@@ -1727,6 +1742,7 @@ namespace Fika.Core.Coop.Players
 
             base.SpawnController(controllerFactory(), handler.DisposeHandler);
             OnSetInHands(new(item, CommandStatus.Succeed, InventoryController));
+            _shouldCullController = _handsController is EmptyHandsController || _handsController is KnifeController || _handsController is UsableItemController;
         }
 
         public void SpawnHandsController(EHandsControllerType controllerType, string itemId, bool isStationary)
@@ -1813,14 +1829,14 @@ namespace Fika.Core.Coop.Players
                 FikaPlugin.Instance.FikaLogger.LogError(result.Error);
                 return;
             }
-            handler.item = result.Value;
-            if (handler.item is ThrowWeapItemClass)
+            handler.Item = result.Value;
+            if (handler.Item is ThrowWeapItemClass)
             {
-                CreateHandsController(handler.ReturnController, handler.item);
+                CreateHandsController(handler.ReturnController, handler.Item);
             }
             else
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"CreateGrenadeController: Item was not of type GrenadeClass, was {handler.item.GetType()}!");
+                FikaPlugin.Instance.FikaLogger.LogError($"CreateGrenadeController: Item was not of type GrenadeClass, was {handler.Item.GetType()}!");
             }
         }
 
@@ -1833,7 +1849,7 @@ namespace Fika.Core.Coop.Players
                 return;
             }
             CreateMedsControllerHandler handler = new(this, result.Value, bodyParts, amount, animationVariant);
-            CreateHandsController(handler.ReturnController, handler.item);
+            CreateHandsController(handler.ReturnController, handler.Item);
         }
 
         private void CreateKnifeController(string itemId)
@@ -1845,14 +1861,14 @@ namespace Fika.Core.Coop.Players
                 FikaPlugin.Instance.FikaLogger.LogError(result.Error);
                 return;
             }
-            handler.knife = result.Value.GetItemComponent<KnifeComponent>();
-            if (handler.knife != null)
+            handler.Knife = result.Value.GetItemComponent<KnifeComponent>();
+            if (handler.Knife != null)
             {
-                CreateHandsController(handler.ReturnController, handler.knife.Item);
+                CreateHandsController(handler.ReturnController, handler.Knife.Item);
             }
             else
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"CreateKnifeController: Item did not contain a KnifeComponent, was of type {handler.knife.GetType()}!");
+                FikaPlugin.Instance.FikaLogger.LogError($"CreateKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
             }
         }
 
@@ -1865,14 +1881,14 @@ namespace Fika.Core.Coop.Players
                 FikaPlugin.Instance.FikaLogger.LogError(result.Error);
                 return;
             }
-            handler.item = result.Value;
-            if (handler.item is ThrowWeapItemClass)
+            handler.tem = result.Value;
+            if (handler.tem is ThrowWeapItemClass)
             {
-                CreateHandsController(handler.ReturnController, handler.item);
+                CreateHandsController(handler.ReturnController, handler.tem);
             }
             else
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickGrenadeController: Item was not of type GrenadeClass, was {handler.item.GetType()}!");
+                FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickGrenadeController: Item was not of type GrenadeClass, was {handler.tem.GetType()}!");
             }
         }
 
@@ -1885,14 +1901,14 @@ namespace Fika.Core.Coop.Players
                 FikaPlugin.Instance.FikaLogger.LogError(result.Error);
                 return;
             }
-            handler.knife = result.Value.GetItemComponent<KnifeComponent>();
-            if (handler.knife != null)
+            handler.Knife = result.Value.GetItemComponent<KnifeComponent>();
+            if (handler.Knife != null)
             {
-                CreateHandsController(handler.ReturnController, handler.knife.Item);
+                CreateHandsController(handler.ReturnController, handler.Knife.Item);
             }
             else
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.knife.GetType()}!");
+                FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
             }
         }
 
@@ -1905,7 +1921,7 @@ namespace Fika.Core.Coop.Players
                 return;
             }
             CreateUsableItemControllerHandler handler = new(this, result.Value);
-            CreateHandsController(handler.ReturnController, handler.item);
+            CreateHandsController(handler.ReturnController, handler.Item);
         }
 
         private void CreateQuickUseItemController(string itemId)
@@ -1917,7 +1933,7 @@ namespace Fika.Core.Coop.Players
                 return;
             }
             CreateQuickUseItemControllerHandler handler = new(this, result.Value);
-            CreateHandsController(handler.ReturnController, handler.item);
+            CreateHandsController(handler.ReturnController, handler.Item);
         }
 
         public void SetAggressorData(string killerId, EBodyPart bodyPart, string weaponId)
@@ -1936,28 +1952,129 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        private void ObservedVisualPass(float deltaTime, int ikUpdateInterval)
+        {
+            if (CustomAnimationsAreProcessing)
+            {
+                return;
+            }
+
+            float num = CameraClass.Instance.Distance(Transform.position);
+            bool isVisibleOrClose = IsVisible && num <= EFTHardSettings.Instance.CULL_GROUNDER;
+
+            if (_armsupdated && isVisibleOrClose && !UsedSimplifiedSkeleton)
+            {
+                ProceduralWeaponAnimation.ProcessEffectors(deltaTime, 2, Motion, Velocity);
+                PlayerBones.Offset = ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim.localPosition;
+                PlayerBones.DeltaRotation = ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim.localRotation;
+            }
+
+            if (isVisibleOrClose && !UsedSimplifiedSkeleton)
+            {
+                RestoreIKPos();
+                ObservedFBBIKUpdate(num, ikUpdateInterval);
+                MouseLook(false);
+                float num2 = 1f;
+                float num4 = method_25(PlayerAnimator.LEFT_STANCE_CURVE);
+                ProceduralWeaponAnimation.GetLeftStanceCurrentCurveValue(num4);
+                _rightHand = 1f - method_25(PlayerAnimator.RIGHT_HAND_WEIGHT) * num2;
+                _leftHand = 1f - method_25(PlayerAnimator.LEFT_HAND_WEIGHT) * num2;
+                ThirdPersonWeaponRootAuthority = MovementContext.IsInMountedState ? 0f : (method_25(PlayerAnimator.WEAPON_ROOT_3RD) * num2);
+                method_23(num);
+                if (_armsupdated)
+                {
+                    float num5 = ThirdPersonWeaponRootAuthority;
+                    if (MovementContext.StationaryWeapon != null)
+                    {
+                        num5 = 0f;
+                    }
+                    ProceduralWeaponAnimation.GetLeftStanceCurrentCurveValue(num4);
+                    PlayerBones.ShiftWeaponRoot(deltaTime, EPointOfView.ThirdPerson, num5);
+                }
+                PlayerBones.RotateHead(0f, ProceduralWeaponAnimation.GetHeadRotation(),
+                    MovementContext.LeftStanceEnabled && HasFirearmInHands(), num4,
+                    ProceduralWeaponAnimation.IsAiming);
+                HandPosers[0].weight = _leftHand;
+                _observedLimbs[0].solver.IKRotationWeight = _observedLimbs[0].solver.IKPositionWeight = _leftHand;
+                _observedLimbs[1].solver.IKRotationWeight = _observedLimbs[1].solver.IKPositionWeight = _rightHand;
+                method_20(num);
+                method_24(num2);
+                method_19(num);
+                if (_rightHand < 1f)
+                {
+                    PlayerBones.Kinematics(_observedMarkers[1], _rightHand);
+                }
+                float num6 = method_25(PlayerAnimator.AIMING_LAYER_CURVE);
+                MovementContext.PlayerAnimator.Animator.SetLayerWeight(6, 1f - num6);
+                _prevHeight = Transform.position.y;
+            }
+            else
+            {
+                if (!Mathf.Approximately(PlayerBones.AnimatedTransform.localPosition.y, 0f))
+                {
+                    PlayerBones.AnimatedTransform.localPosition = new Vector3(PlayerBones.AnimatedTransform.localPosition.x, 0f, PlayerBones.AnimatedTransform.localPosition.z);
+                }
+                method_14();
+                MouseLook(false);
+                Transform child = PlayerBones.Weapon_Root_Anim.GetChild(0);
+                child.localPosition = Vector3.zero;
+                child.localRotation = Quaternion.identity;
+            }
+            if (num > EFTHardSettings.Instance.AnimatorCullDistance)
+            {
+                BodyAnimatorCommon.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+                ArmsAnimatorCommon.cullingMode = _shouldCullController ? AnimatorCullingMode.AlwaysAnimate : AnimatorCullingMode.CullUpdateTransforms;
+            }
+            else
+            {
+                BodyAnimatorCommon.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                ArmsAnimatorCommon.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            }
+            if (_armsupdated)
+            {
+                ProceduralWeaponAnimation.LateTransformations(deltaTime);
+                if (HandsController != null)
+                {
+                    HandsController.ManualLateUpdate(deltaTime);
+                }
+            }
+        }
+
+        private void ObservedFBBIKUpdate(float distance, int ikUpdateInterval)
+        {
+            _fbbik.solver.iterations = (int)Mathf.Clamp(15f / distance, 0f, 2f);
+            if (!_fbbik.solver.Quick && Time.time > TurnOffFbbikAt)
+            {
+                _fbbik.solver.Quick = true;
+            }
+            if (!_fbbik.solver.Quick || Time.frameCount % ikUpdateInterval == 0)
+            {
+                _fbbik.solver.Update();
+            }
+        }
+
         private class RemoveHandsControllerHandler(ObservedCoopPlayer coopPlayer, Callback callback)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            private readonly Callback callback = callback;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
+            private readonly Callback _callback = callback;
 
             public void Handle(Result<GInterface160> result)
             {
-                if (coopPlayer._removeFromHandsCallback == callback)
+                if (_coopPlayer._removeFromHandsCallback == _callback)
                 {
-                    coopPlayer._removeFromHandsCallback = null;
+                    _coopPlayer._removeFromHandsCallback = null;
                 }
-                callback.Invoke(result);
+                _callback.Invoke(result);
             }
         }
 
         private class CreateHandsControllerHandler(Class1203 setInHandsOperation)
         {
-            public readonly Class1203 setInHandsOperation = setInHandsOperation;
+            public readonly Class1203 SetInHandsOperation = setInHandsOperation;
 
             internal void DisposeHandler()
             {
-                Class1203 handler = setInHandsOperation;
+                Class1203 handler = SetInHandsOperation;
                 if (handler == null)
                 {
                     return;
@@ -1968,92 +2085,92 @@ namespace Fika.Core.Coop.Players
 
         private class CreateFirearmControllerHandler(ObservedCoopPlayer coopPlayer)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
             public Item item;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedFirearmController.Create(coopPlayer, (Weapon)item);
+                return CoopObservedFirearmController.Create(_coopPlayer, (Weapon)item);
             }
         }
 
         private class CreateGrenadeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
             private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            public Item item;
+            public Item Item;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedGrenadeController.Create(coopPlayer, (ThrowWeapItemClass)item);
+                return CoopObservedGrenadeController.Create(coopPlayer, (ThrowWeapItemClass)Item);
             }
         }
 
         private class CreateMedsControllerHandler(ObservedCoopPlayer coopPlayer, Item item, GStruct356<EBodyPart> bodyParts, float amount, int animationVariant)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            public readonly Item item = item;
-            private readonly GStruct356<EBodyPart> bodyParts = bodyParts;
-            private readonly float amount = amount;
-            private readonly int animationVariant = animationVariant;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
+            public readonly Item Item = item;
+            private readonly GStruct356<EBodyPart> _bodyParts = bodyParts;
+            private readonly float _amount = amount;
+            private readonly int _animationVariant = animationVariant;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedMedsController.Create(coopPlayer, item, bodyParts, amount, animationVariant);
+                return CoopObservedMedsController.Create(_coopPlayer, Item, _bodyParts, _amount, _animationVariant);
             }
         }
 
         private class CreateKnifeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            public KnifeComponent knife;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
+            public KnifeComponent Knife;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedKnifeController.Create(coopPlayer, knife);
+                return CoopObservedKnifeController.Create(_coopPlayer, Knife);
             }
         }
 
         private class CreateQuickGrenadeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            public Item item;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
+            public Item tem;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedQuickGrenadeController.Create(coopPlayer, (ThrowWeapItemClass)item);
+                return CoopObservedQuickGrenadeController.Create(_coopPlayer, (ThrowWeapItemClass)tem);
             }
         }
 
         private class CreateQuickKnifeControllerHandler(ObservedCoopPlayer coopPlayer)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            public KnifeComponent knife;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
+            public KnifeComponent Knife;
 
             internal AbstractHandsController ReturnController()
             {
-                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(coopPlayer, knife);
+                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(_coopPlayer, Knife);
             }
         }
 
         private class CreateUsableItemControllerHandler(ObservedCoopPlayer coopPlayer, Item item)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            public readonly Item item = item;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
+            public readonly Item Item = item;
 
             internal AbstractHandsController ReturnController()
             {
-                return UsableItemController.smethod_6<UsableItemController>(coopPlayer, item);
+                return UsableItemController.smethod_6<UsableItemController>(_coopPlayer, Item);
             }
         }
 
         private class CreateQuickUseItemControllerHandler(ObservedCoopPlayer coopPlayer, Item item)
         {
-            private readonly ObservedCoopPlayer coopPlayer = coopPlayer;
-            public readonly Item item = item;
+            private readonly ObservedCoopPlayer _coopPlayer = coopPlayer;
+            public readonly Item Item = item;
 
             internal AbstractHandsController ReturnController()
             {
-                return QuickUseItemController.smethod_6<QuickUseItemController>(coopPlayer, item);
+                return QuickUseItemController.smethod_6<QuickUseItemController>(_coopPlayer, Item);
             }
         }
     }

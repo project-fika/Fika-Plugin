@@ -378,5 +378,10 @@ namespace Fika.Core.Coop.Utils
                 _ => 20,
             };
         }
+
+        public static void EmptyAction()
+        {
+
+        }
     }
 }
