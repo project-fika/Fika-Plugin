@@ -203,7 +203,12 @@ namespace Fika.Core.Coop.FreeCamera
 
             List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
             // If no alive players, add bots to spectate pool if enabled
+#if DEBUG
+            if (FikaPlugin.AllowSpectateBots.Value)
+#else
+
             if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
+#endif
             {
                 _isSpectatingBots = true;
                 if (FikaBackendUtils.IsServer)
