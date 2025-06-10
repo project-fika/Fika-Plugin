@@ -1378,7 +1378,7 @@ namespace Fika.Core.Coop.Players
                 Profile.Info.TeamId = "Fika";
                 if (!FikaBackendUtils.IsHeadless)
                 {
-                    _waitForStartRoutine = StartCoroutine(CreateHealthBar()); 
+                    _waitForStartRoutine = StartCoroutine(CreateHealthBar());
                 }
 
                 IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
