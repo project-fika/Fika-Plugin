@@ -151,8 +151,6 @@ namespace Fika.Core.Coop.Players
         private LocalPlayerCullingHandlerClass _cullingHandler;
         private float _rightHand;
         private float _leftHand;
-        private float _smoothLV;
-        private float _shoulderVelocity;
         private LimbIK[] _observedLimbs;
         private Transform[] _observedMarkers;
         private bool _shouldCullController;
