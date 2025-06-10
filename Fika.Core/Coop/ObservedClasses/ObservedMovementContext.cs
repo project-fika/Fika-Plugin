@@ -210,6 +210,9 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             base.Init();
             RotationAction = Rotate;
+            // Fix base game bug where idle animations are not playing
+            PlayerAnimator.SetIsThirdPerson(true);
+            PlayerAnimator.SetLayerWeight(1, 1f);
         }
 
         private void Rotate(Player player)

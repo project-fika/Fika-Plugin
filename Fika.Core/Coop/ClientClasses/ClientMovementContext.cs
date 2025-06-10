@@ -1,4 +1,5 @@
 ﻿using EFT;
+using Fika.Core.Coop.Utils;
 using System;
 using UnityEngine;
 
@@ -18,6 +19,12 @@ namespace Fika.Core.Coop.ClientClasses
         {
             _doGravity = true;
             base.Init();
+            if (!_player.IsYourPlayer && _player.IsAI && !FikaBackendUtils.IsHeadless)
+            {
+                // Fix base game bug where idle animations are not playing
+                PlayerAnimator.SetIsThirdPerson(true);
+                PlayerAnimator.SetLayerWeight(1, 1f);
+            }
         }
 
         public override void ApplyGravity(ref Vector3 motion, float deltaTime, bool stickToGround)
