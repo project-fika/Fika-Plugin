@@ -4,10 +4,13 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using static EFT.Player;
 using static Fika.Core.Networking.FirearmSubPackets;
@@ -44,6 +47,7 @@ namespace Fika.Core.Coop.ObservedClasses
         private UnderbarrelManagerClass _underBarrelManager;
         private bool _boltActionReload;
         private bool _isThrowingPatron;
+        private bool _stationaryWeapon;
 
         public override bool IsAiming
         {
@@ -119,11 +123,13 @@ namespace Fika.Core.Coop.ObservedClasses
             WeaponPrefab prefab = ControllerGameObject.GetComponent<WeaponPrefab>();
             _weaponPrefab = prefab;
             _weaponManager = _weaponPrefab.ObjectInHands as WeaponManagerClass;
+            Traverse weaponTraverse = Traverse.Create(this);
             if (UnderbarrelWeapon != null)
             {
-                _underBarrelManager = Traverse.Create(this).Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
+                _underBarrelManager = weaponTraverse.Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
             }
             IsRevolver = Weapon is RevolverItemClass;
+            _stationaryWeapon = Weapon.IsStationaryWeapon;
         }
 
         public static CoopObservedFirearmController Create(ObservedCoopPlayer player, Weapon weapon)
@@ -388,7 +394,7 @@ namespace Fika.Core.Coop.ObservedClasses
         /// <param name="shotForward">The forward velocity</param>
         public void HandleRocketShot(AmmoItemClass rocketClass, in Vector3 shotPosition, in Vector3 shotForward)
         {
-            FirearmsAnimator.SetFire(true);            
+            FirearmsAnimator.SetFire(true);
 
             // Handle the rocket shot
             rocketClass.IsUsed = true;
@@ -550,6 +556,11 @@ namespace Fika.Core.Coop.ObservedClasses
             AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate.Value, null);
             InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
                 CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
+
+            if (_stationaryWeapon)
+            {
+                _player.MovementContext.StationaryWeapon.ObservedShot();
+            }
 
             if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
             {
