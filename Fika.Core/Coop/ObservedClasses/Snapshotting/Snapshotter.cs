@@ -67,7 +67,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// <param name="snapshot"></param>
         public void Insert(T snapshot, double networkTime)
         {
-            //localTimeline > snapshot.RemoteTime
             lock (_bufferLock)
             {
                 if (_buffer.Count > _interpolationSettings.bufferLimit)
