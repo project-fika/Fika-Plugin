@@ -213,11 +213,11 @@ namespace Fika.Core.Coop.FreeCamera
                 _isSpectatingBots = true;
                 if (FikaBackendUtils.IsServer)
                 {
-                    players = [.. coopHandler.Players.Values.Where(x => x.IsAI && x.HealthController.IsAlive)];
+                    players = [.. players, .. coopHandler.Players.Values.Where(x => x.IsAI && x.HealthController.IsAlive)];
                 }
                 else
                 {
-                    players = [.. coopHandler.Players.Values.Where(x => x.IsObservedAI && x.HealthController.IsAlive)];
+                    players = [.. players, .. coopHandler.Players.Values.Where(x => x.IsObservedAI && x.HealthController.IsAlive)];
                 }
             }
 #if DEBUG
