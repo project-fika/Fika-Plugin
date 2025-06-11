@@ -94,14 +94,14 @@ public static class PingFactory
         //internal static readonly AssetBundle pingBundle;
         internal static readonly Dictionary<InternalBundleLoader.EFikaSprite, Sprite> sprites;
 
-        protected Image image;
-        protected Vector3 hitPoint;
-        private RectTransform canvasRect;
-        private TextMeshProUGUI rangeText;
-        private bool displayRange;
-        private float screenScale = 1f;
+        protected Image _image;
+        protected Vector3 _hitPoint;
+        private RectTransform _canvasRect;
+        private TextMeshProUGUI _rangeText;
+        private bool _displayRange;
+        private float _screenScale = 1f;
         private Color _pingColor = Color.white;
-        private CoopPlayer mainPlayer;
+        private CoopPlayer _mainPlayer;
 
         static AbstractPing()
         {
@@ -110,15 +110,15 @@ public static class PingFactory
 
         protected void Awake()
         {
-            image = GetComponentInChildren<Image>();
-            image.color = Color.clear;
-            mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            canvasRect = GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
-            rangeText = GetComponentInChildren<TextMeshProUGUI>(true);
-            rangeText.color = Color.clear;
-            displayRange = FikaPlugin.ShowPingRange.Value;
-            rangeText.gameObject.SetActive(displayRange);
-            if (mainPlayer == null)
+            _image = GetComponentInChildren<Image>();
+            _image.color = Color.clear;
+            _mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            _canvasRect = GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
+            _rangeText = GetComponentInChildren<TextMeshProUGUI>(true);
+            _rangeText.color = Color.clear;
+            _displayRange = FikaPlugin.ShowPingRange.Value;
+            _rangeText.gameObject.SetActive(_displayRange);
+            if (_mainPlayer == null)
             {
                 Destroy(gameObject);
                 FikaPlugin.Instance.FikaLogger.LogError("Ping::Awake: Could not find MainPlayer!");
@@ -128,14 +128,14 @@ public static class PingFactory
 
         protected void Update()
         {
-            if (mainPlayer.HealthController.IsAlive && mainPlayer.ProceduralWeaponAnimation.IsAiming)
+            if (_mainPlayer.HealthController.IsAlive && _mainPlayer.ProceduralWeaponAnimation.IsAiming)
             {
-                if (mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic && !FikaPlugin.ShowPingDuringOptics.Value)
+                if (_mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic && !FikaPlugin.ShowPingDuringOptics.Value)
                 {
-                    image.color = Color.clear;
-                    if (displayRange)
+                    _image.color = Color.clear;
+                    if (_displayRange)
                     {
-                        rangeText.color = Color.clear;
+                        _rangeText.color = Color.clear;
                     }
                     return;
                 }
@@ -145,14 +145,14 @@ public static class PingFactory
             {
                 int outputWidth = CameraClass.Instance.SSAA.GetOutputWidth();
                 float inputWidth = CameraClass.Instance.SSAA.GetInputWidth();
-                screenScale = outputWidth / inputWidth;
+                _screenScale = outputWidth / inputWidth;
             }
 
             /*
 			* Positioning based on https://github.com/Omti90/Off-Screen-Target-Indicator-Tutorial/blob/main/Scripts/TargetIndicator.cs
 			*/
 
-            if (WorldToScreen.GetScreenPoint(hitPoint, mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value, true))
+            if (WorldToScreen.GetScreenPoint(_hitPoint, _mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value, true))
             {
                 float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
 
@@ -160,57 +160,57 @@ public static class PingFactory
                 {
                     float alpha = Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200);
                     Color newColor = new(_pingColor.r, _pingColor.g, _pingColor.b, alpha);
-                    image.color = newColor;
-                    if (displayRange)
+                    _image.color = newColor;
+                    if (_displayRange)
                     {
-                        rangeText.color = Color.white.SetAlpha(alpha);
+                        _rangeText.color = Color.white.SetAlpha(alpha);
                     }
                 }
                 else
                 {
-                    image.color = _pingColor;
-                    if (displayRange)
+                    _image.color = _pingColor;
+                    if (_displayRange)
                     {
-                        rangeText.color = Color.white;
+                        _rangeText.color = Color.white;
                     }
                 }
 
                 if (screenPoint.z >= 0f
-                    & screenPoint.x <= canvasRect.rect.width * canvasRect.localScale.x
-                    & screenPoint.y <= canvasRect.rect.height * canvasRect.localScale.x
+                    & screenPoint.x <= _canvasRect.rect.width * _canvasRect.localScale.x
+                    & screenPoint.y <= _canvasRect.rect.height * _canvasRect.localScale.x
                     & screenPoint.x >= 0f
                     & screenPoint.y >= 0f)
                 {
                     screenPoint.z = 0f;
-                    WorldToScreen.TargetOutOfSight(false, screenPoint, image.rectTransform, canvasRect);
+                    WorldToScreen.TargetOutOfSight(false, screenPoint, _image.rectTransform, _canvasRect);
                 }
 
                 else if (screenPoint.z >= 0f)
                 {
-                    screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, canvasRect, 20f);
-                    WorldToScreen.TargetOutOfSight(true, screenPoint, image.rectTransform, canvasRect);
+                    screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, _canvasRect, 20f);
+                    WorldToScreen.TargetOutOfSight(true, screenPoint, _image.rectTransform, _canvasRect);
                 }
                 else
                 {
                     screenPoint *= -1f;
 
-                    screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, canvasRect, 20f);
-                    WorldToScreen.TargetOutOfSight(true, screenPoint, image.rectTransform, canvasRect);
+                    screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, _canvasRect, 20f);
+                    WorldToScreen.TargetOutOfSight(true, screenPoint, _image.rectTransform, _canvasRect);
 
                 }
 
-                image.transform.position = screenScale < 1 ? screenPoint : screenPoint * screenScale;
-                if (displayRange)
+                _image.transform.position = _screenScale < 1 ? screenPoint : screenPoint * _screenScale;
+                if (_displayRange)
                 {
-                    int distance = (int)CameraClass.Instance.Distance(hitPoint);
-                    rangeText.text = $"[{distance}m]";
+                    int distance = (int)CameraClass.Instance.Distance(_hitPoint);
+                    _rangeText.text = $"[{distance}m]";
                 }
             }
         }
 
         public virtual void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
-            hitPoint = point;
+            _hitPoint = point;
             transform.position = point;
             _pingColor = pingColor;
 
@@ -225,7 +225,7 @@ public static class PingFactory
             {
                 scaledSize *= 0.5f;
             }
-            image.rectTransform.localScale = scaledSize;
+            _image.rectTransform.localScale = scaledSize;
         }
     }
 
@@ -234,7 +234,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPoint];
+            _image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPoint];
         }
     }
 
@@ -243,7 +243,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPlayer];
+            _image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPlayer];
         }
     }
 
@@ -252,7 +252,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingLootableContainer];
+            _image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingLootableContainer];
         }
     }
 
@@ -261,7 +261,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingDoor];
+            _image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingDoor];
         }
     }
 
@@ -270,7 +270,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPoint];
+            _image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingPoint];
         }
     }
 
@@ -280,7 +280,7 @@ public static class PingFactory
         {
             base.Initialize(ref point, userObject, Color.white); // White since this icon is already red...
             transform.localScale *= 0.5f;
-            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingDeadBody];
+            _image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingDeadBody];
         }
     }
 
@@ -289,7 +289,7 @@ public static class PingFactory
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
-            image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingLootItem];
+            _image.sprite = sprites[InternalBundleLoader.EFikaSprite.PingLootItem];
         }
     }
 }

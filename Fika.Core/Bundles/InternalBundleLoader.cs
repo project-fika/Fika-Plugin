@@ -17,7 +17,7 @@ namespace Fika.Core.Bundles
     {
         public static InternalBundleLoader Instance { get; private set; }
 
-        private AssetBundle masterBundle;
+        private AssetBundle _masterBundle;
 
         public InternalBundleLoader()
         {
@@ -32,7 +32,7 @@ namespace Fika.Core.Bundles
                     {
                         stream.CopyTo(memoryStream);
                         AssetBundleCreateRequest assetBundle = AssetBundle.LoadFromMemoryAsync(memoryStream.ToArray());
-                        masterBundle = assetBundle.assetBundle;
+                        _masterBundle = assetBundle.assetBundle;
                     }
                     else
                     {
@@ -55,7 +55,7 @@ namespace Fika.Core.Bundles
         /// <exception cref="ArgumentOutOfRangeException"><see cref="EFikaAsset"/> was out of range</exception>
         internal T GetFikaAsset<T>(EFikaAsset asset) where T : UnityEngine.Object
         {
-            if (masterBundle == null)
+            if (_masterBundle == null)
             {
                 throw new NullReferenceException("GetFikaAsset::MasterBundle did not exist!");
             }
@@ -63,15 +63,15 @@ namespace Fika.Core.Bundles
             switch (asset)
             {
                 case EFikaAsset.MainMenuUI:
-                    return masterBundle.LoadAsset<T>("MainMenuUI");
+                    return _masterBundle.LoadAsset<T>("MainMenuUI");
                 case EFikaAsset.MatchmakerUI:
-                    return masterBundle.LoadAsset<T>("NewMatchMakerUI");
+                    return _masterBundle.LoadAsset<T>("NewMatchMakerUI");
                 case EFikaAsset.Ping:
-                    return masterBundle.LoadAsset<T>("BasePingPrefab"); ;
+                    return _masterBundle.LoadAsset<T>("BasePingPrefab"); ;
                 case EFikaAsset.PlayerUI:
-                    return masterBundle.LoadAsset<T>("PlayerFriendlyUI");
+                    return _masterBundle.LoadAsset<T>("PlayerFriendlyUI");
                 case EFikaAsset.SendItemMenu:
-                    return masterBundle.LoadAsset<T>("SendItemMenu");
+                    return _masterBundle.LoadAsset<T>("SendItemMenu");
             }
 
             throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given");
@@ -85,12 +85,12 @@ namespace Fika.Core.Bundles
         {
             Dictionary<EFikaSprite, Sprite> sprites = [];
 
-            sprites.Add(EFikaSprite.PingPoint, masterBundle.LoadAsset<Sprite>("PingPoint"));
-            sprites.Add(EFikaSprite.PingPlayer, masterBundle.LoadAsset<Sprite>("PingPlayer"));
-            sprites.Add(EFikaSprite.PingLootableContainer, masterBundle.LoadAsset<Sprite>("PingLootableContainer"));
-            sprites.Add(EFikaSprite.PingDoor, masterBundle.LoadAsset<Sprite>("PingDoor"));
-            sprites.Add(EFikaSprite.PingDeadBody, masterBundle.LoadAsset<Sprite>("PingDeadBody"));
-            sprites.Add(EFikaSprite.PingLootItem, masterBundle.LoadAsset<Sprite>("PingLootItem"));
+            sprites.Add(EFikaSprite.PingPoint, _masterBundle.LoadAsset<Sprite>("PingPoint"));
+            sprites.Add(EFikaSprite.PingPlayer, _masterBundle.LoadAsset<Sprite>("PingPlayer"));
+            sprites.Add(EFikaSprite.PingLootableContainer, _masterBundle.LoadAsset<Sprite>("PingLootableContainer"));
+            sprites.Add(EFikaSprite.PingDoor, _masterBundle.LoadAsset<Sprite>("PingDoor"));
+            sprites.Add(EFikaSprite.PingDeadBody, _masterBundle.LoadAsset<Sprite>("PingDeadBody"));
+            sprites.Add(EFikaSprite.PingLootItem, _masterBundle.LoadAsset<Sprite>("PingLootItem"));
 
             return sprites;
         }
