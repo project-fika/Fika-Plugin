@@ -2012,7 +2012,6 @@ namespace Fika.Core.Coop.Players
                 {
                     PlayerBones.AnimatedTransform.localPosition = new Vector3(PlayerBones.AnimatedTransform.localPosition.x, 0f, PlayerBones.AnimatedTransform.localPosition.z);
                 }
-                method_14();
                 MouseLook(false);
                 Transform child = PlayerBones.Weapon_Root_Anim.GetChild(0);
                 child.localPosition = Vector3.zero;
