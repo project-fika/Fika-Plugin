@@ -22,13 +22,19 @@ namespace Fika.Core.Coop.Custom
     /// </summary>
     public class FikaHealthBar : MonoBehaviour
     {
+        /// <summary>
+        /// Check for GClass increments, can be checked in <see cref="StaticIcons.EffectSprites"/> method <see cref="ISerializationCallbackReceiver.OnAfterDeserialize"/> <br/><br/>
+        /// <see cref="ActiveHealthController.Wound"/>, <see cref="ActiveHealthController.Encumbered"/>, <see cref="ActiveHealthController.OverEncumbered"/>, <br/>
+        /// <see cref="ActiveHealthController-MildMusclePlain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
+        /// </summary>
+        private static readonly List<Type> _ignoredTypes = [typeof(GInterface340), typeof(GInterface342), typeof(GInterface343), typeof(GInterface357), typeof(GInterface358)];
+
         private ObservedCoopPlayer _currentPlayer;
         private CoopPlayer _mainPlayer;
         private PlayerPlateUI _playerPlate;
         private float _screenScale = 1f;
         private Dictionary<Type, Sprite> _effectIcons;
         private List<HealthBarEffect> _effects;
-        private List<Type> _ignoredTypes;
         private float _counter = 0;
         private bool _updatePos = true;
 
@@ -44,10 +50,8 @@ namespace Fika.Core.Coop.Custom
             healthBar._currentPlayer = player;
             healthBar._mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             healthBar._effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
-            healthBar._effects = [];
-            // Check for GClass increments, can be checked in EFT.UI.StaticIcons.EffectSprites method UnityEngine.ISerializationCallbackReceiver.OnAfterDeserialize
-            // Wound, Encumbered, OverEncumbered, MildMusclePlain, SevereMusclePain
-            healthBar._ignoredTypes = [typeof(GInterface340), typeof(GInterface342), typeof(GInterface343), typeof(GInterface357), typeof(GInterface358)];
+            healthBar._effects = [];            
+            
             healthBar.CreateHealthBar();
             return healthBar;
         }
