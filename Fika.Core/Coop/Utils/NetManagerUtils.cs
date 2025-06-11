@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Utils
         public static GameObject FikaGameObject;
 
         private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("NetManagerUtils");
-        private static readonly CancellationTokenSource _pingTokenSource = new();
+        private static CancellationTokenSource _pingTokenSource;
 
         public static void CreateFikaGameObject()
         {
@@ -191,6 +191,7 @@ namespace Fika.Core.Coop.Utils
 #if DEBUG
             _logger.LogInfo("Starting pinger");
 #endif
+            _pingTokenSource = new();
             _ = Task.Run(() => PingBackend(_pingTokenSource.Token));
         }
 
