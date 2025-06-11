@@ -943,6 +943,11 @@ namespace Fika.Core.Networking
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
+            if (_hostPlayer = null)
+            {
+                return;
+            }
+
             if (_hostPlayer.HealthController.IsAlive)
             {
                 if (_hostPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -998,6 +1003,11 @@ namespace Fika.Core.Networking
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
+            if (_hostPlayer = null)
+            {
+                return;
+            }
+
             if (_hostPlayer.HealthController.IsAlive)
             {
                 if (_hostPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -1010,6 +1020,11 @@ namespace Fika.Core.Networking
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet, NetPeer peer)
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+            if (_hostPlayer = null)
+            {
+                return;
+            }
 
             if (_hostPlayer.HealthController.IsAlive)
             {

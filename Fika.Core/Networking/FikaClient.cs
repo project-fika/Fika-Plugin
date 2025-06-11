@@ -854,6 +854,11 @@ namespace Fika.Core.Networking
 
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet)
         {
+            if (MyPlayer = null)
+            {
+                return;
+            }
+
             if (MyPlayer.HealthController.IsAlive)
             {
                 if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -865,6 +870,11 @@ namespace Fika.Core.Networking
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet)
         {
+            if (MyPlayer = null)
+            {
+                return;
+            }
+
             if (MyPlayer.HealthController.IsAlive)
             {
                 if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
@@ -876,6 +886,11 @@ namespace Fika.Core.Networking
 
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet)
         {
+            if (MyPlayer = null)
+            {
+                return;
+            }
+
             if (MyPlayer.HealthController.IsAlive)
             {
                 if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
