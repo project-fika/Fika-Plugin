@@ -787,6 +787,14 @@ namespace Fika.Core.Coop.Players
 
         public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
         {
+            if (command is StationaryPacketStruct.EStationaryCommand.Occupy)
+            {
+                if (WaitingForCallback || !HandsController.CanRemove())
+                {
+                    return;
+                }
+            }
+
             base.OperateStationaryWeapon(stationaryWeapon, command);
             CommonPlayerPacket packet = new()
             {

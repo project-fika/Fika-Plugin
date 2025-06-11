@@ -68,15 +68,15 @@ namespace Fika.Core.Coop.ClientClasses
             return base.CanStartReload();
         }
 
-        /*public override bool CanPressTrigger()
-		{
-			if (isClient)
-			{
-				return !player.WaitingForCallback && base.CanPressTrigger();
-			}
+        public override bool CanPressTrigger()
+        {
+            if (isClient)
+            {
+                return !player.WaitingForCallback && base.CanPressTrigger();
+            }
 
-			return base.CanPressTrigger();
-		}*/
+            return base.CanPressTrigger();
+        }
 
         public Player.BaseAnimationOperationClass Weapon1()
         {
