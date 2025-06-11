@@ -854,7 +854,7 @@ namespace Fika.Core.Networking
 
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet)
         {
-            if (MyPlayer = null)
+            if (MyPlayer == null)
             {
                 return;
             }
@@ -870,7 +870,7 @@ namespace Fika.Core.Networking
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet)
         {
-            if (MyPlayer = null)
+            if (MyPlayer == null)
             {
                 return;
             }
@@ -886,7 +886,7 @@ namespace Fika.Core.Networking
 
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet)
         {
-            if (MyPlayer = null)
+            if (MyPlayer == null)
             {
                 return;
             }

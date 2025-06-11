@@ -939,24 +939,6 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
-        {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-
-            if (_hostPlayer = null)
-            {
-                return;
-            }
-
-            if (_hostPlayer.HealthController.IsAlive)
-            {
-                if (_hostPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
-                {
-                    sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
-                }
-            }
-        }
-
         private bool ValidateLocalIP(string LocalIP)
         {
             try
@@ -999,11 +981,29 @@ namespace Fika.Core.Networking
             _logger.LogInfo("NatIntroduceRoutine ended.");
         }
 
+        private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
+        {
+            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+            if (_hostPlayer == null)
+            {
+                return;
+            }
+
+            if (_hostPlayer.HealthController.IsAlive)
+            {
+                if (_hostPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                {
+                    sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
+                }
+            }
+        }
+
         private void OnQuestItemPacketReceived(QuestItemPacket packet, NetPeer peer)
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
-            if (_hostPlayer = null)
+            if (_hostPlayer == null)
             {
                 return;
             }
@@ -1021,7 +1021,7 @@ namespace Fika.Core.Networking
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
-            if (_hostPlayer = null)
+            if (_hostPlayer == null)
             {
                 return;
             }
