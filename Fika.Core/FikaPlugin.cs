@@ -195,7 +195,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> NativeSockets { get; set; }
         public static ConfigEntry<string> ForceIP { get; set; }
         public static ConfigEntry<string> ForceBindIP { get; set; }
-        public static ConfigEntry<int> UDPPort { get; set; }
+        public static ConfigEntry<ushort> UDPPort { get; set; }
         public static ConfigEntry<bool> UseUPnP { get; set; }
         public static ConfigEntry<bool> UseNatPunching { get; set; }
         public static ConfigEntry<int> ConnectionTimeout { get; set; }
@@ -1188,8 +1188,8 @@ namespace Fika.Core
                 }),
                 "Force Bind IP", ref failed, headers);
 
-            UDPPort = SetupSetting(networkDefaultHeader, "UDP Port", 25565,
-                new ConfigDescription(LocaleUtils.BEPINEX_UDP_PORT_D.Localized(), new AcceptableValueRange<int>(0, 65535),
+            UDPPort = SetupSetting(networkDefaultHeader, "UDP Port", (ushort)25565,
+                new ConfigDescription(LocaleUtils.BEPINEX_UDP_PORT_D.Localized(), new AcceptableValueRange<ushort>(ushort.MinValue, ushort.MaxValue),
                 tags: new ConfigurationManagerAttributes()
                 {
                     Category = networkHeader,
