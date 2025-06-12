@@ -527,7 +527,7 @@ namespace Fika.Core.Coop.GameMode
             do
             {
                 await Task.Delay(100);
-                _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
+                _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)_coopHandler.AmountOfHumans / expectedPlayers);
             } while (_coopHandler.AmountOfHumans < expectedPlayers);
 
             InformationPacket packet = new()
