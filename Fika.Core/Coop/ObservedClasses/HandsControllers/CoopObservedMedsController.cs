@@ -148,7 +148,8 @@ namespace Fika.Core.Coop.ObservedClasses
 
             public void HealthController_EffectRemovedEvent(IEffect effect)
             {
-                if (effect is not GInterface350)
+                // Look for GClass increments
+                if (effect is not GInterface354)
                 {
                     return;
                 }
