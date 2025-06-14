@@ -33,34 +33,6 @@ namespace Fika.Core.Networking
             NetId = netId;
         }
 
-        /*public PlayerStatePacket(int netId, Vector3 position, Vector2 rotation, Vector2 headRotation, Vector2 movementDirection,
-            EPlayerState state, float tilt, int step, int animatorStateIndex, float characterMovementSpeed, bool isProne,
-            float poseLevel, bool isSprinting, BasePhysicalClass.PhysicalStateStruct stamina, int blindfire, float weaponOverlap,
-            bool leftStanceDisabled, bool isGrounded, bool hasGround, ESurfaceSound surfaceSound, double remoteTime)
-        {
-            NetId = netId;
-            Position = position;
-            Rotation = rotation;
-            HeadRotation = headRotation;
-            MovementDirection = movementDirection;
-            State = state;
-            Tilt = tilt;
-            Step = step;
-            AnimatorStateIndex = animatorStateIndex;
-            CharacterMovementSpeed = characterMovementSpeed;
-            IsProne = isProne;
-            PoseLevel = poseLevel;
-            IsSprinting = isSprinting;
-            Stamina = stamina;
-            Blindfire = blindfire;
-            WeaponOverlap = weaponOverlap;
-            LeftStanceDisabled = leftStanceDisabled;
-            IsGrounded = isGrounded;
-            HasGround = hasGround;
-            SurfaceSound = surfaceSound;
-            RemoteTime = remoteTime;
-        }*/
-
         // Snapshot
         public double RemoteTime { get; set; }
         public double LocalTime { get; set; }
