@@ -29,8 +29,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             player.CurrentPlayerState.WeaponOverlap = Mathf.LerpUnclamped(from.WeaponOverlap, to.WeaponOverlap, ratio);
             player.CurrentPlayerState.LeftStanceDisabled = to.LeftStanceDisabled;
             player.CurrentPlayerState.IsGrounded = to.IsGrounded;
-            player.CurrentPlayerState.HasGround = to.HasGround;
-            player.CurrentPlayerState.SurfaceSound = to.SurfaceSound;
         }
     }
 }

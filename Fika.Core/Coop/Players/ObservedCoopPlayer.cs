@@ -148,6 +148,7 @@ namespace Fika.Core.Coop.Players
             }
         }
         public float TurnOffFbbikAt = 0f;
+        private float _lastDistance = 0f;
         private LocalPlayerCullingHandlerClass _cullingHandler;
         private float _rightHand;
         private float _leftHand;
@@ -312,12 +313,6 @@ namespace Fika.Core.Coop.Players
         public override BasePhysicalClass CreatePhysical()
         {
             return new BasePhysicalClass();
-        }
-
-        public override bool CheckSurface(float range)
-        {
-            float spreadRange = 42f * ProtagonistHearing;
-            return !(Distance - spreadRange > 0);
         }
 
         public override void Say(EPhraseTrigger phrase, bool demand = false, float delay = 0, ETagStatus mask = 0, int probability = 100, bool aggressive = false)
@@ -812,7 +807,10 @@ namespace Fika.Core.Coop.Players
 
         public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
         {
-            method_33(clip);
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                method_33(clip);
+            }
         }
 
         public override void MouseLook(bool forceApplyToOriginalRibcage = false)
@@ -823,108 +821,25 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void Interpolate(ref PlayerStatePacket to, ref PlayerStatePacket from, double ratio)
+        public override bool CheckSurface(float range)
         {
-            float interpolateRatio = (float)ratio;
-            bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
-
-            method_76(to.HasGround, to.SurfaceSound);
-
-            Rotation = new Vector2(Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, interpolateRatio),
-                Mathf.LerpUnclamped(from.Rotation.y, to.Rotation.y, interpolateRatio));
-
-            if (to.HeadRotation != default)
+            if (_lastDistance > (range * ProtagonistHearing))
             {
-                Vector3 newRotation = Vector3.LerpUnclamped(HeadRotation, to.HeadRotation, interpolateRatio);
-                HeadRotation = newRotation;
-                ProceduralWeaponAnimation.SetHeadRotation(newRotation);
+                return false;
             }
 
-            bool isGrounded = to.IsGrounded;
-            MovementContext.IsGrounded = isGrounded;
-
-            EPlayerState newState = to.State;
-
-            if (newState == EPlayerState.Jump)
+            (bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_75();
+            method_76(hit, surfaceSound);
+            if (Environment == EnvironmentType.Outdoor)
             {
-                MovementContext.PlayerAnimatorEnableJump(true);
-                if (_isServer)
-                {
-                    MovementContext.method_2(1f);
-                }
+                method_35();
             }
-
-            if (isJumpSet && isGrounded)
-            {
-                MovementContext.PlayerAnimatorEnableJump(false);
-                MovementContext.PlayerAnimatorEnableLanding(true);
-            }
-            if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)
-            {
-                MovementContext.UpdateSprintInertia();
-                MovementContext.PlayerAnimatorEnableInert(false);
-            }
-
-            Physical.SerializationStruct = to.Stamina;
-
-            if (!Mathf.Approximately(MovementContext.Step, to.Step))
-            {
-                CurrentManagedState.SetStep(to.Step);
-            }
-
-            if (MovementContext.IsSprintEnabled != to.IsSprinting)
-            {
-                CurrentManagedState.EnableSprint(to.IsSprinting);
-            }
-
-            if (MovementContext.IsInPronePose != to.IsProne)
-            {
-                MovementContext.IsInPronePose = to.IsProne;
-            }
-
-            if (!Mathf.Approximately(PoseLevel, to.PoseLevel))
-            {
-                MovementContext.SetPoseLevel(from.PoseLevel + (to.PoseLevel - from.PoseLevel));
-            }
-
-            MovementContext.SetCharacterMovementSpeed(to.CharacterMovementSpeed, true);
-
-            if (MovementContext.BlindFire != to.Blindfire)
-            {
-                MovementContext.SetBlindFire(to.Blindfire);
-            }
-
-            if (!IsInventoryOpened && isGrounded)
-            {
-                Move(to.MovementDirection);
-                if (_isServer)
-                {
-                    MovementContext.method_1(to.MovementDirection);
-                }
-            }
-
-            Transform.position = Vector3.LerpUnclamped(from.Position, to.Position, interpolateRatio);
-
-            float currentTilt = MovementContext.Tilt;
-            if (!Mathf.Approximately(currentTilt, to.Tilt))
-            {
-                float newTilt = Mathf.LerpUnclamped(currentTilt, to.Tilt, interpolateRatio);
-                MovementContext.SetTilt(newTilt, true);
-            }
-
-            if (!ObservedOverlap.ApproxEquals(to.WeaponOverlap))
-            {
-                ObservedOverlap = to.WeaponOverlap;
-                ShouldOverlap = true;
-            }
-            LeftStanceDisabled = to.LeftStanceDisabled;
+            return true;
         }
 
         public void ManualStateUpdate()
         {
             bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
-
-            method_76(CurrentPlayerState.HasGround, CurrentPlayerState.SurfaceSound);
 
             Rotation = CurrentPlayerState.Rotation;
 
@@ -1058,7 +973,7 @@ namespace Fika.Core.Coop.Players
         {
             if (!FikaBackendUtils.IsHeadless)
             {
-                base.CreateNestedSource(); 
+                base.CreateNestedSource();
             }
         }
 
@@ -1066,7 +981,7 @@ namespace Fika.Core.Coop.Players
         {
             if (!FikaBackendUtils.IsHeadless)
             {
-                base.CreateSpeechSource(); 
+                base.CreateSpeechSource();
             }
         }
 
@@ -1163,11 +1078,6 @@ namespace Fika.Core.Coop.Players
                     }
                 }
 
-                /*// TODO: Fix this and consistently get the correct data...
-				if (Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(packet.ProfileId).HandsController.Item is Weapon weapon)
-				{
-					DamageInfo.Weapon = weapon;
-				}*/
                 _lastWeaponId = packet.WeaponId;
             }
 
@@ -1276,7 +1186,7 @@ namespace Fika.Core.Coop.Players
                 {
                     if (item is not Weapon newWeapon)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogError("SetInventory::HandsController item was not Weapon");
+                        FikaGlobals.LogError("SetInventory::HandsController item was not Weapon");
                         return;
                     }
 
@@ -1290,7 +1200,7 @@ namespace Fika.Core.Coop.Players
                             {
                                 if (currentViews.ContainsKey(slot.FullId))
                                 {
-                                    FikaPlugin.Instance.FikaLogger.LogError("RefreshSlotViews::CRITICAL ERROR DICTIONARY: " + slot.FullId);
+                                    FikaGlobals.LogError("RefreshSlotViews::CRITICAL ERROR DICTIONARY: " + slot.FullId);
                                     continue;
                                 }
                                 currentViews.Add(slot.FullId, kvp.Value);
@@ -1306,7 +1216,7 @@ namespace Fika.Core.Coop.Players
                                     Transform transform = GClass837.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
                                     if (transform == null)
                                     {
-                                        FikaPlugin.Instance.FikaLogger.LogWarning($"RefreshSlotViews::Transform was missing: {slot.ID}, this is harmless");
+                                        FikaGlobals.LogWarning($"RefreshSlotViews::Transform was missing: {slot.ID}, this is harmless");
                                         continue;
                                     }
                                     controller.CCV.AddBone(slot, transform);
@@ -1548,8 +1458,11 @@ namespace Fika.Core.Coop.Players
 
         public override void InitAudioController()
         {
-            base.InitAudioController();
-            Singleton<BetterAudio>.Instance.ProtagonistHearingChanged += UpdateSoundRolloff;
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                base.InitAudioController();
+                Singleton<BetterAudio>.Instance.ProtagonistHearingChanged += UpdateSoundRolloff;
+            }
         }
 
         private void UpdateSoundRolloff()
@@ -1973,8 +1886,8 @@ namespace Fika.Core.Coop.Players
                 return;
             }
 
-            float num = CameraClass.Instance.Distance(Transform.position);
-            bool isVisibleOrClose = IsVisible && num <= EFTHardSettings.Instance.CULL_GROUNDER;
+            _lastDistance = CameraClass.Instance.Distance(Transform.position);
+            bool isVisibleOrClose = IsVisible && _lastDistance <= EFTHardSettings.Instance.CULL_GROUNDER;
 
             if (_armsupdated && isVisibleOrClose && !UsedSimplifiedSkeleton)
             {
@@ -1986,7 +1899,7 @@ namespace Fika.Core.Coop.Players
             if (isVisibleOrClose && !UsedSimplifiedSkeleton)
             {
                 RestoreIKPos();
-                ObservedFBBIKUpdate(num, ikUpdateInterval);
+                ObservedFBBIKUpdate(_lastDistance, ikUpdateInterval);
                 MouseLook(false);
                 float num2 = 1f;
                 float num4 = method_25(PlayerAnimator.LEFT_STANCE_CURVE);
@@ -1994,7 +1907,7 @@ namespace Fika.Core.Coop.Players
                 _rightHand = 1f - method_25(PlayerAnimator.RIGHT_HAND_WEIGHT) * num2;
                 _leftHand = 1f - method_25(PlayerAnimator.LEFT_HAND_WEIGHT) * num2;
                 ThirdPersonWeaponRootAuthority = MovementContext.IsInMountedState ? 0f : (method_25(PlayerAnimator.WEAPON_ROOT_3RD) * num2);
-                method_23(num);
+                method_23(_lastDistance);
                 if (_armsupdated)
                 {
                     float num5 = ThirdPersonWeaponRootAuthority;
@@ -2011,9 +1924,9 @@ namespace Fika.Core.Coop.Players
                 HandPosers[0].weight = _leftHand;
                 _observedLimbs[0].solver.IKRotationWeight = _observedLimbs[0].solver.IKPositionWeight = _leftHand;
                 _observedLimbs[1].solver.IKRotationWeight = _observedLimbs[1].solver.IKPositionWeight = _rightHand;
-                method_20(num);
+                method_20(_lastDistance);
                 method_24(num2);
-                method_19(num);
+                method_19(_lastDistance);
                 if (_rightHand < 1f)
                 {
                     PlayerBones.Kinematics(_observedMarkers[1], _rightHand);
@@ -2033,7 +1946,7 @@ namespace Fika.Core.Coop.Players
                 child.localPosition = Vector3.zero;
                 child.localRotation = Quaternion.identity;
             }
-            if (num > EFTHardSettings.Instance.AnimatorCullDistance)
+            if (_lastDistance > EFTHardSettings.Instance.AnimatorCullDistance)
             {
                 BodyAnimatorCommon.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
                 ArmsAnimatorCommon.cullingMode = _shouldCullController ? AnimatorCullingMode.AlwaysAnimate : AnimatorCullingMode.CullUpdateTransforms;

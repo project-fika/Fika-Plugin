@@ -30,17 +30,20 @@ namespace Fika.Core.Coop.Players
     /// </summary>
     public class CoopBot : CoopPlayer
     {
+
         public override bool IsVisible
         {
             get
             {
-                return FikaBackendUtils.IsHeadless || OnScreen;
+                return _isHeadless || OnScreen;
             }
             set
             {
 
             }
         }
+
+        private bool _isHeadless;
 
         public BotPacketSender BotPacketSender { get; internal set; }
 
@@ -55,6 +58,7 @@ namespace Fika.Core.Coop.Players
             CoopBot player = Create<CoopBot>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
                 bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
+            player._isHeadless = FikaBackendUtils.IsHeadless;
             player.IsYourPlayer = false;
             player.NetId = playerId;
 
@@ -83,7 +87,7 @@ namespace Fika.Core.Coop.Players
 
             if (FikaBackendUtils.IsHeadless)
             {
-                botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.SetMode(LocalPlayerCullingHandlerClass.EMode.Disabled);
+                botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.SetMode(EMode.Disabled);
             }
 
             player.AggressorFound = false;
@@ -115,6 +119,47 @@ namespace Fika.Core.Coop.Players
         public override void ConnectSkillManager()
         {
             // Do nothing
+        }
+
+        public override void InitAudioController()
+        {
+            if (!_isHeadless)
+            {
+                base.InitAudioController();
+            }
+        }
+
+        public override void CreateSpeechSource()
+        {
+            if (!_isHeadless)
+            {
+                base.CreateSpeechSource();
+            }
+        }
+
+        public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
+        {
+            if (_isHeadless)
+            {
+                if (ActiveHealthController.IsAlive)
+                {
+                    CommonPlayerPacket packet = new()
+                    {
+                        NetId = NetId,
+                        Type = ECommonSubPacketType.Phrase,
+                        SubPacket = new PhrasePacket()
+                        {
+                            PhraseTrigger = @event,
+                            PhraseIndex = clip.NetId
+                        }
+                    };
+                    PacketSender.SendPacket(ref packet);
+                }
+            }
+            else
+            {
+                base.OnPhraseTold(@event, clip, bank, speaker);
+            }
         }
 
         public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
@@ -351,21 +396,21 @@ namespace Fika.Core.Coop.Players
 
         private class BotFirearmControllerHandler(CoopBot coopBot, Weapon weapon)
         {
-            private readonly CoopBot coopBot = coopBot;
+            private readonly CoopBot _coopBot = coopBot;
             public readonly Weapon weapon = weapon;
             public Process<FirearmController, IFirearmHandsController> Process;
             public Action ConfirmCallback;
 
             internal BotFirearmController ReturnController()
             {
-                return BotFirearmController.Create(coopBot, weapon);
+                return BotFirearmController.Create(_coopBot, weapon);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopBot.NetId,
+                    NetId = _coopBot.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -373,7 +418,7 @@ namespace Fika.Core.Coop.Players
                         ItemId = weapon.Id
                     }
                 };
-                coopBot.PacketSender.SendPacket(ref packet);
+                _coopBot.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)

@@ -11,7 +11,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             Rotation = rotation;
             PoseLevel = 1f;
             IsGrounded = true;
-            HasGround = true;
         }
 
         public Vector3 Position;
@@ -30,7 +29,5 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         public float WeaponOverlap;
         public bool LeftStanceDisabled;
         public bool IsGrounded;
-        public bool HasGround;
-        public ESurfaceSound SurfaceSound;
     }
 }

@@ -25,8 +25,6 @@ namespace Fika.Core.Networking
         public float WeaponOverlap;
         public bool LeftStanceDisabled;
         public bool IsGrounded;
-        public bool HasGround;
-        public ESurfaceSound SurfaceSound;
 
         public PlayerStatePacket(int netId)
         {
@@ -56,8 +54,6 @@ namespace Fika.Core.Networking
             writer.Put(WeaponOverlap);
             writer.Put(LeftStanceDisabled);
             writer.Put(IsGrounded);
-            writer.Put(HasGround);
-            writer.Put((byte)SurfaceSound);
             writer.Put(RemoteTime);
         }
 
@@ -80,8 +76,6 @@ namespace Fika.Core.Networking
             WeaponOverlap = reader.GetFloat();
             LeftStanceDisabled = reader.GetBool();
             IsGrounded = reader.GetBool();
-            HasGround = reader.GetBool();
-            SurfaceSound = (ESurfaceSound)reader.GetByte();
             RemoteTime = reader.GetDouble();
         }
 
@@ -103,8 +97,6 @@ namespace Fika.Core.Networking
             WeaponOverlap = player.ObservedOverlap;
             LeftStanceDisabled = player.LeftStanceDisabled;
             IsGrounded = player.MovementContext.IsGrounded;
-            HasGround = player.HasGround;
-            SurfaceSound = player.CurrentSurface;
             RemoteTime = NetworkTimeSync.NetworkTime;
         }
     }

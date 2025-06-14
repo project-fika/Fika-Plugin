@@ -45,7 +45,6 @@ namespace Fika.Core.Coop.Players
         public bool HasSkilledScav;
         public float ObservedOverlap = 0f;
         public CorpseSyncPacket CorpseSyncPacket = default;
-        public bool HasGround;
         public int NetId;
         public bool IsObservedAI;
         public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
@@ -233,12 +232,6 @@ namespace Fika.Core.Coop.Players
                 SubPacket = new GenericSubPackets.MuffledState(NetId, isMuffled)
             };
             PacketSender.SendPacket(ref packet);
-        }
-
-        public override bool CheckSurface(float range)
-        {
-            HasGround = base.CheckSurface(range);
-            return HasGround;
         }
 
         public override void OnWeaponMastered(MasterSkillClass masterSkill)
