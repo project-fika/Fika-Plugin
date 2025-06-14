@@ -1054,6 +1054,22 @@ namespace Fika.Core.Coop.Players
             return corpse;
         }
 
+        public override void CreateNestedSource()
+        {
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                base.CreateNestedSource(); 
+            }
+        }
+
+        public override void CreateSpeechSource()
+        {
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                base.CreateSpeechSource(); 
+            }
+        }
+
         public override void OnDead(EDamageType damageType)
         {
             if (HealthBar != null)
