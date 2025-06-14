@@ -87,7 +87,7 @@ namespace Fika.Core.Coop.Players
 
             if (FikaBackendUtils.IsHeadless)
             {
-                botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.SetMode(EMode.Disabled);
+                botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.SetMode(LocalPlayerCullingHandlerClass.EMode.Disabled);
             }
 
             player.AggressorFound = false;
