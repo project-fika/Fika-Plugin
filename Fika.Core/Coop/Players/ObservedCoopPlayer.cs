@@ -156,6 +156,7 @@ namespace Fika.Core.Coop.Players
         private Transform[] _observedMarkers;
         private bool _shouldCullController;
         private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
+        private ObservedCorpseCulling _observedCorpseCulling;
         #endregion
 
         public static async Task<ObservedCoopPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -1029,6 +1030,7 @@ namespace Fika.Core.Coop.Players
             {
                 _cullingHandler.DisableCullingOnDead();
             }
+            _observedCorpseCulling = new(this, Corpse);
             if (CorpseSyncPacket.ItemInHands != null)
             {
                 Corpse.SetItemInHandsLootedCallback(null);
@@ -1364,6 +1366,7 @@ namespace Fika.Core.Coop.Players
             Physical.LateUpdate();
             ObservedVisualPass(Time.deltaTime, 3);
             PropUpdate();
+            _observedCorpseCulling?.ManualUpdate();
             _armsupdated = false;
             _bodyupdated = false;
         }
@@ -1511,6 +1514,7 @@ namespace Fika.Core.Coop.Players
                 slotViewHandler.Dispose();
             }
             _observedSlotViewHandlers.Clear();
+            _observedCorpseCulling?.Dispose();
             if (HealthController.IsAlive)
             {
                 if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
@@ -1589,38 +1593,38 @@ namespace Fika.Core.Coop.Players
 
         private class ObservedSlotViewHandler : IDisposable
         {
-            private readonly Slot slot;
-            private readonly ObservedCoopPlayer observedPlayer;
-            private readonly EquipmentSlot slotType;
+            private readonly Slot _slot;
+            private readonly ObservedCoopPlayer _observedPlayer;
+            private readonly EquipmentSlot _slotType;
 
             public ObservedSlotViewHandler(Slot itemSlot, ObservedCoopPlayer player, EquipmentSlot equipmentType)
             {
-                slot = itemSlot;
-                observedPlayer = player;
-                slotType = equipmentType;
+                _slot = itemSlot;
+                _observedPlayer = player;
+                _slotType = equipmentType;
 
                 itemSlot.OnAddOrRemoveItem += HandleItemMove;
             }
 
             public void Dispose()
             {
-                slot.OnAddOrRemoveItem -= HandleItemMove;
+                _slot.OnAddOrRemoveItem -= HandleItemMove;
             }
 
             private void HandleItemMove(Item item)
             {
-                Transform slotBone = observedPlayer.PlayerBody.GetSlotBone(slotType);
-                Transform alternativeHolsterBone = observedPlayer.PlayerBody.GetAlternativeHolsterBone(slotType);
-                PlayerBody.GClass2154 newSlotView = new(observedPlayer.PlayerBody, slot, slotBone, slotType,
-                        observedPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone, false);
-                PlayerBody.GClass2154 oldSlotView = observedPlayer.PlayerBody.SlotViews.AddOrReplace(slotType, newSlotView);
+                Transform slotBone = _observedPlayer.PlayerBody.GetSlotBone(_slotType);
+                Transform alternativeHolsterBone = _observedPlayer.PlayerBody.GetAlternativeHolsterBone(_slotType);
+                PlayerBody.GClass2154 newSlotView = new(_observedPlayer.PlayerBody, _slot, slotBone, _slotType,
+                        _observedPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone, false);
+                PlayerBody.GClass2154 oldSlotView = _observedPlayer.PlayerBody.SlotViews.AddOrReplace(_slotType, newSlotView);
                 if (oldSlotView != null)
                 {
                     ClearSlotView(oldSlotView);
                     oldSlotView.Dispose();
                 }
-                observedPlayer.PlayerBody.ValidateHoodedDress(slotType);
-                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3393>().Invoke(observedPlayer.ProfileId);
+                _observedPlayer.PlayerBody.ValidateHoodedDress(_slotType);
+                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3393>().Invoke(_observedPlayer.ProfileId);
                 Dispose();
             }
 

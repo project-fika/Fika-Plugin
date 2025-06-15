@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.Utils
 
         public const int PingRange = 1000;
 
-        private static readonly ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource("FikaGlobals");
+        private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("FikaGlobals");
 
         internal static readonly List<EInteraction> BlockedInteractions =
         [
@@ -202,7 +202,7 @@ namespace Fika.Core.Coop.Utils
                 return tarkovApplication.Session;
             }
 
-            logger.LogError("GetSession: Could not find TarkovApplication!");
+            _logger.LogError("GetSession: Could not find TarkovApplication!");
             return null;
         }
 
@@ -216,7 +216,7 @@ namespace Fika.Core.Coop.Utils
             ISession session = GetSession();
             if (session == null)
             {
-                logger.LogError("GetProfile: Session was null!");
+                _logger.LogError("GetProfile: Session was null!");
                 return null;
             }
 
