@@ -73,6 +73,7 @@ namespace Fika.Core.Coop.Players
                 new ObservedStatisticsManager(), null, null, null, filter,
                 EVoipState.NotAvailable, aiControl, false);
 
+            player.Pedometer.Stop();
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
 

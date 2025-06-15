@@ -197,6 +197,7 @@ namespace Fika.Core.Coop.Players
                 statisticsManager, observedQuestController, null,
                 null, filter, player.VoipState, aiControl, false);
 
+            player.Pedometer.Stop();
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, FikaGlobals.EmptyAction);
 
