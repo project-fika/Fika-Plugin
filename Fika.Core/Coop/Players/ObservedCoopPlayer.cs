@@ -1030,7 +1030,10 @@ namespace Fika.Core.Coop.Players
             {
                 _cullingHandler.DisableCullingOnDead();
             }
-            _observedCorpseCulling = new(this, Corpse);
+            if (!FikaBackendUtils.IsHeadless)
+            {
+                _observedCorpseCulling = new(this, Corpse); 
+            }
             if (CorpseSyncPacket.ItemInHands != null)
             {
                 Corpse.SetItemInHandsLootedCallback(null);
