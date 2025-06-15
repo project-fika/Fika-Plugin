@@ -132,7 +132,8 @@ namespace Fika.Core.Networking
         private int _currentNetId;
         private FikaChat _fikaChat;
         private CancellationTokenSource _natIntroduceRoutineCts;
-        private int _statisticsCounter;
+        private float _statisticsCounter;
+        private float _sendThreshold;
         private Dictionary<Profile, bool> _visualProfiles;
         private Dictionary<string, int> _cachedConnections;
         private JobHandle _stateHandle;
@@ -162,7 +163,8 @@ namespace Fika.Core.Networking
             _packetProcessor = new();
             _dataWriter = new();
             _externalIp = NetUtils.GetLocalIp(LocalAddrType.IPv4);
-            _statisticsCounter = 0;
+            _statisticsCounter = 0f;
+            _sendThreshold = 2f;
             _cachedConnections = [];
             _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
             Snapshots = new(128);
@@ -1252,13 +1254,14 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             _netServer?.PollEvents();
-            _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 16,
+            float unscaledDetla = Time.unscaledDeltaTime;
+            _stateHandle = new UpdateInterpolators(unscaledDetla).Schedule(ObservedCoopPlayers.Count, 16,
                 new HandlePlayerStates(NetworkTimeSync.NetworkTime).Schedule(Snapshots.Count, 16));
 
-            _statisticsCounter++;
-            if (_statisticsCounter > 600)
+            _statisticsCounter += unscaledDetla;
+            if (_statisticsCounter > _sendThreshold)
             {
-                _statisticsCounter = 0;
+                _statisticsCounter -= _sendThreshold;
                 SendStatisticsPacket();
             }
         }
