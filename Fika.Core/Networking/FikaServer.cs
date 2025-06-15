@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using Dissonance;
 using Dissonance.Integrations.MirrorIgnorance;
+using Diz.Utils;
 using EFT;
 using EFT.Airdrop;
 using EFT.Interactive;
@@ -1499,8 +1500,32 @@ namespace Fika.Core.Networking
             {
                 if (_netServer.ConnectedPeersCount == 0)
                 {
-                    DisconnectHeadless();
+                    if (disconnectInfo.Reason != DisconnectReason.RemoteConnectionClose)
+                    {
+                        _ = Task.Run(WaitBeforeStopping);
+                    }
+                    else
+                    {
+                        DisconnectHeadless();
+                    }                    
                 }
+            }
+        }
+
+        private async void WaitBeforeStopping()
+        {
+            int minutes = 0;
+            while (minutes < 5)
+            {
+                await Task.Delay(TimeSpan.FromMinutes(1));
+                minutes++;
+                _logger.LogInfo($"Waited {minutes} minutes for reconnect...");
+            }
+
+            if (_netServer.ConnectedPeersCount == 0)
+            {
+                _logger.LogInfo("No reconnect was made, stopping session");
+                AsyncWorker.RunInMainTread(DisconnectHeadless);
             }
         }
 
