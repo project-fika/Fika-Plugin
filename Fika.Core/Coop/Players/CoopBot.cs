@@ -138,6 +138,14 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public override void UpdateMuffledState()
+        {
+            if (!_isHeadless)
+            {
+                base.UpdateMuffledState(); 
+            }
+        }
+
         public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
         {
             if (_isHeadless)
