@@ -114,7 +114,7 @@ namespace Fika.Core.Networking.Websocket
                 case EFikaNotifications.StartedRaid:
                     notification = e.Data.ParseJsonTo<StartRaidNotification>([]);
 
-                    if (FikaGlobals.IsInRaid())
+                    if (FikaGlobals.IsInRaid)
                     {
                         return;
                     }

@@ -63,6 +63,18 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
+        /// <summary>
+        /// Checks whether the game client is in a raid
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsInRaid
+        {
+            get
+            {
+                return Singleton<IFikaGame>.Instantiated;
+            }
+        }
+
         private static VoipSettingsClass voipHandler;
 
         internal static float GetOtherPlayerSensitivity()
@@ -153,15 +165,6 @@ namespace Fika.Core.Coop.Utils
                 yield break;
             }
             ConsoleScreen.Log($"{player.Profile.Info.Nickname} has spawned item: {item.ShortName.Localized()}");
-        }
-
-        /// <summary>
-        /// Checks whether the game client is in a raid
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsInRaid()
-        {
-            return Singleton<IFikaGame>.Instantiated;
         }
 
         /// <summary>

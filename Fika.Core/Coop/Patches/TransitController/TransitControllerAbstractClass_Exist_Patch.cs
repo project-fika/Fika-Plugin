@@ -16,7 +16,7 @@ namespace Fika.Core.Coop.Patches
         [PatchPrefix]
         public static bool Prefix(ref bool __result, ref TransitControllerAbstractClass transitController)
         {
-            if (FikaGlobals.IsInRaid())
+            if (FikaGlobals.IsInRaid)
             {
                 GameWorld gameWorld = Singleton<GameWorld>.Instance;
                 if (gameWorld != null)
