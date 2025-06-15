@@ -1882,7 +1882,7 @@ namespace Fika.Core.Coop.Players
 
         private void ObservedVisualPass(float deltaTime, int ikUpdateInterval)
         {
-            if (CustomAnimationsAreProcessing)
+            if (CustomAnimationsAreProcessing || !_cullingHandler.IsVisible || !HealthController.IsAlive)
             {
                 return;
             }
