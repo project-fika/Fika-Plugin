@@ -1512,7 +1512,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private async void WaitBeforeStopping()
+        private async Task WaitBeforeStopping()
         {
             int minutes = 0;
             while (minutes < 5)
