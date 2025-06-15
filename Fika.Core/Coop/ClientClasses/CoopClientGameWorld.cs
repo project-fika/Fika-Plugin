@@ -4,6 +4,7 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,7 +40,23 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override void PlayerTick(float dt)
         {
-            method_10(smethod_2);
+            for (int i = AllAlivePlayersList.Count - 1; i >= 0; i--)
+            {
+                Player player = AllAlivePlayersList[i];
+                try
+                {
+                    player.UpdateTick();
+                }
+                catch (Exception ex)
+                {
+                    FikaGlobals.LogError($"[{player.FullIdInfo}] tick operation exception: {ex}");
+                }
+            }
+        }
+
+        public override void AfterPlayerTick(float dt)
+        {
+            // Do nothing
         }
 
         public override void vmethod_1(float dt)

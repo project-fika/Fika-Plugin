@@ -47,6 +47,29 @@ namespace Fika.Core.Coop.HostClasses
             return gameWorld;
         }
 
+        public override void PlayerTick(float dt)
+        {
+            for (int i = AllAlivePlayersList.Count - 1; i >= 0; i--)
+            {
+                Player player = AllAlivePlayersList[i];
+                try
+                {
+                    player.UpdateTick();
+                }
+                catch (Exception ex)
+                {
+                    FikaGlobals.LogError($"[{player.FullIdInfo}] tick operation exception: {ex}");
+                }
+            }
+            ClientSynchronizableObjectLogicProcessor.RemoveNonActiveAndStaticObjects();
+            ClientSynchronizableObjectLogicProcessor.ManualUpdate(dt);
+        }
+
+        public override void AfterPlayerTick(float dt)
+        {
+            // Do nothing
+        }
+
         public override GrenadeFactoryClass CreateGrenadeFactory()
         {
             return new HostGrenadeFactory();
