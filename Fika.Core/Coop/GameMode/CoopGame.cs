@@ -702,6 +702,11 @@ namespace Fika.Core.Coop.GameMode
             dateTime_0 = EFTDateTimeClass.Now;
         }
 
+        public override void FixedUpdate()
+        {
+            // Do nothing
+        }
+
         /// <summary>
         /// Updates a <see cref="ExfiltrationPoint"/> from the server
         /// </summary>
