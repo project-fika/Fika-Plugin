@@ -870,6 +870,7 @@ namespace Fika.Core.Coop.Players
                 MovementContext.PlayerAnimatorEnableJump(false);
                 MovementContext.PlayerAnimatorEnableLanding(true);
             }
+
             if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)
             {
                 MovementContext.UpdateSprintInertia();
