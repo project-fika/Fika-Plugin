@@ -116,33 +116,33 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private class ObservedMedsOperation(Player.MedsController controller) : Class1182(controller)
         {
-            private readonly CoopObservedMedsController observedMedsController = (CoopObservedMedsController)controller;
-            private int animation;
+            private readonly CoopObservedMedsController _observedMedsController = (CoopObservedMedsController)controller;
+            private int _animation;
 
             public void ObservedStart(Action callback)
             {
                 State = Player.EOperationState.Executing;
                 SetLeftStanceAnimOnStartOperation();
                 callback();
-                if (observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
+                if (_observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
                 {
-                    animation = UnityEngine.Random.Range(0, animationVariantsComponent.VariantsNumber);
+                    _animation = UnityEngine.Random.Range(0, animationVariantsComponent.VariantsNumber);
                 }
                 else
                 {
-                    animation = 0;
+                    _animation = 0;
                 }
-                observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
-                observedMedsController._coopPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
-                observedMedsController.OnOutUseEvent += ObservedMedsController_OnOutUseEvent;
+                _observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
+                _observedMedsController._coopPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
+                _observedMedsController.OnOutUseEvent += ObservedMedsController_OnOutUseEvent;
             }
 
             public void ObservedMedsController_OnOutUseEvent()
             {
-                if (observedMedsController.FirearmsAnimator != null)
+                if (_observedMedsController.FirearmsAnimator != null)
                 {
-                    observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
-                    observedMedsController.FirearmsAnimator.SetNextLimb(false);
+                    _observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
+                    _observedMedsController.FirearmsAnimator.SetNextLimb(false);
                 }
             }
 
@@ -154,9 +154,9 @@ namespace Fika.Core.Coop.ObservedClasses
                     return;
                 }
 
-                if (observedMedsController.FirearmsAnimator != null)
+                if (_observedMedsController.FirearmsAnimator != null)
                 {
-                    FirearmsAnimator animator = observedMedsController.FirearmsAnimator;
+                    FirearmsAnimator animator = _observedMedsController.FirearmsAnimator;
 
                     animator.SetActiveParam(false, false);
                     if (animator.HasNextLimb())
@@ -164,16 +164,16 @@ namespace Fika.Core.Coop.ObservedClasses
                         animator.SetNextLimb(true);
                     }
 
-                    float mult = observedMedsController._coopPlayer.Skills.SurgerySpeed.Value / 100f;
+                    float mult = _observedMedsController._coopPlayer.Skills.SurgerySpeed.Value / 100f;
                     animator.SetUseTimeMultiplier(1f + mult);
 
                     int variant = 0;
-                    animation++;
-                    if (observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
+                    _animation++;
+                    if (_observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
                     {
                         variant = animationVariantsComponent.VariantsNumber;
                     }
-                    int newAnim = (int)Mathf.Repeat((float)animation, (float)variant);
+                    int newAnim = (int)Mathf.Repeat((float)_animation, (float)variant);
 
                     animator.SetAnimationVariant(newAnim);
                 }
@@ -181,10 +181,10 @@ namespace Fika.Core.Coop.ObservedClasses
 
             public void HideObservedWeapon()
             {
-                if (observedMedsController != null && observedMedsController.FirearmsAnimator != null)
+                if (_observedMedsController != null && _observedMedsController.FirearmsAnimator != null)
                 {
-                    observedMedsController.FirearmsAnimator.SetNextLimb(false);
-                    observedMedsController.FirearmsAnimator.SetActiveParam(false, true);
+                    _observedMedsController.FirearmsAnimator.SetNextLimb(false);
+                    _observedMedsController.FirearmsAnimator.SetActiveParam(false, true);
                 }
             }
 

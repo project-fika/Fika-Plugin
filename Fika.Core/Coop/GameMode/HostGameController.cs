@@ -122,6 +122,11 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
+        public override Task ReceiveSpawnPoint(Profile profile)
+        {
+            throw new NotImplementedException("Should not be called as a host");
+        }
+
         public void BotDespawn(BotOwner bot)
         {
             Player getPlayer = bot.GetPlayer;

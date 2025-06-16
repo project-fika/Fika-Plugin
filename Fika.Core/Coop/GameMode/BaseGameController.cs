@@ -75,11 +75,11 @@ namespace Fika.Core.Coop.GameMode
         {
             get
             {
-                return season;
+                return _season;
             }
             set
             {
-                season = value;
+                _season = value;
                 Logger.LogInfo($"Setting Season to: {value}");
                 WeatherReady = true;
             }
@@ -131,7 +131,7 @@ namespace Fika.Core.Coop.GameMode
         private CoopHalloweenEventManager _halloweenEventManager;
         private FikaDebug _fikaDebug;
 
-        private ESeason season;
+        private ESeason _season;
 
         protected CoopHandler _coopHandler;
         protected CoopPlayer _localPlayer;
@@ -203,10 +203,7 @@ namespace Fika.Core.Coop.GameMode
             return null;
         }
 
-        public virtual IEnumerator WaitForHostInit(int timeBeforeDeployLocal)
-        {
-            throw new NotImplementedException("Use derived classes");
-        }
+        public abstract IEnumerator WaitForHostInit(int timeBeforeDeployLocal);
 
         public Vector3 GetSpawnPosition()
         {
@@ -303,11 +300,7 @@ namespace Fika.Core.Coop.GameMode
         /// This task ensures that all players are joined and loaded before continuing
         /// </summary>
         /// <returns></returns>
-        public virtual async Task WaitForOtherPlayersToLoad()
-        {
-            await Task.Yield();
-            throw new NotImplementedException();
-        }
+        public abstract Task WaitForOtherPlayersToLoad();
 
         /// <summary>
         /// Runs a few last changes to the raid setup
@@ -353,11 +346,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public virtual async Task GenerateWeathers()
-        {
-            await Task.Yield();
-            throw new NotImplementedException();
-        }
+        public abstract Task GenerateWeathers();
 
         public virtual IEnumerator CountdownScreen(Profile profile, string profileId)
         {
@@ -471,16 +460,9 @@ namespace Fika.Core.Coop.GameMode
             Logger.LogError("SyncTransitControllers: Could not find TransitData in Summonedtransits!");
         }
 
-        public virtual async Task ReceiveSpawnPoint(Profile profile)
-        {
-            await Task.Yield();
-            throw new NotImplementedException();
-        }
+        public abstract Task ReceiveSpawnPoint(Profile profile);
 
-        public virtual void CreateSpawnSystem(Profile profile)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void CreateSpawnSystem(Profile profile);
 
         public void InitShellingController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
         {
@@ -615,11 +597,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public virtual async Task InitializeLoot(LocationSettingsClass.Location location)
-        {
-            await Task.Yield();
-            throw new NotImplementedException();
-        }
+        public abstract Task InitializeLoot(LocationSettingsClass.Location location);
 
         public Task SetupRaidCode()
         {
@@ -638,15 +616,9 @@ namespace Fika.Core.Coop.GameMode
             return Task.CompletedTask;
         }
 
-        public virtual void SetupEventsAndExfils(Player player)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void SetupEventsAndExfils(Player player);
 
-        public virtual void Extract(CoopPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Extract(CoopPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null);
 
         /// <summary>
         /// Used to make sure no stims or mods reset the DamageCoeff
@@ -705,11 +677,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        public virtual async Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld)
-        {
-            await Task.Yield();
-            throw new NotImplementedException();
-        }
+        public abstract Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld);
 
         public void SetClientTime(DateTime gameTime, TimeSpan sessionTime)
         {
