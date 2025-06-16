@@ -38,7 +38,6 @@ namespace Fika.Core.Coop.ObservedClasses
                 MovementContext.SetUpDiscreteDirection(GClass1879.ConvertToMovementDirection(Direction));
                 Direction = Vector2.zero;
                 MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
-                MovementContext.SprintAcceleration(deltaTime);
                 UpdateRotationAndPosition(deltaTime);
             }
             else

@@ -839,6 +839,9 @@ namespace Fika.Core.Coop.Players
             return true;
         }
 
+        /// <summary>
+        /// Updates replicated values from the <see cref="ObservedState"/>
+        /// </summary>
         public void ManualStateUpdate()
         {
             bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
@@ -895,7 +898,8 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetPoseLevel(CurrentPlayerState.PoseLevel);
             }
 
-            MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.CharacterMovementSpeed, true);
+            MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.MovementSpeed, true);
+            MovementContext.SprintSpeed = CurrentPlayerState.SprintSpeed;
 
             if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
             {

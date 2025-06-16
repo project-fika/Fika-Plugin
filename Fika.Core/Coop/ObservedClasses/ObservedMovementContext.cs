@@ -186,6 +186,17 @@ namespace Fika.Core.Coop.ObservedClasses
             return movementContext;
         }
 
+        public override void ManualUpdate(float deltaTime)
+        {
+            if (!_player.HealthController.IsAlive)
+            {
+                return;
+            }
+            LastDeltaTime = deltaTime;
+            SmoothPoseLevel(deltaTime);
+            method_13(deltaTime);
+        }
+
         public override void SetStationaryWeapon(Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
         {
             StationaryHandler handler = new(this, callback);
@@ -244,7 +255,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private class StationaryHandler(MovementContext context, Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
         {
-            private readonly MovementContext context = context;
+            private readonly MovementContext _context = context;
             public readonly Action<Player.AbstractHandsController, Player.AbstractHandsController> callback = callback;
 
             public void HandleSwap(Player.AbstractHandsController oldController, Player.AbstractHandsController newController)
@@ -254,9 +265,9 @@ namespace Fika.Core.Coop.ObservedClasses
                     return;
                 }
 
-                if (newController != null && newController is CoopObservedFirearmController observedController && observedController.Item == context.StationaryWeapon.Item)
+                if (newController != null && newController is CoopObservedFirearmController observedController && observedController.Item == _context.StationaryWeapon.Item)
                 {
-                    context.OnHandsControllerChanged -= HandleSwap;
+                    _context.OnHandsControllerChanged -= HandleSwap;
                     callback(null, newController);
                 }
             }

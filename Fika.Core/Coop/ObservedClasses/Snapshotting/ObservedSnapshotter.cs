@@ -20,7 +20,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             _player.CurrentPlayerState.State = to.State;
             _player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
             _player.CurrentPlayerState.Step = to.Step;
-            _player.CurrentPlayerState.CharacterMovementSpeed = to.CharacterMovementSpeed;
+            _player.CurrentPlayerState.MovementSpeed = Mathf.Lerp(from.MovementSpeed, to.MovementSpeed, ratio);
+            _player.CurrentPlayerState.SprintSpeed = Mathf.Lerp(from.SprintSpeed, to.SprintSpeed, ratio);
             _player.CurrentPlayerState.IsProne = to.IsProne;
             _player.CurrentPlayerState.PoseLevel = Mathf.LerpUnclamped(from.PoseLevel, to.PoseLevel, ratio);
             _player.CurrentPlayerState.IsSprinting = to.IsSprinting;

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using static BaseBallistic;
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 {
@@ -20,7 +19,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         public EPlayerState State;
         public float Tilt;
         public int Step;
-        public float CharacterMovementSpeed;
+        public float MovementSpeed;
+        public float SprintSpeed;
         public bool IsProne;
         public float PoseLevel;
         public bool IsSprinting;
