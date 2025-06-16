@@ -480,6 +480,11 @@ namespace Fika.Core.Coop.Players
             }
         }
 
+        public override void MouseLook(bool forceApplyToOriginalRibcage = false)
+        {
+            MovementContext.RotationAction.Invoke(this);
+        }
+
         protected Item FindWeapon()
         {
 #if DEBUG
