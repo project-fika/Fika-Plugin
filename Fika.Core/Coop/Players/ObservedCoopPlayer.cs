@@ -1456,11 +1456,14 @@ namespace Fika.Core.Coop.Players
         {
             method_13(deltaTime);
 
-            if (Time.frameCount % 2 == _frameSkip)
+            if (HealthController.IsAlive)
             {
-                UpdateTriggerColliderSearcher(deltaTime, _cullingHandler.IsCloseToMyPlayerCamera);
+                if (Time.frameCount % 2 == _frameSkip)
+                {
+                    UpdateTriggerColliderSearcher(deltaTime, _cullingHandler.IsCloseToMyPlayerCamera);
+                }
+                _cullingHandler.ManualUpdate(deltaTime); 
             }
-            _cullingHandler.ManualUpdate(deltaTime);
         }
 
         public override void InitAudioController()
