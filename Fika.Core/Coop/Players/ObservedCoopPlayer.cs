@@ -897,10 +897,7 @@ namespace Fika.Core.Coop.Players
             }
 
             MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.MovementSpeed, true);
-            if (!Mathf.Approximately(MovementContext.SprintSpeed, CurrentPlayerState.SprintSpeed))
-            {
-                MovementContext.SprintSpeed = CurrentPlayerState.SprintSpeed;
-            }
+            MovementContext.SprintSpeed = CurrentPlayerState.SprintSpeed;
 
             if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
             {

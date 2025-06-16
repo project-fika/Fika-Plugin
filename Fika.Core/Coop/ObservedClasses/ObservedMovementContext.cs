@@ -193,6 +193,11 @@ namespace Fika.Core.Coop.ObservedClasses
                 return;
             }
             LastDeltaTime = deltaTime;
+
+            /* TODO: Fix the sprint sound and don't run the entire method
+             * Without UpdateGroundCollision sprint sounds randomly stop...
+             */
+            UpdateGroundCollision(deltaTime);
             SmoothPoseLevel(deltaTime);
             method_13(deltaTime);
         }
@@ -221,6 +226,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             base.Init();
             RotationAction = Rotate;
+
             // Fix base game bug where idle animations are not playing
             PlayerAnimator.SetIsThirdPerson(true);
             PlayerAnimator.SetLayerWeight(1, 1f);
