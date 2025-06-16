@@ -79,6 +79,10 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private async Task DropController()
         {
+            if (ObservedOperation != null)
+            {
+                ObservedOperation.RequestDestroy();
+            }
             await Task.Delay(600);
             Destroyed = true;
             ObservedOperation.HideObservedWeapon();
@@ -118,6 +122,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             private readonly CoopObservedMedsController _observedMedsController = (CoopObservedMedsController)controller;
             private int _animation;
+            private bool _destroyRequested;
 
             public void ObservedStart(Action callback)
             {
@@ -150,6 +155,16 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 // Look for GClass increments
                 if (effect is not GInterface354)
+                {
+                    return;
+                }
+
+                if (_destroyRequested)
+                {
+                    return;
+                }
+
+                if (_observedMedsController._player.HealthController.GetBodyPartHealth(EBodyPart.Common).AtMaximum)
                 {
                     return;
                 }
@@ -199,6 +214,11 @@ namespace Fika.Core.Coop.ObservedClasses
                 {
                     HideObservedWeaponComplete();
                 }
+            }
+
+            public void RequestDestroy()
+            {
+                _destroyRequested = true;
             }
         }
     }
