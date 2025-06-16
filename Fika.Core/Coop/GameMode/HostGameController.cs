@@ -23,11 +23,9 @@ using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using LiteNetLib;
 using System;
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.SubPacket;
@@ -451,7 +449,7 @@ namespace Fika.Core.Coop.GameMode
             if (!FikaBackendUtils.IsHeadless)
             {
                 FreeCameraController freeCamController = gameWorld.gameObject.AddComponent<FreeCameraController>();
-                Singleton<FreeCameraController>.Create(freeCamController); 
+                Singleton<FreeCameraController>.Create(freeCamController);
             }
 
             await SetupRaidCode();
@@ -908,7 +906,7 @@ namespace Fika.Core.Coop.GameMode
                 if (coopGame.GameUi.TimerPanel.enabled)
                 {
                     coopGame.GameUi.TimerPanel.Close();
-                }     
+                }
             }
             else
             {
@@ -934,7 +932,7 @@ namespace Fika.Core.Coop.GameMode
                 if (coopPlayer.PacketSender != null)
                 {
                     coopPlayer.PacketSender.DestroyThis();
-                } 
+                }
             }
 
             if (DynamicAI != null)
@@ -1081,7 +1079,7 @@ namespace Fika.Core.Coop.GameMode
                 _botsController.StopGettingInfo();
                 if (!FikaBackendUtils.IsHeadless)
                 {
-                    _botsController.DestroyInfo(_localPlayer); 
+                    _botsController.DestroyInfo(_localPlayer);
                 }
             }
 

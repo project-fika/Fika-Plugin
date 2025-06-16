@@ -52,7 +52,7 @@ namespace Fika.Core.Networking
                             fikaGame.ExtractedPlayers.Add(NetId);
                             if (FikaBackendUtils.IsServer)
                             {
-                                (fikaGame.GameController as HostGameController).ClearHostAI(playerToApply); 
+                                (fikaGame.GameController as HostGameController).ClearHostAI(playerToApply);
                             }
 
                             if (FikaPlugin.ShowNotifications.Value)
@@ -68,7 +68,7 @@ namespace Fika.Core.Networking
                     if (playerToApply != null)
                     {
                         playerToApply.Dispose();
-                        AssetPoolObject.ReturnToPool(playerToApply.gameObject, true); 
+                        AssetPoolObject.ReturnToPool(playerToApply.gameObject, true);
                     }
                 }
             }

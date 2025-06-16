@@ -1510,7 +1510,7 @@ namespace Fika.Core.Networking
                     else
                     {
                         DisconnectHeadless();
-                    }                    
+                    }
                 }
             }
         }

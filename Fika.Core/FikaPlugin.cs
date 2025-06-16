@@ -392,7 +392,7 @@ namespace Fika.Core
                 while (LocaleUtils.BEPINEX_H_ADVANCED.Localized() == "F_BepInEx_H_Advanced")
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
-                } 
+                }
             }
             Logger.LogInfo("Locales are ready!");
             SetupConfig();

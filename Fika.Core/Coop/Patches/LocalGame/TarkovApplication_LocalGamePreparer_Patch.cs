@@ -53,7 +53,7 @@ namespace Fika.Core.Coop.Patches
             if (!FikaBackendUtils.IsTransit)
             {
 #if DEBUG
-                FikaGlobals.LogInfo("Creating net manager"); 
+                FikaGlobals.LogInfo("Creating net manager");
 #endif
                 NetManagerUtils.CreateNetManager(isServer);
                 if (isServer)

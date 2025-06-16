@@ -50,8 +50,8 @@ namespace Fika.Core.Coop.Custom
             healthBar._currentPlayer = player;
             healthBar._mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             healthBar._effectIcons = EFTHardSettings.Instance.StaticIcons.EffectIcons.EffectIcons;
-            healthBar._effects = [];            
-            
+            healthBar._effects = [];
+
             healthBar.CreateHealthBar();
             return healthBar;
         }

@@ -1,12 +1,7 @@
-﻿using EFT;
-using EFT.Interactive;
-using EFT.InventoryLogic;
+﻿using EFT.Interactive;
 using Fika.Core.Coop.Players;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ObservedClasses
@@ -20,7 +15,7 @@ namespace Fika.Core.Coop.ObservedClasses
         private readonly List<Renderer> _renderers = new(256);
         private GClass994 _gClass994;
         private bool _ragdollDone;
-        private bool _localVisible = true;        
+        private bool _localVisible = true;
 
         public ObservedCorpseCulling(ObservedCoopPlayer observedCoopPlayer, Corpse observedCorpse)
         {

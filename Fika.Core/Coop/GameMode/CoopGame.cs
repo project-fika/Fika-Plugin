@@ -1228,7 +1228,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
             }
-        }        
+        }
 
         public bool IsHeard()
         {

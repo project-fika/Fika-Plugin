@@ -350,7 +350,7 @@ namespace Fika.Core.Console
 
                 Singleton<FikaClient>.Instance.SendData(ref commandPacket, DeliveryMethod.ReliableOrdered);
                 return;
-            }    
+            }
 
             BotWaveDataClass newBotData = new()
             {

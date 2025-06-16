@@ -2,7 +2,6 @@
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 

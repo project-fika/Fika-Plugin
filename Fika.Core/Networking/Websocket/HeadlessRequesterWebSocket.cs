@@ -7,11 +7,9 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Websocket.Headless;
 using Fika.Core.UI.Custom;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System;
-using System.Net.Configuration;
 using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket
@@ -101,7 +99,7 @@ namespace Fika.Core.Networking.Websocket
                 case EFikaHeadlessWSMessageTypes.RequesterJoinRaid:
 
                     RequesterJoinRaid data = e.Data.ParseJsonTo<RequesterJoinRaid>();
-                    MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;                    
+                    MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;
 
                     if (!string.IsNullOrEmpty(data.MatchId))
                     {
@@ -111,7 +109,7 @@ namespace Fika.Core.Networking.Websocket
                             if (success)
                             {
                                 // Matchmaker next screen (accept)
-                                matchMakerAcceptScreen.method_20().HandleExceptions();                                
+                                matchMakerAcceptScreen.method_20().HandleExceptions();
                             }
                         }, false));
                     }

@@ -142,7 +142,7 @@ namespace Fika.Core.Coop.Players
         {
             if (!_isHeadless)
             {
-                base.UpdateMuffledState(); 
+                base.UpdateMuffledState();
             }
         }
 

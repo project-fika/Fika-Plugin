@@ -4,7 +4,6 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using LiteNetLib;
 using LiteNetLib.Utils;
-using System;
 using System.Collections;
 using System.Net;
 using System.Net.Sockets;

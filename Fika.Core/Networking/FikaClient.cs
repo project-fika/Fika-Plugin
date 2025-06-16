@@ -800,7 +800,7 @@ namespace Fika.Core.Networking
                         {
                             coopGame.Profile_0 = packet.Profile;
                             coopGame.Profile_0.Health = packet.ProfileHealthClass;
-                        }                        
+                        }
                         FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
                         break;
                     case ReconnectPacket.EReconnectDataType.Finished:

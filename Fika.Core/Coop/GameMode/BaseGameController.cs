@@ -1,6 +1,5 @@
 ﻿using Audio.AmbientSubsystem;
 using BepInEx.Logging;
-using ChatShared;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio.RadioSystem;
 using Dissonance;

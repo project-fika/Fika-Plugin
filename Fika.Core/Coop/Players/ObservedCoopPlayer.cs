@@ -902,7 +902,7 @@ namespace Fika.Core.Coop.Players
             MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.MovementSpeed, true);
             if (!Mathf.Approximately(MovementContext.SprintSpeed, CurrentPlayerState.SprintSpeed))
             {
-                MovementContext.SprintSpeed = CurrentPlayerState.SprintSpeed; 
+                MovementContext.SprintSpeed = CurrentPlayerState.SprintSpeed;
             }
 
             if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
@@ -1040,7 +1040,7 @@ namespace Fika.Core.Coop.Players
             }
             if (!FikaBackendUtils.IsHeadless)
             {
-                _observedCorpseCulling = new(this, Corpse); 
+                _observedCorpseCulling = new(this, Corpse);
             }
             if (CorpseSyncPacket.ItemInHands != null)
             {
@@ -1470,7 +1470,7 @@ namespace Fika.Core.Coop.Players
                 {
                     UpdateTriggerColliderSearcher(deltaTime, _cullingHandler.IsCloseToMyPlayerCamera);
                 }
-                _cullingHandler.ManualUpdate(deltaTime); 
+                _cullingHandler.ManualUpdate(deltaTime);
             }
         }
 

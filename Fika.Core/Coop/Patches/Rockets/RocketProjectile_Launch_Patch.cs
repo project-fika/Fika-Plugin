@@ -3,7 +3,6 @@ using EFT;
 using EFT.RocketLauncher;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Patching;
-using System.Collections;
 using System.Reflection;
 using UnityEngine;
 

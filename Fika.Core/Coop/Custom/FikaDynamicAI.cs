@@ -6,7 +6,6 @@ using EFT;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 

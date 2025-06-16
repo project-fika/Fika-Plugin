@@ -1,5 +1,4 @@
 ﻿using Comfort.Common;
-using Fika.Core.Coop.Players;
 using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;

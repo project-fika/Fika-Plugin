@@ -2,7 +2,6 @@
 using Fika.Core.Coop.Players;
 using LiteNetLib.Utils;
 using UnityEngine;
-using static BaseBallistic;
 
 namespace Fika.Core.Networking
 {

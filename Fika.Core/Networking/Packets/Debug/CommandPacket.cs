@@ -1,5 +1,4 @@
-﻿using EFT;
-using LiteNetLib.Utils;
+﻿using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
