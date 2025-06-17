@@ -1195,7 +1195,7 @@ namespace Fika.Core.Networking
                     }
                     else
                     {
-                        throw new NullReferenceException($"Inventory controller was not of type {nameof(Interface16)}!");
+                        throw new InvalidTypeException($"Inventory controller was not of type {nameof(Interface16)}!");
                     }
                 }
                 catch (Exception exception)
