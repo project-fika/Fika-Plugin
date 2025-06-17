@@ -1191,7 +1191,7 @@ namespace Fika.Core.Networking
                         SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
                         SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-                        handler.OperationResult.Value.method_1(new Callback(handler.HandleResult));
+                        handler.OperationResult.Value.method_1(handler.HandleResult);
                     }
                     else
                     {
