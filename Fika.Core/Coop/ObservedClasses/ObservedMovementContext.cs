@@ -164,18 +164,14 @@ namespace Fika.Core.Coop.ObservedClasses
             float y = TransformPosition.y;
             if (IsGrounded)
             {
-                float num = StartFallingHeight - y;
-                float num2 = y - StartFlyHeight;
+                float fallHeight = StartFallingHeight - y;
+                float jumpHeight = y - StartFlyHeight;
                 StartFallingHeight = y;
                 if (!PreviousGroundResult)
                 {
-                    Action<float, float> onGrounded = OnGrounded;
-                    if (onGrounded != null)
-                    {
-                        onGrounded(num, num2);
-                    }
-                    FallHeight = num;
-                    JumpHeight = num2;
+                    OnGrounded?.Invoke(fallHeight, jumpHeight);
+                    FallHeight = fallHeight;
+                    JumpHeight = jumpHeight;
                 }
             }
             else
