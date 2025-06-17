@@ -202,6 +202,21 @@ namespace Fika.Core.Coop.ObservedClasses
             method_13(deltaTime);
         }
 
+        public override void SmoothPoseLevel(float deltaTime)
+        {
+            float num = Math.Abs(SmoothedPoseLevel - PoseLevel_1);
+            if (num < 1E-45f)
+            {
+                return;
+            }
+            if (num > 0.001f)
+            {
+                SmoothedPoseLevel = Mathf.Lerp(SmoothedPoseLevel, PoseLevel_1, deltaTime * EFTHardSettings.Instance.POSE_CHANGING_SPEED * TransitionSpeed);
+                return;
+            }
+            SmoothedPoseLevel = PoseLevel_1;
+        }
+
         public override void SetStationaryWeapon(Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
         {
             StationaryHandler handler = new(this, callback);
