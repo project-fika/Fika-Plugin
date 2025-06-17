@@ -2,6 +2,7 @@
 
 using Diz.LanguageExtensions;
 using EFT;
+using EFT.HealthSystem;
 using System;
 using UnityEngine;
 
@@ -156,6 +157,39 @@ namespace Fika.Core.Coop.ObservedClasses
             PlayerAnimatorSetFallingDownFloat(num);
             PlayerAnimator.SetIsGrounded(IsGrounded);
             CheckFlying(deltaTime);
+        }
+
+        public override void CheckFlying(float deltaTime)
+        {
+            float y = TransformPosition.y;
+            if (IsGrounded)
+            {
+                float num = StartFallingHeight - y;
+                float num2 = y - StartFlyHeight;
+                StartFallingHeight = y;
+                if (!PreviousGroundResult)
+                {
+                    Action<float, float> onGrounded = OnGrounded;
+                    if (onGrounded != null)
+                    {
+                        onGrounded(num, num2);
+                    }
+                    FallHeight = num;
+                    JumpHeight = num2;
+                }
+            }
+            else
+            {
+                if (PreviousGroundResult)
+                {
+                    StartFlyHeight = y;
+                }
+                if (y > StartFallingHeight)
+                {
+                    StartFallingHeight = y;
+                }
+            }
+            PreviousGroundResult = IsGrounded;
         }
 
         public override void WeightRelatedValuesUpdated()
