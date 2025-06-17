@@ -1617,10 +1617,10 @@ namespace Fika.Core.Networking
         private class InventoryOperationHandler(OperationDataStruct operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
         {
             public OperationDataStruct OperationResult = operationResult;
-            private readonly uint operationId = operationId;
-            private readonly int netId = netId;
-            private readonly NetPeer peer = peer;
-            private readonly FikaServer server = server;
+            private readonly uint _operationId = operationId;
+            private readonly int _netId = netId;
+            private readonly NetPeer _peer = peer;
+            private readonly FikaServer _server = server;
 
             internal void HandleResult(IResult result)
             {
@@ -1628,18 +1628,18 @@ namespace Fika.Core.Networking
 
                 if (!result.Succeed)
                 {
-                    server._logger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
-                    operationCallbackPacket = new(netId, operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
-                    server.SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+                    _server._logger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
+                    operationCallbackPacket = new(_netId, _operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
+                    _server.SendDataToPeer(_peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
 
-                    ResyncInventoryIdPacket resyncPacket = new(netId);
-                    server.SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+                    ResyncInventoryIdPacket resyncPacket = new(_netId);
+                    _server.SendDataToPeer(_peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
 
                     return;
                 }
 
-                operationCallbackPacket = new(netId, operationId, EOperationStatus.Succeeded);
-                server.SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+                operationCallbackPacket = new(_netId, _operationId, EOperationStatus.Succeeded);
+                _server.SendDataToPeer(_peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
             }
         }
     }
