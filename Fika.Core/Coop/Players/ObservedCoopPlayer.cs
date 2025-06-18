@@ -866,6 +866,14 @@ namespace Fika.Core.Coop.Players
             {
                 MovementContext.PlayerAnimatorEnableJump(false);
                 MovementContext.PlayerAnimatorEnableLanding(true);
+                if (newState is EPlayerState.Run or EPlayerState.Sprint)
+                {
+                    MovementContext.PlayerAnimatorEnableInert(true);
+                }
+                else
+                {
+                    MovementContext.PlayerAnimatorEnableInert(false);
+                }
             }
 
             if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)

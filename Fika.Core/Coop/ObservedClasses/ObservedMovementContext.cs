@@ -138,6 +138,19 @@ namespace Fika.Core.Coop.ObservedClasses
             // Do nothing
         }
 
+        public override void ManualUpdate(float deltaTime)
+        {
+            if (!_player.HealthController.IsAlive)
+            {
+                return;
+            }
+            LastDeltaTime = deltaTime;
+
+            CheckFlying(deltaTime);
+            SmoothPoseLevel(deltaTime);
+            method_13(deltaTime);
+        }
+
         public override void UpdateGroundCollision(float deltaTime)
         {
             if (!_player.IsVisible)
@@ -169,6 +182,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 StartFallingHeight = y;
                 if (!PreviousGroundResult)
                 {
+                    FreefallTime = 0f;
                     OnGrounded?.Invoke(fallHeight, jumpHeight);
                     FallHeight = fallHeight;
                     JumpHeight = jumpHeight;
@@ -176,6 +190,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
             else
             {
+                FreefallTime += deltaTime;
                 if (PreviousGroundResult)
                 {
                     StartFlyHeight = y;
@@ -185,6 +200,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     StartFallingHeight = y;
                 }
             }
+
             PreviousGroundResult = IsGrounded;
         }
 
@@ -214,23 +230,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             ObservedMovementContext movementContext = Create<ObservedMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
             return movementContext;
-        }
-
-        public override void ManualUpdate(float deltaTime)
-        {
-            if (!_player.HealthController.IsAlive)
-            {
-                return;
-            }
-            LastDeltaTime = deltaTime;
-
-            /* TODO: Fix the sprint sound and don't run the entire method
-             * Without UpdateGroundCollision sprint sounds randomly stop...
-             */
-            UpdateGroundCollision(deltaTime);
-            SmoothPoseLevel(deltaTime);
-            method_13(deltaTime);
-        }
+        }        
 
         public override void SmoothPoseLevel(float deltaTime)
         {

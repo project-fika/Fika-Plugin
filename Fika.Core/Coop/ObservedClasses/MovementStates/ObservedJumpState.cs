@@ -7,9 +7,38 @@ namespace Fika.Core.Coop.ObservedClasses
     {
         public override void ApplyMovementAndRotation(float deltaTime)
         {
-            Quaternion quaternion = Quaternion.Lerp(MovementContext.TransformRotation, Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up), EFTHardSettings.Instance.TRANSFORM_ROTATION_LERP_SPEED * deltaTime);
+            Quaternion quaternion = Quaternion.Lerp(MovementContext.TransformRotation,
+                Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up),
+                EFTHardSettings.Instance.TRANSFORM_ROTATION_LERP_SPEED * deltaTime);
             MovementContext.ApplyRotation(quaternion);
             MovementContext.PlayerAnimatorSetAimAngle(MovementContext.Pitch);
+        }
+
+        public override void ManualAnimatorMoveUpdate(float deltaTime)
+        {
+            MovementContext.PlayerAnimatorEnableInert(Vector2_0.magnitude > 0.1f);
+            if (EjumpState_0 == EJumpState.PushingFromTheGround)
+            {
+                if (!MovementContext.HeadBump(Vector3_2.y * deltaTime) && Float_2 <= 2f + Float_3)
+                {
+                    if (!MovementContext.IsGrounded && Float_2 > Float_3)
+                    {
+                        EjumpState_0 = EJumpState.Jump;
+                    }
+                }
+            }
+            else if (EjumpState_0 == EJumpState.Jump)
+            {
+                if (Float_10 > EFTHardSettings.Instance.JumpTimeDescendingForStateExit && MovementContext.IsGrounded)
+                {
+                    if (Vector2_0.sqrMagnitude > 0.1f && MovementContext.CanWalk)
+                    {
+                        MovementContext.MovementDirection = Vector2_0;
+                    }
+                }
+            }
+            Float_2 += deltaTime;
+            ApplyMovementAndRotation(deltaTime);
         }
     }
 }
