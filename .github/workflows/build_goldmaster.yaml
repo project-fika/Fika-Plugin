@@ -1,0 +1,58 @@
+name: Build GoldMaster
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release Tag (e.g., v1.0.0)'
+        required: true
+      release_name:
+        description: 'Release Title (e.g., Fika Release 1.0.0)'
+        required: true
+      release_notes:
+        description: 'Release Notes (optional)'
+        required: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build the solution
+        run: dotnet build Fika-Plugin.sln --configuration GoldMaster
+
+      - name: Publish the project
+        run: dotnet publish Fika.Core/Fika.Core.csproj --configuration GoldMaster --output output/
+
+      - name: Copy loose files
+        run: |
+          mkdir -p BepInEx/plugins/Fika
+          cp -r output/Fika.Core.dll BepInEx/plugins/Fika
+          cp LICENSE.md BepInEx/plugins/Fika
+          cp LICENSE-SIT.md BepInEx/plugins/Fika
+          cp LICENSE-LiteNetLib.md BepInEx/plugins/Fika
+          cp LICENSE-Mirror.md BepInEx/plugins/Fika
+          cp LICENSE-Open.NAT.md BepInEx/plugins/Fika
+
+      - name: Zip the build and loose files
+        run: zip -r "${{ inputs.release_name }}.zip" BepInEx/plugins/Fika
+
+      - name: Create GitHub Release Draft
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: ${{ inputs.release_name }}
+          body: ${{ inputs.release_notes }}
+          draft: true
+          files: |
+            ${{ inputs.release_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
