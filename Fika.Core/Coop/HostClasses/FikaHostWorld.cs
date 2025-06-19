@@ -28,11 +28,11 @@ namespace Fika.Core.Coop.HostClasses
             hostWorld.LootSyncPackets = new List<LootSyncStruct>(8);
             hostWorld.WorldPacket = new()
             {
-                ArtilleryPackets = [],
-                SyncObjectPackets = [],
-                GrenadePackets = [],
-                LootSyncStructs = [],
-                RagdollPackets = []
+                ArtilleryPackets = new(8),
+                SyncObjectPackets = new(8),
+                GrenadePackets = new(8),
+                LootSyncStructs = new(8),
+                RagdollPackets = new(8)
             };
             return hostWorld;
         }

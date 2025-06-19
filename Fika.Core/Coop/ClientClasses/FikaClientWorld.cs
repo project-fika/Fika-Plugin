@@ -27,11 +27,11 @@ namespace Fika.Core.Coop.ClientClasses
             clientWorld.SyncObjectPackets = new(16);
             clientWorld.WorldPacket = new()
             {
-                ArtilleryPackets = [],
-                SyncObjectPackets = [],
-                GrenadePackets = [],
-                LootSyncStructs = [],
-                RagdollPackets = []
+                ArtilleryPackets = new(8),
+                SyncObjectPackets = new(8),
+                GrenadePackets = new(8),
+                LootSyncStructs = new(8),
+                RagdollPackets = new(8)
             };
             clientWorld._client = Singleton<FikaClient>.Instance;
             clientWorld._client.FikaClientWorld = clientWorld;
