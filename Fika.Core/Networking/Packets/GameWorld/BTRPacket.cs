@@ -29,7 +29,7 @@ public struct BTRPacket : INetSerializable
         };
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(Data.position);
         writer.Put(Data.BtrBotId);

@@ -21,7 +21,7 @@ namespace Fika.Core.Networking
             NetId = reader.GetInt();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.PutPlayerInfoPacket(PlayerInfoPacket);
             writer.Put(IsAlive);

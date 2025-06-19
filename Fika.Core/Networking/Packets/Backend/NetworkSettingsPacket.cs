@@ -23,7 +23,7 @@ namespace Fika.Core.Networking
             AllowVOIP = reader.GetBool();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             bool isRequest = !string.IsNullOrEmpty(ProfileId);
             writer.Put(isRequest);

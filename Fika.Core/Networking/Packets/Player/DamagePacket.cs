@@ -49,7 +49,7 @@ namespace Fika.Core.Networking
             WeaponId = reader.GetString();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.Put((int)DamageType);

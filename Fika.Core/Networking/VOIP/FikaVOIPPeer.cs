@@ -59,7 +59,7 @@ namespace Fika.Core.Networking.VOIP
     {
         public bool IsLocal { get; set; } = false;
 
-        public NetPeer Peer
+        public readonly NetPeer Peer
         {
             get
             {

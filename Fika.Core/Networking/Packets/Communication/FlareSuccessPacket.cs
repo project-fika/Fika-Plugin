@@ -13,7 +13,7 @@ namespace Fika.Core.Networking
             Success = reader.GetBool();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(ProfileId);
             writer.Put(Success);

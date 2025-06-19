@@ -46,7 +46,7 @@ namespace Fika.Core.Models
         [DataMember(Name = "anyoneCanStartRaid")]
         public bool AnyoneCanStartRaid { get; set; }
 
-        public void LogValues()
+        public readonly void LogValues()
         {
             FikaPlugin.Instance.FikaLogger.LogInfo("Received config from server:");
             FieldInfo[] fields = typeof(ClientConfigModel).GetFields();

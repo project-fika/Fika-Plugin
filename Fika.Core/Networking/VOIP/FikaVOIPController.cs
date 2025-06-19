@@ -794,7 +794,7 @@ namespace Fika.Core.Networking.VOIP
             public DateTime Created;
             public DateTime DateTime_1;
 
-            public TimeSpan TimeSpan_0
+            public readonly TimeSpan TimeSpan_0
             {
                 get
                 {

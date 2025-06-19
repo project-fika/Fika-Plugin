@@ -28,7 +28,7 @@ namespace Fika.Core.Networking
                 PhraseIndex = reader.GetInt();
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 if (player.gameObject.activeSelf && player.HealthController.IsAlive)
                 {
@@ -36,7 +36,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)PhraseTrigger);
                 writer.Put(PhraseIndex);
@@ -61,7 +61,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
                 if (worldInteractiveObject != null)
@@ -133,7 +133,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put(InteractiveId);
                 writer.Put((byte)InteractionType);
@@ -156,7 +156,7 @@ namespace Fika.Core.Networking
                 InteractionType = (EInteractionType)reader.GetByte();
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
                 if (lootableContainer != null)
@@ -173,7 +173,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put(InteractiveId);
                 writer.Put((byte)InteractionType);
@@ -253,12 +253,12 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 player.HandleHeadLightsPacket(this);
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put(Amount);
                 writer.Put(IsSilent);
@@ -283,12 +283,12 @@ namespace Fika.Core.Networking
                 InventoryOpen = reader.GetBool();
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 player.HandleInventoryOpenedPacket(InventoryOpen);
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put(InventoryOpen);
             }
@@ -303,12 +303,12 @@ namespace Fika.Core.Networking
                 FastDrop = reader.GetBool();
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 player.HandleDropPacket(FastDrop);
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put(FastDrop);
             }
@@ -328,14 +328,14 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 StationaryWeapon stationaryWeapon = (Command == EStationaryCommand.Occupy)
                     ? Singleton<GameWorld>.Instance.FindStationaryWeapon(Id) : null;
                 player.ObservedStationaryInteract(stationaryWeapon, (StationaryPacketStruct.EStationaryCommand)Command);
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)Command);
                 if (Command == EStationaryCommand.Occupy)
@@ -354,12 +354,12 @@ namespace Fika.Core.Networking
                 Interaction = (EInteraction)reader.GetByte();
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 player.SetInteractInHands(Interaction);
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)Interaction);
             }
@@ -386,7 +386,7 @@ namespace Fika.Core.Networking
                 AbsoluteForwardVelocity = reader.GetFloat();
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 // A headless client can get stuck in permanent high-velocity states due to vaulting, skip it
                 if (!FikaBackendUtils.IsHeadless)
@@ -395,7 +395,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)VaultingStrategy);
                 writer.Put(VaultingPoint);
@@ -452,7 +452,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Execute(CoopPlayer player)
+            public readonly void Execute(CoopPlayer player)
             {
                 switch (Command)
                 {
@@ -488,7 +488,7 @@ namespace Fika.Core.Networking
                 }
             }
 
-            public void Serialize(NetDataWriter writer)
+            public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)Command);
                 if (Command == MountingPacketStruct.EMountingCommand.Update)

@@ -262,7 +262,7 @@ namespace Fika.Core.Networking
             Packet = packet;
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             NetworkHealthSyncPacketStruct.NetworkHealthDataPacketStruct packet = Packet.Data;

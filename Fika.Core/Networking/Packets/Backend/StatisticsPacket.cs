@@ -11,7 +11,7 @@ namespace Fika.Core.Networking
             ServerFPS = reader.GetInt();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(ServerFPS);
         }

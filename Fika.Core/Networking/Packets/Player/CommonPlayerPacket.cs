@@ -10,7 +10,7 @@ namespace Fika.Core.Networking
         public ECommonSubPacketType Type;
         public ISubPacket SubPacket;
 
-        public void Execute(CoopPlayer player)
+        public readonly void Execute(CoopPlayer player)
         {
             SubPacket.Execute(player);
         }
@@ -22,7 +22,7 @@ namespace Fika.Core.Networking
             SubPacket = reader.GetCommonSubPacket(Type);
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.Put((byte)Type);

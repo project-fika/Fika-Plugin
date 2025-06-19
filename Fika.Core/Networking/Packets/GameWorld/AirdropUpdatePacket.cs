@@ -32,7 +32,7 @@ namespace Fika.Core.Networking
             Data.IsStatic = reader.GetBool();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Data.ObjectId);
             writer.Put(Data.Position);

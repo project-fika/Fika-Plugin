@@ -13,7 +13,7 @@ namespace Fika.Core.Networking
             Type = (EStateType)reader.GetByte();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.Put((byte)Type);

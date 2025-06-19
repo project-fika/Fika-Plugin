@@ -15,7 +15,7 @@ namespace Fika.Core.Networking
             Durabilities = reader.GetFloatArray();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.PutArray(ItemIds);

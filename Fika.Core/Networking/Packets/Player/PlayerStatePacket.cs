@@ -35,7 +35,7 @@ namespace Fika.Core.Networking
         public double RemoteTime { get; set; }
         public double LocalTime { get; set; }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.Put(Position);

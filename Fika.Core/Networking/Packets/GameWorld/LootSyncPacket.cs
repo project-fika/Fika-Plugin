@@ -22,7 +22,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Data.Id);
             writer.Put(Data.Position);

@@ -14,7 +14,7 @@ namespace Fika.Core.Networking
             MongoId = reader.GetMongoID();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.PutMongoID(MongoId);

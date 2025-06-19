@@ -21,7 +21,7 @@ namespace Fika.Core.Networking
             LocaleId = reader.GetString();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(PingLocation);
             writer.Put((byte)PingType);

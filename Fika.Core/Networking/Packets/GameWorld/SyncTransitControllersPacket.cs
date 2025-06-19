@@ -17,7 +17,7 @@ namespace Fika.Core.Networking
             Maps = reader.GetStringArray();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(ProfileId);
             writer.Put(RaidId);

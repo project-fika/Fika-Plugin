@@ -23,7 +23,7 @@ namespace Fika.Core.UI.Models
             NatIntroduceAmount = natIntroduceAmount;
         }
 
-        public void LogValues()
+        public readonly void LogValues()
         {
             FikaPlugin.Instance.FikaLogger.LogInfo("Received NatPunchServer config from server:");
             FieldInfo[] fields = typeof(NatPunchServerConfigModel).GetFields();

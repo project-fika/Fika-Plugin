@@ -14,7 +14,7 @@ namespace Fika.Core.Networking
             Item = reader.GetItem();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.PutItem(Item);

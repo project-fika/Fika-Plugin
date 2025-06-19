@@ -8,7 +8,7 @@ namespace Fika.Core.Jobs
     {
         public float _unscaledDeltaTime = unscaledDeltaTime;
 
-        public void Execute(int index)
+        public readonly void Execute(int index)
         {
             Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[index]
                 .Snapshotter.ManualUpdate(_unscaledDeltaTime);

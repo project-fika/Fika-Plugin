@@ -11,7 +11,7 @@ namespace Fika.Core.Networking
             Data = reader.GetByteArray();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.PutByteArray(Data);
         }

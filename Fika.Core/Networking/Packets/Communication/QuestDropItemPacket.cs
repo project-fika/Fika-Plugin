@@ -15,7 +15,7 @@ namespace Fika.Core.Networking
             ZoneId = reader.GetString();
         }
 
-        public void Serialize(NetDataWriter writer)
+        public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Nickname);
             writer.Put(ItemId);
