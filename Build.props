@@ -8,19 +8,19 @@
   </PropertyGroup>
 
   <!-- assembly signing -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' ">
+  <!-- <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' ">
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
     <AssemblyOriginatorKeyFile>../Properties/signing/public.snk</AssemblyOriginatorKeyFile>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <!-- assembly versioning -->
-  <PropertyGroup>
+  <!-- <PropertyGroup>
     <AssemblyVersion>0.9.*</AssemblyVersion>
     <Deterministic>false</Deterministic>
     <NoWarn>$(NoWarn);CS7035</NoWarn>
-  </PropertyGroup>
+  </PropertyGroup> -->
 
   <!-- use author info from AssemblyInfo.cs -->
   <PropertyGroup>
