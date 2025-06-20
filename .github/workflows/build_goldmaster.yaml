@@ -9,6 +9,13 @@ on:
       release_name:
         description: 'Release Title (e.g., Fika Release 1.0.0)'
         required: true
+      build_type:
+        description: The build configuration (e.g., GoldMaster)
+        required: true
+        options: 
+        - Release
+        - Debug
+        - GoldMaster
       release_notes:
         description: 'Release Notes (optional)'
         required: false
