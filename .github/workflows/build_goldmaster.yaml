@@ -14,9 +14,9 @@ on:
         description: The build configuration (e.g., GoldMaster)
         required: true
         options: 
+        - GoldMaster
         - Release
         - Debug
-        - GoldMaster
       release_notes:
         description: 'Release Notes (optional)'
         required: false
