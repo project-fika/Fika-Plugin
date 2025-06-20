@@ -1,4 +1,4 @@
-name: Build GoldMaster
+name: Build And Publish
 
 on:
   workflow_dispatch:
@@ -10,6 +10,7 @@ on:
         description: 'Release Title (e.g., Fika Release 1.0.0)'
         required: true
       build_type:
+        type: choice
         description: The build configuration (e.g., GoldMaster)
         required: true
         options: 
@@ -45,7 +46,7 @@ jobs:
         run: dotnet restore Fika-Plugin.sln
 
       - name: Publish the project
-        run: dotnet publish Fika.Core/Fika.Core.csproj --configuration GoldMaster --no-restore --output output/
+        run: dotnet publish Fika.Core/Fika.Core.csproj --configuration ${{ inputs.build_type }} --no-restore --output output/
 
       - name: Copy loose files
         run: |
