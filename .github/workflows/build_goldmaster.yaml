@@ -24,10 +24,18 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '8.x'
 
-      - name: Build the solution
-        run: dotnet build Fika-Plugin.sln --configuration GoldMaster
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore dependencies
+        run: dotnet restore Fika-Plugin.sln
 
       - name: Publish the project
         run: dotnet publish Fika.Core/Fika.Core.csproj --configuration GoldMaster --output output/
@@ -36,11 +44,7 @@ jobs:
         run: |
           mkdir -p BepInEx/plugins/Fika
           cp -r output/Fika.Core.dll BepInEx/plugins/Fika
-          cp LICENSE.md BepInEx/plugins/Fika
-          cp LICENSE-SIT.md BepInEx/plugins/Fika
-          cp LICENSE-LiteNetLib.md BepInEx/plugins/Fika
-          cp LICENSE-Mirror.md BepInEx/plugins/Fika
-          cp LICENSE-Open.NAT.md BepInEx/plugins/Fika
+          cp Licenses/* BepInEx/plugins/Fika
 
       - name: Zip the build and loose files
         run: zip -r "${{ inputs.release_name }}.zip" BepInEx/plugins/Fika
