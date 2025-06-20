@@ -24,13 +24,13 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '8.0.x'
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json', '**/*.csproj') }}
           restore-keys: |
             nuget-${{ runner.os }}-
 
@@ -38,7 +38,7 @@ jobs:
         run: dotnet restore Fika-Plugin.sln
 
       - name: Publish the project
-        run: dotnet publish Fika.Core/Fika.Core.csproj --configuration GoldMaster --output output/
+        run: dotnet publish Fika.Core/Fika.Core.csproj --configuration GoldMaster --no-restore --output output/
 
       - name: Copy loose files
         run: |
