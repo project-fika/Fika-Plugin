@@ -1,4 +1,4 @@
-name: Build GoldMaster
+name: Build And Publish
 
 on:
   workflow_dispatch:
@@ -9,6 +9,14 @@ on:
       release_name:
         description: 'Release Title (e.g., Fika Release 1.0.0)'
         required: true
+      build_type:
+        type: choice
+        description: The build configuration (e.g., GoldMaster)
+        required: true
+        options: 
+        - GoldMaster
+        - Release
+        - Debug
       release_notes:
         description: 'Release Notes (optional)'
         required: false
@@ -24,21 +32,15 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            nuget-${{ runner.os }}-
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: 'Fika.Core/packages.lock.json'
 
       - name: Restore dependencies
         run: dotnet restore Fika-Plugin.sln
 
       - name: Publish the project
-        run: dotnet publish Fika.Core/Fika.Core.csproj --configuration GoldMaster --output output/
+        run: dotnet publish Fika.Core/Fika.Core.csproj --configuration ${{ inputs.build_type }} --no-restore --output output/
 
       - name: Copy loose files
         run: |
