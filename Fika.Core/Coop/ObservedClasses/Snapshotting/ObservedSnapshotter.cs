@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             _player.CurrentPlayerState.IsProne = to.IsProne;
             _player.CurrentPlayerState.PoseLevel = Mathf.LerpUnclamped(from.PoseLevel, to.PoseLevel, ratio);
             _player.CurrentPlayerState.IsSprinting = to.IsSprinting;
-            _player.CurrentPlayerState.Stamina = to.Stamina;
+            _player.CurrentPlayerState.Stamina = to.Physical;
             _player.CurrentPlayerState.Blindfire = to.Blindfire;
             _player.CurrentPlayerState.WeaponOverlap = Mathf.LerpUnclamped(from.WeaponOverlap, to.WeaponOverlap, ratio);
             _player.CurrentPlayerState.LeftStanceDisabled = to.LeftStanceDisabled;

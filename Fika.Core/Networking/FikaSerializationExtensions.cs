@@ -120,11 +120,13 @@ namespace Fika.Core.Networking
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="physical"></param>
-        public static void Put(this NetDataWriter writer, PhysicalStateStruct physical)
+        public static void PutPhysical(this NetDataWriter writer, PhysicalStateStruct physical)
         {
-            writer.Put(physical.StaminaExhausted);
-            writer.Put(physical.OxygenExhausted);
-            writer.Put(physical.HandsExhausted);
+            byte flags = 0;
+            if (physical.StaminaExhausted) flags |= 1 << 0;
+            if (physical.OxygenExhausted) flags |= 1 << 1;
+            if (physical.HandsExhausted) flags |= 1 << 2;
+            writer.Put(flags);
         }
 
         /// <summary>
@@ -134,7 +136,13 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="PhysicalStateStruct"/> (Physical)</returns>
         public static PhysicalStateStruct GetPhysical(this NetDataReader reader)
         {
-            return new PhysicalStateStruct() { StaminaExhausted = reader.GetBool(), OxygenExhausted = reader.GetBool(), HandsExhausted = reader.GetBool() };
+            byte flags = reader.GetByte();
+            return new()
+            {
+                StaminaExhausted = (flags & (1 << 0)) != 0,
+                OxygenExhausted = (flags & (1 << 1)) != 0,
+                HandsExhausted = (flags & (1 << 2)) != 0
+            };
         }
 
         /// <summary>

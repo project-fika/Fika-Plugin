@@ -7,78 +7,97 @@ namespace Fika.Core.Networking
 {
     public struct PlayerStatePacket : INetSerializable, ISnapshot
     {
-        public int NetId;
+        public double RemoteTime { get; set; }
+        public double LocalTime { get; set; }
+
         public Vector3 Position;
-        public Vector2 Rotation;
         public Vector3 HeadRotation;
+        public Vector2 Rotation;
         public Vector2 MovementDirection;
-        public EPlayerState State;
+
         public float Tilt;
-        public int Step;
         public float MovementSpeed;
         public float SprintSpeed;
-        public bool IsProne;
         public float PoseLevel;
-        public bool IsSprinting;
-        public BasePhysicalClass.PhysicalStateStruct Stamina;
-        public int Blindfire;
         public float WeaponOverlap;
+
+        public int NetId;
+        public int Step;
+        public int Blindfire;
+
+        public EPlayerState State;
+
+        public bool IsProne;
+        public bool IsSprinting;
         public bool LeftStanceDisabled;
         public bool IsGrounded;
+
+        public BasePhysicalClass.PhysicalStateStruct Physical;
 
         public PlayerStatePacket(int netId)
         {
             NetId = netId;
         }
 
-        // Snapshot
-        public double RemoteTime { get; set; }
-        public double LocalTime { get; set; }
-
         public readonly void Serialize(NetDataWriter writer)
         {
+            byte boolFlags = 0;
+            if (IsProne) boolFlags |= 1 << 0;
+            if (IsSprinting) boolFlags |= 1 << 1;
+            if (LeftStanceDisabled) boolFlags |= 1 << 2;
+            if (IsGrounded) boolFlags |= 1 << 3;
+            writer.Put(boolFlags);
+
+            writer.Put(RemoteTime);
+            writer.Put(LocalTime);
+
             writer.Put(NetId);
-            writer.Put(Position);
-            writer.Put(Rotation);
-            writer.Put(HeadRotation);
-            writer.Put(MovementDirection);
-            writer.Put((byte)State);
-            writer.Put(Tilt);
             writer.Put(Step);
+            writer.Put(Blindfire);
+            writer.Put((byte)State);
+
+            writer.Put(Position);
+            writer.Put(HeadRotation);
+            writer.Put(Rotation);
+            writer.Put(MovementDirection);
+
+            writer.Put(Tilt);
             writer.Put(MovementSpeed);
             writer.Put(SprintSpeed);
-            writer.Put(IsProne);
             writer.Put(PoseLevel);
-            writer.Put(IsSprinting);
-            writer.Put(Stamina);
-            writer.Put(Blindfire);
             writer.Put(WeaponOverlap);
-            writer.Put(LeftStanceDisabled);
-            writer.Put(IsGrounded);
-            writer.Put(RemoteTime);
+
+            writer.PutPhysical(Physical);
         }
 
         public void Deserialize(NetDataReader reader)
         {
+            byte boolFlags = reader.GetByte();
+            IsProne = (boolFlags & (1 << 0)) != 0;
+            IsSprinting = (boolFlags & (1 << 1)) != 0;
+            LeftStanceDisabled = (boolFlags & (1 << 2)) != 0;
+            IsGrounded = (boolFlags & (1 << 3)) != 0;
+
+            RemoteTime = reader.GetDouble();
+            LocalTime = reader.GetDouble();
+
             NetId = reader.GetInt();
-            Position = reader.GetVector3();
-            Rotation = reader.GetVector2();
-            HeadRotation = reader.GetVector3();
-            MovementDirection = reader.GetVector2();
-            State = (EPlayerState)reader.GetByte();
-            Tilt = reader.GetFloat();
             Step = reader.GetInt();
+            Blindfire = reader.GetInt();
+            State = (EPlayerState)reader.GetByte();
+
+            Position = reader.GetVector3();
+            HeadRotation = reader.GetVector3();
+            Rotation = reader.GetVector2();
+            MovementDirection = reader.GetVector2();
+
+            Tilt = reader.GetFloat();
             MovementSpeed = reader.GetFloat();
             SprintSpeed = reader.GetFloat();
-            IsProne = reader.GetBool();
             PoseLevel = reader.GetFloat();
-            IsSprinting = reader.GetBool();
-            Stamina = reader.GetPhysical();
-            Blindfire = reader.GetInt();
             WeaponOverlap = reader.GetFloat();
-            LeftStanceDisabled = reader.GetBool();
-            IsGrounded = reader.GetBool();
-            RemoteTime = reader.GetDouble();
+
+            Physical = reader.GetPhysical();
         }
 
         public void UpdateData(CoopPlayer player, bool isMoving)
@@ -95,7 +114,7 @@ namespace Fika.Core.Networking
             IsProne = player.IsInPronePose;
             PoseLevel = player.PoseLevel;
             IsSprinting = player.MovementContext.IsSprintEnabled;
-            Stamina = player.Physical.SerializationStruct;
+            Physical = player.Physical.SerializationStruct;
             Blindfire = player.MovementContext.BlindFire;
             WeaponOverlap = player.ObservedOverlap;
             LeftStanceDisabled = player.LeftStanceDisabled;
