@@ -75,8 +75,14 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             currentState.HeadRotation = Vector3.LerpUnclamped(from.HeadRotation, to.HeadRotation, ratio);
             currentState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
 
-            Vector2 movDir = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio);
-            currentState.MovementDirection = movDir.sqrMagnitude < _deadZone ? Vector2.zero : movDir.normalized;
+            if (to.MovementDirection.sqrMagnitude < _deadZone)
+            {
+                currentState.MovementDirection = Vector2.zero;
+            }
+            else
+            {
+                currentState.MovementDirection = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio).normalized;
+            }
 
             currentState.State = to.State;
             currentState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
