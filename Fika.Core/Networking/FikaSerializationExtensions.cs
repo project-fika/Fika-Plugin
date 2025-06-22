@@ -1084,28 +1084,22 @@ namespace Fika.Core.Networking
         /// <param name="compression">Number of bits to use for compression (8 or 16)</param>
         public static void PutPackedFloat(this NetDataWriter writer, float value, float min, float max, EFloatCompression compression = EFloatCompression.Low)
         {
-            int bitCount = (int)compression;
-
             // Clamp input value to expected range
             float clamped = Mathf.Clamp(value, min, max);
 
             // Calculate max integer value for the bit width (e.g., 255 for 8 bits, 65535 for 16 bits)
-            int maxInt = (1 << bitCount) - 1;
+            int maxInt = (1 << (int)compression) - 1;
 
             // Normalize and quantize using rounding for better precision
             int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
 
-            if (bitCount <= 8)
+            if (compression is EFloatCompression.High)
             {
                 writer.Put((byte)quantized);
             }
-            else if (bitCount <= 16)
-            {
-                writer.Put((ushort)quantized);
-            }
             else
             {
-                throw new ArgumentOutOfRangeException(nameof(bitCount), "Only 8 or 16 bits supported.");
+                writer.Put((ushort)quantized);
             }
         }
 
@@ -1120,21 +1114,16 @@ namespace Fika.Core.Networking
         /// <returns>The decompressed float value.</returns>
         public static float GetPackedFloat(this NetDataReader reader, float min, float max, EFloatCompression compression = EFloatCompression.Low)
         {
-            int bitCount = (int)compression;
-            int maxInt = (1 << bitCount) - 1;
+            int maxInt = (1 << (int)compression) - 1;
             int quantized;
 
-            if (bitCount <= 8)
+            if (compression is EFloatCompression.High)
             {
                 quantized = reader.GetByte();
             }
-            else if (bitCount <= 16)
-            {
-                quantized = reader.GetUShort();
-            }
             else
             {
-                throw new ArgumentOutOfRangeException(nameof(bitCount), "Only 8 or 16 bits supported.");
+                quantized = reader.GetUShort();
             }
 
             float normalized = (float)quantized / maxInt;
