@@ -82,7 +82,7 @@ namespace Fika.Core.Networking
                     case EReconnectDataType.OwnCharacter:
                         writer.PutProfile(Profile);
                         writer.PutByteArray(SimpleZlib.CompressToBytes(ProfileHealthClass.ToJson(), 4));
-                        writer.Put(PlayerPosition);
+                        writer.PutVector3(PlayerPosition);
                         break;
                     case EReconnectDataType.Finished:
                     default:

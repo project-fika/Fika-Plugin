@@ -35,8 +35,8 @@ namespace Fika.Core.Networking
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Data.ObjectId);
-            writer.Put(Data.Position);
-            writer.Put(Data.Rotation);
+            writer.PutVector3(Data.Position);
+            writer.PutVector3(Data.Rotation);
             writer.Put((byte)Data.ObjectType);
             if (Data.ObjectType == SynchronizableObjectType.AirDrop)
             {

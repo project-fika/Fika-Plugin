@@ -31,7 +31,7 @@ public struct BTRPacket : INetSerializable
 
     public readonly void Serialize(NetDataWriter writer)
     {
-        writer.Put(Data.position);
+        writer.PutVector3(Data.position);
         writer.Put(Data.BtrBotId);
         writer.Put(Data.MoveSpeed);
         writer.Put(Data.moveDirection);
@@ -47,6 +47,6 @@ public struct BTRPacket : INetSerializable
         writer.Put(Data.State);
         writer.Put(Data.gunsBlockRotation);
         writer.Put(Data.turretRotation);
-        writer.Put(Data.rotation);
+        writer.PutQuaternion(Data.rotation);
     }
 }

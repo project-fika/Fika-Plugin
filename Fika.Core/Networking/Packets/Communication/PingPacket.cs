@@ -23,9 +23,9 @@ namespace Fika.Core.Networking
 
         public readonly void Serialize(NetDataWriter writer)
         {
-            writer.Put(PingLocation);
+            writer.PutVector3(PingLocation);
             writer.Put((byte)PingType);
-            writer.Put(PingColor);
+            writer.PutColor(PingColor);
             writer.Put(Nickname);
             writer.Put(LocaleId);
         }

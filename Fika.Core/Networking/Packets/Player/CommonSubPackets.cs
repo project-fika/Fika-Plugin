@@ -398,7 +398,7 @@ namespace Fika.Core.Networking
             public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)VaultingStrategy);
-                writer.Put(VaultingPoint);
+                writer.PutVector3(VaultingPoint);
                 writer.Put(VaultingHeight);
                 writer.Put(VaultingLength);
                 writer.Put(VaultingSpeed);
@@ -501,17 +501,17 @@ namespace Fika.Core.Networking
                 }
                 if (Command == MountingPacketStruct.EMountingCommand.Enter)
                 {
-                    writer.Put(MountDirection);
-                    writer.Put(MountingPoint);
+                    writer.PutVector3(MountDirection);
+                    writer.PutVector3(MountingPoint);
                     writer.Put(MountingDirection);
                     writer.Put(TransitionTime);
-                    writer.Put(TargetPos);
+                    writer.PutVector3(TargetPos);
                     writer.Put(TargetPoseLevel);
                     writer.Put(TargetHandsRotation);
-                    writer.Put(TargetBodyRotation);
-                    writer.Put(PoseLimit);
-                    writer.Put(PitchLimit);
-                    writer.Put(YawLimit);
+                    writer.PutQuaternion(TargetBodyRotation);
+                    writer.PutVector2(PoseLimit);
+                    writer.PutVector2(PitchLimit);
+                    writer.PutVector2(YawLimit);
                 }
             }
         }

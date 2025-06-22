@@ -43,7 +43,7 @@ namespace Fika.Core.Networking
                 case EHalloweenPacketType.Summon:
                     if (SyncEvent is HalloweenSummonStartedEvent startedEvent)
                     {
-                        writer.Put(startedEvent.PointPosition);
+                        writer.PutVector3(startedEvent.PointPosition);
                     }
                     break;
                 case EHalloweenPacketType.Sync:

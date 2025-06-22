@@ -16,7 +16,15 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             _player.CurrentPlayerState.PoseLevel = from.PoseLevel + (to.PoseLevel - from.PoseLevel);
             _player.CurrentPlayerState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
             _player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
-            _player.CurrentPlayerState.MovementDirection = Vector2.Lerp(from.MovementDirection, to.MovementDirection, ratio);
+            Vector2 movDir = Vector2.Lerp(from.MovementDirection, to.MovementDirection, ratio);
+            if (movDir.sqrMagnitude < 0.05f * 0.05f) // deadzone of 0.05f
+            {
+                _player.CurrentPlayerState.MovementDirection = Vector2.zero;
+            }
+            else
+            {
+                _player.CurrentPlayerState.MovementDirection = movDir.normalized;
+            }
             _player.CurrentPlayerState.State = to.State;
             _player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
             _player.CurrentPlayerState.Step = to.Step;
@@ -27,7 +35,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             _player.CurrentPlayerState.IsSprinting = to.IsSprinting;
             _player.CurrentPlayerState.Stamina = to.Physical;
             _player.CurrentPlayerState.Blindfire = to.Blindfire;
-            _player.CurrentPlayerState.WeaponOverlap = Mathf.LerpUnclamped(from.WeaponOverlap, to.WeaponOverlap, ratio);
+            _player.CurrentPlayerState.WeaponOverlap = Mathf.Lerp(from.WeaponOverlap, to.WeaponOverlap, ratio);
             _player.CurrentPlayerState.LeftStanceDisabled = to.LeftStanceDisabled;
             _player.CurrentPlayerState.IsGrounded = to.IsGrounded;
         }

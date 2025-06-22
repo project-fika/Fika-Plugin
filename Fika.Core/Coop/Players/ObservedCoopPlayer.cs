@@ -928,7 +928,8 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetTilt(CurrentPlayerState.Tilt, true);
             }
 
-            if (!ObservedOverlap.ApproxEquals(CurrentPlayerState.WeaponOverlap))
+            
+            if (!Mathf.Approximately(ObservedOverlap, CurrentPlayerState.WeaponOverlap))
             {
                 ObservedOverlap = CurrentPlayerState.WeaponOverlap;
                 ShouldOverlap = true;

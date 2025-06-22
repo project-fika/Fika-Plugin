@@ -11,7 +11,7 @@ namespace Fika.Core.Networking
         public double LocalTime { get; set; }
 
         public Vector3 Position;
-        public Vector3 HeadRotation;
+        public Vector2 HeadRotation;
         public Vector2 Rotation;
         public Vector2 MovementDirection;
 
@@ -56,16 +56,16 @@ namespace Fika.Core.Networking
             writer.Put(Blindfire);
             writer.Put((byte)State);
 
-            writer.Put(Position);
-            writer.Put(HeadRotation);
-            writer.Put(Rotation);
-            writer.Put(MovementDirection);
+            writer.PutVector3(Position);
+            writer.PutHeadRotation(HeadRotation);
+            writer.PutVector2(Rotation);
+            writer.PutMovementDirection(MovementDirection);
 
-            writer.Put(Tilt);
-            writer.Put(MovementSpeed);
-            writer.Put(SprintSpeed);
-            writer.Put(PoseLevel);
-            writer.Put(WeaponOverlap);
+            writer.PutPackedFloat(Tilt, -5f, 5f);
+            writer.PutPackedFloat(MovementSpeed, 0f, 1f, EFloatCompression.High);
+            writer.PutPackedFloat(SprintSpeed, 0f, 1f, EFloatCompression.High);
+            writer.PutPackedFloat(PoseLevel, 0f, 1f);
+            writer.PutPackedFloat(WeaponOverlap, 0f, 1f);
 
             writer.PutPhysical(Physical);
         }
@@ -81,21 +81,21 @@ namespace Fika.Core.Networking
             RemoteTime = reader.GetDouble();
             LocalTime = reader.GetDouble();
 
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
             Step = reader.GetInt();
             Blindfire = reader.GetInt();
             State = (EPlayerState)reader.GetByte();
 
             Position = reader.GetVector3();
-            HeadRotation = reader.GetVector3();
+            HeadRotation = reader.GetHeadRotation();
             Rotation = reader.GetVector2();
-            MovementDirection = reader.GetVector2();
+            MovementDirection = reader.GetMovementDirection();
 
-            Tilt = reader.GetFloat();
-            MovementSpeed = reader.GetFloat();
-            SprintSpeed = reader.GetFloat();
-            PoseLevel = reader.GetFloat();
-            WeaponOverlap = reader.GetFloat();
+            Tilt = reader.GetPackedFloat(-5f, 5f);
+            MovementSpeed = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
+            SprintSpeed = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
+            PoseLevel = reader.GetPackedFloat(0f, 1f);
+            WeaponOverlap = reader.GetPackedFloat(0f, 1f);
 
             Physical = reader.GetPhysical();
         }

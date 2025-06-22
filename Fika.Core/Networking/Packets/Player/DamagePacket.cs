@@ -57,9 +57,9 @@ namespace Fika.Core.Networking
             writer.Put((byte)BodyPartType);
             writer.Put((byte)ColliderType);
             writer.Put((byte)ArmorPlateCollider);
-            writer.Put(Direction);
-            writer.Put(Point);
-            writer.Put(HitNormal);
+            writer.PutVector3(Direction);
+            writer.PutVector3(Point);
+            writer.PutVector3(HitNormal);
             writer.Put(PenetrationPower);
             writer.PutMongoID(BlockedBy);
             writer.PutMongoID(DeflectedBy);

@@ -328,8 +328,8 @@ namespace Fika.Core.Networking
             public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((int)ShotType);
-                writer.Put(ShotPosition);
-                writer.Put(ShotDirection);
+                writer.PutVector3(ShotPosition);
+                writer.PutVector3(ShotDirection);
                 writer.Put(ChamberIndex);
                 writer.Put(Overheat);
                 writer.Put(UnderbarrelShot);
@@ -485,9 +485,9 @@ namespace Fika.Core.Networking
                 writer.Put(HasGrenade);
                 if (HasGrenade)
                 {
-                    writer.Put(GrenadeRotation);
-                    writer.Put(GrenadePosition);
-                    writer.Put(ThrowForce);
+                    writer.PutQuaternion(GrenadeRotation);
+                    writer.PutVector3(GrenadePosition);
+                    writer.PutVector3(ThrowForce);
                     writer.Put(LowThrow);
                 }
                 writer.Put(PlantTripwire);
@@ -1015,8 +1015,8 @@ namespace Fika.Core.Networking
                 writer.Put(StartOneShotFire);
                 if (!StartOneShotFire)
                 {
-                    writer.Put(ShotPosition);
-                    writer.Put(ShotForward);
+                    writer.PutVector3(ShotPosition);
+                    writer.PutVector3(ShotForward);
                     writer.Put(AmmoTemplateId);
                 }
             }
@@ -1039,8 +1039,8 @@ namespace Fika.Core.Networking
 
             public readonly void Serialize(NetDataWriter writer)
             {
-                writer.Put(ShotPosition);
-                writer.Put(ShotForward);
+                writer.PutVector3(ShotPosition);
+                writer.PutVector3(ShotForward);
                 writer.Put(AmmoTemplateId);
             }
         }

@@ -418,7 +418,7 @@ namespace Fika.Core.Networking
                     }
                 case NetworkHealthSyncPacketStruct.ESyncType.BurnEyes:
                     {
-                        writer.Put(packet.BurnEyes.Position);
+                        writer.PutVector3(packet.BurnEyes.Position);
                         writer.Put(packet.BurnEyes.DistanceStrength);
                         writer.Put(packet.BurnEyes.NormalTime);
                         break;

@@ -389,7 +389,7 @@ namespace Fika.Core.Networking
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.Put(MinePosition);
+                writer.PutVector3(MinePosition);
             }
         }
 
@@ -499,8 +499,8 @@ namespace Fika.Core.Networking
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.Put(Position);
-                writer.Put(Rotation);
+                writer.PutVector3(Position);
+                writer.PutQuaternion(Rotation);
                 writer.Put(PlayerProfileId);
             }
         }

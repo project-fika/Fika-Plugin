@@ -26,7 +26,7 @@ namespace Fika.Core.Networking
             writer.PutPlayerInfoPacket(PlayerInfoPacket);
             writer.Put(IsAlive);
             writer.Put(IsAI);
-            writer.Put(Position);
+            writer.PutVector3(Position);
             writer.Put(NetId);
         }
     }

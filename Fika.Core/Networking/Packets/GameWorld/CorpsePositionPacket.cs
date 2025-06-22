@@ -32,7 +32,7 @@ namespace Fika.Core.Networking
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Data.Id);
-            writer.Put(Data.Position);
+            writer.PutVector3(Data.Position);
             writer.Put(Data.Done);
 
             if (Data.Done && Data.TransformSyncs != null)
@@ -40,8 +40,8 @@ namespace Fika.Core.Networking
                 GStruct116[] transforms = Data.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
-                    writer.Put(transforms[i].Position);
-                    writer.Put(transforms[i].Rotation);
+                    writer.PutVector3(transforms[i].Position);
+                    writer.PutQuaternion(transforms[i].Rotation);
                 }
             }
         }

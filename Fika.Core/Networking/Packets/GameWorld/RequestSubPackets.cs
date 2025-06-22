@@ -84,8 +84,8 @@ namespace Fika.Core.Networking
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Infiltration);
-                writer.Put(Position);
-                writer.Put(Rotation);
+                writer.PutVector3(Position);
+                writer.PutQuaternion(Rotation);
             }
         }
 
@@ -155,7 +155,7 @@ namespace Fika.Core.Networking
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)Season);
-                writer.Put(SpringSnowFactor);
+                writer.PutVector3(SpringSnowFactor);
                 int amount = WeatherClasses.Length;
                 writer.Put(amount);
                 for (int i = 0; i < amount; i++)

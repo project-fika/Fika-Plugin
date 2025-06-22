@@ -73,9 +73,9 @@ namespace Fika.Core.Networking
                 writer.Put(GrenadeTemplate);
                 writer.Put(GrenadeId);
                 writer.Put(ProfileId);
-                writer.Put(Position);
-                writer.Put(ToPosition);
-                writer.Put(Rotation);
+                writer.PutVector3(Position);
+                writer.PutVector3(ToPosition);
+                writer.PutQuaternion(Rotation);
             }
         }
 
@@ -115,8 +115,8 @@ namespace Fika.Core.Networking
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(ObjectId);
-                writer.Put(Position);
-                writer.Put(Rotation);
+                writer.PutVector3(Position);
+                writer.PutQuaternion(Rotation);
             }
         }
 
@@ -195,8 +195,8 @@ namespace Fika.Core.Networking
             {
                 writer.Put(ObjectId);
                 writer.Put(IsStatic);
-                writer.Put(Position);
-                writer.Put(Rotation);
+                writer.PutVector3(Position);
+                writer.PutQuaternion(Rotation);
                 writer.Put((byte)AirdropType);
                 writer.PutItem(AirdropItem);
                 writer.PutMongoID(ContainerId);

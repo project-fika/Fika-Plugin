@@ -31,7 +31,7 @@ namespace Fika.Core.Networking
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="vector"></param>
-        public static void Put(this NetDataWriter writer, Vector3 vector)
+        public static void PutVector3(this NetDataWriter writer, Vector3 vector)
         {
             writer.Put(vector.x);
             writer.Put(vector.y);
@@ -53,7 +53,7 @@ namespace Fika.Core.Networking
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="vector"></param>
-        public static void Put(this NetDataWriter writer, Vector2 vector)
+        public static void PutVector2(this NetDataWriter writer, Vector2 vector)
         {
             writer.Put(vector.x);
             writer.Put(vector.y);
@@ -74,7 +74,7 @@ namespace Fika.Core.Networking
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="quaternion"></param>
-        public static void Put(this NetDataWriter writer, Quaternion quaternion)
+        public static void PutQuaternion(this NetDataWriter writer, Quaternion quaternion)
         {
             writer.Put(quaternion.x);
             writer.Put(quaternion.y);
@@ -97,7 +97,7 @@ namespace Fika.Core.Networking
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="color"></param>
-        public static void Put(this NetDataWriter writer, Color color)
+        public static void PutColor(this NetDataWriter writer, Color color)
         {
             writer.Put(color.r);
             writer.Put(color.g);
@@ -201,7 +201,7 @@ namespace Fika.Core.Networking
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="dateTime"></param>
-        public static void Put(this NetDataWriter writer, DateTime dateTime)
+        public static void PutDateTime(this NetDataWriter writer, DateTime dateTime)
         {
             writer.Put(dateTime.ToOADate());
         }
@@ -295,10 +295,10 @@ namespace Fika.Core.Networking
             foreach (SmokeGrenadeDataPacketStruct data in throwables)
             {
                 writer.Put(data.Id);
-                writer.Put(data.Position);
+                writer.PutVector3(data.Position);
                 writer.Put(data.Template);
                 writer.Put(data.Time);
-                writer.Put(data.Orientation);
+                writer.PutQuaternion(data.Orientation);
                 writer.Put(data.PlatformId);
             }
         }
@@ -436,7 +436,7 @@ namespace Fika.Core.Networking
             foreach (KeyValuePair<int, Vector3> windowBreakerState in windowBreakerStates)
             {
                 writer.Put(windowBreakerState.Key);
-                writer.Put(windowBreakerState.Value);
+                writer.PutVector3(windowBreakerState.Value);
             }
         }
 
@@ -623,7 +623,7 @@ namespace Fika.Core.Networking
         public static void PutArtilleryStruct(this NetDataWriter writer, ArtilleryPacketStruct artilleryStruct)
         {
             writer.Put(artilleryStruct.id);
-            writer.Put(artilleryStruct.position);
+            writer.PutVector3(artilleryStruct.position);
             writer.Put(artilleryStruct.explosion);
         }
 
@@ -650,14 +650,14 @@ namespace Fika.Core.Networking
         public static void PutGrenadeStruct(this NetDataWriter writer, GrenadeDataPacketStruct grenadeStruct)
         {
             writer.Put(grenadeStruct.Id);
-            writer.Put(grenadeStruct.Position);
-            writer.Put(grenadeStruct.Rotation);
+            writer.PutVector3(grenadeStruct.Position);
+            writer.PutQuaternion(grenadeStruct.Rotation);
             writer.Put(grenadeStruct.CollisionNumber);
             writer.Put(grenadeStruct.Done);
             if (!grenadeStruct.Done)
             {
-                writer.Put(grenadeStruct.Velocity);
-                writer.Put(grenadeStruct.AngularVelocity);
+                writer.PutVector3(grenadeStruct.Velocity);
+                writer.PutVector3(grenadeStruct.AngularVelocity);
             }
         }
 
@@ -674,8 +674,8 @@ namespace Fika.Core.Networking
             switch (airplaneDataPacketStruct.ObjectType)
             {
                 case SynchronizableObjectType.AirDrop:
-                    writer.Put(airplaneDataPacketStruct.Position);
-                    writer.Put(airplaneDataPacketStruct.Rotation);
+                    writer.PutVector3(airplaneDataPacketStruct.Position);
+                    writer.PutVector3(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.Outdated);
                     writer.Put(airplaneDataPacketStruct.IsStatic);
                     writer.Put((byte)airplaneDataPacketStruct.PacketData.AirdropDataPacket.AirdropType);
@@ -684,16 +684,16 @@ namespace Fika.Core.Networking
                     writer.Put(airplaneDataPacketStruct.PacketData.AirdropDataPacket.UniqueId);
                     return;
                 case SynchronizableObjectType.AirPlane:
-                    writer.Put(airplaneDataPacketStruct.Position);
-                    writer.Put(airplaneDataPacketStruct.Rotation);
+                    writer.PutVector3(airplaneDataPacketStruct.Position);
+                    writer.PutVector3(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.PacketData.AirplaneDataPacket.AirplanePercent);
                     writer.Put(airplaneDataPacketStruct.Outdated);
                     writer.Put(airplaneDataPacketStruct.IsStatic);
                     return;
                 case SynchronizableObjectType.Tripwire:
                     writer.Put((byte)airplaneDataPacketStruct.PacketData.TripwireDataPacket.State);
-                    writer.Put(airplaneDataPacketStruct.Position);
-                    writer.Put(airplaneDataPacketStruct.Rotation);
+                    writer.PutVector3(airplaneDataPacketStruct.Position);
+                    writer.PutVector3(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.IsActive);
                     return;
             }
@@ -834,16 +834,16 @@ namespace Fika.Core.Networking
             writer.Put(weatherClass.GlobalFogDensity);
             writer.Put(weatherClass.GlobalFogHeight);
             writer.Put(weatherClass.LyingWater);
-            writer.Put(weatherClass.MainWindDirection);
-            writer.Put(weatherClass.MainWindPosition);
+            writer.PutVector2(weatherClass.MainWindDirection);
+            writer.PutVector2(weatherClass.MainWindPosition);
             writer.Put(weatherClass.Rain);
             writer.Put(weatherClass.RainRandomness);
             writer.Put(weatherClass.ScaterringFogDensity);
             writer.Put(weatherClass.ScaterringFogHeight);
             writer.Put(weatherClass.Temperature);
             writer.Put(weatherClass.Time);
-            writer.Put(weatherClass.TopWindDirection);
-            writer.Put(weatherClass.TopWindPosition);
+            writer.PutVector2(weatherClass.TopWindDirection);
+            writer.PutVector2(weatherClass.TopWindPosition);
             writer.Put(weatherClass.Turbulence);
             writer.Put(weatherClass.Wind);
             writer.Put(weatherClass.WindDirection);
@@ -887,10 +887,10 @@ namespace Fika.Core.Networking
         public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPacket packet)
         {
             writer.Put((int)packet.BodyPartColliderType);
-            writer.Put(packet.Direction);
-            writer.Put(packet.Point);
+            writer.PutVector3(packet.Direction);
+            writer.PutVector3(packet.Point);
             writer.Put(packet.Force);
-            writer.Put(packet.OverallVelocity);
+            writer.PutVector3(packet.OverallVelocity);
             writer.PutItemDescriptor(packet.InventoryDescriptor);
             writer.Put((byte)packet.ItemSlot);
         }
@@ -929,7 +929,7 @@ namespace Fika.Core.Networking
             writer.Put(packet.KillerName);
             writer.Put((byte)packet.Side);
             writer.Put(packet.Level);
-            writer.Put(packet.Time);
+            writer.PutDateTime(packet.Time);
             writer.Put(packet.Status);
             writer.Put(packet.WeaponName);
             writer.Put(packet.GroupId);
@@ -962,7 +962,7 @@ namespace Fika.Core.Networking
         public static void PutRagdollStruct(this NetDataWriter writer, RagdollPacketStruct packet)
         {
             writer.Put(packet.Id);
-            writer.Put(packet.Position);
+            writer.PutVector3(packet.Position);
             writer.Put(packet.Done);
 
             if (packet.Done && packet.TransformSyncs != null)
@@ -970,8 +970,8 @@ namespace Fika.Core.Networking
                 GStruct116[] transforms = packet.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
-                    writer.Put(transforms[i].Position);
-                    writer.Put(transforms[i].Rotation);
+                    writer.PutVector3(transforms[i].Position);
+                    writer.PutQuaternion(transforms[i].Rotation);
                 }
             }
         }
@@ -1004,14 +1004,14 @@ namespace Fika.Core.Networking
         public static void PutLootSyncStruct(this NetDataWriter writer, LootSyncStruct packet)
         {
             writer.Put(packet.Id);
-            writer.Put(packet.Position);
-            writer.Put(packet.Rotation);
+            writer.PutVector3(packet.Position);
+            writer.PutQuaternion(packet.Rotation);
             writer.Put(packet.Done);
 
             if (!packet.Done)
             {
-                writer.Put(packet.Velocity);
-                writer.Put(packet.AngularVelocity);
+                writer.PutVector3(packet.Velocity);
+                writer.PutVector3(packet.AngularVelocity);
             }
         }
 
@@ -1034,6 +1034,123 @@ namespace Fika.Core.Networking
             return data;
         }
 
+        /// <summary>
+        /// Compresses a float value into a fixed bit-width integer and writes it to the NetDataWriter. <br/>
+        /// Supports 8 or 16 bit compression for network efficiency.
+        /// </summary>
+        /// <param name="writer">The network data writer</param>
+        /// <param name="value">The float value to compress</param>
+        /// <param name="min">Minimum expected float value (clamping lower bound)</param>
+        /// <param name="max">Maximum expected float value (clamping upper bound)</param>
+        /// <param name="compression">Number of bits to use for compression (8 or 16)</param>
+        public static void PutPackedFloat(this NetDataWriter writer, float value, float min, float max, EFloatCompression compression = EFloatCompression.Low)
+        {
+            int bitCount = (int)compression;
+
+            // Clamp input value to expected range
+            float clamped = Mathf.Clamp(value, min, max);
+
+            // Calculate max integer value for the bit width (e.g., 255 for 8 bits, 65535 for 16 bits)
+            int maxInt = (1 << bitCount) - 1;
+
+            // Normalize and quantize using rounding for better precision
+            int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
+
+            if (bitCount <= 8)
+            {
+                writer.Put((byte)quantized);
+            }
+            else if (bitCount <= 16)
+            {
+                writer.Put((ushort)quantized);
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(bitCount), "Only 8 or 16 bits supported.");
+            }
+        }
+
+        /// <summary>
+        /// Reads a compressed float value from the NetDataReader that was packed with a fixed bit-width integer. <br/>
+        /// Supports 8 or 16 bit decompression.
+        /// </summary>
+        /// <param name="reader">The network data reader</param>
+        /// <param name="min">Minimum expected float value (used for decompression range)</param>
+        /// <param name="max">Maximum expected float value (used for decompression range)</param>
+        /// <param name="compression">Number of bits used during compression (8 or 16)</param>
+        /// <returns>The decompressed float value.</returns>
+        public static float GetPackedFloat(this NetDataReader reader, float min, float max, EFloatCompression compression = EFloatCompression.Low)
+        {
+            int bitCount = (int)compression;
+            int maxInt = (1 << bitCount) - 1;
+            int quantized;
+
+            if (bitCount <= 8)
+            {
+                quantized = reader.GetByte();
+            }
+            else if (bitCount <= 16)
+            {
+                quantized = reader.GetUShort();
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(bitCount), "Only 8 or 16 bits supported.");
+            }
+
+            float normalized = (float)quantized / maxInt;
+            return min + normalized * (max - min);
+        }
+
+        /// <summary>
+        /// Writes the head rotation angles, compressing each <see cref="float"/> using high compression.
+        /// </summary>
+        /// <param name="writer">The network data writer to write to</param>
+        /// <param name="rotation">The head rotation</param>
+        public static void PutHeadRotation(this NetDataWriter writer, Vector2 rotation)
+        {
+            writer.PutPackedFloat(rotation.x, -50f, 20f, EFloatCompression.High);
+            writer.PutPackedFloat(rotation.y, -40f, 40f, EFloatCompression.High);
+        }
+
+        /// <summary>
+        /// Reads the head rotation angles, decompressing each <see cref="float"/> using high compression.
+        /// </summary>
+        /// <param name="reader">The network data reader to read from</param>
+        /// <returns>A <see cref="Vector2"/> representing the head rotation</returns>
+        public static Vector2 GetHeadRotation(this NetDataReader reader)
+        {
+            return new()
+            {
+                x = reader.GetPackedFloat(-50f, 20f, EFloatCompression.High),
+                y = reader.GetPackedFloat(-40f, 40f, EFloatCompression.High)
+            };
+        }
+
+        /// <summary>
+        /// Writes the movement direction <see cref="Vector2"/>, compressing each <see cref="float"/> using high compression.
+        /// </summary>
+        /// <param name="writer">The network data writer to write to</param>
+        /// <param name="movementDirection">The movement direction</param>
+        public static void PutMovementDirection(this NetDataWriter writer, Vector2 movementDirection)
+        {
+            writer.PutPackedFloat(movementDirection.x, -1f, 1f, EFloatCompression.High);
+            writer.PutPackedFloat(movementDirection.y, -1f, 1f, EFloatCompression.High);
+        }
+
+        /// <summary>
+        /// Reads the movement direction <see cref="Vector2"/>, decompressing each <see cref="float"/> using high compression.
+        /// </summary>
+        /// <param name="reader">The network data reader to read from</param>
+        /// <returns>A <see cref="Vector2"/> representing movement direction</returns>
+        public static Vector2 GetMovementDirection(this NetDataReader reader)
+        {
+            return new()
+            {
+                x = reader.GetPackedFloat(-1f, 1f, EFloatCompression.High),
+                y = reader.GetPackedFloat(-1f, 1f, EFloatCompression.High)
+            };
+        }
 
         public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
         {
@@ -1237,5 +1354,27 @@ namespace Fika.Core.Networking
             }
             return null;
         }
+    }
+
+    /// <summary>
+    /// Specifies the number of bits used for packing a floating-point value.
+    /// </summary>
+    /// <remarks>
+    /// This enum is used to define the precision of the bit-packed float representation. <br/>
+    /// Higher bit counts provide greater precision but use more bandwidth.
+    /// </remarks>
+    public enum EFloatCompression : byte
+    {
+        /// <summary>
+        /// Pack the float using 8 bits (1 byte).
+        /// Provides lower precision but reduces bandwidth usage.
+        /// </summary>
+        High = 8,
+
+        /// <summary>
+        /// Pack the float using 16 bits (2 bytes).
+        /// Provides higher precision than 8 bits but uses more bandwidth.
+        /// </summary>
+        Low = 16
     }
 }

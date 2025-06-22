@@ -40,7 +40,7 @@ namespace Fika.Core.Networking
             writer.Put(HostReady);
             if (HostReady)
             {
-                writer.Put(GameTime);
+                writer.PutDateTime(GameTime);
                 writer.Put(SessionTime.Ticks);
             }
             writer.Put(HostLoaded);
