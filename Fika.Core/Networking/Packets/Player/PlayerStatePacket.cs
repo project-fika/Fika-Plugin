@@ -51,14 +51,14 @@ namespace Fika.Core.Networking
             writer.Put(RemoteTime);
             writer.Put(LocalTime);
 
-            writer.Put(NetId);
-            writer.Put(Step);
-            writer.Put(Blindfire);
+            writer.Put((byte)NetId);
+            writer.Put((byte)Step);
+            writer.Put((byte)Blindfire);
             writer.Put((byte)State);
 
             writer.PutVector3(Position);
             writer.PutHeadRotation(HeadRotation);
-            writer.PutVector2(Rotation);
+            writer.PutRotation(Rotation);
             writer.PutMovementDirection(MovementDirection);
 
             writer.PutPackedFloat(Tilt, -5f, 5f);
@@ -81,14 +81,14 @@ namespace Fika.Core.Networking
             RemoteTime = reader.GetDouble();
             LocalTime = reader.GetDouble();
 
-            NetId = reader.GetUShort();
-            Step = reader.GetInt();
-            Blindfire = reader.GetInt();
+            NetId = reader.GetByte();
+            Step = reader.GetByte();
+            Blindfire = reader.GetByte();
             State = (EPlayerState)reader.GetByte();
 
             Position = reader.GetVector3();
             HeadRotation = reader.GetHeadRotation();
-            Rotation = reader.GetVector2();
+            Rotation = reader.GetRotation();
             MovementDirection = reader.GetMovementDirection();
 
             Tilt = reader.GetPackedFloat(-5f, 5f);

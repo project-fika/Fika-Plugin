@@ -1152,6 +1152,43 @@ namespace Fika.Core.Networking
             };
         }
 
+        /// <summary>
+        /// Writes a <see cref="Vector2"/> of the players rotation
+        /// </summary>
+        /// <param name="writer">The <see cref="NetDataWriter"/> instance to write to</param>
+        /// <param name="rotation">
+        /// The <see cref="Vector2"/> representing the rotation, where:
+        /// <list type="bullet">
+        /// <item><description><c>x</c> is stored as a raw float</description></item>
+        /// <item><description><c>y</c> is stored as a compressed float in the range [-90, 90] using <see cref="EFloatCompression.High"/></description></item>
+        /// </list>
+        /// </param>
+        public static void PutRotation(this NetDataWriter writer, Vector2 rotation)
+        {
+            writer.Put(rotation.x);
+            writer.PutPackedFloat(rotation.y, -90f, 90f, EFloatCompression.High);
+        }
+
+        /// <summary>
+        /// Reads a <see cref="Vector2"/> of the players rotation
+        /// </summary>
+        /// <param name="reader">The <see cref="NetDataReader"/> instance to read from</param>
+        /// <returns>
+        /// A <see cref="Vector2"/> where:
+        /// <list type="bullet">
+        /// <item><description><c>x</c> is read as a raw float.</description></item>
+        /// <item><description><c>y</c> is read as a compressed float in the range [-90, 90] using <see cref="EFloatCompression.High"/>.</description></item>
+        /// </list>
+        /// </returns>
+        public static Vector2 GetRotation(this NetDataReader reader)
+        {
+            return new()
+            {
+                x = reader.GetFloat(),
+                y = reader.GetPackedFloat(-90f, 90f, EFloatCompression.High)
+            };
+        }
+
         public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
         {
             switch (type)
