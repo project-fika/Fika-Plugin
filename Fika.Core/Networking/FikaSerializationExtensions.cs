@@ -1438,13 +1438,13 @@ namespace Fika.Core.Networking
     public enum EFloatCompression : byte
     {
         /// <summary>
-        /// Pack the float using 8 bits (1 byte).
+        /// Pack the float using 8 bits (1 byte). <br/>
         /// Provides lower precision but reduces bandwidth usage.
         /// </summary>
         High = 8,
 
         /// <summary>
-        /// Pack the float using 16 bits (2 bytes).
+        /// Pack the float using 16 bits (2 bytes). <br/>
         /// Provides higher precision than 8 bits but uses more bandwidth.
         /// </summary>
         Low = 16
