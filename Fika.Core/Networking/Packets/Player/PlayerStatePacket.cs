@@ -5,10 +5,16 @@ using UnityEngine;
 
 namespace Fika.Core.Networking
 {
-    public struct PlayerStatePacket : INetSerializable, ISnapshot
+    public struct PlayerStatePacket : INetSerializable
     {
-        public double RemoteTime { get; set; }
-        public double LocalTime { get; set; }
+        /// <summary>
+        /// The remote timestamp (when it was sent locally by the remote)
+        /// </summary>
+        public double RemoteTime;
+        /// <summary>
+        /// The local timestamp (when it was received on our end)
+        /// </summary>
+        public double LocalTime;
 
         public Vector3 Position;
         public Vector2 HeadRotation;

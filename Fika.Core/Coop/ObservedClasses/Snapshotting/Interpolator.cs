@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Fika.Core.Networking;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Coop.ObservedClasses.Snapshotting
@@ -44,8 +45,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             return Mathd.Clamp(safezone, 0, 5);
         }
 
-        public static bool InsertIfNotExists<T>(SortedList<double, T> buffer, int bufferLimit, T snapshot)
-            where T : ISnapshot
+        public static bool InsertIfNotExists(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, PlayerStatePacket snapshot)
         {
             if (buffer.Count >= bufferLimit)
             {
@@ -65,11 +65,10 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             return Mathd.Clamp(localTimeline, lowerBound, upperBound);
         }
 
-        public static void InsertAndAdjust<T>(SortedList<double, T> buffer, int bufferLimit, T snapshot,
+        public static void InsertAndAdjust(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, PlayerStatePacket snapshot,
             ref double localTimeline, ref double localTimescale, float sendInterval, double bufferTime,
             double catchupSpeed, double slowdownSpeed, ref ExponentialMovingAverage driftEma,
             float catchupNegativeThreshold, float catchupPositiveThreshold, ref ExponentialMovingAverage deliveryTimeEma)
-            where T : ISnapshot
         {
             if (buffer.Count == 0)
             {
@@ -105,17 +104,15 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             }
         }
 
-        public static void Sample<T>(SortedList<double, T> buffer, double localTimeline, out int from, out int to, out double t)
-            where T : ISnapshot
+        public static void Sample(SortedList<double, PlayerStatePacket> buffer, double localTimeline, out int from, out int to, out double t)
         {
-            from = -1;
-            to = -1;
-            t = 0;
+            // this is a wrapper, so we cache it
+            IList<PlayerStatePacket> values = buffer.Values;
 
             for (int i = 0; i < buffer.Count - 1; ++i)
             {
-                T first = buffer.Values[i];
-                T second = buffer.Values[i + 1];
+                PlayerStatePacket first = values[i];
+                PlayerStatePacket second = values[i + 1];
                 if (localTimeline >= first.RemoteTime && localTimeline <= second.RemoteTime)
                 {
                     from = i;
@@ -125,7 +122,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 }
             }
 
-            if (buffer.Values[0].RemoteTime > localTimeline)
+            if (values[0].RemoteTime > localTimeline)
             {
                 from = to = 0;
                 t = 0;
@@ -142,8 +139,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             localTimeline += deltaTime * localTimescale;
         }
 
-        public static void StepInterpolation<T>(SortedList<double, T> buffer, double localTimeline, out T fromSnapshot, out T toSnapshot, out double t)
-            where T : ISnapshot
+        public static void StepInterpolation(SortedList<double, PlayerStatePacket> buffer, double localTimeline,
+            out PlayerStatePacket fromSnapshot, out PlayerStatePacket toSnapshot, out double t)
         {
             Sample(buffer, localTimeline, out int from, out int to, out t);
 
@@ -153,8 +150,8 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             buffer.RemoveRange(from);
         }
 
-        public static void Step<T>(SortedList<double, T> buffer, double deltaTime, ref double localTimeline, double localTimescale, out T fromSnapshot, out T toSnapshot, out double t)
-            where T : ISnapshot
+        public static void Step(SortedList<double, PlayerStatePacket> buffer, double deltaTime, ref double localTimeline,
+            double localTimescale, out PlayerStatePacket fromSnapshot, out PlayerStatePacket toSnapshot, out double t)
         {
             StepTime(deltaTime, ref localTimeline, localTimescale);
             StepInterpolation(buffer, localTimeline, out fromSnapshot, out toSnapshot, out t);
