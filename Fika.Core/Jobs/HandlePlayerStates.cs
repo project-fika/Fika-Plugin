@@ -8,6 +8,7 @@ namespace Fika.Core.Jobs
 {
     internal readonly struct HandlePlayerStates(double networkTime, NativeArray<PlayerStatePacket> snapshots) : IJobParallelFor
     {
+        [ReadOnly]
         private readonly double _networkTime = networkTime;
         [ReadOnly]
         private readonly NativeArray<PlayerStatePacket> _snapshots = snapshots;
