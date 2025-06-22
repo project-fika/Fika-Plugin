@@ -12,7 +12,6 @@ namespace Fika.Core.Coop.PacketHandlers
 {
     public class ObservedPacketSender : MonoBehaviour, IPacketSender
     {
-        private CoopPlayer _player;
         private bool _isServer;
         public bool Enabled { get; set; }
         public bool SendState { get; set; }
@@ -21,7 +20,6 @@ namespace Fika.Core.Coop.PacketHandlers
 
         protected void Awake()
         {
-            _player = GetComponent<ObservedCoopPlayer>();
             _isServer = FikaBackendUtils.IsServer;
             if (_isServer)
             {
