@@ -152,8 +152,9 @@ namespace Fika.Core.Networking
         /// <param name="bytes"></param>
         public static void PutByteArray(this NetDataWriter writer, byte[] bytes)
         {
-            writer.Put(bytes.Length);
-            if (bytes.Length > 0)
+            int length = bytes.Length;
+            writer.Put(length);
+            if (length > 0)
             {
                 writer.Put(bytes);
             }
@@ -167,13 +168,14 @@ namespace Fika.Core.Networking
         public static byte[] GetByteArray(this NetDataReader reader)
         {
             int length = reader.GetInt();
-            if (length > 0)
+            if (length <= 0)
             {
-                byte[] bytes = new byte[length];
-                reader.GetBytes(bytes, length);
-                return bytes;
+                return [];
             }
-            return [];
+
+            byte[] bytes = new byte[length];
+            reader.GetBytes(bytes, length);
+            return bytes;
         }
 
         /// <summary>
