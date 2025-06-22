@@ -7,17 +7,16 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
     public class ObservedSnapshotter(ObservedCoopPlayer observedPlayer) : Snapshotter<PlayerStatePacket>
     {
         private readonly ObservedCoopPlayer _player = observedPlayer;
+        private readonly float _deadZone = 0.05f * 0.05f;
 
         public override void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, float ratio)
         {
             _player.CurrentPlayerState.Rotation = new Vector2(Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, ratio),
                 Mathf.Lerp(from.Rotation.y, to.Rotation.y, ratio));
             _player.CurrentPlayerState.HeadRotation = Vector3.LerpUnclamped(from.HeadRotation, to.HeadRotation, ratio);
-            _player.CurrentPlayerState.PoseLevel = from.PoseLevel + (to.PoseLevel - from.PoseLevel);
             _player.CurrentPlayerState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
-            _player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
             Vector2 movDir = Vector2.Lerp(from.MovementDirection, to.MovementDirection, ratio);
-            if (movDir.sqrMagnitude < 0.05f * 0.05f) // deadzone of 0.05f
+            if (movDir.sqrMagnitude < _deadZone)
             {
                 _player.CurrentPlayerState.MovementDirection = Vector2.zero;
             }

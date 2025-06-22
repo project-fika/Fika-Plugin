@@ -44,6 +44,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using static Fika.Core.Networking.CommandPacket;
@@ -116,7 +117,6 @@ namespace Fika.Core.Networking
         public int NetId { get; set; }
         public ESideType RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
-        public List<PlayerStatePacket> Snapshots { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
 
         private int _sendRate;
@@ -137,6 +137,8 @@ namespace Fika.Core.Networking
         private Dictionary<Profile, bool> _visualProfiles;
         private Dictionary<string, int> _cachedConnections;
         private JobHandle _stateHandle;
+        private NativeArray<PlayerStatePacket> _snapshots;
+        private int _snapshotCount;
 
         internal FikaVOIPServer VOIPServer { get; set; }
         internal FikaVOIPClient VOIPClient { get; set; }
@@ -167,7 +169,8 @@ namespace Fika.Core.Networking
             _sendThreshold = 2f;
             _cachedConnections = [];
             _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
-            Snapshots = new(128);
+            _snapshotCount = 0;
+            _snapshots = _snapshots = new(255, Allocator.Persistent);
             ObservedCoopPlayers = [];
 
             ReadyClients = 0;
@@ -1247,7 +1250,16 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)
         {
-            Snapshots.Add(packet);
+            if (_snapshotCount < _snapshots.Length)
+            {
+                _snapshots[_snapshotCount] = packet;
+                _snapshotCount++;
+            }
+            else
+            {
+                _logger.LogWarning($"OnPlayerStatePacketReceived: Received a packet but buffer was full!");
+            }
+
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
@@ -1255,8 +1267,8 @@ namespace Fika.Core.Networking
         {
             _netServer?.PollEvents();
             float unscaledDetla = Time.unscaledDeltaTime;
-            _stateHandle = new UpdateInterpolators(unscaledDetla).Schedule(ObservedCoopPlayers.Count, 16,
-                new HandlePlayerStates(NetworkTimeSync.NetworkTime).Schedule(Snapshots.Count, 16));
+            _stateHandle = new UpdateInterpolators(unscaledDetla).Schedule(ObservedCoopPlayers.Count, 32,
+                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 32));
 
             _statisticsCounter += unscaledDetla;
             if (_statisticsCounter > _sendThreshold)
@@ -1273,7 +1285,8 @@ namespace Fika.Core.Networking
             {
                 ObservedCoopPlayers[i].ManualStateUpdate();
             }
-            Snapshots.Clear();
+
+            _snapshotCount = 0;
         }
 
         private void SendStatisticsPacket()
@@ -1292,6 +1305,7 @@ namespace Fika.Core.Networking
         protected void OnDestroy()
         {
             _netServer?.Stop();
+            _snapshots.Dispose();
 
             if (_fikaChat != null)
             {
