@@ -300,14 +300,14 @@ namespace Fika.Core.Networking
 
         public struct ShotInfoPacket(NetDataReader reader) : ISubPacket
         {
-            public EShotType ShotType = (EShotType)reader.GetInt();
+            public EShotType ShotType = (EShotType)reader.GetByte();
             public Vector3 ShotPosition = reader.GetVector3();
             public Vector3 ShotDirection = reader.GetVector3();
             public int ChamberIndex = reader.GetInt();
-            public float Overheat = reader.GetFloat();
+            public float Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public bool UnderbarrelShot = reader.GetBool();
             public MongoID? AmmoTemplate = reader.GetMongoID();
-            public float LastShotOverheat = reader.GetFloat();
+            public float LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public float LastShotTime = reader.GetFloat();
             public bool SlideOnOverheatReached = reader.GetBool();
 
@@ -327,14 +327,14 @@ namespace Fika.Core.Networking
 
             public readonly void Serialize(NetDataWriter writer)
             {
-                writer.Put((int)ShotType);
+                writer.Put((byte)ShotType);
                 writer.PutVector3(ShotPosition);
                 writer.PutVector3(ShotDirection);
                 writer.Put(ChamberIndex);
-                writer.Put(Overheat);
+                writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(UnderbarrelShot);
                 writer.PutMongoID(AmmoTemplate);
-                writer.Put(LastShotOverheat);
+                writer.PutPackedFloat(LastShotOverheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(LastShotTime);
                 writer.Put(SlideOnOverheatReached);
             }
@@ -400,7 +400,7 @@ namespace Fika.Core.Networking
 
             public GrenadePacket(NetDataReader reader)
             {
-                PacketType = (EGrenadePacketType)reader.GetInt();
+                PacketType = (EGrenadePacketType)reader.GetByte();
                 HasGrenade = reader.GetBool();
                 if (HasGrenade)
                 {
@@ -481,7 +481,7 @@ namespace Fika.Core.Networking
 
             public readonly void Serialize(NetDataWriter writer)
             {
-                writer.Put((int)PacketType);
+                writer.Put((byte)PacketType);
                 writer.Put(HasGrenade);
                 if (HasGrenade)
                 {
