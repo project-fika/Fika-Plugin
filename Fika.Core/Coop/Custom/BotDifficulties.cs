@@ -7,6 +7,20 @@ namespace Fika.Core.Coop.Custom
 {
     public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
     {
+        public CoreBotSettingsClass CoreSettings
+        {
+            get
+            {
+                FikaPlugin.Instance.FikaLogger.LogInfo("Retrieving Core settings");
+                if (_coreSettings != null)
+                {
+                    return _coreSettings;
+                }
+
+                return null;
+            }
+        }
+
         [JsonIgnore]
         private readonly CoreBotSettingsClass _coreSettings;
 
@@ -35,18 +49,7 @@ namespace Fika.Core.Coop.Custom
 
             FikaPlugin.Instance.FikaLogger.LogError($"Unable to retrieve difficulty settings for: {role}, difficulty: {botDifficulty}");
             return null;
-        }
-
-        public CoreBotSettingsClass GetCoreSettings()
-        {
-            FikaPlugin.Instance.FikaLogger.LogInfo("Retrieving Core settings");
-            if (_coreSettings != null)
-            {
-                return _coreSettings;
-            }
-
-            return null;
-        }
+        }        
 
         public class RoleData : Dictionary<string, BotSettingsComponents>
         {

@@ -9,7 +9,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(LocalBotSettingsProviderClass).GetMethod(nameof(LocalBotSettingsProviderClass.LoadInternal), BindingFlags.Static | BindingFlags.Public);
+            return typeof(LocalBotSettingsProviderClass).GetMethod(nameof(LocalBotSettingsProviderClass.LoadInternal),
+                BindingFlags.Static | BindingFlags.Public);
         }
 
         [PatchPrefix]
@@ -17,7 +18,7 @@ namespace Fika.Core.Coop.Patches
         {
             if (FikaPlugin.Instance.BotDifficulties != null)
             {
-                core = FikaPlugin.Instance.BotDifficulties.GetCoreSettings();
+                core = FikaPlugin.Instance.BotDifficulties.CoreSettings;
             }
             else
             {
@@ -35,8 +36,6 @@ namespace Fika.Core.Coop.Patches
             {
                 foreach (object difficulty in Enum.GetValues(typeof(BotDifficulty)))
                 {
-                    //Todo (Archangel for Lacyway): Bsg added an additional set here (Gclass619_1) for PVE.
-                    //I switched this over to PVE but this needs to be observed if proper behavior is maintained
                     BotSettingsComponents botSettingsComponents;
                     botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
                     if (botSettingsComponents != null)
