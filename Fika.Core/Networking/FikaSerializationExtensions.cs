@@ -254,6 +254,11 @@ namespace Fika.Core.Networking
             }.ToInventory();
         }
 
+        /// <summary>
+        /// Writes an <see cref="InventoryDescriptorClass"/>
+        /// </summary>
+        /// <param name="writer">The writer to write data to</param>
+        /// <param name="descriptor">The <see cref="InventoryDescriptorClass"/> instance to serialize</param>
         public static void PutItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass descriptor)
         {
             EFTWriterClass eftWriter = new();
@@ -261,12 +266,22 @@ namespace Fika.Core.Networking
             writer.PutByteArray(eftWriter.ToArray());
         }
 
+        /// <summary>
+        /// Reads and returns an <see cref="InventoryDescriptorClass"/>
+        /// </summary>
+        /// <param name="reader">The reader to read the serialized inventory descriptor data from</param>
+        /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
         public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
         {
             using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return eftReader.ReadEFTItemDescriptor();
         }
 
+        /// <summary>
+        /// Deserializes and retrieves an <see cref="Item"/>
+        /// </summary>
+        /// <param name="reader">The reader to read the serialized item data from</param>
+        /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
         public static Item GetAirdropItem(this NetDataReader reader)
         {
             using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
@@ -959,6 +974,11 @@ namespace Fika.Core.Networking
             };
         }
 
+        /// <summary>
+        /// Writes a <see cref="RagdollPacketStruct"/>
+        /// </summary>
+        /// <param name="writer">The writer to write data to</param>
+        /// <param name="packet">The <see cref="RagdollPacketStruct"/> instance to serialize</param>
         public static void PutRagdollStruct(this NetDataWriter writer, RagdollPacketStruct packet)
         {
             writer.Put(packet.Id);
@@ -976,6 +996,11 @@ namespace Fika.Core.Networking
             }
         }
 
+        /// <summary>
+        /// Reads a <see cref="RagdollPacketStruct"/>
+        /// </summary>
+        /// <param name="reader">The reader to read data from.</param>
+        /// <returns>The deserialized <see cref="RagdollPacketStruct"/></returns>
         public static RagdollPacketStruct GetRagdollStruct(this NetDataReader reader)
         {
             RagdollPacketStruct packet = new()
@@ -1001,6 +1026,11 @@ namespace Fika.Core.Networking
             return packet;
         }
 
+        /// <summary>
+        /// Writes a <see cref="LootSyncStruct"/>
+        /// </summary>
+        /// <param name="writer">The writer to write data to</param>
+        /// <param name="packet">The <see cref="LootSyncStruct"/> to serialize</param>
         public static void PutLootSyncStruct(this NetDataWriter writer, LootSyncStruct packet)
         {
             writer.Put(packet.Id);
@@ -1015,6 +1045,11 @@ namespace Fika.Core.Networking
             }
         }
 
+        /// <summary>
+        /// Reads a <see cref="LootSyncStruct"/>
+        /// </summary>
+        /// <param name="reader">The reader to read data from</param>
+        /// <returns>The deserialized <see cref="LootSyncStruct"/></returns>
         public static LootSyncStruct GetLootSyncStruct(this NetDataReader reader)
         {
             LootSyncStruct data = new()
