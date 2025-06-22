@@ -52,8 +52,8 @@ namespace Fika.Core.Networking
             writer.Put(LocalTime);
 
             writer.Put((byte)NetId);
-            writer.Put((byte)Step);
-            writer.Put((byte)Blindfire);
+            writer.PutPackedInt(Step, -1, 1);
+            writer.PutPackedInt(Blindfire, -1, 1);
             writer.Put((byte)State);
 
             writer.PutVector3(Position);
@@ -64,7 +64,7 @@ namespace Fika.Core.Networking
             writer.PutPackedFloat(Tilt, -5f, 5f);
             writer.PutPackedFloat(MovementSpeed, 0f, 1f, EFloatCompression.High);
             writer.PutPackedFloat(SprintSpeed, 0f, 1f, EFloatCompression.High);
-            writer.PutPackedFloat(PoseLevel, 0f, 1f);
+            writer.PutPackedFloat(PoseLevel, 0f, 1f, EFloatCompression.High);
             writer.PutPackedFloat(WeaponOverlap, 0f, 1f);
 
             writer.PutPhysical(Physical);
@@ -82,8 +82,8 @@ namespace Fika.Core.Networking
             LocalTime = reader.GetDouble();
 
             NetId = reader.GetByte();
-            Step = reader.GetByte();
-            Blindfire = reader.GetByte();
+            Step = reader.GetPackedInt(-1, 1);
+            Blindfire = reader.GetPackedInt(-1, 1);
             State = (EPlayerState)reader.GetByte();
 
             Position = reader.GetVector3();
@@ -94,7 +94,7 @@ namespace Fika.Core.Networking
             Tilt = reader.GetPackedFloat(-5f, 5f);
             MovementSpeed = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
             SprintSpeed = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
-            PoseLevel = reader.GetPackedFloat(0f, 1f);
+            PoseLevel = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
             WeaponOverlap = reader.GetPackedFloat(0f, 1f);
 
             Physical = reader.GetPhysical();

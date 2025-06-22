@@ -123,9 +123,21 @@ namespace Fika.Core.Networking
         public static void PutPhysical(this NetDataWriter writer, PhysicalStateStruct physical)
         {
             byte flags = 0;
-            if (physical.StaminaExhausted) flags |= 1 << 0;
-            if (physical.OxygenExhausted) flags |= 1 << 1;
-            if (physical.HandsExhausted) flags |= 1 << 2;
+            if (physical.StaminaExhausted)
+            {
+                flags |= 1 << 0;
+            }
+
+            if (physical.OxygenExhausted)
+            {
+                flags |= 1 << 1;
+            }
+
+            if (physical.HandsExhausted)
+            {
+                flags |= 1 << 2;
+            }
+
             writer.Put(flags);
         }
 
@@ -1137,6 +1149,55 @@ namespace Fika.Core.Networking
 
             float normalized = (float)quantized / maxInt;
             return min + normalized * (max - min);
+        }
+
+        /// <summary>
+        /// Scales an integer value from a specified input range to a target byte range and writes it
+        /// </summary>
+        /// <param name="writer">The NetDataWriter to write to</param>
+        /// <param name="value">The integer value to scale</param>
+        /// <param name="minValue">The minimum value of the input integer range</param>
+        /// <param name="maxValue">The maximum value of the input integer range</param>
+        /// <param name="minTarget">The minimum value of the target byte range</param>
+        /// <param name="maxTarget">The maximum value of the target byte range</param>
+        public static void PutPackedInt(this NetDataWriter writer, int value, int minValue, int maxValue)
+        {
+            int minTarget = 0;
+            int maxTarget = byte.MaxValue;
+
+            int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
+            int rangeInput = maxValue - minValue;
+            int rangeTarget = maxTarget - minTarget;
+
+            float normalized = (float)clampedValue / rangeInput;
+            int scaled = (int)(minTarget + normalized * rangeTarget);
+
+            byte result = (byte)Mathf.Clamp(scaled, minTarget, maxTarget);
+            writer.Put(result);
+        }
+
+        /// <summary>
+        /// Scales a byte value from a specified input range to a target integer range
+        /// </summary>
+        /// <param name="reader">The NetDataReader to read from</param>
+        /// <param name="minValue">The minimum value of the input byte range</param>
+        /// <param name="maxValue">The maximum value of the input byte range</param>
+        /// <param name="minTarget">The minimum value of the target integer range</param>
+        /// <param name="maxTarget">The maximum value of the target integer range</param>
+        /// <returns>The scaled integer value within the target range</returns>
+        public static int GetPackedInt(this NetDataReader reader, int minTarget, int maxTarget)
+        {
+            int minValue = 0;
+            int maxValue = byte.MaxValue;
+
+            byte value = reader.GetByte();
+
+            int rangeInput = maxValue - minValue;
+            int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
+            float rangeTarget = maxTarget - minTarget;
+
+            float normalized = (float)clampedValue / rangeInput;
+            return (int)(minTarget + normalized * rangeTarget);
         }
 
         /// <summary>

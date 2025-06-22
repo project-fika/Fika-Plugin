@@ -11,32 +11,32 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
 
         public override void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, float ratio)
         {
-            _player.CurrentPlayerState.Rotation = new Vector2(Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, ratio),
-                Mathf.Lerp(from.Rotation.y, to.Rotation.y, ratio));
-            _player.CurrentPlayerState.HeadRotation = Vector3.LerpUnclamped(from.HeadRotation, to.HeadRotation, ratio);
-            _player.CurrentPlayerState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
-            Vector2 movDir = Vector2.Lerp(from.MovementDirection, to.MovementDirection, ratio);
-            if (movDir.sqrMagnitude < _deadZone)
-            {
-                _player.CurrentPlayerState.MovementDirection = Vector2.zero;
-            }
-            else
-            {
-                _player.CurrentPlayerState.MovementDirection = movDir.normalized;
-            }
-            _player.CurrentPlayerState.State = to.State;
-            _player.CurrentPlayerState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
-            _player.CurrentPlayerState.Step = to.Step;
-            _player.CurrentPlayerState.MovementSpeed = Mathf.Lerp(from.MovementSpeed, to.MovementSpeed, ratio);
-            _player.CurrentPlayerState.SprintSpeed = Mathf.Lerp(from.SprintSpeed, to.SprintSpeed, ratio);
-            _player.CurrentPlayerState.IsProne = to.IsProne;
-            _player.CurrentPlayerState.PoseLevel = Mathf.LerpUnclamped(from.PoseLevel, to.PoseLevel, ratio);
-            _player.CurrentPlayerState.IsSprinting = to.IsSprinting;
-            _player.CurrentPlayerState.Stamina = to.Physical;
-            _player.CurrentPlayerState.Blindfire = to.Blindfire;
-            _player.CurrentPlayerState.WeaponOverlap = Mathf.Lerp(from.WeaponOverlap, to.WeaponOverlap, ratio);
-            _player.CurrentPlayerState.LeftStanceDisabled = to.LeftStanceDisabled;
-            _player.CurrentPlayerState.IsGrounded = to.IsGrounded;
+            ObservedState currentState = _player.CurrentPlayerState;
+
+            currentState.Rotation = new Vector2(
+                Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, ratio),
+                Mathf.LerpUnclamped(from.Rotation.y, to.Rotation.y, ratio)
+            );
+
+            currentState.HeadRotation = Vector3.LerpUnclamped(from.HeadRotation, to.HeadRotation, ratio);
+            currentState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
+
+            Vector2 movDir = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio);
+            currentState.MovementDirection = movDir.sqrMagnitude < _deadZone ? Vector2.zero : movDir.normalized;
+
+            currentState.State = to.State;
+            currentState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
+            currentState.Step = to.Step;
+            currentState.MovementSpeed = Mathf.LerpUnclamped(from.MovementSpeed, to.MovementSpeed, ratio);
+            currentState.SprintSpeed = Mathf.LerpUnclamped(from.SprintSpeed, to.SprintSpeed, ratio);
+            currentState.IsProne = to.IsProne;
+            currentState.PoseLevel = Mathf.LerpUnclamped(from.PoseLevel, to.PoseLevel, ratio);
+            currentState.IsSprinting = to.IsSprinting;
+            currentState.Stamina = to.Physical;
+            currentState.Blindfire = to.Blindfire;
+            currentState.WeaponOverlap = Mathf.LerpUnclamped(from.WeaponOverlap, to.WeaponOverlap, ratio);
+            currentState.LeftStanceDisabled = to.LeftStanceDisabled;
+            currentState.IsGrounded = to.IsGrounded;
         }
     }
 }
