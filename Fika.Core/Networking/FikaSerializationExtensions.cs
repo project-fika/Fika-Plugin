@@ -669,7 +669,7 @@ namespace Fika.Core.Networking
         public static void PutAirplaneDataPacketStruct(this NetDataWriter writer, AirplaneDataPacketStruct airplaneDataPacketStruct)
         {
             writer.Put((byte)airplaneDataPacketStruct.ObjectType);
-            writer.Put(airplaneDataPacketStruct.ObjectId);
+            writer.Put((byte)airplaneDataPacketStruct.ObjectId);
 
             switch (airplaneDataPacketStruct.ObjectType)
             {
@@ -709,7 +709,7 @@ namespace Fika.Core.Networking
             AirplaneDataPacketStruct packet = new()
             {
                 ObjectType = (SynchronizableObjectType)reader.GetByte(),
-                ObjectId = reader.GetInt(),
+                ObjectId = reader.GetByte(),
                 PacketData = new()
             };
 
