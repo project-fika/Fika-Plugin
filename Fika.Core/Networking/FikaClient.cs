@@ -39,6 +39,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 
@@ -120,6 +121,7 @@ namespace Fika.Core.Networking
         private Queue<BaseInventoryOperationClass> _inventoryOperations;
         private List<int> _missingIds;
         private JobHandle _stateHandle;
+        [NativeDisableContainerSafetyRestriction]
         private NativeArray<PlayerStatePacket> _snapshots;
         private int _snapshotCount;
 
@@ -1112,6 +1114,7 @@ namespace Fika.Core.Networking
         protected void OnDestroy()
         {
             _netClient?.Stop();
+            _stateHandle.Complete();
             _snapshots.Dispose();
 
             if (_fikaChat != null)
