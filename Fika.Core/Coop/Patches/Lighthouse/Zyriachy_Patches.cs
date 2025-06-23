@@ -8,6 +8,9 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 {
     internal class Zyriachy_Patches
     {
+        /// <summary>
+        /// Search for 'Zryachiy don't have controllable zone FIX it' string in assembly to find class
+        /// </summary>
         internal class ZyriachyBossLogicClass_Activate_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()

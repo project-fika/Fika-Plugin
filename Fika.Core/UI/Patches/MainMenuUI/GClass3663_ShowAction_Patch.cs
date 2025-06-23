@@ -10,7 +10,7 @@ namespace Fika.Core.UI.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass3629).GetMethod(nameof(GClass3663.ShowAction));
+            return typeof(GClass3663).GetMethod(nameof(GClass3663.ShowAction));
         }
 
         [PatchPostfix]
