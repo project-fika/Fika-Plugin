@@ -147,7 +147,7 @@ namespace Fika.Core.Networking
             _inventoryOperations = new();
             _missingIds = [];
             _snapshotCount = 0;
-            _snapshots = new(255, Allocator.Persistent);
+            _snapshots = new(512, Allocator.Persistent);
             ObservedCoopPlayers = [];
 
             Ping = 0;
