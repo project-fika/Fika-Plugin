@@ -1077,10 +1077,6 @@ namespace Fika.Core.Networking
                 _snapshots[_snapshotCount] = packet;
                 _snapshotCount++;
             }
-            else
-            {
-                _logger.LogWarning($"OnPlayerStatePacketReceived: Received a packet but buffer was full!");
-            }
         }
 
         protected void Update()

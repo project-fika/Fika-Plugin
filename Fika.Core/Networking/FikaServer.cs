@@ -1252,17 +1252,13 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)
         {
+            SendDataToAll(ref packet, DeliveryMethod.Unreliable, peer);
+
             if (_snapshotCount < _snapshots.Length)
             {
                 _snapshots[_snapshotCount] = packet;
                 _snapshotCount++;
             }
-            else
-            {
-                _logger.LogWarning($"OnPlayerStatePacketReceived: Received a packet but buffer was full!");
-            }
-
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         protected void Update()
