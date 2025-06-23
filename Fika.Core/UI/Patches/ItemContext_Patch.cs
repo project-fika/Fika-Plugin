@@ -30,8 +30,7 @@ namespace Fika.Core.UI.Patches
         [PatchPrefix]
         private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
         {
-            // Check for GClass increments, contains base Insure()
-            if (contextInteractions is not GClass3516 gclass)
+            if (contextInteractions is not ContextInteractionsClass gclass)
             {
                 return;
             }
@@ -127,7 +126,7 @@ namespace Fika.Core.UI.Patches
                     GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.SendItemMenu);
                     GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
                     uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
-                    InventoryScreen.GClass3630 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3630>("ScreenController").Value;
+                    InventoryScreen.GClass3664 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3664>("ScreenController").Value;
                     screenController.OnClose += () => { Object.Destroy(uiGameObj); };
                     SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
                     sendItemUI.PlayersDropdown.ClearOptions();

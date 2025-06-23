@@ -17,7 +17,7 @@ namespace Fika.Core.Networking
 
             if (Data.Done)
             {
-                Data.TransformSyncs = new GStruct116[12];
+                Data.TransformSyncs = new GStruct135[12];
                 for (int i = 0; i < 12; i++)
                 {
                     Data.TransformSyncs[i] = new()
@@ -37,7 +37,7 @@ namespace Fika.Core.Networking
 
             if (Data.Done && Data.TransformSyncs != null)
             {
-                GStruct116[] transforms = Data.TransformSyncs;
+                GStruct135[] transforms = Data.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
                     writer.PutVector3(transforms[i].Position);

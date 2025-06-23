@@ -100,7 +100,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (Item is RocketLauncherItemClass)
             {
-                return new GClass1839(this);
+                return new GClass1867(this);
             }
             if (Item.IsFlareGun)
             {
@@ -785,7 +785,7 @@ namespace Fika.Core.Coop.ClientClasses
         }
 
         // Check for GClass increments
-        private class FirearmClass4(Player.FirearmController controller) : GClass1834(controller)
+        private class FirearmClass4(Player.FirearmController controller) : GClass1862(controller)
         {
             public override void Start()
             {
@@ -851,7 +851,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = gridItemAddress;
-                GClass1755 descriptor = itemAddress?.ToDescriptor();
+                GClass1783 descriptor = itemAddress?.ToDescriptor();
                 EFTWriterClass eftWriter = new();
 
                 byte[] locationDescription;
@@ -924,7 +924,7 @@ namespace Fika.Core.Coop.ClientClasses
             public void Process(IResult result)
             {
                 ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
-                GClass1755 descriptor = itemAddress?.ToDescriptor();
+                GClass1783 descriptor = itemAddress?.ToDescriptor();
                 EFTWriterClass eftWriter = new();
                 string[] ammoIds = ammoPack.GetReloadingAmmoIds();
 

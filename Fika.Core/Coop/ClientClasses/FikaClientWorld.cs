@@ -52,7 +52,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
         }
 
-        public void UpdateLootItems(GClass813<int, LootItem> lootItems)
+        public void UpdateLootItems(GClass815<int, LootItem> lootItems)
         {
             for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
             {

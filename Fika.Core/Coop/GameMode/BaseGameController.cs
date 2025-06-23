@@ -92,7 +92,7 @@ namespace Fika.Core.Coop.GameMode
         // Raid data
         public List<ThrowWeapItemClass> ThrownGrenades { get; set; }
         public RaidSettings RaidSettings { get; set; }
-        public GClass1370 LootItems { get; set; } = [];
+        public GClass1398 LootItems { get; set; } = [];
         public LocationSettingsClass.Location Location { get; set; }
         public Dictionary<string, Player> Bots = [];
         public CoopHandler CoopHandler
@@ -317,7 +317,7 @@ namespace Fika.Core.Coop.GameMode
                 yield return endOfFrame;
             }
 
-            GClass2114.ResetAudioBuffer();
+            GClass2142.ResetAudioBuffer();
 
             _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalClientTriggersModule>();
             _gameWorld.FillLampControllers();
@@ -328,7 +328,7 @@ namespace Fika.Core.Coop.GameMode
             WeatherReady = true;
             OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
-            Class438 seasonController = new();
+            Class445 seasonController = new();
             _gameWorld.GInterface29_0 = seasonController;
 
 #if DEBUG
@@ -509,8 +509,8 @@ namespace Fika.Core.Coop.GameMode
 #if DEBUG
                 Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
                 JsonType.BTRServerSettings settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
-                KeyValuePair<string, GStruct118> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
-                GStruct118 btrSettings = mapSettings.Value;
+                KeyValuePair<string, GStruct137> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
+                GStruct137 btrSettings = mapSettings.Value;
                 btrSettings.ChanceSpawn = 100;
                 btrSettings.SpawnPeriod = new(5, 10);
                 settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
@@ -583,7 +583,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                BackendConfigSettingsClass.GClass1554 runddansSettings = instance.runddansSettings;
+                BackendConfigSettingsClass.GClass1582 runddansSettings = instance.runddansSettings;
                 runddansActive = runddansSettings != null && runddansSettings.active;
             }
             if (runddansActive)

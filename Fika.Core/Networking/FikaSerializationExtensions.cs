@@ -240,7 +240,7 @@ namespace Fika.Core.Networking
         /// <returns>An <see cref="Item"/> (cast to type inside packet)</returns>
         public static Item GetItem(this NetDataReader reader)
         {
-            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
         }
 
@@ -251,8 +251,8 @@ namespace Fika.Core.Networking
         /// <returns>An <see cref="Inventory"/></returns>
         public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
         {
-            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
-            return new GClass1719()
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            return new EFTInventoryClass()
             {
                 Equipment = eftReader.ReadEFTItemDescriptor()
             }.ToInventory();
@@ -277,7 +277,7 @@ namespace Fika.Core.Networking
         /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
         public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
         {
-            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return eftReader.ReadEFTItemDescriptor();
         }
 
@@ -288,15 +288,15 @@ namespace Fika.Core.Networking
         /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
         public static Item GetAirdropItem(this NetDataReader reader)
         {
-            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             Item item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
-            GClass1370 enumerable = [new LootItemPositionClass()];
+            GClass1398 enumerable = [new LootItemPositionClass()];
             enumerable[0].Item = item;
             Item[] array = [.. enumerable.Select(FikaGlobals.GetLootItemPositionItem)];
-            ResourceKey[] resourceKeys = [.. array.OfType<GClass3090>().GetAllItemsFromCollections()
-                .Concat(array.Where(AirdropSynchronizableObject.Class2020.class2020_0.method_1))
-                .SelectMany(AirdropSynchronizableObject.Class2020.class2020_0.method_2)];
+            ResourceKey[] resourceKeys = [.. array.OfType<GClass3118>().GetAllItemsFromCollections()
+                .Concat(array.Where(AirdropSynchronizableObject.Class2036.class2036_0.method_1))
+                .SelectMany(AirdropSynchronizableObject.Class2036.class2036_0.method_2)];
             Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
                 resourceKeys, JobPriorityClass.Immediate, null, default).HandleExceptions();
 
@@ -341,7 +341,7 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Profile"/></returns>
         public static Profile GetProfile(this NetDataReader reader)
         {
-            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return new(eftReader.ReadEFTProfileDescriptor());
         }
 
@@ -605,7 +605,7 @@ namespace Fika.Core.Networking
             // Stamina Coeff
             writer.Write(standard);
 
-            foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass2010> bodyPart in health.BodyParts)
+            foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass2038> bodyPart in health.BodyParts)
             {
                 Profile.ProfileHealthClass.ValueInfo bodyPartInfo = bodyPart.Value.Health;
                 writer.Write(bodyPartInfo.Current <= bodyPartInfo.Minimum);
@@ -991,7 +991,7 @@ namespace Fika.Core.Networking
 
             if (packet.Done && packet.TransformSyncs != null)
             {
-                GStruct116[] transforms = packet.TransformSyncs;
+                GStruct135[] transforms = packet.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
                     writer.PutVector3(transforms[i].Position);
@@ -1016,7 +1016,7 @@ namespace Fika.Core.Networking
 
             if (packet.Done)
             {
-                packet.TransformSyncs = new GStruct116[12];
+                packet.TransformSyncs = new GStruct135[12];
                 for (int i = 0; i < 12; i++)
                 {
                     packet.TransformSyncs[i] = new()

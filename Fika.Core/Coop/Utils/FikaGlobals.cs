@@ -43,7 +43,7 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                return GClass2042.Instance;
+                return GClass2070.Instance;
             }
         }
 

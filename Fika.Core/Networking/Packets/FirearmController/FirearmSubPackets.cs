@@ -613,7 +613,7 @@ namespace Fika.Core.Networking
                     MagazineItemClass magazine = null;
                     try
                     {
-                        GStruct442<Item> result = player.FindItemById(MagId);
+                        GStruct461<Item> result = player.FindItemById(MagId);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -639,10 +639,10 @@ namespace Fika.Core.Networking
                     {
                         try
                         {
-                            using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+                            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                             if (LocationDescription.Length != 0)
                             {
-                                GClass1755 descriptor = eftReader.ReadPolymorph<GClass1755>();
+                                GClass1783 descriptor = eftReader.ReadPolymorph<GClass1783>();
                                 gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                             }
                         }
@@ -694,7 +694,7 @@ namespace Fika.Core.Networking
                 {
                     try
                     {
-                        GStruct442<Item> result = player.FindItemById(MagId);
+                        GStruct461<Item> result = player.FindItemById(MagId);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -925,12 +925,12 @@ namespace Fika.Core.Networking
                     AmmoPackReloadingClass ammoPack = new(ammo);
                     ItemAddress gridItemAddress = null;
 
-                    using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+                    using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                     try
                     {
                         if (LocationDescription.Length > 0)
                         {
-                            GClass1755 descriptor = eftReader.ReadPolymorph<GClass1755>();
+                            GClass1783 descriptor = eftReader.ReadPolymorph<GClass1783>();
                             gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                         }
                     }

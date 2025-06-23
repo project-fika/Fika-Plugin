@@ -190,7 +190,7 @@ namespace Fika.Core.Coop.HostClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3351(method_12(), this, PlayerSearchController, Profile, item);
+            return new GClass3380(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class HostInventoryOperationHandler(CoopHostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)

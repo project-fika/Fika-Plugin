@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return false;
         }
 
-        public override bool ApplyItem(Item item, GStruct356<EBodyPart> bodyPart, float? amount = null)
+        public override bool ApplyItem(Item item, GStruct375<EBodyPart> bodyPart, float? amount = null)
         {
             return false;
         }
@@ -60,7 +60,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 Profile.ProfileHealthClass profileHealthClass2 = new()
                 {
-                    BodyParts = GClass863<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass2010>(),
+                    BodyParts = GClass863<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.GClass2038>(),
                     Energy = new Profile.ProfileHealthClass.ValueInfo
                     {
                         Current = HealthValue_0.Current,
@@ -94,9 +94,9 @@ namespace Fika.Core.Coop.ObservedClasses
                 keyValuePair.Deconstruct(out EBodyPart ebodyPart, out BodyPartState bodyPartState);
                 EBodyPart ebodyPart2 = ebodyPart;
                 BodyPartState bodyPartState2 = bodyPartState;
-                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass2010 gclass))
+                if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.GClass2038 gclass))
                 {
-                    gclass = new Profile.ProfileHealthClass.GClass2010();
+                    gclass = new Profile.ProfileHealthClass.GClass2038();
                     health.BodyParts.Add(ebodyPart2, gclass);
                 }
                 gclass.Health = new Profile.ProfileHealthClass.ValueInfo
@@ -109,9 +109,9 @@ namespace Fika.Core.Coop.ObservedClasses
 
             foreach (NetworkBodyEffectsAbstractClass gclass in IReadOnlyList_0)
             {
-                if (gclass is GInterface310 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments
+                if (gclass is GInterface315 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments
                 {
-                    Profile.ProfileHealthClass.GClass2010 gclass2 = health.BodyParts[gclass.BodyPart];
+                    Profile.ProfileHealthClass.GClass2038 gclass2 = health.BodyParts[gclass.BodyPart];
                     gclass2.Effects ??= [];
                     gclass2.Effects.Add(gclass.GetType().Name, new()
                     {

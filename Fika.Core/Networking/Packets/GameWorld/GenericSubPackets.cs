@@ -374,7 +374,7 @@ namespace Fika.Core.Networking
             {
                 if (Singleton<GameWorld>.Instance.MineManager != null)
                 {
-                    NetworkGame<EftGamePlayerOwner>.Class1540 mineSeeker = new()
+                    NetworkGame<EftGamePlayerOwner>.Class1556 mineSeeker = new()
                     {
                         minePosition = MinePosition
                     };

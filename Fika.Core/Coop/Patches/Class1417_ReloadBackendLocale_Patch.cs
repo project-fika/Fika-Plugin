@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.Patches
 {
-    internal class Class1401_ReloadBackendLocale_Patch : FikaPatch
+    internal class Class1417_ReloadBackendLocale_Patch : FikaPatch
     {
         private static bool HasBeenSet = false;
 
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(Class1401).GetMethod(nameof(Class1401.ReloadBackendLocale));
+            return typeof(Class1417).GetMethod(nameof(Class1417.ReloadBackendLocale));
         }
 
         [PatchPostfix]

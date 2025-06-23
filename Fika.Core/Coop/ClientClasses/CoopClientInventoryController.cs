@@ -189,7 +189,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3351(method_12(), this, PlayerSearchController, Profile, item);
+            return new GClass3380(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class ClientInventoryOperationHandler
@@ -245,7 +245,7 @@ namespace Fika.Core.Coop.ClientClasses
                 EOperationStatus localStatus = Operation.Status;
                 if (localStatus.InProgress())
                 {
-                    if (Operation is GInterface419 ginterface)
+                    if (Operation is GInterface424 ginterface)
                     {
                         ginterface.Terminate();
                     }

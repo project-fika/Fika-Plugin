@@ -257,12 +257,12 @@ namespace Fika.Core.Coop.GameMode
                 profile.SetSpawnedInSession(false);
             }
 
-            statisticsManager = FikaBackendUtils.IsHeadless ? new ObservedStatisticsManager() : new GClass2070();
+            statisticsManager = FikaBackendUtils.IsHeadless ? new ObservedStatisticsManager() : new GClass2098();
 
             CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-                statisticsManager, new GClass1660(), session, playerId);
+                statisticsManager, new GClass1688(), session, playerId);
 
             coopPlayer.Location = Location_0.Id;
             CoopHandler coopHandler = GameController.CoopHandler;
@@ -358,7 +358,7 @@ namespace Fika.Core.Coop.GameMode
                 UnityEngine.Events.UnityEvent newEvent = new();
                 newEvent.AddListener(() =>
                 {
-                    GClass3595 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
+                    GClass3629 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
                         message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
                         ErrorScreen.EButtonType.OkButton, 15f);
                     errorScreen.OnAccept += StopFromCancel(myPlayer);
@@ -461,7 +461,7 @@ namespace Fika.Core.Coop.GameMode
             if (FikaBackendUtils.IsReconnect)
             {
                 await Reconnect();
-                foreach (KeyValuePair<EBodyPart, GClass2852<ActiveHealthController.GClass2851>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
+                foreach (KeyValuePair<EBodyPart, GClass2880<ActiveHealthController.GClass2879>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
                 {
                     if (item.Value.Health.AtMinimum)
                     {
@@ -481,7 +481,7 @@ namespace Fika.Core.Coop.GameMode
                 };
                 airdropEventClass.Init(true);
                 (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = airdropEventClass;
-                GameWorld_0.SynchronizableObjectLogicProcessor.Ginterface257_0 = Singleton<FikaServer>.Instance;
+                GameWorld_0.SynchronizableObjectLogicProcessor.Ginterface262_0 = Singleton<FikaServer>.Instance;
             }
 
             await method_6();
@@ -571,7 +571,7 @@ namespace Fika.Core.Coop.GameMode
                 IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
                 if (items != null)
                 {
-                    Class1520 keyFinder = new()
+                    Class1536 keyFinder = new()
                     {
                         accessKeys = Location_0.AccessKeys
                     };
@@ -832,7 +832,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct440<GClass3249> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+                    GStruct459<GClass3278> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
                         myPlayer.InventoryController, false);
                     if (result.Error != null)
                     {
@@ -1032,7 +1032,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
                 {
-                    GStruct440<GClass3249> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+                    GStruct459<GClass3278> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
                         myPlayer.InventoryController, false);
                     if (result.Error != null)
                     {
@@ -1163,7 +1163,7 @@ namespace Fika.Core.Coop.GameMode
             BTRSide_Patches.Passengers.Clear();
         }
 
-        private class ExitManager : Class1522
+        private class ExitManager : Class1538
         {
             public new CoopGame baseLocalGame_0;
 
@@ -1194,7 +1194,7 @@ namespace Fika.Core.Coop.GameMode
                 baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
                 baseLocalGame_0.CleanUp();
 
-                Class1523 exitCallback = new()
+                Class1539 exitCallback = new()
                 {
                     baseLocalGame_0 = baseLocalGame_0,
                     duration = EFTDateTimeClass.Now - baseLocalGame_0.dateTime_0,
@@ -1208,7 +1208,7 @@ namespace Fika.Core.Coop.GameMode
         /// <summary>
         /// Used to manage the stopping of the <see cref="CoopGame"/> gracefully when cancelling
         /// </summary>
-        private class CancelExitManager : Class1522
+        private class CancelExitManager : Class1538
         {
             public void ExitOverride()
             {
@@ -1240,7 +1240,7 @@ namespace Fika.Core.Coop.GameMode
             {
                 return true;
             }
-            bool flag = GClass1244.IsTalkDetected();
+            bool flag = GClass1272.IsTalkDetected();
             _localPlayer.TalkDateTime = flag ? EFTDateTimeClass.UtcNow : default;
             bool flag2;
             bool flag3;
@@ -1272,7 +1272,7 @@ namespace Fika.Core.Coop.GameMode
                     }
                 }
             }
-            GClass1244.Blocked = !flag3;
+            GClass1272.Blocked = !flag3;
             return flag2;
         }
 

@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class WeaponManagerClass_method_13_Patch : FikaPatch
+    public class WeaponManagerClass_method_12_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(WeaponManagerClass).GetMethod(nameof(WeaponManagerClass.method_13));
+            return typeof(WeaponManagerClass).GetMethod(nameof(WeaponManagerClass.method_12));
         }
 
         [PatchPrefix]

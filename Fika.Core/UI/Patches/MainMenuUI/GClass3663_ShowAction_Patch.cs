@@ -6,15 +6,15 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches
 {
-    public class GClass3629_ShowAction_Patch : FikaPatch
+    public class GClass3663_ShowAction_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass3629).GetMethod(nameof(GClass3629.ShowAction));
+            return typeof(GClass3629).GetMethod(nameof(GClass3663.ShowAction));
         }
 
         [PatchPostfix]
-        public static void Postfix(GClass3629 __instance)
+        public static void Postfix(GClass3663 __instance)
         {
             if (!__instance.InRaid)
             {

@@ -109,7 +109,7 @@ namespace Fika.Core.Networking.Websocket
                             if (success)
                             {
                                 // Matchmaker next screen (accept)
-                                matchMakerAcceptScreen.method_20().HandleExceptions();
+                                matchMakerAcceptScreen.method_22().HandleExceptions();
                             }
                         }, false));
                     }

@@ -8,7 +8,7 @@ using Fika.Core.Networking;
 namespace Fika.Core.Coop.ClientClasses
 {
     public sealed class CoopBotHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth)
-        : GClass2853(healthInfo, player, inventoryController, skillManager, aiHealth)
+        : GClass2881(healthInfo, player, inventoryController, skillManager, aiHealth)
     {
         private readonly CoopBot _coopBot = (CoopBot)player;
         public override bool _sendNetworkSyncPackets

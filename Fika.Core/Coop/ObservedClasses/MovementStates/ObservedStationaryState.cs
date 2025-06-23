@@ -40,7 +40,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public void SetStationaryCallback(Player.AbstractHandsController arg1, Player.AbstractHandsController newContoller)
         {
-            Class1290 @class = new()
+            Class1306 @class = new()
             {
                 StationaryStateClass = this
             };

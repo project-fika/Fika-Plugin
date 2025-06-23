@@ -55,14 +55,13 @@ namespace Fika.Core.Coop.ObservedClasses
             limit = 0;
             return false;
         }
-
-        public override GStruct442<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
+        public override GStruct461<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
         {
             ThrowItem(item, false, callback);
             return true;
         }
 
-        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3910 error)
+        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3945 error)
         {
             error = null;
             return true;
@@ -114,7 +113,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return null;
         }
 
-        public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface416 operation, Callback callback)
+        public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface421 operation, Callback callback)
         {
             if (!succeed)
             {
@@ -130,9 +129,9 @@ namespace Fika.Core.Coop.ObservedClasses
             _coopPlayer.StatisticsManager.OnGrabLoot(item);
         }
 
-        private void HandleInProcess(Item item, ItemAddress to, GInterface416 operation, Callback callback)
+        private void HandleInProcess(Item item, ItemAddress to, GInterface421 operation, Callback callback)
         {
-            Player.Class1240 handler = new()
+            Player.Class1255 handler = new()
             {
                 player_0 = _coopPlayer,
                 callback = callback

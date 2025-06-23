@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.ObservedClasses
     internal class CoopObservedMedsController : Player.MedsController
     {
         private CoopPlayer _coopPlayer;
-        private GStruct356<EBodyPart> _healParts;
+        private GStruct375<EBodyPart> _healParts;
 
         private ObservedMedsOperation ObservedOperation
         {
@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        public static CoopObservedMedsController Create(CoopPlayer player, Item item, GStruct356<EBodyPart> bodyParts, float amount, int animationVariant)
+        public static CoopObservedMedsController Create(CoopPlayer player, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
         {
             CoopObservedMedsController controller = smethod_6<CoopObservedMedsController>(player, item, bodyParts, amount, animationVariant);
             controller._coopPlayer = player;
@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             return new Dictionary<Type, OperationFactoryDelegate> {
                 {
-                    typeof(Class1182),
+                    typeof(Class1197),
                     new OperationFactoryDelegate(GetObservedMedsOperation)
                 },
                 {
@@ -118,7 +118,7 @@ namespace Fika.Core.Coop.ObservedClasses
             ObservedOperation.HideObservedWeaponComplete();
         }
 
-        private class ObservedMedsOperation(Player.MedsController controller) : Class1182(controller)
+        private class ObservedMedsOperation(Player.MedsController controller) : Class1197(controller)
         {
             private readonly CoopObservedMedsController _observedMedsController = (CoopObservedMedsController)controller;
             private int _animation;

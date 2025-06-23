@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.Players
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, delegate { });
 
-            player.AIData = new GClass583(null, player)
+            player.AIData = new PlayerAIDataClass(null, player)
             {
                 IsAI = true
             };
@@ -277,7 +277,7 @@ namespace Fika.Core.Coop.Players
                 if (num > 0f)
                 {
                     num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
-                    method_95(num, armorComponent);
+                    method_96(num, armorComponent);
                 }
             }
 

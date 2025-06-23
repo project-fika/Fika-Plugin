@@ -58,7 +58,7 @@ namespace Fika.Core.Networking
     /// <summary>
     /// Server used to synchronize all <see cref="FikaClient"/>s
     /// </summary>
-    public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface257, IFikaNetworkManager
+    public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface262, IFikaNetworkManager
     {
         public int ReadyClients;
         public DateTime TimeSinceLastPeerDisconnected;
@@ -307,12 +307,12 @@ namespace Fika.Core.Networking
         async Task IFikaNetworkManager.InitializeVOIP()
         {
             VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
-            GClass1065 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+            GClass1068 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
             if (voipHandler.MicrophoneChecked && !FikaBackendUtils.IsHeadless)
             {
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == ESideType.Savage).ProfileId;
-                await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
+                await GClass1640.LoadScene(AssetsManagerSingletonClass.Manager,
                     SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
@@ -332,7 +332,7 @@ namespace Fika.Core.Networking
             }
             else if (FikaBackendUtils.IsHeadless)
             {
-                await GClass1612.LoadScene(AssetsManagerSingletonClass.Manager,
+                await GClass1640.LoadScene(AssetsManagerSingletonClass.Manager,
                     SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
@@ -504,7 +504,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            GStruct442<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+            GStruct461<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
             if (gstruct2.Failed)
             {
                 _logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
@@ -787,7 +787,7 @@ namespace Fika.Core.Networking
                 GameWorld gameWorld = Singleton<GameWorld>.Instance;
                 Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
-                GClass813<int, Throwable>.GStruct46 grenades = gameWorld.Grenades.GetValuesEnumerator();
+                GClass815<int, Throwable>.GStruct45 grenades = gameWorld.Grenades.GetValuesEnumerator();
                 List<SmokeGrenadeDataPacketStruct> smokeData = [];
                 foreach (Throwable item in grenades)
                 {
@@ -849,7 +849,7 @@ namespace Fika.Core.Networking
                     SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
                 }
 
-                GClass813<int, WindowBreaker>.GStruct46 windows = gameWorld.Windows.GetValuesEnumerator();
+                GClass815<int, WindowBreaker>.GStruct45 windows = gameWorld.Windows.GetValuesEnumerator();
                 Dictionary<int, Vector3> windowData = [];
                 foreach (WindowBreaker window in windows)
                 {
@@ -1165,7 +1165,7 @@ namespace Fika.Core.Networking
         {
             if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
             {
-                using GClass1249 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
+                using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
                 try
                 {
                     OperationCallbackPacket operationCallbackPacket;

@@ -307,7 +307,9 @@ namespace Fika.Core.Coop.FreeCamera
         private void ClearEffects()
         {
             CameraClass cameraClass = CameraClass.Instance;
-            cameraClass.EffectsController.method_4(false);
+           
+            //Todo: I can't find this anymore, not in the old asm or the new one.. Not sure where to change this one to
+            //cameraClass.EffectsController.method_2(false);
 
             Traverse effectsController = Traverse.Create(cameraClass.EffectsController);
 
@@ -317,10 +319,10 @@ namespace Fika.Core.Coop.FreeCamera
                 Destroy(bloodOnScreen);
             }
 
-            List<EffectsController.Class631> effectsManagerList = effectsController.Field<List<EffectsController.Class631>>("list_0").Value;
+            List<EffectsController.Class633> effectsManagerList = effectsController.Field<List<EffectsController.Class633>>("list_0").Value;
             if (effectsManagerList != null)
             {
-                foreach (EffectsController.Class631 effectsManager in effectsManagerList)
+                foreach (EffectsController.Class633 effectsManager in effectsManagerList)
                 {
                     while (effectsManager.ActiveEffects.Count > 0)
                     {

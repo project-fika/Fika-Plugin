@@ -8,11 +8,11 @@ namespace Fika.Core.Coop.Patches.Lighthouse
 {
     internal class Zyriachy_Patches
     {
-        internal class GClass449_Activate_Patch : FikaPatch
+        internal class ZyriachyBossLogicClass_Activate_Patch : FikaPatch
         {
             protected override MethodBase GetTargetMethod()
             {
-                return typeof(GClass449).GetMethod(nameof(GClass449.Activate));
+                return typeof(ZyriachyBossLogicClass).GetMethod(nameof(ZyriachyBossLogicClass.Activate));
             }
 
             [PatchPostfix]

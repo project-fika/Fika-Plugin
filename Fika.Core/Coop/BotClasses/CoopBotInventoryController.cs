@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.BotClasses
         {
             // Check for GClass increments
             // Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-            if (operation is not GClass3329)
+            if (operation is not GClass3358)
             {
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_coopBot.Profile.Nickname}");
@@ -91,7 +91,7 @@ namespace Fika.Core.Coop.BotClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3351(method_12(), this, PlayerSearchController, Profile, item);
+            return new GClass3380(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class BotInventoryOperationHandler(CoopBotInventoryController controller, BaseInventoryOperationClass operation, Callback callback)
