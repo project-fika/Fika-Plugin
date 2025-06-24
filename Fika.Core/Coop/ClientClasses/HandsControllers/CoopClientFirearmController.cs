@@ -16,27 +16,27 @@ namespace Fika.Core.Coop.ClientClasses
 {
     public class CoopClientFirearmController : Player.FirearmController
     {
-        protected CoopPlayer player;
-        private bool isClient;
+        protected CoopPlayer _player;
+        private bool _isClient;
 
         public static CoopClientFirearmController Create(CoopPlayer player, Weapon weapon)
         {
             CoopClientFirearmController controller = smethod_6<CoopClientFirearmController>(player, weapon);
-            controller.player = player;
-            controller.isClient = FikaBackendUtils.IsClient;
+            controller._player = player;
+            controller._isClient = FikaBackendUtils.IsClient;
             return controller;
         }
 
         public override void SetWeaponOverlapValue(float overlap)
         {
             base.SetWeaponOverlapValue(overlap);
-            player.ObservedOverlap = overlap;
+            _player.ObservedOverlap = overlap;
         }
 
         public override void WeaponOverlapping()
         {
             base.WeaponOverlapping();
-            player.LeftStanceDisabled = DisableLeftStanceByOverlap;
+            _player.LeftStanceDisabled = DisableLeftStanceByOverlap;
         }
 
         public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
@@ -60,9 +60,9 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override bool CanStartReload()
         {
-            if (isClient)
+            if (_isClient)
             {
-                return !player.WaitingForCallback && base.CanStartReload();
+                return !_player.WaitingForCallback && base.CanStartReload();
             }
 
             return base.CanStartReload();
@@ -70,9 +70,9 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override bool CanPressTrigger()
         {
-            if (isClient)
+            if (_isClient)
             {
-                return !player.WaitingForCallback && base.CanPressTrigger();
+                return !_player.WaitingForCallback && base.CanPressTrigger();
             }
 
             return base.CanPressTrigger();
@@ -132,10 +132,10 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ToggleBipod
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return success;
         }
@@ -147,10 +147,10 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.CheckChamber
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -162,10 +162,10 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.CheckAmmo
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -177,14 +177,14 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ChangeFireMode,
                     SubPacket = new ChangeFireModePacket()
                     {
                         FireMode = fireMode
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -194,14 +194,14 @@ namespace Fika.Core.Coop.ClientClasses
             base.ChangeAimingMode();
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ToggleAim,
                 SubPacket = new ToggleAimPacket()
                 {
                     AimingIndex = IsAiming ? Item.AimIndex.Value : -1
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void SetAim(bool value)
@@ -209,50 +209,50 @@ namespace Fika.Core.Coop.ClientClasses
             bool isAiming = IsAiming;
             bool aimingInterruptedByOverlap = AimingInterruptedByOverlap;
             base.SetAim(value);
-            if (IsAiming != isAiming || aimingInterruptedByOverlap && player.HealthController.IsAlive)
+            if (IsAiming != isAiming || aimingInterruptedByOverlap && _player.HealthController.IsAlive)
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ToggleAim,
                     SubPacket = new ToggleAimPacket()
                     {
                         AimingIndex = IsAiming ? Item.AimIndex.Value : -1
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
         }
 
         public override void AimingChanged(bool newValue)
         {
             base.AimingChanged(newValue);
-            if (!IsAiming && player.HealthController.IsAlive)
+            if (!IsAiming && _player.HealthController.IsAlive)
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ToggleAim,
                     SubPacket = new ToggleAimPacket()
                     {
                         AimingIndex = -1
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
         }
 
         public override bool CheckFireMode()
         {
             bool flag = base.CheckFireMode();
-            if (flag && player.HealthController.IsAlive)
+            if (flag && _player.HealthController.IsAlive)
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.CheckFireMode
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -262,7 +262,7 @@ namespace Fika.Core.Coop.ClientClasses
             base.DryShot(chamberIndex, underbarrelShot);
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket()
                 {
@@ -271,20 +271,20 @@ namespace Fika.Core.Coop.ClientClasses
                     UnderbarrelShot = underbarrelShot
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override bool ExamineWeapon()
         {
             bool flag = base.ExamineWeapon();
-            if (flag && player.HealthController.IsAlive)
+            if (flag && _player.HealthController.IsAlive)
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ExamineWeapon
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -317,7 +317,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket()
                 {
@@ -333,9 +333,9 @@ namespace Fika.Core.Coop.ClientClasses
                     SlideOnOverheatReached = weapon.MalfState.SlideOnOverheatReached
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
 
-            player.StatisticsManager.OnShot(Weapon, ammo);
+            _player.PacketSender.SendPacket(ref packet);
+            _player.StatisticsManager.OnShot(Weapon, ammo);
 
             base.InitiateShot(weapon, ammo, shotPosition, shotDirection, fireportPosition, chamberIndex, overheat);
         }
@@ -347,7 +347,7 @@ namespace Fika.Core.Coop.ClientClasses
                 base.QuickReloadMag(magazine, callback);
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.QuickReloadMag,
                     SubPacket = new QuickReloadMagPacket()
                     {
@@ -355,7 +355,7 @@ namespace Fika.Core.Coop.ClientClasses
                         MagId = magazine.Id
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
                 return;
             }
 
@@ -366,7 +366,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             if (CanStartReload() && ammoPack.AmmoCount > 0)
             {
-                ReloadBarrelsHandler handler = new(player, placeToPutContainedAmmoMagazine, ammoPack);
+                ReloadBarrelsHandler handler = new(_player, placeToPutContainedAmmoMagazine, ammoPack);
                 CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, handler.Process);
                 return;
             }
@@ -386,7 +386,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
             if (CanStartReload())
             {
-                ReloadCylinderMagazineHandler handler = new(player, this, quickReload, ammoPack.GetReloadingAmmoIds(),
+                ReloadCylinderMagazineHandler handler = new(_player, this, quickReload, ammoPack.GetReloadingAmmoIds(),
                 [], (CylinderMagazineItemClass)Item.GetCurrentMagazine());
                 Weapon.GetShellsIndexes(handler.ShellsIndexes);
                 CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.QuickReload);
@@ -403,7 +403,7 @@ namespace Fika.Core.Coop.ClientClasses
                 string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ReloadLauncher,
                     SubPacket = new ReloadLauncherPacket()
                     {
@@ -411,7 +411,7 @@ namespace Fika.Core.Coop.ClientClasses
                         AmmoIds = reloadingAmmoIds
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
 
                 CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
                 return;
@@ -427,10 +427,10 @@ namespace Fika.Core.Coop.ClientClasses
                 return;
             }
 
-            _player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
-            if (!_player.MovementContext.PlayerAnimator.AnimatedInteractions.IsInteractionPlaying)
+            base._player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
+            if (!base._player.MovementContext.PlayerAnimator.AnimatedInteractions.IsInteractionPlaying)
             {
-                ReloadMagHandler handler = new(player, itemAddress, magazine);
+                ReloadMagHandler handler = new(_player, itemAddress, magazine);
                 CurrentOperation.ReloadMag(magazine, itemAddress, callback, handler.Process);
                 return;
             }
@@ -446,7 +446,7 @@ namespace Fika.Core.Coop.ClientClasses
             }
             if (CanStartReload())
             {
-                ReloadWithAmmoHandler handler = new(player, ammoPack.GetReloadingAmmoIds());
+                ReloadWithAmmoHandler handler = new(_player, ammoPack.GetReloadingAmmoIds());
                 CurrentOperation.ReloadWithAmmo(ammoPack, callback, handler.Process);
                 return;
             }
@@ -460,7 +460,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ToggleLightStates,
                     SubPacket = new LightStatesPacket()
                     {
@@ -468,7 +468,7 @@ namespace Fika.Core.Coop.ClientClasses
                         States = lightsStates
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
 
             return base.SetLightsState(lightsStates, force);
@@ -500,7 +500,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ToggleScopeStates,
                 SubPacket = new ScopeStatesPacket()
                 {
@@ -508,7 +508,7 @@ namespace Fika.Core.Coop.ClientClasses
                     States = scopeStates
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void ShotMisfired(AmmoItemClass ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
@@ -536,7 +536,7 @@ namespace Fika.Core.Coop.ClientClasses
 
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket()
                 {
@@ -545,7 +545,7 @@ namespace Fika.Core.Coop.ClientClasses
                     AmmoTemplate = ammo.TemplateId
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
 
             base.ShotMisfired(ammo, malfunctionState, overheat);
         }
@@ -557,10 +557,10 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ToggleLauncher
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
             return flag;
         }
@@ -570,10 +570,10 @@ namespace Fika.Core.Coop.ClientClasses
             base.Loot(p);
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.Loot
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void SetInventoryOpened(bool opened)
@@ -581,14 +581,14 @@ namespace Fika.Core.Coop.ClientClasses
             base.SetInventoryOpened(opened);
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ToggleInventory,
                 SubPacket = new ToggleInventoryPacket()
                 {
                     Open = opened
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void ChangeLeftStance()
@@ -596,35 +596,35 @@ namespace Fika.Core.Coop.ClientClasses
             base.ChangeLeftStance();
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.LeftStanceChange,
                 SubPacket = new LeftStanceChangePacket()
                 {
-                    LeftStance = player.MovementContext.LeftStanceEnabled
+                    LeftStance = _player.MovementContext.LeftStanceEnabled
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void SendStartOneShotFire()
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.FlareShot,
                 SubPacket = new FlareShotPacket()
                 {
                     StartOneShotFire = true
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void CreateFlareShot(AmmoItemClass flareItem, Vector3 shotPosition, Vector3 forward)
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.FlareShot,
                 SubPacket = new FlareShotPacket()
                 {
@@ -633,7 +633,7 @@ namespace Fika.Core.Coop.ClientClasses
                     AmmoTemplateId = flareItem.TemplateId
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
             base.CreateFlareShot(flareItem, shotPosition, forward);
         }
 
@@ -641,7 +641,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.RocketShot,
                 SubPacket = new RocketShotPacket()
                 {
@@ -650,7 +650,7 @@ namespace Fika.Core.Coop.ClientClasses
                     ShotForward = forward
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
             base.CreateRocketShot(rocketItem, shotPosition, forward, smokeport);
         }
 
@@ -658,7 +658,7 @@ namespace Fika.Core.Coop.ClientClasses
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ReloadWithAmmo,
                 SubPacket = new ReloadWithAmmoPacket()
                 {
@@ -667,7 +667,7 @@ namespace Fika.Core.Coop.ClientClasses
                     AmmoLoadedToMag = amount
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         public override void RollCylinder(bool rollToZeroCamora)
@@ -679,25 +679,25 @@ namespace Fika.Core.Coop.ClientClasses
 
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.RollCylinder,
                 SubPacket = new RollCylinderPacket()
                 {
                     RollToZeroCamora = rollToZeroCamora
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
 
             CurrentOperation.RollCylinder(null, rollToZeroCamora);
         }
 
         private void SendEndReloadPacket(int amount)
         {
-            if (player.HealthController.IsAlive)
+            if (_player.HealthController.IsAlive)
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = player.NetId,
+                    NetId = _player.NetId,
                     Type = EFirearmSubPacketType.ReloadWithAmmo,
                     SubPacket = new ReloadWithAmmoPacket()
                     {
@@ -706,7 +706,7 @@ namespace Fika.Core.Coop.ClientClasses
                         AmmoLoadedToMag = amount
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.SendPacket(ref packet);
             }
         }
 
@@ -714,10 +714,10 @@ namespace Fika.Core.Coop.ClientClasses
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _player.NetId,
                 Type = EFirearmSubPacketType.ReloadBoltAction
             };
-            player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.SendPacket(ref packet);
         }
 
         private class FirearmClass1(Player.FirearmController controller) : CylinderReloadOperationClass(controller)
@@ -750,17 +750,17 @@ namespace Fika.Core.Coop.ClientClasses
                 base.SetTriggerPressed(pressed);
                 if (Bool_1 && !bool_)
                 {
-                    coopClientFirearmController.SendAbortReloadPacket(Int_0);
+                    _coopClientFirearmController.SendAbortReloadPacket(Int_0);
                 }
             }
 
             public override void SwitchToIdle()
             {
-                coopClientFirearmController.SendEndReloadPacket(Int_0);
+                _coopClientFirearmController.SendEndReloadPacket(Int_0);
                 base.SwitchToIdle();
             }
 
-            private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
+            private readonly CoopClientFirearmController _coopClientFirearmController = (CoopClientFirearmController)controller;
         }
 
         private class FirearmClass3(Player.FirearmController controller) : AmmoPackReloadInternalBoltOpenOperationClass(controller)
@@ -771,17 +771,17 @@ namespace Fika.Core.Coop.ClientClasses
                 base.SetTriggerPressed(pressed);
                 if (Bool_1 && !bool_)
                 {
-                    coopClientFirearmController.SendAbortReloadPacket(Int_0);
+                    _coopClientFirearmController.SendAbortReloadPacket(Int_0);
                 }
             }
 
             public override void SwitchToIdle()
             {
-                coopClientFirearmController.SendEndReloadPacket(Int_0);
+                _coopClientFirearmController.SendEndReloadPacket(Int_0);
                 base.SwitchToIdle();
             }
 
-            private readonly CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
+            private readonly CoopClientFirearmController _coopClientFirearmController = (CoopClientFirearmController)controller;
         }
 
         // Check for GClass increments
@@ -825,21 +825,21 @@ namespace Fika.Core.Coop.ClientClasses
 
             private void SendBoltActionReloadPacket(bool value)
             {
-                if (!hasSent && value)
+                if (!_hasSent && value)
                 {
-                    hasSent = true;
-                    coopClientFirearmController.SendBoltActionReloadPacket();
+                    _hasSent = true;
+                    _coopClientFirearmController.SendBoltActionReloadPacket();
                 }
             }
 
             public override void Reset()
             {
                 base.Reset();
-                hasSent = false;
+                _hasSent = false;
             }
 
-            private CoopClientFirearmController coopClientFirearmController = (CoopClientFirearmController)controller;
-            private bool hasSent;
+            private CoopClientFirearmController _coopClientFirearmController = (CoopClientFirearmController)controller;
+            private bool _hasSent;
         }
 
         private class ReloadMagHandler(CoopPlayer coopPlayer, ItemAddress gridItemAddress, MagazineItemClass magazine)
