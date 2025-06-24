@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -109,7 +110,14 @@ namespace Fika.Core.Patching
 
                 foreach (Type type in query)
                 {
-                    ((FikaPatch)Activator.CreateInstance(type)).Enable(_harmony);
+                    try
+                    {
+                        ((FikaPatch)Activator.CreateInstance(type)).Enable(_harmony);
+                    }
+                    catch (Exception ex)
+                    {
+                        FikaGlobals.LogFatal($"Failed to init [{type.Name}]: {ex.Message}");
+                    }
                 }
 
                 _logger.LogInfo($"Enabled {query.Count} patches");
