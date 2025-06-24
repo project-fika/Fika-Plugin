@@ -82,6 +82,7 @@ namespace Fika.Core.Coop.ObservedClasses
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(GClass1868)] = new OperationFactoryDelegate(Idle1);
+            // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
             operationFactoryDelegates[typeof(GClass1852)] = new OperationFactoryDelegate(ThrowPatron1);
             operationFactoryDelegates[typeof(GClass1853)] = new OperationFactoryDelegate(ThrowPatron2);
             operationFactoryDelegates[typeof(GClass1879)] = new OperationFactoryDelegate(ThrowPatron3);
@@ -787,7 +788,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private class ObservedThrowPatronOperation1(FirearmController controller) : GClass1852(controller)
         {
-            private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller; 
+            private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
             public override void Start(GClass1839 reloadMultiBarrelResult, Callback callback)
             {
