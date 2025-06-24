@@ -810,14 +810,7 @@ namespace Fika.Core.Coop.Players
         // Start
         public override void vmethod_0(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
         {
-            if (this is ObservedCoopPlayer)
-            {
-                base.vmethod_0(interactiveObject, interactionResult, callback);
-                return;
-            }
-
             base.vmethod_0(interactiveObject, interactionResult, callback);
-
             CommonPlayerPacket packet = new()
             {
                 NetId = NetId,
@@ -836,19 +829,7 @@ namespace Fika.Core.Coop.Players
         // Execute
         public override void vmethod_1(WorldInteractiveObject door, InteractionResult interactionResult)
         {
-            if (door == null)
-            {
-                return;
-            }
-
-            if (this is ObservedCoopPlayer)
-            {
-                base.vmethod_1(door, interactionResult);
-                return;
-            }
-
             base.vmethod_1(door, interactionResult);
-
             if (!door.ForceLocalInteraction)
             {
                 CommonPlayerPacket packet = new()
@@ -865,7 +846,6 @@ namespace Fika.Core.Coop.Players
                 };
                 PacketSender.SendPacket(ref packet);
             }
-
             UpdateInteractionCast();
         }
 

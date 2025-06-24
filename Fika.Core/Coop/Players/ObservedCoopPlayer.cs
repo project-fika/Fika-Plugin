@@ -1498,6 +1498,20 @@ namespace Fika.Core.Coop.Players
             SpeechSource?.SetRolloff(60f * ProtagonistHearing);
         }
 
+        public override void vmethod_0(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
+        {
+            CurrentManagedState.StartDoorInteraction(interactiveObject, interactionResult, callback);
+            UpdateInteractionCast();
+        }
+
+        public override void vmethod_1(WorldInteractiveObject door, InteractionResult interactionResult)
+        {
+            if (door != null)
+            {
+                CurrentManagedState.ExecuteDoorInteraction(door, interactionResult, null, this);
+            }
+        }
+
         public override bool UpdateGrenadeAnimatorDuePoV()
         {
             return true;
