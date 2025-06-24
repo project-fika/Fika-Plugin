@@ -95,10 +95,6 @@ namespace Fika.Core.Coop.FreeCamera
             Camera FCamera = _cameraParent.GetOrAddComponent<Camera>();
             FCamera.enabled = false;
             _isSpectator = FikaBackendUtils.IsSpectator;
-            if (BattleUI == null)
-            {
-                FikaPlugin.Instance.FikaLogger.LogWarning("FreeCameraController::Awake: Failed to cache BattleUI");
-            }
         }
 
         protected void Start()
@@ -307,7 +303,7 @@ namespace Fika.Core.Coop.FreeCamera
         private void ClearEffects()
         {
             CameraClass cameraClass = CameraClass.Instance;
-           
+
             //Todo: I can't find this anymore, not in the old asm or the new one.. Not sure where to change this one to
             //cameraClass.EffectsController.method_2(false);
 
