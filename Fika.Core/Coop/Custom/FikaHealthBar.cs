@@ -27,7 +27,7 @@ namespace Fika.Core.Coop.Custom
         /// <see cref="ActiveHealthController.Wound"/>, <see cref="ActiveHealthController.Encumbered"/>, <see cref="ActiveHealthController.OverEncumbered"/>, <br/>
         /// <see cref="ActiveHealthController-MildMusclePlain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
         /// </summary>
-        private static readonly List<Type> _ignoredTypes = [typeof(GInterface340), typeof(GInterface342), typeof(GInterface343), typeof(GInterface357), typeof(GInterface358)];
+        private static readonly List<Type> _ignoredTypes = [typeof(GInterface345), typeof(GInterface347), typeof(GInterface348), typeof(GInterface362), typeof(GInterface363)];
 
         private ObservedCoopPlayer _currentPlayer;
         private CoopPlayer _mainPlayer;

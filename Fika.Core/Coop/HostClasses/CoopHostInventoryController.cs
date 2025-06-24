@@ -139,7 +139,7 @@ namespace Fika.Core.Coop.HostClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
             // Check for GClass increments, TraderServices
-            if (operation is GClass3330)
+            if (operation is GClass3359)
             {
                 base.vmethod_1(operation, callback);
                 return;
