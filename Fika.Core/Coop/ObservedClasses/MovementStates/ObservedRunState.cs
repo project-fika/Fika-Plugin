@@ -3,7 +3,7 @@
 using EFT;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses
+namespace Fika.Core.Coop.ObservedClasses.MovementStates
 {
     public class ObservedRunState : RunStateClass
     {
@@ -72,7 +72,7 @@ namespace Fika.Core.Coop.ObservedClasses
             Direction = method_7(Direction);
             MovementContext.MovementDirection = method_8(Direction);
             bool isZero = Direction.IsZero();
-            Vector2 vector = (isZero ? MovementContext.MovementDirection : Direction);
+            Vector2 vector = isZero ? MovementContext.MovementDirection : Direction;
             method_3(GClass1907.ConvertToMovementDirection(vector), deltaTime);
             return isZero;
         }

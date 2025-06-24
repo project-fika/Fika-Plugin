@@ -1,7 +1,7 @@
 ﻿using EFT;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses
+namespace Fika.Core.Coop.ObservedClasses.MovementStates
 {
     public class ObservedJumpState(MovementContext movementContext) : JumpStateClass(movementContext)
     {

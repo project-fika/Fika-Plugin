@@ -2,7 +2,7 @@
 
 using Diz.LanguageExtensions;
 using EFT;
-using EFT.HealthSystem;
+using Fika.Core.Coop.ObservedClasses.MovementStates;
 using System;
 using UnityEngine;
 
@@ -222,6 +222,9 @@ namespace Fika.Core.Coop.ObservedClasses
                 EPlayerState.Stationary => new ObservedStationaryState(this),
                 EPlayerState.IdleWeaponMounting => new ObservedMountedState(this, _player),
                 EPlayerState.Jump => new ObservedJumpState(this),
+                EPlayerState.BreachDoor => new ObservedBreachDoorState(this),
+                EPlayerState.DoorInteraction => new ObservedDoorInteractionState(this),
+                EPlayerState.DoorInteractionZombieState => new ObservedDoorInteractionState(this),
                 _ => base.GetNewState(name, isAI)
             };
         }
@@ -230,7 +233,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             ObservedMovementContext movementContext = Create<ObservedMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
             return movementContext;
-        }        
+        }
 
         public override void SmoothPoseLevel(float deltaTime)
         {

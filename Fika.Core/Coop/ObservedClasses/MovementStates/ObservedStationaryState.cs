@@ -2,7 +2,7 @@
 using System;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses
+namespace Fika.Core.Coop.ObservedClasses.MovementStates
 {
     public class ObservedStationaryState(MovementContext movementContext) : StationaryStateClass(movementContext)
     {
@@ -50,8 +50,8 @@ namespace Fika.Core.Coop.ObservedClasses
             StationaryWeapon.SetPivots(newContoller.HandsHierarchy);
             @class.firearm = newContoller as Player.FirearmController;
             StationaryWeapon.Hide(MovementContext.IsAI);
-            MovementContext.RotationAction = ((StationaryWeapon.Animation == EFT.Interactive.StationaryWeapon.EStationaryAnimationType.AGS_17)
-                ? MovementContext.AGSRotationFunction : MovementContext.UtesRotationFunction);
+            MovementContext.RotationAction = StationaryWeapon.Animation == EFT.Interactive.StationaryWeapon.EStationaryAnimationType.AGS_17
+                ? MovementContext.AGSRotationFunction : MovementContext.UtesRotationFunction;
             Stage = EStationaryStage.Main;
             MovementContext.OnHandsControllerChanged += method_3;
             MovementContext.HandsChangingEvent += method_2;

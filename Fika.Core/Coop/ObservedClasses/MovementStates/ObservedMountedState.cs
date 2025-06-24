@@ -4,7 +4,7 @@ using EFT.WeaponMounting;
 using System;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses
+namespace Fika.Core.Coop.ObservedClasses.MovementStates
 {
     public class ObservedMountedState : MovementState
     {
@@ -123,7 +123,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 {
                     num -= 360f;
                 }
-                float num2 = ((num > 0f) ? (num - 360f) : (num + 360f));
+                float num2 = num > 0f ? num - 360f : num + 360f;
                 if (num < _playerMountingPointData.YawLimit.x || num > _playerMountingPointData.YawLimit.y)
                 {
                     num = num2;
@@ -134,11 +134,11 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 else
                 {
-                    _float_6 = ((MovementContext.Yaw < _playerMountingPointData.YawLimit.x) ? _playerMountingPointData.YawLimit.x : _playerMountingPointData.YawLimit.y);
+                    _float_6 = MovementContext.Yaw < _playerMountingPointData.YawLimit.x ? _playerMountingPointData.YawLimit.x : _playerMountingPointData.YawLimit.y;
                 }
-                _float_9 = (Mathf.Approximately(_playerMountingPointData.TargetHandsRotation, _playerMountingPointData.YawLimit.x)
-                    ? (_float_6 - _playerMountingPointData.YawLimit.x) : (_float_6 - _playerMountingPointData.YawLimit.y));
-                float num3 = (((float)_int_0 * _float_9 < 0f) ? ((float)_int_0) : ((_int_0 == 0) ? (-_float_9) : 0f));
+                _float_9 = Mathf.Approximately(_playerMountingPointData.TargetHandsRotation, _playerMountingPointData.YawLimit.x)
+                    ? _float_6 - _playerMountingPointData.YawLimit.x : _float_6 - _playerMountingPointData.YawLimit.y;
+                float num3 = _int_0 * _float_9 < 0f ? _int_0 : _int_0 == 0 ? -_float_9 : 0f;
                 float num4 = Mathf.Abs(_float_9) / _float_11;
                 _float_8 = Mathf.Sign(num3) * Mathf.Lerp(0f, 5f, num4);
             }
@@ -150,8 +150,8 @@ namespace Fika.Core.Coop.ObservedClasses
             _bool_0 = MovementContext.CanUseProp.Value;
             _bool_1 = false;
             _player.OnMounting(MountingPacketStruct.EMountingCommand.Enter);
-            _float_5 = ((_playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward || MovementContext.IsInPronePose)
-                ? ((MovementContext.Pitch < MovementContext.PitchLimit.x) ? PitchLimitX : ((MovementContext.Pitch > MovementContext.PitchLimit.y) ? MovementContext.PitchLimit.y : MovementContext.Pitch)) : 0f);
+            _float_5 = _playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward || MovementContext.IsInPronePose
+                ? MovementContext.Pitch < MovementContext.PitchLimit.x ? PitchLimitX : MovementContext.Pitch > MovementContext.PitchLimit.y ? MovementContext.PitchLimit.y : MovementContext.Pitch : 0f;
             float num5 = Mathf.InverseLerp(PitchLimitX, PitchLimitY, _float_5);
             float num6 = Mathf.Lerp(_playerMountingPointData.PoseLimit.x, _playerMountingPointData.PoseLimit.y, num5);
             MovementContext.SetPoseLevel(num6, false);
@@ -289,9 +289,9 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public void SetRotation(float currentRotationFactor)
         {
-            if ((float)_int_0 * _float_10 < 0f || _int_0 == 0)
+            if (_int_0 * _float_10 < 0f || _int_0 == 0)
             {
-                float num = Mathf.Sign(((float)_int_0 * _float_10 < 0f) ? ((float)_int_0) : ((_int_0 == 0) ? (-_float_10) : 0f)) * Mathf.Lerp(0f, 5f, currentRotationFactor);
+                float num = Mathf.Sign(_int_0 * _float_10 < 0f ? _int_0 : _int_0 == 0 ? -_float_10 : 0f) * Mathf.Lerp(0f, 5f, currentRotationFactor);
                 MovementContext.SetTilt(num, false);
                 MovementContext.MountedSmoothedTilt = num;
                 if (_playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward)
@@ -337,10 +337,10 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
                 if (!ignoreClamp)
                 {
-                    deltaRotation = base.ClampRotation(deltaRotation);
+                    deltaRotation = ClampRotation(deltaRotation);
                 }
-                float num = ((_int_0 > 0) ? (-_float_11) : 0f);
-                float num2 = ((_int_0 > 0) ? 0f : _float_11);
+                float num = _int_0 > 0 ? -_float_11 : 0f;
+                float num2 = _int_0 > 0 ? 0f : _float_11;
                 if (_int_0 == 0)
                 {
                     num = -_float_11;
@@ -351,7 +351,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 if (Mathf.Abs(_float_10) > Mathf.Abs(num3))
                 {
                     float num4 = Mathf.Abs(_float_10) / _float_11;
-                    float num5 = (((float)_int_0 * _float_10 < 0f) ? ((float)_int_0) : ((_int_0 == 0) ? Mathf.Sign(-_float_10) : 0f));
+                    float num5 = _int_0 * _float_10 < 0f ? _int_0 : _int_0 == 0 ? Mathf.Sign(-_float_10) : 0f;
                     if (!MovementContext.RotationOverlapPrediction(MovementContext.PlayerTransform.right * (num5 * num4 * _mountingMovementSettings.TiltPositionOffset), Quaternion.Euler(0f, 2f * deltaRotation.x, 0f), MovementContext.PlayerTransform.Original).Equals(Vector3.zero))
                     {
                         _float_10 = num3;
