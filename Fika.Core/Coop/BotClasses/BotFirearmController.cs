@@ -11,14 +11,14 @@ namespace Fika.Core.Coop.BotClasses
         {
             get
             {
-                return _player.LookDirection;
+                return _coopPlayer.LookDirection;
             }
         }
 
         public static BotFirearmController Create(CoopBot player, Weapon weapon)
         {
             BotFirearmController controller = smethod_6<BotFirearmController>(player, weapon);
-            controller._player = player;
+            controller._coopPlayer = player;
             return controller;
         }
     }
