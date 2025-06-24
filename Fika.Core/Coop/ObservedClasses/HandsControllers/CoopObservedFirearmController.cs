@@ -404,7 +404,7 @@ namespace Fika.Core.Coop.ObservedClasses
             FirearmsAnimator.SetFire(false);
         }
 
-        public void HandleShotInfoPacket(ref ShotInfoPacket packet, InventoryController inventoryController)
+        public void HandleShotInfoPacket(in ShotInfoPacket packet, InventoryController inventoryController)
         {
             if (packet.ShotType == EShotType.DryFire)
             {
@@ -524,7 +524,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
             }
 
-            HandleObservedShot(ref packet, inventoryController);
+            HandleObservedShot(in packet, inventoryController);
         }
 
         // Leave here for now - Lacyway
@@ -543,7 +543,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return (AmmoItemClass)currentMagazine.Cartridges.PopTo(coopPlayer.InventoryController, chamberSlot.CreateItemAddress()).Value.ResultItem;
         }*/
 
-        private void HandleObservedShot(ref ShotInfoPacket packet, InventoryController inventoryController)
+        private void HandleObservedShot(in ShotInfoPacket packet, InventoryController inventoryController)
         {
             if (!packet.AmmoTemplate.HasValue)
             {
@@ -556,12 +556,16 @@ namespace Fika.Core.Coop.ObservedClasses
             InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
                 CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
+            Weapon weapon = Weapon;
+
+            weapon.Repairable.Durability = Mathf.Clamp(packet.Durability, 0f, weapon.Repairable.MaxDurability);
+
             if (_stationaryWeapon)
             {
                 _player.MovementContext.StationaryWeapon.ObservedShot();
             }
 
-            if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+            if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
             {
                 _triggerPressed = true;
             }
@@ -570,29 +574,29 @@ namespace Fika.Core.Coop.ObservedClasses
             WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
                 pitchMult, Malfunction, false, IsBirstOf2Start);
 
-            Weapon.MalfState.LastShotOverheat = packet.LastShotOverheat;
-            Weapon.MalfState.LastShotTime = packet.LastShotTime;
-            Weapon.MalfState.SlideOnOverheatReached = packet.SlideOnOverheatReached;
+            weapon.MalfState.LastShotOverheat = packet.LastShotOverheat;
+            weapon.MalfState.LastShotTime = packet.LastShotTime;
+            weapon.MalfState.SlideOnOverheatReached = packet.SlideOnOverheatReached;
 
             _triggerPressed = false;
             _hasFired = true;
             _lastFireTime = 0f;
-            if (Weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
+            if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
             {
                 _needsReset = true;
             }
 
-            MagazineItemClass magazine = Weapon.GetCurrentMagazine();
+            MagazineItemClass magazine = weapon.GetCurrentMagazine();
 
             FirearmsAnimator.SetFire(true);
 
-            if (Weapon.MalfState.State == Weapon.EMalfunctionState.None)
+            if (weapon.MalfState.State == Weapon.EMalfunctionState.None)
             {
                 if (IsRevolver && Weapon.CylinderHammerClosed)
                 {
                     FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0.2f);
                 }
-                else if (Weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
+                else if (weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
                 {
                     FirearmsAnimator.Animator.Play(FirearmsAnimator.FullSemiFireStateName, 1, 0.2f);
                 }
@@ -616,30 +620,30 @@ namespace Fika.Core.Coop.ObservedClasses
                     return;
                 }
 
-                if (Weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
+                if (weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
                 {
-                    Slot slot = Weapon.FirstLoadedChamberSlot;
-                    int index = Weapon.Chambers.IndexOf(slot);
+                    Slot slot = weapon.FirstLoadedChamberSlot;
+                    int index = weapon.Chambers.IndexOf(slot);
                     if (slot.ContainedItem is AmmoItemClass grenadeBullet && !grenadeBullet.IsUsed)
                     {
                         grenadeBullet.IsUsed = true;
                         slot.RemoveItem();
                         _weaponManager.MoveAmmoFromChamberToShellPort(true, index);
-                        Weapon.ShellsInChambers[index] = grenadeBullet.AmmoTemplate;
-                        FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
-                        FirearmsAnimator.SetShellsInWeapon(Weapon.ShellsInWeaponCount);
+                        weapon.ShellsInChambers[index] = grenadeBullet.AmmoTemplate;
+                        FirearmsAnimator.SetAmmoInChamber(weapon.ChamberAmmoCount);
+                        FirearmsAnimator.SetShellsInWeapon(weapon.ShellsInWeaponCount);
                     }
                 }
             }
 
-            bool hasChambers = Weapon.HasChambers;
+            bool hasChambers = weapon.HasChambers;
             if (hasChambers)
             {
-                if (Weapon.ReloadMode is Weapon.EReloadMode.OnlyBarrel)
+                if (weapon.ReloadMode is Weapon.EReloadMode.OnlyBarrel)
                 {
-                    for (int i = 0; i < Weapon.Chambers.Length; i++)
+                    for (int i = 0; i < weapon.Chambers.Length; i++)
                     {
-                        if (Weapon.Chambers[i].ContainedItem is AmmoItemClass bClass && !bClass.IsUsed)
+                        if (weapon.Chambers[i].ContainedItem is AmmoItemClass bClass && !bClass.IsUsed)
                         {
                             bClass.IsUsed = true;
                             if (!bClass.AmmoTemplate.RemoveShellAfterFire)
@@ -652,17 +656,17 @@ namespace Fika.Core.Coop.ObservedClasses
                             }
                             if (!bClass.AmmoTemplate.RemoveShellAfterFire)
                             {
-                                Weapon.ShellsInChambers[i] = bClass.AmmoTemplate;
+                                weapon.ShellsInChambers[i] = bClass.AmmoTemplate;
                             }
                         }
                     }
                 }
                 else
                 {
-                    Weapon.Chambers[0].RemoveItem(false);
+                    weapon.Chambers[0].RemoveItem(false);
                     HandleShellEvent(_weaponManager, packet.ChamberIndex, ammo, magazine);
                 }
-                FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
+                FirearmsAnimator.SetAmmoInChamber(weapon.ChamberAmmoCount);
             }
 
             if (IsRevolver)
@@ -670,8 +674,8 @@ namespace Fika.Core.Coop.ObservedClasses
                 if (magazine is CylinderMagazineItemClass cylinderMagazine)
                 {
                     FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
-                    int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!Weapon.CylinderHammerClosed);
-                    AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!Weapon.CylinderHammerClosed);
+                    int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!weapon.CylinderHammerClosed);
+                    AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!weapon.CylinderHammerClosed);
                     if (cylinderAmmo != null)
                     {
                         GStruct459<GInterface407> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
@@ -679,36 +683,36 @@ namespace Fika.Core.Coop.ObservedClasses
                         {
                             FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {_coopPlayer.NetId}, error: {removeOperation.Error}");
                         }
-                        inventoryController.CheckChamber(Weapon, false);
+                        inventoryController.CheckChamber(weapon, false);
                         cylinderAmmo.IsUsed = true;
-                        Weapon.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
+                        weapon.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
                     }
-                    if (Weapon.CylinderHammerClosed || Weapon.FireMode.FireMode != Weapon.EFireMode.doubleaction)
+                    if (weapon.CylinderHammerClosed || weapon.FireMode.FireMode != Weapon.EFireMode.doubleaction)
                     {
                         cylinderMagazine.IncrementCamoraIndex(false);
                     }
                     FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
-                    FirearmsAnimator.SetDoubleAction(Convert.ToSingle(Weapon.CylinderHammerClosed));
-                    FirearmsAnimator.SetHammerArmed(!Weapon.CylinderHammerClosed);
+                    FirearmsAnimator.SetDoubleAction(Convert.ToSingle(weapon.CylinderHammerClosed));
+                    FirearmsAnimator.SetHammerArmed(!weapon.CylinderHammerClosed);
                     _weaponManager.MoveAmmoFromChamberToShellPort(true, firstIndex);
 
                     FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
 
                     if (cylinderMagazine.Count > 0)
                     {
-                        Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
+                        weapon.CylinderHammerClosed = weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
                     }
                 }
             }
 
             ammo.IsUsed = true;
 
-            if (magazine != null && magazine is not CylinderMagazineItemClass && magazine.Count > 0 && !Weapon.BoltAction)
+            if (magazine != null && magazine is not CylinderMagazineItemClass && magazine.Count > 0 && !weapon.BoltAction)
             {
                 if (hasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
                 {
                     magazine.Cartridges.PopTo(inventoryController, Item.Chambers[0].CreateItemAddress());
-                    FirearmsAnimator.SetAmmoInChamber(Weapon.ChamberAmmoCount);
+                    FirearmsAnimator.SetAmmoInChamber(weapon.ChamberAmmoCount);
                 }
                 else
                 {
@@ -716,7 +720,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 }
             }
 
-            if (Weapon.IsBoltCatch && Weapon.ChamberAmmoCount == 1 && !Weapon.ManualBoltCatch && !Weapon.MustBoltBeOpennedForExternalReload && !Weapon.MustBoltBeOpennedForInternalReload)
+            if (weapon.IsBoltCatch && weapon.ChamberAmmoCount == 1 && !weapon.ManualBoltCatch && !weapon.MustBoltBeOpennedForExternalReload && !weapon.MustBoltBeOpennedForInternalReload)
             {
                 FirearmsAnimator.SetBoltCatch(false);
             }

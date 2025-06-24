@@ -310,6 +310,7 @@ namespace Fika.Core.Networking
             public float LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public float LastShotTime = reader.GetFloat();
             public bool SlideOnOverheatReached = reader.GetBool();
+            public float Durability = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
 
             public void Execute(CoopPlayer player)
             {
@@ -321,7 +322,7 @@ namespace Fika.Core.Networking
 
                 if (player.HandsController is CoopObservedFirearmController controller)
                 {
-                    controller.HandleShotInfoPacket(ref this, player.InventoryController);
+                    controller.HandleShotInfoPacket(in this, player.InventoryController);
                 }
             }
 
@@ -337,6 +338,7 @@ namespace Fika.Core.Networking
                 writer.PutPackedFloat(LastShotOverheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(LastShotTime);
                 writer.Put(SlideOnOverheatReached);
+                writer.PutPackedFloat(Durability, 0f, 100f, EFloatCompression.High);
             }
         }
 

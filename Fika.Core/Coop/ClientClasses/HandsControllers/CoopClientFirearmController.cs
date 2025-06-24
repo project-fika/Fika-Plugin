@@ -330,7 +330,8 @@ namespace Fika.Core.Coop.ClientClasses
                     AmmoTemplate = ammo.AmmoTemplate._id,
                     LastShotOverheat = weapon.MalfState.LastShotOverheat,
                     LastShotTime = weapon.MalfState.LastShotTime,
-                    SlideOnOverheatReached = weapon.MalfState.SlideOnOverheatReached
+                    SlideOnOverheatReached = weapon.MalfState.SlideOnOverheatReached,
+                    Durability = Weapon.Repairable.Durability
                 }
             };
 
