@@ -131,7 +131,15 @@ namespace Fika.Core.Patching
 
             for (int i = 0; i < _patches.Count; i++)
             {
-                _patches[i].Enable(_harmony);
+                try
+                {
+                    _patches[i].Enable(_harmony);
+                }
+                catch (Exception ex)
+                {
+                    FikaGlobals.LogFatal($"Failed to init [{_patches[i].GetType().Name}]: {ex.Message}");
+                    throw;
+                }
             }
         }
 
