@@ -8,11 +8,12 @@ namespace Fika.Core.UI.Patches
     /// <summary>
     /// The intention of this patch is to enable FikaNotificationManager after NotificationManagerClass and the NotifierView are initialized.
     /// </summary>
-    public class TarkovApplication_method_18_Patch : FikaPatch
+    public class TarkovApplication_method_16_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_16));
+            return typeof(TarkovApplication)
+                .GetMethod(nameof(TarkovApplication.method_16));
         }
 
         [PatchPostfix]

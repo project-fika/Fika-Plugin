@@ -6,11 +6,12 @@ namespace Fika.Core.UI.Patches
     /// <summary>
     /// This allows all game editions to edit the <see cref="EFT.RaidSettings"/>
     /// </summary>
-    public class MainMenuControllerClass_method_52_Patch : FikaPatch
+    public class MainMenuControllerClass_method_54_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(MainMenuControllerClass).GetMethod(nameof(MainMenuControllerClass.method_52));
+            return typeof(MainMenuControllerClass)
+                .GetMethod(nameof(MainMenuControllerClass.method_54));
         }
 
         [PatchPrefix]

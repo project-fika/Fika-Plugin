@@ -14,7 +14,8 @@ namespace Fika.Core.UI.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(RaidSettingsWindow).GetMethod(nameof(RaidSettingsWindow.method_8));
+            return typeof(RaidSettingsWindow)
+                .GetMethod(nameof(RaidSettingsWindow.method_8));
         }
 
         [PatchPrefix]

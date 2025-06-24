@@ -9,7 +9,8 @@ namespace Fika.Core.UI.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(PartyInfoPanel).GetMethod(nameof(PartyInfoPanel.Show));
+            return typeof(PartyInfoPanel)
+                .GetMethod(nameof(PartyInfoPanel.Show));
         }
 
         [PatchPrefix]
