@@ -3,7 +3,7 @@
 using EFT;
 using UnityEngine;
 
-namespace Fika.Core.Coop.ObservedClasses.MovementStates
+namespace Fika.Core.Coop.ObservedClasses
 {
     public class ObservedRunState : RunStateClass
     {
@@ -36,10 +36,12 @@ namespace Fika.Core.Coop.ObservedClasses.MovementStates
             }
             if (!isZero)
             {
-                MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
+                //MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
+                method_0(deltaTime);
             }
             else
             {
+                method_0(deltaTime);
                 MovementContext.PlayerAnimatorEnableInert(false);
             }
             if (Bool_1)
@@ -69,11 +71,12 @@ namespace Fika.Core.Coop.ObservedClasses.MovementStates
 
         private bool SetupDirection(float deltaTime)
         {
-            Direction = method_7(Direction);
-            MovementContext.MovementDirection = method_8(Direction);
+            /*Direction = method_7(Direction);
+            MovementContext.MovementDirection = method_8(Direction);*/
             bool isZero = Direction.IsZero();
-            Vector2 vector = isZero ? MovementContext.MovementDirection : Direction;
-            method_3(GClass1907.ConvertToMovementDirection(vector), deltaTime);
+            MovementContext.MovementDirection = Direction;
+            //Vector2 vector = Direction;//(isZero ? MovementContext.MovementDirection : Direction);
+            method_3(GClass1907.ConvertToMovementDirection(Direction), deltaTime);
             return isZero;
         }
 
