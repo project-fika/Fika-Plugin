@@ -388,8 +388,8 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 ReloadCylinderMagazineHandler handler = new(player, this, quickReload, ammoPack.GetReloadingAmmoIds(),
                 [], (CylinderMagazineItemClass)Item.GetCurrentMagazine());
-                Weapon.GetShellsIndexes(handler.shellsIndexes);
-                CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.quickReload);
+                Weapon.GetShellsIndexes(handler.ShellsIndexes);
+                CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.QuickReload);
                 return;
             }
 
@@ -844,13 +844,13 @@ namespace Fika.Core.Coop.ClientClasses
 
         private class ReloadMagHandler(CoopPlayer coopPlayer, ItemAddress gridItemAddress, MagazineItemClass magazine)
         {
-            private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly ItemAddress gridItemAddress = gridItemAddress;
-            private readonly MagazineItemClass magazine = magazine;
+            private readonly CoopPlayer _coopPlayer = coopPlayer;
+            private readonly ItemAddress _gridItemAddress = gridItemAddress;
+            private readonly MagazineItemClass _magazine = magazine;
 
             public void Process(IResult result)
             {
-                ItemAddress itemAddress = gridItemAddress;
+                ItemAddress itemAddress = _gridItemAddress;
                 GClass1783 descriptor = itemAddress?.ToDescriptor();
                 EFTWriterClass eftWriter = new();
 
@@ -865,68 +865,68 @@ namespace Fika.Core.Coop.ClientClasses
                     locationDescription = [];
                 }
 
-                if (coopPlayer.HealthController.IsAlive)
+                if (_coopPlayer.HealthController.IsAlive)
                 {
                     WeaponPacket packet = new()
                     {
-                        NetId = coopPlayer.NetId,
+                        NetId = _coopPlayer.NetId,
                         Type = EFirearmSubPacketType.ReloadMag,
                         SubPacket = new ReloadMagPacket()
                         {
                             Reload = true,
-                            MagId = magazine.Id,
+                            MagId = _magazine.Id,
                             LocationDescription = locationDescription,
                         }
                     };
-                    coopPlayer.PacketSender.SendPacket(ref packet);
+                    _coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }
 
         private class ReloadCylinderMagazineHandler(CoopPlayer coopPlayer, CoopClientFirearmController coopClientFirearmController, bool quickReload, string[] ammoIds, List<int> shellsIndexes, CylinderMagazineItemClass cylinderMagazine)
         {
-            private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly CoopClientFirearmController coopClientFirearmController = coopClientFirearmController;
-            public readonly bool quickReload = quickReload;
-            private readonly string[] ammoIds = ammoIds;
-            public readonly List<int> shellsIndexes = shellsIndexes;
-            private readonly CylinderMagazineItemClass cylinderMagazine = cylinderMagazine;
+            private readonly CoopPlayer _coopPlayer = coopPlayer;
+            private readonly CoopClientFirearmController _coopClientFirearmController = coopClientFirearmController;
+            public readonly bool QuickReload = quickReload;
+            private readonly string[] _ammoIds = ammoIds;
+            public readonly List<int> ShellsIndexes = shellsIndexes;
+            private readonly CylinderMagazineItemClass _cylinderMagazine = cylinderMagazine;
 
             public void Process(IResult result)
             {
-                if (coopPlayer.HealthController.IsAlive)
+                if (_coopPlayer.HealthController.IsAlive)
                 {
                     WeaponPacket packet = new()
                     {
-                        NetId = coopPlayer.NetId,
+                        NetId = _coopPlayer.NetId,
                         Type = EFirearmSubPacketType.CylinderMag,
                         SubPacket = new CylinderMagPacket()
                         {
                             Changed = true,
-                            CamoraIndex = cylinderMagazine.CurrentCamoraIndex,
-                            HammerClosed = coopClientFirearmController.Item.CylinderHammerClosed,
+                            CamoraIndex = _cylinderMagazine.CurrentCamoraIndex,
+                            HammerClosed = _coopClientFirearmController.Item.CylinderHammerClosed,
                             Reload = true,
                             Status = EReloadWithAmmoStatus.StartReload,
-                            AmmoIds = ammoIds
+                            AmmoIds = _ammoIds
                         }
                     };
-                    coopPlayer.PacketSender.SendPacket(ref packet);
+                    _coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }
 
         private class ReloadBarrelsHandler(CoopPlayer coopPlayer, ItemAddress placeToPutContainedAmmoMagazine, AmmoPackReloadingClass ammoPack)
         {
-            private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly ItemAddress placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
-            private readonly AmmoPackReloadingClass ammoPack = ammoPack;
+            private readonly CoopPlayer _coopPlayer = coopPlayer;
+            private readonly ItemAddress _placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
+            private readonly AmmoPackReloadingClass _ammoPack = ammoPack;
 
             public void Process(IResult result)
             {
-                ItemAddress itemAddress = placeToPutContainedAmmoMagazine;
+                ItemAddress itemAddress = _placeToPutContainedAmmoMagazine;
                 GClass1783 descriptor = itemAddress?.ToDescriptor();
                 EFTWriterClass eftWriter = new();
-                string[] ammoIds = ammoPack.GetReloadingAmmoIds();
+                string[] ammoIds = _ammoPack.GetReloadingAmmoIds();
 
                 byte[] locationDescription;
                 if (descriptor != null)
@@ -939,11 +939,11 @@ namespace Fika.Core.Coop.ClientClasses
                     locationDescription = [];
                 }
 
-                if (coopPlayer.HealthController.IsAlive)
+                if (_coopPlayer.HealthController.IsAlive)
                 {
                     WeaponPacket packet = new()
                     {
-                        NetId = coopPlayer.NetId,
+                        NetId = _coopPlayer.NetId,
                         Type = EFirearmSubPacketType.ReloadBarrels,
                         SubPacket = new ReloadBarrelsPacket()
                         {
@@ -952,32 +952,32 @@ namespace Fika.Core.Coop.ClientClasses
                             LocationDescription = locationDescription
                         }
                     };
-                    coopPlayer.PacketSender.SendPacket(ref packet);
+                    _coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }
 
         private class ReloadWithAmmoHandler(CoopPlayer coopPlayer, string[] ammoIds)
         {
-            private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly string[] ammoIds = ammoIds;
+            private readonly CoopPlayer _coopPlayer = coopPlayer;
+            private readonly string[] _ammoIds = ammoIds;
 
             public void Process(IResult result)
             {
-                if (coopPlayer.HealthController.IsAlive)
+                if (_coopPlayer.HealthController.IsAlive)
                 {
                     WeaponPacket packet = new()
                     {
-                        NetId = coopPlayer.NetId,
+                        NetId = _coopPlayer.NetId,
                         Type = EFirearmSubPacketType.ReloadWithAmmo,
                         SubPacket = new ReloadWithAmmoPacket()
                         {
                             Reload = true,
                             Status = EReloadWithAmmoStatus.StartReload,
-                            AmmoIds = ammoIds
+                            AmmoIds = _ammoIds
                         }
                     };
-                    coopPlayer.PacketSender.SendPacket(ref packet);
+                    _coopPlayer.PacketSender.SendPacket(ref packet);
                 }
             }
         }
