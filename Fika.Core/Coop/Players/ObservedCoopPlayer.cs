@@ -928,12 +928,13 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetTilt(CurrentPlayerState.Tilt, true);
             }
 
-            
+
             if (!Mathf.Approximately(ObservedOverlap, CurrentPlayerState.WeaponOverlap))
             {
                 ObservedOverlap = CurrentPlayerState.WeaponOverlap;
                 ShouldOverlap = true;
             }
+
             LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
         }
 
