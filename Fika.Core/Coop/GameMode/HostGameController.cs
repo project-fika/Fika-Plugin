@@ -785,9 +785,8 @@ namespace Fika.Core.Coop.GameMode
             if (Location.EventTrapsData != null)
             {
                 GClass1458.InitLabyrinthSyncableTraps(Location.EventTrapsData);
+                _gameWorld.SyncModule = new();
             }
-
-            _gameWorld.SyncModule = new();
 
             ExfilManager.Run(exfilPoints, secretExfilPoints);
             coopGame.Status = GameStatus.Started;
@@ -1111,6 +1110,11 @@ namespace Fika.Core.Coop.GameMode
 
         public void SyncTraps()
         {
+            if (Location.EventTrapsData == null)
+            {
+                return;
+            }
+
             if (_gameWorld.SyncModule == null)
             {
                 Logger.LogError("SyncModule was null when trying to sync trap data!");
