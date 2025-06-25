@@ -1120,7 +1120,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogError("SyncModule was null when trying to sync trap data!");
             }
 
-            GClass1362 writer = new(new byte[1024]);
+            GClass1362 writer = new(new byte[2048]);
             _gameWorld.SyncModule.Serialize(writer);
 
             SyncTrapsPacket packet = new()
