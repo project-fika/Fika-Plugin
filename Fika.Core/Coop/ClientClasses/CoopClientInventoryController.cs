@@ -133,9 +133,9 @@ namespace Fika.Core.Coop.ClientClasses
                 }
             }
 
-            // Do not replicate quest operations / search operations
-            // Check for GClass increments, ReadPolymorph
-            if (operation is GClass3351)// or GClass3307 or GClass3308 or GClass3309)
+            // Do not replicate search operations
+            // Check for GClass increments, ReadPolymorph or vmethod_2 in this class
+            if (operation is GClass3380)
             {
                 base.vmethod_1(operation, callback);
                 return;
