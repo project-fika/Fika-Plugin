@@ -14,9 +14,19 @@ namespace Fika.Core.Coop.ObservedClasses.MovementStates
             MovementContext.PlayerAnimatorSetAimAngle(MovementContext.Pitch);
         }
 
+        public override void Exit(bool toSameState)
+        {
+            if (MovementContext.IsInPronePose)
+            {
+                MovementContext.IsInPronePose = MovementContext.CanProne;
+            }
+            MovementContext.SetTilt(0f, false);
+            MovementContext.GrounderSetActive(true);
+            MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromBodyAction(false);
+        }
+
         public override void ManualAnimatorMoveUpdate(float deltaTime)
         {
-            MovementContext.PlayerAnimatorEnableInert(Vector2_0.magnitude > 0.1f);
             if (EjumpState_0 == EJumpState.PushingFromTheGround)
             {
                 if (!MovementContext.HeadBump(Vector3_2.y * deltaTime) && Float_2 <= 2f + Float_3)
