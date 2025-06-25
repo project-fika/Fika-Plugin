@@ -11,13 +11,21 @@ Client-side changes to make multiplayer work.
 
 ## State of the project
 
-There are few bugs left. The goal now is to look back and refactor old code to
-make it better, as a lot of it is not efficient or easy to read.
+Fully functional with minimal bugs.
+
+- 99.99% of all base game features are replicating and working properly
+- Multi-threaded interpolation for performance
+- Compressed packets using bitpacking and flags (Fika is very light-weight and efficient)
+- Headless client to off-load AI (see [Fika-Headless](https://github.com/project-fika/Fika-Headless) repo)
+- Base game bug fixes that have been unfixed for years
+- Base game performance fixes
+- DNS support
 
 ## Contributing
 
 You are free to fork, improve and send PRs to improve the project. Please try
 to make your code coherent for the other developers.
+It is recommended to check in with our developers on Discord before spending time on a pull request, so that no time is wasted on unwanted features.
 
 ## Requirements
 
@@ -42,11 +50,6 @@ VSCode     | `Terminal > Run Build Task...`
 
 You have to create a `References` folder and populate it with the required
 dependencies from your game installation for the project to build.
-
-### GoldMaster
-
-1. Have no certificates yet? > `Properties/signing/generate.bat`
-2. `dotnet build --configuration GoldMaster`
 
 ## Licenses
 
