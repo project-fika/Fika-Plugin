@@ -346,6 +346,7 @@ namespace Fika.Core.Coop.GameMode
                 transitController.Init();
             }
 
+            _gameWorld.SyncModule = new GClass698();
             ExfilManager.Run(exfilPoints, secretExfilPoints);
 
             coopGame.Status = GameStatus.Started;

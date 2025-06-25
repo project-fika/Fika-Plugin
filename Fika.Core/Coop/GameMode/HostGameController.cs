@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using CommonAssets.Scripts.Game.LabyrinthEvent;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
@@ -590,6 +591,8 @@ namespace Fika.Core.Coop.GameMode
         {
             yield return base.CountdownScreen(profile, profileId);
             _localPlayer.PacketSender.Init();
+
+            SyncTraps();
         }
 
         public override void CreateSpawnSystem(Profile profile)
@@ -778,6 +781,13 @@ namespace Fika.Core.Coop.GameMode
                 transitController.Init();
                 // TODO: Sync to clients!!!
             }
+
+            if (Location.EventTrapsData != null)
+            {
+                GClass1458.InitLabyrinthSyncableTraps(Location.EventTrapsData);
+            }
+
+            _gameWorld.SyncModule = new();
 
             ExfilManager.Run(exfilPoints, secretExfilPoints);
             coopGame.Status = GameStatus.Started;
@@ -1097,6 +1107,35 @@ namespace Fika.Core.Coop.GameMode
             {
                 _wavesSpawnScenario.Stop();
             }
+        }
+
+        public void SyncTraps()
+        {
+            if (_gameWorld.SyncModule == null)
+            {
+                Logger.LogError("SyncModule was null when trying to sync trap data!");
+            }
+
+            GClass1362 writer = new(new byte[1024]);
+            _gameWorld.SyncModule.Serialize(writer);
+
+            SyncTrapsPacket packet = new()
+            {
+                Data = new byte[writer.BytesWritten]
+            };
+            Buffer.BlockCopy(writer.Buffer, 0, packet.Data, 0, writer.BytesWritten);
+
+            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
+        private bool IsBarbedWireTrap(TrapSyncable trap)
+        {
+            return trap.TrapType is ETrapType.BarbedWire;
+        }
+
+        private bool IsTrapDoorTrap(TrapSyncable trap)
+        {
+            return trap.TrapType is ETrapType.TrapDoor;
         }
     }
 }

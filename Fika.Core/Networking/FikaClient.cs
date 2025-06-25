@@ -279,8 +279,23 @@ namespace Fika.Core.Networking
             RegisterPacket<InraidQuestPacket>(OnInraidQuestPacketReceived);
             RegisterPacket<EventControllerEventPacket>(OnEventControllerEventPacketReceived);
             RegisterPacket<EventControllerInteractPacket>(OnEventControllerInteractPacketReceived);
+            RegisterPacket<SyncTrapsPacket>(OnSyncTrapsPacketReceived);
 
             RegisterReusable<WorldPacket>(OnWorldPacketReceived);
+        }
+
+        private void OnSyncTrapsPacketReceived(SyncTrapsPacket packet)
+        {
+            GClass1358 reader = new(packet.Data);
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld.SyncModule != null)
+            {
+                gameWorld.SyncModule.Deserialize(reader);
+            }
+            else
+            {
+                _logger.LogError("Received SyncTrapsPacket but the SyncModule was null!");
+            }
         }
 
         private void OnEventControllerInteractPacketReceived(EventControllerInteractPacket packet)
