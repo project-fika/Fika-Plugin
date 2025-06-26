@@ -8,17 +8,17 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            Data = new()
+            ref LootSyncStruct data = ref Data;
+
+            data.Id = reader.GetInt();
+            data.Position = reader.GetVector3();
+            data.Rotation = reader.GetQuaternion();
+            data.Done = reader.GetBool();
+
+            if (!data.Done)
             {
-                Id = reader.GetInt(),
-                Position = reader.GetVector3(),
-                Rotation = reader.GetQuaternion(),
-                Done = reader.GetBool()
-            };
-            if (!Data.Done)
-            {
-                Data.Velocity = reader.GetVector3();
-                Data.AngularVelocity = reader.GetVector3();
+                data.Velocity = reader.GetVector3();
+                data.AngularVelocity = reader.GetVector3();
             }
         }
 
