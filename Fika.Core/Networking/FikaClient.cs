@@ -1209,7 +1209,7 @@ namespace Fika.Core.Networking
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
         {
-            _logger.LogInfo("[CLIENT] We received error " + socketErrorCode);
+            _logger.LogError("[CLIENT] We received error " + socketErrorCode);
         }
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
