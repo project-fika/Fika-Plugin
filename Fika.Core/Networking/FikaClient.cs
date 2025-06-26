@@ -42,6 +42,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using static Fika.Core.Networking.NetworkUtils;
 
 namespace Fika.Core.Networking
 {
@@ -1145,6 +1146,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
+            _dataWriter.Put((byte)EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
             _netClient.FirstPeer.Send(_dataWriter, deliveryMethod);
         }
@@ -1163,6 +1165,7 @@ namespace Fika.Core.Networking
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
         {
             _dataWriter.Reset();
+            _dataWriter.Put((byte)EPacketType.VOIP);
             _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
             _netClient.FirstPeer.Send(_dataWriter, 1, DeliveryMethod.Sequenced);
         }
@@ -1171,6 +1174,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
+            _dataWriter.Put((byte)EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
             _netClient.FirstPeer.Send(_dataWriter, deliveryMethod);
 
@@ -1214,13 +1218,14 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            if (channelNumber == 1)
+            switch ((EPacketType)reader.GetByte())
             {
-                VOIPClient.NetworkReceivedPacket(new(reader.GetBytesWithLength()));
-            }
-            else
-            {
-                _packetProcessor.ReadAllPackets(reader, peer);
+                case EPacketType.Serializable:
+                    _packetProcessor.ReadAllPackets(reader, peer);
+                    break;
+                case EPacketType.VOIP:
+                    VOIPClient.NetworkReceivedPacket(new(reader.GetBytesWithLength()));
+                    break;
             }
         }
 

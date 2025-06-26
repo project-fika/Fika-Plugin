@@ -50,6 +50,7 @@ using Unity.Jobs;
 using UnityEngine;
 using static Fika.Core.Networking.CommandPacket;
 using static Fika.Core.Networking.GenericSubPackets;
+using static Fika.Core.Networking.NetworkUtils;
 using static Fika.Core.Networking.ReconnectPacket;
 using static Fika.Core.Networking.SubPacket;
 
@@ -1318,6 +1319,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
+            _dataWriter.Put((byte)EPacketType.Serializable);
             if (peerToExclude != null)
             {
                 if (NetServer.ConnectedPeersCount > 1)
@@ -1336,6 +1338,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
+            _dataWriter.Put((byte)EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
             if (peerToExlude != null)
             {
@@ -1353,6 +1356,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
+            _dataWriter.Put((byte)EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
             peer.Send(_dataWriter, deliveryMethod);
         }
@@ -1383,8 +1387,9 @@ namespace Fika.Core.Networking
             }
 
             _dataWriter.Reset();
+            _dataWriter.Put((byte)EPacketType.VOIP);
             _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-            peer.Send(_dataWriter, 1, DeliveryMethod.Sequenced);
+            peer.Send(_dataWriter, DeliveryMethod.Sequenced);
         }
 
         public void OnPeerConnected(NetPeer peer)
@@ -1552,15 +1557,15 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            if (channelNumber == 1)
+            switch ((EPacketType)reader.GetByte())
             {
-                VOIPServer.NetworkReceivedPacket(
-                    new(new RemotePeer(peer)),
-                    new(reader.GetBytesWithLength()));
-            }
-            else
-            {
-                _packetProcessor.ReadAllPackets(reader, peer);
+                case EPacketType.Serializable:
+                    _packetProcessor.ReadAllPackets(reader, peer);
+                    break;
+                case EPacketType.VOIP:
+                    VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)),
+                        new(reader.GetBytesWithLength()));
+                    break;
             }
         }
 

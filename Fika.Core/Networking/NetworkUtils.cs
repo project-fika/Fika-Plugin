@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using LiteNetLib.Utils;
+using System.IO;
 using System.IO.Compression;
 
 namespace Fika.Core.Networking
@@ -36,6 +37,21 @@ namespace Fika.Core.Networking
                 gzip.CopyTo(output);
                 return output.ToArray();
             }
+        }
+
+        /// <summary>
+        /// Used to determine what kind of packet was received on the <see cref="IFikaNetworkManager"/>
+        /// </summary>
+        public enum EPacketType : byte
+        {
+            /// <summary>
+            /// A packet that implements <see cref="INetSerializable"/>
+            /// </summary>
+            Serializable,
+            /// <summary>
+            /// A voip packet that contains a raw byte array
+            /// </summary>
+            VOIP
         }
     }
 }
