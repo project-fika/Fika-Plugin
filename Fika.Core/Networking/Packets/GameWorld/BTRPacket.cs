@@ -7,26 +7,25 @@ public struct BTRPacket : INetSerializable
 
     public void Deserialize(NetDataReader reader)
     {
-        Data = new BTRDataPacketStruct
-        {
-            position = reader.GetVector3(),
-            BtrBotId = reader.GetInt(),
-            MoveSpeed = reader.GetFloat(),
-            moveDirection = reader.GetByte(),
-            timeToEndPause = reader.GetFloat(),
-            currentSpeed = reader.GetFloat(),
-            RightSlot1State = reader.GetByte(),
-            RightSlot0State = reader.GetByte(),
-            RightSideState = reader.GetByte(),
-            LeftSlot1State = reader.GetByte(),
-            LeftSlot0State = reader.GetByte(),
-            LeftSideState = reader.GetByte(),
-            RouteState = reader.GetByte(),
-            State = reader.GetByte(),
-            gunsBlockRotation = reader.GetFloat(),
-            turretRotation = reader.GetFloat(),
-            rotation = reader.GetQuaternion()
-        };
+        ref BTRDataPacketStruct data = ref Data;
+
+        data.position = reader.GetVector3();
+        data.BtrBotId = reader.GetInt();
+        data.MoveSpeed = reader.GetFloat();
+        data.moveDirection = reader.GetByte();
+        data.timeToEndPause = reader.GetFloat();
+        data.currentSpeed = reader.GetFloat();
+        data.RightSlot1State = reader.GetByte();
+        data.RightSlot0State = reader.GetByte();
+        data.RightSideState = reader.GetByte();
+        data.LeftSlot1State = reader.GetByte();
+        data.LeftSlot0State = reader.GetByte();
+        data.LeftSideState = reader.GetByte();
+        data.RouteState = reader.GetByte();
+        data.State = reader.GetByte();
+        data.gunsBlockRotation = reader.GetFloat();
+        data.turretRotation = reader.GetFloat();
+        data.rotation = reader.GetQuaternion();
     }
 
     public readonly void Serialize(NetDataWriter writer)
