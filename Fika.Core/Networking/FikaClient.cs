@@ -1146,7 +1146,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
-            _dataWriter.Put((byte)EPacketType.Serializable);
+            _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
             _netClient.FirstPeer.Send(_dataWriter, deliveryMethod);
         }
@@ -1165,7 +1165,8 @@ namespace Fika.Core.Networking
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
         {
             _dataWriter.Reset();
-            _dataWriter.Put((byte)EPacketType.VOIP);
+
+            _dataWriter.PutEnum(EPacketType.VOIP);
             _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
             _netClient.FirstPeer.Send(_dataWriter, 1, DeliveryMethod.Sequenced);
         }
@@ -1174,7 +1175,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
-            _dataWriter.Put((byte)EPacketType.Serializable);
+            _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
             _netClient.FirstPeer.Send(_dataWriter, deliveryMethod);
 

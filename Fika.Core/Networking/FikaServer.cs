@@ -12,7 +12,9 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
+#if DEBUG
 using Fika.Core.Console;
+#endif
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
@@ -48,7 +50,9 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+#if DEBUG
 using static Fika.Core.Networking.CommandPacket;
+# endif
 using static Fika.Core.Networking.GenericSubPackets;
 using static Fika.Core.Networking.NetworkUtils;
 using static Fika.Core.Networking.ReconnectPacket;
@@ -1319,7 +1323,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
-            _dataWriter.Put((byte)EPacketType.Serializable);
+            _dataWriter.PutEnum(EPacketType.Serializable);
             if (peerToExclude != null)
             {
                 if (NetServer.ConnectedPeersCount > 1)
@@ -1338,7 +1342,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
-            _dataWriter.Put((byte)EPacketType.Serializable);
+            _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
             if (peerToExlude != null)
             {
@@ -1356,7 +1360,7 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
-            _dataWriter.Put((byte)EPacketType.Serializable);
+            _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
             peer.Send(_dataWriter, deliveryMethod);
         }
@@ -1387,7 +1391,7 @@ namespace Fika.Core.Networking
             }
 
             _dataWriter.Reset();
-            _dataWriter.Put((byte)EPacketType.VOIP);
+            _dataWriter.PutEnum(EPacketType.VOIP);
             _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
             peer.Send(_dataWriter, DeliveryMethod.Sequenced);
         }
