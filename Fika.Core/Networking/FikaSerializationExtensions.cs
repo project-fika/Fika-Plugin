@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using static BasePhysicalClass;
 using static Fika.Core.Networking.CommonSubPackets;
@@ -198,6 +199,29 @@ namespace Fika.Core.Networking
         public static byte[] GetByteSegment(this NetDataReader reader)
         {
             return reader.GetBytesWithLength();
+        }
+
+        /// <summary>
+        /// Writes an enum value to the writer as a single byte
+        /// </summary>
+        /// <typeparam name="T">The enum type constrained to unmanaged enums</typeparam>
+        /// <param name="writer">The writer to write the byte to</param>
+        /// <param name="en">The enum value to serialize</param>
+        public static void PutEnum<T>(this NetDataWriter writer, T en) where T : unmanaged, Enum
+        {
+            writer.Put(Unsafe.As<T, byte>(ref en));
+        }
+
+        /// <summary>
+        /// Reads a byte from the reader and converts it to the enum type
+        /// </summary>
+        /// <typeparam name="T">The enum type constrained to unmanaged enums</typeparam>
+        /// <param name="reader">The reader to read the byte from</param>
+        /// <returns>The deserialized enum value</returns>
+        public static T GetEnum<T>(this NetDataReader reader) where T : unmanaged, Enum
+        {
+            byte value = reader.GetByte();
+            return Unsafe.As<byte, T>(ref value);
         }
 
         /// <summary>

@@ -7,24 +7,24 @@ namespace Fika.Core.Networking
 {
     public class RequestPacket : INetSerializable
     {
-        public ERequestSubPacketType PacketType;
+        public ERequestSubPacketType Type;
         /// <summary>
         /// Do not assign manually, this is handled by the packet during <see cref="Serialize(NetDataWriter)"/>
         /// </summary>
-        private bool hasSubPacket;
+        private bool _hasSubPacket;
         public IRequestPacket RequestSubPacket;
 
         public void Deserialize(NetDataReader reader)
         {
-            PacketType = (ERequestSubPacketType)reader.GetByte();
-            hasSubPacket = reader.GetBool();
-            if (hasSubPacket)
+            Type = reader.GetEnum<ERequestSubPacketType>();
+            _hasSubPacket = reader.GetBool();
+            if (_hasSubPacket)
             {
-                RequestSubPacket = FikaSerializationExtensions.GetRequestSubPacket(reader, PacketType);
+                RequestSubPacket = FikaSerializationExtensions.GetRequestSubPacket(reader, Type);
                 return;
             }
 
-            RequestSubPacket = GenerateDefaultSubPacket(PacketType);
+            RequestSubPacket = GenerateDefaultSubPacket(Type);
         }
 
         private IRequestPacket GenerateDefaultSubPacket(ERequestSubPacketType packetType)
@@ -53,10 +53,10 @@ namespace Fika.Core.Networking
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.Put((byte)PacketType);
-            hasSubPacket = RequestSubPacket != null;
-            writer.Put(hasSubPacket);
-            if (hasSubPacket)
+            writer.PutEnum(Type);
+            _hasSubPacket = RequestSubPacket != null;
+            writer.Put(_hasSubPacket);
+            if (_hasSubPacket)
             {
                 RequestSubPacket.Serialize(writer);
             }

@@ -20,8 +20,10 @@ namespace Fika.Core.Networking
         {
             NetId = reader.GetInt();
 
-            NetworkHealthSyncPacketStruct packet = new();
-            packet.SyncType = (NetworkHealthSyncPacketStruct.ESyncType)reader.GetByte();
+            NetworkHealthSyncPacketStruct packet = new()
+            {
+                SyncType = (ESyncType)reader.GetByte()
+            };
             ref NetworkHealthDataPacketStruct data = ref packet.Data;
 
             switch (packet.SyncType)

@@ -53,7 +53,7 @@ namespace Fika.Core.Coop.HostClasses
             {
                 RequestPacket request = new()
                 {
-                    PacketType = SubPacket.ERequestSubPacketType.TraderServices,
+                    Type = SubPacket.ERequestSubPacketType.TraderServices,
                     RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                     {
                         NetId = _coopPlayer.NetId,

@@ -352,7 +352,7 @@ namespace Fika.Core.Networking
             {
                 RequestPacket request = new()
                 {
-                    PacketType = SubPacket.ERequestSubPacketType.CharacterSync,
+                    Type = SubPacket.ERequestSubPacketType.CharacterSync,
                     RequestSubPacket = new RequestSubPackets.RequestCharactersPacket(_missingIds)
                 };
 

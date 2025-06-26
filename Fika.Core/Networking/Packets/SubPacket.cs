@@ -19,7 +19,7 @@ namespace Fika.Core.Networking
             public void Serialize(NetDataWriter writer);
         }
 
-        public enum EGrenadePacketType
+        public enum EGrenadePacketType : byte
         {
             None,
             ExamineWeapon,
@@ -29,7 +29,7 @@ namespace Fika.Core.Networking
             PullRingForLowThrow
         };
 
-        public enum EReloadWithAmmoStatus
+        public enum EReloadWithAmmoStatus : byte
         {
             None,
             StartReload,
@@ -37,14 +37,14 @@ namespace Fika.Core.Networking
             AbortReload
         }
 
-        public enum EStationaryCommand
+        public enum EStationaryCommand : byte
         {
             Occupy,
             Leave,
             Denied
         }
 
-        public enum EProceedType
+        public enum EProceedType : byte
         {
             EmptyHands,
             FoodClass,
@@ -60,7 +60,7 @@ namespace Fika.Core.Networking
             TryProceed
         }
 
-        public enum EFirearmSubPacketType
+        public enum EFirearmSubPacketType : byte
         {
             ShotInfo,
             ChangeFireMode,
@@ -94,7 +94,7 @@ namespace Fika.Core.Networking
             LeftStanceChange
         }
 
-        public enum ECommonSubPacketType
+        public enum ECommonSubPacketType : byte
         {
             Phrase,
             WorldInteraction,
@@ -109,7 +109,7 @@ namespace Fika.Core.Networking
             Mounting,
         }
 
-        public enum EGenericSubPacketType
+        public enum EGenericSubPacketType : byte
         {
             ClientExtract,
             ClientConnected,
@@ -127,7 +127,7 @@ namespace Fika.Core.Networking
             //TraderServiceNotification,
         }
 
-        public enum ERequestSubPacketType
+        public enum ERequestSubPacketType : byte
         {
             SpawnPoint,
             Weather,

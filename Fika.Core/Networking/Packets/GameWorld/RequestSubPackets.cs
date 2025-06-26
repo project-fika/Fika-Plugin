@@ -48,7 +48,7 @@ namespace Fika.Core.Networking
                     {
                         RequestPacket response = new()
                         {
-                            PacketType = ERequestSubPacketType.SpawnPoint,
+                            Type = ERequestSubPacketType.SpawnPoint,
                             RequestSubPacket = new SpawnPointRequest(fikaGame.GameController.InfiltrationPoint,
                             fikaGame.GameController.SpawnPoint.Position, fikaGame.GameController.SpawnPoint.Rotation)
                         };
@@ -119,7 +119,7 @@ namespace Fika.Core.Networking
                 {
                     RequestPacket response = new()
                     {
-                        PacketType = ERequestSubPacketType.Weather,
+                        Type = ERequestSubPacketType.Weather,
                         RequestSubPacket = new WeatherRequest()
                         {
                             Season = fikaGame.Season,
@@ -205,7 +205,7 @@ namespace Fika.Core.Networking
 
                 RequestPacket response = new()
                 {
-                    PacketType = ERequestSubPacketType.Exfiltration,
+                    Type = ERequestSubPacketType.Exfiltration,
                     RequestSubPacket = new ExfiltrationRequest()
                     {
                         Data = writer.Data
@@ -308,7 +308,7 @@ namespace Fika.Core.Networking
                     List<TraderServicesClass> services = playerToApply.GetAvailableTraderServices(TraderId).ToList();
                     RequestPacket response = new()
                     {
-                        PacketType = ERequestSubPacketType.TraderServices,
+                        Type = ERequestSubPacketType.TraderServices,
                         RequestSubPacket = new TraderServicesRequest()
                         {
                             NetId = NetId,

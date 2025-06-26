@@ -18,14 +18,14 @@ namespace Fika.Core.Networking
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
-            Type = (EFirearmSubPacketType)reader.GetByte();
+            Type = reader.GetEnum<EFirearmSubPacketType>();
             SubPacket = reader.GetFirearmSubPacket(Type);
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            writer.Put((byte)Type);
+            writer.PutEnum(Type);
             writer.PutFirearmSubPacket(SubPacket, Type);
         }
     }

@@ -51,7 +51,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 RequestPacket request = new()
                 {
-                    PacketType = SubPacket.ERequestSubPacketType.TraderServices,
+                    Type = SubPacket.ERequestSubPacketType.TraderServices,
                     RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                     {
                         NetId = _coopPlayer.NetId,

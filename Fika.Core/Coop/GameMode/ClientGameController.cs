@@ -138,7 +138,7 @@ namespace Fika.Core.Coop.GameMode
         {
             RequestPacket packet = new()
             {
-                PacketType = ERequestSubPacketType.Weather
+                Type = ERequestSubPacketType.Weather
             };
 
             FikaClient client = Singleton<FikaClient>.Instance;
@@ -181,7 +181,7 @@ namespace Fika.Core.Coop.GameMode
 
                 RequestPacket packet = new()
                 {
-                    PacketType = ERequestSubPacketType.SpawnPoint
+                    Type = ERequestSubPacketType.SpawnPoint
                 };
                 FikaClient client = Singleton<FikaClient>.Instance;
 
@@ -271,7 +271,7 @@ namespace Fika.Core.Coop.GameMode
             FikaClient client = Singleton<FikaClient>.Instance;
             RequestPacket request = new()
             {
-                PacketType = ERequestSubPacketType.Exfiltration
+                Type = ERequestSubPacketType.Exfiltration
             };
 
             do
