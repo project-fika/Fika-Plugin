@@ -1,6 +1,8 @@
 ﻿using EFT;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.SubPackets;
+using static NetworkHealthSyncPacketStruct;
+using static NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct;
 
 namespace Fika.Core.Networking
 {
@@ -17,246 +19,183 @@ namespace Fika.Core.Networking
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
-            NetworkHealthSyncPacketStruct packet = new()
-            {
-                SyncType = (NetworkHealthSyncPacketStruct.ESyncType)reader.GetByte()
-            };
+
+            NetworkHealthSyncPacketStruct packet = new();
+            packet.SyncType = (NetworkHealthSyncPacketStruct.ESyncType)reader.GetByte();
+            ref NetworkHealthDataPacketStruct data = ref packet.Data;
+
             switch (packet.SyncType)
             {
-                case NetworkHealthSyncPacketStruct.ESyncType.AddEffect:
+                case ESyncType.AddEffect:
                     {
-                        packet.Data.AddEffect = new()
+                        ref NetworkHealthExtraDataTypeStruct addEffect = ref data.AddEffect;
+                        addEffect.EffectId = reader.GetInt();
+                        addEffect.Type = reader.GetByte();
+                        addEffect.BodyPart = (EBodyPart)reader.GetByte();
+                        addEffect.DelayTime = reader.GetFloat();
+                        addEffect.BuildUpTime = reader.GetFloat();
+                        addEffect.WorkTime = reader.GetFloat();
+                        addEffect.ResidueTime = reader.GetFloat();
+                        addEffect.Strength = reader.GetFloat();
+                        addEffect.ExtraDataType = (NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType)reader.GetByte();
+
+                        switch (addEffect.ExtraDataType)
                         {
-                            EffectId = reader.GetInt(),
-                            Type = reader.GetByte(),
-                            BodyPart = (EBodyPart)reader.GetByte(),
-                            DelayTime = reader.GetFloat(),
-                            BuildUpTime = reader.GetFloat(),
-                            WorkTime = reader.GetFloat(),
-                            ResidueTime = reader.GetFloat(),
-                            Strength = reader.GetFloat(),
-                            ExtraDataType = (NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType)reader.GetByte()
-                        };
-                        switch (packet.Data.AddEffect.ExtraDataType)
-                        {
-                            case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.MedEffect:
-                                {
-                                    packet.Data.AddEffect.ExtraData = new()
-                                    {
-                                        MedEffect = new()
-                                        {
-                                            ItemId = reader.GetString(),
-                                            Amount = reader.GetFloat()
-                                        }
-                                    };
-                                }
+                            case EExtraDataType.MedEffect:
+                                addEffect.ExtraData.MedEffect.ItemId = reader.GetString();
+                                addEffect.ExtraData.MedEffect.Amount = reader.GetFloat();
                                 break;
-                            case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.Stimulator:
-                                {
-                                    packet.Data.AddEffect.ExtraData = new()
-                                    {
-                                        Stimulator = new()
-                                        {
-                                            BuffsName = reader.GetString()
-                                        }
-                                    };
-                                    break;
-                                }
+
+                            case EExtraDataType.Stimulator:
+                                addEffect.ExtraData.Stimulator.BuffsName = reader.GetString();
+                                break;
                         }
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.RemoveEffect:
+
+                case ESyncType.RemoveEffect:
+                    data.RemoveEffect.EffectId = reader.GetInt();
+                    break;
+
+                case ESyncType.EffectNextState:
+                    ref GStruct393 ens = ref data.EffectNextState;
+                    ens.EffectId = reader.GetInt();
+                    ens.StateTime = reader.GetFloat();
+                    break;
+
+                case ESyncType.EffectStateTime:
+                    ref GStruct394 est = ref data.EffectStateTime;
+                    est.EffectId = reader.GetInt();
+                    est.RemainingStateTime = reader.GetFloat();
+                    break;
+
+                case ESyncType.EffectStrength:
+                    ref GStruct395 estr = ref data.EffectStrength;
+                    estr.EffectId = reader.GetInt();
+                    estr.Strength = reader.GetFloat();
+                    break;
+
+                case ESyncType.EffectMedResource:
+                    ref GStruct396 emr = ref data.EffectMedResource;
+                    emr.EffectId = reader.GetInt();
+                    emr.Resource = reader.GetFloat();
+                    break;
+
+                case ESyncType.EffectStimulatorBuff:
                     {
-                        packet.Data.RemoveEffect = new()
+                        ref GStruct397 stim = ref data.EffectStimulatorBuff;
+                        stim.EffectId = reader.GetInt();
+                        stim.BuffIndex = reader.GetInt();
+                        stim.BuffActivate = reader.GetBool();
+
+                        if (stim.BuffActivate)
                         {
-                            EffectId = reader.GetInt()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectNextState:
-                    {
-                        packet.Data.EffectNextState = new()
-                        {
-                            EffectId = reader.GetInt(),
-                            StateTime = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectStateTime:
-                    {
-                        packet.Data.EffectStateTime = new()
-                        {
-                            EffectId = reader.GetInt(),
-                            RemainingStateTime = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectStrength:
-                    {
-                        packet.Data.EffectStrength = new()
-                        {
-                            EffectId = reader.GetInt(),
-                            Strength = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectMedResource:
-                    {
-                        packet.Data.EffectMedResource = new()
-                        {
-                            EffectId = reader.GetInt(),
-                            Resource = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectStimulatorBuff:
-                    {
-                        packet.Data.EffectStimulatorBuff = new()
-                        {
-                            EffectId = reader.GetInt(),
-                            BuffIndex = reader.GetInt(),
-                            BuffActivate = reader.GetBool()
-                        };
-                        if (packet.Data.EffectStimulatorBuff.BuffActivate)
-                        {
-                            packet.Data.EffectStimulatorBuff.BuffValue = reader.GetFloat();
-                            packet.Data.EffectStimulatorBuff.BuffDuration = reader.GetFloat();
-                            packet.Data.EffectStimulatorBuff.BuffDelay = reader.GetFloat();
-                            break;
+                            stim.BuffValue = reader.GetFloat();
+                            stim.BuffDuration = reader.GetFloat();
+                            stim.BuffDelay = reader.GetFloat();
                         }
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.IsAlive:
+
+                case ESyncType.IsAlive:
                     {
-                        packet.Data.IsAlive = new()
+                        ref GStruct398 alive = ref data.IsAlive;
+                        alive.IsAlive = reader.GetBool();
+
+                        if (!alive.IsAlive)
                         {
-                            IsAlive = reader.GetBool()
-                        };
-                        if (!packet.Data.IsAlive.IsAlive)
-                        {
-                            packet.Data.IsAlive.DamageType = (EDamageType)reader.GetInt();
+                            alive.DamageType = (EDamageType)reader.GetInt();
                             KillerId = reader.GetString();
                             WeaponId = reader.GetString();
                             BodyPart = (EBodyPart)reader.GetByte();
                             CorpseSyncPacket = reader.GetCorpseSyncPacket();
                             TriggerZones = reader.GetStringArray();
-                            break;
                         }
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.BodyHealth:
+
+                case ESyncType.BodyHealth:
                     {
-                        packet.Data.BodyHealth = new()
-                        {
-                            BodyPart = (EBodyPart)reader.GetByte(),
-                            Value = reader.GetFloat()
-                        };
+                        ref GStruct399 bh = ref data.BodyHealth;
+                        bh.BodyPart = (EBodyPart)reader.GetByte();
+                        bh.Value = reader.GetFloat();
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.Energy:
+
+                case ESyncType.Energy:
+                    data.Energy.Value = reader.GetFloat();
+                    break;
+
+                case ESyncType.Hydration:
+                    data.Hydration.Value = reader.GetFloat();
+                    break;
+
+                case ESyncType.Temperature:
+                    data.Temperature.Value = reader.GetFloat();
+                    break;
+
+                case ESyncType.DamageCoeff:
+                    data.DamageCoeff.DamageCoeff = reader.GetFloat();
+                    break;
+
+                case ESyncType.ApplyDamage:
                     {
-                        packet.Data.Energy = new()
-                        {
-                            Value = reader.GetFloat()
-                        };
+                        ref GStruct403 dmg = ref data.ApplyDamage;
+                        dmg.BodyPart = (EBodyPart)reader.GetByte();
+                        dmg.Damage = reader.GetFloat();
+                        dmg.DamageType = (EDamageType)reader.GetInt();
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.Hydration:
+
+                case ESyncType.DestroyedBodyPart:
                     {
-                        packet.Data.Hydration = new()
+                        ref GStruct404 destroyed = ref data.DestroyedBodyPart;
+                        destroyed.BodyPart = (EBodyPart)reader.GetByte();
+                        destroyed.IsDestroyed = reader.GetBool();
+
+                        if (destroyed.IsDestroyed)
                         {
-                            Value = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.Temperature:
-                    {
-                        packet.Data.Temperature = new()
-                        {
-                            Value = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.DamageCoeff:
-                    {
-                        packet.Data.DamageCoeff = new()
-                        {
-                            DamageCoeff = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage:
-                    {
-                        packet.Data.ApplyDamage = new()
-                        {
-                            BodyPart = (EBodyPart)reader.GetByte(),
-                            Damage = reader.GetFloat(),
-                            DamageType = (EDamageType)reader.GetInt()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart:
-                    {
-                        packet.Data.DestroyedBodyPart = new()
-                        {
-                            BodyPart = (EBodyPart)reader.GetByte(),
-                            IsDestroyed = reader.GetBool()
-                        };
-                        if (packet.Data.DestroyedBodyPart.IsDestroyed)
-                        {
-                            packet.Data.DestroyedBodyPart.DamageType = (EDamageType)reader.GetInt();
-                            break;
+                            destroyed.DamageType = (EDamageType)reader.GetInt();
                         }
-                        packet.Data.DestroyedBodyPart.HealthMaximum = reader.GetFloat();
+                        else
+                        {
+                            destroyed.HealthMaximum = reader.GetFloat();
+                        }
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.HealthRates:
+
+                case ESyncType.HealthRates:
                     {
-                        packet.Data.HealthRates = new()
-                        {
-                            HealRate = reader.GetFloat(),
-                            DamageRate = reader.GetFloat(),
-                            DamageMultiplier = reader.GetFloat(),
-                            Energy = reader.GetFloat(),
-                            Hydration = reader.GetFloat(),
-                            Temperature = reader.GetFloat()
-                        };
+                        ref GStruct405 rates = ref data.HealthRates;
+                        rates.HealRate = reader.GetFloat();
+                        rates.DamageRate = reader.GetFloat();
+                        rates.DamageMultiplier = reader.GetFloat();
+                        rates.Energy = reader.GetFloat();
+                        rates.Hydration = reader.GetFloat();
+                        rates.Temperature = reader.GetFloat();
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.HealerDone:
+
+                case ESyncType.HealerDone:
+                    data.HealerDone.EffectId = reader.GetInt();
+                    break;
+
+                case ESyncType.BurnEyes:
                     {
-                        packet.Data.HealerDone = new()
-                        {
-                            EffectId = reader.GetInt()
-                        };
+                        ref GStruct407 burn = ref data.BurnEyes;
+                        burn.Position = reader.GetVector3();
+                        burn.DistanceStrength = reader.GetFloat();
+                        burn.NormalTime = reader.GetFloat();
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.BurnEyes:
-                    {
-                        packet.Data.BurnEyes = new()
-                        {
-                            Position = reader.GetVector3(),
-                            DistanceStrength = reader.GetFloat(),
-                            NormalTime = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.Poison:
-                    {
-                        packet.Data.Poison = new()
-                        {
-                            Value = reader.GetFloat()
-                        };
-                        break;
-                    }
-                case NetworkHealthSyncPacketStruct.ESyncType.StaminaCoeff:
-                    {
-                        packet.Data.StaminaCoeff = new()
-                        {
-                            StaminaCoeff = reader.GetFloat()
-                        };
-                        return;
-                    }
+
+                case ESyncType.Poison:
+                    data.Poison.Value = reader.GetFloat();
+                    break;
+
+                case ESyncType.StaminaCoeff:
+                    data.StaminaCoeff.StaminaCoeff = reader.GetFloat();
+                    break;
             }
 
             Packet = packet;
@@ -265,11 +204,11 @@ namespace Fika.Core.Networking
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            NetworkHealthSyncPacketStruct.NetworkHealthDataPacketStruct packet = Packet.Data;
+            NetworkHealthDataPacketStruct packet = Packet.Data;
             writer.Put((byte)Packet.SyncType);
             switch (Packet.SyncType)
             {
-                case NetworkHealthSyncPacketStruct.ESyncType.AddEffect:
+                case ESyncType.AddEffect:
                     {
                         writer.Put(packet.AddEffect.EffectId);
                         writer.Put(packet.AddEffect.Type);
@@ -282,15 +221,15 @@ namespace Fika.Core.Networking
                         writer.Put((byte)packet.AddEffect.ExtraDataType);
                         switch (packet.AddEffect.ExtraDataType)
                         {
-                            case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.None:
+                            case EExtraDataType.None:
                                 break;
-                            case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.MedEffect:
+                            case EExtraDataType.MedEffect:
                                 {
                                     writer.Put(packet.AddEffect.ExtraData.MedEffect.ItemId);
                                     writer.Put(packet.AddEffect.ExtraData.MedEffect.Amount);
                                     break;
                                 }
-                            case NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType.Stimulator:
+                            case EExtraDataType.Stimulator:
                                 {
                                     writer.Put(packet.AddEffect.ExtraData.Stimulator.BuffsName);
                                     break;
@@ -298,36 +237,36 @@ namespace Fika.Core.Networking
                         }
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.RemoveEffect:
+                case ESyncType.RemoveEffect:
                     {
                         writer.Put(packet.RemoveEffect.EffectId);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectNextState:
+                case ESyncType.EffectNextState:
                     {
                         writer.Put(packet.EffectNextState.EffectId);
                         writer.Put(packet.EffectNextState.StateTime);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectStateTime:
+                case ESyncType.EffectStateTime:
                     {
                         writer.Put(packet.EffectStateTime.EffectId);
                         writer.Put(packet.EffectStateTime.RemainingStateTime);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectStrength:
+                case ESyncType.EffectStrength:
                     {
                         writer.Put(packet.EffectStrength.EffectId);
                         writer.Put(packet.EffectStrength.Strength);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectMedResource:
+                case ESyncType.EffectMedResource:
                     {
                         writer.Put(packet.EffectMedResource.EffectId);
                         writer.Put(packet.EffectMedResource.Resource);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.EffectStimulatorBuff:
+                case ESyncType.EffectStimulatorBuff:
                     {
                         writer.Put(packet.EffectStimulatorBuff.EffectId);
                         writer.Put(packet.EffectStimulatorBuff.BuffIndex);
@@ -341,7 +280,7 @@ namespace Fika.Core.Networking
                         }
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.IsAlive:
+                case ESyncType.IsAlive:
                     {
                         writer.Put(packet.IsAlive.IsAlive);
                         if (!packet.IsAlive.IsAlive)
@@ -356,40 +295,40 @@ namespace Fika.Core.Networking
                         }
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.BodyHealth:
+                case ESyncType.BodyHealth:
                     {
                         writer.Put((byte)packet.BodyHealth.BodyPart);
                         writer.Put(packet.BodyHealth.Value);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.Energy:
+                case ESyncType.Energy:
                     {
                         writer.Put(packet.Energy.Value);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.Hydration:
+                case ESyncType.Hydration:
                     {
                         writer.Put(packet.Hydration.Value);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.Temperature:
+                case ESyncType.Temperature:
                     {
                         writer.Put(packet.Temperature.Value);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.DamageCoeff:
+                case ESyncType.DamageCoeff:
                     {
                         writer.Put(packet.DamageCoeff.DamageCoeff);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage:
+                case ESyncType.ApplyDamage:
                     {
                         writer.Put((byte)packet.ApplyDamage.BodyPart);
                         writer.Put(packet.ApplyDamage.Damage);
                         writer.Put((int)packet.ApplyDamage.DamageType);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart:
+                case ESyncType.DestroyedBodyPart:
                     {
                         writer.Put((byte)packet.DestroyedBodyPart.BodyPart);
                         writer.Put(packet.DestroyedBodyPart.IsDestroyed);
@@ -401,7 +340,7 @@ namespace Fika.Core.Networking
                         writer.Put(packet.DestroyedBodyPart.HealthMaximum);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.HealthRates:
+                case ESyncType.HealthRates:
                     {
                         writer.Put(packet.HealthRates.HealRate);
                         writer.Put(packet.HealthRates.DamageRate);
@@ -411,24 +350,24 @@ namespace Fika.Core.Networking
                         writer.Put(packet.HealthRates.Temperature);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.HealerDone:
+                case ESyncType.HealerDone:
                     {
                         writer.Put(packet.HealerDone.EffectId);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.BurnEyes:
+                case ESyncType.BurnEyes:
                     {
                         writer.PutVector3(packet.BurnEyes.Position);
                         writer.Put(packet.BurnEyes.DistanceStrength);
                         writer.Put(packet.BurnEyes.NormalTime);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.Poison:
+                case ESyncType.Poison:
                     {
                         writer.Put(packet.Poison.Value);
                         break;
                     }
-                case NetworkHealthSyncPacketStruct.ESyncType.StaminaCoeff:
+                case ESyncType.StaminaCoeff:
                     {
                         writer.Put(packet.StaminaCoeff.StaminaCoeff);
                         break;
