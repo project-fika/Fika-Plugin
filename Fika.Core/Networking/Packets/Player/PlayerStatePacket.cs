@@ -60,7 +60,7 @@ namespace Fika.Core.Networking
             writer.Put((byte)NetId);
             writer.PutPackedInt(Step, -1, 1);
             writer.PutPackedInt(Blindfire, -1, 1);
-            writer.Put((byte)State);
+            writer.PutEnum(State);
 
             writer.PutVector3(Position);
             writer.PutHeadRotation(HeadRotation);
@@ -90,7 +90,7 @@ namespace Fika.Core.Networking
             NetId = reader.GetByte();
             Step = reader.GetPackedInt(-1, 1);
             Blindfire = reader.GetPackedInt(-1, 1);
-            State = (EPlayerState)reader.GetByte();
+            State = reader.GetEnum<EPlayerState>();
 
             Position = reader.GetVector3();
             HeadRotation = reader.GetHeadRotation();
