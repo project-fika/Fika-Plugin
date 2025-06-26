@@ -10,6 +10,8 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -386,5 +388,29 @@ namespace Fika.Core.Coop.Utils
         {
 
         }
+
+        public static byte[] CompressBytes(byte[] data)
+        {
+            using (MemoryStream output = new())
+            {
+                using (GZipStream gzip = new(output, CompressionMode.Compress, true))
+                {
+                    gzip.Write(data, 0, data.Length);
+                }
+                return output.ToArray();
+            }
+        }
+
+        public static byte[] DecompressBytes(byte[] compressedData)
+        {
+            using (MemoryStream input = new(compressedData))
+            using (GZipStream gzip = new(input, CompressionMode.Decompress))
+            using (MemoryStream output = new())
+            {
+                gzip.CopyTo(output);
+                return output.ToArray();
+            }
+        }
+
     }
 }
