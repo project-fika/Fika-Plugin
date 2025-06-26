@@ -47,7 +47,7 @@ namespace Fika.Core.Networking
 
             FragmentIndex = reader.GetInt();
 
-            DamageType = (EDamageType)reader.GetByte();
+            DamageType = (EDamageType)reader.GetInt();
             BodyPartType = (EBodyPart)reader.GetByte();
             ColliderType = (EBodyPartColliderType)reader.GetByte();
             ArmorPlateCollider = (EArmorPlateCollider)reader.GetByte();
@@ -76,7 +76,7 @@ namespace Fika.Core.Networking
 
             writer.Put(FragmentIndex);
 
-            writer.Put((byte)DamageType);
+            writer.Put((int)DamageType);
             writer.Put((byte)BodyPartType);
             writer.Put((byte)ColliderType);
             writer.Put((byte)ArmorPlateCollider);
