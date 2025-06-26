@@ -204,175 +204,183 @@ namespace Fika.Core.Networking
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            NetworkHealthDataPacketStruct packet = Packet.Data;
+            ref readonly NetworkHealthDataPacketStruct packet = ref Packet.Data;
             writer.Put((byte)Packet.SyncType);
+
             switch (Packet.SyncType)
             {
                 case ESyncType.AddEffect:
                     {
-                        writer.Put(packet.AddEffect.EffectId);
-                        writer.Put(packet.AddEffect.Type);
-                        writer.Put((byte)packet.AddEffect.BodyPart);
-                        writer.Put(packet.AddEffect.DelayTime);
-                        writer.Put(packet.AddEffect.BuildUpTime);
-                        writer.Put(packet.AddEffect.WorkTime);
-                        writer.Put(packet.AddEffect.ResidueTime);
-                        writer.Put(packet.AddEffect.Strength);
-                        writer.Put((byte)packet.AddEffect.ExtraDataType);
-                        switch (packet.AddEffect.ExtraDataType)
+                        ref readonly NetworkHealthExtraDataTypeStruct addEffect = ref packet.AddEffect;
+                        writer.Put(addEffect.EffectId);
+                        writer.Put(addEffect.Type);
+                        writer.Put((byte)addEffect.BodyPart);
+                        writer.Put(addEffect.DelayTime);
+                        writer.Put(addEffect.BuildUpTime);
+                        writer.Put(addEffect.WorkTime);
+                        writer.Put(addEffect.ResidueTime);
+                        writer.Put(addEffect.Strength);
+                        writer.Put((byte)addEffect.ExtraDataType);
+
+                        switch (addEffect.ExtraDataType)
                         {
-                            case EExtraDataType.None:
-                                break;
                             case EExtraDataType.MedEffect:
-                                {
-                                    writer.Put(packet.AddEffect.ExtraData.MedEffect.ItemId);
-                                    writer.Put(packet.AddEffect.ExtraData.MedEffect.Amount);
-                                    break;
-                                }
+                                writer.Put(addEffect.ExtraData.MedEffect.ItemId);
+                                writer.Put(addEffect.ExtraData.MedEffect.Amount);
+                                break;
                             case EExtraDataType.Stimulator:
-                                {
-                                    writer.Put(packet.AddEffect.ExtraData.Stimulator.BuffsName);
-                                    break;
-                                }
+                                writer.Put(addEffect.ExtraData.Stimulator.BuffsName);
+                                break;
                         }
                         break;
                     }
+
                 case ESyncType.RemoveEffect:
-                    {
-                        writer.Put(packet.RemoveEffect.EffectId);
-                        break;
-                    }
+                    writer.Put(packet.RemoveEffect.EffectId);
+                    break;
+
                 case ESyncType.EffectNextState:
                     {
-                        writer.Put(packet.EffectNextState.EffectId);
-                        writer.Put(packet.EffectNextState.StateTime);
+                        ref readonly GStruct393 ens = ref packet.EffectNextState;
+                        writer.Put(ens.EffectId);
+                        writer.Put(ens.StateTime);
                         break;
                     }
+
                 case ESyncType.EffectStateTime:
                     {
-                        writer.Put(packet.EffectStateTime.EffectId);
-                        writer.Put(packet.EffectStateTime.RemainingStateTime);
+                        ref readonly GStruct394 est = ref packet.EffectStateTime;
+                        writer.Put(est.EffectId);
+                        writer.Put(est.RemainingStateTime);
                         break;
                     }
+
                 case ESyncType.EffectStrength:
                     {
-                        writer.Put(packet.EffectStrength.EffectId);
-                        writer.Put(packet.EffectStrength.Strength);
+                        ref readonly GStruct395 estr = ref packet.EffectStrength;
+                        writer.Put(estr.EffectId);
+                        writer.Put(estr.Strength);
                         break;
                     }
+
                 case ESyncType.EffectMedResource:
                     {
-                        writer.Put(packet.EffectMedResource.EffectId);
-                        writer.Put(packet.EffectMedResource.Resource);
+                        ref readonly GStruct396 emr = ref packet.EffectMedResource;
+                        writer.Put(emr.EffectId);
+                        writer.Put(emr.Resource);
                         break;
                     }
+
                 case ESyncType.EffectStimulatorBuff:
                     {
-                        writer.Put(packet.EffectStimulatorBuff.EffectId);
-                        writer.Put(packet.EffectStimulatorBuff.BuffIndex);
-                        writer.Put(packet.EffectStimulatorBuff.BuffActivate);
-                        if (packet.EffectStimulatorBuff.BuffActivate)
+                        ref readonly GStruct397 stim = ref packet.EffectStimulatorBuff;
+                        writer.Put(stim.EffectId);
+                        writer.Put(stim.BuffIndex);
+                        writer.Put(stim.BuffActivate);
+                        if (stim.BuffActivate)
                         {
-                            writer.Put(packet.EffectStimulatorBuff.BuffValue);
-                            writer.Put(packet.EffectStimulatorBuff.BuffDuration);
-                            writer.Put(packet.EffectStimulatorBuff.BuffDelay);
-                            break;
+                            writer.Put(stim.BuffValue);
+                            writer.Put(stim.BuffDuration);
+                            writer.Put(stim.BuffDelay);
                         }
                         break;
                     }
+
                 case ESyncType.IsAlive:
                     {
-                        writer.Put(packet.IsAlive.IsAlive);
-                        if (!packet.IsAlive.IsAlive)
+                        ref readonly GStruct398 alive = ref packet.IsAlive;
+                        writer.Put(alive.IsAlive);
+                        if (!alive.IsAlive)
                         {
-                            writer.Put((int)packet.IsAlive.DamageType);
+                            writer.Put((int)alive.DamageType);
                             writer.Put(KillerId);
                             writer.Put(WeaponId);
                             writer.Put((byte)BodyPart);
                             writer.PutCorpseSyncPacket(CorpseSyncPacket);
                             writer.PutArray(TriggerZones);
-                            break;
                         }
                         break;
                     }
+
                 case ESyncType.BodyHealth:
                     {
-                        writer.Put((byte)packet.BodyHealth.BodyPart);
-                        writer.Put(packet.BodyHealth.Value);
+                        ref readonly GStruct399 bh = ref packet.BodyHealth;
+                        writer.Put((byte)bh.BodyPart);
+                        writer.Put(bh.Value);
                         break;
                     }
+
                 case ESyncType.Energy:
-                    {
-                        writer.Put(packet.Energy.Value);
-                        break;
-                    }
+                    writer.Put(packet.Energy.Value);
+                    break;
+
                 case ESyncType.Hydration:
-                    {
-                        writer.Put(packet.Hydration.Value);
-                        break;
-                    }
+                    writer.Put(packet.Hydration.Value);
+                    break;
+
                 case ESyncType.Temperature:
-                    {
-                        writer.Put(packet.Temperature.Value);
-                        break;
-                    }
+                    writer.Put(packet.Temperature.Value);
+                    break;
+
                 case ESyncType.DamageCoeff:
-                    {
-                        writer.Put(packet.DamageCoeff.DamageCoeff);
-                        break;
-                    }
+                    writer.Put(packet.DamageCoeff.DamageCoeff);
+                    break;
+
                 case ESyncType.ApplyDamage:
                     {
-                        writer.Put((byte)packet.ApplyDamage.BodyPart);
-                        writer.Put(packet.ApplyDamage.Damage);
-                        writer.Put((int)packet.ApplyDamage.DamageType);
+                        ref readonly GStruct403 dmg = ref packet.ApplyDamage;
+                        writer.Put((byte)dmg.BodyPart);
+                        writer.Put(dmg.Damage);
+                        writer.Put((int)dmg.DamageType);
                         break;
                     }
+
                 case ESyncType.DestroyedBodyPart:
                     {
-                        writer.Put((byte)packet.DestroyedBodyPart.BodyPart);
-                        writer.Put(packet.DestroyedBodyPart.IsDestroyed);
-                        if (packet.DestroyedBodyPart.IsDestroyed)
-                        {
-                            writer.Put((int)packet.DestroyedBodyPart.DamageType);
-                            break;
-                        }
-                        writer.Put(packet.DestroyedBodyPart.HealthMaximum);
+                        ref readonly GStruct404 destroyed = ref packet.DestroyedBodyPart;
+                        writer.Put((byte)destroyed.BodyPart);
+                        writer.Put(destroyed.IsDestroyed);
+                        if (destroyed.IsDestroyed)
+                            writer.Put((int)destroyed.DamageType);
+                        else
+                            writer.Put(destroyed.HealthMaximum);
                         break;
                     }
+
                 case ESyncType.HealthRates:
                     {
-                        writer.Put(packet.HealthRates.HealRate);
-                        writer.Put(packet.HealthRates.DamageRate);
-                        writer.Put(packet.HealthRates.DamageMultiplier);
-                        writer.Put(packet.HealthRates.Energy);
-                        writer.Put(packet.HealthRates.Hydration);
-                        writer.Put(packet.HealthRates.Temperature);
+                        ref readonly GStruct405 rates = ref packet.HealthRates;
+                        writer.Put(rates.HealRate);
+                        writer.Put(rates.DamageRate);
+                        writer.Put(rates.DamageMultiplier);
+                        writer.Put(rates.Energy);
+                        writer.Put(rates.Hydration);
+                        writer.Put(rates.Temperature);
                         break;
                     }
+
                 case ESyncType.HealerDone:
-                    {
-                        writer.Put(packet.HealerDone.EffectId);
-                        break;
-                    }
+                    writer.Put(packet.HealerDone.EffectId);
+                    break;
+
                 case ESyncType.BurnEyes:
                     {
-                        writer.PutVector3(packet.BurnEyes.Position);
-                        writer.Put(packet.BurnEyes.DistanceStrength);
-                        writer.Put(packet.BurnEyes.NormalTime);
+                        ref readonly GStruct407 burn = ref packet.BurnEyes;
+                        writer.PutVector3(burn.Position);
+                        writer.Put(burn.DistanceStrength);
+                        writer.Put(burn.NormalTime);
                         break;
                     }
+
                 case ESyncType.Poison:
-                    {
-                        writer.Put(packet.Poison.Value);
-                        break;
-                    }
+                    writer.Put(packet.Poison.Value);
+                    break;
+
                 case ESyncType.StaminaCoeff:
-                    {
-                        writer.Put(packet.StaminaCoeff.StaminaCoeff);
-                        break;
-                    }
+                    writer.Put(packet.StaminaCoeff.StaminaCoeff);
+                    break;
             }
         }
+
     }
 }

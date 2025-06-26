@@ -3,7 +3,7 @@ using System.IO.Compression;
 
 namespace Fika.Core.Networking
 {
-    public static class NetworkingUtils
+    public static class NetworkUtils
     {
         /// <summary>
         /// Compresses the given byte array using GZip compression

@@ -839,7 +839,7 @@ namespace Fika.Core.Networking
             IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
             if (fikaGame != null)
             {
-                byte[] decompressed = NetworkingUtils.DecompressBytes(packet.Data);
+                byte[] decompressed = NetworkUtils.DecompressBytes(packet.Data);
 #if DEBUG
                 double reverseRate = 100.0 * ((decompressed.Length - packet.Data.Length) / (double)packet.Data.Length);
                 _logger.LogWarning($"Original is {reverseRate:F2}% larger than compressed");

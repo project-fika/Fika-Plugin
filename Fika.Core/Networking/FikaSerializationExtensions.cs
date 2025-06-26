@@ -267,7 +267,8 @@ namespace Fika.Core.Networking
         {
             EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTItemDescriptor(descriptor);
-            writer.PutByteArray(eftWriter.ToArray());
+            byte[] compressed = NetworkUtils.CompressBytes(eftWriter.ToArray());
+            writer.PutByteArray(compressed);
         }
 
         /// <summary>
@@ -277,7 +278,8 @@ namespace Fika.Core.Networking
         /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
         public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
         {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            byte[] decomprssed = NetworkUtils.DecompressBytes(reader.GetByteArray());
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(decomprssed);
             return eftReader.ReadEFTItemDescriptor();
         }
 
@@ -331,7 +333,7 @@ namespace Fika.Core.Networking
         {
             EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
-            byte[] compressed = NetworkingUtils.CompressBytes(eftWriter.ToArray());
+            byte[] compressed = NetworkUtils.CompressBytes(eftWriter.ToArray());
             writer.PutByteArray(compressed);
         }
 
@@ -342,7 +344,7 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Profile"/></returns>
         public static Profile GetProfile(this NetDataReader reader)
         {
-            byte[] decompressed = NetworkingUtils.DecompressBytes(reader.GetByteArray());
+            byte[] decompressed = NetworkUtils.DecompressBytes(reader.GetByteArray());
             using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(decompressed);
             return new(eftReader.ReadEFTProfileDescriptor());
         }
