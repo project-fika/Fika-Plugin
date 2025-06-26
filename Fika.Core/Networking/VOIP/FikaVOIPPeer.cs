@@ -63,11 +63,11 @@ namespace Fika.Core.Networking.VOIP
         {
             get
             {
-                return peer;
+                return _peer;
             }
         }
 
-        private readonly NetPeer peer = peer;
+        private readonly NetPeer _peer = peer;
 
         public void SendData(ArraySegment<byte> data, bool reliable)
         {
@@ -77,11 +77,11 @@ namespace Fika.Core.Networking.VOIP
                 {
                     Data = data.Array
                 };
-                Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, peer);
+                Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, _peer);
             }
             else
             {
-                Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, peer);
+                Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, _peer);
             }
         }
     }
