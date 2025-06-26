@@ -1042,7 +1042,7 @@ namespace Fika.Core.Networking
         {
             if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply) && playerToApply.IsYourPlayer)
             {
-                playerToApply.HandleDamagePacket(packet);
+                playerToApply.HandleDamagePacket(in packet);
             }
         }
 

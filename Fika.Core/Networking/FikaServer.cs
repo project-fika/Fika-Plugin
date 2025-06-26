@@ -1224,7 +1224,7 @@ namespace Fika.Core.Networking
             {
                 if (playerToApply.IsAI || playerToApply.IsYourPlayer)
                 {
-                    playerToApply.HandleDamagePacket(packet);
+                    playerToApply.HandleDamagePacket(in packet);
                     return;
                 }
 
