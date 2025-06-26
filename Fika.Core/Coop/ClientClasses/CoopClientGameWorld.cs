@@ -3,6 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;

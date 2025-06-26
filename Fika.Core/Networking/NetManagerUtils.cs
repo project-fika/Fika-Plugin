@@ -3,16 +3,16 @@ using Comfort.Common;
 using Dissonance.Networking;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Fika.Core.Coop.Utils
+namespace Fika.Core.Networking
 {
     public static class NetManagerUtils
     {
@@ -24,7 +24,7 @@ namespace Fika.Core.Coop.Utils
         public static void CreateFikaGameObject()
         {
             FikaGameObject = new GameObject("FikaGameObject");
-            GameObject.DontDestroyOnLoad(FikaGameObject);
+            UnityEngine.Object.DontDestroyOnLoad(FikaGameObject);
             _logger.LogInfo("FikaGameObject has been created!");
         }
 
@@ -93,7 +93,7 @@ namespace Fika.Core.Coop.Utils
                 GCManager gcManager = FikaGameObject.GetComponent<GCManager>();
                 if (gcManager != null)
                 {
-                    GameObject.Destroy(gcManager);
+                    UnityEngine.Object.Destroy(gcManager);
                 }
 
                 if (isServer)
@@ -113,7 +113,7 @@ namespace Fika.Core.Coop.Utils
                         _logger.LogError("DestroyNetManager: " + ex.Message);
                     }
                     Singleton<FikaServer>.TryRelease(server);
-                    GameObject.Destroy(server);
+                    UnityEngine.Object.Destroy(server);
                     _logger.LogInfo("Destroyed FikaServer");
                     return;
                 }
@@ -133,7 +133,7 @@ namespace Fika.Core.Coop.Utils
                     _logger.LogError("DestroyNetManager: " + ex.Message);
                 }
                 Singleton<FikaClient>.TryRelease(client);
-                GameObject.Destroy(client);
+                UnityEngine.Object.Destroy(client);
                 _logger.LogInfo("Destroyed FikaClient");
             }
         }
@@ -146,7 +146,7 @@ namespace Fika.Core.Coop.Utils
                 pingingClient.StopKeepAliveRoutine();
                 pingingClient.NetClient.Stop();
                 Singleton<FikaPingingClient>.TryRelease(pingingClient);
-                GameObject.Destroy(pingingClient);
+                UnityEngine.Object.Destroy(pingingClient);
                 _logger.LogInfo("Destroyed FikaPingingClient");
             }
         }
@@ -243,7 +243,7 @@ namespace Fika.Core.Coop.Utils
                         return Task.CompletedTask;
                     }
 
-                    GameObject.Destroy(coopHandler);
+                    UnityEngine.Object.Destroy(coopHandler);
                     _logger.LogError("No ServerId found, deleting CoopHandler!");
                     throw new MissingReferenceException("No Server Id found");
                 }

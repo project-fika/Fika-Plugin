@@ -1,6 +1,7 @@
 ﻿using EFT;
 using EFT.Communications;
 using Fika.Core.Coop.Utils;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Patching;
 using Fika.Core.UI.Models;
