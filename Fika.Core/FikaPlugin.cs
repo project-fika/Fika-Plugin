@@ -1314,7 +1314,7 @@ namespace Fika.Core
                     }
                 }
 
-                LocalIPs = ips.Skip(1).ToArray();
+                LocalIPs = [.. ips.Skip(1)];
                 string allIps = string.Join(", ", LocalIPs);
                 Logger.LogInfo($"Cached local IPs: {allIps}");
                 return [.. ips];
@@ -1372,7 +1372,7 @@ namespace Fika.Core
         /// <summary>
         /// The SendRate of the <see cref="Networking.IFikaNetworkManager"/>
         /// </summary>
-        public enum ESendRate
+        public enum ESendRate : byte
         {
             Low,
             Medium,
