@@ -49,7 +49,7 @@ namespace Fika.Core.Coop.Custom
 
             FikaPlugin.Instance.FikaLogger.LogError($"Unable to retrieve difficulty settings for: {role}, difficulty: {botDifficulty}");
             return null;
-        }        
+        }
 
         public class RoleData : Dictionary<string, BotSettingsComponents>
         {

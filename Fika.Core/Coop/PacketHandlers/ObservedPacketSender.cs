@@ -1,7 +1,6 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using Comfort.Common;
-using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using LiteNetLib;
