@@ -10,26 +10,28 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            Data = new()
+            ref AirplaneDataPacketStruct data = ref Data;
+            data.ObjectId = reader.GetInt();
+            data.Position = reader.GetVector3();
+            data.Rotation = reader.GetVector3();
+            data.ObjectType = (SynchronizableObjectType)reader.GetByte();
+
+            if (data.ObjectType == SynchronizableObjectType.AirDrop)
             {
-                ObjectId = reader.GetInt(),
-                Position = reader.GetVector3(),
-                Rotation = reader.GetVector3(),
-                ObjectType = (SynchronizableObjectType)reader.GetByte()
-            };
-            if (Data.ObjectType == SynchronizableObjectType.AirDrop)
-            {
-                Data.PacketData.AirdropDataPacket.SignalFire = reader.GetBool();
-                Data.PacketData.AirdropDataPacket.FallingStage = (EAirdropFallingStage)reader.GetByte();
-                Data.PacketData.AirdropDataPacket.AirdropType = (EAirdropType)reader.GetByte();
-                Data.PacketData.AirdropDataPacket.UniqueId = reader.GetInt();
+                ref GStruct39 airdrop = ref data.PacketData.AirdropDataPacket;
+                airdrop.SignalFire = reader.GetBool();
+                airdrop.FallingStage = (EAirdropFallingStage)reader.GetByte();
+                airdrop.AirdropType = (EAirdropType)reader.GetByte();
+                airdrop.UniqueId = reader.GetInt();
             }
             else
             {
-                Data.PacketData.AirplaneDataPacket.AirplanePercent = reader.GetInt();
+                data.PacketData.AirplaneDataPacket.AirplanePercent = reader.GetInt();
             }
-            Data.Outdated = reader.GetBool();
-            Data.IsStatic = reader.GetBool();
+
+            byte flags = reader.GetByte();
+            data.Outdated = (flags & (1 << 0)) != 0;
+            data.IsStatic = (flags & (1 << 1)) != 0;
         }
 
         public readonly void Serialize(NetDataWriter writer)
@@ -38,19 +40,24 @@ namespace Fika.Core.Networking
             writer.PutVector3(Data.Position);
             writer.PutVector3(Data.Rotation);
             writer.Put((byte)Data.ObjectType);
+
             if (Data.ObjectType == SynchronizableObjectType.AirDrop)
             {
-                writer.Put(Data.PacketData.AirdropDataPacket.SignalFire);
-                writer.Put((byte)Data.PacketData.AirdropDataPacket.FallingStage);
-                writer.Put((byte)Data.PacketData.AirdropDataPacket.AirdropType);
-                writer.Put(Data.PacketData.AirdropDataPacket.UniqueId);
+                GStruct39 airdrop = Data.PacketData.AirdropDataPacket;
+                writer.Put(airdrop.SignalFire);
+                writer.Put((byte)airdrop.FallingStage);
+                writer.Put((byte)airdrop.AirdropType);
+                writer.Put(airdrop.UniqueId);
             }
             else
             {
                 writer.Put(Data.PacketData.AirplaneDataPacket.AirplanePercent);
             }
-            writer.Put(Data.Outdated);
-            writer.Put(Data.IsStatic);
+
+            byte flags = 0;
+            if (Data.Outdated) flags |= 1 << 0;
+            if (Data.IsStatic) flags |= 1 << 1;
+            writer.Put(flags);
         }
     }
 }
