@@ -1062,7 +1062,7 @@ namespace Fika.Core.Coop.Players
             // Do nothing
         }
 
-        public override void HandleDamagePacket(DamagePacket packet)
+        public override void HandleDamagePacket(in DamagePacket packet)
         {
             DamageInfoStruct DamageInfo = new()
             {
