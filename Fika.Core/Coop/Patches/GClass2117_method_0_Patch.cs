@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static void Prefix(ref GStruct268 preset)
+        public static void Prefix(ref ServerScenesDataStruct preset)
         {
             if (FikaBackendUtils.IsClient)
             {

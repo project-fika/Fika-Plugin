@@ -36,7 +36,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override GrenadeFactoryClass CreateGrenadeFactory()
         {
-            return new GClass767();
+            return new ClientNetworkGrenadeFactoryClass();
         }
 
         public override void PlayerTick(float dt)

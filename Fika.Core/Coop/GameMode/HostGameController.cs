@@ -618,7 +618,7 @@ namespace Fika.Core.Coop.GameMode
                 waveInfos.AddRange(BotHalloweenWithZombies.GetProfilesOnStart());
             }
             await botsPresets.TryLoadBotsProfilesOnStart(waveInfos);
-            GClass917 botCreator = new(this, botsPresets, CreateBot);
+            BotCreatorClass botCreator = new(this, botsPresets, CreateBot);
             BotZone[] botZones = [.. LocationScene.GetAllObjects<BotZone>(false)];
 
             bool useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;

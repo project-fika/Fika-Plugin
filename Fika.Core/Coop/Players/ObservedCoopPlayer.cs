@@ -1647,9 +1647,9 @@ namespace Fika.Core.Coop.Players
             {
                 Transform slotBone = _observedPlayer.PlayerBody.GetSlotBone(_slotType);
                 Transform alternativeHolsterBone = _observedPlayer.PlayerBody.GetAlternativeHolsterBone(_slotType);
-                PlayerBody.GClass2182 newSlotView = new(_observedPlayer.PlayerBody, _slot, slotBone, _slotType,
+                PlayerBody.EquipmentSlotClass newSlotView = new(_observedPlayer.PlayerBody, _slot, slotBone, _slotType,
                         _observedPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone, false);
-                PlayerBody.GClass2182 oldSlotView = _observedPlayer.PlayerBody.SlotViews.AddOrReplace(_slotType, newSlotView);
+                PlayerBody.EquipmentSlotClass oldSlotView = _observedPlayer.PlayerBody.SlotViews.AddOrReplace(_slotType, newSlotView);
                 if (oldSlotView != null)
                 {
                     ClearSlotView(oldSlotView);
@@ -1660,7 +1660,7 @@ namespace Fika.Core.Coop.Players
                 Dispose();
             }
 
-            private void ClearSlotView(PlayerBody.GClass2182 oldSlotView)
+            private void ClearSlotView(PlayerBody.EquipmentSlotClass oldSlotView)
             {
                 for (int i = 0; i < oldSlotView.Renderers.Length; i++)
                 {

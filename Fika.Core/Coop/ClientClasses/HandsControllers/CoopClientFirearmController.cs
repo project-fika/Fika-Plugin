@@ -786,7 +786,7 @@ namespace Fika.Core.Coop.ClientClasses
         }
 
         // Check for GClass increments
-        private class FirearmClass4(Player.FirearmController controller) : GClass1862(controller)
+        private class FirearmClass4(Player.FirearmController controller) : DefaultWeaponOperationClass(controller)
         {
             public override void Start()
             {

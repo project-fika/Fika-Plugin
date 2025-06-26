@@ -6,11 +6,11 @@ using System.Reflection;
 
 namespace Fika.Core.Coop.Patches
 {
-    public class GClass1737_method_11_Patch : FikaPatch
+    public class TransitInteractionControllerAbstractClass_method_11_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass1737).GetMethod(nameof(GClass1737.method_11));
+            return typeof(TransitInteractionControllerAbstractClass).GetMethod(nameof(TransitInteractionControllerAbstractClass.method_11));
         }
 
         [PatchPrefix]

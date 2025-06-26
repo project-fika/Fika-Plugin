@@ -129,7 +129,7 @@ namespace Fika.Core.Coop.HostClasses
 
             // Do not replicate search operations
             // Check for GClass increments, ReadPolymorph or vmethod_2 in this class
-            if (operation is GClass3380)
+            if (operation is SearchContentOperationResultClass)
             {
                 base.vmethod_1(operation, callback);
                 return;
@@ -190,7 +190,7 @@ namespace Fika.Core.Coop.HostClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3380(method_12(), this, PlayerSearchController, Profile, item);
+            return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class HostInventoryOperationHandler(CoopHostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)

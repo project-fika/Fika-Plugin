@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.Utils
         public static string HostLocationId { get; internal set; }
         public static IPAddress VPNIP { get; internal set; }
         public static RaidSettings CachedRaidSettings { get; set; }
-        public static GClass3966<GClass1406> GroupPlayers { get; set; } = [];
+        public static GClass3966<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
 
         internal static bool RequestFikaWorld;
         internal static Vector3 ReconnectPosition = Vector3.zero;
@@ -218,7 +218,7 @@ namespace Fika.Core.Coop.Utils
             {
                 Profile profile = kvp.Key;
                 InfoClass info = profile.Info;
-                GClass1405 infoSet = new()
+                GroupPlayerDataClass infoSet = new()
                 {
                     AccountId = profile.AccountId,
                     Id = profile.Id,
@@ -234,7 +234,7 @@ namespace Fika.Core.Coop.Utils
                         HasCoopExtension = info.HasCoopExtension
                     }
                 };
-                GClass1406 visualProfile = new(infoSet)
+                GroupPlayerViewModelClass visualProfile = new(infoSet)
                 {
                     PlayerVisualRepresentation = profile.GetVisualEquipmentState(false)
                 };

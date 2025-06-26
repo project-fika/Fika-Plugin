@@ -609,7 +609,7 @@ namespace Fika.Core.Networking
             // Stamina Coeff
             writer.Write(standard);
 
-            foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.GClass2038> bodyPart in health.BodyParts)
+            foreach (KeyValuePair<EBodyPart, Profile.ProfileHealthClass.ProfileBodyPartHealthClass> bodyPart in health.BodyParts)
             {
                 Profile.ProfileHealthClass.ValueInfo bodyPartInfo = bodyPart.Value.Health;
                 writer.Write(bodyPartInfo.Current <= bodyPartInfo.Minimum);

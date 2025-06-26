@@ -83,10 +83,10 @@ namespace Fika.Core.Coop.ObservedClasses
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(GClass1868)] = new OperationFactoryDelegate(Idle1);
             // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
-            operationFactoryDelegates[typeof(GClass1852)] = new OperationFactoryDelegate(ThrowPatron1);
-            operationFactoryDelegates[typeof(GClass1853)] = new OperationFactoryDelegate(ThrowPatron2);
-            operationFactoryDelegates[typeof(GClass1879)] = new OperationFactoryDelegate(ThrowPatron3);
-            operationFactoryDelegates[typeof(GClass1882)] = new OperationFactoryDelegate(ThrowPatron4);
+            operationFactoryDelegates[typeof(MutliBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron1);
+            operationFactoryDelegates[typeof(SingleBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron2);
+            operationFactoryDelegates[typeof(FixMalfunctionOperationClass)] = new OperationFactoryDelegate(ThrowPatron3);
+            operationFactoryDelegates[typeof(RechamberOperationClass)] = new OperationFactoryDelegate(ThrowPatron4);
             return operationFactoryDelegates;
         }
 
@@ -790,7 +790,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation1(FirearmController controller) : GClass1852(controller)
+        private class ObservedThrowPatronOperation1(FirearmController controller) : MutliBarrelReloadOperationClass(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
@@ -801,7 +801,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation2(FirearmController controller) : GClass1853(controller)
+        private class ObservedThrowPatronOperation2(FirearmController controller) : SingleBarrelReloadOperationClass(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
@@ -812,7 +812,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation3(FirearmController controller) : GClass1879(controller)
+        private class ObservedThrowPatronOperation3(FirearmController controller) : FixMalfunctionOperationClass(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 
@@ -823,7 +823,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedThrowPatronOperation4(FirearmController controller) : GClass1882(controller)
+        private class ObservedThrowPatronOperation4(FirearmController controller) : RechamberOperationClass(controller)
         {
             private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
 

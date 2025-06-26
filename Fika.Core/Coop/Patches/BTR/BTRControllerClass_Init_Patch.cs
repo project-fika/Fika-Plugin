@@ -33,7 +33,7 @@ namespace Fika.Core.Coop.Patches
             }
 
             __result = __instance.method_5();
-            __instance.TransferItemsController = new GClass1733(___GameWorld_0, ___BtrglobalSettings_0, true);
+            __instance.TransferItemsController = new BTRTransferItemsControllerClass(___GameWorld_0, ___BtrglobalSettings_0, true);
             if (FikaBackendUtils.IsClient)
             {
                 __instance.TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");

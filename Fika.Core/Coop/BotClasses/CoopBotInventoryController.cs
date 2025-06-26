@@ -91,7 +91,7 @@ namespace Fika.Core.Coop.BotClasses
 
         public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
         {
-            return new GClass3380(method_12(), this, PlayerSearchController, Profile, item);
+            return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
         }
 
         private class BotInventoryOperationHandler(CoopBotInventoryController controller, BaseInventoryOperationClass operation, Callback callback)

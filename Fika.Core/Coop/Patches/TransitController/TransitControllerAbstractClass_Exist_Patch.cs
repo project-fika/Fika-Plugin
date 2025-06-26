@@ -12,7 +12,7 @@ namespace Fika.Core.Coop.Patches
         {
             return typeof(TransitControllerAbstractClass)
                 .GetMethod(nameof(TransitControllerAbstractClass.Exist))
-                .MakeGenericMethod(typeof(GClass1737));
+                .MakeGenericMethod(typeof(TransitInteractionControllerAbstractClass));
         }
 
         [PatchPrefix]

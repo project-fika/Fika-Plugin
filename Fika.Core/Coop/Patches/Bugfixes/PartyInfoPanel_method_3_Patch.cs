@@ -19,7 +19,7 @@ namespace Fika.Core.Coop.Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(GClass1406 raidPlayer)
+        public static bool Prefix(GroupPlayerViewModelClass raidPlayer)
         {
             InventoryEquipment equipment = raidPlayer.PlayerVisualRepresentation.Equipment;
             if (equipment.CurrentAddress.GetOwnerOrNull() is Player.PlayerOwnerInventoryController)

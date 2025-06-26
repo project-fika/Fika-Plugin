@@ -30,7 +30,7 @@ namespace Fika.Core.UI.Patches
         [PatchPrefix]
         private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
         {
-            if (contextInteractions is not ContextInteractionsClass gclass)
+            if (contextInteractions is not ContextInteractionsAbstractClass gclass)
             {
                 return;
             }
