@@ -129,6 +129,7 @@ namespace Fika.Core.Coop.HostClasses
 
             // Do not replicate search operations
             // Check for GClass increments, ReadPolymorph or vmethod_2 in this class
+            if (operation is GClass3380)
             {
                 base.vmethod_1(operation, callback);
                 return;
