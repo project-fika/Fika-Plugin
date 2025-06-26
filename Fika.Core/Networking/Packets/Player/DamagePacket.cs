@@ -8,66 +8,85 @@ namespace Fika.Core.Networking
     public struct DamagePacket : INetSerializable
     {
         public int NetId;
-        public EDamageType DamageType;
         public float Damage;
-        public EBodyPart BodyPartType;
-        public EBodyPartColliderType ColliderType;
-        public EArmorPlateCollider ArmorPlateCollider;
         public float Absorbed;
+        public float PenetrationPower;
+        public float ArmorDamage;
+
         public Vector3 Direction;
         public Vector3 Point;
         public Vector3 HitNormal;
-        public float PenetrationPower;
+
+        public int FragmentIndex;
+
+        public EDamageType DamageType;
+        public EBodyPart BodyPartType;
+        public EBodyPartColliderType ColliderType;
+        public EArmorPlateCollider ArmorPlateCollider;
+        public MaterialType Material;
+
         public MongoID? BlockedBy;
         public MongoID? DeflectedBy;
+
         public string SourceId;
-        public int FragmentIndex;
-        public float ArmorDamage;
         public string ProfileId;
-        public MaterialType Material;
         public string WeaponId;
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
-            DamageType = (EDamageType)reader.GetInt();
+
             Damage = reader.GetFloat();
-            BodyPartType = (EBodyPart)reader.GetByte();
-            ColliderType = (EBodyPartColliderType)reader.GetByte();
-            ArmorPlateCollider = (EArmorPlateCollider)reader.GetByte();
+            Absorbed = reader.GetFloat();
+            PenetrationPower = reader.GetFloat();
+            ArmorDamage = reader.GetFloat();
+
             Direction = reader.GetVector3();
             Point = reader.GetVector3();
             HitNormal = reader.GetVector3();
-            PenetrationPower = reader.GetFloat();
+
+            FragmentIndex = reader.GetInt();
+
+            DamageType = (EDamageType)reader.GetByte();
+            BodyPartType = (EBodyPart)reader.GetByte();
+            ColliderType = (EBodyPartColliderType)reader.GetByte();
+            ArmorPlateCollider = (EArmorPlateCollider)reader.GetByte();
+            Material = (MaterialType)reader.GetByte();
+
             BlockedBy = reader.GetMongoID();
             DeflectedBy = reader.GetMongoID();
+
             SourceId = reader.GetString();
-            FragmentIndex = reader.GetInt();
-            ArmorDamage = reader.GetFloat();
             ProfileId = reader.GetString();
-            Material = (MaterialType)reader.GetByte();
             WeaponId = reader.GetString();
         }
 
-        public readonly void Serialize(NetDataWriter writer)
+        public void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            writer.Put((int)DamageType);
+
             writer.Put(Damage);
-            writer.Put((byte)BodyPartType);
-            writer.Put((byte)ColliderType);
-            writer.Put((byte)ArmorPlateCollider);
+            writer.Put(Absorbed);
+            writer.Put(PenetrationPower);
+            writer.Put(ArmorDamage);
+
             writer.PutVector3(Direction);
             writer.PutVector3(Point);
             writer.PutVector3(HitNormal);
-            writer.Put(PenetrationPower);
+
+            writer.Put(FragmentIndex);
+
+            writer.Put((byte)DamageType);
+            writer.Put((byte)BodyPartType);
+            writer.Put((byte)ColliderType);
+            writer.Put((byte)ArmorPlateCollider);
+            writer.Put((byte)Material);
+
             writer.PutMongoID(BlockedBy);
             writer.PutMongoID(DeflectedBy);
+
             writer.Put(SourceId);
-            writer.Put(FragmentIndex);
-            writer.Put(ArmorDamage);
             writer.Put(ProfileId);
-            writer.Put((byte)Material);
             writer.Put(WeaponId);
         }
     }
