@@ -331,7 +331,8 @@ namespace Fika.Core.Networking
         {
             EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
-            writer.PutByteArray(eftWriter.ToArray());
+            byte[] compressed = FikaGlobals.CompressBytes(eftWriter.ToArray());
+            writer.PutByteArray(compressed);
         }
 
         /// <summary>
@@ -341,7 +342,8 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Profile"/></returns>
         public static Profile GetProfile(this NetDataReader reader)
         {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            byte[] decompressed = FikaGlobals.DecompressBytes(reader.GetByteArray());
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(decompressed);
             return new(eftReader.ReadEFTProfileDescriptor());
         }
 
