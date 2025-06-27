@@ -44,7 +44,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
-                    PacketType = EGrenadePacketType.ExamineWeapon
+                    Type = EGrenadePacketType.ExamineWeapon
                 }
             };
             player.PacketSender.SendPacket(ref packet);
@@ -59,7 +59,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
-                    PacketType = EGrenadePacketType.HighThrow
+                    Type = EGrenadePacketType.HighThrow
                 }
             };
             player.PacketSender.SendPacket(ref packet);
@@ -74,7 +74,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
-                    PacketType = EGrenadePacketType.LowThrow
+                    Type = EGrenadePacketType.LowThrow
                 }
             };
             player.PacketSender.SendPacket(ref packet);
@@ -89,7 +89,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
-                    PacketType = EGrenadePacketType.PullRingForHighThrow
+                    Type = EGrenadePacketType.PullRingForHighThrow
                 }
             };
             player.PacketSender.SendPacket(ref packet);
@@ -104,7 +104,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
-                    PacketType = EGrenadePacketType.PullRingForLowThrow
+                    Type = EGrenadePacketType.PullRingForLowThrow
                 }
             };
             player.PacketSender.SendPacket(ref packet);
@@ -119,7 +119,7 @@ namespace Fika.Core.Coop.ClientClasses
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
-                    PacketType = EGrenadePacketType.None,
+                    Type = EGrenadePacketType.None,
                     HasGrenade = true,
                     GrenadeRotation = rotation,
                     GrenadePosition = position,

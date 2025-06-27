@@ -390,7 +390,7 @@ namespace Fika.Core.Networking
 
         public struct GrenadePacket : ISubPacket
         {
-            public EGrenadePacketType PacketType;
+            public EGrenadePacketType Type;
             public bool HasGrenade;
             public Quaternion GrenadeRotation;
             public Vector3 GrenadePosition;
@@ -402,7 +402,7 @@ namespace Fika.Core.Networking
 
             public GrenadePacket(NetDataReader reader)
             {
-                PacketType = (EGrenadePacketType)reader.GetByte();
+                Type = reader.GetEnum<EGrenadePacketType>();
                 HasGrenade = reader.GetBool();
                 if (HasGrenade)
                 {
@@ -420,7 +420,7 @@ namespace Fika.Core.Networking
             {
                 if (player.HandsController is CoopObservedGrenadeController controller)
                 {
-                    switch (PacketType)
+                    switch (Type)
                     {
                         case EGrenadePacketType.ExamineWeapon:
                             {
@@ -483,7 +483,7 @@ namespace Fika.Core.Networking
 
             public readonly void Serialize(NetDataWriter writer)
             {
-                writer.Put((byte)PacketType);
+                writer.PutEnum(Type);
                 writer.Put(HasGrenade);
                 if (HasGrenade)
                 {
@@ -679,14 +679,14 @@ namespace Fika.Core.Networking
         public struct QuickReloadMagPacket : ISubPacket
         {
             public bool Reload;
-            public string MagId;
+            public MongoID? MagId;
 
             public QuickReloadMagPacket(NetDataReader reader)
             {
                 Reload = reader.GetBool();
                 if (Reload)
                 {
-                    MagId = reader.GetString();
+                    MagId = reader.GetMongoID();
                 }
             }
 
@@ -696,7 +696,7 @@ namespace Fika.Core.Networking
                 {
                     try
                     {
-                        GStruct461<Item> result = player.FindItemById(MagId);
+                        GStruct461<Item> result = player.FindItemById(MagId.Value);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -726,7 +726,7 @@ namespace Fika.Core.Networking
                 writer.Put(Reload);
                 if (Reload)
                 {
-                    writer.Put(MagId);
+                    writer.PutMongoID(MagId);
                 }
             }
         }
@@ -743,7 +743,7 @@ namespace Fika.Core.Networking
                 Reload = reader.GetBool();
                 if (Reload)
                 {
-                    Status = (EReloadWithAmmoStatus)reader.GetByte();
+                    Status = reader.GetEnum<EReloadWithAmmoStatus>();
                     if (Status == EReloadWithAmmoStatus.StartReload)
                     {
                         AmmoIds = reader.GetStringArray();
@@ -782,7 +782,7 @@ namespace Fika.Core.Networking
                 writer.Put(Reload);
                 if (Reload)
                 {
-                    writer.Put((byte)Status);
+                    writer.PutEnum(Status);
                     if (Status == EReloadWithAmmoStatus.StartReload)
                     {
                         writer.PutArray(AmmoIds);
@@ -969,7 +969,7 @@ namespace Fika.Core.Networking
             public bool StartOneShotFire;
             public Vector3 ShotPosition;
             public Vector3 ShotForward;
-            public string AmmoTemplateId;
+            public MongoID? AmmoTemplateId;
 
             public FlareShotPacket(NetDataReader reader)
             {
@@ -978,7 +978,7 @@ namespace Fika.Core.Networking
                 {
                     ShotPosition = reader.GetVector3();
                     ShotForward = reader.GetVector3();
-                    AmmoTemplateId = reader.GetString();
+                    AmmoTemplateId = reader.GetMongoID();
                 }
             }
 
@@ -1019,7 +1019,7 @@ namespace Fika.Core.Networking
                 {
                     writer.PutVector3(ShotPosition);
                     writer.PutVector3(ShotForward);
-                    writer.Put(AmmoTemplateId);
+                    writer.PutMongoID(AmmoTemplateId);
                 }
             }
         }
@@ -1028,7 +1028,7 @@ namespace Fika.Core.Networking
         {
             public Vector3 ShotPosition = reader.GetVector3();
             public Vector3 ShotForward = reader.GetVector3();
-            public string AmmoTemplateId = reader.GetString();
+            public MongoID? AmmoTemplateId = reader.GetMongoID();
 
             public readonly void Execute(CoopPlayer player)
             {
@@ -1043,7 +1043,7 @@ namespace Fika.Core.Networking
             {
                 writer.PutVector3(ShotPosition);
                 writer.PutVector3(ShotForward);
-                writer.Put(AmmoTemplateId);
+                writer.PutMongoID(AmmoTemplateId);
             }
         }
     }
