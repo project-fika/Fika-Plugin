@@ -1,25 +1,26 @@
-﻿using LiteNetLib.Utils;
+﻿using EFT;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
     public struct ArmorDamagePacket : INetSerializable
     {
         public int NetId;
-        public string ItemId;
+        public MongoID? ItemId;
         public float Durability;
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
-            ItemId = reader.GetString();
-            Durability = reader.GetPackedFloat(0f, 200f);
+            ItemId = reader.GetMongoID();
+            Durability = reader.GetFloat();
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            writer.Put(ItemId);
-            writer.PutPackedFloat(Durability, 0f, 200f);
+            writer.PutMongoID(ItemId);
+            writer.Put(Durability);
         }
     }
 }

@@ -27,6 +27,9 @@ namespace Fika.Core.Networking
     /// </summary>
     public static class FikaSerializationExtensions
     {
+        private static readonly byte[] _byteBuffer = new byte[12];
+        private static readonly char[] _charBuffer = new char[24];
+
         /// <summary>
         /// Serializes a <see cref="Vector3"/>
         /// </summary>
@@ -125,9 +128,20 @@ namespace Fika.Core.Networking
         {
             byte flags = 0;
 
-            if (physical.StaminaExhausted) flags |= 1 << 0;
-            if (physical.OxygenExhausted) flags |= 1 << 1;
-            if (physical.HandsExhausted) flags |= 1 << 2;
+            if (physical.StaminaExhausted)
+            {
+                flags |= 1 << 0;
+            }
+
+            if (physical.OxygenExhausted)
+            {
+                flags |= 1 << 1;
+            }
+
+            if (physical.HandsExhausted)
+            {
+                flags |= 1 << 2;
+            }
 
             writer.Put(flags);
         }
@@ -511,13 +525,11 @@ namespace Fika.Core.Networking
         /// <param name="mongoId"></param>
         public static void PutMongoID(this NetDataWriter writer, MongoID? mongoId)
         {
-            if (!mongoId.HasValue)
+            writer.Put(mongoId.HasValue);
+            if (mongoId.HasValue)
             {
-                writer.Put((byte)0);
-                return;
+                writer.Put(HexStringToBytes(mongoId.Value), 0, 12);
             }
-            writer.Put((byte)1);
-            writer.Put(mongoId.Value.ToString());
         }
 
         /// <summary>
@@ -527,12 +539,13 @@ namespace Fika.Core.Networking
         /// <returns>A new <see cref="MongoID"/>? (nullable)</returns>
         public static MongoID? GetMongoID(this NetDataReader reader)
         {
-            byte value = reader.GetByte();
-            if (value == 0)
+            if (!reader.GetBool())
             {
                 return null;
             }
-            return new(reader.GetString());
+
+            reader.GetBytes(_byteBuffer, 0, 12);
+            return new(BytesToHexString(_byteBuffer));
         }
 
         /// <summary>
@@ -1288,6 +1301,75 @@ namespace Fika.Core.Networking
                 x = reader.GetFloat(),
                 y = reader.GetPackedFloat(-90f, 90f, EFloatCompression.High)
             };
+        }
+
+        private static byte[] HexStringToBytes(string hex)
+        {
+            if (hex == null)
+            {
+                throw new ArgumentNullException(nameof(hex));
+            }
+
+            if (hex.Length != 24)
+            {
+                throw new ArgumentException("Hex string must be 24 characters long.", nameof(hex));
+            }
+
+            for (int i = 0; i < 12; i++)
+            {
+                int high = FromHexChar(hex[i * 2]);
+                int low = FromHexChar(hex[i * 2 + 1]);
+                _byteBuffer[i] = (byte)((high << 4) | low);
+            }
+
+            return _byteBuffer;
+        }
+
+        private static string BytesToHexString(byte[] bytes)
+        {
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
+            if (bytes.Length != 12)
+            {
+                throw new ArgumentException("Byte array must be 12 bytes long.", nameof(bytes));
+            }
+
+            for (int i = 0; i < 12; i++)
+            {
+                byte b = bytes[i];
+                _charBuffer[i * 2] = ToHexChar(b >> 4);
+                _charBuffer[i * 2 + 1] = ToHexChar(b & 0xF);
+            }
+
+            return new string(_charBuffer);
+        }
+
+        private static int FromHexChar(char c)
+        {
+            if (c >= '0' && c <= '9')
+            {
+                return c - '0';
+            }
+
+            if (c >= 'a' && c <= 'f')
+            {
+                return c - 'a' + 10;
+            }
+
+            if (c >= 'A' && c <= 'F')
+            {
+                return c - 'A' + 10;
+            }
+
+            throw new ArgumentException($"Invalid hex character: {c}");
+        }
+
+        private static char ToHexChar(int val)
+        {
+            return (char)(val < 10 ? ('0' + val) : ('a' + (val - 10)));
         }
 
         public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
