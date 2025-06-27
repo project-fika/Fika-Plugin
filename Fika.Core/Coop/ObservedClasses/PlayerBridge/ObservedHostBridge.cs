@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 return;
             }
 
-            if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI)
+            if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.iPlayer.IsAI))
             {
                 _observedPlayer.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
             }
