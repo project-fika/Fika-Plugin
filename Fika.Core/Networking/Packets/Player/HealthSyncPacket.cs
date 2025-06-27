@@ -10,8 +10,8 @@ namespace Fika.Core.Networking
     {
         public int NetId;
         public NetworkHealthSyncPacketStruct Packet;
-        public string KillerId;
-        public string WeaponId;
+        public MongoID? KillerId;
+        public MongoID? WeaponId;
         public EBodyPart BodyPart;
         public CorpseSyncPacket CorpseSyncPacket;
         public string[] TriggerZones;
@@ -38,13 +38,13 @@ namespace Fika.Core.Networking
                         addEffect.BuildUpTime = reader.GetFloat();
                         addEffect.WorkTime = reader.GetFloat();
                         addEffect.ResidueTime = reader.GetFloat();
-                        addEffect.Strength = reader.GetFloat();
-                        addEffect.ExtraDataType = (NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct.EExtraDataType)reader.GetByte();
+                        addEffect.Strength = reader.GetPackedFloat(-100f, 100f, EFloatCompression.High);
+                        addEffect.ExtraDataType = (EExtraDataType)reader.GetByte();
 
                         switch (addEffect.ExtraDataType)
                         {
                             case EExtraDataType.MedEffect:
-                                addEffect.ExtraData.MedEffect.ItemId = reader.GetString();
+                                addEffect.ExtraData.MedEffect.ItemId = reader.GetMongoID();
                                 addEffect.ExtraData.MedEffect.Amount = reader.GetFloat();
                                 break;
 
@@ -74,20 +74,20 @@ namespace Fika.Core.Networking
                 case ESyncType.EffectStrength:
                     ref GStruct395 estr = ref data.EffectStrength;
                     estr.EffectId = reader.GetInt();
-                    estr.Strength = reader.GetFloat();
+                    estr.Strength = reader.GetPackedFloat(0f, 27f, EFloatCompression.High);
                     break;
 
                 case ESyncType.EffectMedResource:
                     ref GStruct396 emr = ref data.EffectMedResource;
                     emr.EffectId = reader.GetInt();
-                    emr.Resource = reader.GetFloat();
+                    emr.Resource = reader.GetPackedFloat(-1f, 3000f);
                     break;
 
                 case ESyncType.EffectStimulatorBuff:
                     {
                         ref GStruct397 stim = ref data.EffectStimulatorBuff;
                         stim.EffectId = reader.GetInt();
-                        stim.BuffIndex = reader.GetInt();
+                        stim.BuffIndex = reader.GetPackedInt(0, 63);
                         stim.BuffActivate = reader.GetBool();
 
                         if (stim.BuffActivate)
@@ -107,8 +107,8 @@ namespace Fika.Core.Networking
                         if (!alive.IsAlive)
                         {
                             alive.DamageType = (EDamageType)reader.GetInt();
-                            KillerId = reader.GetString();
-                            WeaponId = reader.GetString();
+                            KillerId = reader.GetMongoID();
+                            WeaponId = reader.GetMongoID();
                             BodyPart = (EBodyPart)reader.GetByte();
                             CorpseSyncPacket = reader.GetCorpseSyncPacket();
                             TriggerZones = reader.GetStringArray();
@@ -125,15 +125,15 @@ namespace Fika.Core.Networking
                     }
 
                 case ESyncType.Energy:
-                    data.Energy.Value = reader.GetFloat();
+                    data.Energy.Value = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
                     break;
 
                 case ESyncType.Hydration:
-                    data.Hydration.Value = reader.GetFloat();
+                    data.Hydration.Value = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
                     break;
 
                 case ESyncType.Temperature:
-                    data.Temperature.Value = reader.GetFloat();
+                    data.Temperature.Value = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
                     break;
 
                 case ESyncType.DamageCoeff:
@@ -169,12 +169,12 @@ namespace Fika.Core.Networking
                 case ESyncType.HealthRates:
                     {
                         ref GStruct405 rates = ref data.HealthRates;
-                        rates.HealRate = reader.GetFloat();
-                        rates.DamageRate = reader.GetFloat();
-                        rates.DamageMultiplier = reader.GetFloat();
-                        rates.Energy = reader.GetFloat();
-                        rates.Hydration = reader.GetFloat();
-                        rates.Temperature = reader.GetFloat();
+                        rates.HealRate = reader.GetPackedFloat(0f, 3000f, EFloatCompression.High);
+                        rates.DamageRate = reader.GetPackedFloat(-1000f, 0f, EFloatCompression.High);
+                        rates.DamageMultiplier = reader.GetPackedFloat(0f, 2f, EFloatCompression.High);
+                        rates.Energy = reader.GetPackedFloat(-2000f, 3000f, EFloatCompression.High);
+                        rates.Hydration = reader.GetPackedFloat(-2000f, 3000f, EFloatCompression.High);
+                        rates.Temperature = reader.GetPackedFloat(-100f, 100f, EFloatCompression.High);
                         break;
                     }
 
@@ -192,7 +192,7 @@ namespace Fika.Core.Networking
                     }
 
                 case ESyncType.Poison:
-                    data.Poison.Value = reader.GetFloat();
+                    data.Poison.Value = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
                     break;
 
                 case ESyncType.StaminaCoeff:
@@ -221,13 +221,13 @@ namespace Fika.Core.Networking
                         writer.Put(addEffect.BuildUpTime);
                         writer.Put(addEffect.WorkTime);
                         writer.Put(addEffect.ResidueTime);
-                        writer.Put(addEffect.Strength);
+                        writer.PutPackedFloat(addEffect.Strength, -100f, 100f, EFloatCompression.High);
                         writer.Put((byte)addEffect.ExtraDataType);
 
                         switch (addEffect.ExtraDataType)
                         {
                             case EExtraDataType.MedEffect:
-                                writer.Put(addEffect.ExtraData.MedEffect.ItemId);
+                                writer.PutMongoID(addEffect.ExtraData.MedEffect.ItemId);
                                 writer.Put(addEffect.ExtraData.MedEffect.Amount);
                                 break;
                             case EExtraDataType.Stimulator:
@@ -261,7 +261,7 @@ namespace Fika.Core.Networking
                     {
                         ref readonly GStruct395 estr = ref packet.EffectStrength;
                         writer.Put(estr.EffectId);
-                        writer.Put(estr.Strength);
+                        writer.PutPackedFloat(estr.Strength, 0f, 27f, EFloatCompression.High);
                         break;
                     }
 
@@ -269,7 +269,7 @@ namespace Fika.Core.Networking
                     {
                         ref readonly GStruct396 emr = ref packet.EffectMedResource;
                         writer.Put(emr.EffectId);
-                        writer.Put(emr.Resource);
+                        writer.PutPackedFloat(emr.Resource, -1f, 3000f);
                         break;
                     }
 
@@ -277,7 +277,7 @@ namespace Fika.Core.Networking
                     {
                         ref readonly GStruct397 stim = ref packet.EffectStimulatorBuff;
                         writer.Put(stim.EffectId);
-                        writer.Put(stim.BuffIndex);
+                        writer.PutPackedInt(stim.BuffIndex, 0, 63);
                         writer.Put(stim.BuffActivate);
                         if (stim.BuffActivate)
                         {
@@ -295,8 +295,8 @@ namespace Fika.Core.Networking
                         if (!alive.IsAlive)
                         {
                             writer.Put((int)alive.DamageType);
-                            writer.Put(KillerId);
-                            writer.Put(WeaponId);
+                            writer.PutMongoID(KillerId);
+                            writer.PutMongoID(WeaponId);
                             writer.Put((byte)BodyPart);
                             writer.PutCorpseSyncPacket(CorpseSyncPacket);
                             writer.PutArray(TriggerZones);
@@ -313,15 +313,15 @@ namespace Fika.Core.Networking
                     }
 
                 case ESyncType.Energy:
-                    writer.Put(packet.Energy.Value);
+                    writer.PutPackedFloat(packet.Energy.Value, 0f, 200f, EFloatCompression.High);
                     break;
 
                 case ESyncType.Hydration:
-                    writer.Put(packet.Hydration.Value);
+                    writer.PutPackedFloat(packet.Hydration.Value, 0f, 200f, EFloatCompression.High);
                     break;
 
                 case ESyncType.Temperature:
-                    writer.Put(packet.Temperature.Value);
+                    writer.PutPackedFloat(packet.Temperature.Value, 0f, 100f, EFloatCompression.High);
                     break;
 
                 case ESyncType.DamageCoeff:
@@ -352,12 +352,12 @@ namespace Fika.Core.Networking
                 case ESyncType.HealthRates:
                     {
                         ref readonly GStruct405 rates = ref packet.HealthRates;
-                        writer.Put(rates.HealRate);
-                        writer.Put(rates.DamageRate);
-                        writer.Put(rates.DamageMultiplier);
-                        writer.Put(rates.Energy);
-                        writer.Put(rates.Hydration);
-                        writer.Put(rates.Temperature);
+                        writer.PutPackedFloat(rates.HealRate, 0f, 3000f, EFloatCompression.High);
+                        writer.PutPackedFloat(rates.DamageRate, -1000f, 0f, EFloatCompression.High);
+                        writer.PutPackedFloat(rates.DamageMultiplier, 0f, 2f, EFloatCompression.High);
+                        writer.PutPackedFloat(rates.Energy, -2000f, 3000f, EFloatCompression.High);
+                        writer.PutPackedFloat(rates.Hydration, -2000f, 3000f, EFloatCompression.High);
+                        writer.PutPackedFloat(rates.Temperature, -100f, 100f, EFloatCompression.High);
                         break;
                     }
 
@@ -375,7 +375,7 @@ namespace Fika.Core.Networking
                     }
 
                 case ESyncType.Poison:
-                    writer.Put(packet.Poison.Value);
+                    writer.PutPackedFloat(packet.Poison.Value, 0f, 100f, EFloatCompression.High);
                     break;
 
                 case ESyncType.StaminaCoeff:
