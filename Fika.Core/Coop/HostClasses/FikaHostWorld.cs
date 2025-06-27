@@ -101,7 +101,7 @@ namespace Fika.Core.Coop.HostClasses
         {
             GenericPacket packet = new()
             {
-                NetId = (ushort)player.iPlayer.Id,
+                NetId = player.iPlayer.Id,
                 Type = SubPacket.EGenericSubPacketType.BorderZone,
                 SubPacket = new BorderZoneEvent(player.iPlayer.ProfileId, zone.Id)
             };

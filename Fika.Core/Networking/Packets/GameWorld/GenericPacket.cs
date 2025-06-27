@@ -11,13 +11,13 @@ namespace Fika.Core.Networking
     /// <param name="packageType"></param>
     public class GenericPacket : INetSerializable
     {
-        public ushort NetId;
+        public int NetId;
         public EGenericSubPacketType Type;
         public ISubPacket SubPacket;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             Type = reader.GetEnum<EGenericSubPacketType>();
             SubPacket = reader.GetGenericSubPacket(Type, NetId);
         }

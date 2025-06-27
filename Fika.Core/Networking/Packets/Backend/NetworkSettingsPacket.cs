@@ -7,7 +7,7 @@ namespace Fika.Core.Networking
         public string ProfileId;
 
         public int SendRate;
-        public ushort NetId;
+        public int NetId;
         public bool AllowVOIP;
 
         public void Deserialize(NetDataReader reader)
@@ -19,7 +19,7 @@ namespace Fika.Core.Networking
             }
 
             SendRate = reader.GetInt();
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             AllowVOIP = reader.GetBool();
         }
 

@@ -210,7 +210,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            ushort netId = 1000;
+            int netId = 1000;
             CoopBot coopBot;
             if (Bots.ContainsKey(profile.Id))
             {

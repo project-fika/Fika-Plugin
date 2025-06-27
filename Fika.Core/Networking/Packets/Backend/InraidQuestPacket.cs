@@ -6,15 +6,15 @@ namespace Fika.Core.Networking.Packets.Backend
 {
     public class InraidQuestPacket : INetSerializable
     {
-        public ushort NetId;
+        public int NetId;
         public InraidQuestType Type;
         public List<FlatItemsDataClass[]> Items;
         public List<string> ItemIdsToRemove;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
-            Type = reader.GetEnum<InraidQuestType>();
+            NetId = reader.GetInt();
+            Type = (InraidQuestType)reader.GetByte();
             switch (Type)
             {
                 case InraidQuestType.Finish:
@@ -48,7 +48,7 @@ namespace Fika.Core.Networking.Packets.Backend
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            writer.PutEnum(Type);
+            writer.Put((byte)Type);
             switch (Type)
             {
                 case InraidQuestType.Finish:
@@ -74,7 +74,7 @@ namespace Fika.Core.Networking.Packets.Backend
             }
         }
 
-        public enum InraidQuestType : byte
+        public enum InraidQuestType
         {
             Finish,
             Handover

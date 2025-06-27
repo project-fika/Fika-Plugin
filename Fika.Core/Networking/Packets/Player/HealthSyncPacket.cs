@@ -8,7 +8,7 @@ namespace Fika.Core.Networking
 {
     public struct HealthSyncPacket : INetSerializable
     {
-        public ushort NetId;
+        public int NetId;
         public NetworkHealthSyncPacketStruct Packet;
         public MongoID? KillerId;
         public MongoID? WeaponId;
@@ -18,7 +18,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
 
             NetworkHealthSyncPacketStruct packet = new()
             {

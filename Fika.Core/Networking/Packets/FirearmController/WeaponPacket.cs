@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
 {
     public struct WeaponPacket : INetSerializable
     {
-        public ushort NetId;
+        public int NetId;
         public EFirearmSubPacketType Type;
         public ISubPacket SubPacket;
 
@@ -17,7 +17,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             Type = reader.GetEnum<EFirearmSubPacketType>();
             SubPacket = reader.GetFirearmSubPacket(Type);
         }

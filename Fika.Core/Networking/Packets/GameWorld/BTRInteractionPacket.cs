@@ -4,16 +4,16 @@ using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
-    public struct BTRInteractionPacket(ushort netId) : INetSerializable
+    public struct BTRInteractionPacket(int netId) : INetSerializable
     {
-        public ushort NetId = netId;
+        public int NetId = netId;
         public bool IsResponse;
         public EBtrInteractionStatus Status;
         public PlayerInteractPacket Data;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             IsResponse = reader.GetBool();
             if (IsResponse)
             {

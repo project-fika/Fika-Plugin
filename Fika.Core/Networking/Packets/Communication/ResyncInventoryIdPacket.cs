@@ -3,14 +3,14 @@ using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
-    public struct ResyncInventoryIdPacket(ushort netId) : INetSerializable
+    public struct ResyncInventoryIdPacket(int netId) : INetSerializable
     {
-        public ushort NetId = netId;
+        public int NetId = netId;
         public MongoID? MongoId;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             MongoId = reader.GetMongoID();
         }
 

@@ -4,7 +4,7 @@ namespace Fika.Core.Networking
 {
     public struct InventoryPacket : INetSerializable
     {
-        public ushort NetId;
+        public int NetId;
         public uint CallbackId;
         public byte[] OperationBytes;
 
@@ -17,7 +17,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             CallbackId = reader.GetUInt();
             OperationBytes = reader.GetByteArray();
         }

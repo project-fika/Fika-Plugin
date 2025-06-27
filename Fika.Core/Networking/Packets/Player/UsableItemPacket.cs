@@ -2,9 +2,9 @@
 
 namespace Fika.Core.Networking
 {
-    public struct UsableItemPacket(ushort netId) : INetSerializable
+    public struct UsableItemPacket(int netId) : INetSerializable
     {
-        public ushort NetId = netId;
+        public int NetId = netId;
         public bool HasCompassState;
         public bool CompassState;
         public bool ExamineWeapon;
@@ -13,7 +13,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             HasCompassState = reader.GetBool();
             if (HasCompassState)
             {

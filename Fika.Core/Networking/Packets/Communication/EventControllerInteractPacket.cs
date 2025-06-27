@@ -5,12 +5,12 @@ namespace Fika.Core.Networking
 {
     public class EventControllerInteractPacket : INetSerializable
     {
-        public ushort NetId;
+        public int NetId;
         public InteractPacketStruct Data;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetUShort();
+            NetId = reader.GetInt();
             Data = new()
             {
                 hasInteraction = reader.GetBool(),

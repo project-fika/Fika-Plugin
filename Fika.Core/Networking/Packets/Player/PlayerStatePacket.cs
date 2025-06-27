@@ -27,7 +27,7 @@ namespace Fika.Core.Networking
         public float PoseLevel;
         public float WeaponOverlap;
 
-        public ushort NetId;
+        public int NetId;
         public int Step;
         public int Blindfire;
 
@@ -40,7 +40,7 @@ namespace Fika.Core.Networking
 
         public BasePhysicalClass.PhysicalStateStruct Physical;
 
-        public PlayerStatePacket(ushort netId)
+        public PlayerStatePacket(int netId)
         {
             NetId = netId;
         }
@@ -87,7 +87,7 @@ namespace Fika.Core.Networking
             RemoteTime = reader.GetDouble();
             LocalTime = reader.GetDouble();
 
-            NetId = reader.GetUShort();
+            NetId = reader.GetByte();
             Step = reader.GetPackedInt(-1, 1);
             Blindfire = reader.GetPackedInt(-1, 1);
             State = reader.GetEnum<EPlayerState>();
