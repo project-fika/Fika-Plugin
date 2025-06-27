@@ -1,4 +1,5 @@
-﻿using LiteNetLib.Utils;
+﻿using EFT;
+using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -9,7 +10,7 @@ namespace Fika.Core.Networking.Packets.Backend
         public int NetId;
         public InraidQuestType Type;
         public List<FlatItemsDataClass[]> Items;
-        public List<string> ItemIdsToRemove;
+        public List<MongoID?> ItemIdsToRemove;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -35,7 +36,7 @@ namespace Fika.Core.Networking.Packets.Backend
                             ItemIdsToRemove = new(length);
                             for (int i = 0; i < length; i++)
                             {
-                                ItemIdsToRemove.Add(reader.GetString());
+                                ItemIdsToRemove.Add(reader.GetMongoID());
                             }
                         }
                     }
@@ -65,7 +66,7 @@ namespace Fika.Core.Networking.Packets.Backend
                         writer.Put(ItemIdsToRemove.Count);
                         for (int i = 0; i < ItemIdsToRemove.Count; i++)
                         {
-                            writer.Put(ItemIdsToRemove[i]);
+                            writer.PutMongoID(ItemIdsToRemove[i]);
                         }
                     }
                     break;

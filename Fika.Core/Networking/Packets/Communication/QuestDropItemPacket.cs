@@ -1,24 +1,25 @@
-﻿using LiteNetLib.Utils;
+﻿using EFT;
+using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking
 {
     public struct QuestDropItemPacket(string nickname, string itemId, string zoneId) : INetSerializable
     {
         public string Nickname = nickname;
-        public string ItemId = itemId;
+        public MongoID? ItemId = itemId;
         public string ZoneId = zoneId;
 
         public void Deserialize(NetDataReader reader)
         {
             Nickname = reader.GetString();
-            ItemId = reader.GetString();
+            ItemId = reader.GetMongoID();
             ZoneId = reader.GetString();
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Nickname);
-            writer.Put(ItemId);
+            writer.PutMongoID(ItemId);
             writer.Put(ZoneId);
         }
     }
