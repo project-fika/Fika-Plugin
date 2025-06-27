@@ -5,21 +5,21 @@ namespace Fika.Core.Networking
     public struct ArmorDamagePacket : INetSerializable
     {
         public int NetId;
-        public string[] ItemIds;
-        public float[] Durabilities;
+        public string ItemId;
+        public float Durability;
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
-            ItemIds = reader.GetStringArray();
-            Durabilities = reader.GetFloatArray();
+            ItemId = reader.GetString();
+            Durability = reader.GetPackedFloat(0f, 200f);
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
-            writer.PutArray(ItemIds);
-            writer.PutArray(Durabilities);
+            writer.Put(ItemId);
+            writer.PutPackedFloat(Durability, 0f, 200f);
         }
     }
 }

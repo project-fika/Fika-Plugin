@@ -540,14 +540,8 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            if (list != null)
-            {
-                _preAllocatedArmorComponents.Clear();
-                _preAllocatedArmorComponents.AddRange(list);
-                SendArmorDamagePacket();
-            }
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((_preAllocatedArmorComponents == null || _preAllocatedArmorComponents.Count < 1)
-                ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
+                ? MaterialType.Body : list[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
@@ -612,12 +606,8 @@ namespace Fika.Core.Coop.Players
                     {
                         num = armorComponent.ApplyExplosionDurabilityDamage(num, DamageInfo, _preAllocatedArmorComponents);
                         method_96(num, armorComponent);
+                        OnArmorPointsChanged(armorComponent);
                     }
-                }
-
-                if (_preAllocatedArmorComponents.Count > 0)
-                {
-                    SendArmorDamagePacket();
                 }
             }
         }
@@ -640,13 +630,8 @@ namespace Fika.Core.Coop.Players
             bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-            if (list != null)
-            {
-                _preAllocatedArmorComponents.Clear();
-                _preAllocatedArmorComponents.AddRange(list);
-                SendArmorDamagePacket();
-            }
-            MaterialType materialType = flag ? MaterialType.HelmetRicochet : (_preAllocatedArmorComponents.Count < 1 ? MaterialType.Body : _preAllocatedArmorComponents[0].Material);
+            MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
+                ? MaterialType.Body : list[0].Material);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
