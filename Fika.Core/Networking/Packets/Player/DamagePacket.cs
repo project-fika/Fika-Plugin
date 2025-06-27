@@ -27,10 +27,9 @@ namespace Fika.Core.Networking
 
         public MongoID? BlockedBy;
         public MongoID? DeflectedBy;
-
-        public string SourceId;
-        public string ProfileId;
-        public string WeaponId;
+        public MongoID? SourceId;
+        public MongoID? ProfileId;
+        public MongoID? WeaponId;
 
         public void Deserialize(NetDataReader reader)
         {
