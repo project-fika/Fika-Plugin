@@ -1303,6 +1303,13 @@ namespace Fika.Core.Networking
             };
         }
 
+        /// <summary>
+        /// Converts a 24-character hexadecimal string to a 12-byte array
+        /// </summary>
+        /// <param name="hex">A hexadecimal string expected to be 24 characters long</param>
+        /// <returns>A byte array of length 12 containing the converted values</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the input hex string is null</exception>
+        /// <exception cref="ArgumentException">Thrown when the input string is not exactly 24 characters long</exception>
         private static byte[] HexStringToBytes(string hex)
         {
             if (hex == null)
@@ -1325,6 +1332,13 @@ namespace Fika.Core.Networking
             return _byteBuffer;
         }
 
+        /// <summary>
+        /// Converts a 12-byte array into a 24-character hexadecimal string
+        /// </summary>
+        /// <param name="bytes">A byte array expected to be 12 bytes long</param>
+        /// <returns>A 24-character string representing the hexadecimal value of the input bytes</returns>
+        /// <exception cref="ArgumentNullException">Thrown when the input byte array is null</exception>
+        /// <exception cref="ArgumentException">Thrown when the input byte array is not exactly 12 bytes long</exception>
         private static string BytesToHexString(byte[] bytes)
         {
             if (bytes == null)
@@ -1347,6 +1361,12 @@ namespace Fika.Core.Networking
             return new string(_charBuffer);
         }
 
+        /// <summary>
+        /// Converts a hexadecimal character into its integer value
+        /// </summary>
+        /// <param name="c">A character representing a hexadecimal digit (0-9, a-f, A-F)</param>
+        /// <returns>An integer value corresponding to the hex digit</returns>
+        /// <exception cref="ArgumentException">Thrown when the character is not a valid hex digit</exception>
         private static int FromHexChar(char c)
         {
             if (c >= '0' && c <= '9')
@@ -1367,6 +1387,11 @@ namespace Fika.Core.Networking
             throw new ArgumentException($"Invalid hex character: {c}");
         }
 
+        /// <summary>
+        /// Converts an integer value (0-15) to its corresponding hexadecimal character
+        /// </summary>
+        /// <param name="val">An integer value from 0 to 15</param>
+        /// <returns>A character representing the hexadecimal digit</returns>
         private static char ToHexChar(int val)
         {
             return (char)(val < 10 ? ('0' + val) : ('a' + (val - 10)));
