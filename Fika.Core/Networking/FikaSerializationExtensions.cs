@@ -1514,9 +1514,8 @@ namespace Fika.Core.Networking
                     return new MountingPacket(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetCommonSubPacket: type was outside of bounds!");
-                    break;
+                    return null;
             }
-            return null;
         }
 
         public static ISubPacket GetGenericSubPacket(this NetDataReader reader, EGenericSubPacketType type, int netId)
@@ -1549,9 +1548,8 @@ namespace Fika.Core.Networking
                     return new BtrSpawn(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
-                    break;
+                    return null;
             }
-            return null;
         }
 
         public static IRequestPacket GetRequestSubPacket(this NetDataReader reader, ERequestSubPacketType type)
@@ -1570,9 +1568,8 @@ namespace Fika.Core.Networking
                     return new RequestCharactersPacket(reader);
                 default:
                     FikaPlugin.Instance.FikaLogger.LogError("GetRequestSubPacket: type was outside of bounds!");
-                    break;
+                    return null;
             }
-            return null;
         }
     }
 
