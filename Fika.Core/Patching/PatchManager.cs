@@ -138,7 +138,6 @@ namespace Fika.Core.Patching
                 catch (Exception ex)
                 {
                     FikaGlobals.LogFatal($"Failed to init [{_patches[i].GetType().Name}]: {ex.Message}");
-                    throw;
                 }
             }
         }
@@ -172,7 +171,14 @@ namespace Fika.Core.Patching
 
                 foreach (Type type in query)
                 {
-                    ((FikaPatch)Activator.CreateInstance(type)).Disable(_harmony);
+                    try
+                    {
+                        ((FikaPatch)Activator.CreateInstance(type)).Disable(_harmony);
+                    }
+                    catch (Exception ex)
+                    {
+                        FikaGlobals.LogFatal($"Failed to disable [{type.Name}]: {ex.Message}");
+                    }
                 }
 
                 _logger.LogInfo($"Disabled {query.Count} patches");
@@ -186,7 +192,14 @@ namespace Fika.Core.Patching
 
             for (int i = 0; i < _patches.Count; i++)
             {
-                _patches[i].Disable(_harmony);
+                try
+                {
+                    _patches[i].Disable(_harmony);
+                }
+                catch (Exception ex)
+                {
+                    FikaGlobals.LogFatal($"Failed to disable [{_patches[i].GetType().Name}]: {ex.Message}");
+                }
             }
         }
 
