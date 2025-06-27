@@ -262,7 +262,7 @@ namespace Fika.Core.Coop.GameMode
             CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-                statisticsManager, new GClass1688(), session, playerId);
+                statisticsManager, new GClass1688(), session, (ushort)playerId);
 
             coopPlayer.Location = Location_0.Id;
             CoopHandler coopHandler = GameController.CoopHandler;
@@ -538,7 +538,7 @@ namespace Fika.Core.Coop.GameMode
         {
             Status = GameStatus.Running;
 
-            int num = Singleton<IFikaNetworkManager>.Instance.NetId;
+            ushort num = Singleton<IFikaNetworkManager>.Instance.NetId;
 
             Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
             if (BackendConfigAbstractClass.Config.UseHandsFastAnimator)

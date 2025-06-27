@@ -18,7 +18,7 @@ namespace Fika.Core.Networking
         public string SpawnType;
         public int SpawnAmount;
 
-        public int NetId;
+        public ushort NetId;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -32,7 +32,7 @@ namespace Fika.Core.Networking
                     break;
                 case ECommandType.DespawnAI:
                 case ECommandType.Bring:
-                    NetId = reader.GetInt();
+                    NetId = reader.GetUShort();
                     break;
                 case ECommandType.SpawnAirdrop:
                 default:

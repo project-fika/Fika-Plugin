@@ -7,7 +7,7 @@ namespace Fika.Core.Networking
 {
     public struct DamagePacket : INetSerializable
     {
-        public int NetId;
+        public ushort NetId;
         public float Damage;
         public float Absorbed;
         public float PenetrationPower;
@@ -33,7 +33,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
 
             Damage = reader.GetFloat();
             Absorbed = reader.GetFloat();

@@ -105,7 +105,7 @@ namespace Fika.Core.Networking
 
         internal FikaVOIPClient VOIPClient { get; set; }
 
-        public int NetId { get; set; }
+        public ushort NetId { get; set; }
         public FikaClientWorld FikaClientWorld { get; set; }
         public ESideType RaidSide { get; set; }
         public bool AllowVOIP { get; set; }

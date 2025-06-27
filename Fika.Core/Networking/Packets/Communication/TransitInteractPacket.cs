@@ -5,12 +5,12 @@ namespace Fika.Core.Networking
 {
     public struct TransitInteractPacket : INetSerializable
     {
-        public int NetId;
+        public ushort NetId;
         public TransitInteractionPacketStruct Data;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
             Data = new()
             {
                 hasInteraction = true,

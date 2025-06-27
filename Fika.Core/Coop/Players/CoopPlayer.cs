@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.Players
         public bool HasSkilledScav;
         public float ObservedOverlap = 0f;
         public CorpseSyncPacket CorpseSyncPacket = default;
-        public int NetId;
+        public ushort NetId;
         public bool IsObservedAI;
         public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
         public Snapshotter Snapshotter;
@@ -86,7 +86,7 @@ namespace Fika.Core.Coop.Players
             bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
             CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
             Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
-            int netId)
+            ushort netId)
         {
             bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
             ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;

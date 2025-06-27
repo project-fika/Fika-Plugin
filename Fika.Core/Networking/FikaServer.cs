@@ -120,7 +120,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        public int NetId { get; set; }
+        public ushort NetId { get; set; }
         public ESideType RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
         public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
@@ -135,13 +135,13 @@ namespace Fika.Core.Networking
         private int _port;
         private CoopHandler _coopHandler;
         private ManualLogSource _logger;
-        private int _currentNetId;
+        private ushort _currentNetId;
         private FikaChat _fikaChat;
         private CancellationTokenSource _natIntroduceRoutineCts;
         private float _statisticsCounter;
         private float _sendThreshold;
         private Dictionary<Profile, bool> _visualProfiles;
-        private Dictionary<string, int> _cachedConnections;
+        private Dictionary<string, ushort> _cachedConnections;
         private JobHandle _stateHandle;
         [NativeDisableContainerSafetyRestriction]
         private NativeArray<PlayerStatePacket> _snapshots;
@@ -451,7 +451,7 @@ namespace Fika.Core.Networking
 #if DEBUG
             _logger.LogInfo($"Received connection from {packet.ProfileId}");
 #endif
-            if (!_cachedConnections.TryGetValue(packet.ProfileId, out int netId))
+            if (!_cachedConnections.TryGetValue(packet.ProfileId, out ushort netId))
             {
                 netId = PopNetId();
                 _cachedConnections.Add(packet.ProfileId, netId);
@@ -1060,9 +1060,9 @@ namespace Fika.Core.Networking
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
-        public int PopNetId()
+        public ushort PopNetId()
         {
-            int netId = _currentNetId;
+            ushort netId = _currentNetId;
             _currentNetId++;
 
             return netId;
@@ -1636,11 +1636,11 @@ namespace Fika.Core.Networking
             _logger.LogInfo($"Packet loss: {_netServer.Statistics.PacketLossPercent}%");
         }
 
-        private class InventoryOperationHandler(OperationDataStruct operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
+        private class InventoryOperationHandler(OperationDataStruct operationResult, uint operationId, ushort netId, NetPeer peer, FikaServer server)
         {
             public OperationDataStruct OperationResult = operationResult;
             private readonly uint _operationId = operationId;
-            private readonly int _netId = netId;
+            private readonly ushort _netId = netId;
             private readonly NetPeer _peer = peer;
             private readonly FikaServer _server = server;
 

@@ -5,13 +5,13 @@ namespace Fika.Core.Networking
 {
     public struct ArmorDamagePacket : INetSerializable
     {
-        public int NetId;
+        public ushort NetId;
         public MongoID? ItemId;
         public float Durability;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
             ItemId = reader.GetMongoID();
             Durability = reader.GetFloat();
         }

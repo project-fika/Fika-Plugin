@@ -317,14 +317,14 @@ namespace Fika.Core.Networking
         public struct StationaryPacket : ISubPacket
         {
             public EStationaryCommand Command;
-            public string Id;
+            public MongoID? Id;
 
             public StationaryPacket(NetDataReader reader)
             {
                 Command = (EStationaryCommand)reader.GetByte();
                 if (Command == EStationaryCommand.Occupy)
                 {
-                    Id = reader.GetString();
+                    Id = reader.GetMongoID();
                 }
             }
 
@@ -340,7 +340,7 @@ namespace Fika.Core.Networking
                 writer.Put((byte)Command);
                 if (Command == EStationaryCommand.Occupy)
                 {
-                    writer.Put(Id);
+                    writer.PutMongoID(Id);
                 }
             }
         }

@@ -4,12 +4,12 @@ namespace Fika.Core.Networking
 {
     public struct BotStatePacket : INetSerializable
     {
-        public int NetId;
+        public ushort NetId;
         public EStateType Type;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
             Type = (EStateType)reader.GetByte();
         }
 

@@ -4,13 +4,13 @@ using static Fika.Core.Networking.SubPackets;
 
 namespace Fika.Core.Networking
 {
-    public struct SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId) : INetSerializable
+    public struct SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, ushort netId) : INetSerializable
     {
         public PlayerInfoPacket PlayerInfoPacket = playerInfoPacket;
         public bool IsAlive = isAlive;
         public bool IsAI = isAi;
         public Vector3 Position = position;
-        public int NetId = netId;
+        public ushort NetId = netId;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -18,7 +18,7 @@ namespace Fika.Core.Networking
             IsAlive = reader.GetBool();
             IsAI = reader.GetBool();
             Position = reader.GetVector3();
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
         }
 
         public readonly void Serialize(NetDataWriter writer)

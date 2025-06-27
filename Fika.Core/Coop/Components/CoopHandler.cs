@@ -348,7 +348,7 @@ namespace Fika.Core.Coop.Components
             _queuedPlayers.Remove(spawnObject.NetId);
         }
 
-        public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie,
+        public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, ushort netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie,
             EHandsControllerType controllerType = EHandsControllerType.None, string itemId = null)
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
@@ -395,7 +395,7 @@ namespace Fika.Core.Coop.Components
             bool isAi = spawnObject.IsAI;
             Profile profile = spawnObject.Profile;
             Vector3 position = spawnObject.Position;
-            int netId = spawnObject.NetId;
+            ushort netId = spawnObject.NetId;
             MongoID firstId = spawnObject.CurrentId;
             ushort firstOperationId = spawnObject.FirstOperationId;
             byte[] healthBytes = spawnObject.HealthBytes;
@@ -565,13 +565,13 @@ namespace Fika.Core.Coop.Components
             Extracted
         }
 
-        public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId, bool isZombie)
+        public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, ushort netId, MongoID currentId, ushort firstOperationId, bool isZombie)
         {
             public Profile Profile = profile;
             public Vector3 Position = position;
             public bool IsAlive = isAlive;
             public bool IsAI = isAI;
-            public int NetId = netId;
+            public ushort NetId = netId;
             public MongoID CurrentId = currentId;
             public ushort FirstOperationId = firstOperationId;
             public EHandsControllerType ControllerType;

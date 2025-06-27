@@ -6,7 +6,7 @@ namespace Fika.Core.Networking
 {
     public struct CommonPlayerPacket : INetSerializable
     {
-        public int NetId;
+        public ushort NetId;
         public ECommonSubPacketType Type;
         public ISubPacket SubPacket;
 
@@ -17,7 +17,7 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
             Type = reader.GetEnum<ECommonSubPacketType>();
             SubPacket = reader.GetCommonSubPacket(Type);
         }

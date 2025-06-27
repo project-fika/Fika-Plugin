@@ -5,12 +5,12 @@ namespace Fika.Core.Networking
 {
     public struct SpawnItemPacket : INetSerializable
     {
-        public int NetId;
+        public ushort NetId;
         public Item Item;
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
+            NetId = reader.GetUShort();
             Item = reader.GetItem();
         }
 
