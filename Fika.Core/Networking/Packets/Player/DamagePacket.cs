@@ -54,10 +54,9 @@ namespace Fika.Core.Networking
 
             BlockedBy = reader.GetMongoID();
             DeflectedBy = reader.GetMongoID();
-
-            SourceId = reader.GetString();
-            ProfileId = reader.GetString();
-            WeaponId = reader.GetString();
+            SourceId = reader.GetMongoID();
+            ProfileId = reader.GetMongoID();
+            WeaponId = reader.GetMongoID();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -83,10 +82,9 @@ namespace Fika.Core.Networking
 
             writer.PutMongoID(BlockedBy);
             writer.PutMongoID(DeflectedBy);
-
-            writer.Put(SourceId);
-            writer.Put(ProfileId);
-            writer.Put(WeaponId);
+            writer.PutMongoID(SourceId);
+            writer.PutMongoID(ProfileId);
+            writer.PutMongoID(WeaponId);
         }
     }
 }
