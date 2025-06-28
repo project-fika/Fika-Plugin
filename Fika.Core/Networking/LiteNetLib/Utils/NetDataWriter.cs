@@ -240,6 +240,7 @@ namespace LiteNetLib.Utils
         public void Put(byte[] data, int offset, int length)
         {
             Put(data.AsSpan(offset, length));
+
             /*if (_autoResize)
                 ResizeIfNeed(_position + length);
             Buffer.BlockCopy(data, offset, _data, _position, length);
@@ -249,6 +250,7 @@ namespace LiteNetLib.Utils
         public void Put(byte[] data)
         {
             Put(data.AsSpan());
+
             /*if (_autoResize)
                 ResizeIfNeed(_position + data.Length);
             Buffer.BlockCopy(data, 0, _data, _position, data.Length);
@@ -280,11 +282,26 @@ namespace LiteNetLib.Utils
 
         public void PutBytesWithLength(byte[] data, int offset, ushort length)
         {
-            if (_autoResize)
+            PutBytesWithLength(data.AsSpan(offset, length));
+
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 2 + length);
             FastBitConverter.GetBytes(_data, _position, length);
             Buffer.BlockCopy(data, offset, _data, _position + 2, length);
-            _position += 2 + length;
+            _position += 2 + length;*/
+        }
+
+        public void PutBytesWithLength(ReadOnlySpan<byte> data)
+        {
+            if (_autoResize)
+                ResizeIfNeed(_position + 2 + data.Length);
+
+            FastBitConverter.GetBytes(_data, _position, (ushort)data.Length);
+
+            Span<byte> destSpan = new Span<byte>(_data, _position + 2, data.Length);
+            data.CopyTo(destSpan);
+
+            _position += 2 + data.Length;
         }
 
         public void PutBytesWithLength(byte[] data)
