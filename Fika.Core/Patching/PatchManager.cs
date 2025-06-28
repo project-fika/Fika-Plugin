@@ -4,6 +4,7 @@ using Fika.Core.Coop.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.Patching
@@ -80,41 +81,6 @@ namespace Fika.Core.Patching
             _patches.AddRange(patchList);
         }
 
-        private List<Type> GetPatches()
-        {
-#if DEBUG
-            Assembly assembly = Assembly.GetCallingAssembly();
-            Type[] types = assembly.GetTypes();
-            List<Type> query = [];
-
-            for (int i = 0; i < types.Length; i++)
-            {
-                Type t = types[i];
-                if (t.BaseType == typeof(FikaPatch) && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null)
-                {
-                    query.Add(t);
-                }
-            }
-#else
-            Assembly assembly = Assembly.GetCallingAssembly();
-            Type[] types = assembly.GetTypes();
-            List<Type> query = [];
-
-            for (int i = 0; i < types.Length; i++)
-            {
-                Type t = types[i];
-                if (t.BaseType == typeof(FikaPatch)
-                    && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null
-                    && t.GetCustomAttribute<DebugPatchAttribute>() == null)
-                {
-                    query.Add(t);
-                }
-            }
-#endif
-
-            return query;
-        }
-
         /// <summary>
         /// Enables all patches, if <see cref="_autoPatch"/> is enabled it will find them automatically
         /// </summary>
@@ -124,14 +90,25 @@ namespace Fika.Core.Patching
         {
             if (_autoPatch)
             {
-                List<Type> patches = GetPatches();
+#if DEBUG
+                List<Type> query = [.. Assembly.GetCallingAssembly()
+                    .GetTypes()
+                    .Where(t => t.BaseType == typeof(FikaPatch)
+                                && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null)];
+#else
+                List<Type> query = [.. Assembly.GetCallingAssembly()
+                    .GetTypes()
+                    .Where(t => t.BaseType == typeof(FikaPatch)
+                                && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null
+                                && t.GetCustomAttribute<DebugPatchAttribute>() == null)];
+#endif
 
-                if (patches.Count == 0)
+                if (query.Count == 0)
                 {
                     throw new ArgumentException("Could not find any patches defined in the assembly during auto patching");
                 }
 
-                foreach (Type type in patches)
+                foreach (Type type in query)
                 {
                     try
                     {
@@ -143,7 +120,7 @@ namespace Fika.Core.Patching
                     }
                 }
 
-                _logger.LogInfo($"Enabled {patches.Count} patches");
+                _logger.LogInfo($"Enabled {query.Count} patches");
                 return;
             }
 
@@ -174,14 +151,25 @@ namespace Fika.Core.Patching
         {
             if (_autoPatch)
             {
-                List<Type> patches = GetPatches();
+#if DEBUG
+                List<Type> query = [.. Assembly.GetCallingAssembly()
+                    .GetTypes()
+                    .Where(t => t.BaseType == typeof(FikaPatch)
+                                && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null)];
+#else
+                List<Type> query = [.. Assembly.GetCallingAssembly()
+                    .GetTypes()
+                    .Where(t => t.BaseType == typeof(FikaPatch)
+                                && t.GetCustomAttribute<IgnoreAutoPatchAttribute>() == null
+                                && t.GetCustomAttribute<DebugPatchAttribute>() == null)];
+#endif
 
-                if (patches.Count == 0)
+                if (query.Count == 0)
                 {
                     throw new ArgumentException("Could not find any patches defined in the assembly during auto patching");
                 }
 
-                foreach (Type type in patches)
+                foreach (Type type in query)
                 {
                     try
                     {
@@ -193,7 +181,7 @@ namespace Fika.Core.Patching
                     }
                 }
 
-                _logger.LogInfo($"Disabled {patches.Count} patches");
+                _logger.LogInfo($"Disabled {query.Count} patches");
                 return;
             }
 
