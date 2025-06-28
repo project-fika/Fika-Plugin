@@ -21,15 +21,17 @@ namespace Fika.Core.Networking
             Stopwatch sw = new();
             sw.Start();
 #endif
+
             byte[] buffer = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
             int encoded = LZ4Codec.Encode(input, 0, input.Length, buffer, 0, buffer.Length, LZ4Level.L04_HC);
-            byte[] trimmed = new byte[encoded];
-            Buffer.BlockCopy(buffer, 0, trimmed, 0, encoded);
+            byte[] trimmed = buffer
+                .AsSpan(0, encoded)
+                .ToArray();
 
 #if DEBUG
             sw.Stop();
             double compressionRate = 100.0 * (1.0 - (trimmed.Length / (double)input.Length));
-            FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%, took {sw.Elapsed.TotalMilliseconds:F2} ms"); 
+            FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%, took {sw.Elapsed.TotalMilliseconds:F2} ms");
 #endif
 
             return trimmed;
