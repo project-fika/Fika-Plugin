@@ -840,12 +840,7 @@ namespace Fika.Core.Networking
             IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
             if (fikaGame != null)
             {
-                byte[] decompressed = NetworkUtils.DecompressBytes(packet.Data);
-#if DEBUG
-                double reverseRate = 100.0 * ((decompressed.Length - packet.Data.Length) / (double)packet.Data.Length);
-                _logger.LogWarning($"Original is {reverseRate:F2}% larger than compressed");
-#endif
-                using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(decompressed);
+                using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
                 GClass1780 lootData = eftReader.ReadEFTLootDataDescriptor();
                 GClass1398 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
                 if (lootItems.Count < 1)

@@ -973,7 +973,7 @@ namespace Fika.Core.Coop.GameMode
             EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
             byte[] lootData = eftWriter.ToArray();
-            LootData = NetworkUtils.CompressBytes(lootData);
+            LootData = lootData;
 #if DEBUG
             double compressionRate = 100.0 * (1.0 - (LootData.Length / (double)lootData.Length));
             FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%");
@@ -1030,12 +1030,8 @@ namespace Fika.Core.Coop.GameMode
                 GClass1780 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
                 EFTWriterClass eftWriter = new();
                 eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
-                byte[] lootData = eftWriter.ToArray();
-#if DEBUG
-                double compressionRate = 100.0 * (1.0 - (LootData.Length / (double)lootData.Length));
-                FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%");
-#endif
-                return NetworkUtils.CompressBytes(lootData);
+
+                return eftWriter.ToArray();
             }
 
             return LootData;

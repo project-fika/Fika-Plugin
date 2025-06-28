@@ -5,7 +5,7 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<Nullable>disable</Nullable>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>	  
   </PropertyGroup>
 
   <!-- targets -->
@@ -13,16 +13,10 @@
     <Configurations>Debug;Release;GoldMaster</Configurations>
     <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
   </PropertyGroup>
+	
   <ItemGroup>
-    <Compile Remove="Coop\Patches\SPTBugs\**" />
-    <EmbeddedResource Remove="Coop\Patches\SPTBugs\**" />
-    <None Remove="Coop\Patches\SPTBugs\**" />
-  </ItemGroup>
-  <ItemGroup>
+	<EmbeddedResource Include="Bundles\Files\masterbundle.bundle" />	
     <None Remove="Bundles\Files\masterbundle.bundle" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Bundles\Files\masterbundle.bundle" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,12 +34,12 @@
     <Reference Include="Assembly-CSharp" HintPath="..\References\hollowed.dll" Private="false" />
     <Reference Include="bsg.componentace.compression.libs.zlib" HintPath="..\References\bsg.componentace.compression.libs.zlib.dll" Private="false" />
     <Reference Include="bsg.console.core" HintPath="..\References\bsg.console.core.dll" Private="false" />
-	<Reference Include="com.unity.multiplayer-hlapi.Runtime" HintPath="..\References\com.unity.multiplayer-hlapi.Runtime.dll"/>
+	<Reference Include="com.unity.multiplayer-hlapi.Runtime" HintPath="..\References\com.unity.multiplayer-hlapi.Runtime.dll" />
     <Reference Include="Comfort" HintPath="..\References\Comfort.dll" Private="false" />
     <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
     <Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
     <Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
-	<Reference Include="DOTween" HintPath="..\References\DOTween.dll"/>
+	<Reference Include="DOTween" HintPath="..\References\DOTween.dll" />
     <Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
     <Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />
     <Reference Include="Sirenix.Serialization" HintPath="..\References\Sirenix.Serialization.dll" Private="false" />
@@ -55,15 +49,13 @@
     <Reference Include="spt-debugging" HintPath="..\References\spt-debugging.dll" Private="false" />
     <Reference Include="spt-reflection" HintPath="..\References\spt-reflection.dll" Private="false" />
     <Reference Include="spt-singleplayer" HintPath="..\References\spt-singleplayer.dll" Private="false" />
-	<Reference Include="System.Runtime.CompilerServices.Unsafe" HintPath="..\References\System.Runtime.CompilerServices.Unsafe.dll"/>
+	<Reference Include="System.Runtime.CompilerServices.Unsafe" HintPath="..\References\System.Runtime.CompilerServices.Unsafe.dll" />
     <Reference Include="Unity.Postprocessing.Runtime" HintPath="..\References\Unity.Postprocessing.Runtime.dll" Private="false" />
     <Reference Include="Unity.TextMeshPro" HintPath="..\References\Unity.TextMeshPro.dll" Private="false" />
     <Reference Include="UnityEngine" HintPath="..\References\UnityEngine.dll" Private="false" />
     <Reference Include="UnityEngine.UI" HintPath="..\References\UnityEngine.UI.dll" Private="false" />
 	<Reference Include="websocket-sharp" HintPath="..\References\websocket-sharp.dll" Private="false" />
-  </ItemGroup>
-
-   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
+  </ItemGroup>   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
     <Exec Condition=" '$(Configuration)|$(Platform)' != 'GoldMaster|AnyCPU' " Command="call ../Properties/build/postbuild-core.bat &quot;$(TargetPath)&quot; &quot;$(ProjectDir)&quot;" />
     <!--<Exec Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' " Command="call ../Properties/build/goldmaster-core.bat" />-->
   </Target> 

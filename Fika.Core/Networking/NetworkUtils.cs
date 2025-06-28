@@ -1,42 +1,66 @@
-﻿using LiteNetLib.Utils;
-using System.IO;
-using System.IO.Compression;
+﻿#if DEBUG
+using Fika.Core.Coop.Utils;
+# endif
+using K4os.Compression.LZ4;
+using LiteNetLib.Utils;
+using System;
+using System.Diagnostics;
 
 namespace Fika.Core.Networking
 {
     public static class NetworkUtils
     {
         /// <summary>
-        /// Compresses the given byte array using GZip compression
+        /// Compresses the given byte array using LZ4 compression
         /// </summary>
         /// <param name="data">The original uncompressed byte array</param>
         /// <returns>The compressed byte array</returns>
-        public static byte[] CompressBytes(byte[] data)
+        public static byte[] CompressBytes(byte[] input)
         {
-            using (MemoryStream output = new())
-            {
-                using (GZipStream gzip = new(output, CompressionMode.Compress, true))
-                {
-                    gzip.Write(data, 0, data.Length);
-                }
-                return output.ToArray();
-            }
+#if DEBUG
+            Stopwatch sw = new();
+            sw.Start();
+#endif
+            byte[] buffer = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
+            int encoded = LZ4Codec.Encode(input, 0, input.Length, buffer, 0, buffer.Length, LZ4Level.L04_HC);
+            byte[] trimmed = new byte[encoded];
+            Buffer.BlockCopy(buffer, 0, trimmed, 0, encoded);
+
+#if DEBUG
+            sw.Stop();
+            double compressionRate = 100.0 * (1.0 - (trimmed.Length / (double)input.Length));
+            FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%, took {sw.Elapsed.TotalMilliseconds:F2} ms"); 
+#endif
+
+            return trimmed;
         }
 
         /// <summary>
-        /// Decompresses a GZip-compressed byte array back to its original form
+        /// Decompresses a LZ4-compressed byte array back to its original form
         /// </summary>
         /// <param name="compressedData">The compressed byte array to decompress</param>
+        /// <param name="originalLength">The length of the original byte array</param>
         /// <returns>The decompressed byte array</returns>
-        public static byte[] DecompressBytes(byte[] compressedData)
+        public static byte[] DecompressBytes(byte[] compressedData, int originalLength)
         {
-            using (MemoryStream input = new(compressedData))
-            using (GZipStream gzip = new(input, CompressionMode.Decompress))
-            using (MemoryStream output = new())
+#if DEBUG
+            Stopwatch sw = new();
+            sw.Start(); 
+#endif
+            byte[] result = new byte[originalLength];
+            int decoded = LZ4Codec.Decode(compressedData, 0, compressedData.Length, result, 0, originalLength);
+            if (decoded != originalLength)
             {
-                gzip.CopyTo(output);
-                return output.ToArray();
+                throw new Exception("LZ4 decompression failed: length mismatch.");
             }
+
+#if DEBUG
+            sw.Stop();
+            double reverseRate = 100.0 * ((originalLength - compressedData.Length) / (double)compressedData.Length);
+            FikaGlobals.LogWarning($"Original is {reverseRate:F2}% larger than compressed, took {sw.Elapsed.TotalMilliseconds:F2} ms");
+#endif
+
+            return result;
         }
 
         /// <summary>

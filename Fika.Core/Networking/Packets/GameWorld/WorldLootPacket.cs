@@ -8,12 +8,12 @@ namespace Fika.Core.Networking
 
         public void Deserialize(NetDataReader reader)
         {
-            Data = reader.GetByteArray();
+            Data = reader.DecompressAndGetByteArray();
         }
 
         public void Serialize(NetDataWriter writer)
         {
-            writer.PutByteArray(Data);
+            writer.CompressAndPutByteArray(Data);
         }
     }
 }
