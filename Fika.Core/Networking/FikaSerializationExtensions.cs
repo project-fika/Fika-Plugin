@@ -381,29 +381,6 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Serializes a <see cref="Profile"/>
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="profile"></param>
-        public static void PutProfile(this NetDataWriter writer, Profile profile)
-        {
-            EFTWriterClass eftWriter = new();
-            eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
-            writer.CompressAndPutByteArray(eftWriter.ToArray());
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="Profile"/>
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="Profile"/></returns>
-        public static Profile GetProfile(this NetDataReader reader)
-        {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
-            return new(eftReader.ReadEFTProfileDescriptor());
-        }
-
-        /// <summary>
         /// Deserializes a <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/>
         /// </summary>
         /// <param name="reader"></param>
@@ -427,6 +404,29 @@ namespace Fika.Core.Networking
             }
 
             return throwables;
+        }
+
+        /// <summary>
+        /// Serializes a <see cref="Profile"/>
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="profile"></param>
+        public static void PutProfile(this NetDataWriter writer, Profile profile)
+        {
+            EFTWriterClass eftWriter = new();
+            eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
+            writer.CompressAndPutByteArray(eftWriter.ToArray());
+        }
+
+        /// <summary>
+        /// Deserializes a <see cref="Profile"/>
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns>A <see cref="Profile"/></returns>
+        public static Profile GetProfile(this NetDataReader reader)
+        {
+            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
+            return new(eftReader.ReadEFTProfileDescriptor());
         }
 
         /// <summary>
