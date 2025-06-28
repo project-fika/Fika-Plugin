@@ -974,10 +974,6 @@ namespace Fika.Core.Coop.GameMode
             eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
             byte[] lootData = eftWriter.ToArray();
             LootData = lootData;
-#if DEBUG
-            double compressionRate = 100.0 * (1.0 - (LootData.Length / (double)lootData.Length));
-            FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%");
-#endif
             return Task.CompletedTask;
         }
 

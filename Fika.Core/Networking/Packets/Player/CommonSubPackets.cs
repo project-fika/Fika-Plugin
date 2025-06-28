@@ -48,7 +48,7 @@ namespace Fika.Core.Networking
             public string InteractiveId;
             public EInteractionType InteractionType;
             public EInteractionStage InteractionStage;
-            public MongoID? ItemId;
+            public string ItemId;
 
             public WorldInteractionPacket(NetDataReader reader)
             {
@@ -57,7 +57,7 @@ namespace Fika.Core.Networking
                 InteractionStage = reader.GetEnum<EInteractionStage>();
                 if (InteractionType == EInteractionType.Unlock)
                 {
-                    ItemId = reader.GetNullableMongoID();
+                    ItemId = reader.GetString();
                 }
             }
 
@@ -74,13 +74,13 @@ namespace Fika.Core.Networking
                         {
                             KeyHandler keyHandler = new(player);
 
-                            if (!ItemId.HasValue)
+                            if (string.IsNullOrEmpty(ItemId))
                             {
                                 FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: ItemID was null!");
                                 return;
                             }
 
-                            GStruct461<Item> result = player.FindItemById(ItemId.Value, false, false);
+                            GStruct461<Item> result = player.FindItemById(ItemId, false, false);
                             if (!result.Succeeded)
                             {
                                 FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
@@ -140,7 +140,7 @@ namespace Fika.Core.Networking
                 writer.PutEnum(InteractionStage);
                 if (InteractionType == EInteractionType.Unlock)
                 {
-                    writer.PutNullableMongoID(ItemId);
+                    writer.Put(ItemId);
                 }
             }
         }
