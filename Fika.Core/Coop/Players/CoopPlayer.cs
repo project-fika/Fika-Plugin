@@ -1609,29 +1609,29 @@ namespace Fika.Core.Coop.Players
 
         private class UsableItemControllerHandler(CoopPlayer coopPlayer, Item item)
         {
-            private readonly CoopPlayer coopPlayer = coopPlayer;
-            private readonly Item item = item;
+            private readonly CoopPlayer _coopPlayer = coopPlayer;
+            private readonly Item _item = item;
             public Process<UsableItemController, GInterface184> process;
             public Action confirmCallback;
 
             internal CoopClientUsableItemController ReturnController()
             {
-                return CoopClientUsableItemController.Create(coopPlayer, item);
+                return CoopClientUsableItemController.Create(_coopPlayer, _item);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = _coopPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
                         ProceedType = EProceedType.UsableItem,
-                        ItemId = item.Id
+                        ItemId = _item.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                _coopPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)

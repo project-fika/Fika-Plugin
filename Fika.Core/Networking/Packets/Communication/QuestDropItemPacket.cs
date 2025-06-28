@@ -12,14 +12,14 @@ namespace Fika.Core.Networking
         public void Deserialize(NetDataReader reader)
         {
             Nickname = reader.GetString();
-            ItemId = reader.GetMongoID();
+            ItemId = reader.GetNullableMongoID();
             ZoneId = reader.GetString();
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Nickname);
-            writer.PutMongoID(ItemId);
+            writer.PutNullableMongoID(ItemId);
             writer.Put(ZoneId);
         }
     }

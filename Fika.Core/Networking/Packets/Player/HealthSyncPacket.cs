@@ -44,7 +44,7 @@ namespace Fika.Core.Networking
                         switch (addEffect.ExtraDataType)
                         {
                             case EExtraDataType.MedEffect:
-                                addEffect.ExtraData.MedEffect.ItemId = reader.GetMongoID();
+                                addEffect.ExtraData.MedEffect.ItemId = reader.GetNullableMongoID();
                                 addEffect.ExtraData.MedEffect.Amount = reader.GetFloat();
                                 break;
 
@@ -107,8 +107,8 @@ namespace Fika.Core.Networking
                         if (!alive.IsAlive)
                         {
                             alive.DamageType = (EDamageType)reader.GetInt();
-                            KillerId = reader.GetMongoID();
-                            WeaponId = reader.GetMongoID();
+                            KillerId = reader.GetNullableMongoID();
+                            WeaponId = reader.GetNullableMongoID();
                             BodyPart = (EBodyPart)reader.GetByte();
                             CorpseSyncPacket = reader.GetCorpseSyncPacket();
                             TriggerZones = reader.GetStringArray();
@@ -227,7 +227,7 @@ namespace Fika.Core.Networking
                         switch (addEffect.ExtraDataType)
                         {
                             case EExtraDataType.MedEffect:
-                                writer.PutMongoID(addEffect.ExtraData.MedEffect.ItemId);
+                                writer.PutNullableMongoID(addEffect.ExtraData.MedEffect.ItemId);
                                 writer.Put(addEffect.ExtraData.MedEffect.Amount);
                                 break;
                             case EExtraDataType.Stimulator:
@@ -295,8 +295,8 @@ namespace Fika.Core.Networking
                         if (!alive.IsAlive)
                         {
                             writer.Put((int)alive.DamageType);
-                            writer.PutMongoID(KillerId);
-                            writer.PutMongoID(WeaponId);
+                            writer.PutNullableMongoID(KillerId);
+                            writer.PutNullableMongoID(WeaponId);
                             writer.Put((byte)BodyPart);
                             writer.PutCorpseSyncPacket(CorpseSyncPacket);
                             writer.PutArray(TriggerZones);

@@ -52,11 +52,11 @@ namespace Fika.Core.Networking
             ArmorPlateCollider = (EArmorPlateCollider)reader.GetByte();
             Material = (MaterialType)reader.GetByte();
 
-            BlockedBy = reader.GetMongoID();
-            DeflectedBy = reader.GetMongoID();
-            SourceId = reader.GetMongoID();
-            ProfileId = reader.GetMongoID();
-            WeaponId = reader.GetMongoID();
+            BlockedBy = reader.GetNullableMongoID();
+            DeflectedBy = reader.GetNullableMongoID();
+            SourceId = reader.GetNullableMongoID();
+            ProfileId = reader.GetNullableMongoID();
+            WeaponId = reader.GetNullableMongoID();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -80,11 +80,11 @@ namespace Fika.Core.Networking
             writer.Put((byte)ArmorPlateCollider);
             writer.Put((byte)Material);
 
-            writer.PutMongoID(BlockedBy);
-            writer.PutMongoID(DeflectedBy);
-            writer.PutMongoID(SourceId);
-            writer.PutMongoID(ProfileId);
-            writer.PutMongoID(WeaponId);
+            writer.PutNullableMongoID(BlockedBy);
+            writer.PutNullableMongoID(DeflectedBy);
+            writer.PutNullableMongoID(SourceId);
+            writer.PutNullableMongoID(ProfileId);
+            writer.PutNullableMongoID(WeaponId);
         }
     }
 }

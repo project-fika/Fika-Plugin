@@ -1550,7 +1550,7 @@ namespace Fika.Core.Coop.Players
             }
         }
 
-        public void HandleProceedPacket(ref ProceedPacket packet)
+        public void HandleProceedPacket(in ProceedPacket packet)
         {
             switch (packet.ProceedType)
             {

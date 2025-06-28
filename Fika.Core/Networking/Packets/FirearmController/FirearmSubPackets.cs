@@ -306,7 +306,7 @@ namespace Fika.Core.Networking
             public int ChamberIndex = reader.GetInt();
             public float Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public bool UnderbarrelShot = reader.GetBool();
-            public MongoID? AmmoTemplate = reader.GetMongoID();
+            public MongoID? AmmoTemplate = reader.GetNullableMongoID();
             public float LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public float LastShotTime = reader.GetFloat();
             public bool SlideOnOverheatReached = reader.GetBool();
@@ -334,7 +334,7 @@ namespace Fika.Core.Networking
                 writer.Put(ChamberIndex);
                 writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(UnderbarrelShot);
-                writer.PutMongoID(AmmoTemplate);
+                writer.PutNullableMongoID(AmmoTemplate);
                 writer.PutPackedFloat(LastShotOverheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(LastShotTime);
                 writer.Put(SlideOnOverheatReached);
@@ -686,7 +686,7 @@ namespace Fika.Core.Networking
                 Reload = reader.GetBool();
                 if (Reload)
                 {
-                    MagId = reader.GetMongoID();
+                    MagId = reader.GetNullableMongoID();
                 }
             }
 
@@ -726,7 +726,7 @@ namespace Fika.Core.Networking
                 writer.Put(Reload);
                 if (Reload)
                 {
-                    writer.PutMongoID(MagId);
+                    writer.PutNullableMongoID(MagId);
                 }
             }
         }
@@ -978,7 +978,7 @@ namespace Fika.Core.Networking
                 {
                     ShotPosition = reader.GetVector3();
                     ShotForward = reader.GetVector3();
-                    AmmoTemplateId = reader.GetMongoID();
+                    AmmoTemplateId = reader.GetNullableMongoID();
                 }
             }
 
@@ -1019,7 +1019,7 @@ namespace Fika.Core.Networking
                 {
                     writer.PutVector3(ShotPosition);
                     writer.PutVector3(ShotForward);
-                    writer.PutMongoID(AmmoTemplateId);
+                    writer.PutNullableMongoID(AmmoTemplateId);
                 }
             }
         }
@@ -1028,7 +1028,7 @@ namespace Fika.Core.Networking
         {
             public Vector3 ShotPosition = reader.GetVector3();
             public Vector3 ShotForward = reader.GetVector3();
-            public MongoID? AmmoTemplateId = reader.GetMongoID();
+            public MongoID? AmmoTemplateId = reader.GetNullableMongoID();
 
             public readonly void Execute(CoopPlayer player)
             {
@@ -1043,7 +1043,7 @@ namespace Fika.Core.Networking
             {
                 writer.PutVector3(ShotPosition);
                 writer.PutVector3(ShotForward);
-                writer.PutMongoID(AmmoTemplateId);
+                writer.PutNullableMongoID(AmmoTemplateId);
             }
         }
     }

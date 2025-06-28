@@ -36,7 +36,7 @@ namespace Fika.Core.Networking.Packets.Backend
                             ItemIdsToRemove = new(length);
                             for (int i = 0; i < length; i++)
                             {
-                                ItemIdsToRemove.Add(reader.GetMongoID());
+                                ItemIdsToRemove.Add(reader.GetNullableMongoID());
                             }
                         }
                     }
@@ -66,7 +66,7 @@ namespace Fika.Core.Networking.Packets.Backend
                         writer.Put(ItemIdsToRemove.Count);
                         for (int i = 0; i < ItemIdsToRemove.Count; i++)
                         {
-                            writer.PutMongoID(ItemIdsToRemove[i]);
+                            writer.PutNullableMongoID(ItemIdsToRemove[i]);
                         }
                     }
                     break;

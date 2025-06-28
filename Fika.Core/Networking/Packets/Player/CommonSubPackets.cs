@@ -48,7 +48,7 @@ namespace Fika.Core.Networking
             public string InteractiveId;
             public EInteractionType InteractionType;
             public EInteractionStage InteractionStage;
-            public string ItemId;
+            public MongoID ItemId;
 
             public WorldInteractionPacket(NetDataReader reader)
             {
@@ -57,7 +57,7 @@ namespace Fika.Core.Networking
                 InteractionStage = (EInteractionStage)reader.GetByte();
                 if (InteractionType == EInteractionType.Unlock)
                 {
-                    ItemId = reader.GetString();
+                    ItemId = reader.GetMongoID();
                 }
             }
 
@@ -140,7 +140,7 @@ namespace Fika.Core.Networking
                 writer.Put((byte)InteractionStage);
                 if (InteractionType == EInteractionType.Unlock)
                 {
-                    writer.Put(ItemId);
+                    writer.PutMongoID(ItemId);
                 }
             }
         }
@@ -182,25 +182,36 @@ namespace Fika.Core.Networking
 
         public struct ProceedPacket : ISubPacket
         {
-            public EProceedType ProceedType;
-            public string ItemId;
+            public GStruct375<EBodyPart> BodyParts;
+            public MongoID ItemId;
             public float Amount;
             public int AnimationVariant;
+            public EProceedType ProceedType;
             public bool Scheduled;
-            public GStruct375<EBodyPart> BodyParts;
 
             public ProceedPacket(NetDataReader reader)
             {
-                ProceedType = (EProceedType)reader.GetInt();
-                ItemId = reader.GetString();
-                Amount = reader.GetFloat();
-                AnimationVariant = reader.GetInt();
-                Scheduled = reader.GetBool();
-                BodyParts = default;
-                int bodyPartsAmount = reader.GetInt();
-                for (int i = 0; i < bodyPartsAmount; i++)
+                ProceedType = reader.GetEnum<EProceedType>();
+                if (ProceedType is not EProceedType.EmptyHands)
                 {
-                    BodyParts.Add((EBodyPart)reader.GetByte());
+                    ItemId = reader.GetMongoID();
+                }
+                else
+                {
+                    Scheduled = reader.GetBool();
+                }
+                if (ProceedType is EProceedType.FoodClass or EProceedType.MedsClass)
+                {
+                    Amount = reader.GetFloat();
+                    AnimationVariant = reader.GetInt();
+                    if (ProceedType is EProceedType.MedsClass)
+                    {
+                        int bodyPartsAmount = reader.GetInt();
+                        for (int i = 0; i < bodyPartsAmount; i++)
+                        {
+                            BodyParts.Add((EBodyPart)reader.GetByte());
+                        }
+                    }
                 }
             }
 
@@ -208,22 +219,34 @@ namespace Fika.Core.Networking
             {
                 if (player is ObservedCoopPlayer observedPlayer)
                 {
-                    observedPlayer.HandleProceedPacket(ref this);
+                    observedPlayer.HandleProceedPacket(in this);
                 }
             }
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.Put((int)ProceedType);
-                writer.Put(ItemId);
-                writer.Put(Amount);
-                writer.Put(AnimationVariant);
-                writer.Put(Scheduled);
-                int bodyPartsAmount = BodyParts.Length;
-                writer.Put(bodyPartsAmount);
-                for (int i = 0; i < bodyPartsAmount; i++)
+                writer.PutEnum(ProceedType);
+                if (ProceedType is not EProceedType.EmptyHands)
                 {
-                    writer.Put((byte)BodyParts[i]);
+                    writer.PutMongoID(ItemId);
+                }
+                else
+                {
+                    writer.Put(Scheduled);
+                }
+                if (ProceedType is EProceedType.FoodClass or EProceedType.MedsClass)
+                {
+                    writer.Put(Amount);
+                    writer.Put(AnimationVariant);
+                    if (ProceedType is EProceedType.MedsClass)
+                    {
+                        int bodyPartsAmount = BodyParts.Length;
+                        writer.Put(bodyPartsAmount);
+                        for (int i = 0; i < bodyPartsAmount; i++)
+                        {
+                            writer.Put((byte)BodyParts[i]);
+                        }
+                    }
                 }
             }
         }
