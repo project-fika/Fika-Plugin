@@ -29,7 +29,18 @@ namespace LiteNetLib.Utils
             get => _position;
         }
 
-        public static readonly ThreadLocal<UTF8Encoding> uTF8Encoding = new ThreadLocal<UTF8Encoding>(() => new UTF8Encoding(false, true));
+        /// <summary>
+        /// Returns a new <see cref="ReadOnlySpan{T}"/> of the <see cref="Data"/>
+        /// </summary>
+        public ReadOnlySpan<byte> AsReadOnlySpan
+        {
+            get
+            {
+                return new(Data, 0, Length);
+            }
+        }
+
+        public static readonly ThreadLocal<UTF8Encoding> uTF8Encoding = new(() => new UTF8Encoding(false, true));
 
         public NetDataWriter() : this(true, InitialSize)
         {

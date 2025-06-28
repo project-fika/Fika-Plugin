@@ -74,7 +74,7 @@ namespace Fika.Core.Networking
                         {
                             KeyHandler keyHandler = new(player);
 
-                            if (string.IsNullOrEmpty(ItemId))
+                            if (!ItemId.HasValue)
                             {
                                 FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: ItemID was null!");
                                 return;

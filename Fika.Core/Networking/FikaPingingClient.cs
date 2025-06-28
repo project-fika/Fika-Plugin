@@ -116,11 +116,11 @@ namespace Fika.Core.Networking
 
             if (_localEndPoint != null)
             {
-                NetClient.SendUnconnectedMessage(writer, _localEndPoint);
+                NetClient.SendUnconnectedMessage(writer.AsReadOnlySpan, _localEndPoint);
             }
             if (_remoteEndPoint != null)
             {
-                NetClient.SendUnconnectedMessage(writer, _remoteEndPoint);
+                NetClient.SendUnconnectedMessage(writer.AsReadOnlySpan, _remoteEndPoint);
             }
         }
 
@@ -238,8 +238,8 @@ namespace Fika.Core.Networking
 
                 for (int i = 0; i < 20; i++)
                 {
-                    NetClient.SendUnconnectedMessage(data, _localEndPoint);
-                    NetClient.SendUnconnectedMessage(data, _remoteEndPoint);
+                    NetClient.SendUnconnectedMessage(data.AsReadOnlySpan, _localEndPoint);
+                    NetClient.SendUnconnectedMessage(data.AsReadOnlySpan, _remoteEndPoint);
                     await Task.Delay(250);
                 }
             });

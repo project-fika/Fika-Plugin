@@ -1143,7 +1143,7 @@ namespace Fika.Core.Networking
 
             _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            _netClient.FirstPeer.Send(_dataWriter, deliveryMethod);
+            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
@@ -1163,7 +1163,7 @@ namespace Fika.Core.Networking
 
             _dataWriter.PutEnum(EPacketType.VOIP);
             _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-            _netClient.FirstPeer.Send(_dataWriter, 1, DeliveryMethod.Sequenced);
+            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
         }
 
         public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
@@ -1172,7 +1172,7 @@ namespace Fika.Core.Networking
 
             _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
-            _netClient.FirstPeer.Send(_dataWriter, deliveryMethod);
+            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
 
             packet.Flush();
         }
@@ -1214,7 +1214,7 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            switch ((EPacketType)reader.GetByte())
+            switch (reader.GetEnum<EPacketType>())
             {
                 case EPacketType.Serializable:
                     _packetProcessor.ReadAllPackets(reader, peer);

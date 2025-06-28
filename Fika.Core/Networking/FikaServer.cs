@@ -1329,13 +1329,13 @@ namespace Fika.Core.Networking
                 if (NetServer.ConnectedPeersCount > 1)
                 {
                     _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-                    _netServer.SendToAll(_dataWriter, deliveryMethod, peerToExclude);
+                    _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToExclude);
                 }
                 return;
             }
 
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            _netServer.SendToAll(_dataWriter, deliveryMethod);
+            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
         public void SendReusableToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer peerToExlude = null) where T : class, IReusable, new()
@@ -1346,11 +1346,11 @@ namespace Fika.Core.Networking
             _packetProcessor.Write(_dataWriter, packet);
             if (peerToExlude != null)
             {
-                _netServer.SendToAll(_dataWriter, deliveryMethod, peerToExlude);
+                _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToExlude);
             }
             else
             {
-                _netServer.SendToAll(_dataWriter, deliveryMethod);
+                _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
             }
 
             packet.Flush();
@@ -1362,7 +1362,21 @@ namespace Fika.Core.Networking
 
             _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            peer.Send(_dataWriter, deliveryMethod);
+            peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        }
+
+        public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
+        {
+            if (peer == null)
+            {
+                _logger.LogError("SendVOIPData: peer was null!");
+                return;
+            }
+
+            _dataWriter.Reset();
+            _dataWriter.PutEnum(EPacketType.VOIP);
+            _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
+            peer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
         }
 
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
@@ -1380,21 +1394,7 @@ namespace Fika.Core.Networking
             }
 
             SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
-        }
-
-        public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
-        {
-            if (peer == null)
-            {
-                _logger.LogError("SendVOIPData: peer was null!");
-                return;
-            }
-
-            _dataWriter.Reset();
-            _dataWriter.PutEnum(EPacketType.VOIP);
-            _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-            peer.Send(_dataWriter, DeliveryMethod.Sequenced);
-        }
+        }        
 
         public void OnPeerConnected(NetPeer peer)
         {
@@ -1425,7 +1425,7 @@ namespace Fika.Core.Networking
                 _logger.LogInfo("[SERVER] Received discovery request. Send discovery response");
                 NetDataWriter resp = new();
                 resp.Put(1);
-                _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
 
                 return;
             }
@@ -1439,13 +1439,13 @@ namespace Fika.Core.Networking
                     case "fika.hello":
                         resp = new();
                         resp.Put(started ? "fika.reject" : data);
-                        _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                        _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
                         break;
 
                     case "fika.keepalive":
                         resp = new();
                         resp.Put(data);
-                        _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                        _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
 
                         if (!_natIntroduceRoutineCts.IsCancellationRequested)
                         {
@@ -1456,7 +1456,7 @@ namespace Fika.Core.Networking
                     case "fika.reconnect":
                         resp = new();
                         resp.Put("fika.hello");
-                        _netServer.SendUnconnectedMessage(resp, remoteEndPoint);
+                        _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
                         break;
 
                     default:
@@ -1561,7 +1561,7 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
-            switch ((EPacketType)reader.GetByte())
+            switch (reader.GetEnum<EPacketType>())
             {
                 case EPacketType.Serializable:
                     _packetProcessor.ReadAllPackets(reader, peer);

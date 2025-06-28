@@ -158,7 +158,7 @@ namespace LiteNetLib
         }
 
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        public static implicit operator Span<byte>(NetPacket p) => new Span<byte>(p.RawData, 0, p.Size);
+        public static implicit operator Span<byte>(NetPacket p) => new(p.RawData, 0, p.Size);
 #endif
     }
 }
