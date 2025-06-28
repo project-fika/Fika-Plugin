@@ -10,7 +10,7 @@ namespace LiteNetLib.Utils
     {
         protected byte[] _data;
         protected int _position;
-        private const int InitialSize = 64;
+        private const int _initialSize = 64;
         private readonly bool _autoResize;
 
         public int Capacity
@@ -43,11 +43,11 @@ namespace LiteNetLib.Utils
 
         public static readonly ThreadLocal<UTF8Encoding> uTF8Encoding = new(() => new UTF8Encoding(false, true));
 
-        public NetDataWriter() : this(true, InitialSize)
+        public NetDataWriter() : this(true, _initialSize)
         {
         }
 
-        public NetDataWriter(bool autoResize) : this(autoResize, InitialSize)
+        public NetDataWriter(bool autoResize) : this(autoResize, _initialSize)
         {
         }
 
