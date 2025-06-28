@@ -201,7 +201,16 @@ namespace Fika.Core.Coop.FreeCamera
                 return;
             }
 
-            List<CoopPlayer> players = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+            List<CoopPlayer> players = [];
+            List<CoopPlayer> humanPlayers = coopHandler.HumanPlayers;
+            for (int i = 0; i < humanPlayers.Count; i++)
+            {
+                CoopPlayer player = humanPlayers[i];
+                if (!player.IsYourPlayer && player.HealthController.IsAlive)
+                {
+                    players.Add(player);
+                }
+            }
             // If no alive players, add bots to spectate pool if enabled
 #if DEBUG
             if (FikaPlugin.AllowSpectateBots.Value)
@@ -213,11 +222,23 @@ namespace Fika.Core.Coop.FreeCamera
                 _isSpectatingBots = true;
                 if (FikaBackendUtils.IsServer)
                 {
-                    players = [.. players, .. coopHandler.Players.Values.Where(x => x.IsAI && x.HealthController.IsAlive)];
+                    foreach (CoopPlayer player in coopHandler.Players.Values)
+                    {
+                        if (player.IsAI && player.HealthController.IsAlive)
+                        {
+                            players.Add(player);
+                        }
+                    }
                 }
                 else
                 {
-                    players = [.. players, .. coopHandler.Players.Values.Where(x => x.IsObservedAI && x.HealthController.IsAlive)];
+                    foreach (CoopPlayer player in coopHandler.Players.Values)
+                    {
+                        if (player.IsObservedAI && player.HealthController.IsAlive)
+                        {
+                            players.Add(player);
+                        }
+                    }
                 }
             }
 #if DEBUG
