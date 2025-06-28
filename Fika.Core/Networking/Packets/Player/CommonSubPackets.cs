@@ -48,7 +48,7 @@ namespace Fika.Core.Networking
             public string InteractiveId;
             public EInteractionType InteractionType;
             public EInteractionStage InteractionStage;
-            public MongoID ItemId;
+            public MongoID? ItemId;
 
             public WorldInteractionPacket(NetDataReader reader)
             {
@@ -57,7 +57,7 @@ namespace Fika.Core.Networking
                 InteractionStage = (EInteractionStage)reader.GetByte();
                 if (InteractionType == EInteractionType.Unlock)
                 {
-                    ItemId = reader.GetMongoID();
+                    ItemId = reader.GetNullableMongoID();
                 }
             }
 
@@ -80,7 +80,7 @@ namespace Fika.Core.Networking
                                 return;
                             }
 
-                            GStruct461<Item> result = player.FindItemById(ItemId, false, false);
+                            GStruct461<Item> result = player.FindItemById(ItemId.Value, false, false);
                             if (!result.Succeeded)
                             {
                                 FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
@@ -140,7 +140,7 @@ namespace Fika.Core.Networking
                 writer.Put((byte)InteractionStage);
                 if (InteractionType == EInteractionType.Unlock)
                 {
-                    writer.PutMongoID(ItemId);
+                    writer.PutNullableMongoID(ItemId);
                 }
             }
         }
