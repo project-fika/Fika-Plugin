@@ -403,7 +403,17 @@ namespace Fika.Core.Coop.FreeCamera
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    List<CoopPlayer> alivePlayers = [.. coopHandler.HumanPlayers.Where(x => !x.IsYourPlayer && x.HealthController.IsAlive)];
+                    List<CoopPlayer> alivePlayers = [];
+
+                    List<CoopPlayer> humanPlayers = coopHandler.HumanPlayers;
+                    for (int i = 0; i < humanPlayers.Count; i++)
+                    {
+                        CoopPlayer player = humanPlayers[i];
+                        if (!player.IsYourPlayer && player.HealthController.IsAlive)
+                        {
+                            alivePlayers.Add(player);
+                        }
+                    }
                     if (alivePlayers.Count <= 0)
                     {
                         // No alive players to attach to at this time, so let's fallback to freecam on last known position
