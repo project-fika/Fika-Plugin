@@ -54,7 +54,7 @@ namespace Fika.Core.Networking
             {
                 InteractiveId = reader.GetString();
                 InteractionType = (EInteractionType)reader.GetByte();
-                InteractionStage = (EInteractionStage)reader.GetByte();
+                InteractionStage = reader.GetEnum<EInteractionStage>();
                 if (InteractionType == EInteractionType.Unlock)
                 {
                     ItemId = reader.GetNullableMongoID();
@@ -137,7 +137,7 @@ namespace Fika.Core.Networking
             {
                 writer.Put(InteractiveId);
                 writer.Put((byte)InteractionType);
-                writer.Put((byte)InteractionStage);
+                writer.PutEnum(InteractionStage);
                 if (InteractionType == EInteractionType.Unlock)
                 {
                     writer.PutNullableMongoID(ItemId);
