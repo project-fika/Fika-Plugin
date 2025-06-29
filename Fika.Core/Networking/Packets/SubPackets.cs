@@ -15,25 +15,32 @@ namespace Fika.Core.Networking
         public struct PlayerInfoPacket
         {
             public Profile Profile;
-            public byte[] HealthByteArray;
             public MongoID ControllerId;
+            public string ItemId;
+
+            public byte[] HealthByteArray;
+
             public ushort FirstOperationId;
             public EHandsControllerType ControllerType;
-            public string ItemId;
+
             public bool IsStationary;
             public bool IsZombie;
         }
 
         public struct CorpseSyncPacket
         {
+            public InventoryDescriptorClass InventoryDescriptor;
+            public Item ItemInHands;
+
             public EBodyPartColliderType BodyPartColliderType;
+
             public Vector3 Direction;
             public Vector3 Point;
-            public float Force;
             public Vector3 OverallVelocity;
-            public InventoryDescriptorClass InventoryDescriptor;
+
+            public float Force;
+
             public EquipmentSlot ItemSlot;
-            public Item ItemInHands;
         }
 
         public struct DeathInfoPacket
@@ -44,12 +51,13 @@ namespace Fika.Core.Networking
             public string KillerAccountId;
             public string KillerProfileId;
             public string KillerName;
-            public EPlayerSide Side;
-            public int Level;
-            public DateTime Time;
             public string Status;
             public string WeaponName;
             public string GroupId;
+
+            public EPlayerSide Side;
+            public int Level;
+            public DateTime Time;
         }
     }
 }

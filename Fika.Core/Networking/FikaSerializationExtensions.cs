@@ -885,15 +885,16 @@ namespace Fika.Core.Networking
         {
             writer.PutProfile(packet.Profile);
             writer.PutMongoID(packet.ControllerId);
+            writer.Put(packet.ItemId);
+            writer.PutByteArray(packet.HealthByteArray ?? []);
+
             writer.Put(packet.FirstOperationId);
-            writer.PutByteArray(packet.HealthByteArray ?? ([]));
             writer.Put((byte)packet.ControllerType);
-            if (packet.ControllerType != EHandsControllerType.None)
-            {
-                writer.Put(packet.ItemId);
-                writer.Put(packet.IsStationary);
-            }
-            writer.Put(packet.IsZombie);
+
+            byte flags = 0;
+            if (packet.IsStationary) flags |= 1;
+            if (packet.IsZombie) flags |= 2;
+            writer.Put(flags);
         }
 
         /// <summary>
@@ -907,16 +908,17 @@ namespace Fika.Core.Networking
             {
                 Profile = reader.GetProfile(),
                 ControllerId = reader.GetMongoID(),
-                FirstOperationId = reader.GetUShort(),
+                ItemId = reader.GetString(),
                 HealthByteArray = reader.GetByteArray(),
-                ControllerType = (EHandsControllerType)reader.GetByte()
+
+                FirstOperationId = reader.GetUShort(),
+                ControllerType = (EHandsControllerType)reader.GetByte(),
             };
-            if (packet.ControllerType != EHandsControllerType.None)
-            {
-                packet.ItemId = reader.GetString();
-                packet.IsStationary = reader.GetBool();
-            }
-            packet.IsZombie = reader.GetBool();
+
+            byte flags = reader.GetByte();
+            packet.IsStationary = (flags & 1) != 0;
+            packet.IsZombie = (flags & 2) != 0;
+
             return packet;
         }
 
@@ -990,12 +992,14 @@ namespace Fika.Core.Networking
         /// <param name="packet"></param>
         public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPacket packet)
         {
-            writer.Put((int)packet.BodyPartColliderType);
+            writer.PutItemDescriptor(packet.InventoryDescriptor);
+
             writer.PutVector3(packet.Direction);
             writer.PutVector3(packet.Point);
-            writer.Put(packet.Force);
             writer.PutVector3(packet.OverallVelocity);
-            writer.PutItemDescriptor(packet.InventoryDescriptor);
+            writer.Put(packet.Force);
+
+            writer.Put((byte)packet.BodyPartColliderType);
             writer.Put((byte)packet.ItemSlot);
         }
 
@@ -1008,12 +1012,14 @@ namespace Fika.Core.Networking
         {
             return new CorpseSyncPacket()
             {
-                BodyPartColliderType = (EBodyPartColliderType)reader.GetInt(),
+                InventoryDescriptor = reader.GetItemDescriptor(),
+
                 Direction = reader.GetVector3(),
                 Point = reader.GetVector3(),
-                Force = reader.GetFloat(),
                 OverallVelocity = reader.GetVector3(),
-                InventoryDescriptor = reader.GetItemDescriptor(),
+                Force = reader.GetFloat(),
+
+                BodyPartColliderType = (EBodyPartColliderType)reader.GetByte(),
                 ItemSlot = (EquipmentSlot)reader.GetByte()
             };
         }
@@ -1031,12 +1037,13 @@ namespace Fika.Core.Networking
             writer.Put(packet.KillerAccountId);
             writer.Put(packet.KillerProfileId);
             writer.Put(packet.KillerName);
-            writer.Put((byte)packet.Side);
-            writer.Put(packet.Level);
-            writer.PutDateTime(packet.Time);
             writer.Put(packet.Status);
             writer.Put(packet.WeaponName);
             writer.Put(packet.GroupId);
+
+            writer.PutDateTime(packet.Time);
+            writer.Put(packet.Level);
+            writer.Put((byte)packet.Side);
         }
 
         /// <summary>
@@ -1054,12 +1061,13 @@ namespace Fika.Core.Networking
                 KillerAccountId = reader.GetString(),
                 KillerProfileId = reader.GetString(),
                 KillerName = reader.GetString(),
-                Side = (EPlayerSide)reader.GetByte(),
-                Level = reader.GetInt(),
-                Time = reader.GetDateTime(),
                 Status = reader.GetString(),
                 WeaponName = reader.GetString(),
-                GroupId = reader.GetString()
+                GroupId = reader.GetString(),
+
+                Time = reader.GetDateTime(),
+                Level = reader.GetInt(),
+                Side = (EPlayerSide)reader.GetByte()
             };
         }
 
