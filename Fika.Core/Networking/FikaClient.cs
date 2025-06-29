@@ -613,7 +613,7 @@ namespace Fika.Core.Networking
                 {
                     if (observedPlayer.InventoryController is ObservedInventoryController observedController)
                     {
-                        observedController.SetNewID(packet.MongoId.Value);
+                        observedController.SetNewID(packet.MongoId);
                     }
                     return;
                 }

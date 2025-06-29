@@ -747,7 +747,7 @@ namespace Fika.Core.Networking
                     SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
                     if (observedPlayer.InventoryController is ObservedInventoryController observedController)
                     {
-                        observedController.SetNewID(packet.MongoId.Value);
+                        observedController.SetNewID(packet.MongoId);
                     }
                 }
             }
