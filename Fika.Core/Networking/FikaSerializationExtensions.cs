@@ -760,6 +760,32 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
+        /// Deserializes a <see cref="GrenadeDataPacketStruct"/>
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns>A <see cref="GrenadeDataPacketStruct"/> with data</returns>
+        public static GrenadeDataPacketStruct GetGrenadeStruct(this NetDataReader reader)
+        {
+            GrenadeDataPacketStruct grenadeStruct = new()
+            {
+                Id = reader.GetInt(),
+                Position = reader.GetVector3(),
+                Rotation = reader.GetQuaternion(),
+                CollisionNumber = reader.GetByte()
+            };
+
+            if (!reader.GetBool())
+            {
+                grenadeStruct.Velocity = reader.GetVector3();
+                grenadeStruct.AngularVelocity = reader.GetVector3();
+                return grenadeStruct;
+            }
+
+            grenadeStruct.Done = true;
+            return grenadeStruct;
+        }
+
+        /// <summary>
         /// Serializes a <see cref="AirplaneDataPacketStruct"/>
         /// </summary>
         /// <param name="writer"></param>
@@ -848,33 +874,7 @@ namespace Fika.Core.Networking
             }
 
             return packet;
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="GrenadeDataPacketStruct"/>
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="GrenadeDataPacketStruct"/> with data</returns>
-        public static GrenadeDataPacketStruct GetGrenadeStruct(this NetDataReader reader)
-        {
-            GrenadeDataPacketStruct grenadeStruct = new()
-            {
-                Id = reader.GetInt(),
-                Position = reader.GetVector3(),
-                Rotation = reader.GetQuaternion(),
-                CollisionNumber = reader.GetByte()
-            };
-
-            if (!reader.GetBool())
-            {
-                grenadeStruct.Velocity = reader.GetVector3();
-                grenadeStruct.AngularVelocity = reader.GetVector3();
-                return grenadeStruct;
-            }
-
-            grenadeStruct.Done = true;
-            return grenadeStruct;
-        }
+        }        
 
         /// <summary>
         /// Serializes a <see cref="PlayerInfoPacket"/>
