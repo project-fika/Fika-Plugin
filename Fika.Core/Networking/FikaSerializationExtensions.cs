@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using static BasePhysicalClass;
 using static Fika.Core.Networking.CommonSubPackets;
 using static Fika.Core.Networking.FirearmSubPackets;
@@ -926,23 +927,26 @@ namespace Fika.Core.Networking
         /// <param name="weatherClass"></param>
         public static void PutWeatherClass(this NetDataWriter writer, WeatherClass weatherClass)
         {
+            writer.Put(weatherClass.Time);
+
+            writer.PutVector2(weatherClass.MainWindDirection);
+            writer.PutVector2(weatherClass.MainWindPosition);
+            writer.PutVector2(weatherClass.TopWindDirection);
+            writer.PutVector2(weatherClass.TopWindPosition);
+
             writer.Put(weatherClass.AtmospherePressure);
             writer.Put(weatherClass.Cloudness);
             writer.Put(weatherClass.GlobalFogDensity);
             writer.Put(weatherClass.GlobalFogHeight);
             writer.Put(weatherClass.LyingWater);
-            writer.PutVector2(weatherClass.MainWindDirection);
-            writer.PutVector2(weatherClass.MainWindPosition);
             writer.Put(weatherClass.Rain);
             writer.Put(weatherClass.RainRandomness);
             writer.Put(weatherClass.ScaterringFogDensity);
             writer.Put(weatherClass.ScaterringFogHeight);
             writer.Put(weatherClass.Temperature);
-            writer.Put(weatherClass.Time);
-            writer.PutVector2(weatherClass.TopWindDirection);
-            writer.PutVector2(weatherClass.TopWindPosition);
             writer.Put(weatherClass.Turbulence);
             writer.Put(weatherClass.Wind);
+
             writer.Put(weatherClass.WindDirection);
         }
 
@@ -955,24 +959,27 @@ namespace Fika.Core.Networking
         {
             return new WeatherClass()
             {
+                Time = reader.GetLong(),
+
+                MainWindDirection = reader.GetVector2(),
+                MainWindPosition = reader.GetVector2(),
+                TopWindDirection = reader.GetVector2(),
+                TopWindPosition = reader.GetVector2(),
+
                 AtmospherePressure = reader.GetFloat(),
                 Cloudness = reader.GetFloat(),
                 GlobalFogDensity = reader.GetFloat(),
                 GlobalFogHeight = reader.GetFloat(),
                 LyingWater = reader.GetFloat(),
-                MainWindDirection = reader.GetVector2(),
-                MainWindPosition = reader.GetVector2(),
                 Rain = reader.GetFloat(),
                 RainRandomness = reader.GetFloat(),
                 ScaterringFogDensity = reader.GetFloat(),
                 ScaterringFogHeight = reader.GetFloat(),
                 Temperature = reader.GetFloat(),
-                Time = reader.GetLong(),
-                TopWindDirection = reader.GetVector2(),
-                TopWindPosition = reader.GetVector2(),
                 Turbulence = reader.GetFloat(),
                 Wind = reader.GetFloat(),
-                WindDirection = reader.GetInt()
+
+                WindDirection = reader.GetInt(),
             };
         }
 

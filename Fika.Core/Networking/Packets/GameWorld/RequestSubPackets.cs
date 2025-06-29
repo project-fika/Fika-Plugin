@@ -102,7 +102,7 @@ namespace Fika.Core.Networking
 
             public WeatherRequest(NetDataReader reader)
             {
-                Season = (ESeason)reader.GetByte();
+                Season = reader.GetEnum<ESeason>();
                 SpringSnowFactor = reader.GetVector3();
                 int amount = reader.GetInt();
                 WeatherClasses = new WeatherClass[amount];
@@ -154,7 +154,7 @@ namespace Fika.Core.Networking
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.Put((byte)Season);
+                writer.PutEnum(Season);
                 writer.PutVector3(SpringSnowFactor);
                 int amount = WeatherClasses.Length;
                 writer.Put(amount);

@@ -24,28 +24,6 @@ namespace Fika.Core.Networking
             public bool IsZombie;
         }
 
-        public struct WeatherClassPacket
-        {
-            public float AtmospherePressure;
-            public float Cloudness;
-            public float GlobalFogDensity;
-            public float GlobalFogHeight;
-            public float LyingWater;
-            public Vector2 MainWindDirection;
-            public Vector2 MainWindPosition;
-            public float Rain;
-            public float RainRandomness;
-            public float ScaterringFogDensity;
-            public float ScaterringFogHeight;
-            public float Temperature;
-            public long Time;
-            public Vector2 TopWindDirection;
-            public Vector2 TopWindPosition;
-            public float Turbulence;
-            public float Wind;
-            public int WindDirection;
-        }
-
         public struct CorpseSyncPacket
         {
             public EBodyPartColliderType BodyPartColliderType;
