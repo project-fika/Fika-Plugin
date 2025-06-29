@@ -34,7 +34,7 @@ namespace Fika.Core.Networking
 
         public struct ChangeFireModePacket(NetDataReader reader) : ISubPacket
         {
-            public Weapon.EFireMode FireMode = (Weapon.EFireMode)reader.GetByte();
+            public Weapon.EFireMode FireMode = reader.GetEnum<Weapon.EFireMode>();
 
             public readonly void Execute(CoopPlayer player)
             {
@@ -46,7 +46,7 @@ namespace Fika.Core.Networking
 
             public readonly void Serialize(NetDataWriter writer)
             {
-                writer.Put((byte)FireMode);
+                writer.PutEnum(FireMode);
             }
         }
 
@@ -300,17 +300,17 @@ namespace Fika.Core.Networking
 
         public struct ShotInfoPacket(NetDataReader reader) : ISubPacket
         {
-            public EShotType ShotType = (EShotType)reader.GetByte();
             public Vector3 ShotPosition = reader.GetVector3();
             public Vector3 ShotDirection = reader.GetVector3();
-            public int ChamberIndex = reader.GetInt();
-            public float Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
-            public bool UnderbarrelShot = reader.GetBool();
             public MongoID AmmoTemplate = reader.GetMongoID();
+            public float Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public float LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public float LastShotTime = reader.GetFloat();
-            public bool SlideOnOverheatReached = reader.GetBool();
             public float Durability = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
+            public int ChamberIndex = reader.GetPackedInt(0, 16);
+            public bool UnderbarrelShot = reader.GetBool();
+            public bool SlideOnOverheatReached = reader.GetBool();
+            public EShotType ShotType = (EShotType)reader.GetByte();
 
             public void Execute(CoopPlayer player)
             {
@@ -328,17 +328,17 @@ namespace Fika.Core.Networking
 
             public readonly void Serialize(NetDataWriter writer)
             {
-                writer.Put((byte)ShotType);
                 writer.PutVector3(ShotPosition);
                 writer.PutVector3(ShotDirection);
-                writer.Put(ChamberIndex);
-                writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
-                writer.Put(UnderbarrelShot);
                 writer.PutMongoID(AmmoTemplate);
+                writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
                 writer.PutPackedFloat(LastShotOverheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(LastShotTime);
-                writer.Put(SlideOnOverheatReached);
                 writer.PutPackedFloat(Durability, 0f, 100f, EFloatCompression.High);
+                writer.PutPackedInt(ChamberIndex, 0, 16);
+                writer.Put(UnderbarrelShot);
+                writer.Put(SlideOnOverheatReached);
+                writer.Put((byte)ShotType);
             }
         }
 
@@ -390,11 +390,11 @@ namespace Fika.Core.Networking
 
         public struct GrenadePacket : ISubPacket
         {
-            public EGrenadePacketType Type;
-            public bool HasGrenade;
             public Quaternion GrenadeRotation;
             public Vector3 GrenadePosition;
             public Vector3 ThrowForce;
+            public EGrenadePacketType Type;
+            public bool HasGrenade;
             public bool LowThrow;
             public bool PlantTripwire;
             public bool ChangeToIdle;
@@ -594,16 +594,16 @@ namespace Fika.Core.Networking
 
         public struct ReloadMagPacket : ISubPacket
         {
-            public bool Reload;
-            public string MagId;
+            public MongoID MagId;
             public byte[] LocationDescription;
+            public bool Reload;
 
             public ReloadMagPacket(NetDataReader reader)
             {
                 Reload = reader.GetBool();
                 if (Reload)
                 {
-                    MagId = reader.GetString();
+                    MagId = reader.GetMongoID();
                     LocationDescription = reader.GetByteArray();
                 }
             }
@@ -670,7 +670,7 @@ namespace Fika.Core.Networking
                 writer.Put(Reload);
                 if (Reload)
                 {
-                    writer.Put(MagId);
+                    writer.PutMongoID(MagId);
                     writer.PutByteArray(LocationDescription);
                 }
             }
@@ -678,8 +678,8 @@ namespace Fika.Core.Networking
 
         public struct QuickReloadMagPacket : ISubPacket
         {
-            public bool Reload;
             public MongoID MagId;
+            public bool Reload;
 
             public QuickReloadMagPacket(NetDataReader reader)
             {
@@ -797,12 +797,12 @@ namespace Fika.Core.Networking
 
         public struct CylinderMagPacket : ISubPacket
         {
-            public bool Changed;
+            public EReloadWithAmmoStatus Status;
             public int CamoraIndex;
+            public int AmmoLoadedToMag;
+            public bool Changed;
             public bool HammerClosed;
             public bool Reload;
-            public EReloadWithAmmoStatus Status;
-            public int AmmoLoadedToMag;
             public string[] AmmoIds;
 
             public CylinderMagPacket(NetDataReader reader)
@@ -870,8 +870,8 @@ namespace Fika.Core.Networking
 
         public struct ReloadLauncherPacket : ISubPacket
         {
-            public bool Reload;
             public string[] AmmoIds;
+            public bool Reload;
 
             public ReloadLauncherPacket(NetDataReader reader)
             {
@@ -905,9 +905,9 @@ namespace Fika.Core.Networking
 
         public struct ReloadBarrelsPacket : ISubPacket
         {
-            public bool Reload;
             public string[] AmmoIds;
             public byte[] LocationDescription;
+            public bool Reload;
 
             public ReloadBarrelsPacket(NetDataReader reader)
             {
@@ -966,10 +966,10 @@ namespace Fika.Core.Networking
 
         public struct FlareShotPacket : ISubPacket
         {
-            public bool StartOneShotFire;
             public Vector3 ShotPosition;
             public Vector3 ShotForward;
             public MongoID AmmoTemplateId;
+            public bool StartOneShotFire;
 
             public FlareShotPacket(NetDataReader reader)
             {
