@@ -121,10 +121,10 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Serializes a <see cref="PhysicalStateStruct"/> (Physical) struct
+        /// Serializes a <see cref="PhysicalStateStruct"/> struct to the <paramref name="writer"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="physical"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="physical">The <see cref="PhysicalStateStruct"/> to serialize</param>
         public static void PutPhysical(this NetDataWriter writer, PhysicalStateStruct physical)
         {
             byte flags = 0;
@@ -148,10 +148,10 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Deserializes a <see cref="PhysicalStateStruct"/> (Physical) struct
+        /// Deserializes a <see cref="PhysicalStateStruct"/> struct from the <paramref name="reader"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="PhysicalStateStruct"/> (Physical)</returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="PhysicalStateStruct"/></returns>
         public static PhysicalStateStruct GetPhysical(this NetDataReader reader)
         {
             byte flags = reader.GetByte();
@@ -227,20 +227,20 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Serializes an <see cref="ArraySegment{T}"/> of <see cref="byte"/>[]
+        /// Serializes an <see cref="ArraySegment{T}"/> of <see cref="byte"/> to the <paramref name="writer"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="segment"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="segment">The <see cref="ArraySegment{T}"/> of bytes to serialize</param>
         public static void PutByteSegment(this NetDataWriter writer, ArraySegment<byte> segment)
         {
             writer.PutBytesWithLength(segment.Array, segment.Offset, (ushort)segment.Count);
         }
 
         /// <summary>
-        /// Deserializes an <see cref="ArraySegment{T}"/> of <see cref="byte"/>[]
+        /// Deserializes a <see cref="byte"/> array from the <paramref name="reader"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns></returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized byte array</returns>
         public static byte[] GetByteSegment(this NetDataReader reader)
         {
             return reader.GetBytesWithLength();
@@ -273,29 +273,30 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Serializes a <see cref="DateTime"/>
+        /// Serializes a <see cref="DateTime"/> to the <paramref name="writer"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="dateTime"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="dateTime">The <see cref="DateTime"/> to serialize</param>
         public static void PutDateTime(this NetDataWriter writer, DateTime dateTime)
         {
             writer.Put(dateTime.ToOADate());
         }
 
         /// <summary>
-        /// Deserializes a <see cref="DateTime"/>
+        /// Deserializes a <see cref="DateTime"/> from the <paramref name="reader"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="DateTime"/></returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="DateTime"/></returns>
         public static DateTime GetDateTime(this NetDataReader reader)
         {
             return DateTime.FromOADate(reader.GetDouble());
         }
 
         /// <summary>
-        /// This write and serializes an <see cref="Item"/>, which can be cast to different types of inherited classes. Casting should be handled inside packet for consistency.
+        /// Serializes an <see cref="Item"/> to the <paramref name="writer"/>. <br/>
+        /// Casting to inherited types should be handled inside the packet for consistency.
         /// </summary>
-        /// <param name="writer"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
         /// <param name="item">The <see cref="Item"/> to serialize</param>
         public static void PutItem(this NetDataWriter writer, Item item)
         {
@@ -306,15 +307,17 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Gets a serialized <see cref="Item"/>
+        /// Deserializes an <see cref="Item"/> from the <paramref name="reader"/>. <br/>
+        /// The returned <see cref="Item"/> is cast to the appropriate type inside the packet.
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>An <see cref="Item"/> (cast to type inside packet)</returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="Item"/></returns>
         public static Item GetItem(this NetDataReader reader)
         {
             using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
         }
+
 
         /// <summary>
         /// Reads an <see cref="InventoryEquipment"/> serialized from <see cref="PutItem(NetDataWriter, Item)"/> and converts it into an <see cref="Inventory"/>
