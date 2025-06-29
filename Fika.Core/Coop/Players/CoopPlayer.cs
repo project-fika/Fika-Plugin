@@ -672,7 +672,7 @@ namespace Fika.Core.Coop.Players
         {
             if (PacketSender != null && PacketSender.Enabled)
             {
-                FirearmLightStateStruct[] lightStates = _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates).ToArray();
+                FirearmLightStateStruct[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
 
                 CommonPlayerPacket packet = new()
                 {
@@ -680,7 +680,7 @@ namespace Fika.Core.Coop.Players
                     Type = ECommonSubPacketType.HeadLights,
                     SubPacket = new HeadLightsPacket()
                     {
-                        Amount = lightStates.Count(),
+                        Amount = lightStates.Length,
                         IsSilent = isSilent,
                         LightStates = lightStates
                     }
@@ -698,9 +698,10 @@ namespace Fika.Core.Coop.Players
 
             if (HandsController is CoopClientFirearmController controller)
             {
-                FirearmLightStateStruct[] array = controller.Item.AllSlots.Select(FikaGlobals.GetContainedItem)
-                    .GetComponents<LightComponent>().Select(FikaGlobals.GetFirearmLightStatesFromComponent)
-                    .ToArray();
+                FirearmLightStateStruct[] array = [.. controller.Item.AllSlots
+                    .Select(FikaGlobals.GetContainedItem)
+                    .GetComponents<LightComponent>()
+                    .Select(FikaGlobals.GetFirearmLightStatesFromComponent)];
 
                 if (array.Length == 0)
                 {
