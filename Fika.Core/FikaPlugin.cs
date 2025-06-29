@@ -91,7 +91,7 @@ namespace Fika.Core
             { "rairai",       "Very nice and caring person, someone I've appreciated getting to know. ~ Lacyway"            },
             { "cwx",          "Active and dedicated tester who has contributed a lot of good ideas to Fika. ~ Lacyway"      },
             { "shynd",        "Active contributor and resident helper of Fika ~ Archangel"                                  },
-            { "Janky",        "It's so, forsooth, alas ~ Lacyway"                                                           }
+            { "janky",        "It's so, forsooth, alas ~ Lacyway"                                                           }
         };
 
         public static Dictionary<string, string> DevelopersList = new()
@@ -102,7 +102,7 @@ namespace Fika.Core
             { "thesparta",    "I keep asking him to fix these darn bugs ~ GhostFenixx"                   },
             { "senko-san",    "creator of SPT, extremely talented dev, a blast to work with ~ TheSparta" },
             { "leaves",       "Super talented person who comes up with the coolest ideas ~ Lacyway"      },
-            { "Archangel",    "The 'tbh' guy :pepeChad: ~ Lacyway"                                       },
+            { "archangel",    "The 'tbh' guy :pepeChad: ~ Lacyway"                                       },
             { "trippy",       "One of the chads that made the headless client a reality ~ Archangel"     }
         };
 
