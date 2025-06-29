@@ -476,6 +476,13 @@ namespace LiteNetLib.Utils
         {
             return new ReadOnlySpan<byte>(_data, _position, _dataSize - _position);
         }
+
+        public ReadOnlySpan<byte> GetSpan(int length)
+        {
+            ReadOnlySpan<byte> span = new(_data, _position, length);
+            _position += length;
+            return span;
+        }
 #endif
 
         public byte[] GetRemainingBytes()

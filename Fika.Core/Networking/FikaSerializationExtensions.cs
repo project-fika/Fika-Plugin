@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using static BasePhysicalClass;
@@ -38,9 +39,12 @@ namespace Fika.Core.Networking
         /// <param name="vector"></param>
         public static void PutVector3(this NetDataWriter writer, Vector3 vector)
         {
-            writer.Put(vector.x);
+            Span<byte> buffer = stackalloc byte[12];
+            MemoryMarshal.Write(buffer, ref vector);
+            writer.Put(buffer);
+            /*writer.Put(vector.x);
             writer.Put(vector.y);
-            writer.Put(vector.z);
+            writer.Put(vector.z);*/
         }
 
         /// <summary>
@@ -50,7 +54,8 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Vector3"/></returns>
         public static Vector3 GetVector3(this NetDataReader reader)
         {
-            return new Vector3(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+            return MemoryMarshal.Read<Vector3>(reader.GetSpan(12));
+            /*return new Vector3(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
@@ -60,8 +65,11 @@ namespace Fika.Core.Networking
         /// <param name="vector"></param>
         public static void PutVector2(this NetDataWriter writer, Vector2 vector)
         {
-            writer.Put(vector.x);
-            writer.Put(vector.y);
+            Span<byte> buffer = stackalloc byte[8];
+            MemoryMarshal.Write(buffer, ref vector);
+            writer.Put(buffer);
+            /*writer.Put(vector.x);
+            writer.Put(vector.y);*/
         }
 
         /// <summary>
@@ -71,7 +79,8 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Vector2"/></returns>
         public static Vector2 GetVector2(this NetDataReader reader)
         {
-            return new Vector2(reader.GetFloat(), reader.GetFloat());
+            return MemoryMarshal.Read<Vector2>(reader.GetSpan(8));
+            /*return new Vector2(reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
@@ -81,10 +90,13 @@ namespace Fika.Core.Networking
         /// <param name="quaternion"></param>
         public static void PutQuaternion(this NetDataWriter writer, Quaternion quaternion)
         {
-            writer.Put(quaternion.x);
+            Span<byte> buffer = stackalloc byte[16];
+            MemoryMarshal.Write(buffer, ref quaternion);
+            writer.Put(buffer);
+            /*writer.Put(quaternion.x);
             writer.Put(quaternion.y);
             writer.Put(quaternion.z);
-            writer.Put(quaternion.w);
+            writer.Put(quaternion.w);*/
         }
 
         /// <summary>
@@ -94,7 +106,8 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Quaternion"/></returns>
         public static Quaternion GetQuaternion(this NetDataReader reader)
         {
-            return new Quaternion(reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+            return MemoryMarshal.Read<Quaternion>(reader.GetSpan(16));
+            /*return new Quaternion(reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
@@ -104,10 +117,13 @@ namespace Fika.Core.Networking
         /// <param name="color"></param>
         public static void PutColor(this NetDataWriter writer, Color color)
         {
-            writer.Put(color.r);
+            Span<byte> buffer = stackalloc byte[16];
+            MemoryMarshal.Write(buffer, ref color);
+            writer.Put(buffer);
+            /*writer.Put(color.r);
             writer.Put(color.g);
             writer.Put(color.b);
-            writer.Put(color.a);
+            writer.Put(color.a);*/
         }
 
         /// <summary>
@@ -117,7 +133,8 @@ namespace Fika.Core.Networking
         /// <returns>A <see cref="Color"/>/returns>
         public static Color GetColor(this NetDataReader reader)
         {
-            return new Color(reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+            return MemoryMarshal.Read<Color>(reader.GetSpan(16));
+            /*return new Color(reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
