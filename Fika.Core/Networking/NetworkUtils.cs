@@ -18,23 +18,29 @@ namespace Fika.Core.Networking
         public static byte[] CompressBytes(byte[] input)
         {
 #if DEBUG
-            Stopwatch sw = new();
-            sw.Start();
+            Stopwatch sw = Stopwatch.StartNew();
 #endif
 
             byte[] buffer = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
             int encoded = LZ4Codec.Encode(input, 0, input.Length, buffer, 0, buffer.Length, LZ4Level.L04_HC);
-            byte[] trimmed = buffer
-                .AsSpan(0, encoded)
-                .ToArray();
 
 #if DEBUG
             sw.Stop();
-            double compressionRate = 100.0 * (1.0 - (trimmed.Length / (double)input.Length));
+            double compressionRate = 100.0 * (1.0 - (encoded / (double)input.Length));
             FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%, took {sw.Elapsed.TotalMilliseconds:F2} ms");
 #endif
 
-            return trimmed;
+            // Return exact compressed data slice without extra ToArray allocation
+            if (encoded == buffer.Length)
+            {
+                // Compressed data fills buffer completely, just return it
+                return buffer;
+            }
+            else
+            {
+                // Create trimmed array from buffer span
+                return buffer.AsSpan(0, encoded).ToArray();
+            }
         }
 
         /// <summary>
@@ -46,14 +52,13 @@ namespace Fika.Core.Networking
         public static byte[] DecompressBytes(byte[] compressedData, int originalLength)
         {
 #if DEBUG
-            Stopwatch sw = new();
-            sw.Start(); 
+            Stopwatch sw = Stopwatch.StartNew();
 #endif
             byte[] result = new byte[originalLength];
             int decoded = LZ4Codec.Decode(compressedData, 0, compressedData.Length, result, 0, originalLength);
             if (decoded != originalLength)
             {
-                throw new Exception("LZ4 decompression failed: length mismatch.");
+                throw new InvalidOperationException("LZ4 decompression failed: length mismatch.");
             }
 
 #if DEBUG
