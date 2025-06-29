@@ -145,7 +145,7 @@ namespace Fika.Core.Networking
             _packetProcessor = new();
             _dataWriter = new();
             _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
-            _inventoryOperations = new();
+            _inventoryOperations = new(8);
             _missingIds = [];
             _snapshotCount = 0;
             _snapshots = new(512, Allocator.Persistent);
