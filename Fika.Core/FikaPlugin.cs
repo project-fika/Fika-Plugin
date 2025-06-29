@@ -39,9 +39,9 @@ using UnityEngine;
 namespace Fika.Core
 {
     /// <summary>
-    /// Fika.Core Plugin. <br/> <br/>
+    /// Fika.Core main plugin. <br/> <br/>
     /// Originally by: Paulov <br/>
-    /// Re-written by: Lacyway & the Fika team
+    /// Re-written by: <see langword="Lacyway and the Fika team"/>
     /// </summary>
     [BepInPlugin("com.fika.core", "Fika.Core", FikaVersion)]
     [BepInProcess("EscapeFromTarkov.exe")]
@@ -90,7 +90,8 @@ namespace Fika.Core
             { "vox",          "My favourite american. ~ Lacyway"                                                            },
             { "rairai",       "Very nice and caring person, someone I've appreciated getting to know. ~ Lacyway"            },
             { "cwx",          "Active and dedicated tester who has contributed a lot of good ideas to Fika. ~ Lacyway"      },
-            { "shynd",        "Active contributor and resident helper of Fika ~ Archangel"                                  }
+            { "shynd",        "Active contributor and resident helper of Fika ~ Archangel"                                  },
+            { "Janky",        "It's so, forsooth, alas ~ Lacyway"                                                           }
         };
 
         public static Dictionary<string, string> DevelopersList = new()
