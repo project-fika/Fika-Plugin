@@ -310,7 +310,7 @@ namespace Fika.Core.Networking
             public int ChamberIndex = reader.GetPackedInt(0, 16);
             public bool UnderbarrelShot = reader.GetBool();
             public bool SlideOnOverheatReached = reader.GetBool();
-            public EShotType ShotType = (EShotType)reader.GetByte();
+            public EShotType ShotType = reader.GetEnum<EShotType>();
 
             public void Execute(CoopPlayer player)
             {
@@ -338,7 +338,7 @@ namespace Fika.Core.Networking
                 writer.PutPackedInt(ChamberIndex, 0, 16);
                 writer.Put(UnderbarrelShot);
                 writer.Put(SlideOnOverheatReached);
-                writer.Put((byte)ShotType);
+                writer.PutEnum(ShotType);
             }
         }
 

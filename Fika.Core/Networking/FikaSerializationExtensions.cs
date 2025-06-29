@@ -254,26 +254,29 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Writes an enum value to the writer as a single byte
+        /// Writes the enum value to the writer using <see cref="MemoryMarshal"/> to handle all enum sizes correctly
         /// </summary>
         /// <typeparam name="T">The enum type constrained to unmanaged enums</typeparam>
-        /// <param name="writer">The writer to write the byte to</param>
-        /// <param name="en">The enum value to serialize</param>
+        /// <param name="writer">The writer to write the enum bytes to</param>
+        /// <param name="en">The enum value to write</param>
         public static void PutEnum<T>(this NetDataWriter writer, T en) where T : unmanaged, Enum
         {
-            writer.Put(Unsafe.As<T, byte>(ref en));
+            Span<byte> span = stackalloc byte[Unsafe.SizeOf<T>()];
+            MemoryMarshal.Write(span, ref en);
+            writer.Put(span);
         }
 
         /// <summary>
-        /// Reads a byte from the reader and converts it to the enum type
+        /// Reads bytes from the reader and converts them to the enum type using <see cref="MemoryMarshal"/> <br/>
+        /// Supports enums with any underlying type size
         /// </summary>
         /// <typeparam name="T">The enum type constrained to unmanaged enums</typeparam>
-        /// <param name="reader">The reader to read the byte from</param>
+        /// <param name="reader">The reader to read the bytes from</param>
         /// <returns>The deserialized enum value</returns>
         public static T GetEnum<T>(this NetDataReader reader) where T : unmanaged, Enum
         {
-            byte value = reader.GetByte();
-            return Unsafe.As<byte, T>(ref value);
+            ReadOnlySpan<byte> span = reader.GetSpan(Unsafe.SizeOf<T>());
+            return MemoryMarshal.Read<T>(span);
         }
 
         /// <summary>

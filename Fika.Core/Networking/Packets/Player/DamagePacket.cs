@@ -46,11 +46,11 @@ namespace Fika.Core.Networking
 
             FragmentIndex = reader.GetInt();
 
-            DamageType = (EDamageType)reader.GetInt();
-            BodyPartType = (EBodyPart)reader.GetByte();
-            ColliderType = (EBodyPartColliderType)reader.GetByte();
-            ArmorPlateCollider = (EArmorPlateCollider)reader.GetByte();
-            Material = (MaterialType)reader.GetByte();
+            DamageType = reader.GetEnum<EDamageType>();
+            BodyPartType = reader.GetEnum<EBodyPart>();
+            ColliderType = reader.GetEnum<EBodyPartColliderType>();
+            ArmorPlateCollider = reader.GetEnum<EArmorPlateCollider>();
+            Material = reader.GetEnum<MaterialType>();
 
             BlockedBy = reader.GetNullableMongoID();
             DeflectedBy = reader.GetNullableMongoID();
@@ -74,11 +74,11 @@ namespace Fika.Core.Networking
 
             writer.Put(FragmentIndex);
 
-            writer.Put((int)DamageType);
-            writer.Put((byte)BodyPartType);
-            writer.Put((byte)ColliderType);
-            writer.Put((byte)ArmorPlateCollider);
-            writer.Put((byte)Material);
+            writer.PutEnum(DamageType);
+            writer.PutEnum(BodyPartType);
+            writer.PutEnum(ColliderType);
+            writer.PutEnum(ArmorPlateCollider);
+            writer.PutEnum(Material);
 
             writer.PutNullableMongoID(BlockedBy);
             writer.PutNullableMongoID(DeflectedBy);
