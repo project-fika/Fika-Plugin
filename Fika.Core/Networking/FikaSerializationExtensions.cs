@@ -213,6 +213,11 @@ namespace Fika.Core.Networking
             return bytes;
         }
 
+        /// <summary>
+        /// Compresses the provided byte array and writes it to the writer with its original length prefixed
+        /// </summary>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write the compressed data to</param>
+        /// <param name="bytes">The byte array to compress and write</param>
         public static void CompressAndPutByteArray(this NetDataWriter writer, byte[] bytes)
         {
             writer.Put(bytes.Length);
@@ -223,6 +228,11 @@ namespace Fika.Core.Networking
             writer.PutByteArray(NetworkUtils.CompressBytes(bytes));
         }
 
+        /// <summary>
+        /// Reads a compressed byte array from the reader, decompresses it and returns the original byte array
+        /// </summary>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read the compressed data from</param>
+        /// <returns>The decompressed original byte array or an empty array if length is zero</returns>
         public static byte[] DecompressAndGetByteArray(this NetDataReader reader)
         {
             int originalLength = reader.GetInt();
@@ -614,7 +624,7 @@ namespace Fika.Core.Networking
         public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
         {
             writer.PutMongoID(traderService.TraderId);
-            writer.Put((byte)traderService.ServiceType);
+            writer.PutEnum(traderService.ServiceType);
             writer.Put(traderService.CanAfford);
             writer.Put(traderService.WasPurchasedInThisRaid);
             writer.Put(traderService.ItemsToPay.Count);
@@ -630,10 +640,10 @@ namespace Fika.Core.Networking
                 writer.PutMongoID(traderService.UniqueItems[i]);
             }
             writer.Put(traderService.SubServices.Count);
-            foreach (KeyValuePair<string, int> pair in traderService.SubServices)
+            foreach ((string key, int value) in traderService.SubServices)
             {
-                writer.Put(pair.Key);
-                writer.Put(pair.Value);
+                writer.Put(key);
+                writer.Put(value);
             }
         }
 
@@ -647,7 +657,7 @@ namespace Fika.Core.Networking
             TraderServicesClass traderService = new()
             {
                 TraderId = reader.GetMongoID(),
-                ServiceType = (ETraderServiceType)reader.GetByte(),
+                ServiceType = reader.GetEnum<ETraderServiceType>(),
                 CanAfford = reader.GetBool(),
                 WasPurchasedInThisRaid = reader.GetBool()
             };
@@ -812,7 +822,7 @@ namespace Fika.Core.Networking
         /// <param name="airplaneDataPacketStruct"></param>
         public static void PutAirplaneDataPacketStruct(this NetDataWriter writer, AirplaneDataPacketStruct airplaneDataPacketStruct)
         {
-            writer.Put((byte)airplaneDataPacketStruct.ObjectType);
+            writer.PutEnum(airplaneDataPacketStruct.ObjectType);
             writer.Put((byte)airplaneDataPacketStruct.ObjectId);
 
             switch (airplaneDataPacketStruct.ObjectType)
@@ -822,8 +832,8 @@ namespace Fika.Core.Networking
                     writer.PutVector3(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.Outdated);
                     writer.Put(airplaneDataPacketStruct.IsStatic);
-                    writer.Put((byte)airplaneDataPacketStruct.PacketData.AirdropDataPacket.AirdropType);
-                    writer.Put((byte)airplaneDataPacketStruct.PacketData.AirdropDataPacket.FallingStage);
+                    writer.PutEnum(airplaneDataPacketStruct.PacketData.AirdropDataPacket.AirdropType);
+                    writer.PutEnum(airplaneDataPacketStruct.PacketData.AirdropDataPacket.FallingStage);
                     writer.Put(airplaneDataPacketStruct.PacketData.AirdropDataPacket.SignalFire);
                     writer.Put(airplaneDataPacketStruct.PacketData.AirdropDataPacket.UniqueId);
                     return;
@@ -835,7 +845,7 @@ namespace Fika.Core.Networking
                     writer.Put(airplaneDataPacketStruct.IsStatic);
                     return;
                 case SynchronizableObjectType.Tripwire:
-                    writer.Put((byte)airplaneDataPacketStruct.PacketData.TripwireDataPacket.State);
+                    writer.PutEnum(airplaneDataPacketStruct.PacketData.TripwireDataPacket.State);
                     writer.PutVector3(airplaneDataPacketStruct.Position);
                     writer.PutVector3(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.IsActive);
@@ -852,7 +862,7 @@ namespace Fika.Core.Networking
         {
             AirplaneDataPacketStruct packet = new()
             {
-                ObjectType = (SynchronizableObjectType)reader.GetByte(),
+                ObjectType = reader.GetEnum<SynchronizableObjectType>(),
                 ObjectId = reader.GetByte(),
                 PacketData = new()
             };
@@ -866,8 +876,8 @@ namespace Fika.Core.Networking
                     packet.IsStatic = reader.GetBool();
                     packet.PacketData.AirdropDataPacket = new()
                     {
-                        AirdropType = (EAirdropType)reader.GetByte(),
-                        FallingStage = (EAirdropFallingStage)reader.GetByte(),
+                        AirdropType = reader.GetEnum<EAirdropType>(),
+                        FallingStage = reader.GetEnum<EAirdropFallingStage>(),
                         SignalFire = reader.GetBool(),
                         UniqueId = reader.GetInt()
                     };
@@ -885,7 +895,7 @@ namespace Fika.Core.Networking
                 case SynchronizableObjectType.Tripwire:
                     packet.PacketData.TripwireDataPacket = new()
                     {
-                        State = (ETripwireState)reader.GetByte()
+                        State = reader.GetEnum<ETripwireState>()
                     };
                     packet.Position = reader.GetVector3();
                     packet.Rotation = reader.GetVector3();
@@ -909,7 +919,7 @@ namespace Fika.Core.Networking
             writer.PutByteArray(packet.HealthByteArray ?? []);
 
             writer.Put(packet.FirstOperationId);
-            writer.Put((byte)packet.ControllerType);
+            writer.PutEnum(packet.ControllerType);
 
             byte flags = 0;
             if (packet.IsStationary) flags |= 1;
@@ -932,7 +942,7 @@ namespace Fika.Core.Networking
                 HealthByteArray = reader.GetByteArray(),
 
                 FirstOperationId = reader.GetUShort(),
-                ControllerType = (EHandsControllerType)reader.GetByte(),
+                ControllerType = reader.GetEnum<EHandsControllerType>(),
             };
 
             byte flags = reader.GetByte();
@@ -1019,8 +1029,8 @@ namespace Fika.Core.Networking
             writer.PutVector3(packet.OverallVelocity);
             writer.Put(packet.Force);
 
-            writer.Put((byte)packet.BodyPartColliderType);
-            writer.Put((byte)packet.ItemSlot);
+            writer.PutEnum(packet.BodyPartColliderType);
+            writer.PutEnum(packet.ItemSlot);
         }
 
         /// <summary>
@@ -1039,8 +1049,8 @@ namespace Fika.Core.Networking
                 OverallVelocity = reader.GetVector3(),
                 Force = reader.GetFloat(),
 
-                BodyPartColliderType = (EBodyPartColliderType)reader.GetByte(),
-                ItemSlot = (EquipmentSlot)reader.GetByte()
+                BodyPartColliderType = reader.GetEnum<EBodyPartColliderType>(),
+                ItemSlot = reader.GetEnum<EquipmentSlot>()
             };
         }
 
@@ -1063,7 +1073,7 @@ namespace Fika.Core.Networking
 
             writer.PutDateTime(packet.Time);
             writer.Put(packet.Level);
-            writer.Put((byte)packet.Side);
+            writer.PutEnum(packet.Side);
         }
 
         /// <summary>
@@ -1087,7 +1097,7 @@ namespace Fika.Core.Networking
 
                 Time = reader.GetDateTime(),
                 Level = reader.GetInt(),
-                Side = (EPlayerSide)reader.GetByte()
+                Side = reader.GetEnum<EPlayerSide>()
             };
         }
 
