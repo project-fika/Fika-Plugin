@@ -33,108 +33,91 @@ namespace Fika.Core.Networking
         private static readonly char[] _charBuffer = new char[24];
 
         /// <summary>
-        /// Serializes a <see cref="Vector3"/>
+        /// Serializes a <see cref="Vector3"/> to the <paramref name="writer"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="vector"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="vector">The <see cref="Vector3"/> to serialize</param>
         public static void PutVector3(this NetDataWriter writer, Vector3 vector)
         {
             Span<byte> buffer = stackalloc byte[12];
             MemoryMarshal.Write(buffer, ref vector);
             writer.Put(buffer);
-            /*writer.Put(vector.x);
-            writer.Put(vector.y);
-            writer.Put(vector.z);*/
         }
 
         /// <summary>
-        /// Deserializes a <see cref="Vector3"/>
+        /// Deserializes a <see cref="Vector3"/> from the <paramref name="reader"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="Vector3"/></returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="Vector3"/></returns>
         public static Vector3 GetVector3(this NetDataReader reader)
         {
             return MemoryMarshal.Read<Vector3>(reader.GetSpan(12));
-            /*return new Vector3(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
-        /// Serializes a <see cref="Vector2"/>
+        /// Serializes a <see cref="Vector2"/> to the <paramref name="writer"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="vector"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="vector">The <see cref="Vector2"/> to serialize</param>
         public static void PutVector2(this NetDataWriter writer, Vector2 vector)
         {
             Span<byte> buffer = stackalloc byte[8];
             MemoryMarshal.Write(buffer, ref vector);
             writer.Put(buffer);
-            /*writer.Put(vector.x);
-            writer.Put(vector.y);*/
         }
 
         /// <summary>
-        /// Deserializes a <see cref="Vector2"/>
+        /// Deserializes a <see cref="Vector2"/> from the <paramref name="reader"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="Vector2"/></returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="Vector2"/></returns>
         public static Vector2 GetVector2(this NetDataReader reader)
         {
             return MemoryMarshal.Read<Vector2>(reader.GetSpan(8));
-            /*return new Vector2(reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
-        /// Serializes a <see cref="Quaternion"/>
+        /// Serializes a <see cref="Quaternion"/> to the <paramref name="writer"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="quaternion"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="quaternion">The <see cref="Quaternion"/> to serialize</param>
         public static void PutQuaternion(this NetDataWriter writer, Quaternion quaternion)
         {
             Span<byte> buffer = stackalloc byte[16];
             MemoryMarshal.Write(buffer, ref quaternion);
             writer.Put(buffer);
-            /*writer.Put(quaternion.x);
-            writer.Put(quaternion.y);
-            writer.Put(quaternion.z);
-            writer.Put(quaternion.w);*/
         }
 
         /// <summary>
-        /// Deserializes a <see cref="Quaternion"/>
+        /// Deserializes a <see cref="Quaternion"/> from the <paramref name="reader"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="Quaternion"/></returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="Quaternion"/></returns>
         public static Quaternion GetQuaternion(this NetDataReader reader)
         {
             return MemoryMarshal.Read<Quaternion>(reader.GetSpan(16));
-            /*return new Quaternion(reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
-        /// Serializes a <see cref="Color"/>
+        /// Serializes a <see cref="Color"/> to the <paramref name="writer"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="color"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="color">The <see cref="Color"/> to serialize</param>
         public static void PutColor(this NetDataWriter writer, Color color)
         {
             Span<byte> buffer = stackalloc byte[16];
             MemoryMarshal.Write(buffer, ref color);
             writer.Put(buffer);
-            /*writer.Put(color.r);
-            writer.Put(color.g);
-            writer.Put(color.b);
-            writer.Put(color.a);*/
         }
 
         /// <summary>
-        /// Deserializes a <see cref="Color"/>
+        /// Deserializes a <see cref="Color"/> from the <paramref name="reader"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="Color"/>/returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="Color"/></returns>
         public static Color GetColor(this NetDataReader reader)
         {
             return MemoryMarshal.Read<Color>(reader.GetSpan(16));
-            /*return new Color(reader.GetFloat(), reader.GetFloat(), reader.GetFloat(), reader.GetFloat());*/
         }
 
         /// <summary>
