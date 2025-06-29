@@ -959,7 +959,7 @@ namespace Fika.Core.Networking
             if (packet.PlayerInfoPacket.Profile.ProfileId != _myProfileId)
             {
                 _coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-                             packet.PlayerInfoPacket.ControllerId.Value, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
+                             packet.PlayerInfoPacket.ControllerId, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
                              packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
             }
         }

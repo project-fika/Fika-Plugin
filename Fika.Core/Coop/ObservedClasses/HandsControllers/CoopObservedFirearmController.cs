@@ -440,13 +440,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         break;
                 }
 
-                if (!packet.AmmoTemplate.HasValue)
-                {
-                    FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::HandleShotInfoPacket: AmmoTemplate was null!");
-                    return;
-                }
-
-                AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate.Value, null);
+                AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
                 Weapon.MalfState.MalfunctionedAmmo = ammo;
                 Weapon.MalfState.AmmoToFire = ammo;
 
@@ -545,13 +539,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private void HandleObservedShot(in ShotInfoPacket packet, InventoryController inventoryController)
         {
-            if (!packet.AmmoTemplate.HasValue)
-            {
-                FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::HandleObservedShot: AmmoTemplate was null!");
-                return;
-            }
-
-            AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate.Value, null);
+            AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
             _coopPlayer.TurnOffFbbikAt = Time.time + 0.6f;
             InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
                 CurrentFireport.position, packet.ChamberIndex, packet.Overheat);

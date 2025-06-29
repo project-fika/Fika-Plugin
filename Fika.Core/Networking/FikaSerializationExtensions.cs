@@ -592,21 +592,21 @@ namespace Fika.Core.Networking
         /// <param name="traderService"></param>
         public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
         {
-            writer.PutNullableMongoID(traderService.TraderId);
+            writer.PutMongoID(traderService.TraderId);
             writer.Put((byte)traderService.ServiceType);
             writer.Put(traderService.CanAfford);
             writer.Put(traderService.WasPurchasedInThisRaid);
             writer.Put(traderService.ItemsToPay.Count);
-            foreach (KeyValuePair<MongoID, int> pair in traderService.ItemsToPay)
+            foreach ((MongoID id, int amount) in traderService.ItemsToPay)
             {
-                writer.PutNullableMongoID(pair.Key);
-                writer.Put(pair.Value);
+                writer.PutMongoID(id);
+                writer.Put(amount);
             }
             int uniqueAmount = traderService.UniqueItems.Length;
             writer.Put(uniqueAmount);
             for (int i = 0; i < uniqueAmount; i++)
             {
-                writer.PutNullableMongoID(traderService.UniqueItems[i]);
+                writer.PutMongoID(traderService.UniqueItems[i]);
             }
             writer.Put(traderService.SubServices.Count);
             foreach (KeyValuePair<string, int> pair in traderService.SubServices)
@@ -625,7 +625,7 @@ namespace Fika.Core.Networking
         {
             TraderServicesClass traderService = new()
             {
-                TraderId = reader.GetNullableMongoID().Value,
+                TraderId = reader.GetMongoID(),
                 ServiceType = (ETraderServiceType)reader.GetByte(),
                 CanAfford = reader.GetBool(),
                 WasPurchasedInThisRaid = reader.GetBool()
@@ -634,13 +634,13 @@ namespace Fika.Core.Networking
             traderService.ItemsToPay = new(toPayAmount);
             for (int i = 0; i < toPayAmount; i++)
             {
-                traderService.ItemsToPay[reader.GetNullableMongoID().Value] = reader.GetInt();
+                traderService.ItemsToPay[reader.GetMongoID()] = reader.GetInt();
             }
             int uniqueAmount = reader.GetInt();
             traderService.UniqueItems = new MongoID[uniqueAmount];
             for (int i = 0; i < uniqueAmount; i++)
             {
-                traderService.UniqueItems[i] = reader.GetNullableMongoID().Value;
+                traderService.UniqueItems[i] = reader.GetMongoID();
             }
             int subAmount = reader.GetInt();
             traderService.SubServices = new(subAmount);
@@ -883,7 +883,7 @@ namespace Fika.Core.Networking
         public static void PutPlayerInfoPacket(this NetDataWriter writer, PlayerInfoPacket packet)
         {
             writer.PutProfile(packet.Profile);
-            writer.PutNullableMongoID(packet.ControllerId);
+            writer.PutMongoID(packet.ControllerId);
             writer.Put(packet.FirstOperationId);
             writer.PutByteArray(packet.HealthByteArray ?? ([]));
             writer.Put((byte)packet.ControllerType);
@@ -905,7 +905,7 @@ namespace Fika.Core.Networking
             PlayerInfoPacket packet = new()
             {
                 Profile = reader.GetProfile(),
-                ControllerId = reader.GetNullableMongoID(),
+                ControllerId = reader.GetMongoID(),
                 FirstOperationId = reader.GetUShort(),
                 HealthByteArray = reader.GetByteArray(),
                 ControllerType = (EHandsControllerType)reader.GetByte()

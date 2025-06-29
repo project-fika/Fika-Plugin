@@ -47,7 +47,7 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override async Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
         {
-            List<MongoID?> itemIds = [];
+            List<MongoID> itemIds = [];
             bool hasNonQuestItem = false;
             foreach (Item item in items)
             {

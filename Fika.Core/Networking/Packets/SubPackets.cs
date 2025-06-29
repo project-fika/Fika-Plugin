@@ -16,7 +16,7 @@ namespace Fika.Core.Networking
         {
             public Profile Profile;
             public byte[] HealthByteArray;
-            public MongoID? ControllerId;
+            public MongoID ControllerId;
             public ushort FirstOperationId;
             public EHandsControllerType ControllerType;
             public string ItemId;

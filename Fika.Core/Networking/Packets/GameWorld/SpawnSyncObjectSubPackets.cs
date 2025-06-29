@@ -128,7 +128,7 @@ namespace Fika.Core.Networking
             public Quaternion Rotation;
             public EAirdropType AirdropType;
             public Item AirdropItem;
-            public MongoID? ContainerId;
+            public MongoID ContainerId;
             public int NetId;
 
             public SpawnAirdrop()
@@ -144,7 +144,7 @@ namespace Fika.Core.Networking
                 Rotation = reader.GetQuaternion();
                 AirdropType = (EAirdropType)reader.GetByte();
                 AirdropItem = reader.GetAirdropItem();
-                ContainerId = reader.GetNullableMongoID();
+                ContainerId = reader.GetMongoID();
                 NetId = reader.GetInt();
             }
 
@@ -199,7 +199,7 @@ namespace Fika.Core.Networking
                 writer.PutQuaternion(Rotation);
                 writer.Put((byte)AirdropType);
                 writer.PutItem(AirdropItem);
-                writer.PutNullableMongoID(ContainerId);
+                writer.PutMongoID(ContainerId);
                 writer.Put(NetId);
             }
         }

@@ -44,7 +44,7 @@ namespace Fika.Core.Networking
                         switch (addEffect.ExtraDataType)
                         {
                             case EExtraDataType.MedEffect:
-                                addEffect.ExtraData.MedEffect.ItemId = reader.GetNullableMongoID();
+                                addEffect.ExtraData.MedEffect.ItemId = reader.GetMongoID();
                                 addEffect.ExtraData.MedEffect.Amount = reader.GetFloat();
                                 break;
 
@@ -227,7 +227,7 @@ namespace Fika.Core.Networking
                         switch (addEffect.ExtraDataType)
                         {
                             case EExtraDataType.MedEffect:
-                                writer.PutNullableMongoID(addEffect.ExtraData.MedEffect.ItemId);
+                                writer.PutMongoID(addEffect.ExtraData.MedEffect.ItemId);
                                 writer.Put(addEffect.ExtraData.MedEffect.Amount);
                                 break;
                             case EExtraDataType.Stimulator:

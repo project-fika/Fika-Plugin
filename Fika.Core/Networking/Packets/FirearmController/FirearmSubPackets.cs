@@ -306,7 +306,7 @@ namespace Fika.Core.Networking
             public int ChamberIndex = reader.GetInt();
             public float Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public bool UnderbarrelShot = reader.GetBool();
-            public MongoID? AmmoTemplate = reader.GetNullableMongoID();
+            public MongoID AmmoTemplate = reader.GetMongoID();
             public float LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             public float LastShotTime = reader.GetFloat();
             public bool SlideOnOverheatReached = reader.GetBool();
@@ -334,7 +334,7 @@ namespace Fika.Core.Networking
                 writer.Put(ChamberIndex);
                 writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(UnderbarrelShot);
-                writer.PutNullableMongoID(AmmoTemplate);
+                writer.PutMongoID(AmmoTemplate);
                 writer.PutPackedFloat(LastShotOverheat, 0f, 200f, EFloatCompression.High);
                 writer.Put(LastShotTime);
                 writer.Put(SlideOnOverheatReached);
@@ -679,14 +679,14 @@ namespace Fika.Core.Networking
         public struct QuickReloadMagPacket : ISubPacket
         {
             public bool Reload;
-            public MongoID? MagId;
+            public MongoID MagId;
 
             public QuickReloadMagPacket(NetDataReader reader)
             {
                 Reload = reader.GetBool();
                 if (Reload)
                 {
-                    MagId = reader.GetNullableMongoID();
+                    MagId = reader.GetMongoID();
                 }
             }
 
@@ -696,7 +696,7 @@ namespace Fika.Core.Networking
                 {
                     try
                     {
-                        GStruct461<Item> result = player.FindItemById(MagId.Value);
+                        GStruct461<Item> result = player.FindItemById(MagId);
                         if (!result.Succeeded)
                         {
                             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -726,7 +726,7 @@ namespace Fika.Core.Networking
                 writer.Put(Reload);
                 if (Reload)
                 {
-                    writer.PutNullableMongoID(MagId);
+                    writer.PutMongoID(MagId);
                 }
             }
         }
@@ -969,7 +969,7 @@ namespace Fika.Core.Networking
             public bool StartOneShotFire;
             public Vector3 ShotPosition;
             public Vector3 ShotForward;
-            public MongoID? AmmoTemplateId;
+            public MongoID AmmoTemplateId;
 
             public FlareShotPacket(NetDataReader reader)
             {
@@ -978,7 +978,7 @@ namespace Fika.Core.Networking
                 {
                     ShotPosition = reader.GetVector3();
                     ShotForward = reader.GetVector3();
-                    AmmoTemplateId = reader.GetNullableMongoID();
+                    AmmoTemplateId = reader.GetMongoID();
                 }
             }
 
@@ -1019,7 +1019,7 @@ namespace Fika.Core.Networking
                 {
                     writer.PutVector3(ShotPosition);
                     writer.PutVector3(ShotForward);
-                    writer.PutNullableMongoID(AmmoTemplateId);
+                    writer.PutMongoID(AmmoTemplateId);
                 }
             }
         }
@@ -1028,7 +1028,7 @@ namespace Fika.Core.Networking
         {
             public Vector3 ShotPosition = reader.GetVector3();
             public Vector3 ShotForward = reader.GetVector3();
-            public MongoID? AmmoTemplateId = reader.GetNullableMongoID();
+            public MongoID AmmoTemplateId = reader.GetMongoID();
 
             public readonly void Execute(CoopPlayer player)
             {
@@ -1043,7 +1043,7 @@ namespace Fika.Core.Networking
             {
                 writer.PutVector3(ShotPosition);
                 writer.PutVector3(ShotForward);
-                writer.PutNullableMongoID(AmmoTemplateId);
+                writer.PutMongoID(AmmoTemplateId);
             }
         }
     }
