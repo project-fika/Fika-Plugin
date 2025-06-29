@@ -381,8 +381,8 @@ namespace Fika.Core.Networking
         /// <summary>
         /// Serializes a <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="throwables"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="throwables">The list of <see cref="SmokeGrenadeDataPacketStruct"/> to serialize</param>
         public static void PutThrowableData(this NetDataWriter writer, List<SmokeGrenadeDataPacketStruct> throwables)
         {
             writer.Put(throwables.Count);
@@ -400,7 +400,7 @@ namespace Fika.Core.Networking
         /// <summary>
         /// Deserializes a <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/>
         /// </summary>
-        /// <param name="reader"></param>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
         /// <returns>A <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/></returns>
         public static List<SmokeGrenadeDataPacketStruct> GetThrowableData(this NetDataReader reader)
         {
@@ -426,8 +426,8 @@ namespace Fika.Core.Networking
         /// <summary>
         /// Serializes a <see cref="Profile"/>
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="profile"></param>
+        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
+        /// <param name="profile">The <see cref="Profile"/> to serialize</param>
         public static void PutProfile(this NetDataWriter writer, Profile profile)
         {
             EFTWriterClass eftWriter = new();
@@ -438,8 +438,8 @@ namespace Fika.Core.Networking
         /// <summary>
         /// Deserializes a <see cref="Profile"/>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <returns>A <see cref="Profile"/></returns>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="Profile"/></returns>
         public static Profile GetProfile(this NetDataReader reader)
         {
             using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
