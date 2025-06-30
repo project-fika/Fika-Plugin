@@ -6,16 +6,55 @@ namespace Fika.Core.Networking
 {
     public class SubPacket
     {
+        /// <summary>
+        /// Represents a sub-packet with execution and serialization capabilities.
+        /// </summary>
         public interface ISubPacket
         {
+            /// <summary>
+            /// Executes the sub-packet logic, optionally with a <see cref="CoopPlayer"/> context.
+            /// </summary>
+            /// <param name="player">
+            /// The player involved in the execution. This parameter is optional and can be null.
+            /// </param>
             public void Execute(CoopPlayer player = null);
+
+            /// <summary>
+            /// Serializes the sub-packet data into the provided <see cref="NetDataWriter"/>.
+            /// </summary>
+            /// <param name="writer">
+            /// The writer used to serialize data.
+            /// </param>
             public void Serialize(NetDataWriter writer);
         }
 
+        /// <summary>
+        /// Represents a request packet with handling for requests, responses, and serialization.
+        /// </summary>
         public interface IRequestPacket
         {
+            /// <summary>
+            /// Handles an incoming request from a network peer within the server context.
+            /// </summary>
+            /// <param name="peer">
+            /// The network peer that sent the request.
+            /// </param>
+            /// <param name="server">
+            /// The server instance processing the request.
+            /// </param>
             public void HandleRequest(NetPeer peer, FikaServer server);
+
+            /// <summary>
+            /// Handles the response to a request.
+            /// </summary>
             public void HandleResponse();
+
+            /// <summary>
+            /// Serializes the request packet data into the provided <see cref="NetDataWriter"/>.
+            /// </summary>
+            /// <param name="writer">
+            /// The writer used to serialize data.
+            /// </param>
             public void Serialize(NetDataWriter writer);
         }
 
