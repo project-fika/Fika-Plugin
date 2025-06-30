@@ -51,15 +51,18 @@ namespace Fika.Core.Coop.Utils
         {
             get
             {
-                if (voipHandler == null)
+                if (_voipHandler == null)
                 {
-                    voipHandler = VoipSettingsClass.Default;
-                    voipHandler.VoipQualitySettings.Apply();
-                    voipHandler.MicrophoneChecked = SoundSettingsDataClass.CheckMicrophone();
-                    voipHandler.VoipEnabled = true;
+                    _voipHandler = VoipSettingsClass.Default;
+                    _voipHandler.VoipQualitySettings.Apply();
+                    _voipHandler.MicrophoneChecked = SoundSettingsDataClass.CheckMicrophone();
+                    _voipHandler.VoipEnabled = true;
+                    PushToTalkSettingsClass pttSettings = _voipHandler.PushToTalkSettings;
+                    pttSettings.SpeakingSecondsLimit = 20f;
+                    pttSettings.BlockingTime = 5f;
                 }
 
-                return voipHandler;
+                return _voipHandler;
             }
         }
 
@@ -75,7 +78,7 @@ namespace Fika.Core.Coop.Utils
             }
         }
 
-        private static VoipSettingsClass voipHandler;
+        private static VoipSettingsClass _voipHandler;
 
         internal static float GetOtherPlayerSensitivity()
         {
