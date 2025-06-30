@@ -34,7 +34,6 @@ namespace LiteNetLib.Utils
         /// </summary>
         public ReadOnlySpan<byte> AsReadOnlySpan
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 return new(Data, 0, Length);
