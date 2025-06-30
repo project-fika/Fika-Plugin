@@ -67,11 +67,11 @@ namespace Fika.Core.Networking
             writer.PutRotation(Rotation);
             writer.PutMovementDirection(MovementDirection);
 
-            writer.PutPackedFloat(Tilt, -5f, 5f);
+            writer.PutPackedFloat(Tilt, -5f, 5f, EFloatCompression.High);
             writer.PutPackedFloat(MovementSpeed, 0f, 1f, EFloatCompression.High);
             writer.PutPackedFloat(SprintSpeed, 0f, 1f, EFloatCompression.High);
             writer.PutPackedFloat(PoseLevel, 0f, 1f, EFloatCompression.High);
-            writer.PutPackedFloat(WeaponOverlap, 0f, 1f);
+            writer.PutPackedFloat(WeaponOverlap, 0f, 1f, EFloatCompression.High);
 
             writer.PutPhysical(Physical);
         }
@@ -97,11 +97,11 @@ namespace Fika.Core.Networking
             Rotation = reader.GetRotation();
             MovementDirection = reader.GetMovementDirection();
 
-            Tilt = reader.GetPackedFloat(-5f, 5f);
+            Tilt = reader.GetPackedFloat(-5f, 5f, EFloatCompression.High);
             MovementSpeed = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
             SprintSpeed = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
             PoseLevel = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
-            WeaponOverlap = reader.GetPackedFloat(0f, 1f);
+            WeaponOverlap = reader.GetPackedFloat(0f, 1f, EFloatCompression.High);
 
             Physical = reader.GetPhysical();
         }
