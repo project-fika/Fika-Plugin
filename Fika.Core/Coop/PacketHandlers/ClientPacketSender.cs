@@ -33,9 +33,7 @@ namespace Fika.Core.Coop.PacketHandlers
         {
             get
             {
-                return _player.CurrentManagedState.Name is not (EPlayerState.Idle
-                    or EPlayerState.IdleWeaponMounting
-                    or EPlayerState.ProneIdle);
+                return _player.MovementContext.PlayerAnimator.Animator.GetBool(PlayerAnimator.INERT_PARAM_HASH);
             }
         }
 
