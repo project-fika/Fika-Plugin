@@ -195,7 +195,7 @@ namespace Fika.Core.Networking
                 foreach (ExfiltrationPoint exfilPoint in allExfils)
                 {
                     writer.Put(exfilPoint.Settings.Name);
-                    writer.Put((byte)exfilPoint.Status);
+                    writer.PutEnum(exfilPoint.Status);
                     writer.Put(exfilPoint.Settings.StartTime);
                     if (exfilPoint.Status == EExfiltrationStatus.Countdown)
                     {
@@ -236,7 +236,7 @@ namespace Fika.Core.Networking
                 for (int i = 0; i < amount; i++)
                 {
                     string name = reader.GetString();
-                    EExfiltrationStatus status = (EExfiltrationStatus)reader.GetByte();
+                    EExfiltrationStatus status = reader.GetEnum<EExfiltrationStatus>();
                     int startTime = reader.GetInt();
                     int exfilStartTime = -1;
                     if (status == EExfiltrationStatus.Countdown)

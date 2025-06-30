@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace LiteNetLib.Utils
 {
@@ -337,58 +338,107 @@ namespace LiteNetLib.Utils
 
         public ushort GetUShort()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            ushort result = MemoryMarshal.Read<ushort>(_data.AsSpan(_position));
+            _position += 2;
+            return result;
+#else
             ushort result = BitConverter.ToUInt16(_data, _position);
             _position += 2;
             return result;
+#endif
         }
 
         public short GetShort()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            short result = MemoryMarshal.Read<short>(_data.AsSpan(_position));
+            _position += 2;
+            return result;
+#else
             short result = BitConverter.ToInt16(_data, _position);
             _position += 2;
             return result;
+#endif
         }
 
         public long GetLong()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+
+            long result = MemoryMarshal.Read<long>(_data.AsSpan(_position));
+            _position += 8;
+            return result;
+#else
             long result = BitConverter.ToInt64(_data, _position);
             _position += 8;
             return result;
+#endif
         }
 
         public ulong GetULong()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            ulong result = MemoryMarshal.Read<ulong>(_data.AsSpan(_position));
+            _position += 8;
+            return result;
+#else
             ulong result = BitConverter.ToUInt64(_data, _position);
             _position += 8;
             return result;
+#endif
         }
 
         public int GetInt()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            int result = MemoryMarshal.Read<int>(_data.AsSpan(_position));
+            _position += 4;
+            return result;
+#else
             int result = BitConverter.ToInt32(_data, _position);
             _position += 4;
             return result;
+#endif
         }
 
         public uint GetUInt()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            uint result = MemoryMarshal.Read<uint>(_data.AsSpan(_position));
+            _position += 4;
+            return result;
+#else
             uint result = BitConverter.ToUInt32(_data, _position);
             _position += 4;
             return result;
+#endif
         }
 
         public float GetFloat()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            float result = MemoryMarshal.Read<float>(_data.AsSpan(_position));
+            _position += 4;
+            return result;
+#else
             float result = BitConverter.ToSingle(_data, _position);
             _position += 4;
             return result;
+#endif
         }
 
         public double GetDouble()
         {
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            double result = MemoryMarshal.Read<double>(_data.AsSpan(_position));
+            _position += 8;
+            return result; 
+#else
             double result = BitConverter.ToDouble(_data, _position);
             _position += 8;
             return result;
+#endif
         }
 
         /// <summary>
@@ -444,7 +494,7 @@ namespace LiteNetLib.Utils
 
         public ArraySegment<byte> GetBytesSegment(int count)
         {
-            ArraySegment<byte> segment = new ArraySegment<byte>(_data, _position, count);
+            ArraySegment<byte> segment = new(_data, _position, count);
             _position += count;
             return segment;
         }
@@ -514,7 +564,7 @@ namespace LiteNetLib.Utils
         {
             return GetArray<byte>(1);
         }
-        #endregion
+#endregion
 
         #region PeekMethods
 
