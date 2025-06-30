@@ -341,7 +341,7 @@ namespace Fika.Core.Coop.Utils
                 return;
             }
 
-            FikaPlugin.Instance.FikaLogger.LogInfo($"[{caller}]: {message}");
+            Instance.FikaLogger.LogInfo($"[{caller}]: {message}");
         }
 
         public static void LogWarning(string message, [CallerMemberName] string caller = "")
@@ -351,7 +351,7 @@ namespace Fika.Core.Coop.Utils
                 return;
             }
 
-            FikaPlugin.Instance.FikaLogger.LogWarning($"[{caller}]: {message}");
+            Instance.FikaLogger.LogWarning($"[{caller}]: {message}");
         }
 
         public static void LogError(string message, [CallerMemberName] string caller = "")
@@ -361,7 +361,7 @@ namespace Fika.Core.Coop.Utils
                 return;
             }
 
-            FikaPlugin.Instance.FikaLogger.LogError($"[{caller}]: {message}");
+            Instance.FikaLogger.LogError($"[{caller}]: {message}");
         }
 
         public static void LogFatal(string message, [CallerMemberName] string caller = "")
@@ -371,7 +371,7 @@ namespace Fika.Core.Coop.Utils
                 return;
             }
 
-            FikaPlugin.Instance.FikaLogger.LogFatal($"[{caller}]: {message}");
+            Instance.FikaLogger.LogFatal($"[{caller}]: {message}");
         }
 
         public static int ToNumber(this ESendRate rate)
