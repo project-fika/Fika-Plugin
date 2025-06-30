@@ -298,19 +298,41 @@ namespace Fika.Core.Networking
             }
         }
 
-        public struct ShotInfoPacket(NetDataReader reader) : ISubPacket
+        public struct ShotInfoPacket : ISubPacket
         {
-            public Vector3 ShotPosition = reader.GetVector3();
-            public Vector3 ShotDirection = reader.GetVector3();
-            public MongoID AmmoTemplate = reader.GetMongoID();
-            public float Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
-            public float LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
-            public float LastShotTime = reader.GetFloat();
-            public float Durability = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
-            public int ChamberIndex = reader.GetPackedInt(0, 16);
-            public bool UnderbarrelShot = reader.GetBool();
-            public bool SlideOnOverheatReached = reader.GetBool();
-            public EShotType ShotType = reader.GetEnum<EShotType>();
+            public Vector3 ShotPosition;
+            public Vector3 ShotDirection;
+            public MongoID AmmoTemplate;
+            public float Overheat;
+            public float LastShotOverheat;
+            public float LastShotTime;
+            public float Durability;
+            public int ChamberIndex;
+            public bool UnderbarrelShot;
+            public bool SlideOnOverheatReached;
+            public EShotType ShotType;
+
+            public ShotInfoPacket(NetDataReader reader)
+            {
+                ShotType = reader.GetEnum<EShotType>();
+                if (ShotType == EShotType.DryFire)
+                {
+                    ChamberIndex = reader.GetPackedInt(0, 16);
+                    UnderbarrelShot = reader.GetBool();
+                    return;
+                }
+
+                ShotPosition = reader.GetVector3();
+                ShotDirection = reader.GetVector3();
+                AmmoTemplate = reader.GetMongoID();
+                Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                LastShotTime = reader.GetFloat();
+                Durability = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
+                ChamberIndex = reader.GetPackedInt(0, 16);
+                UnderbarrelShot = reader.GetBool();
+                SlideOnOverheatReached = reader.GetBool();
+            }
 
             public void Execute(CoopPlayer player)
             {
@@ -328,6 +350,14 @@ namespace Fika.Core.Networking
 
             public readonly void Serialize(NetDataWriter writer)
             {
+                writer.PutEnum(ShotType);
+                if (ShotType == EShotType.DryFire)
+                {
+                    writer.PutPackedInt(ChamberIndex, 0, 16);
+                    writer.Put(UnderbarrelShot);
+                    return;
+                }
+
                 writer.PutVector3(ShotPosition);
                 writer.PutVector3(ShotDirection);
                 writer.PutMongoID(AmmoTemplate);
@@ -338,7 +368,6 @@ namespace Fika.Core.Networking
                 writer.PutPackedInt(ChamberIndex, 0, 16);
                 writer.Put(UnderbarrelShot);
                 writer.Put(SlideOnOverheatReached);
-                writer.PutEnum(ShotType);
             }
         }
 
