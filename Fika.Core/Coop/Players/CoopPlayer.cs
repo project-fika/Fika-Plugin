@@ -1002,9 +1002,9 @@ namespace Fika.Core.Coop.Players
             {
                 NetId = NetId,
                 Packet = packet,
-                KillerId = LastAggressor != null ? LastAggressor.ProfileId : string.Empty,
+                KillerId = LastAggressor != null ? LastAggressor.ProfileId : null,
+                WeaponId = !string.IsNullOrEmpty(_lastWeaponId) ? _lastWeaponId : null,
                 BodyPart = LastBodyPart,
-                WeaponId = _lastWeaponId,
                 CorpseSyncPacket = new()
                 {
                     BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
