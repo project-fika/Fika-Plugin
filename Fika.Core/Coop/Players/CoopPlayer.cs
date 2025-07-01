@@ -1021,8 +1021,7 @@ namespace Fika.Core.Coop.Players
             if (HandsController.Item != null)
             {
                 Item heldItem = HandsController.Item;
-                EquipmentSlot[] weaponSlots = [EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster, EquipmentSlot.Scabbard];
-                foreach (EquipmentSlot weaponSlot in weaponSlots)
+                foreach (EquipmentSlot weaponSlot in FikaGlobals.WeaponSlots)
                 {
                     if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
                     {
