@@ -866,7 +866,7 @@ namespace Fika.Core.Coop.Players
                 CurrentManagedState.SetStep(CurrentPlayerState.Step);
             }
 
-            if (MovementContext.IsSprintEnabled != CurrentPlayerState.IsSprinting)
+            if (Physical.Sprinting != CurrentPlayerState.IsSprinting)
             {
                 CurrentManagedState.EnableSprint(CurrentPlayerState.IsSprinting);
             }
@@ -891,9 +891,10 @@ namespace Fika.Core.Coop.Players
 
             if (!IsInventoryOpened && isGrounded)
             {
-                MovementContext.PlayerAnimatorEnableInert(newState is EPlayerState.Run or EPlayerState.Sprint or EPlayerState.ProneMove);
+                bool isMoving = newState is EPlayerState.Run or EPlayerState.Sprint or EPlayerState.ProneMove;
+                MovementContext.PlayerAnimatorEnableInert(isMoving);
                 MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
-                if (_isServer)
+                if (_isServer && isMoving)
                 {
                     MovementContext.method_1(CurrentPlayerState.MovementDirection);
                 }

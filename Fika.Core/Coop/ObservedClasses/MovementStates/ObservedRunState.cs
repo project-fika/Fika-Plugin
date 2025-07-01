@@ -23,7 +23,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 return;
             }
-            bool isZero = SetupDirection(deltaTime);
+            SetupDirection(deltaTime);
             if (Bool_3)
             {
                 MovementContext.SetSidestep(Mathf.Lerp(Float_11, 0f, Float_12 / Float_13));
@@ -34,22 +34,13 @@ namespace Fika.Core.Coop.ObservedClasses
                     Bool_3 = false;
                 }
             }
-            if (!isZero)
-            {
-                //MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
-                method_0(deltaTime);
-            }
-            else
-            {
-                method_0(deltaTime);
-                MovementContext.PlayerAnimatorEnableInert(false);
-            }
+            method_0(deltaTime);
             if (Bool_1)
             {
                 MovementContext.EnableSprint(true);
                 Bool_1 = false;
             }
-            if (MovementContext.IsSprintEnabled && MovementContext.PoseLevel > 0.9f && MovementContext.SmoothedCharacterMovementSpeed >= 1f)
+            if (MovementContext.IsSprintEnabled)
             {
                 MovementContext.PlayerAnimatorEnableSprint(true, false);
             }
@@ -69,23 +60,15 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private bool SetupDirection(float deltaTime)
+        private void SetupDirection(float deltaTime)
         {
-            /*Direction = method_7(Direction);
-            MovementContext.MovementDirection = method_8(Direction);*/
-            bool isZero = Direction.IsZero();
             MovementContext.MovementDirection = Direction;
-            //Vector2 vector = Direction;//(isZero ? MovementContext.MovementDirection : Direction);
             method_3(GClass1907.ConvertToMovementDirection(Direction), deltaTime);
-            return isZero;
         }
 
         public override void UpdatePosition(float deltaTime)
         {
-            if (!MovementContext.IsGrounded)
-            {
-                MovementContext.PlayerAnimatorEnableFallingDown(true);
-            }
+            // Do nothing
         }
 
         public override void EnableSprint(bool enabled, bool isToggle = false)
