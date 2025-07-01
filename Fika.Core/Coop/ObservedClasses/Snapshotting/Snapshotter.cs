@@ -105,7 +105,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// Inserts a snapshot to the <see cref="_buffer"/>
         /// </summary>
         /// <param name="snapshot"></param>
-        public void Insert(PlayerStatePacket snapshot, double networkTime)
+        public void Insert(ref PlayerStatePacket snapshot, double networkTime)
         {
             lock (_bufferLock)
             {
@@ -119,7 +119,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 _bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(_sendInterval,
                     _deliveryTimeEma.StandardDeviation, _interpolationSettings.dynamicAdjustmentTolerance);
 
-                SnapshotInterpolation.InsertAndAdjust(_buffer, _interpolationSettings.bufferLimit, snapshot, ref _localTimeline, ref _localTimeScale,
+                SnapshotInterpolation.InsertAndAdjust(_buffer, _interpolationSettings.bufferLimit, in snapshot, ref _localTimeline, ref _localTimeScale,
                     _sendInterval, BufferTime, _interpolationSettings.catchupSpeed, _interpolationSettings.slowdownSpeed, ref _driftEma,
                     _interpolationSettings.catchupNegativeThreshold, _interpolationSettings.catchupPositiveThreshold, ref _deliveryTimeEma);
             }

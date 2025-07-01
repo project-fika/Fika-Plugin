@@ -45,7 +45,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             return Mathd.Clamp(safezone, 0, 5);
         }
 
-        public static bool InsertIfNotExists(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, PlayerStatePacket snapshot)
+        public static bool InsertIfNotExists(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, in PlayerStatePacket snapshot)
         {
             if (buffer.Count >= bufferLimit)
             {
@@ -65,7 +65,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             return Mathd.Clamp(localTimeline, lowerBound, upperBound);
         }
 
-        public static void InsertAndAdjust(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, PlayerStatePacket snapshot,
+        public static void InsertAndAdjust(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, in PlayerStatePacket snapshot,
             ref double localTimeline, ref double localTimescale, float sendInterval, double bufferTime,
             double catchupSpeed, double slowdownSpeed, ref ExponentialMovingAverage driftEma,
             float catchupNegativeThreshold, float catchupPositiveThreshold, ref ExponentialMovingAverage deliveryTimeEma)
@@ -75,7 +75,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
                 localTimeline = snapshot.RemoteTime - bufferTime;
             }
 
-            if (InsertIfNotExists(buffer, bufferLimit, snapshot))
+            if (InsertIfNotExists(buffer, bufferLimit, in snapshot))
             {
                 if (buffer.Count >= 2)
                 {
