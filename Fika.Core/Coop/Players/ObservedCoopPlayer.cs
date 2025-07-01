@@ -838,7 +838,7 @@ namespace Fika.Core.Coop.Players
 
             EPlayerState newState = CurrentPlayerState.State;
 
-            if (newState == EPlayerState.Jump)
+            if (newState == EPlayerState.Jump && !isJumpSet)
             {
                 MovementContext.PlayerAnimatorEnableJump(true);
                 if (_isServer)
@@ -851,14 +851,6 @@ namespace Fika.Core.Coop.Players
             {
                 MovementContext.PlayerAnimatorEnableJump(false);
                 MovementContext.PlayerAnimatorEnableLanding(true);
-                /*if (newState is EPlayerState.Run or EPlayerState.Sprint)
-                {
-                    MovementContext.PlayerAnimatorEnableInert(true);
-                }
-                else
-                {
-                    MovementContext.PlayerAnimatorEnableInert(false);
-                }*/
             }
 
             if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)
@@ -899,9 +891,8 @@ namespace Fika.Core.Coop.Players
 
             if (!IsInventoryOpened && isGrounded)
             {
-                //Move(CurrentPlayerState.MovementDirection);
                 MovementContext.PlayerAnimatorEnableInert(newState is EPlayerState.Run or EPlayerState.Sprint or EPlayerState.ProneMove);
-                MovementContext.MovementDirection = CurrentPlayerState.MovementDirection; 
+                MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
                 if (_isServer)
                 {
                     MovementContext.method_1(CurrentPlayerState.MovementDirection);
@@ -915,7 +906,6 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetTilt(CurrentPlayerState.Tilt, true);
             }
 
-
             if (!Mathf.Approximately(ObservedOverlap, CurrentPlayerState.WeaponOverlap))
             {
                 ObservedOverlap = CurrentPlayerState.WeaponOverlap;
@@ -923,6 +913,8 @@ namespace Fika.Core.Coop.Players
             }
 
             LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
+
+            CurrentPlayerState.ShouldUpdate = false;
         }
 
         public override void InteractionRaycast()

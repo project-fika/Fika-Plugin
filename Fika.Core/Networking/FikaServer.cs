@@ -1286,7 +1286,11 @@ namespace Fika.Core.Networking
             _stateHandle.Complete();
             for (int i = 0; i < ObservedCoopPlayers.Count; i++)
             {
-                ObservedCoopPlayers[i].ManualStateUpdate();
+                ObservedCoopPlayer player = ObservedCoopPlayers[i];
+                if (player.CurrentPlayerState.ShouldUpdate)
+                {
+                    player.ManualStateUpdate();
+                }
             }
 
             _snapshotCount = 0;

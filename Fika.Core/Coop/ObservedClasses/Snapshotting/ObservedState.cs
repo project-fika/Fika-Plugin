@@ -12,6 +12,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             IsGrounded = true;
         }
 
+        public bool ShouldUpdate;
         public Vector3 Position;
         public Vector2 Rotation;
         public Vector3 HeadRotation;

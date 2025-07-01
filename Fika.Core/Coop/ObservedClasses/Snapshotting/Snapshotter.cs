@@ -66,6 +66,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, float ratio)
         {
             ObservedState currentState = _player.CurrentPlayerState;
+            currentState.ShouldUpdate = true;
 
             currentState.Rotation = new Vector2(
                 Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, ratio),

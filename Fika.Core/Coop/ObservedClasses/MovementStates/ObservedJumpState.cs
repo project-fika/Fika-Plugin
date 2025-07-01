@@ -16,11 +16,6 @@ namespace Fika.Core.Coop.ObservedClasses.MovementStates
 
         public override void Exit(bool toSameState)
         {
-            if (MovementContext.IsInPronePose)
-            {
-                MovementContext.IsInPronePose = MovementContext.CanProne;
-            }
-            MovementContext.SetTilt(0f, false);
             MovementContext.GrounderSetActive(true);
             MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromBodyAction(false);
         }
@@ -29,12 +24,9 @@ namespace Fika.Core.Coop.ObservedClasses.MovementStates
         {
             if (EjumpState_0 == EJumpState.PushingFromTheGround)
             {
-                if (!MovementContext.HeadBump(Vector3_2.y * deltaTime) && Float_2 <= 2f + Float_3)
+                if (!MovementContext.IsGrounded && Float_2 > Float_3)
                 {
-                    if (!MovementContext.IsGrounded && Float_2 > Float_3)
-                    {
-                        EjumpState_0 = EJumpState.Jump;
-                    }
+                    EjumpState_0 = EJumpState.Jump;
                 }
             }
             else if (EjumpState_0 == EJumpState.Jump)
