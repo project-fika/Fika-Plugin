@@ -889,10 +889,11 @@ namespace Fika.Core.Coop.Players
                 MovementContext.SetBlindFire(CurrentPlayerState.Blindfire);
             }
 
-            if (!IsInventoryOpened && isGrounded)
-            {
-                bool isMoving = newState is EPlayerState.Run or EPlayerState.Sprint or EPlayerState.ProneMove;
-                MovementContext.PlayerAnimatorEnableInert(isMoving);
+            bool isMoving = newState is EPlayerState.Run or EPlayerState.Sprint or EPlayerState.ProneMove;
+            MovementContext.PlayerAnimatorEnableInert(isMoving);
+
+            if (isGrounded)
+            {                
                 MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
                 if (_isServer && isMoving)
                 {
