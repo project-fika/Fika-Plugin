@@ -8,7 +8,7 @@ namespace Fika.Core.Jobs
     internal struct UpdateInterpolators(float unscaledDeltaTime) : IJobParallelFor
     {
         [ReadOnly]
-        public float _unscaledDeltaTime = unscaledDeltaTime;
+        public readonly float _unscaledDeltaTime = unscaledDeltaTime;
 
         public readonly void Execute(int index)
         {

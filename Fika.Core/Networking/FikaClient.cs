@@ -33,6 +33,7 @@ using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -1098,8 +1099,10 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             _netClient?.PollEvents();
-            _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 32,
-                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 32));
+            /*_stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 32,
+                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 32));*/
+            _stateHandle = new InterpolatorJob(Time.unscaledDeltaTime, NetworkTimeSync.NetworkTime, _snapshots)
+                .Schedule();
 
             int inventoryOps = _inventoryOperations.Count;
             if (inventoryOps > 0)

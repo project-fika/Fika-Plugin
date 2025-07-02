@@ -1269,11 +1269,13 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             _netServer?.PollEvents();
-            float unscaledDetla = Time.unscaledDeltaTime;
-            _stateHandle = new UpdateInterpolators(unscaledDetla).Schedule(ObservedCoopPlayers.Count, 32,
-                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 32));
+            float unscaledDelta = Time.unscaledDeltaTime;
+            /*_stateHandle = new UpdateInterpolators(unscaledDetla).Schedule(ObservedCoopPlayers.Count, 32,
+                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 32));*/
+            _stateHandle = new InterpolatorJob(unscaledDelta, NetworkTimeSync.NetworkTime, _snapshots)
+                .Schedule();
 
-            _statisticsCounter += unscaledDetla;
+            _statisticsCounter += unscaledDelta;
             if (_statisticsCounter > _sendThreshold)
             {
                 _statisticsCounter -= _sendThreshold;
