@@ -1002,8 +1002,6 @@ namespace Fika.Core.Coop.Players
             {
                 NetId = NetId,
                 Packet = packet,
-                KillerId = LastAggressor != null ? LastAggressor.ProfileId : null,
-                WeaponId = !string.IsNullOrEmpty(_lastWeaponId) ? _lastWeaponId : null,
                 BodyPart = LastBodyPart,
                 CorpseSyncPacket = new()
                 {
@@ -1017,6 +1015,16 @@ namespace Fika.Core.Coop.Players
                 },
                 TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
             };
+
+            if (LastAggressor != null)
+            {
+                syncPacket.KillerId = LastAggressor.ProfileId;
+            }
+
+            if (!string.IsNullOrEmpty(_lastWeaponId))
+            {
+                syncPacket.WeaponId = _lastWeaponId;
+            }
 
             if (HandsController.Item != null)
             {

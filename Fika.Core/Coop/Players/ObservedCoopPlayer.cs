@@ -1881,7 +1881,7 @@ namespace Fika.Core.Coop.Players
             CreateHandsController(handler.ReturnController, handler.Item);
         }
 
-        public void SetAggressorData(string killerId, EBodyPart bodyPart, string weaponId)
+        public void SetAggressorData(MongoID? killerId, EBodyPart bodyPart, string weaponId)
         {
             Player killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
             if (killer != null)

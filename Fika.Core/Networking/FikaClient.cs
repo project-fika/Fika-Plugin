@@ -977,15 +977,15 @@ namespace Fika.Core.Networking
                 {
                     if (packet.Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
                     {
-                        observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
+                        if (packet.KillerId.HasValue)
+                        {
+                            observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId); 
+                        }
                         observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
                         if (packet.TriggerZones.Length > 0)
                         {
                             observedPlayer.TriggerZones.Clear();
-                            foreach (string triggerZone in packet.TriggerZones)
-                            {
-                                observedPlayer.TriggerZones.Add(triggerZone);
-                            }
+                            observedPlayer.TriggerZones.AddRange(packet.TriggerZones);
                         }
                     }
                     observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
