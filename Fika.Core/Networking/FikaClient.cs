@@ -1234,7 +1234,7 @@ namespace Fika.Core.Networking
             if (messageType == UnconnectedMessageType.BasicMessage && _netClient.ConnectedPeersCount == 0 && reader.GetInt() == 1)
             {
                 _logger.LogInfo("[CLIENT] Received discovery response. Connecting to: " + remoteEndPoint);
-                _netClient.Connect(remoteEndPoint, "fika.core");
+                _netClient.Connect(remoteEndPoint, NetDataWriter.FromString("fika.core").AsReadOnlySpan);
             }
         }
 
