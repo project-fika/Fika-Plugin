@@ -1270,8 +1270,8 @@ namespace Fika.Core.Networking
         {
             _netServer?.PollEvents();
             float unscaledDelta = Time.unscaledDeltaTime;
-            _stateHandle = new UpdateInterpolators(unscaledDelta).Schedule(ObservedCoopPlayers.Count, 4,
-                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 4));
+            _stateHandle = new InterpolatorJob(unscaledDelta, NetworkTimeSync.NetworkTime, _snapshots, _snapshotCount)
+                .Schedule();
 
             _statisticsCounter += unscaledDelta;
             if (_statisticsCounter > _sendThreshold)
