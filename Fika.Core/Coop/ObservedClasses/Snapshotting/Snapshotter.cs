@@ -77,13 +77,15 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             currentState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
 
             Vector2 newDir = currentState.MovementDirection = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio);
-            if (to.State == EPlayerState.Idle || newDir.sqrMagnitude < _deadZone)
+            if (to.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _deadZone)
             {
                 currentState.MovementDirection = Vector2.zero;
+                currentState.IsMoving = false;
             }
             else
             {
                 currentState.MovementDirection = newDir;
+                currentState.IsMoving = true;
             }
 
             currentState.State = to.State;

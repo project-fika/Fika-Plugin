@@ -845,19 +845,14 @@ namespace Fika.Core.Coop.Players
         /// </summary>
         public void ManualStateUpdate()
         {
-            bool isJumpSet = MovementContext.PlayerAnimatorIsJumpSetted();
-
             Rotation = CurrentPlayerState.Rotation;
 
             HeadRotation = CurrentPlayerState.HeadRotation;
             ProceduralWeaponAnimation.SetHeadRotation(CurrentPlayerState.HeadRotation);
 
-            bool isGrounded = CurrentPlayerState.IsGrounded;
-            MovementContext.IsGrounded = isGrounded;
+            EPlayerState newState = CurrentPlayerState.State;            
 
-            EPlayerState newState = CurrentPlayerState.State;
-
-            if (newState == EPlayerState.Jump && !isJumpSet)
+            if (newState == EPlayerState.Jump)
             {
                 MovementContext.PlayerAnimatorEnableJump(true);
                 if (_isServer)
@@ -866,16 +861,20 @@ namespace Fika.Core.Coop.Players
                 }
             }
 
-            if (isJumpSet && isGrounded)
+            bool isGrounded = CurrentPlayerState.IsGrounded;
+            MovementContext.IsGrounded = isGrounded;
+
+            if (isGrounded)
             {
                 MovementContext.PlayerAnimatorEnableJump(false);
                 MovementContext.PlayerAnimatorEnableLanding(true);
             }
 
-            if (CurrentStateName == EPlayerState.Sprint && newState == EPlayerState.Transition)
+            MovementContext.PlayerAnimatorEnableInert(CurrentPlayerState.IsMoving);
+            MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
+            if (_isServer && CurrentPlayerState.IsMoving)
             {
-                MovementContext.UpdateSprintInertia();
-                MovementContext.PlayerAnimatorEnableInert(false);
+                MovementContext.method_1(CurrentPlayerState.MovementDirection);
             }
 
             Physical.SerializationStruct = CurrentPlayerState.Stamina;
@@ -906,14 +905,6 @@ namespace Fika.Core.Coop.Players
             if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
             {
                 MovementContext.SetBlindFire(CurrentPlayerState.Blindfire);
-            }
-
-            bool isMoving = newState is EPlayerState.Run or EPlayerState.Sprint or EPlayerState.ProneMove;
-            MovementContext.PlayerAnimatorEnableInert(isMoving);
-            MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
-            if (_isServer && isMoving)
-            {
-                MovementContext.method_1(CurrentPlayerState.MovementDirection);
             }
 
             Transform.position = CurrentPlayerState.Position;

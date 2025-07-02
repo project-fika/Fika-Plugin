@@ -30,5 +30,6 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         public float WeaponOverlap;
         public bool LeftStanceDisabled;
         public bool IsGrounded;
+        public bool IsMoving;
     }
 }

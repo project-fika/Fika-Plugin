@@ -44,20 +44,6 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 MovementContext.PlayerAnimatorEnableSprint(true, false);
             }
-
-            if (Bool_2)
-            {
-                Float_5 = 0f;
-            }
-            else
-            {
-                Float_5 += deltaTime;
-            }
-            Bool_2 = false;
-            if (Float_5 > Float_0)
-            {
-                Direction = Vector2.zero;
-            }
         }
 
         private void SetupDirection(float deltaTime)
