@@ -1272,7 +1272,7 @@ namespace Fika.Core.Networking
             float unscaledDelta = Time.unscaledDeltaTime;
             /*_stateHandle = new UpdateInterpolators(unscaledDetla).Schedule(ObservedCoopPlayers.Count, 32,
                 new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 32));*/
-            _stateHandle = new InterpolatorJob(unscaledDelta, NetworkTimeSync.NetworkTime, _snapshots)
+            _stateHandle = new InterpolatorJob(unscaledDelta, NetworkTimeSync.NetworkTime, _snapshots, _snapshotCount)
                 .Schedule();
 
             _statisticsCounter += unscaledDelta;

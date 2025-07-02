@@ -1101,7 +1101,7 @@ namespace Fika.Core.Networking
             _netClient?.PollEvents();
             /*_stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 32,
                 new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 32));*/
-            _stateHandle = new InterpolatorJob(Time.unscaledDeltaTime, NetworkTimeSync.NetworkTime, _snapshots)
+            _stateHandle = new InterpolatorJob(Time.unscaledDeltaTime, NetworkTimeSync.NetworkTime, _snapshots, _snapshotCount)
                 .Schedule();
 
             int inventoryOps = _inventoryOperations.Count;

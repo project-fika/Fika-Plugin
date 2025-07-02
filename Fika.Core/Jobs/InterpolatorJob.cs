@@ -6,7 +6,7 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs
 {
-    public readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, NativeArray<PlayerStatePacket> snapshots) : IJob
+    public readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, NativeArray<PlayerStatePacket> snapshots, int amount) : IJob
     {
         [ReadOnly]
         public readonly float _unscaledDeltaTime = unscaledDeltaTime;
@@ -14,11 +14,12 @@ namespace Fika.Core.Jobs
         private readonly double _networkTime = networkTime;
         [ReadOnly]
         private readonly NativeArray<PlayerStatePacket> _snapshots = snapshots;
+        [ReadOnly]
+        private readonly int _amount = amount;
 
         public void Execute()
         {
-            int snapLength = _snapshots.Length;
-            for (int i = 0; i < snapLength; i++)
+            for (int i = 0; i < _amount; i++)
             {
                 IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
                 PlayerStatePacket packet = _snapshots[i];
