@@ -17,7 +17,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         private readonly int _sendRate;
         private readonly float _sendInterval;
         private double _bufferTimeMultiplier;
-        //private readonly object _bufferLock;
+        private readonly object _bufferLock;
         private readonly ObservedCoopPlayer _player;
         private readonly float _deadZone;
 
@@ -31,7 +31,7 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
             _driftEma = new(_sendRate * _interpolationSettings.driftEmaDuration);
             _deliveryTimeEma = new(_sendRate * _interpolationSettings.deliveryTimeEmaDuration);
             _sendInterval = 1f / _sendRate;
-            //_bufferLock = new();
+            _bufferLock = new();
             _player = observedPlayer;
             _deadZone = 0.05f * 0.05f;
         }
@@ -109,19 +109,22 @@ namespace Fika.Core.Coop.ObservedClasses.Snapshotting
         /// <param name="snapshot"></param>
         public void Insert(ref PlayerStatePacket snapshot, double networkTime)
         {
-            if (_buffer.Count > _interpolationSettings.bufferLimit)
+            lock (_bufferLock)
             {
-                _buffer.Clear();
+                if (_buffer.Count > _interpolationSettings.bufferLimit)
+                {
+                    _buffer.Clear();
+                }
+
+                snapshot.LocalTime = networkTime;
+
+                _bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(_sendInterval,
+                    _deliveryTimeEma.StandardDeviation, _interpolationSettings.dynamicAdjustmentTolerance);
+
+                SnapshotInterpolation.InsertAndAdjust(_buffer, _interpolationSettings.bufferLimit, in snapshot, ref _localTimeline, ref _localTimeScale,
+                    _sendInterval, BufferTime, _interpolationSettings.catchupSpeed, _interpolationSettings.slowdownSpeed, ref _driftEma,
+                    _interpolationSettings.catchupNegativeThreshold, _interpolationSettings.catchupPositiveThreshold, ref _deliveryTimeEma); 
             }
-
-            snapshot.LocalTime = networkTime;
-
-            _bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(_sendInterval,
-                _deliveryTimeEma.StandardDeviation, _interpolationSettings.dynamicAdjustmentTolerance);
-
-            SnapshotInterpolation.InsertAndAdjust(_buffer, _interpolationSettings.bufferLimit, in snapshot, ref _localTimeline, ref _localTimeScale,
-                _sendInterval, BufferTime, _interpolationSettings.catchupSpeed, _interpolationSettings.slowdownSpeed, ref _driftEma,
-                _interpolationSettings.catchupNegativeThreshold, _interpolationSettings.catchupPositiveThreshold, ref _deliveryTimeEma);
         }
 
         /// <summary>
