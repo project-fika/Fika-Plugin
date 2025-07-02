@@ -42,7 +42,6 @@ namespace Fika.Core.Coop.Players
     {
         #region Fields and Properties
         public IPacketSender PacketSender;
-        public bool HasSkilledScav;
         public float ObservedOverlap = 0f;
         public CorpseSyncPacket CorpseSyncPacket = default;
         public int NetId;
@@ -58,6 +57,7 @@ namespace Fika.Core.Coop.Players
         }
 
         protected string _lastWeaponId;
+        private bool _hasSkilledScav;
         private bool _shouldSendSideEffect;
         private VoipSettingsClass _voipHandler;
         private FikaVOIPController _voipController;
@@ -463,12 +463,12 @@ namespace Fika.Core.Coop.Players
                     coopPlayer.Loyalty.method_1(this);
                 }
 
-                if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer.HasSkilledScav)
+                if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer._hasSkilledScav)
                 {
-                    coopPlayer.HasSkilledScav = true;
+                    coopPlayer._hasSkilledScav = true;
                     return;
                 }
-                else if (Side != EPlayerSide.Savage && HasSkilledScav && aggressor.Side == EPlayerSide.Savage)
+                else if (Side != EPlayerSide.Savage && _hasSkilledScav && aggressor.Side == EPlayerSide.Savage)
                 {
                     coopPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
                 }
@@ -489,8 +489,9 @@ namespace Fika.Core.Coop.Players
             Item item = itemResult.Value;
             if (!itemResult.Succeeded)
             {
-                foreach (ThrowWeapItemClass grenadeClass in Singleton<IFikaGame>.Instance.GameController.ThrownGrenades)
+                for (int i = 0; i < Singleton<IFikaGame>.Instance.GameController.ThrownGrenades.Count; i++)
                 {
+                    ThrowWeapItemClass grenadeClass = Singleton<IFikaGame>.Instance.GameController.ThrownGrenades[i];
                     if (grenadeClass.Id == _lastWeaponId)
                     {
                         item = grenadeClass;
