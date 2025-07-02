@@ -583,8 +583,9 @@ namespace Fika.Core.Coop.Players
                     break;
             }
 
-            foreach (string value in list)
+            for (int i = 0; i < list.Count; i++)
             {
+                string value = list[i];
                 AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                                 bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
                                 killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
@@ -1031,8 +1032,9 @@ namespace Fika.Core.Coop.Players
             if (HandsController.Item != null)
             {
                 Item heldItem = HandsController.Item;
-                foreach (EquipmentSlot weaponSlot in FikaGlobals.WeaponSlots)
+                for (int i = 0; i < FikaGlobals.WeaponSlots.Count; i++)
                 {
+                    EquipmentSlot weaponSlot = FikaGlobals.WeaponSlots[i];
                     if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
                     {
                         syncPacket.CorpseSyncPacket.ItemSlot = weaponSlot;
@@ -1276,14 +1278,15 @@ namespace Fika.Core.Coop.Players
                 _preAllocatedArmorComponents.Clear();
                 List<ArmorComponent> listTocheck = [];
                 Inventory.GetPutOnArmorsNonAlloc(listTocheck);
-                foreach (ArmorComponent armorComponent in listTocheck)
+                for (int i = 0; i < listTocheck.Count; i++)
                 {
+                    ArmorComponent armorComponent = listTocheck[i];
                     float num = 0f;
-                    foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
+                    foreach ((ExplosiveHitArmorColliderStruct colliderStruct, float amount) in armorDamage)
                     {
-                        if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
+                        if (armorComponent.ShotMatches(colliderStruct.BodyPartColliderType, colliderStruct.ArmorPlateCollider))
                         {
-                            num += keyValuePair.Value;
+                            num += amount;
                             _preAllocatedArmorComponents.Add(armorComponent);
                         }
                     }
@@ -1410,8 +1413,9 @@ namespace Fika.Core.Coop.Players
         {
             _preAllocatedArmorComponents.Clear();
             Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
-            foreach (ArmorComponent armorComponent in _preAllocatedArmorComponents)
+            for (int i = 0; i < _preAllocatedArmorComponents.Count; i++)
             {
+                ArmorComponent armorComponent = _preAllocatedArmorComponents[i];
                 if (armorComponent.Item.Id == packet.ItemId)
                 {
                     armorComponent.Repairable.Durability = packet.Durability;
@@ -1502,8 +1506,9 @@ namespace Fika.Core.Coop.Players
 
             Dictionary<ETraderServiceType, BackendConfigSettingsClass.ServiceData> servicesData = Singleton<BackendConfigSettingsClass>.Instance.ServicesData;
 
-            foreach (TraderServicesClass service in services)
+            for (int i = 0; i < services.Count; i++)
             {
+                TraderServicesClass service = services[i];
                 BackendConfigSettingsClass.ServiceData serviceData = new(service, null);
                 if (servicesData.ContainsKey(serviceData.ServiceType))
                 {
@@ -1526,8 +1531,9 @@ namespace Fika.Core.Coop.Players
 
         public Item FindQuestItem(string itemId)
         {
-            foreach (IKillableLootItem lootItem in Singleton<GameWorld>.Instance.LootList)
+            for (int i = 0; i < Singleton<GameWorld>.Instance.LootList.Count; i++)
             {
+                IKillableLootItem lootItem = Singleton<GameWorld>.Instance.LootList[i];
                 if (lootItem is LootItem observedLootItem)
                 {
                     if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
