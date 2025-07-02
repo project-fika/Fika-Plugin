@@ -293,6 +293,7 @@ namespace Fika.Core.Coop.Players
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
                 ? MaterialType.Body : list[0].Material);
+            method_97(list);
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
