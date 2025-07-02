@@ -41,6 +41,11 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
         {
+            if (damageInfo.DamageType is EDamageType.Explosion or EDamageType.Landmine or EDamageType.Sniper)
+            {
+                return _bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
+            }
+
             if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
             {
                 return _bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
