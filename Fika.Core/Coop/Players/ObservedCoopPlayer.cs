@@ -26,6 +26,7 @@ using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -198,6 +199,8 @@ namespace Fika.Core.Coop.Players
                 statisticsManager, observedQuestController, null,
                 null, filter, player.VoipState, aiControl, false);
 
+            player.DisposeObservers();
+
             player.Pedometer.Stop();
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
             player._handsController.Spawn(1f, FikaGlobals.EmptyAction);
@@ -251,6 +254,17 @@ namespace Fika.Core.Coop.Players
             CameraClass.Instance.FoVUpdateAction -= player.OnFovUpdatedEvent;
 
             return player;
+        }
+
+        /// <summary>
+        /// These are redundant on observed players
+        /// </summary>
+        private void DisposeObservers()
+        {
+            NightVisionObserver.Dispose();
+            ThermalVisionObserver.Dispose();
+            FaceCoverObserver.Dispose();
+            FaceCoverObserver.Dispose();
         }
 
         public override void InitVoip(EVoipState voipState)
@@ -582,6 +596,11 @@ namespace Fika.Core.Coop.Players
             ManageAggressor(damageInfo, bodyPartType, colliderType);
 
             return hitInfo;
+        }
+
+        public override void OnItemAddedOrRemoved(Item item, ItemAddress location, bool added)
+        {
+            // Do nothing
         }
 
         public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct DamageInfo)

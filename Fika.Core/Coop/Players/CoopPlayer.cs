@@ -737,12 +737,7 @@ namespace Fika.Core.Coop.Players
 
                 PacketSender.SendPacket(ref packet);
             }
-        }
-
-        public override void OnItemAddedOrRemoved(Item item, ItemAddress location, bool added)
-        {
-            base.OnItemAddedOrRemoved(item, location, added);
-        }
+        }        
 
         public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
         {
