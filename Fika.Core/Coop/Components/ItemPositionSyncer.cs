@@ -45,14 +45,16 @@ namespace Fika.Core.Coop.Components
         {
             if (_lootItem == null)
             {
-                FikaGlobals.LogError("HostItemPositionSync::Start: LootItem was null!");
+                FikaGlobals.LogError("ItemPositionSyncer::Start: LootItem was null!");
                 Destroy(this);
+                return;
             }
 
             if (Rigidbody == null)
             {
-                FikaGlobals.LogError("HostItemPositionSync::Start: Rigidbody was null!");
+                FikaGlobals.LogError("ItemPositionSyncer::Start: Rigidbody was null!");
                 Destroy(this);
+                return;
             }
 
             _data.Position = _lootItem.transform.position;
