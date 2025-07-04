@@ -15,7 +15,7 @@ namespace Fika.Core.Networking
         /// </summary>
         /// <param name="data">The original uncompressed byte array</param>
         /// <returns>The compressed byte array</returns>
-        public static byte[] CompressBytes(byte[] input)
+        public static ReadOnlySpan<byte> CompressBytes(byte[] input)
         {
 #if DEBUG
             Stopwatch sw = Stopwatch.StartNew();

@@ -179,6 +179,21 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
+        /// Serialize a <see cref="ReadOnlySpan{T}"/> array of <see cref="byte"/>
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="bytes"></param>
+        public static void PutByteArray(this NetDataWriter writer, ReadOnlySpan<byte> bytes)
+        {
+            int length = bytes.Length;
+            writer.Put(length);
+            if (length > 0)
+            {
+                writer.Put(bytes);
+            }
+        }
+
+        /// <summary>
         /// Deserializes a <see cref="byte"/> array
         /// </summary>
         /// <param name="reader"></param>
