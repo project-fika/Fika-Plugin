@@ -876,7 +876,7 @@ namespace Fika.Core.Networking
                 Reload = reader.GetBool();
                 if (Reload)
                 {
-                    Status = (EReloadWithAmmoStatus)reader.GetByte();
+                    Status = reader.GetEnum<EReloadWithAmmoStatus>();
                     AmmoLoadedToMag = reader.GetInt();
                     AmmoIds = reader.GetStringArray();
                 }
@@ -921,7 +921,7 @@ namespace Fika.Core.Networking
                 writer.Put(Reload);
                 if (Reload)
                 {
-                    writer.Put((byte)Status);
+                    writer.PutEnum(Status);
                     writer.Put(AmmoLoadedToMag);
                     writer.PutArray(AmmoIds);
                 }
@@ -1066,7 +1066,6 @@ namespace Fika.Core.Networking
                         controller.InitiateFlare(bulletClass, ShotPosition, ShotForward);
                         bulletClass.IsUsed = true;
                         controller.WeaponManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);
-                        bulletClass = null;
                         controller.FirearmsAnimator.SetFire(false);
                     }
                 }
