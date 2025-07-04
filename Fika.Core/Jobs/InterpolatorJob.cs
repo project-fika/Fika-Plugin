@@ -6,7 +6,7 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs
 {
-    public readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, NativeArray<PlayerStatePacket> snapshots, int amount) : IJob
+    internal readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, NativeArray<PlayerStatePacket> snapshots, int amount) : IJob
     {
         [ReadOnly]
         public readonly float _unscaledDeltaTime = unscaledDeltaTime;
