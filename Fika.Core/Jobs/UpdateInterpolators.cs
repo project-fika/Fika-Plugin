@@ -5,7 +5,7 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs
 {
-    internal struct UpdateInterpolators(float unscaledDeltaTime) : IJobParallelFor
+    internal struct UpdateInterpolators(float unscaledDeltaTime) : IJobFor
     {
         [ReadOnly]
         public readonly float _unscaledDeltaTime = unscaledDeltaTime;

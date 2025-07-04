@@ -123,9 +123,11 @@ namespace Fika.Core.Networking
         private Queue<BaseInventoryOperationClass> _inventoryOperations;
         private List<int> _missingIds;
         private JobHandle _stateHandle;
-        [NativeDisableContainerSafetyRestriction]
-        private NativeArray<PlayerStatePacket> _snapshots;
         private int _snapshotCount;
+
+        [NativeDisableContainerSafetyRestriction]
+        [NativeDisableParallelForRestriction]
+        private NativeArray<PlayerStatePacket> _snapshots;
 
         public async void Init()
         {
@@ -1099,8 +1101,8 @@ namespace Fika.Core.Networking
         protected void Update()
         {
             _netClient?.PollEvents();
-            _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).Schedule(ObservedCoopPlayers.Count, 4,
-                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).Schedule(_snapshotCount, 4));
+            _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).ScheduleParallel(ObservedCoopPlayers.Count, 4,
+                new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).ScheduleParallel(_snapshotCount, 4, default));
 
             int inventoryOps = _inventoryOperations.Count;
             if (inventoryOps > 0)

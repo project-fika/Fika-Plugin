@@ -19,18 +19,17 @@ namespace Fika.Core.Jobs
 
         public void Execute()
         {
+            IFikaNetworkManager netManager = Singleton<IFikaNetworkManager>.Instance;
             for (int i = 0; i < _amount; i++)
-            {
-                IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
+            {                
                 PlayerStatePacket packet = _snapshots[i];
-                if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+                if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
                 {
                     player.Snapshotter.Insert(ref packet, _networkTime);
                 }
             }
 
-            IFikaNetworkManager netmanager = Singleton<IFikaNetworkManager>.Instance;
-            int amount = netmanager.ObservedCoopPlayers.Count;
+            int amount = netManager.ObservedCoopPlayers.Count;
             for (int i = 0; i < amount; i++)
             {
                 Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[i].Snapshotter

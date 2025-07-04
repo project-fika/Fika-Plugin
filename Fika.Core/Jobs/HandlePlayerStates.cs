@@ -6,7 +6,7 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs
 {
-    internal readonly struct HandlePlayerStates(double networkTime, NativeArray<PlayerStatePacket> snapshots) : IJobParallelFor
+    internal readonly struct HandlePlayerStates(double networkTime, NativeArray<PlayerStatePacket> snapshots) : IJobFor
     {
         [ReadOnly]
         private readonly double _networkTime = networkTime;
