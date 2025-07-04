@@ -298,19 +298,19 @@ namespace Fika.Core.Networking
             }
         }
 
-        public struct ShotInfoPacket : ISubPacket
+        public readonly struct ShotInfoPacket : ISubPacket
         {
-            public Vector3 ShotPosition;
-            public Vector3 ShotDirection;
-            public MongoID AmmoTemplate;
-            public float Overheat;
-            public float LastShotOverheat;
-            public float LastShotTime;
-            public float Durability;
-            public int ChamberIndex;
-            public bool UnderbarrelShot;
-            public bool SlideOnOverheatReached;
-            public EShotType ShotType;
+            public readonly Vector3 ShotPosition;
+            public readonly Vector3 ShotDirection;
+            public readonly MongoID AmmoTemplate;
+            public readonly float Overheat;
+            public readonly float LastShotOverheat;
+            public readonly float LastShotTime;
+            public readonly float Durability;
+            public readonly int ChamberIndex;
+            public readonly bool UnderbarrelShot;
+            public readonly bool SlideOnOverheatReached;
+            public readonly EShotType ShotType;
 
             public ShotInfoPacket(NetDataReader reader)
             {
@@ -332,6 +332,37 @@ namespace Fika.Core.Networking
                 ChamberIndex = reader.GetPackedInt(0, 16);
                 UnderbarrelShot = reader.GetBool();
                 SlideOnOverheatReached = reader.GetBool();
+            }
+
+            public ShotInfoPacket(int chamberIndex, bool underbarrelShot, EShotType shotType)
+            {
+                ShotType = shotType;
+                ChamberIndex = chamberIndex;
+                UnderbarrelShot = underbarrelShot;
+            }
+
+            public ShotInfoPacket(MongoID ammoTemplate, float overheat, EShotType shotType)
+            {
+                AmmoTemplate = ammoTemplate;
+                Overheat = overheat;
+                ShotType = shotType;
+            }
+
+            public ShotInfoPacket(Vector3 shotPosition, Vector3 shotDirection, MongoID ammoTemplate, float overheat,
+                float lastShotOverheat, float lastShotTime, float durability, int chamberIndex, bool underbarrelShot,
+                bool slideOnOverheatReached, EShotType shotType)
+            {
+                ShotPosition = shotPosition;
+                ShotDirection = shotDirection;
+                AmmoTemplate = ammoTemplate;
+                Overheat = overheat;
+                LastShotOverheat = lastShotOverheat;
+                LastShotTime = lastShotTime;
+                Durability = durability;
+                ChamberIndex = chamberIndex;
+                UnderbarrelShot = underbarrelShot;
+                SlideOnOverheatReached = slideOnOverheatReached;
+                ShotType = shotType;
             }
 
             public void Execute(CoopPlayer player)

@@ -18,12 +18,14 @@ namespace Fika.Core.Coop.ClientClasses
     {
         protected CoopPlayer _coopPlayer;
         private bool _isClient;
+        private bool _isGrenadeLauncher;
 
         public static CoopClientFirearmController Create(CoopPlayer player, Weapon weapon)
         {
             CoopClientFirearmController controller = smethod_6<CoopClientFirearmController>(player, weapon);
             controller._coopPlayer = player;
             controller._isClient = FikaBackendUtils.IsClient;
+            controller._isGrenadeLauncher = weapon.IsGrenadeLauncher;
             return controller;
         }
 
@@ -264,12 +266,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 NetId = _coopPlayer.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
-                SubPacket = new ShotInfoPacket()
-                {
-                    ShotType = EShotType.DryFire,
-                    ChamberIndex = chamberIndex,
-                    UnderbarrelShot = underbarrelShot
-                }
+                SubPacket = new ShotInfoPacket(chamberIndex, underbarrelShot, EShotType.DryFire)
             };
             _coopPlayer.PacketSender.SendPacket(ref packet);
         }
@@ -319,20 +316,9 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 NetId = _coopPlayer.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
-                SubPacket = new ShotInfoPacket()
-                {
-                    ShotType = shotType,
-                    ShotPosition = shotPosition,
-                    ShotDirection = shotDirection,
-                    ChamberIndex = chamberIndex,
-                    Overheat = overheat,
-                    UnderbarrelShot = Weapon.IsUnderBarrelDeviceActive || Weapon.IsGrenadeLauncher,
-                    AmmoTemplate = ammo.AmmoTemplate._id,
-                    LastShotOverheat = weapon.MalfState.LastShotOverheat,
-                    LastShotTime = weapon.MalfState.LastShotTime,
-                    SlideOnOverheatReached = weapon.MalfState.SlideOnOverheatReached,
-                    Durability = Weapon.Repairable.Durability
-                }
+                SubPacket = new ShotInfoPacket(shotPosition, shotDirection, ammo.TemplateId, overheat, weapon.MalfState.LastShotOverheat,
+                weapon.MalfState.LastShotTime, Weapon.Repairable.Durability, chamberIndex,
+                Weapon.IsUnderBarrelDeviceActive || _isGrenadeLauncher, weapon.MalfState.SlideOnOverheatReached, shotType)
             };
 
             _coopPlayer.PacketSender.SendPacket(ref packet);
@@ -539,12 +525,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 NetId = _coopPlayer.NetId,
                 Type = EFirearmSubPacketType.ShotInfo,
-                SubPacket = new ShotInfoPacket()
-                {
-                    ShotType = shotType,
-                    Overheat = overheat,
-                    AmmoTemplate = ammo.TemplateId
-                }
+                SubPacket = new ShotInfoPacket(ammo.TemplateId, overheat, shotType)
             };
             _coopPlayer.PacketSender.SendPacket(ref packet);
 
