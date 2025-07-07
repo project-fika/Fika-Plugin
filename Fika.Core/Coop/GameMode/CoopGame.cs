@@ -72,7 +72,7 @@ namespace Fika.Core.Coop.GameMode
             }
         }
 
-        private static ManualLogSource Logger;
+        private static ManualLogSource _logger;
 
         private Func<LocalPlayer, EftGamePlayerOwner> _func_1;
         private CoopPlayer _localPlayer;
@@ -106,14 +106,14 @@ namespace Fika.Core.Coop.GameMode
             ISession backEndSession, TimeSpan sessionTime, MetricsEventsClass metricsEvents,
             MetricsCollectorClass metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
         {
-            Logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
+            _logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
 
             Singleton<IFikaNetworkManager>.Instance.RaidSide = localRaidSettings.playerSide;
 
             GameDateTime gameTime = backendDateTime;
             if (timeAndWeather.HourOfDay != -1)
             {
-                Logger.LogInfo($"Using custom time, hour of day: {timeAndWeather.HourOfDay}");
+                _logger.LogInfo($"Using custom time, hour of day: {timeAndWeather.HourOfDay}");
                 DateTime currentTime = backendDateTime.DateTime_1;
                 DateTime newTime = new(currentTime.Year, currentTime.Month, currentTime.Day, timeAndWeather.HourOfDay,
                     currentTime.Minute, currentTime.Second, currentTime.Millisecond);
@@ -143,12 +143,12 @@ namespace Fika.Core.Coop.GameMode
             {
                 float newFlow = timeAndWeather.TimeFlowType.ToTimeFlow();
                 coopGame.GameWorld_0.GameDateTime.TimeFactor = newFlow;
-                Logger.LogInfo($"Using custom time flow: {newFlow}");
+                _logger.LogInfo($"Using custom time flow: {newFlow}");
             }
 
             if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.GameController.IsServer)
             {
-                Logger.LogInfo("Custom weather enabled, initializing curves");
+                _logger.LogInfo("Custom weather enabled, initializing curves");
                 (coopGame.GameController as HostGameController).SetupCustomWeather(timeAndWeather);
             }
 
@@ -269,7 +269,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (coopHandler == null)
             {
-                Logger.LogError("vmethod_3: CoopHandler was null!");
+                _logger.LogError("vmethod_3: CoopHandler was null!");
                 throw new MissingComponentException("CoopHandler was missing during CoopGame init");
             }
 
@@ -318,7 +318,7 @@ namespace Fika.Core.Coop.GameMode
                 client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
 
-            Logger.LogInfo("Adding debug component...");
+            _logger.LogInfo("Adding debug component...");
             GameController.CreateDebugComponent();
 
             //Destroy(customButton);
@@ -388,7 +388,7 @@ namespace Fika.Core.Coop.GameMode
         {
             if (FikaBackendUtils.IsHeadless)
             {
-                Logger.LogWarning("Unloading resources");
+                _logger.LogWarning("Unloading resources");
                 await Resources.UnloadUnusedAssets().Await();
             }
 
@@ -408,7 +408,7 @@ namespace Fika.Core.Coop.GameMode
             ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, Location_0.SecretExits,
                 !GameController.IsServer, Location_0.DisabledScavExits);
 
-            Logger.LogInfo($"Location: {Location_0.Name}");
+            _logger.LogInfo($"Location: {Location_0.Name}");
             BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
 
             GameController.InitShellingController(instance, gameWorld, Location_0);
@@ -446,7 +446,7 @@ namespace Fika.Core.Coop.GameMode
             }
             catch (Exception ex)
             {
-                Logger.LogError($"InitPlayer: {ex.Message}");
+                _logger.LogError($"InitPlayer: {ex.Message}");
                 throw;
             }
 
@@ -555,7 +555,7 @@ namespace Fika.Core.Coop.GameMode
                 await GameController.ReceiveSpawnPoint(Profile_0);
                 if (string.IsNullOrEmpty(GameController.InfiltrationPoint))
                 {
-                    Logger.LogError("InfiltrationPoint was null after retrieving it from the server!");
+                    _logger.LogError("InfiltrationPoint was null after retrieving it from the server!");
                     GameController.CreateSpawnSystem(Profile_0);
                 }
 
@@ -585,14 +585,14 @@ namespace Fika.Core.Coop.GameMode
 
             if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
             {
-                Logger.LogInfo("VOIP enabled, initializing...");
+                _logger.LogInfo("VOIP enabled, initializing...");
                 try
                 {
                     await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP();
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError($"There was an error initializing the VOIP module: {ex.Message}");
+                    _logger.LogError($"There was an error initializing the VOIP module: {ex.Message}");
                 }
             }
 
@@ -621,7 +621,7 @@ namespace Fika.Core.Coop.GameMode
             }
             catch (Exception ex)
             {
-                Logger.LogError($"CreateLocalPlayer: {ex.Message}");
+                _logger.LogError($"CreateLocalPlayer: {ex.Message}");
                 throw;
             }
 
@@ -630,7 +630,7 @@ namespace Fika.Core.Coop.GameMode
             _localPlayer = myPlayer as CoopPlayer;
             GameController.SetLocalPlayer(_localPlayer);
 
-            Logger.LogInfo("Local player created");
+            _logger.LogInfo("Local player created");
             return myPlayer;
         }
 
@@ -644,12 +644,12 @@ namespace Fika.Core.Coop.GameMode
             {
                 Traverse.Create(dogTag).Field<string>("<Id>k__BackingField").Value = MongoID.Generate(true);
 #if DEBUG
-                Logger.LogWarning("Generated new ID for DogTag");
+                _logger.LogWarning("Generated new ID for DogTag");
 #endif
             }
             else
             {
-                Logger.LogError("Could not find DogTag when generating new ID!");
+                _logger.LogError("Could not find DogTag when generating new ID!");
             }
         }
 
@@ -663,7 +663,7 @@ namespace Fika.Core.Coop.GameMode
         {
             SetStatusModel statusBody = new(myPlayer.ProfileId, status);
             await FikaRequestHandler.UpdateSetStatus(statusBody);
-            Logger.LogInfo("Setting game status to: " + status.ToString());
+            _logger.LogInfo("Setting game status to: " + status.ToString());
         }
 
         /// <summary>
@@ -720,7 +720,7 @@ namespace Fika.Core.Coop.GameMode
                 return;
             }
 
-            Logger.LogError("CoopGame::UpdateExfilPointFromServer: ExfilManager was null!");
+            _logger.LogError("CoopGame::UpdateExfilPointFromServer: ExfilManager was null!");
         }
 
         public override void Dispose()
@@ -738,7 +738,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(ex);
+                    _logger.LogError(ex);
                 }
             }
             dictionary_0.Clear();
@@ -819,7 +819,7 @@ namespace Fika.Core.Coop.GameMode
                 FikaBackendUtils.ResetTransitData();
             }
 
-            Logger.LogDebug("Stop");
+            _logger.LogDebug("Stop");
 
             ToggleDebug(false);
 
@@ -836,7 +836,7 @@ namespace Fika.Core.Coop.GameMode
                         myPlayer.InventoryController, false);
                     if (result.Error != null)
                     {
-                        Logger.LogError("Stop: Error removing dog tag!");
+                        _logger.LogError("Stop: Error removing dog tag!");
                     }
                 }
             }
@@ -876,7 +876,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                Logger.LogError("Stop: Could not find CoopHandler!");
+                _logger.LogError("Stop: Could not find CoopHandler!");
             }
 
             if (!FikaBackendUtils.IsTransit)
@@ -1023,7 +1023,7 @@ namespace Fika.Core.Coop.GameMode
                 FikaBackendUtils.IsTransit = false;
             }
 
-            Logger.LogWarning("Game init was cancelled!");
+            _logger.LogWarning("Game init was cancelled!");
 
             CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
@@ -1036,7 +1036,7 @@ namespace Fika.Core.Coop.GameMode
                         myPlayer.InventoryController, false);
                     if (result.Error != null)
                     {
-                        Logger.LogWarning("StopFromError: Error removing dog tag!");
+                        _logger.LogWarning("StopFromError: Error removing dog tag!");
                     }
                 }
             }
@@ -1063,7 +1063,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                Logger.LogError("Stop: Could not find CoopHandler!");
+                _logger.LogError("Stop: Could not find CoopHandler!");
             }
 
             Destroy(GameController.CoopHandler);
@@ -1130,7 +1130,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
+                    _logger.LogError("Unable to send RaidLeave request to server: " + ex.Message);
                 }
             }
             metricsCollectorClass.Stop();
@@ -1154,7 +1154,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(ex);
+                    _logger.LogError(ex);
                 }
             }
             dictionary_0.Clear();
@@ -1278,7 +1278,7 @@ namespace Fika.Core.Coop.GameMode
 
         public void ReportAbuse()
         {
-            Logger.LogInfo("NO");
+            _logger.LogInfo("NO");
         }
     }
 }
