@@ -111,6 +111,10 @@ namespace Fika.Core.Coop.FreeCamera
         private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
         {
             _showOverlay = FikaPlugin.KeybindOverlay.Value;
+            if (IsActive)
+            {
+                _freecamUI.gameObject.SetActive(_showOverlay);
+            }
         }
 
         public void SetCurrentPlayer(CoopPlayer player)
