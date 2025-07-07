@@ -683,6 +683,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         protected void OnDestroy()
         {
+            Destroy(_freecamUI.gameObject);
             Destroy(this);
         }
     }
