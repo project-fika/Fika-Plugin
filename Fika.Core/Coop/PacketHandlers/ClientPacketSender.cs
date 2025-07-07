@@ -29,11 +29,12 @@ namespace Fika.Core.Coop.PacketHandlers
 
         private CoopPlayer _player;
         private PlayerStatePacket _state;
+        private int _animHash;
         private bool IsMoving
         {
             get
             {
-                return _player.MovementContext.PlayerAnimator.Animator.GetBool(PlayerAnimator.INERT_PARAM_HASH);
+                return _player.MovementContext.PlayerAnimator.Animator.GetBool(_animHash);
             }
         }
 
@@ -65,6 +66,7 @@ namespace Fika.Core.Coop.PacketHandlers
             sender._updateCount = 0;
             sender._updatesPerTick = 1f / sender._updateRate;
             sender._state = new(player.NetId);
+            sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
             return sender;
         }
 

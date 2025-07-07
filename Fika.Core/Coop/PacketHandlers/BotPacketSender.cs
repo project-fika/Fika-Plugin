@@ -20,11 +20,12 @@ namespace Fika.Core.Coop.PacketHandlers
         private CoopPlayer _player;
         private bool _sendPackets;
         private PlayerStatePacket _state;
+        private int _animHash;
         private bool IsMoving
         {
             get
             {
-                return _player.MovementContext.PlayerAnimator.Animator.GetBool(PlayerAnimator.INERT_PARAM_HASH);
+                return _player.MovementContext.PlayerAnimator.Animator.GetBool(_animHash);
             }
         }
 
@@ -34,6 +35,7 @@ namespace Fika.Core.Coop.PacketHandlers
             sender._player = bot;
             sender.Server = Singleton<FikaServer>.Instance;
             sender._state = new(bot.NetId);
+            sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
             sender.Enabled = true;
             sender.SendState = true;
             return sender;
