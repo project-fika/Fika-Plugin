@@ -780,44 +780,44 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private class ObservedThrowPatronOperation1(FirearmController controller) : MutliBarrelReloadOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
             public override void Start(GClass1839 reloadMultiBarrelResult, Callback callback)
             {
-                observedController._isThrowingPatron = true;
+                _observedController._isThrowingPatron = true;
                 base.Start(reloadMultiBarrelResult, callback);
             }
         }
 
         private class ObservedThrowPatronOperation2(FirearmController controller) : SingleBarrelReloadOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
             public override void Start(GClass1840 reloadSingleBarrelResult, Callback callback)
             {
-                observedController._isThrowingPatron = true;
+                _observedController._isThrowingPatron = true;
                 base.Start(reloadSingleBarrelResult, callback);
             }
         }
 
         private class ObservedThrowPatronOperation3(FirearmController controller) : FixMalfunctionOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
             public override void Start()
             {
-                observedController._isThrowingPatron = true;
+                _observedController._isThrowingPatron = true;
                 base.Start();
             }
         }
 
         private class ObservedThrowPatronOperation4(FirearmController controller) : RechamberOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController observedController = (CoopObservedFirearmController)controller;
+            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
             public override void Start(AmmoItemClass ammo, Callback callback)
             {
-                observedController._isThrowingPatron = true;
+                _observedController._isThrowingPatron = true;
                 base.Start(ammo, callback);
             }
         }
