@@ -80,13 +80,13 @@ namespace Fika.Core.Coop.GameMode
         private float _voipDistance;
 
         /// <summary>
-        /// Creates a CoopGame
+        /// Creates a <see cref="CoopGame"/>
         /// </summary>
         /// <param name="inputTree"></param>
         /// <param name="profile"></param>
+        /// <param name="gameWorld"></param>
         /// <param name="backendDateTime"></param>
         /// <param name="insurance"></param>
-        /// <param name="menuUI"></param>
         /// <param name="gameUI"></param>
         /// <param name="location"></param>
         /// <param name="timeAndWeather"></param>
@@ -97,6 +97,9 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="updateQueue"></param>
         /// <param name="backEndSession"></param>
         /// <param name="sessionTime"></param>
+        /// <param name="metricsEvents"></param>
+        /// <param name="metricsCollector"></param>
+        /// <param name="localRaidSettings"></param>
         /// <param name="raidSettings"></param>
         /// <returns></returns>
         internal static CoopGame Create(IInputTree inputTree, Profile profile, GameWorld gameWorld, GameDateTime backendDateTime,
