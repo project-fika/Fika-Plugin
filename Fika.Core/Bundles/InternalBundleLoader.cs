@@ -72,6 +72,8 @@ namespace Fika.Core.Bundles
                     return _masterBundle.LoadAsset<T>("PlayerFriendlyUI");
                 case EFikaAsset.SendItemMenu:
                     return _masterBundle.LoadAsset<T>("SendItemMenu");
+                case EFikaAsset.FreecamUI:
+                    return _masterBundle.LoadAsset<T>("FreecamUI");
             }
 
             throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given");
@@ -111,7 +113,8 @@ namespace Fika.Core.Bundles
             MatchmakerUI,
             Ping,
             PlayerUI,
-            SendItemMenu
+            SendItemMenu,
+            FreecamUI
         }
     }
 }

@@ -6,13 +6,9 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 public class MainMenuUIPlayer : MonoBehaviour
 {
-    [SerializeField]
     public TextMeshProUGUI PlayerName;
-    [SerializeField]
     public TextMeshProUGUI PlayerLevel;
-    [SerializeField]
     public TextMeshProUGUI PlayerStatus;
-    [SerializeField]
     public Image StatusImage;
 
     public void SetActivity(string nickname, int level, EFikaPlayerPresence presence)

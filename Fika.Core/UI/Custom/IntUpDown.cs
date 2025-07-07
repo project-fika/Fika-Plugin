@@ -7,27 +7,27 @@ using UnityEngine.UI;
 public class IntUpDown : MonoBehaviour
 {
     [SerializeField]
-    Button increaseButton;
+    Button _increaseButton;
     [SerializeField]
-    Button decreaseButton;
+    Button _decreaseButton;
     [SerializeField]
-    int AmountOfPlayers = 1;
+    int _amountOfPlayers = 1;
     [SerializeField]
-    TextMeshProUGUI AmountText;
+    TextMeshProUGUI _amountText;
 
     public void IncreaseAmount()
     {
-        AmountOfPlayers++;
-        AmountOfPlayers = Mathf.Clamp(AmountOfPlayers, 1, 32);
+        _amountOfPlayers++;
+        _amountOfPlayers = Mathf.Clamp(_amountOfPlayers, 1, 32);
 
-        AmountText.text = AmountOfPlayers.ToString();
+        _amountText.text = _amountOfPlayers.ToString();
     }
 
     public void DecreaseAmount()
     {
-        AmountOfPlayers--;
-        AmountOfPlayers = Mathf.Clamp(AmountOfPlayers, 1, 32);
+        _amountOfPlayers--;
+        _amountOfPlayers = Mathf.Clamp(_amountOfPlayers, 1, 32);
 
-        AmountText.text = AmountOfPlayers.ToString();
+        _amountText.text = _amountOfPlayers.ToString();
     }
 }

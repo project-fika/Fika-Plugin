@@ -2,9 +2,11 @@
 using Comfort.Common;
 using EFT;
 using EFT.UI;
+using Fika.Core.Bundles;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
+using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
@@ -45,6 +47,7 @@ namespace Fika.Core.Coop.FreeCamera
         private float _originalFov;
         private bool _nightVisionActive;
         private bool _thermalVisionActive;
+        private FreecamUI _freecamUI;
 
         private KeyCode _forwardKey;
         private KeyCode _backKey;
@@ -93,6 +96,16 @@ namespace Fika.Core.Coop.FreeCamera
 
             _freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
             _originalFov = CameraClass.Instance.Fov;
+
+            GameObject asset = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.FreecamUI);
+            GameObject freecamObject = Instantiate(asset);
+            freecamObject.transform.SetParent(transform);
+            _freecamUI = freecamObject.GetComponent<FreecamUI>();
+            if (_freecamUI == null)
+            {
+                throw new NullReferenceException("Could not assign FreecamUI");
+            }
+            freecamObject.SetActive(false);
         }
 
         private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
@@ -106,50 +119,6 @@ namespace Fika.Core.Coop.FreeCamera
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Setting player to {_currentPlayer}");
 #endif
-        }
-
-        protected void OnGUI()
-        {
-            if (IsActive && _showOverlay)
-            {
-                string visionText = "Enable nightvision";
-
-                if (_nightVision != null && _nightVision.On)
-                {
-                    visionText = "Enable thermals";
-                }
-
-                if (_thermalVision != null && _thermalVision.On)
-                {
-                    visionText = "Disable thermals";
-                }
-
-                GUILayout.BeginArea(new Rect(5, 5, 800, 800));
-                GUILayout.BeginVertical();
-
-                if (FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator)
-                {
-                    GUILayout.Label($"Left/Right Mouse Button: Jump between players");
-                    GUILayout.Label($"CTRL + Left/Right Mouse Button: Jump and spectate in 3rd person");
-                }
-                else
-                {
-                    GUILayout.Label($"Left/Right Mouse Button: Jump and spectate in 3rd person");
-                }
-                GUILayout.Label($"Spacebar + Left/Right Mouse Button: Jump and spectate in head cam");
-                if (FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator || _isSpectatingBots)
-                {
-                    GUILayout.Label($"G: Detach Camera");
-                }
-                GUILayout.Label($"T: Teleport to cam position");
-                GUILayout.Label($"N: {visionText}");
-                GUILayout.Label($"M: Disable culling");
-                GUILayout.Label($"HOME: {(_disableInput ? "Enable Input" : "Disable Input")}");
-                GUILayout.Label($"Shift + Ctrl: Turbo Speed");
-
-                GUILayout.EndVertical();
-                GUILayout.EndArea();
-            }
         }
 
         public void DetachCamera()
@@ -319,6 +288,7 @@ namespace Fika.Core.Coop.FreeCamera
             if (Input.GetKeyDown(KeyCode.Home))
             {
                 _disableInput = !_disableInput;
+                _freecamUI.InputText.SetText($"HOME: {(_disableInput ? "Enable Input" : "Disable Input")}");
                 NotificationManagerClass.DisplayMessageNotification(_disableInput ? LocaleUtils.FREECAM_DISABLED.Localized() : LocaleUtils.FREECAM_ENABLED.Localized());
             }
 
@@ -549,15 +519,18 @@ namespace Fika.Core.Coop.FreeCamera
                 if (!_nightVision.On && !_thermalVision.On)
                 {
                     _nightVision.On = true;
+                    _freecamUI.VisionText.SetText("N: Enable thermals");
                 }
                 else if (_nightVision.On && !_thermalVision.On)
                 {
                     _nightVision.On = false;
                     _thermalVision.On = true;
+                    _freecamUI.VisionText.SetText("N: Disable thermals");
                 }
                 else if (_thermalVision.On)
                 {
                     _thermalVision.On = false;
+                    _freecamUI.VisionText.SetText("N: Enable nightvision");
                 }
             }
         }
@@ -628,6 +601,7 @@ namespace Fika.Core.Coop.FreeCamera
         {
             if (!active)
             {
+                _freecamUI.gameObject.SetActive(false);
                 if (_nightVision != null && _nightVision.On)
                 {
                     _nightVision.method_1(false);
@@ -657,6 +631,11 @@ namespace Fika.Core.Coop.FreeCamera
 
             if (active)
             {
+                if (_showOverlay)
+                {
+                    _freecamUI.gameObject.SetActive(true);
+                    _freecamUI.VisionText.SetText("N: Enable nightvision"); 
+                }
                 _nightVisionActive = false;
                 _thermalVisionActive = false;
                 Player player = Singleton<GameWorld>.Instance.MainPlayer;
