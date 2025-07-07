@@ -611,7 +611,7 @@ namespace Fika.Core.Coop.ObservedClasses
                 if (weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
                 {
                     Slot slot = weapon.FirstLoadedChamberSlot;
-                    int index = weapon.Chambers.IndexOf(slot);
+                    int index = Array.IndexOf(weapon.Chambers, slot);
                     if (slot.ContainedItem is AmmoItemClass grenadeBullet && !grenadeBullet.IsUsed)
                     {
                         grenadeBullet.IsUsed = true;
