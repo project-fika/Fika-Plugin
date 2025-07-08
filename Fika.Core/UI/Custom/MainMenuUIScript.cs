@@ -20,7 +20,7 @@ namespace Fika.Core.UI.Custom
         {
             get
             {
-                return instance != null;
+                return _instance != null;
             }
         }
 
@@ -28,32 +28,32 @@ namespace Fika.Core.UI.Custom
         {
             get
             {
-                return instance;
+                return _instance;
             }
         }
 
-        private static MainMenuUIScript instance;
+        private static MainMenuUIScript _instance;
 
-        private Coroutine queryRoutine;
-        private MainMenuUI mainMenuUI;
-        private GameObject playerTemplate;
-        private GameObject userInterface;
-        private List<GameObject> players;
-        private DateTime lastRefresh;
-        private DateTime lastSet;
-        private int minSecondsToWait;
-        private RectTransform transformToScale;
-        private GInterface207<RaidSettings> backendSession;
+        private Coroutine _queryRoutine;
+        private MainMenuUI _mainMenuUI;
+        private GameObject _playerTemplate;
+        private GameObject _userInterface;
+        private List<GameObject> _players;
+        private DateTime _lastRefresh;
+        private DateTime _lastSet;
+        private int _minSecondsToWait;
+        private RectTransform _transformToScale;
+        private GInterface207<RaidSettings> _backendSession;
 
         private DateTime BackendTime
         {
             get
             {
-                if (backendSession == null)
+                if (_backendSession == null)
                 {
                     return DateTime.MinValue;
                 }
-                return backendSession.GetCurrentLocationTime;
+                return _backendSession.GetCurrentLocationTime;
             }
         }
 
@@ -67,16 +67,16 @@ namespace Fika.Core.UI.Custom
 
         protected void Start()
         {
-            instance = this;
-            minSecondsToWait = 2;
-            players = [];
-            lastRefresh = DateTime.Now;
-            lastSet = DateTime.Now;
+            _instance = this;
+            _minSecondsToWait = 2;
+            _players = [];
+            _lastRefresh = DateTime.Now;
+            _lastSet = DateTime.Now;
             if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
             {
                 if (tarkovApplication.Session != null)
                 {
-                    backendSession = tarkovApplication.Session;
+                    _backendSession = tarkovApplication.Session;
                 }
             }
             CreateMainMenuUI();
@@ -86,31 +86,31 @@ namespace Fika.Core.UI.Custom
         {
             if (!FikaPlugin.EnableOnlinePlayers.Value)
             {
-                if (userInterface != null)
+                if (_userInterface != null)
                 {
-                    userInterface.SetActive(false);
+                    _userInterface.SetActive(false);
                 }
                 return;
             }
 
-            if (userInterface != null)
+            if (_userInterface != null)
             {
-                userInterface.SetActive(true);
+                _userInterface.SetActive(true);
             }
 
-            if (transformToScale != null)
+            if (_transformToScale != null)
             {
                 float scale = FikaPlugin.OnlinePlayersScale.Value;
-                transformToScale.localScale = new(scale, scale, scale);
+                _transformToScale.localScale = new(scale, scale, scale);
             }
-            queryRoutine = StartCoroutine(QueryPlayers());
+            _queryRoutine = StartCoroutine(QueryPlayers());
         }
 
         protected void OnDisable()
         {
-            if (queryRoutine != null)
+            if (_queryRoutine != null)
             {
-                StopCoroutine(queryRoutine);
+                StopCoroutine(_queryRoutine);
             }
         }
 
@@ -118,20 +118,20 @@ namespace Fika.Core.UI.Custom
         {
             GameObject mainMenuUIPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.MainMenuUI);
             GameObject mainMenuUI = GameObject.Instantiate(mainMenuUIPrefab);
-            this.mainMenuUI = mainMenuUI.GetComponent<MainMenuUI>();
-            playerTemplate = this.mainMenuUI.PlayerTemplate;
+            _mainMenuUI = mainMenuUI.GetComponent<MainMenuUI>();
+            _playerTemplate = _mainMenuUI.PlayerTemplate;
             Transform newParent = Singleton<CommonUI>.Instance.MenuScreen.gameObject.transform;
             mainMenuUI.transform.SetParent(newParent);
             gameObject.transform.SetParent(newParent);
 
-            Transform mainMenuUITransform = this.mainMenuUI.gameObject.transform;
+            Transform mainMenuUITransform = _mainMenuUI.gameObject.transform;
             GameObject objectToAttach = mainMenuUITransform.GetChild(0).GetChild(0).gameObject;
-            userInterface = objectToAttach;
-            transformToScale = objectToAttach.RectTransform();
+            _userInterface = objectToAttach;
+            _transformToScale = objectToAttach.RectTransform();
             float scale = FikaPlugin.OnlinePlayersScale.Value;
-            transformToScale.localScale = new(scale, scale, scale);
-            objectToAttach.AddComponent<UIDragComponent>().Init(transformToScale, true);
-            this.mainMenuUI.RefreshButton.onClick.AddListener(ManualRefresh);
+            _transformToScale.localScale = new(scale, scale, scale);
+            objectToAttach.AddComponent<UIDragComponent>().Init(_transformToScale, true);
+            _mainMenuUI.RefreshButton.onClick.AddListener(ManualRefresh);
 
             gameObject.SetActive(false);
             this.WaitFrames(3, null);
@@ -140,9 +140,9 @@ namespace Fika.Core.UI.Custom
 
         private void ManualRefresh()
         {
-            if ((DateTime.Now - lastRefresh).TotalSeconds >= 5)
+            if ((DateTime.Now - _lastRefresh).TotalSeconds >= 5)
             {
-                lastRefresh = DateTime.Now;
+                _lastRefresh = DateTime.Now;
                 ClearAndQueryPlayers();
             }
         }
@@ -161,14 +161,14 @@ namespace Fika.Core.UI.Custom
 
         private void ClearAndQueryPlayers()
         {
-            foreach (GameObject item in players)
+            foreach (GameObject item in _players)
             {
                 GameObject.Destroy(item);
             }
-            players.Clear();
+            _players.Clear();
 
             FikaPlayerPresence[] response = FikaRequestHandler.GetPlayerPresences();
-            mainMenuUI.UpdateLabel(response.Length);
+            _mainMenuUI.UpdateLabel(response.Length);
             SetupPlayers(ref response);
         }
 
@@ -197,7 +197,7 @@ namespace Fika.Core.UI.Custom
         {
             foreach (FikaPlayerPresence presence in responses)
             {
-                GameObject newPlayer = GameObject.Instantiate(playerTemplate, playerTemplate.transform.parent);
+                GameObject newPlayer = GameObject.Instantiate(_playerTemplate, _playerTemplate.transform.parent);
                 MainMenuUIPlayer mainMenuUIPlayer = newPlayer.GetComponent<MainMenuUIPlayer>();
                 mainMenuUIPlayer.SetActivity(presence.Nickname, presence.Level, presence.Activity);
                 if (presence.Activity is EFikaPlayerPresence.IN_RAID && presence.RaidInformation.HasValue)
@@ -212,19 +212,19 @@ namespace Fika.Core.UI.Custom
                         BoldText(time)));
                 }
                 newPlayer.SetActive(true);
-                players.Add(newPlayer);
+                _players.Add(newPlayer);
             }
         }
 
         public void UpdatePresence(EFikaPlayerPresence presence)
         {
             // Prevent spamming going back and forth to the main menu causing server lag for no reason
-            if ((DateTime.Now - lastSet).TotalSeconds < minSecondsToWait)
+            if ((DateTime.Now - _lastSet).TotalSeconds < _minSecondsToWait)
             {
                 return;
             }
 
-            lastSet = DateTime.Now;
+            _lastSet = DateTime.Now;
             FikaSetPresence data = new(presence);
             FikaRequestHandler.SetPresence(data);
         }
