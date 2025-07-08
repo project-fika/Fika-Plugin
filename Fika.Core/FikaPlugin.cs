@@ -183,6 +183,7 @@ namespace Fika.Core
         // Performance | Bot Limits            
         public static ConfigEntry<bool> EnforcedSpawnLimits { get; set; }
         public static ConfigEntry<bool> DespawnFurthest { get; set; }
+        public static ConfigEntry<bool> DespawnOnlyScavs { get; set; }
         public static ConfigEntry<float> DespawnMinimumDistance { get; set; }
         public static ConfigEntry<int> MaxBotsFactory { get; set; }
         public static ConfigEntry<int> MaxBotsCustoms { get; set; }
@@ -1022,7 +1023,7 @@ namespace Fika.Core
                 {
                     Category = performanceBotsHeader,
                     DispName = LocaleUtils.BEPINEX_ENFORCED_SPAWN_LIMITS_T.Localized(),
-                    Order = 14
+                    Order = 15
                 }),
                 "Enforced Spawn Limits", ref failed, headers);
 
@@ -1031,9 +1032,19 @@ namespace Fika.Core
                 {
                     Category = performanceBotsHeader,
                     DispName = LocaleUtils.BEPINEX_DESPAWN_FURTHEST_T.Localized(),
-                    Order = 13
+                    Order = 14
                 }),
                 "Despawn Furthest", ref failed, headers);
+
+            DespawnOnlyScavs = SetupSetting(performanceDefaultBotsHeader, "Despawn Only Scavs", false,
+                new ConfigDescription(LocaleUtils.BEPINEX_DESPAWN_ONLY_SCAVS_D.Localized(), tags: new ConfigurationManagerAttributes()
+                {
+                    Category = performanceBotsHeader,
+                    DispName = LocaleUtils.BEPINEX_DESPAWN_ONLY_SCAVS_T.Localized(),
+                    Order = 13,
+                    IsAdvanced = true
+                }),
+                "Despawn Only Scavs", ref failed, headers);
 
             DespawnMinimumDistance = SetupSetting(performanceDefaultBotsHeader, "Despawn Minimum Distance", 200.0f,
                 new ConfigDescription(LocaleUtils.BEPINEX_DESPAWN_MIN_DISTANCE_D.Localized(),

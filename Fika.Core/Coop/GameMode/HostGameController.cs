@@ -336,7 +336,9 @@ namespace Fika.Core.Coop.GameMode
         {
             List<CoopPlayer> humanPlayers = BotExtensions.GetPlayers(coopHandler);
 
-            string botKey = BotExtensions.GetFurthestBot(humanPlayers, Bots, out float furthestDistance);
+            bool onlyScavs = FikaPlugin.DespawnOnlyScavs.Value;
+
+            string botKey = BotExtensions.GetFurthestBot(humanPlayers, Bots, out float furthestDistance, onlyScavs);
 
             if (botKey == string.Empty)
             {

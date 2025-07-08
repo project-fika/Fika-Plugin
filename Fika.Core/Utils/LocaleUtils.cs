@@ -343,6 +343,8 @@ namespace Fika.Core.Utils
         public const string BEPINEX_ENFORCED_SPAWN_LIMITS_D = "F_BepInEx_EnforcedSpawnLimits_D";
         public const string BEPINEX_DESPAWN_FURTHEST_T = "F_BepInEx_DespawnFurthest_T";
         public const string BEPINEX_DESPAWN_FURTHEST_D = "F_BepInEx_DespawnFurthest_D";
+        public const string BEPINEX_DESPAWN_ONLY_SCAVS_T = "F_BepInEx_DespawnOnlyScavs_T";
+        public const string BEPINEX_DESPAWN_ONLY_SCAVS_D = "F_BepInEx_DespawnOnlyScavs_D";
         public const string BEPINEX_DESPAWN_MIN_DISTANCE_T = "F_BepInEx_DespawnMinDistance_T";
         public const string BEPINEX_DESPAWN_MIN_DISTANCE_D = "F_BepInEx_DespawnMinDistance_D";
         public const string BEPINEX_MAX_BOTS_T = "F_BepInEx_MaxBots_T";
