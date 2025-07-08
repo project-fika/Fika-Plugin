@@ -687,6 +687,7 @@ namespace Fika.Core.Coop.FreeCamera
 
         protected void OnDestroy()
         {
+            FikaPlugin.KeybindOverlay.SettingChanged -= KeybindOverlay_SettingChanged;
             Destroy(_freecamUI.gameObject);
             Destroy(this);
         }
