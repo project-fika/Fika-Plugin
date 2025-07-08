@@ -3,6 +3,10 @@
 # CS0618: Type or member is obsolete
 dotnet_diagnostic.CS0618.severity = none
 
+# IDE0031: Use null propagation (does not work well with Unity)
+dotnet_diagnostic.IDE0031.severity = none
+dotnet_analyzer_diagnostic.category-Style.severity = none
+
 # Custom config
 tab_width = 4
 indent_size = 4

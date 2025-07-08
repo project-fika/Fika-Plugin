@@ -48,35 +48,28 @@ namespace Fika.Core.Bundles
         /// <summary>
         /// Loads a Fika asset from the Master Bundle
         /// </summary>
-        /// <typeparam name="T">The <see cref="UnityEngine.Object"/> to load</typeparam>
-        /// <param name="asset">The <see cref="EFikaAsset"/> to load</param>
+        /// <param name="asset">The <see cref="EFikaAsset"/> type to load</param>
         /// <returns></returns>
         /// <exception cref="NullReferenceException">Master Bundle could not be found</exception>
         /// <exception cref="ArgumentOutOfRangeException"><see cref="EFikaAsset"/> was out of range</exception>
-        internal T GetFikaAsset<T>(EFikaAsset asset) where T : UnityEngine.Object
+        internal GameObject GetFikaAsset(EFikaAsset asset)
         {
             if (_masterBundle == null)
             {
                 throw new NullReferenceException("GetFikaAsset::MasterBundle did not exist!");
             }
 
-            switch (asset)
+            return asset switch
             {
-                case EFikaAsset.MainMenuUI:
-                    return _masterBundle.LoadAsset<T>("MainMenuUI");
-                case EFikaAsset.MatchmakerUI:
-                    return _masterBundle.LoadAsset<T>("NewMatchMakerUI");
-                case EFikaAsset.Ping:
-                    return _masterBundle.LoadAsset<T>("BasePingPrefab"); ;
-                case EFikaAsset.PlayerUI:
-                    return _masterBundle.LoadAsset<T>("PlayerFriendlyUI");
-                case EFikaAsset.SendItemMenu:
-                    return _masterBundle.LoadAsset<T>("SendItemMenu");
-                case EFikaAsset.FreecamUI:
-                    return _masterBundle.LoadAsset<T>("FreecamUI");
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given");
+                EFikaAsset.MainMenuUI => _masterBundle.LoadAsset<GameObject>("MainMenuUI"),
+                EFikaAsset.MatchmakerUI => _masterBundle.LoadAsset<GameObject>("NewMatchMakerUI"),
+                EFikaAsset.Ping => _masterBundle.LoadAsset<GameObject>("BasePingPrefab"),
+                EFikaAsset.PlayerUI => _masterBundle.LoadAsset<GameObject>("PlayerFriendlyUI"),
+                EFikaAsset.SendItemMenu => _masterBundle.LoadAsset<GameObject>("SendItemMenu"),
+                EFikaAsset.FreecamUI => _masterBundle.LoadAsset<GameObject>("FreecamUI"),
+                EFikaAsset.AdminUI => _masterBundle.LoadAsset<GameObject>("AdminSettingsUI"),
+                _ => throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given")
+            };
         }
 
         /// <summary>
@@ -114,7 +107,8 @@ namespace Fika.Core.Bundles
             Ping,
             PlayerUI,
             SendItemMenu,
-            FreecamUI
+            FreecamUI,
+            AdminUI
         }
     }
 }

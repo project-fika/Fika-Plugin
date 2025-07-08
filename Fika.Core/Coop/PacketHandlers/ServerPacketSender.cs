@@ -199,7 +199,7 @@ namespace Fika.Core.Coop.PacketHandlers
                     userData = interactable;
                 }
 
-                GameObject basePingPrefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.Ping);
+                GameObject basePingPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.Ping);
                 GameObject basePing = GameObject.Instantiate(basePingPrefab);
                 Vector3 hitPoint = hit.point;
                 PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);

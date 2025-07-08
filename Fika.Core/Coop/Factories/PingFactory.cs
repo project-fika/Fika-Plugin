@@ -30,7 +30,7 @@ public static class PingFactory
 
     public static void ReceivePing(Vector3 location, EPingType pingType, Color pingColor, string nickname, string localeId)
     {
-        GameObject prefab = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.Ping);
+        GameObject prefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.Ping);
         GameObject pingGameObject = UnityEngine.Object.Instantiate(prefab);
         AbstractPing abstractPing = FromPingType(pingType, pingGameObject);
         if (abstractPing != null)

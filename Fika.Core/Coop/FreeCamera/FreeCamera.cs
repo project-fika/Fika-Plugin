@@ -97,7 +97,7 @@ namespace Fika.Core.Coop.FreeCamera
             _freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
             _originalFov = CameraClass.Instance.Fov;
 
-            GameObject asset = InternalBundleLoader.Instance.GetFikaAsset<GameObject>(InternalBundleLoader.EFikaAsset.FreecamUI);
+            GameObject asset = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FreecamUI);
             GameObject freecamObject = Instantiate(asset);
             freecamObject.transform.SetParent(transform);
             _freecamUI = freecamObject.GetComponent<FreecamUI>();
