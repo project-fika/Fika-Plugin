@@ -6,6 +6,7 @@ namespace Fika.Core.Networking.Websocket
         KeepAlive = 0,
         StartedRaid = 1,
         SentItem = 2,
-        PushNotification = 3
+        PushNotification = 3,
+        OpenAdminSettings = 4
     }
 }

@@ -1,5 +1,7 @@
-﻿using Fika.Core.Networking.Http;
+﻿using Fika.Core.Bundles;
+using Fika.Core.Networking.Http;
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -41,5 +43,12 @@ public class AdminSettingsUIScript : MonoBehaviour
         SetSettingsResponse resp = FikaRequestHandler.SaveServerSettings(req);
 
         NotificationManagerClass.DisplayMessageNotification(resp.Success.ToString());
+    }
+
+    internal static void Create()
+    {
+        GameObject gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.AdminUI);
+        GameObject obj = Instantiate(gameObject);
+        obj.AddComponent<AdminSettingsUIScript>();
     }
 }

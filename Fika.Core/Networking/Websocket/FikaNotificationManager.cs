@@ -128,6 +128,23 @@ namespace Fika.Core.Networking.Websocket
                     notification = e.Data.ParseJsonTo<PushNotification>([]);
                     HandleNotification(notification);
                     break;
+                case EFikaNotifications.KeepAlive:
+                    break;
+                case EFikaNotifications.OpenAdminSettings:
+                    notification = e.Data.ParseJsonTo<OpenAdminMenuNotification>([]);
+                    HandleAdminMenu(notification);
+                    break;
+            }
+        }
+
+        private void HandleAdminMenu(NotificationAbstractClass notification)
+        {
+            if (notification is OpenAdminMenuNotification openAdminNotif && openAdminNotif.Success)
+            {
+                AsyncWorker.RunInMainTread(() =>
+                {
+                    AdminSettingsUIScript.Create();
+                }); 
             }
         }
 
