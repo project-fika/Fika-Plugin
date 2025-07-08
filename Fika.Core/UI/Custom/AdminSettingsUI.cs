@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class AdminSettingsUIScript : MonoBehaviour
+public class AdminSettingsUI : MonoBehaviour
 {
     public Toggle FriendlyFireCheck;
     public Toggle FreecamCheck;
