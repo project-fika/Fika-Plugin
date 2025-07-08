@@ -232,5 +232,15 @@ namespace Fika.Core.Networking.Http
         {
             return PostJson<FikaSetPresence, FikaPlayerPresence[]>("/fika/presence/setget", data);
         }
+
+        public static CurrentSettingsResponse GetServerSettings()
+        {
+            return GetJson<CurrentSettingsResponse>("/fika/admin/get");
+        }
+
+        public static SetSettingsResponse SaveServerSettings(SetSettingsRequest request)
+        {
+            return PostJson<SetSettingsRequest, SetSettingsResponse>("/fika/admin/set", request);
+        }
     }
 }
