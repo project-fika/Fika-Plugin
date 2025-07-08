@@ -59,7 +59,7 @@ namespace Fika.Core.Coop.Utils
         /// <param name="humanPlayers">List of all human <see cref="CoopPlayer"/>s</param>
         /// <param name="furthestDistance">The furthest <see cref="float"/> distance</param>
         /// <returns></returns>
-        public static string GetFurthestBot(List<CoopPlayer> humanPlayers, Dictionary<string, Player> bots, out float furthestDistance)
+        public static string GetFurthestBot(List<CoopPlayer> humanPlayers, Dictionary<string, Player> bots, out float furthestDistance, bool onlyScavs = false)
         {
             string furthestBot = string.Empty;
             furthestDistance = 0f;
@@ -67,6 +67,12 @@ namespace Fika.Core.Coop.Utils
             foreach (KeyValuePair<string, Player> botKeyValuePair in bots)
             {
                 if (IsInvalidBotForDespawning(botKeyValuePair))
+                {
+                    continue;
+                }
+
+                //if set to only despawn scavs, skip anything that is not WildSpawnType.assault
+                if (onlyScavs && botKeyValuePair.Value.Profile.Info.Settings.Role != WildSpawnType.assault)
                 {
                     continue;
                 }
