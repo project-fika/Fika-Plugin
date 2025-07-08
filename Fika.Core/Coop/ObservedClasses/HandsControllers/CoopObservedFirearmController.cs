@@ -50,7 +50,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             get
             {
-                return base.IsAiming;
+                return _isAiming;
             }
             set
             {
@@ -63,7 +63,7 @@ namespace Fika.Core.Coop.ObservedClasses
                     return;
                 }
                 _isAiming = value;
-                _player.Skills.FastAimTimer.Target = value ? 0f : 2f;
+                //_player.Skills.FastAimTimer.Target = value ? 0f : 2f;
                 method_63(_isAiming); // Set animator flags
                 _coopPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
             }
@@ -166,8 +166,8 @@ namespace Fika.Core.Coop.ObservedClasses
                 _player.MovementContext.PlayerAnimator.SetAiming(isAiming);
             }
             IsAiming = isAiming;
-            _player.ProceduralWeaponAnimation.CheckShouldMoveWeaponCloser();
-            _player.ProceduralWeaponAnimation.Shootingg.CurrentRecoilEffect.WeaponRecoilEffect.SetAiming(isAiming);
+            //_player.ProceduralWeaponAnimation.CheckShouldMoveWeaponCloser();
+            //_player.ProceduralWeaponAnimation.Shootingg.CurrentRecoilEffect.WeaponRecoilEffect.SetAiming(isAiming);
             _player.method_60(0.2f, false);
             if (isAiming)
             {
