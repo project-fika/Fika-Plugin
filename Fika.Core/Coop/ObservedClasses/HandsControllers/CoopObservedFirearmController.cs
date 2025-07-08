@@ -121,9 +121,9 @@ namespace Fika.Core.Coop.ObservedClasses
             WeaponPrefab prefab = ControllerGameObject.GetComponent<WeaponPrefab>();
             _weaponPrefab = prefab;
             _weaponManager = _weaponPrefab.ObjectInHands as WeaponManagerClass;
-            Traverse weaponTraverse = Traverse.Create(this);
             if (UnderbarrelWeapon != null)
             {
+                Traverse weaponTraverse = Traverse.Create(this);
                 _underBarrelManager = weaponTraverse.Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
             }
             IsRevolver = Weapon is RevolverItemClass;
