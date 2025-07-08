@@ -1,10 +1,10 @@
-﻿using Fika.Core.Bundles;
+﻿using Comfort.Common;
+using EFT.UI;
+using Fika.Core.Bundles;
+using Fika.Core.Coop.Utils;
 using Fika.Core.Networking.Http;
 using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.UI;
 
 public class AdminSettingsUIScript : MonoBehaviour
 {
@@ -27,13 +27,21 @@ public class AdminSettingsUIScript : MonoBehaviour
 
         _adminSettingsUI.ApplyButton.onClick.AddListener(() =>
         {
+            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
             ApplySettings();
         });
 
         _adminSettingsUI.CloseButton.onClick.AddListener(() =>
         {
-            GameObject.Destroy(this);
+            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
+
+            Destroy(this);
         });
+    }
+
+    private void OnDestroy()
+    {
+        Destroy(_adminSettingsUI.gameObject);
     }
 
     private void ApplySettings()
@@ -43,6 +51,8 @@ public class AdminSettingsUIScript : MonoBehaviour
         SetSettingsResponse resp = FikaRequestHandler.SaveServerSettings(req);
 
         NotificationManagerClass.DisplayMessageNotification(resp.Success.ToString());
+
+        Destroy(this);
     }
 
     internal static void Create()
@@ -50,5 +60,14 @@ public class AdminSettingsUIScript : MonoBehaviour
         GameObject gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.AdminUI);
         GameObject obj = Instantiate(gameObject);
         obj.AddComponent<AdminSettingsUIScript>();
+        RectTransform rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
+        if (rectTransform == null)
+        {
+            FikaGlobals.LogError("Could not get the RectTransform!");
+            Destroy(obj);
+            return;
+        }
+        rectTransform.gameObject.AddComponent<UIDragComponent>().Init(rectTransform, true);
+        obj.SetActive(true);
     }
 }
