@@ -1206,7 +1206,7 @@ namespace Fika.Core.Coop.Players
 
                 if (packet.HasAim)
                 {
-                    usableItemController.IsAiming = packet.AimState;
+                    usableItemController.SetAim(packet.AimState);
                 }
             }
         }
