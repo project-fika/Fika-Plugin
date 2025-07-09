@@ -11,7 +11,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(AIPlaceLogicPartisan).GetMethod(nameof(AIPlaceLogicPartisan.Dispose));
+            return typeof(AIPlaceLogicPartisan)
+                .GetMethod(nameof(AIPlaceLogicPartisan.Dispose));
         }
 
         [PatchPrefix]

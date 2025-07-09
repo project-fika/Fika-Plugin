@@ -12,7 +12,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GrenadeFactoryClass).GetMethod(nameof(GrenadeFactoryClass.Create));
+            return typeof(GrenadeFactoryClass)
+                .GetMethod(nameof(GrenadeFactoryClass.Create));
         }
 
         [PatchPostfix]

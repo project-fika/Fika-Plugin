@@ -6,20 +6,21 @@ namespace Fika.Core.Coop.Patches
 {
     internal class Class1417_ReloadBackendLocale_Patch : FikaPatch
     {
-        private static bool HasBeenSet = false;
+        private static bool _hasBeenSet = false;
 
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(Class1417).GetMethod(nameof(Class1417.ReloadBackendLocale));
+            return typeof(Class1417)
+                .GetMethod(nameof(Class1417.ReloadBackendLocale));
         }
 
         [PatchPostfix]
         public static void Postfix(Task __result)
         {
-            if (!HasBeenSet)
+            if (!_hasBeenSet)
             {
                 _ = Task.Run(() => FikaPlugin.Instance.WaitForLocales(__result));
-                HasBeenSet = true;
+                _hasBeenSet = true;
             }
         }
     }

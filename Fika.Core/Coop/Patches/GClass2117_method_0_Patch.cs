@@ -8,7 +8,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass2117).GetMethod(nameof(GClass2117.method_0));
+            return typeof(GClass2117)
+                .GetMethod(nameof(GClass2117.method_0));
         }
 
         [PatchPrefix]

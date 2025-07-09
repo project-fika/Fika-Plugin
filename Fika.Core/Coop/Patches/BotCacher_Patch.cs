@@ -9,7 +9,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(LocalBotSettingsProviderClass).GetMethod(nameof(LocalBotSettingsProviderClass.LoadInternal),
+            return typeof(LocalBotSettingsProviderClass)
+                .GetMethod(nameof(LocalBotSettingsProviderClass.LoadInternal),
                 BindingFlags.Static | BindingFlags.Public);
         }
 

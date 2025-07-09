@@ -12,7 +12,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass3451).GetMethod(nameof(GClass3451.ExceptAI));
+            return typeof(GClass3451)
+                .GetMethod(nameof(GClass3451.ExceptAI));
         }
 
         [PatchPrefix]

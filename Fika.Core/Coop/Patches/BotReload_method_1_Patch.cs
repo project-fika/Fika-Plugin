@@ -12,7 +12,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(BotReload).GetMethod(nameof(BotReload.method_1));
+            return typeof(BotReload)
+                .GetMethod(nameof(BotReload.method_1));
         }
 
         [PatchPostfix]
