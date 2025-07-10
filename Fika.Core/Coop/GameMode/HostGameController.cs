@@ -629,6 +629,10 @@ namespace Fika.Core.Coop.GameMode
                 controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
             _bossSpawnScenario.HaveSectants, gameWorld, location.OpenZones, location.Events);
             UpdateByUnity -= _botsController.method_0;
+            if (controllerSettings.ExcludedBosses != null)
+            {
+                _botsController.BotSpawner.SetBlockedRoles(controllerSettings.ExcludedBosses);
+            }
             _botStateManager.AssignBotsController(_botsController);
 
             int numberOfBots = controllerSettings.BotAmount switch
