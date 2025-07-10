@@ -424,7 +424,7 @@ namespace Fika.Core.Coop.Players
             if (player.IsYourPlayer)
             {
                 // Check for GClass increment
-                bool flag = DamageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface323>(bodyPart) != null;
+                bool flag = DamageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface324>(bodyPart) != null;
                 player.StatisticsManager.OnEnemyDamage(DamageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
                     GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
                     Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
