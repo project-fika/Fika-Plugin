@@ -43,7 +43,6 @@ namespace Fika.Core.Coop.ClientClasses
 
         public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
         {
-            // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
             operationFactoryDelegates[typeof(CylinderReloadOperationClass)] = new OperationFactoryDelegate(Weapon2);
@@ -766,7 +765,6 @@ namespace Fika.Core.Coop.ClientClasses
             private readonly CoopClientFirearmController _coopClientFirearmController = (CoopClientFirearmController)controller;
         }
 
-        // Check for GClass increments
         private class FirearmClass4(Player.FirearmController controller) : DefaultWeaponOperationClass(controller)
         {
             public override void Start()

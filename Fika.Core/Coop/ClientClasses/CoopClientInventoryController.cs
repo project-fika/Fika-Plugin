@@ -134,7 +134,6 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             // Do not replicate search operations
-            // Check for GClass increments, ReadPolymorph or vmethod_2 in this class
             if (operation is SearchContentOperationResultClass)
             {
                 base.vmethod_1(operation, callback);

@@ -24,7 +24,6 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
         {
-            // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
             operationFactoryDelegates[typeof(TripwireStateManagerClass)] = new OperationFactoryDelegate(Grenade1);
             return operationFactoryDelegates;

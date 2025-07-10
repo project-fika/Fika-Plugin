@@ -8,10 +8,10 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(LocalPlayer).GetMethod(nameof(LocalPlayer.Hide));
+            return typeof(LocalPlayer)
+                .GetMethod(nameof(LocalPlayer.Hide));
         }
 
-        // Check for GClass increments
         [PatchPrefix]
         public static bool Prefix(LocalPlayerCullingHandlerClass ___localPlayerCullingHandlerClass)
         {

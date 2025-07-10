@@ -128,7 +128,6 @@ namespace Fika.Core.Coop.HostClasses
             }
 
             // Do not replicate search operations
-            // Check for GClass increments, ReadPolymorph or vmethod_2 in this class
             if (operation is SearchContentOperationResultClass)
             {
                 base.vmethod_1(operation, callback);
@@ -139,7 +138,7 @@ namespace Fika.Core.Coop.HostClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
             // Check for GClass increments, TraderServices
-            if (operation is GClass3359)
+            if (operation is GClass3360)
             {
                 base.vmethod_1(operation, callback);
                 return;
