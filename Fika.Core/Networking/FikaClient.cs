@@ -199,12 +199,12 @@ namespace Fika.Core.Networking
         {
             VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
 
-            GClass1068 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+            GClass1069 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
             if (voipHandler.MicrophoneChecked)
             {
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == ESideType.Savage).ProfileId;
-                await GClass1640.LoadScene(AssetsManagerSingletonClass.Manager,
+                await GClass1641.LoadScene(AssetsManagerSingletonClass.Manager,
                     SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
@@ -290,7 +290,7 @@ namespace Fika.Core.Networking
 
         private void OnSyncTrapsPacketReceived(SyncTrapsPacket packet)
         {
-            GClass1358 reader = new(packet.Data);
+            GClass1359 reader = new(packet.Data);
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld.SyncModule != null)
             {
@@ -407,7 +407,7 @@ namespace Fika.Core.Networking
             for (int i = 0; i < packet.GrenadePackets.Count; i++)
             {
                 GrenadeDataPacketStruct throwablePacket = packet.GrenadePackets[i];
-                GClass815<int, Throwable> grenades = gameWorld.Grenades;
+                GClass816<int, Throwable> grenades = gameWorld.Grenades;
                 if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
                 {
                     throwable.ApplyNetPacket(throwablePacket);
@@ -664,7 +664,7 @@ namespace Fika.Core.Networking
             {
                 if (!packet.Success)
                 {
-                    NotificationManagerClass.DisplayNotification(new GClass2379("AirplaneDelayMessage".Localized(null),
+                    NotificationManagerClass.DisplayNotification(new GClass2380("AirplaneDelayMessage".Localized(null),
                                 ENotificationDurationType.Default, ENotificationIconType.Default, null));
                 }
             }
@@ -843,9 +843,9 @@ namespace Fika.Core.Networking
             IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
             if (fikaGame != null)
             {
-                using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
-                GClass1780 lootData = eftReader.ReadEFTLootDataDescriptor();
-                GClass1398 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
+                using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
+                GClass1782 lootData = eftReader.ReadEFTLootDataDescriptor();
+                GClass1399 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
                 if (lootItems.Count < 1)
                 {
                     throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
@@ -1327,7 +1327,7 @@ namespace Fika.Core.Networking
                 {
                     if (controller is Interface16 networkController)
                     {
-                        using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
+                        using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
                         BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                         OperationDataStruct result = networkController.CreateOperationFromDescriptor(descriptor);
                         if (!result.Succeeded)

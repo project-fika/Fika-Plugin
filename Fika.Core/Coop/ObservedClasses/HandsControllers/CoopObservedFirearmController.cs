@@ -80,7 +80,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-            operationFactoryDelegates[typeof(GClass1868)] = new OperationFactoryDelegate(Idle1);
+            operationFactoryDelegates[typeof(GClass1870)] = new OperationFactoryDelegate(Idle1);
             // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
             operationFactoryDelegates[typeof(MutliBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron1);
             operationFactoryDelegates[typeof(SingleBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron2);
@@ -761,7 +761,7 @@ namespace Fika.Core.Coop.ObservedClasses
             }
         }
 
-        private class ObservedIdleOperation(FirearmController controller) : GClass1868(controller)
+        private class ObservedIdleOperation(FirearmController controller) : GClass1870(controller)
         {
             public override void ProcessRemoveOneOffWeapon()
             {
@@ -773,7 +773,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1839 reloadMultiBarrelResult, Callback callback)
+            public override void Start(GClass1841 reloadMultiBarrelResult, Callback callback)
             {
                 _observedController._isThrowingPatron = true;
                 base.Start(reloadMultiBarrelResult, callback);
@@ -784,7 +784,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1840 reloadSingleBarrelResult, Callback callback)
+            public override void Start(GClass1842 reloadSingleBarrelResult, Callback callback)
             {
                 _observedController._isThrowingPatron = true;
                 base.Start(reloadSingleBarrelResult, callback);

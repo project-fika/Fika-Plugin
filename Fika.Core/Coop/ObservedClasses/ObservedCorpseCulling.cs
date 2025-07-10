@@ -13,7 +13,7 @@ namespace Fika.Core.Coop.ObservedClasses
         private readonly ObservedCoopPlayer _observedCoopPlayer;
         private readonly Corpse _observedCorpse;
         private readonly List<Renderer> _renderers = new(256);
-        private GClass996 _gClass996;
+        private GClass997 _gClass997;
         private bool _ragdollDone;
         private bool _localVisible = true;
 
@@ -21,18 +21,18 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             _observedCoopPlayer = observedCoopPlayer;
             _observedCorpse = observedCorpse;
-            _gClass996 = new(observedCoopPlayer.PlayerBones.Spine3.Original,
+            _gClass997 = new(observedCoopPlayer.PlayerBones.Spine3.Original,
                 EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_DEAD_BODY_RADIUS,
                 EFTHardSettings.Instance.CULLING_PLAYER_DEAD_BODY_DISTANCE);
-            _gClass996.OnVisibilityChanged += ChangeVisibility;
-            _gClass996.Register();
+            _gClass997.OnVisibilityChanged += ChangeVisibility;
+            _gClass997.Register();
         }
 
         public void ManualUpdate()
         {
             if (!_ragdollDone)
             {
-                _gClass996.CustomUpdate();
+                _gClass997.CustomUpdate();
             }
             if (!_ragdollDone && _observedCorpse.Ragdoll.Bool_2)
             {
@@ -73,9 +73,9 @@ namespace Fika.Core.Coop.ObservedClasses
 
         public void Dispose()
         {
-            _gClass996.OnVisibilityChanged -= ChangeVisibility;
-            _gClass996?.Dispose();
-            _gClass996 = null;
+            _gClass997.OnVisibilityChanged -= ChangeVisibility;
+            _gClass997?.Dispose();
+            _gClass997 = null;
             IsVisible = false;
             ChangeRendererState();
         }

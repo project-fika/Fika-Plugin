@@ -35,7 +35,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             return new Dictionary<Type, OperationFactoryDelegate> {
                 {
-                    typeof(Class1197),
+                    typeof(Class1198),
                     new OperationFactoryDelegate(GetObservedMedsOperation)
                 },
                 {
@@ -118,7 +118,7 @@ namespace Fika.Core.Coop.ObservedClasses
             ObservedOperation.HideObservedWeaponComplete();
         }
 
-        private class ObservedMedsOperation(Player.MedsController controller) : Class1197(controller)
+        private class ObservedMedsOperation(Player.MedsController controller) : Class1198(controller)
         {
             private readonly CoopObservedMedsController _observedMedsController = (CoopObservedMedsController)controller;
             private int _animation;

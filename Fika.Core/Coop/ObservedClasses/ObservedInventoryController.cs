@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.ObservedClasses
             return true;
         }
 
-        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3945 error)
+        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3947 error)
         {
             error = null;
             return true;
@@ -131,7 +131,7 @@ namespace Fika.Core.Coop.ObservedClasses
 
         private void HandleInProcess(Item item, ItemAddress to, GInterface421 operation, Callback callback)
         {
-            Player.Class1255 handler = new()
+            Player.Class1256 handler = new()
             {
                 player_0 = _coopPlayer,
                 callback = callback

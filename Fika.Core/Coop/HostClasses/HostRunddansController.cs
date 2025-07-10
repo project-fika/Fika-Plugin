@@ -8,7 +8,7 @@ namespace Fika.Core.Coop.HostClasses
 {
     public class HostRunddansController : LocalGameRunddansControllerClass
     {
-        public HostRunddansController(BackendConfigSettingsClass.GClass1582 settings, LocationSettingsClass.Location location) : base(settings, location)
+        public HostRunddansController(BackendConfigSettingsClass.GClass1583 settings, LocationSettingsClass.Location location) : base(settings, location)
         {
 
         }

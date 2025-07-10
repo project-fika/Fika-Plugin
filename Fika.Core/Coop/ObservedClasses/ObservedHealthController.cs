@@ -41,7 +41,7 @@ namespace Fika.Core.Coop.ObservedClasses
             for (int i = List_1.Count - 1; i >= 0; i--)
             {
                 handler.PausedEffects.Add(List_1[i]);
-                PausedEffectsStruct gstruct = Gclass832_0.Withdraw();
+                PausedEffectsStruct gstruct = Gclass833_0.Withdraw();
                 gstruct.SaveInfo(List_1[i].Id, List_1[i].HealthController, List_1[i].Type, List_1[i].BodyPart, List_1[i].Strength,
                     List_1[i].CurrentStrength, List_1[i].DelayTime, List_1[i].StateTime, List_1[i].WorkStateTime, List_1[i].BuildUpTime,
                     List_1[i].ResidueTime, List_1[i].State);
@@ -60,7 +60,7 @@ namespace Fika.Core.Coop.ObservedClasses
             {
                 Profile.ProfileHealthClass profileHealthClass2 = new()
                 {
-                    BodyParts = GClass863<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.ProfileBodyPartHealthClass>(),
+                    BodyParts = GClass864<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.ProfileBodyPartHealthClass>(),
                     Energy = new Profile.ProfileHealthClass.ValueInfo
                     {
                         Current = HealthValue_0.Current,
@@ -139,7 +139,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         PausedEffectsInfo[i].BuildUpTime, PausedEffectsInfo[i].ResidueStateTime, PausedEffectsInfo[i].State);
                     healthController.AddEffectToList(PausedEffects[i]);
                     PausedEffects[i].UnPauseEffect();
-                    healthController.Gclass832_0.Return(PausedEffectsInfo[i]);
+                    healthController.Gclass833_0.Return(PausedEffectsInfo[i]);
                 }
             }
         }

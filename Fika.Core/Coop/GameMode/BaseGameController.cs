@@ -92,7 +92,7 @@ namespace Fika.Core.Coop.GameMode
         // Raid data
         public List<ThrowWeapItemClass> ThrownGrenades { get; set; }
         public RaidSettings RaidSettings { get; set; }
-        public GClass1398 LootItems { get; set; } = [];
+        public GClass1399 LootItems { get; set; } = [];
         public LocationSettingsClass.Location Location { get; set; }
         public Dictionary<string, Player> Bots = [];
         public CoopHandler CoopHandler
@@ -317,7 +317,7 @@ namespace Fika.Core.Coop.GameMode
                 yield return endOfFrame;
             }
 
-            GClass2142.ResetAudioBuffer();
+            GClass2144.ResetAudioBuffer();
 
             _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalClientTriggersModule>();
             _gameWorld.FillLampControllers();
@@ -328,7 +328,7 @@ namespace Fika.Core.Coop.GameMode
             WeatherReady = true;
             OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
 
-            Class445 seasonController = new();
+            Class444 seasonController = new();
             _gameWorld.GInterface29_0 = seasonController;
 
 #if DEBUG
@@ -583,7 +583,7 @@ namespace Fika.Core.Coop.GameMode
             }
             else
             {
-                BackendConfigSettingsClass.GClass1582 runddansSettings = instance.runddansSettings;
+                BackendConfigSettingsClass.GClass1583 runddansSettings = instance.runddansSettings;
                 runddansActive = runddansSettings != null && runddansSettings.active;
             }
             if (runddansActive)

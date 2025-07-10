@@ -145,7 +145,7 @@ namespace Fika.Core.Coop.Players
             }
 
             player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-            player._handsController.Spawn(1f, Class1682.class1682_0.method_0);
+            player._handsController.Spawn(1f, Class1683.class1683_0.method_0);
             player.AIData = new PlayerAIDataClass(null, player);
             player.AggressorFound = false;
             player._animators[0].enabled = true;
@@ -220,7 +220,7 @@ namespace Fika.Core.Coop.Players
 
         public override void OnSkillLevelChanged(AbstractSkillClass skill)
         {
-            NotificationManagerClass.DisplayNotification(new GClass2377(skill));
+            NotificationManagerClass.DisplayNotification(new GClass2378(skill));
         }
 
         public override void SendVoiceMuffledState(bool isMuffled)
@@ -956,7 +956,7 @@ namespace Fika.Core.Coop.Players
             Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
         }
 
-        public override void vmethod_5(GClass2112 controller, int objectId, EventObject.EInteraction interaction)
+        public override void vmethod_5(GClass2114 controller, int objectId, EventObject.EInteraction interaction)
         {
             InteractPacketStruct packet = controller.GetInteractPacket(objectId, interaction);
             if (FikaBackendUtils.IsServer)

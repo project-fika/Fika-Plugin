@@ -265,7 +265,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 if (questItem.TemplateId == itemId && questItem.QuestItem)
                 {
-                    GStruct459<GClass3278> removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
+                    GStruct459<GClass3279> removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
                     _player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
                     {
                         if (!result.Succeed)

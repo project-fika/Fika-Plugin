@@ -240,14 +240,14 @@ namespace Fika.Core.Coop.Players
             player.Snapshotter = new(player);
             player.CurrentPlayerState = new(position, player.Rotation);
 
-            if (GClass2828.Int_1 == 0)
+            if (GClass2829.Int_1 == 0)
             {
-                GClass2828.Int_1 = 1;
+                GClass2829.Int_1 = 1;
                 player._frameSkip = 1;
             }
             else
             {
-                GClass2828.Int_1 = 0;
+                GClass2829.Int_1 = 0;
                 player._frameSkip = 0;
             }
 
@@ -1198,8 +1198,8 @@ namespace Fika.Core.Coop.Players
                     IEnumerable<Slot> newSlots = newWeapon.AllSlots;
                     if (newSlots != null)
                     {
-                        Dictionary<string, GClass764.GClass765> currentViews = [];
-                        foreach (KeyValuePair<EFT.InventoryLogic.IContainer, GClass764.GClass765> kvp in controller.CCV.ContainerBones)
+                        Dictionary<string, GClass765.GClass766> currentViews = [];
+                        foreach (KeyValuePair<EFT.InventoryLogic.IContainer, GClass765.GClass766> kvp in controller.CCV.ContainerBones)
                         {
                             if (kvp.Key is Slot slot && slot.ContainedItem != null)
                             {
@@ -1227,7 +1227,7 @@ namespace Fika.Core.Coop.Players
                                     controller.CCV.AddBone(slot, transform);
                                     continue;
                                 }
-                                foreach (KeyValuePair<string, GClass764.GClass765> kvp in currentViews)
+                                foreach (KeyValuePair<string, GClass765.GClass766> kvp in currentViews)
                                 {
                                     if (kvp.Key == slot.FullId)
                                     {
@@ -1643,7 +1643,7 @@ namespace Fika.Core.Coop.Players
                     oldSlotView.Dispose();
                 }
                 _observedPlayer.PlayerBody.ValidateHoodedDress(_slotType);
-                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3423>().Invoke(_observedPlayer.ProfileId);
+                GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3424>().Invoke(_observedPlayer.ProfileId);
                 Dispose();
             }
 
@@ -1671,7 +1671,7 @@ namespace Fika.Core.Coop.Players
         #region handControllers
         private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
         {
-            CreateHandsControllerHandler handler = new((item != null) ? method_137(item) : null);
+            CreateHandsControllerHandler handler = new((item != null) ? method_136(item) : null);
 
             handler.SetInHandsOperation?.Confirm(true);
 

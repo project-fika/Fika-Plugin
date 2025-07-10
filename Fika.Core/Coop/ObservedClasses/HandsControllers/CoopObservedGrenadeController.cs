@@ -26,7 +26,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             // Check for GClass increments..
             Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-            operationFactoryDelegates[typeof(Class1184)] = new OperationFactoryDelegate(Grenade1);
+            operationFactoryDelegates[typeof(Class1185)] = new OperationFactoryDelegate(Grenade1);
             return operationFactoryDelegates;
         }
 
@@ -82,9 +82,9 @@ namespace Fika.Core.Coop.ObservedClasses
         }
     }
 
-    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1184(controller)
+    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.Class1185(controller)
     {
-        private readonly CoopPlayer coopPlayer = player;
+        private readonly CoopPlayer _coopPlayer = player;
 
         public new void Start()
         {

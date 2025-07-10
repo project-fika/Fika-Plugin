@@ -701,10 +701,10 @@ namespace Fika.Core.Networking
                     {
                         try
                         {
-                            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+                            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                             if (LocationDescription.Length != 0)
                             {
-                                GClass1783 descriptor = eftReader.ReadPolymorph<GClass1783>();
+                                GClass1785 descriptor = eftReader.ReadPolymorph<GClass1785>();
                                 gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                             }
                         }
@@ -987,12 +987,12 @@ namespace Fika.Core.Networking
                     AmmoPackReloadingClass ammoPack = new(ammo);
                     ItemAddress gridItemAddress = null;
 
-                    using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+                    using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                     try
                     {
                         if (LocationDescription.Length > 0)
                         {
-                            GClass1783 descriptor = eftReader.ReadPolymorph<GClass1783>();
+                            GClass1785 descriptor = eftReader.ReadPolymorph<GClass1785>();
                             gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                         }
                     }

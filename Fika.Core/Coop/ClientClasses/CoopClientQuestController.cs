@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Fika.Core.Coop.ClientClasses
 {
     public class CoopClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session, CoopPlayer player)
-        : GClass3799(profile, inventoryController, searchController, session)
+        : GClass3800(profile, inventoryController, searchController, session)
     {
         protected readonly CoopPlayer _player = player;
 

@@ -61,7 +61,7 @@ namespace Fika.Core.Coop.Utils
         public static string HostLocationId { get; internal set; }
         public static IPAddress VPNIP { get; internal set; }
         public static RaidSettings CachedRaidSettings { get; set; }
-        public static GClass3966<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
+        public static GClass3968<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
 
         internal static bool RequestFikaWorld;
         internal static Vector3 ReconnectPosition = Vector3.zero;

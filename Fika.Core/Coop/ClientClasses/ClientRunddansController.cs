@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Coop.ClientClasses
 {
-    public class ClientRunddansController : GClass2116
+    public class ClientRunddansController : GClass2118
     {
-        public ClientRunddansController(BackendConfigSettingsClass.GClass1582 settings, LocationSettingsClass.Location location) : base(settings, location)
+        public ClientRunddansController(BackendConfigSettingsClass.GClass1583 settings, LocationSettingsClass.Location location) : base(settings, location)
         {
             HandleWeather(settings.ApplyFrozenEveryMS, CancellationTokenSource_0.Token).HandleExceptions();
         }
@@ -31,14 +31,14 @@ namespace Fika.Core.Coop.ClientClasses
                 {
                     break;
                 }
-                if (gameTimer.PastTime.TotalSeconds >= (double)Gclass1582_0.initialFrozenDelaySec)
+                if (gameTimer.PastTime.TotalSeconds >= (double)Gclass1583_0.initialFrozenDelaySec)
                 {
                     Player myPlayer = GamePlayerOwner.MyPlayer;
                     if (myPlayer != null && !myPlayer.IsAI
                         && !myPlayer.AIData.IsInside && !method_0(myPlayer)
                         && !(WeatherController.Instance == null) && WeatherController.Instance.WeatherCurve.Rain
-                        >= Gclass1582_0.rainForFrozen &&
-                        (EFTDateTimeClass.UtcNow - myPlayer.AIData.DrinkTimestamp).TotalSeconds >= (double)Gclass1582_0.drunkImmunitySec)
+                        >= Gclass1583_0.rainForFrozen &&
+                        (EFTDateTimeClass.UtcNow - myPlayer.AIData.DrinkTimestamp).TotalSeconds >= (double)Gclass1583_0.drunkImmunitySec)
                     {
                         ActiveHealthController activeHealthController = myPlayer.ActiveHealthController;
                         if (activeHealthController != null)

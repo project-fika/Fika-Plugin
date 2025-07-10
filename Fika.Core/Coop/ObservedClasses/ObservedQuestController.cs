@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Fika.Core.Coop.ObservedClasses
 {
     public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
-        : GClass3799(profile, inventoryController, searchController, session)
+        : GClass3800(profile, inventoryController, searchController, session)
     {
         public void HandleInraidQuestPacket(InraidQuestPacket packet)
         {
@@ -29,7 +29,7 @@ namespace Fika.Core.Coop.ObservedClasses
                         }
 
                         int generatedItems = 0;
-                        List<GClass3279> results = [];
+                        List<GClass3280> results = [];
                         GStruct458 appendResult = default;
                         foreach (QuestRewardDataClass item in readList)
                         {

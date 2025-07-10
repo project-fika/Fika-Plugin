@@ -329,7 +329,7 @@ namespace Fika.Core.Networking
         /// <returns>The deserialized <see cref="Item"/></returns>
         public static Item GetItem(this NetDataReader reader)
         {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
         }
 
@@ -341,7 +341,7 @@ namespace Fika.Core.Networking
         /// <returns>An <see cref="Inventory"/></returns>
         public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
         {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             return new EFTInventoryClass()
             {
                 Equipment = eftReader.ReadEFTItemDescriptor()
@@ -367,7 +367,7 @@ namespace Fika.Core.Networking
         /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
         public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
         {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
+            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
             return eftReader.ReadEFTItemDescriptor();
         }
 
@@ -378,15 +378,15 @@ namespace Fika.Core.Networking
         /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
         public static Item GetAirdropItem(this NetDataReader reader)
         {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
             Item item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
-            GClass1398 enumerable = [new LootItemPositionClass()];
+            GClass1399 enumerable = [new LootItemPositionClass()];
             enumerable[0].Item = item;
             Item[] array = [.. enumerable.Select(FikaGlobals.GetLootItemPositionItem)];
-            ResourceKey[] resourceKeys = [.. array.OfType<GClass3118>().GetAllItemsFromCollections()
-                .Concat(array.Where(AirdropSynchronizableObject.Class2036.class2036_0.method_1))
-                .SelectMany(AirdropSynchronizableObject.Class2036.class2036_0.method_2)];
+            ResourceKey[] resourceKeys = [.. array.OfType<GClass3119>().GetAllItemsFromCollections()
+                .Concat(array.Where(AirdropSynchronizableObject.Class2037.class2037_0.method_1))
+                .SelectMany(AirdropSynchronizableObject.Class2037.class2037_0.method_2)];
             Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
                 resourceKeys, JobPriorityClass.Immediate, null, default).HandleExceptions();
 
@@ -457,7 +457,7 @@ namespace Fika.Core.Networking
         /// <returns>The deserialized <see cref="Profile"/></returns>
         public static Profile GetProfile(this NetDataReader reader)
         {
-            using GClass1277 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
+            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
             return new(eftReader.ReadEFTProfileDescriptor());
         }
 

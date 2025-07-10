@@ -146,7 +146,7 @@ namespace Fika.Core.Coop.HostClasses
             if (SynchronizableObjectLogicProcessor.TripwireManager == null)
             {
                 FikaPlugin.Instance.FikaLogger.LogError("TripwireManager was null! Creating new...");
-                SynchronizableObjectLogicProcessor.TripwireManager = new GClass2523(this);
+                SynchronizableObjectLogicProcessor.TripwireManager = new GClass2524(this);
             }
 
             TripwireSynchronizableObject tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);

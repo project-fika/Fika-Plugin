@@ -243,7 +243,7 @@ namespace Fika.Core.Coop.GameMode
             coopBot = await CoopBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
                "Bot_", EPointOfView.ThirdPerson, profile, true, _updateQueue, Player.EUpdateMode.Auto,
                Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
-                FikaGlobals.GetOtherPlayerSensitivity, GClass1689.Default, mongoId, nextOperationId);
+                FikaGlobals.GetOtherPlayerSensitivity, GClass1691.Default, mongoId, nextOperationId);
 
             coopBot.Location = Location.Id;
             Bots.Add(coopBot.ProfileId, coopBot);
@@ -612,9 +612,9 @@ namespace Fika.Core.Coop.GameMode
             BotControllerSettings controllerSettings, GameWorld gameWorld)
         {
             BotsPresets botsPresets = new(_backendSession, _wavesSpawnScenario.SpawnWaves,
-                    _bossSpawnScenario.BossSpawnWaves, _nonWavesSpawnScenario.GClass1712_0, false);
+                    _bossSpawnScenario.BossSpawnWaves, _nonWavesSpawnScenario.GClass1714_0, false);
             List<WaveInfoClass> waveInfos = [];
-            LocationSettingsClass.Location.GClass1419 halloween = location.Events.Halloween2024;
+            LocationSettingsClass.Location.GClass1420 halloween = location.Events.Halloween2024;
             if (halloween != null && halloween.InfectionPercentage > 0)
             {
                 waveInfos.AddRange(BotHalloweenWithZombies.GetProfilesOnStart());
@@ -702,7 +702,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            _bossSpawnScenario.Run(EBotsSpawnMode.Anyway);
+            _bossSpawnScenario.Run(_botsController.BotSpawner.GetPmcZones());
             _botsController.EventsController.SpawnAction();
 
             FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
@@ -786,7 +786,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (Location.EventTrapsData != null)
             {
-                GClass1458.InitLabyrinthSyncableTraps(Location.EventTrapsData);
+                GClass1459.InitLabyrinthSyncableTraps(Location.EventTrapsData);
                 _gameWorld.SyncModule = new();
             }
 
@@ -829,7 +829,7 @@ namespace Fika.Core.Coop.GameMode
                 sharedQuestController.ToggleQuestSharing(false);
             }
 
-            BackendConfigSettingsClass.GClass1554.GClass1560 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
+            BackendConfigSettingsClass.GClass1555.GClass1561 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
             if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
             {
                 coopGame.ExitStatus = ExitStatus.Runner;
@@ -971,7 +971,7 @@ namespace Fika.Core.Coop.GameMode
 
         public override Task InitializeLoot(LocationSettingsClass.Location location)
         {
-            GClass1780 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
+            GClass1782 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
             EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
             byte[] lootData = eftWriter.ToArray();
@@ -1025,7 +1025,7 @@ namespace Fika.Core.Coop.GameMode
                 }
                 list.Sort(LootCompare);
 
-                GClass1780 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
+                GClass1782 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
                 EFTWriterClass eftWriter = new();
                 eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
 
@@ -1123,7 +1123,7 @@ namespace Fika.Core.Coop.GameMode
                 Logger.LogError("SyncModule was null when trying to sync trap data!");
             }
 
-            GClass1362 writer = new(new byte[2048]);
+            GClass1363 writer = new(new byte[2048]);
             _gameWorld.SyncModule.Serialize(writer);
 
             SyncTrapsPacket packet = new()

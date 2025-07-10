@@ -383,7 +383,7 @@ namespace Fika.Core.Coop.GameMode
                 sharedQuestController.ToggleQuestSharing(false);
             }
 
-            BackendConfigSettingsClass.GClass1554.GClass1560 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
+            BackendConfigSettingsClass.GClass1555.GClass1561 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
             if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
             {
                 coopGame.ExitStatus = ExitStatus.Runner;
