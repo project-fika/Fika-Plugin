@@ -14,8 +14,8 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            //Check for gclass increments
-            return typeof(LocalPlayer).GetMethod(nameof(LocalPlayer.OnDead));
+            return typeof(LocalPlayer)
+                .GetMethod(nameof(LocalPlayer.OnDead));
         }
 
         [PatchTranspiler]
