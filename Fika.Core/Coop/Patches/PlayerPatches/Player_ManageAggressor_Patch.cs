@@ -14,25 +14,19 @@ namespace Fika.Core.Coop.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            //Check for gclass increments
-            return typeof(LocalPlayer).GetMethod(nameof(LocalPlayer.ManageAggressor));
+            return typeof(LocalPlayer)
+                .GetMethod(nameof(LocalPlayer.ManageAggressor));
         }
 
         [PatchTranspiler]
-        public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> Transpile()
         {
-            // Create a new set of instructions
-            List<CodeInstruction> instructionsList =
-            [
-                new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Ldarg_1),
-                new CodeInstruction(OpCodes.Ldarg_2),
-                new CodeInstruction(OpCodes.Ldarg_3),
-                new CodeInstruction(OpCodes.Call, typeof(Player).GetMethod(nameof(Player.ManageAggressor))),
-                new CodeInstruction(OpCodes.Ret)
-            ];
-
-            return instructionsList;
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Ldarg_1);
+            yield return new CodeInstruction(OpCodes.Ldarg_2);
+            yield return new CodeInstruction(OpCodes.Ldarg_3);
+            yield return new CodeInstruction(OpCodes.Call, typeof(Player).GetMethod(nameof(Player.ManageAggressor)));
+            yield return new CodeInstruction(OpCodes.Ret);
         }
     }
 }
