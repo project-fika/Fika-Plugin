@@ -7,12 +7,12 @@ namespace Fika.Core.Coop.Patches.Rockets
     /// <summary>
     /// Do not run method unless server to avoid double damage
     /// </summary>
-    public class GClass3769_Initialize_Patch : FikaPatch
+    public class RocketLauncherConeBlastClass_Initialize_Patch : FikaPatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GClass3769)
-                .GetMethod(nameof(GClass3769.Initialize));
+            return typeof(RocketLauncherConeBlastClass)
+                .GetMethod(nameof(RocketLauncherConeBlastClass.Initialize));
         }
 
         [PatchPrefix]

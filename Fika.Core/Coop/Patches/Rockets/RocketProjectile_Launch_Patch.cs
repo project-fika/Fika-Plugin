@@ -20,11 +20,11 @@ namespace Fika.Core.Coop.Patches.Rockets
         }
 
         [PatchPrefix]
-        public static bool Prefix(RocketProjectile __instance, ref bool ___bool_0, ref Coroutine ___coroutine_0, GClass3769 ___gclass3769_0)
+        public static bool Prefix(RocketProjectile __instance, ref bool ___bool_0, ref Coroutine ___coroutine_0, RocketLauncherConeBlastClass ___rocketLauncherConeBlastClass)
         {
             if (Singleton<GameWorld>.Instance is ClientLocalGameWorld && FikaBackendUtils.IsServer)
             {
-                ___coroutine_0 = __instance.StartCoroutine(___gclass3769_0.ConeBlast(___coroutine_0));
+                ___coroutine_0 = __instance.StartCoroutine(___rocketLauncherConeBlastClass.ConeBlast(___coroutine_0));
             }
             __instance.method_1();
             __instance.method_11(true);

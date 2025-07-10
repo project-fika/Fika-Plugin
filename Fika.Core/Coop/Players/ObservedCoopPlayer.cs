@@ -77,7 +77,7 @@ namespace Fika.Core.Coop.Players
         private Coroutine _waitForStartRoutine;
         private bool _isServer;
         private VoiceBroadcastTrigger _voiceBroadcastTrigger;
-        private SoundSettingsDataClass _soundSettings;
+        private SoundSettingsControllerClass _soundSettings;
         private bool _voipAssigned;
         private int _frameSkip;
 
@@ -240,14 +240,14 @@ namespace Fika.Core.Coop.Players
             player.Snapshotter = new(player);
             player.CurrentPlayerState = new(position, player.Rotation);
 
-            if (GClass2829.Int_1 == 0)
+            if (ObservedPlayerControllerClass.Int_1 == 0)
             {
-                GClass2829.Int_1 = 1;
+                ObservedPlayerControllerClass.Int_1 = 1;
                 player._frameSkip = 1;
             }
             else
             {
-                GClass2829.Int_1 = 0;
+                ObservedPlayerControllerClass.Int_1 = 0;
                 player._frameSkip = 0;
             }
 

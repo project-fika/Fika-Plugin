@@ -159,7 +159,7 @@ namespace Fika.Core.Coop.ClientClasses
             {
                 if (currentOperation is not Class1184)
                 {
-                    if (currentOperation is Class1185)
+                    if (currentOperation is TripwireStateManagerClass)
                     {
                         WeaponPacket packet = new()
                         {

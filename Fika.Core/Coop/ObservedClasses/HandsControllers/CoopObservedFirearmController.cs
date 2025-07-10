@@ -773,7 +773,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1841 reloadMultiBarrelResult, Callback callback)
+            public override void Start(ReloadMultiBarrelResultClass reloadMultiBarrelResult, Callback callback)
             {
                 _observedController._isThrowingPatron = true;
                 base.Start(reloadMultiBarrelResult, callback);
@@ -784,7 +784,7 @@ namespace Fika.Core.Coop.ObservedClasses
         {
             private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
 
-            public override void Start(GClass1842 reloadSingleBarrelResult, Callback callback)
+            public override void Start(ReloadSingleBarrelResultClass reloadSingleBarrelResult, Callback callback)
             {
                 _observedController._isThrowingPatron = true;
                 base.Start(reloadSingleBarrelResult, callback);

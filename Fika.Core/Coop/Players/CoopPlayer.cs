@@ -126,7 +126,7 @@ namespace Fika.Core.Coop.Players
                 player.PacketSender = ClientPacketSender.Create(player);
             }
 
-            EVoipState voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsDataClass.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
+            EVoipState voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsControllerClass.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
 
             await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
                 new CoopClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
@@ -184,7 +184,7 @@ namespace Fika.Core.Coop.Players
         {
             if (_voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
             {
-                SoundSettingsDataClass settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+                SoundSettingsControllerClass settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
                 if (!settings.VoipEnabled)
                 {
                     voipState = EVoipState.Off;

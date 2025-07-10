@@ -786,7 +786,7 @@ namespace Fika.Core.Coop.GameMode
 
             if (Location.EventTrapsData != null)
             {
-                GClass1459.InitLabyrinthSyncableTraps(Location.EventTrapsData);
+                LabyrinthSyncableTrapClass.InitLabyrinthSyncableTraps(Location.EventTrapsData);
                 _gameWorld.SyncModule = new();
             }
 

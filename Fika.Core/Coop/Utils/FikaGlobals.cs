@@ -55,7 +55,7 @@ namespace Fika.Core.Coop.Utils
                 {
                     _voipHandler = VoipSettingsClass.Default;
                     _voipHandler.VoipQualitySettings.Apply();
-                    _voipHandler.MicrophoneChecked = SoundSettingsDataClass.CheckMicrophone();
+                    _voipHandler.MicrophoneChecked = SoundSettingsControllerClass.CheckMicrophone();
                     _voipHandler.VoipEnabled = true;
                     PushToTalkSettingsClass pttSettings = _voipHandler.PushToTalkSettings;
                     pttSettings.SpeakingSecondsLimit = 20f;

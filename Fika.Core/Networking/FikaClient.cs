@@ -204,7 +204,7 @@ namespace Fika.Core.Networking
             {
                 controller.ResetVoipDisabledReason();
                 DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == ESideType.Savage).ProfileId;
-                await GClass1641.LoadScene(AssetsManagerSingletonClass.Manager,
+                await LoadSceneClass.LoadScene(AssetsManagerSingletonClass.Manager,
                     SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
                 MirrorIgnoranceCommsNetwork mirrorCommsNetwork;

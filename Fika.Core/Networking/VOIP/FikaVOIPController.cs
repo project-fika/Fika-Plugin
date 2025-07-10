@@ -13,7 +13,7 @@ namespace Fika.Core.Networking.VOIP
     {
         private static readonly TimeSpan _hearingDetectionTime = TimeSpan.FromSeconds(2.0);
 
-        public FikaVOIPController(CoopPlayer localPlayer, SoundSettingsDataClass soundSettings)
+        public FikaVOIPController(CoopPlayer localPlayer, SoundSettingsControllerClass soundSettings)
         {
             EVoipState voipState = localPlayer.VoipState;
             LocalPlayer = localPlayer;
@@ -96,7 +96,7 @@ namespace Fika.Core.Networking.VOIP
                 SetDefaultMicrophone();
                 return;
             }
-            if (SoundSettingsDataClass.IsValidMicrophone(device))
+            if (SoundSettingsControllerClass.IsValidMicrophone(device))
             {
                 FikaGlobals.LogInfo($"VoipMicrophone set device: {device}");
                 DissonanceComms.MicrophoneName = device;
@@ -108,7 +108,7 @@ namespace Fika.Core.Networking.VOIP
 
         private void SetDefaultMicrophone()
         {
-            string defaultMicrophone = SoundSettingsDataClass.DefaultMicrophone;
+            string defaultMicrophone = SoundSettingsControllerClass.DefaultMicrophone;
             if (defaultMicrophone != null)
             {
                 FikaGlobals.LogInfo($"VoipMicrophone set default: {defaultMicrophone}");
@@ -515,7 +515,7 @@ namespace Fika.Core.Networking.VOIP
 
 
         public CoopPlayer LocalPlayer { get; set; }
-        public SoundSettingsDataClass SoundSettings { get; set; }
+        public SoundSettingsControllerClass SoundSettings { get; set; }
 
         public DissonanceComms DissonanceComms
         {
