@@ -176,6 +176,7 @@ namespace Fika.Core.Coop.Patches
             await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
             GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
             ___mainMenuController?.Unsubscribe();
+            bundleLock.MaxConcurrentOperations = 1;
             gameWorld.OnGameStarted();
             updater.Dispose();
 
@@ -194,15 +195,15 @@ namespace Fika.Core.Coop.Patches
         private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile,
             LocationSettingsClass.Location location)
         {
-            private readonly TarkovApplication tarkovApplication = tarkovApplication;
-            private readonly Profile pmcProfile = pmcProfile;
-            private readonly Profile scavProfile = scavProfile;
-            private readonly LocationSettingsClass.Location location = location;
+            private readonly TarkovApplication _tarkovApplication = tarkovApplication;
+            private readonly Profile _pmcProfile = pmcProfile;
+            private readonly Profile _scavProfile = scavProfile;
+            private readonly LocationSettingsClass.Location _location = location;
             public CoopGame CoopGame;
 
             public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
             {
-                tarkovApplication.method_52(pmcProfile.Id, scavProfile, location, result);
+                _tarkovApplication.method_52(_pmcProfile.Id, _scavProfile, _location, result);
             }
 
             public void ReleaseSingleton()
@@ -236,24 +237,24 @@ namespace Fika.Core.Coop.Patches
 
     internal class ScreenUpdater : IDisposable
     {
-        private readonly MatchmakerPlayerControllerClass matchmakerPlayerControllerClass;
-        private readonly CoopGame coopGame;
+        private readonly MatchmakerPlayerControllerClass _matchmakerPlayerControllerClass;
+        private readonly CoopGame _coopGame;
 
         public ScreenUpdater(MatchmakerPlayerControllerClass controller, CoopGame game)
         {
-            matchmakerPlayerControllerClass = controller;
-            coopGame = game;
+            _matchmakerPlayerControllerClass = controller;
+            _coopGame = game;
             game.OnMatchingStatusChanged += UpdateStatus;
         }
 
         private void UpdateStatus(string text, float? progress)
         {
-            matchmakerPlayerControllerClass.UpdateMatchingStatus(text, progress);
+            _matchmakerPlayerControllerClass.UpdateMatchingStatus(text, progress);
         }
 
         public void Dispose()
         {
-            coopGame.OnMatchingStatusChanged -= UpdateStatus;
+            _coopGame.OnMatchingStatusChanged -= UpdateStatus;
         }
     }
 }
