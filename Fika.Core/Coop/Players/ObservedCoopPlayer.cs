@@ -26,7 +26,6 @@ using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -850,7 +849,7 @@ namespace Fika.Core.Coop.Players
             HeadRotation = CurrentPlayerState.HeadRotation;
             ProceduralWeaponAnimation.SetHeadRotation(CurrentPlayerState.HeadRotation);
 
-            EPlayerState newState = CurrentPlayerState.State;            
+            EPlayerState newState = CurrentPlayerState.State;
 
             if (newState == EPlayerState.Jump)
             {
@@ -1221,7 +1220,9 @@ namespace Fika.Core.Coop.Players
                                     Transform transform = TransformHelperClass.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
                                     if (transform == null)
                                     {
+#if DEBUG
                                         FikaGlobals.LogWarning($"RefreshSlotViews::Transform was missing: {slot.ID}, this is harmless");
+#endif
                                         continue;
                                     }
                                     controller.CCV.AddBone(slot, transform);
