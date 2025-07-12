@@ -24,7 +24,9 @@ namespace Fika.Core.UI.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(SimpleContextMenu).GetMethod(nameof(SimpleContextMenu.method_0)).MakeGenericMethod(typeof(EItemInfoButton));
+            return typeof(SimpleContextMenu)
+                .GetMethod(nameof(SimpleContextMenu.method_0))
+                .MakeGenericMethod(typeof(EItemInfoButton));
         }
 
         [PatchPrefix]
