@@ -599,7 +599,7 @@ namespace Fika.Core.Coop.GameMode
                 }
             }
 
-            IStatisticsManager statisticsManager = new CoopClientStatisticsManager(Profile_0);
+            IStatisticsManager statisticsManager = new CoopClientStatisticsManager();
 
             Vector3 spawnPos = GameController.GetSpawnPosition();
             Quaternion spawnRot = GameController.GetSpawnRotation();
