@@ -265,7 +265,7 @@ namespace Fika.Core.Coop.GameMode
             CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-                statisticsManager, new GClass1690(), session, playerId);
+                statisticsManager, new ClientViewFilter(), session, playerId);
 
             coopPlayer.Location = Location_0.Id;
             CoopHandler coopHandler = GameController.CoopHandler;

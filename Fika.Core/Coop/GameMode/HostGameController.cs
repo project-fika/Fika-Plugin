@@ -15,6 +15,7 @@ using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
 using Fika.Core.Coop.FreeCamera;
 using Fika.Core.Coop.HostClasses;
+using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -243,7 +244,7 @@ namespace Fika.Core.Coop.GameMode
             coopBot = await CoopBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
                "Bot_", EPointOfView.ThirdPerson, profile, true, _updateQueue, Player.EUpdateMode.Auto,
                Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
-                FikaGlobals.GetOtherPlayerSensitivity, GClass1691.Default, mongoId, nextOperationId);
+                FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default, mongoId, nextOperationId);
 
             coopBot.Location = Location.Id;
             Bots.Add(coopBot.ProfileId, coopBot);

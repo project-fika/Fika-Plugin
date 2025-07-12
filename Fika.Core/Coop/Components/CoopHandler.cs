@@ -4,6 +4,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Coop.GameMode;
+using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
@@ -413,8 +414,11 @@ namespace Fika.Core.Coop.Components
             ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
                 isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
                 EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
-                BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode, FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
-                GClass1691.Default, firstId, firstOperationId, isZombie).Result;
+                BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
+                FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
+                ObservedViewFilter.Default, firstId, firstOperationId, isZombie)
+                .GetAwaiter()
+                .GetResult();
 
             if (otherPlayer == null)
             {
