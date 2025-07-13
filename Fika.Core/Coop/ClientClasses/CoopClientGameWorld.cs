@@ -1,12 +1,14 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.NetworkPackets;
 using EFT.SynchronizableObjects;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using Systems.Effects;
 using UnityEngine;
 
 namespace Fika.Core.Coop.ClientClasses
@@ -32,6 +34,41 @@ namespace Fika.Core.Coop.ClientClasses
             gameWorld.FikaClientWorld = FikaClientWorld.Create(gameWorld);
             Singleton<CoopClientGameWorld>.Create(gameWorld);
             return gameWorld;
+        }
+
+        public override void ShotDelegate(EftBulletClass shotResult)
+        {
+            if (!shotResult.IsFlyingOutOfTime)
+            {
+                DamageInfoStruct damageInfoStruct = new(EDamageType.Bullet, shotResult);
+                ShotIdStruct shotIdStruct = new(shotResult.Ammo.Id, shotResult.FragmentIndex);
+                ShotInfoClass shotInfoClass = (shotResult.HittedBallisticCollider != null) ? shotResult.HittedBallisticCollider.ApplyHit(damageInfoStruct, shotIdStruct) : null;
+                shotResult.AddClientHitPosition(shotInfoClass);
+                GClass2983 itemComponent = shotResult.Ammo.GetItemComponent<GClass2983>();
+                if (itemComponent != null && shotResult.TimeSinceShot >= itemComponent.Template.FuzeArmTimeSec)
+                {
+                    if (Singleton<Effects>.Instantiated)
+                    {
+                        string explosionType = itemComponent.Template.ExplosionType;
+                        if (!string.IsNullOrEmpty(explosionType) && shotResult.IsFirstHit)
+                        {
+                            Singleton<Effects>.Instance.EmitGrenade(explosionType, shotResult.HitPoint, shotResult.HitNormal, (float)(shotResult.IsForwardHit ? 1 : 0));
+                        }
+                        if (itemComponent.Template.ShowHitEffectOnExplode)
+                        {
+                            Singleton<Effects>.Instance.EffectsCommutator.PlayHitEffect(shotResult, shotInfoClass);
+                        }
+                    }
+                    Grenade.Explosion(null, itemComponent, shotResult.HitPoint,
+                        shotResult.Player.iPlayer.ProfileId, SharedBallisticsCalculator,
+                        shotResult.Weapon, shotResult.HitNormal * 0.08f, false);
+                    return;
+                }
+                if (Singleton<Effects>.Instantiated)
+                {
+                    Singleton<Effects>.Instance.EffectsCommutator.PlayHitEffect(shotResult, shotInfoClass);
+                }
+            }
         }
 
         public override GrenadeFactoryClass CreateGrenadeFactory()
