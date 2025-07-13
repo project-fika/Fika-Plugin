@@ -122,8 +122,9 @@ namespace Fika.Core.Coop.ClientClasses
             Singleton<CoopClientGameWorld>.Release(this);
             NetManagerUtils.DestroyNetManager(false);
             List<SynchronizableObject> syncObjects = [.. SynchronizableObjectLogicProcessor.GetSynchronizableObjects()];
-            foreach (SynchronizableObject syncObject in syncObjects)
+            for (int i = 0; i < syncObjects.Count; i++)
             {
+                SynchronizableObject syncObject = syncObjects[i];
                 syncObject.OnUpdateRequired -= SynchronizableObjectLogicProcessor.method_1;
                 syncObject.Logic.ReturnToPool();
                 syncObject.ReturnToPool();

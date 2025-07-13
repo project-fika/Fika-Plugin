@@ -24,8 +24,10 @@ namespace Fika.Core.Coop.ClientClasses
         public override void Init()
         {
             base.Init();
-            foreach (FikaPlugin.EQuestSharingTypes shareType in (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes)))
+            FikaPlugin.EQuestSharingTypes[] array = (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes));
+            for (int i = 0; i < array.Length; i++)
             {
+                FikaPlugin.EQuestSharingTypes shareType = array[i];
                 if (FikaPlugin.QuestTypesToShareAndReceive.Value.HasFlag(shareType))
                 {
                     switch (shareType)
@@ -170,8 +172,9 @@ namespace Fika.Core.Coop.ClientClasses
             }
 
             AddNetworkId(packet.Id);
-            foreach (QuestClass quest in Quests)
+            for (int i = 0; i < Quests.Count; i++)
             {
+                QuestClass quest = Quests[i];
                 // Extra check to prevent redundant notifications
                 if (quest.IsDone())
                 {
@@ -281,8 +284,9 @@ namespace Fika.Core.Coop.ClientClasses
 
         private bool HasQuestForItem(string itemId, string zoneId, out string questName)
         {
-            foreach (QuestClass quest in Quests)
+            for (int i = 0; i < Quests.Count; i++)
             {
+                QuestClass quest = Quests[i];
                 if (quest.IsDone())
                 {
                     continue;

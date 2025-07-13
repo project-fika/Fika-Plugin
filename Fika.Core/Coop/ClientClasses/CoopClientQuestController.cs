@@ -21,8 +21,9 @@ namespace Fika.Core.Coop.ClientClasses
             if (quest.Rewards.TryGetValue(EQuestStatus.Success, out IReadOnlyList<QuestRewardDataClass> list))
             {
                 hasRewards = true;
-                foreach (QuestRewardDataClass item in list)
+                for (int i = 0; i < list.Count; i++)
                 {
+                    QuestRewardDataClass item = list[i];
                     if (item.type != ERewardType.Item)
                     {
                         continue;
@@ -49,8 +50,9 @@ namespace Fika.Core.Coop.ClientClasses
         {
             List<MongoID> itemIds = [];
             bool hasNonQuestItem = false;
-            foreach (Item item in items)
+            for (int i = 0; i < items.Length; i++)
             {
+                Item item = items[i];
                 if (!item.QuestItem)
                 {
                     hasNonQuestItem = true;
@@ -60,8 +62,9 @@ namespace Fika.Core.Coop.ClientClasses
 
             if (hasNonQuestItem)
             {
-                foreach (Item item in items)
+                for (int i = 0; i < items.Length; i++)
                 {
+                    Item item = items[i];
                     if (item.QuestItem)
                     {
                         continue;

@@ -73,8 +73,9 @@ namespace Fika.Core.Coop.ClientClasses
         /// </summary>
         public override void SubscribeToBorderZones(BorderZone[] zones)
         {
-            foreach (BorderZone borderZone in zones)
+            for (int i = 0; i < zones.Length; i++)
             {
+                BorderZone borderZone = zones[i];
                 borderZone.RemoveAuthority();
             }
         }
