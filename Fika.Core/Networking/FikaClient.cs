@@ -28,6 +28,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
+using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -118,7 +119,7 @@ namespace Fika.Core.Networking
         private CoopHandler _coopHandler;
         private ManualLogSource _logger;
         private NetDataWriter _dataWriter;
-        private FikaChat _fikaChat;
+        private FikaChatUIScript _fikaChat;
         private string _myProfileId;
         private Queue<BaseInventoryOperationClass> _inventoryOperations;
         private List<int> _missingIds;
@@ -931,16 +932,21 @@ namespace Fika.Core.Networking
 
             if (_fikaChat != null)
             {
-                _fikaChat.ReceiveMessage(packet.Nickname, packet.Message);
+                _fikaChat.AddMessage(new(packet.Nickname, packet.Message), true);
+                _fikaChat.OpenChat(true);
             }
         }
 
         public void SetupGameVariables(CoopPlayer coopPlayer)
         {
-            MyPlayer = coopPlayer;
+            MyPlayer = coopPlayer;            
+        }
+
+        public void CreateFikaChat(EftGamePlayerOwner gamePlayerOwner)
+        {
             if (FikaPlugin.EnableChat.Value)
             {
-                _fikaChat = gameObject.AddComponent<FikaChat>();
+                _fikaChat = FikaChatUIScript.Create(gamePlayerOwner);
             }
         }
 
@@ -1112,6 +1118,14 @@ namespace Fika.Core.Networking
                     return;
                 }
                 _inventoryOperations.Dequeue().method_1(HandleResult);
+            }
+
+            if (Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))
+            {
+                if (_fikaChat != null)
+                {
+                    _fikaChat.ToggleChat();
+                }
             }
         }
 

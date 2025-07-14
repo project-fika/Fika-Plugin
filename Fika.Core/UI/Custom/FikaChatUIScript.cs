@@ -1,10 +1,13 @@
 ﻿using Comfort.Common;
+using EFT;
 using EFT.InputSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
+using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -14,11 +17,8 @@ using UnityEngine.EventSystems;
 
 namespace Fika.Core.UI.Custom
 {
-    public class FikaChatUIScript : MonoBehaviour
+    public class FikaChatUIScript : InputNode
     {
-        private static readonly FieldInfo _showMouseField = typeof(InputManager).GetField("bool_2",
-            BindingFlags.Instance | BindingFlags.NonPublic);
-
         public List<ChatMessage> ChatMessages
         {
             get
@@ -30,19 +30,25 @@ namespace Fika.Core.UI.Custom
         private FikaChatUI _fikaChatUI;
         private List<ChatMessage> _chatMessages;
         private StringBuilder _stringBuilder;
-        private UISoundsWrapper _soundsWrapper;
-        private InputManager _manager;
+        private EftGamePlayerOwner _playerOwner;
         private string _nickname;
         private bool _isServer;
+        private bool _shouldClose;
+        private float _closeTimer;
+        private float _closeThreshold;
+        private bool _isActive;
 
-        public void AddMessage(ChatMessage message)
+        private void Update()
         {
-            _chatMessages.Add(message);
-            _stringBuilder.AppendLine(message.FormattedMessage);
-
-            _fikaChatUI.ChatText.SetText(_stringBuilder.ToString());
-
-            _fikaChatUI.ScrollView.verticalNormalizedPosition = 0f; // scroll to bottom
+            if (_shouldClose)
+            {
+                _closeTimer += Time.unscaledDeltaTime;
+                if (_closeTimer > _closeThreshold)
+                {
+                    _closeTimer = 0f;
+                    CloseChat();
+                }
+            }
         }
 
         private void Awake()
@@ -53,31 +59,50 @@ namespace Fika.Core.UI.Custom
                 throw new NullReferenceException("Could not find FikaChatUI");
             }
 
-            GUISounds guiSounds = Singleton<GUISounds>.Instance;
-            _soundsWrapper = Traverse.Create(guiSounds).Field<UISoundsWrapper>("uisoundsWrapper_0").Value;
-
-            GameObject managerObj = GameObject.Find("___Input");
-            if (managerObj != null)
-            {
-                InputManager inputManager = managerObj.GetComponent<InputManager>();
-                if (inputManager != null)
-                {
-                    _manager = inputManager;
-                }
-                else
-                {
-                    FikaGlobals.LogError("Could not find InputManager on the manager object");
-                }
-            }
-
             _chatMessages = [];
             _stringBuilder = new();
             _nickname = FikaBackendUtils.PMCName ?? "Unknown";
             _isServer = FikaBackendUtils.IsServer;
+            _closeTimer = 0f;
+            _closeThreshold = 3f;
 
             _fikaChatUI.InputField.onSubmit.AddListener(OnSubmit);
             _fikaChatUI.SendButton.onClick.AddListener(SendMessage);
             _fikaChatUI.CloseButton.onClick.AddListener(CloseChat);
+        }
+
+        private void Start()
+        {            
+            if (_playerOwner != null)
+            {
+                _playerOwner.InputTree.Add(this);
+            }
+            else
+            {
+                throw new NullReferenceException("PlayerOwner was null during start");
+            }
+
+            _isActive = false;
+            _shouldClose = false;
+            gameObject.SetActive(false);
+        }
+
+        public void AddMessage(ChatMessage message, bool remote = false)
+        {
+            _chatMessages.Add(message);
+            if (_stringBuilder.Length > 10000) // to avoid too much data
+            {
+                _stringBuilder.Clear();
+            }
+            _stringBuilder.AppendLine(message.FormattedMessage);
+
+            _fikaChatUI.ChatText.SetText(_stringBuilder.ToString());
+            _fikaChatUI.ScrollView.verticalNormalizedPosition = 0f; // scroll to bottom
+
+            if (remote)
+            {
+                Singleton<GUISounds>.Instance.PlayChatSound(ESocialNetworkSoundType.IncomingMessage);
+            }
         }
 
         private void OnSubmit(string message)
@@ -91,33 +116,75 @@ namespace Fika.Core.UI.Custom
             AddMessage(chatMessage);
 
             TextMessagePacket packet = new(_nickname, message);
-            /*if (_isServer)
+            if (_isServer)
             {
-                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
             }
             else
             {
-                Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-            }*/
-            AudioClip outgoingClip = _soundsWrapper.GetSocialNetworkClip(ESocialNetworkSoundType.OutgoingMessage);
-            Singleton<GUISounds>.Instance.PlaySound(outgoingClip);
+                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            }
+            Singleton<GUISounds>.Instance.PlayChatSound(ESocialNetworkSoundType.OutgoingMessage);
             _fikaChatUI.InputField.DeactivateInputField();
             _fikaChatUI.InputField.text = string.Empty;
         }
 
-        public void OpenChat()
+        public void OpenChat(bool autoClose = false)
         {
             gameObject.SetActive(true);
+            _closeTimer = 0f;
+
+            bool shouldAutoClose = autoClose && !_isActive;
+            if (!_isActive && !autoClose)
+            {
+                _isActive = true;
+            }
+            _shouldClose = shouldAutoClose;
         }
 
         public void CloseChat()
         {
+            _isActive = false;
+            _shouldClose = false;
             gameObject.SetActive(false);
+
+            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuEscape);
+        }
+
+        public void OpenAndSelectInput()
+        {
+            OpenChat();
+            SelectInput();
+        }
+
+        public void ToggleChat()
+        {
+            bool isActive = gameObject.activeSelf;
+            if (!isActive)
+            {
+                OpenAndSelectInput();
+            }
+            else
+            {
+                if (_shouldClose) // this means it was showing from a message, and the player wants to interact with the window
+                {
+                    OpenAndSelectInput();
+                    return;
+                }
+
+                CloseChat();
+            }
         }
 
         private void SendMessage()
         {
             _fikaChatUI.InputField.onSubmit.Invoke(_fikaChatUI.InputField.text);
+        }
+
+        private void SelectInput()
+        {
+            _fikaChatUI.InputField.ActivateInputField();
+            _fikaChatUI.InputField.OnPointerClick(new PointerEventData(EventSystem.current));
         }
 
         private void OnDestroy()
@@ -126,20 +193,69 @@ namespace Fika.Core.UI.Custom
             Destroy(_fikaChatUI.gameObject);
         }
 
-        internal static void Create()
+        internal static FikaChatUIScript Create(EftGamePlayerOwner gamePlayerOwner)
         {
+            if (FikaBackendUtils.IsHeadless)
+            {
+                return null;
+            }
+
             GameObject gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FikaChatUI);
             GameObject obj = Instantiate(gameObject);
-            obj.AddComponent<FikaChatUIScript>();
+            FikaChatUIScript uiScript = obj.AddComponent<FikaChatUIScript>();
             RectTransform rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
             if (rectTransform == null)
             {
                 FikaGlobals.LogError("Could not get the RectTransform!");
                 Destroy(obj);
-                return;
+                return null;
             }
             rectTransform.gameObject.AddComponent<UIDragComponent>().Init(rectTransform, true);
             obj.SetActive(true);
+
+            uiScript._playerOwner = gamePlayerOwner;
+
+            return uiScript;
+        }
+
+        public override ETranslateResult TranslateCommand(ECommand command)
+        {
+            if (!_isActive)
+            {
+                return ETranslateResult.Ignore;
+            }
+
+            if (command.IsCommand(ECommand.Escape))
+            {
+                CloseChat();
+                return ETranslateResult.Block;
+            }
+
+            if (command.IsCommand(ECommand.Enter))
+            {
+                SelectInput();
+                return ETranslateResult.Block;
+            }
+
+            return ETranslateResult.Block;
+        }
+
+        public override void TranslateAxes(ref float[] axes)
+        {
+            if (_isActive)
+            {
+                axes = null;
+            }
+        }
+
+        public override ECursorResult ShouldLockCursor()
+        {
+            if (!_isActive)
+            {
+                return ECursorResult.Ignore;
+            }
+
+            return ECursorResult.ShowCursor;
         }
     }
 

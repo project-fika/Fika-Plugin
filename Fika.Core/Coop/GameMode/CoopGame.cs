@@ -15,7 +15,6 @@ using EFT.UI.Screens;
 using Fika.Core.Coop.ClientClasses;
 using Fika.Core.Coop.Components;
 using Fika.Core.Coop.Custom;
-using Fika.Core.Coop.ObservedClasses;
 using Fika.Core.Coop.Patches;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
@@ -191,18 +190,19 @@ namespace Fika.Core.Coop.GameMode
         /// <param name="location"></param>
         private class SetupGamePlayerOwnerHandler(IInputTree inputTree, InsuranceCompanyClass insurance, ISession backEndSession, GameUI gameUI, CoopGame game, LocationSettingsClass.Location location)
         {
-            private readonly IInputTree inputTree = inputTree;
-            private readonly InsuranceCompanyClass insurance = insurance;
-            private readonly ISession backEndSession = backEndSession;
-            private readonly GameUI gameUI = gameUI;
-            private readonly CoopGame game = game;
-            private readonly LocationSettingsClass.Location location = location;
+            private readonly IInputTree _inputTree = inputTree;
+            private readonly InsuranceCompanyClass _insurance = insurance;
+            private readonly ISession _backEndSession = backEndSession;
+            private readonly GameUI _gameUI = gameUI;
+            private readonly CoopGame _game = game;
+            private readonly LocationSettingsClass.Location _location = location;
 
             public EftGamePlayerOwner HandleSetup(LocalPlayer player)
             {
-                game.LocalPlayer_0 = player;
-                EftGamePlayerOwner gamePlayerOwner = EftGamePlayerOwner.Create(player, inputTree, insurance, backEndSession, gameUI, game.GameDateTime, location);
-                gamePlayerOwner.OnLeave += game.vmethod_4;
+                _game.LocalPlayer_0 = player;
+                EftGamePlayerOwner gamePlayerOwner = EftGamePlayerOwner.Create(player, _inputTree, _insurance, _backEndSession,
+                    _gameUI, _game.GameDateTime, _location);
+                gamePlayerOwner.OnLeave += _game.vmethod_4;
                 return gamePlayerOwner;
             }
         }
@@ -444,6 +444,15 @@ namespace Fika.Core.Coop.GameMode
                 PlayerCameraController.Create(gparam_0.Player);
                 CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
                 CameraClass.Instance.IsActive = false;
+
+                if (PlayerOwner != null)
+                {
+                    Singleton<IFikaNetworkManager>.Instance.CreateFikaChat(PlayerOwner); 
+                }
+                else
+                {
+                    _logger.LogError("PlayerOwner was null, could not instantiate FikaChat");
+                }
             }
             catch (Exception ex)
             {

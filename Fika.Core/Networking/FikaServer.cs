@@ -33,6 +33,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
+using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -136,7 +137,7 @@ namespace Fika.Core.Networking
         private CoopHandler _coopHandler;
         private ManualLogSource _logger;
         private int _currentNetId;
-        private FikaChat _fikaChat;
+        private FikaChatUIScript _fikaChat;
         private CancellationTokenSource _natIntroduceRoutineCts;
         private float _statisticsCounter;
         private float _sendThreshold;
@@ -1054,7 +1055,8 @@ namespace Fika.Core.Networking
 
             if (_fikaChat != null)
             {
-                _fikaChat.ReceiveMessage(packet.Nickname, packet.Message);
+                _fikaChat.AddMessage(new(packet.Nickname, packet.Message), true);
+                _fikaChat.OpenChat(true);
             }
 
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
@@ -1071,9 +1073,13 @@ namespace Fika.Core.Networking
         public void SetupGameVariables(CoopPlayer coopPlayer)
         {
             _hostPlayer = coopPlayer;
+        }
+
+        public void CreateFikaChat(EftGamePlayerOwner gamePlayerOwner)
+        {
             if (FikaPlugin.EnableChat.Value)
             {
-                _fikaChat = gameObject.AddComponent<FikaChat>();
+                _fikaChat = FikaChatUIScript.Create(gamePlayerOwner);
             }
         }
 
@@ -1278,6 +1284,14 @@ namespace Fika.Core.Networking
             {
                 _statisticsCounter -= _sendThreshold;
                 SendStatisticsPacket();
+            }
+
+            if (!FikaBackendUtils.IsHeadless && Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))
+            {
+                if (_fikaChat != null)
+                {
+                    _fikaChat.ToggleChat();
+                }
             }
         }
 
