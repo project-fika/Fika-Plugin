@@ -61,13 +61,14 @@ namespace Fika.Core.Bundles
 
             return asset switch
             {
+                EFikaAsset.Ping => _masterBundle.LoadAsset<GameObject>("BasePingPrefab"),
+                EFikaAsset.SendItemMenu => _masterBundle.LoadAsset<GameObject>("SendItemMenu"),
                 EFikaAsset.MainMenuUI => _masterBundle.LoadAsset<GameObject>("MainMenuUI"),
                 EFikaAsset.MatchmakerUI => _masterBundle.LoadAsset<GameObject>("NewMatchMakerUI"),
-                EFikaAsset.Ping => _masterBundle.LoadAsset<GameObject>("BasePingPrefab"),
                 EFikaAsset.PlayerUI => _masterBundle.LoadAsset<GameObject>("PlayerFriendlyUI"),
-                EFikaAsset.SendItemMenu => _masterBundle.LoadAsset<GameObject>("SendItemMenu"),
                 EFikaAsset.FreecamUI => _masterBundle.LoadAsset<GameObject>("FreecamUI"),
                 EFikaAsset.AdminUI => _masterBundle.LoadAsset<GameObject>("AdminSettingsUI"),
+                EFikaAsset.FikaChatUI => _masterBundle.LoadAsset<GameObject>("FikaChatUI"),
                 _ => throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given")
             };
         }
@@ -102,13 +103,14 @@ namespace Fika.Core.Bundles
 
         public enum EFikaAsset
         {
+            Ping,
+            SendItemMenu,
             MainMenuUI,
             MatchmakerUI,
-            Ping,
             PlayerUI,
-            SendItemMenu,
             FreecamUI,
-            AdminUI
+            AdminUI,
+            FikaChatUI
         }
     }
 }

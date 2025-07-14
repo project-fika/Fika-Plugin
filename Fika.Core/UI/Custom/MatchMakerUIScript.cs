@@ -137,7 +137,9 @@ namespace Fika.Core.UI.Custom
             _mmGameObject = uiGameObj;
             _fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
             _fikaMatchMakerUi.transform.parent = transform;
-            _fikaMatchMakerUi.GetComponent<Canvas>().sortingOrder = 100; // Might wanna do this directly in the SDK later
+
+            RectTransform rectTransform = _fikaMatchMakerUi.transform.GetChild(0).RectTransform();
+            rectTransform.gameObject.AddComponent<UIDragComponent>().Init(rectTransform, true);
 
             if (_fikaMatchMakerUi.RaidGroupDefaultToClone.active)
             {
