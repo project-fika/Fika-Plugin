@@ -27,79 +27,79 @@ namespace Fika.Core.UI.Custom
         {
             get
             {
-                return acceptButton;
+                return _acceptButton;
             }
         }
 
-        private MatchMakerUI fikaMatchMakerUi;
-        private LobbyEntry[] matches;
-        private readonly List<GameObject> matchesListObjects = [];
-        private bool stopQuery = false;
-        private GameObject newBackButton;
-        private string profileId;
-        private float lastRefreshed;
+        private MatchMakerUI _fikaMatchMakerUi;
+        private LobbyEntry[] _matches;
+        private readonly List<GameObject> _matchesListObjects = [];
+        private bool _stopQuery = false;
+        private GameObject _newBackButton;
+        private string _profileId;
+        private float _lastRefreshed;
         private bool _started;
-        private Coroutine serverQueryRoutine;
-        private float loadingTextTick = 0f;
-        private GameObject mmGameObject;
+        private Coroutine _serverQueryRoutine;
+        private float _loadingTextTick = 0f;
+        private GameObject _mmGameObject;
+        private DefaultUIButton _acceptButton;
 
-        internal RaidSettings raidSettings;
-        internal DefaultUIButton backButton;
-        internal DefaultUIButton acceptButton;
+        internal RaidSettings RaidSettings;
+        internal DefaultUIButton BackButton;
 
         protected void OnEnable()
         {
             if (_started)
             {
-                stopQuery = false;
-                if (serverQueryRoutine == null)
+                _stopQuery = false;
+                if (_serverQueryRoutine == null)
                 {
-                    serverQueryRoutine = StartCoroutine(ServerQuery());
+                    _serverQueryRoutine = StartCoroutine(ServerQuery());
                 }
             }
         }
 
         protected void OnDisable()
         {
-            stopQuery = true;
-            if (serverQueryRoutine != null)
+            _stopQuery = true;
+            if (_serverQueryRoutine != null)
             {
-                StopCoroutine(serverQueryRoutine);
-                serverQueryRoutine = null;
+                StopCoroutine(_serverQueryRoutine);
+                _serverQueryRoutine = null;
             }
             DestroyThis();
         }
 
         protected void Start()
         {
-            profileId = FikaBackendUtils.Profile.ProfileId;
+            _profileId = FikaBackendUtils.Profile.ProfileId;
             CreateMatchMakerUI();
-            serverQueryRoutine = StartCoroutine(ServerQuery());
+            _serverQueryRoutine = StartCoroutine(ServerQuery());
             _started = true;
         }
 
         protected void Update()
         {
-            if (stopQuery)
+            if (_stopQuery)
             {
-                if (serverQueryRoutine != null)
+                if (_serverQueryRoutine != null)
                 {
-                    StopCoroutine(serverQueryRoutine);
-                    serverQueryRoutine = null;
+                    StopCoroutine(_serverQueryRoutine);
+                    _serverQueryRoutine = null;
                 }
             }
 
-            if (fikaMatchMakerUi.LoadingScreen.activeSelf)
+            if (_fikaMatchMakerUi.LoadingScreen.activeSelf)
             {
-                fikaMatchMakerUi.LoadingImage.transform.Rotate(0, 0, 3f);
-                string text = fikaMatchMakerUi.LoadingAnimationText.text;
-                TextMeshProUGUI tmpText = fikaMatchMakerUi.LoadingAnimationText;
+                _fikaMatchMakerUi.LoadingImage.transform.Rotate(0, 0, 3f);
+                string text = _fikaMatchMakerUi.LoadingAnimationText.text;
+                TextMeshProUGUI tmpText = _fikaMatchMakerUi.LoadingAnimationText;
 
-                loadingTextTick++;
+                _loadingTextTick++;
 
-                if (loadingTextTick > 30)
+                if (_loadingTextTick > 30)
                 {
-                    loadingTextTick = 0;
+                    _loadingTextTick = 0;
 
                     text += ".";
                     if (text == "....")
@@ -113,24 +113,24 @@ namespace Fika.Core.UI.Custom
 
         private void DestroyThis()
         {
-            stopQuery = true;
-            if (serverQueryRoutine != null)
+            _stopQuery = true;
+            if (_serverQueryRoutine != null)
             {
-                StopCoroutine(serverQueryRoutine);
-                serverQueryRoutine = null;
+                StopCoroutine(_serverQueryRoutine);
+                _serverQueryRoutine = null;
             }
 
-            Destroy(fikaMatchMakerUi);
+            Destroy(_fikaMatchMakerUi);
             Destroy(this);
-            Destroy(mmGameObject);
+            Destroy(_mmGameObject);
         }
 
         protected void OnDestroy()
         {
-            stopQuery = true;
-            if (newBackButton != null)
+            _stopQuery = true;
+            if (_newBackButton != null)
             {
-                Destroy(newBackButton);
+                Destroy(_newBackButton);
             }
         }
 
@@ -142,49 +142,49 @@ namespace Fika.Core.UI.Custom
 
             GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.MatchmakerUI);
             GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
-            mmGameObject = uiGameObj;
-            fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
-            fikaMatchMakerUi.transform.parent = transform;
-            fikaMatchMakerUi.GetComponent<Canvas>().sortingOrder = 100; // Might wanna do this directly in the SDK later
+            _mmGameObject = uiGameObj;
+            _fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
+            _fikaMatchMakerUi.transform.parent = transform;
+            _fikaMatchMakerUi.GetComponent<Canvas>().sortingOrder = 100; // Might wanna do this directly in the SDK later
 
-            if (fikaMatchMakerUi.RaidGroupDefaultToClone.active)
+            if (_fikaMatchMakerUi.RaidGroupDefaultToClone.active)
             {
-                fikaMatchMakerUi.RaidGroupDefaultToClone.SetActive(false);
+                _fikaMatchMakerUi.RaidGroupDefaultToClone.SetActive(false);
             }
 
-            if (fikaMatchMakerUi.DediSelection.active)
+            if (_fikaMatchMakerUi.DediSelection.active)
             {
-                fikaMatchMakerUi.DediSelection.SetActive(false);
+                _fikaMatchMakerUi.DediSelection.SetActive(false);
             }
 
             // Ensure the IsSpectator field is reset every time the matchmaker UI is created
             FikaBackendUtils.IsSpectator = false;
 
-            fikaMatchMakerUi.SpectatorToggle.isOn = false;
-            fikaMatchMakerUi.SpectatorToggle.onValueChanged.AddListener((arg) =>
+            _fikaMatchMakerUi.SpectatorToggle.isOn = false;
+            _fikaMatchMakerUi.SpectatorToggle.onValueChanged.AddListener((arg) =>
             {
                 FikaBackendUtils.IsSpectator = !FikaBackendUtils.IsSpectator;
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
 
-            fikaMatchMakerUi.LoadingAnimationText.text = "";
+            _fikaMatchMakerUi.LoadingAnimationText.text = "";
 
-            fikaMatchMakerUi.DedicatedToggle.isOn = false;
-            fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
+            _fikaMatchMakerUi.DedicatedToggle.isOn = false;
+            _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
 
             if (availableHeadlesses.Length == 0)
             {
-                fikaMatchMakerUi.DedicatedToggle.interactable = false;
-                TextMeshProUGUI dedicatedText = fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
+                _fikaMatchMakerUi.DedicatedToggle.interactable = false;
+                TextMeshProUGUI dedicatedText = _fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
                 if (dedicatedText != null)
                 {
                     dedicatedText.color = new(1f, 1f, 1f, 0.5f);
                 }
 
-                HoverTooltipArea dediTooltipArea = fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
+                HoverTooltipArea dediTooltipArea = _fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
                 dediTooltipArea.enabled = true;
                 dediTooltipArea.SetMessageText(LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized());
             }
@@ -193,16 +193,16 @@ namespace Fika.Core.UI.Custom
             {
                 if (FikaPlugin.UseHeadlessIfAvailable.Value)
                 {
-                    fikaMatchMakerUi.DedicatedToggle.isOn = true;
+                    _fikaMatchMakerUi.DedicatedToggle.isOn = true;
                 }
 
-                fikaMatchMakerUi.HeadlessSelection.gameObject.SetActive(true);
-                fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((value) =>
+                _fikaMatchMakerUi.HeadlessSelection.gameObject.SetActive(true);
+                _fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((value) =>
                 {
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
                 });
 
-                fikaMatchMakerUi.HeadlessSelection.ClearOptions();
+                _fikaMatchMakerUi.HeadlessSelection.ClearOptions();
 
                 List<TMP_Dropdown.OptionData> optionDatas = [];
                 for (int i = 0; i < availableHeadlesses.Length; i++)
@@ -214,41 +214,41 @@ namespace Fika.Core.UI.Custom
                     });
                 }
 
-                fikaMatchMakerUi.HeadlessSelection.AddOptions(optionDatas);
+                _fikaMatchMakerUi.HeadlessSelection.AddOptions(optionDatas);
             }
 
-            HoverTooltipArea hostTooltipArea = fikaMatchMakerUi.RaidGroupHostButton.GetOrAddComponent<HoverTooltipArea>();
+            HoverTooltipArea hostTooltipArea = _fikaMatchMakerUi.RaidGroupHostButton.GetOrAddComponent<HoverTooltipArea>();
             hostTooltipArea.enabled = true;
             hostTooltipArea.SetMessageText(LocaleUtils.UI_HOST_RAID_TOOLTIP.Localized());
 
-            fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
+            _fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                if (!fikaMatchMakerUi.DediSelection.activeSelf)
+                if (!_fikaMatchMakerUi.DediSelection.activeSelf)
                 {
-                    fikaMatchMakerUi.DediSelection.SetActive(true);
+                    _fikaMatchMakerUi.DediSelection.SetActive(true);
                 }
                 else
                 {
-                    fikaMatchMakerUi.DediSelection.SetActive(false);
+                    _fikaMatchMakerUi.DediSelection.SetActive(false);
                 }
             });
 
-            fikaMatchMakerUi.CloseButton.onClick.AddListener(() =>
+            _fikaMatchMakerUi.CloseButton.onClick.AddListener(() =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                if (fikaMatchMakerUi.DediSelection.active)
+                if (_fikaMatchMakerUi.DediSelection.active)
                 {
-                    fikaMatchMakerUi.DediSelection.SetActive(false);
+                    _fikaMatchMakerUi.DediSelection.SetActive(false);
                 }
             });
 
-            fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
+            _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
             {
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
             });
 
-            fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
+            _fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
             {
                 ToggleLoading(true);
 
@@ -257,7 +257,7 @@ namespace Fika.Core.UI.Custom
 
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
 
-                if (!fikaMatchMakerUi.DedicatedToggle.isOn)
+                if (!_fikaMatchMakerUi.DedicatedToggle.isOn)
                 {
                     if (FikaPlugin.ForceIP.Value != "")
                     {
@@ -300,8 +300,8 @@ namespace Fika.Core.UI.Custom
                         }
                     }
 
-                    await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, raidSettings);
-                    acceptButton.OnClick.Invoke();
+                    await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
+                    _acceptButton.OnClick.Invoke();
                 }
                 else
                 {
@@ -319,7 +319,7 @@ namespace Fika.Core.UI.Custom
 
                     if (multipleHeadlesses)
                     {
-                        int selectedHeadless = fikaMatchMakerUi.HeadlessSelection.value;
+                        int selectedHeadless = _fikaMatchMakerUi.HeadlessSelection.value;
                         headlessSessionId = availableHeadlesses[selectedHeadless].HeadlessSessionID;
                     }
 
@@ -353,60 +353,60 @@ namespace Fika.Core.UI.Custom
                 }
             });
 
-            fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
+            _fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
 
-            HoverTooltipArea tooltipArea = fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
+            HoverTooltipArea tooltipArea = _fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
             tooltipArea.enabled = true;
             tooltipArea.SetMessageText(LocaleUtils.UI_REFRESH_RAIDS.Localized());
 
-            acceptButton.gameObject.SetActive(false);
-            acceptButton.enabled = false;
-            acceptButton.Interactable = false;
+            _acceptButton.gameObject.SetActive(false);
+            _acceptButton.enabled = false;
+            _acceptButton.Interactable = false;
 
-            newBackButton = Instantiate(backButton.gameObject, backButton.transform.parent);
+            _newBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
             UnityEngine.Events.UnityEvent newEvent = new();
             newEvent.AddListener(() =>
             {
-                backButton.OnClick.Invoke();
+                BackButton.OnClick.Invoke();
             });
-            DefaultUIButton newButtonComponent = newBackButton.GetComponent<DefaultUIButton>();
+            DefaultUIButton newButtonComponent = _newBackButton.GetComponent<DefaultUIButton>();
             Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
-            if (!newBackButton.active)
+            if (!_newBackButton.active)
             {
-                newBackButton.SetActive(true);
+                _newBackButton.SetActive(true);
             }
 
-            backButton.gameObject.SetActive(false);
+            BackButton.gameObject.SetActive(false);
         }
 
         private void ToggleLoading(bool enabled)
         {
-            fikaMatchMakerUi.RaidGroupHostButton.interactable = !enabled;
-            fikaMatchMakerUi.DediSelection.SetActive(!enabled);
-            fikaMatchMakerUi.StartButton.interactable = !enabled;
-            fikaMatchMakerUi.ServerBrowserPanel.SetActive(!enabled);
+            _fikaMatchMakerUi.RaidGroupHostButton.interactable = !enabled;
+            _fikaMatchMakerUi.DediSelection.SetActive(!enabled);
+            _fikaMatchMakerUi.StartButton.interactable = !enabled;
+            _fikaMatchMakerUi.ServerBrowserPanel.SetActive(!enabled);
 
-            fikaMatchMakerUi.LoadingScreen.SetActive(enabled);
+            _fikaMatchMakerUi.LoadingScreen.SetActive(enabled);
 
             if (enabled)
             {
-                if (serverQueryRoutine != null)
+                if (_serverQueryRoutine != null)
                 {
-                    StopCoroutine(serverQueryRoutine);
-                    serverQueryRoutine = null;
+                    StopCoroutine(_serverQueryRoutine);
+                    _serverQueryRoutine = null;
                 }
                 return;
             }
 
-            serverQueryRoutine = StartCoroutine(ServerQuery());
+            _serverQueryRoutine = StartCoroutine(ServerQuery());
         }
 
         private void AutoRefresh()
         {
-            matches = FikaRequestHandler.LocationRaids(raidSettings);
+            _matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
-            lastRefreshed = Time.time;
+            _lastRefreshed = Time.time;
 
             RefreshUI();
         }
@@ -414,9 +414,9 @@ namespace Fika.Core.UI.Custom
         private void ManualRefresh()
         {
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-            matches = FikaRequestHandler.LocationRaids(raidSettings);
+            _matches = FikaRequestHandler.LocationRaids(RaidSettings);
 
-            lastRefreshed = Time.time;
+            _lastRefreshed = Time.time;
 
             RefreshUI();
         }
@@ -517,35 +517,35 @@ namespace Fika.Core.UI.Custom
 
         private void RefreshUI()
         {
-            if (matches == null)
+            if (_matches == null)
             {
                 // not initialized
                 return;
             }
 
-            if (matchesListObjects != null)
+            if (_matchesListObjects != null)
             {
                 // cleanup old objects
-                foreach (GameObject match in matchesListObjects)
+                foreach (GameObject match in _matchesListObjects)
                 {
                     Destroy(match);
                 }
             }
 
             // create lobby listings
-            for (int i = 0; i < matches.Length; ++i)
+            for (int i = 0; i < _matches.Length; ++i)
             {
-                LobbyEntry entry = matches[i];
+                LobbyEntry entry = _matches[i];
 
-                if (entry.ServerId == profileId)
+                if (entry.ServerId == _profileId)
                 {
                     continue;
                 }
 
                 // server object
-                GameObject server = Instantiate(fikaMatchMakerUi.RaidGroupDefaultToClone, fikaMatchMakerUi.RaidGroupDefaultToClone.transform.parent);
+                GameObject server = Instantiate(_fikaMatchMakerUi.RaidGroupDefaultToClone, _fikaMatchMakerUi.RaidGroupDefaultToClone.transform.parent);
                 server.SetActive(true);
-                matchesListObjects.Add(server);
+                _matchesListObjects.Add(server);
 
                 server.name = entry.ServerId;
 
@@ -553,7 +553,7 @@ namespace Fika.Core.UI.Custom
                 bool localPlayerDead = false;
                 foreach (KeyValuePair<string, bool> player in entry.Players)
                 {
-                    if (player.Key == profileId)
+                    if (player.Key == _profileId)
                     {
                         localPlayerInRaid = true;
                         localPlayerDead = player.Value;
@@ -578,19 +578,19 @@ namespace Fika.Core.UI.Custom
                 Button button = joinButton.GetComponent<Button>();
                 button.onClick.AddListener(() =>
                 {
-                    if (fikaMatchMakerUi.DediSelection.activeSelf)
+                    if (_fikaMatchMakerUi.DediSelection.activeSelf)
                     {
-                        fikaMatchMakerUi.DediSelection.SetActive(false);
+                        _fikaMatchMakerUi.DediSelection.SetActive(false);
                     }
 
                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                     FikaBackendUtils.HostLocationId = entry.Location;
                     ToggleLoading(true);
-                    StartCoroutine(JoinMatch(profileId, server.name, button, (bool success) =>
+                    StartCoroutine(JoinMatch(_profileId, server.name, button, (bool success) =>
                     {
                         if (success)
                         {
-                            acceptButton.OnClick.Invoke();
+                            _acceptButton.OnClick.Invoke();
                             return;
                         }
                         ToggleLoading(false);
@@ -600,7 +600,7 @@ namespace Fika.Core.UI.Custom
                 HoverTooltipArea tooltipArea;
                 Image image = server.GetComponent<Image>();
 
-                if (raidSettings.LocationId != entry.Location && !(raidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
+                if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
                 {
                     button.enabled = false;
                     if (image != null)
@@ -616,7 +616,7 @@ namespace Fika.Core.UI.Custom
                     continue;
                 }
 
-                if (raidSettings.SelectedDateTime != entry.Time)
+                if (RaidSettings.SelectedDateTime != entry.Time)
                 {
                     button.enabled = false;
                     if (image != null)
@@ -631,14 +631,14 @@ namespace Fika.Core.UI.Custom
                     continue;
                 }
 
-                if (raidSettings.Side != entry.Side)
+                if (RaidSettings.Side != entry.Side)
                 {
                     string errorText = "ERROR";
-                    if (raidSettings.Side == ESideType.Pmc)
+                    if (RaidSettings.Side == ESideType.Pmc)
                     {
                         errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_SCAV_AS_PMC.Localized();
                     }
-                    else if (raidSettings.Side == ESideType.Savage)
+                    else if (RaidSettings.Side == ESideType.Savage)
                     {
                         errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_PMC_AS_SCAV.Localized();
                     }
@@ -719,11 +719,11 @@ namespace Fika.Core.UI.Custom
 
         public IEnumerator ServerQuery()
         {
-            while (!stopQuery)
+            while (!_stopQuery)
             {
                 AutoRefresh();
 
-                while (Time.time < lastRefreshed + 5)
+                while (Time.time < _lastRefreshed + 5)
                 {
                     yield return null;
                 }
