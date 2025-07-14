@@ -139,10 +139,16 @@ namespace Fika.Core.UI.Custom
         }
     }
 
-    public class ChatMessage(string sender, string message)
+    public record ChatMessage
     {
-        private readonly string _sender = sender;
-        private readonly string _message = message;
+        private readonly string _sender;
+        private readonly string _message;
+
+        public ChatMessage(string sender, string message)
+        {
+            _sender = sender;
+            _message = message;
+        }
 
         public string FormattedMessage
         {
