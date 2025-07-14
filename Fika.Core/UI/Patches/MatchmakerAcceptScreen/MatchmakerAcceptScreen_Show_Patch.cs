@@ -28,9 +28,9 @@ namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen
             FikaBackendUtils.IsScav = raidSettings.IsScav;
 
             MatchMakerUIScript newMatchMaker = __instance.gameObject.GetOrAddComponent<MatchMakerUIScript>();
-            newMatchMaker.raidSettings = raidSettings;
-            newMatchMaker.acceptButton = ____acceptButton;
-            newMatchMaker.backButton = ____backButton;
+            newMatchMaker.RaidSettings = raidSettings;
+            newMatchMaker.AcceptButton = ____acceptButton;
+            newMatchMaker.BackButton = ____backButton;
         }
 
         [PatchPostfix]

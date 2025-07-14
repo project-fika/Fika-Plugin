@@ -23,14 +23,6 @@ namespace Fika.Core.UI.Custom
 {
     public class MatchMakerUIScript : MonoBehaviour
     {
-        public DefaultUIButton AcceptButton
-        {
-            get
-            {
-                return _acceptButton;
-            }
-        }
-
         private MatchMakerUI _fikaMatchMakerUi;
         private LobbyEntry[] _matches;
         private readonly List<GameObject> _matchesListObjects = [];
@@ -42,8 +34,8 @@ namespace Fika.Core.UI.Custom
         private Coroutine _serverQueryRoutine;
         private float _loadingTextTick = 0f;
         private GameObject _mmGameObject;
-        private DefaultUIButton _acceptButton;
 
+        internal DefaultUIButton AcceptButton;
         internal RaidSettings RaidSettings;
         internal DefaultUIButton BackButton;
 
@@ -301,7 +293,7 @@ namespace Fika.Core.UI.Custom
                     }
 
                     await FikaBackendUtils.CreateMatch(FikaBackendUtils.Profile.ProfileId, FikaBackendUtils.PMCName, RaidSettings);
-                    _acceptButton.OnClick.Invoke();
+                    AcceptButton.OnClick.Invoke();
                 }
                 else
                 {
@@ -359,9 +351,9 @@ namespace Fika.Core.UI.Custom
             tooltipArea.enabled = true;
             tooltipArea.SetMessageText(LocaleUtils.UI_REFRESH_RAIDS.Localized());
 
-            _acceptButton.gameObject.SetActive(false);
-            _acceptButton.enabled = false;
-            _acceptButton.Interactable = false;
+            AcceptButton.gameObject.SetActive(false);
+            AcceptButton.enabled = false;
+            AcceptButton.Interactable = false;
 
             _newBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
             UnityEngine.Events.UnityEvent newEvent = new();
@@ -590,7 +582,7 @@ namespace Fika.Core.UI.Custom
                     {
                         if (success)
                         {
-                            _acceptButton.OnClick.Invoke();
+                            AcceptButton.OnClick.Invoke();
                             return;
                         }
                         ToggleLoading(false);
