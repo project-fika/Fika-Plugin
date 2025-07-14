@@ -7,6 +7,7 @@ using Fika.Core.Networking;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,6 +16,9 @@ namespace Fika.Core.UI.Custom
 {
     public class FikaChatUIScript : MonoBehaviour
     {
+        private static readonly FieldInfo _showMouseField = typeof(InputManager).GetField("bool_2",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
         public List<ChatMessage> ChatMessages
         {
             get

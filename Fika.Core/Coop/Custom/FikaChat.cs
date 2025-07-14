@@ -25,7 +25,7 @@ namespace Fika.Core.Coop.Custom
         private UISoundsWrapper _soundsWrapper;
         private InputManager _manager;
 
-        private static readonly FieldInfo showMouseField = typeof(InputManager).GetField("bool_2",
+        private static readonly FieldInfo _showMouseField = typeof(InputManager).GetField("bool_2",
             BindingFlags.Instance | BindingFlags.NonPublic);
 
         protected void Awake()
@@ -96,7 +96,7 @@ namespace Fika.Core.Coop.Custom
                 if (_manager != null)
                 {
                     GamePlayerOwner.SetIgnoreInput(true);
-                    showMouseField.SetValue(_manager, true);
+                    _showMouseField.SetValue(_manager, true);
                 }
                 _selectText = true;
             }
@@ -107,7 +107,7 @@ namespace Fika.Core.Coop.Custom
                     GamePlayerOwner.SetIgnoreInput(false);
                     GamePlayerOwner.MyPlayer.MovementContext.IsAxesIgnored = false;
                 }
-                showMouseField.SetValue(_manager, false);
+                _showMouseField.SetValue(_manager, false);
             }
         }
 
