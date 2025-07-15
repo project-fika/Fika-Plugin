@@ -199,11 +199,6 @@ namespace Fika.Core.UI.Custom
 
         internal static FikaChatUIScript Create()
         {
-            if (FikaBackendUtils.IsHeadless)
-            {
-                return null;
-            }
-
             GameObject gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FikaChatUI);
             GameObject obj = Instantiate(gameObject);
             FikaChatUIScript uiScript = obj.AddComponent<FikaChatUIScript>();
