@@ -17,7 +17,7 @@ using UnityEngine.EventSystems;
 
 namespace Fika.Core.UI.Custom
 {
-    public class FikaChatUIScript : InputNode
+    public class FikaChatUIScript : UIInputNode
     {
         public List<ChatMessage> ChatMessages
         {
@@ -37,6 +37,7 @@ namespace Fika.Core.UI.Custom
         private float _closeTimer;
         private float _closeThreshold;
         private bool _isActive;
+        private GameObject _mainScreen;
 
         private void Update()
         {
@@ -65,6 +66,7 @@ namespace Fika.Core.UI.Custom
             _isServer = FikaBackendUtils.IsServer;
             _closeTimer = 0f;
             _closeThreshold = 3f;
+            _mainScreen = gameObject.transform.GetChild(0).gameObject;
 
             _fikaChatUI.InputField.onSubmit.AddListener(OnSubmit);
             _fikaChatUI.SendButton.onClick.AddListener(SendMessage);
@@ -84,7 +86,7 @@ namespace Fika.Core.UI.Custom
 
             _isActive = false;
             _shouldClose = false;
-            gameObject.SetActive(false);
+            _mainScreen.SetActive(false);
         }
 
         public void AddMessage(ChatMessage message, bool remote = false)
@@ -131,7 +133,7 @@ namespace Fika.Core.UI.Custom
 
         public void OpenChat(bool autoClose = false)
         {
-            gameObject.SetActive(true);
+            _mainScreen.SetActive(true);
             _closeTimer = 0f;
 
             bool shouldAutoClose = autoClose && !_isActive;
@@ -144,9 +146,13 @@ namespace Fika.Core.UI.Custom
 
         public void CloseChat()
         {
+            if (_isActive)
+            {
+                UIEventSystem.Instance.SetTemporaryStatus(false);
+            }
             _isActive = false;
             _shouldClose = false;
-            gameObject.SetActive(false);
+            _mainScreen.SetActive(false);
 
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuEscape);
         }
@@ -159,7 +165,7 @@ namespace Fika.Core.UI.Custom
 
         public void ToggleChat()
         {
-            bool isActive = gameObject.activeSelf;
+            bool isActive = _mainScreen.activeSelf;
             if (!isActive)
             {
                 OpenAndSelectInput();
@@ -184,7 +190,8 @@ namespace Fika.Core.UI.Custom
         private void SelectInput()
         {
             _fikaChatUI.InputField.ActivateInputField();
-            _fikaChatUI.InputField.OnPointerClick(new PointerEventData(EventSystem.current));
+            UIEventSystem.Instance.SetTemporaryStatus(true);
+            EventSystem.current.SetSelectedGameObject(_mainScreen);
         }
 
         private void OnDestroy()
