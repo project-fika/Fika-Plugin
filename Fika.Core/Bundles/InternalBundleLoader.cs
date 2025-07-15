@@ -69,6 +69,7 @@ namespace Fika.Core.Bundles
                 EFikaAsset.FreecamUI => _masterBundle.LoadAsset<GameObject>("FreecamUI"),
                 EFikaAsset.AdminUI => _masterBundle.LoadAsset<GameObject>("AdminSettingsUI"),
                 EFikaAsset.FikaChatUI => _masterBundle.LoadAsset<GameObject>("FikaChatUI"),
+                EFikaAsset.RaidAdminUI => _masterBundle.LoadAsset<GameObject>("RaidAdminUI"),
                 _ => throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given")
             };
         }
@@ -110,7 +111,8 @@ namespace Fika.Core.Bundles
             PlayerUI,
             FreecamUI,
             AdminUI,
-            FikaChatUI
+            FikaChatUI,
+            RaidAdminUI
         }
     }
 }

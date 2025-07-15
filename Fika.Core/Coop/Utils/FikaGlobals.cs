@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
+using EFT.InputSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -46,6 +47,24 @@ namespace Fika.Core.Coop.Utils
                 return GClass2072.Instance;
             }
         }
+
+        public static InputTree InputTree
+        {
+            get
+            {
+                if (_inputTree == null)
+                {
+                    GameObject inputObj = GameObject.Find("___Input")
+                        ?? throw new NullReferenceException("Could not find InputTree object!");
+
+                    _inputTree = inputObj.GetComponent<InputTree>();
+                }
+
+                return _inputTree;
+            }
+        }
+
+        private static InputTree _inputTree;
 
         public static VoipSettingsClass VOIPHandler
         {

@@ -445,14 +445,7 @@ namespace Fika.Core.Coop.GameMode
                 CameraClass.Instance.SetOcclusionCullingEnabled(Location_0.OcculsionCullingEnabled);
                 CameraClass.Instance.IsActive = false;
 
-                if (PlayerOwner != null)
-                {
-                    Singleton<IFikaNetworkManager>.Instance.CreateFikaChat(PlayerOwner); 
-                }
-                else
-                {
-                    _logger.LogError("PlayerOwner was null, could not instantiate FikaChat");
-                }
+                Singleton<IFikaNetworkManager>.Instance.CreateFikaChat();
             }
             catch (Exception ex)
             {

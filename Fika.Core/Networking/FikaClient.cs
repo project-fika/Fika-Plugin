@@ -942,11 +942,11 @@ namespace Fika.Core.Networking
             MyPlayer = coopPlayer;            
         }
 
-        public void CreateFikaChat(EftGamePlayerOwner gamePlayerOwner)
+        public void CreateFikaChat()
         {
             if (FikaPlugin.EnableChat.Value)
             {
-                _fikaChat = FikaChatUIScript.Create(gamePlayerOwner);
+                _fikaChat = FikaChatUIScript.Create();
             }
         }
 
@@ -1160,6 +1160,11 @@ namespace Fika.Core.Networking
 
         public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
         {
+            if (_netClient.FirstPeer == null)
+            {
+                return;
+            }
+
             _dataWriter.Reset();
 
             _dataWriter.PutEnum(EPacketType.Serializable);

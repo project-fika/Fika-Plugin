@@ -626,6 +626,12 @@ namespace Fika.Core.Coop.GameMode
 
             bool useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
+            if (FikaPlugin.NoAI.Value)
+            {
+                FikaGlobals.LogWarning("No AI enabled - stopping bot spawns");
+                controllerSettings.BotAmount = EBotAmount.NoBots;
+            }
+
             _botsController.Init(this, botCreator, botZones, SpawnSystem, _wavesSpawnScenario.BotLocationModifier,
                 controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
             _bossSpawnScenario.HaveSectants, gameWorld, location.OpenZones, location.Events);
@@ -645,7 +651,7 @@ namespace Fika.Core.Coop.GameMode
                 EBotAmount.High => 25,
                 EBotAmount.Horde => 35,
                 _ => 15,
-            };
+            };            
 
             _botsController.SetSettings(numberOfBots, _backendSession.BackEndConfig.BotPresets, _backendSession.BackEndConfig.BotWeaponScatterings);
             if (!FikaBackendUtils.IsHeadless)

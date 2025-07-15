@@ -138,6 +138,7 @@ namespace Fika.Core.Networking
         private ManualLogSource _logger;
         private int _currentNetId;
         private FikaChatUIScript _fikaChat;
+        private RaidAdminUIScript _raidAdminUIScript;
         private CancellationTokenSource _natIntroduceRoutineCts;
         private float _statisticsCounter;
         private float _sendThreshold;
@@ -308,6 +309,8 @@ namespace Fika.Core.Networking
 
             SetHostRequest body = new(Ips, _port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadlessGame);
             FikaRequestHandler.UpdateSetHost(body);
+
+            _raidAdminUIScript = RaidAdminUIScript.Create(this, _netServer);
         }
 
         async Task IFikaNetworkManager.InitializeVOIP()
@@ -1075,11 +1078,11 @@ namespace Fika.Core.Networking
             _hostPlayer = coopPlayer;
         }
 
-        public void CreateFikaChat(EftGamePlayerOwner gamePlayerOwner)
+        public void CreateFikaChat()
         {
             if (FikaPlugin.EnableChat.Value)
             {
-                _fikaChat = FikaChatUIScript.Create(gamePlayerOwner);
+                _fikaChat = FikaChatUIScript.Create();
             }
         }
 
@@ -1332,6 +1335,10 @@ namespace Fika.Core.Networking
             if (_fikaChat != null)
             {
                 Destroy(_fikaChat);
+            }
+            if (_raidAdminUIScript != null)
+            {
+                Destroy(_raidAdminUIScript);
             }
 
             FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
@@ -1652,6 +1659,14 @@ namespace Fika.Core.Networking
             _logger.LogInfo($"Received packets: {_netServer.Statistics.PacketsReceived}");
             _logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(_netServer.Statistics.BytesReceived)}");
             _logger.LogInfo($"Packet loss: {_netServer.Statistics.PacketLossPercent}%");
+        }
+
+        public void ToggleAdminUI()
+        {
+            if (_raidAdminUIScript != null)
+            {
+                _raidAdminUIScript.Toggle();
+            }
         }
 
         private class InventoryOperationHandler(OperationDataStruct operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)

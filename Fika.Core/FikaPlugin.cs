@@ -114,6 +114,7 @@ namespace Fika.Core
         //Advanced
         public static ConfigEntry<bool> OfficialVersion { get; set; }
         public static ConfigEntry<bool> DevMode { get; set; }
+        public static ConfigEntry<bool> NoAI { get; set; }
 
         // Coop
         public static ConfigEntry<bool> UseHeadlessIfAvailable { get; set; }
@@ -485,6 +486,14 @@ namespace Fika.Core
                     Category = advancedHeader,
                     DispName = "Developer Mode"
                 }), "Developer Mode", ref failed, headers);
+
+            NoAI = SetupSetting(advancedDefaultHeader, "No AI", false,
+                new ConfigDescription("Stops AI from spawning", tags: new ConfigurationManagerAttributes()
+                {
+                    IsAdvanced = true,
+                    Category = advancedHeader,
+                    DispName = "No AI"
+                }), "No AI", ref failed, headers);
 
             // Coop
 

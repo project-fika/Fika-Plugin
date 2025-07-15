@@ -299,10 +299,10 @@ namespace Fika.Core.Console
 
             if (FikaBackendUtils.IsServer)
             {
-                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
                 return;
             }
-            Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         /// <summary>
@@ -447,6 +447,24 @@ namespace Fika.Core.Console
             }
 
             coopGame.ToggleDebug(state);
+        }
+
+        [ConsoleCommand("openAdminUI", "", null, "Opens the Admin UI as the raid host", [])]
+        public static void OpenAdminUI()
+        {
+            if (!CheckForGame())
+            {
+                return;
+            }
+
+            if (!FikaBackendUtils.IsServer)
+            {
+                LogWarning("You are not the host!");
+                return;
+            }
+
+            Singleton<PreloaderUI>.Instance.Console.Close();
+            Singleton<FikaServer>.Instance.ToggleAdminUI();
         }
 
         [ConsoleCommand("clear", "", null, "Clears the console output", [])]

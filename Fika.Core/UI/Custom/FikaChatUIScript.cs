@@ -32,7 +32,6 @@ namespace Fika.Core.UI.Custom
         private FikaChatUI _fikaChatUI;
         private List<ChatMessage> _chatMessages;
         private StringBuilder _stringBuilder;
-        private EftGamePlayerOwner _playerOwner;
         private string _nickname;
         private bool _isServer;
         private bool _shouldClose;
@@ -76,15 +75,8 @@ namespace Fika.Core.UI.Custom
         }
 
         private void Start()
-        {            
-            if (_playerOwner != null)
-            {
-                _playerOwner.InputTree.Add(this);
-            }
-            else
-            {
-                throw new NullReferenceException("PlayerOwner was null during start");
-            }
+        {
+            FikaGlobals.InputTree.Add(this);
 
             _isActive = false;
             _shouldClose = false;
@@ -200,11 +192,12 @@ namespace Fika.Core.UI.Custom
 
         private void OnDestroy()
         {
+            FikaGlobals.InputTree.Remove(this);
             _stringBuilder.Clear();
             Destroy(_fikaChatUI.gameObject);
         }
 
-        internal static FikaChatUIScript Create(EftGamePlayerOwner gamePlayerOwner)
+        internal static FikaChatUIScript Create()
         {
             if (FikaBackendUtils.IsHeadless)
             {
@@ -223,8 +216,6 @@ namespace Fika.Core.UI.Custom
             }
             rectTransform.gameObject.AddComponent<UIDragComponent>().Init(rectTransform, true);
             obj.SetActive(true);
-
-            uiScript._playerOwner = gamePlayerOwner;
 
             return uiScript;
         }
