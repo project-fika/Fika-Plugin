@@ -17,7 +17,7 @@ using UnityEngine.EventSystems;
 
 namespace Fika.Core.UI.Custom
 {
-    public class FikaChatUIScript : UIInputNode
+    public class FikaChatUIScript : InputNode
     {
         public static bool IsActive { get; internal set; }
 
