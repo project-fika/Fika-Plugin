@@ -7,6 +7,7 @@ using Fika.Core.Coop.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
+using Fika.Core.UI.Custom;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,6 +33,7 @@ namespace Fika.Core.Networking
         {
             // Required for VOIP
             TrafficCounters.Reset();
+            FikaChatUIScript.IsActive = false;
 
             if (FikaGameObject == null)
             {

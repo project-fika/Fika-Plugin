@@ -12,6 +12,7 @@ using Fika.Core.Coop.GameMode;
 using Fika.Core.Coop.Players;
 using Fika.Core.Coop.Utils;
 using Fika.Core.Networking;
+using Fika.Core.UI.Custom;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
@@ -44,7 +45,7 @@ namespace Fika.Core.Coop.PacketHandlers
             {
                 return FikaPlugin.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
                     && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
-                    && _lastPingTime < DateTime.Now.AddSeconds(-3) && Singleton<IFikaGame>.Instantiated &&
+                    && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instantiated &&
                     Singleton<IFikaGame>.Instance.GameController.GameInstance.Status is GameStatus.Started && !_player.IsInventoryOpened;
             }
         }

@@ -19,6 +19,8 @@ namespace Fika.Core.UI.Custom
 {
     public class FikaChatUIScript : UIInputNode
     {
+        public static bool IsActive { get; internal set; }
+
         public List<ChatMessage> ChatMessages
         {
             get
@@ -140,6 +142,7 @@ namespace Fika.Core.UI.Custom
             if (!_isActive && !autoClose)
             {
                 _isActive = true;
+                IsActive = true;
             }
             _shouldClose = shouldAutoClose;
         }
@@ -151,6 +154,7 @@ namespace Fika.Core.UI.Custom
                 UIEventSystem.Instance.SetTemporaryStatus(false);
             }
             _isActive = false;
+            IsActive = false;
             _shouldClose = false;
             _mainScreen.SetActive(false);
 
