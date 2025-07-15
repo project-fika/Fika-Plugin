@@ -46,7 +46,7 @@ namespace Fika.Core.UI.Custom
             if (_shouldClose)
             {
                 _closeTimer += Time.unscaledDeltaTime;
-                if (_closeTimer > _closeThreshold)
+                if (_closeTimer >= _closeThreshold)
                 {
                     _closeTimer = 0f;
                     CloseChat();
