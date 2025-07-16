@@ -1,6 +1,6 @@
 ﻿using EFT;
-using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Players;
+using Fika.Core.Main.Components;
+using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
 using LiteNetLib;
 using LiteNetLib.Utils;

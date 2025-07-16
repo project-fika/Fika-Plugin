@@ -4,7 +4,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using Diz.Utils;
 using EFT.UI;
-using Fika.Core.Coop.Patches;
+using Fika.Core.Main.Patches;
 using Fika.Core.Networking.Http;
 using Fika.Core.Patching;
 using LiteNetLib.Utils;

@@ -2,8 +2,8 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Patches;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Patches;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;

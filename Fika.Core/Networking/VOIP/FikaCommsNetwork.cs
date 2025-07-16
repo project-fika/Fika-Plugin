@@ -3,7 +3,7 @@ using Dissonance;
 using Dissonance.Datastructures;
 using Dissonance.Extensions;
 using Dissonance.Networking;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using System;
 using System.Collections.Generic;
 

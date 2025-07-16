@@ -1,7 +1,7 @@
 ﻿using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using Fika.Core.UI.Custom;
 using System.Linq;

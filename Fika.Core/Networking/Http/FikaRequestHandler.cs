@@ -1,7 +1,6 @@
 using EFT;
-using Fika.Core.Coop.Custom;
-using Fika.Core.Coop.Utils;
-using Fika.Core.Models;
+using Fika.Core.Main.Custom;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;

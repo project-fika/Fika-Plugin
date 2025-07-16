@@ -1,6 +1,6 @@
 ﻿using BepInEx.Logging;
-using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.GameMode;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using LiteNetLib;
 using LiteNetLib.Utils;

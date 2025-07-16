@@ -4,7 +4,7 @@ using Diz.Utils;
 using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Websocket.Headless;
 using Fika.Core.UI.Custom;
 using Newtonsoft.Json.Linq;

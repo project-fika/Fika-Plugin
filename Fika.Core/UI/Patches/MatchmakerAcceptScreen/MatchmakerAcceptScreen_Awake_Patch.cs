@@ -1,5 +1,5 @@
 ﻿using EFT.UI.Matchmaker;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using Newtonsoft.Json;
 using System;

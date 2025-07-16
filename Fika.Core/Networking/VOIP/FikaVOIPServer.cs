@@ -1,7 +1,7 @@
 ﻿using Comfort.Common;
 using Dissonance.Networking;
 using Dissonance.Networking.Server;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using LiteNetLib;
 using System;
 using System.Collections.Generic;

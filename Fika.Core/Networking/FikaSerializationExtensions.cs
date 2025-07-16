@@ -4,7 +4,7 @@ using EFT.Airdrop;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;

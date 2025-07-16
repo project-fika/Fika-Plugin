@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.UI;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Patching;
 using Fika.Core.Utils;

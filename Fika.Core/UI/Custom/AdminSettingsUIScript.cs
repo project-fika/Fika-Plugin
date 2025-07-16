@@ -1,7 +1,7 @@
 ﻿using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using System;
 using UnityEngine;

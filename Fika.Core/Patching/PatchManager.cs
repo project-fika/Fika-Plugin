@@ -1,6 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;

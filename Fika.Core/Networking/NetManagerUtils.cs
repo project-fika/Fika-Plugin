@@ -1,9 +1,9 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
 using Dissonance.Networking;
-using Fika.Core.Coop.Components;
-using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Components;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;

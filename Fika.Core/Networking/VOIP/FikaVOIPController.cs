@@ -1,7 +1,7 @@
 ﻿using Dissonance;
 using EFT;
-using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading;

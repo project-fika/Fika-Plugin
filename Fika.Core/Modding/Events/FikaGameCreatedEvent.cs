@@ -1,4 +1,4 @@
-﻿using Fika.Core.Coop.GameMode;
+﻿using Fika.Core.Main.GameMode;
 
 namespace Fika.Core.Modding.Events
 {

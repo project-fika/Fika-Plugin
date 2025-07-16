@@ -2,7 +2,7 @@
 using Comfort.Common;
 using Diz.Utils;
 using EFT.UI;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Websocket.Notifications;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;

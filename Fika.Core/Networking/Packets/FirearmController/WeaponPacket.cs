@@ -1,4 +1,4 @@
-﻿using Fika.Core.Coop.Players;
+﻿using Fika.Core.Main.Players;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.SubPacket;
 

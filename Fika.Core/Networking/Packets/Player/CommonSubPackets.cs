@@ -4,13 +4,13 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
 using EFT.WeaponMounting;
-using Fika.Core.Coop.ObservedClasses;
-using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.ObservedClasses;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using LiteNetLib.Utils;
 using System;
 using UnityEngine;
-using static Fika.Core.Coop.Players.CoopPlayer;
+using static Fika.Core.Main.Players.CoopPlayer;
 using static Fika.Core.Networking.SubPacket;
 
 namespace Fika.Core.Networking

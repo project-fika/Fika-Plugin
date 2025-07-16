@@ -1,8 +1,8 @@
 ﻿using Comfort.Common;
 using EFT.Interactive;
-using Fika.Core.Coop.GameMode;
-using Fika.Core.Coop.Players;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.GameMode;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections.Generic;

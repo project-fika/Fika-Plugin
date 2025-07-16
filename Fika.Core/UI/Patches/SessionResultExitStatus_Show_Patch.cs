@@ -1,7 +1,7 @@
 ﻿using EFT;
 using EFT.UI;
 using EFT.UI.SessionEnd;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using System;
 using System.Reflection;

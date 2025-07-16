@@ -1,4 +1,4 @@
-using Fika.Core.Coop.Components;
+using Fika.Core.Main.Components;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Http

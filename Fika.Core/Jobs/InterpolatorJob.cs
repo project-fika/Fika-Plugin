@@ -1,5 +1,5 @@
 ﻿using Comfort.Common;
-using Fika.Core.Coop.Players;
+using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Unity.Collections;
 using Unity.Jobs;
