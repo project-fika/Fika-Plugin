@@ -27,8 +27,10 @@ namespace Fika.Core.Networking.Websocket.Notifications
 
         [JsonProperty("nickname")]
         public string Nickname;
+
         [JsonProperty("targetId")]
         public string TargetId;
+
         [JsonProperty("itemName")]
         public string ItemName;
     }

@@ -39,8 +39,10 @@ namespace Fika.Core.Networking.Websocket.Notifications
 
         [JsonProperty("nickname")]
         public string Nickname;
+
         [JsonProperty("location")]
         public string Location;
+
         [JsonProperty("raidTime")]
         public EDateTime RaidTime;
     }

@@ -24,6 +24,7 @@ namespace Fika.Core.Networking.Websocket.Notifications
 
         [JsonProperty("notificationIcon")]
         public ENotificationIconType NotificationIcon;
+
         [JsonProperty("notification")]
         public string Notification;
     }
