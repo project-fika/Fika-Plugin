@@ -9,6 +9,7 @@ using SPT.Common.Http;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket
@@ -134,6 +135,18 @@ namespace Fika.Core.Networking.Websocket
                     notification = e.Data.ParseJsonTo<OpenAdminMenuNotification>([]);
                     HandleAdminMenu(notification);
                     break;
+                case EFikaNotifications.ShutdownClient:
+                    notification = e.Data.ParseJsonTo<ShutdownClientNotification>([]);
+                    HandleShutdown(notification);
+                    break;
+            }
+        }
+
+        private void HandleShutdown(NotificationAbstractClass notification)
+        {
+            if (FikaBackendUtils.IsHeadless)
+            {
+                AsyncWorker.RunInMainTread(Application.Quit); 
             }
         }
 
