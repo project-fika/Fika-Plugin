@@ -2,7 +2,7 @@
 {
     public class RequesterJoinRaid
     {
-        public EFikaHeadlessWSMessageTypes Type;
+        public EFikaHeadlessWSMessageType Type;
         public string MatchId;
     }
 }

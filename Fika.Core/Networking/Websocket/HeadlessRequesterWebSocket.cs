@@ -92,11 +92,11 @@ namespace Fika.Core.Networking.Websocket
                 return;
             }
 
-            EFikaHeadlessWSMessageTypes type = (EFikaHeadlessWSMessageTypes)Enum.Parse(typeof(EFikaHeadlessWSMessageTypes), jsonObject.Value<string>("Type"));
+            EFikaHeadlessWSMessageType type = (EFikaHeadlessWSMessageType)Enum.Parse(typeof(EFikaHeadlessWSMessageType), jsonObject.Value<string>("Type"));
 
             switch (type)
             {
-                case EFikaHeadlessWSMessageTypes.RequesterJoinRaid:
+                case EFikaHeadlessWSMessageType.RequesterJoinRaid:
 
                     RequesterJoinRaid data = e.Data.ParseJsonTo<RequesterJoinRaid>();
                     MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;

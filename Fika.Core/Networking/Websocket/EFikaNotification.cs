@@ -1,7 +1,7 @@
 ﻿
 namespace Fika.Core.Networking.Websocket
 {
-    public enum EFikaNotifications
+    public enum EFikaNotification
     {
         KeepAlive = 0,
         StartedRaid = 1,

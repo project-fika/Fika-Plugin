@@ -104,7 +104,7 @@ namespace Fika.Core.Networking.Websocket
                 return;
             }
 
-            EFikaNotifications type = (EFikaNotifications)Enum.Parse(typeof(EFikaNotifications), jsonObject.Value<string>("type"));
+            EFikaNotification type = (EFikaNotification)Enum.Parse(typeof(EFikaNotification), jsonObject.Value<string>("type"));
 
 #if DEBUG
             _logger.LogDebug($"Received type: {type}");
@@ -112,7 +112,7 @@ namespace Fika.Core.Networking.Websocket
             NotificationAbstractClass notification = null;
             switch (type)
             {
-                case EFikaNotifications.StartedRaid:
+                case EFikaNotification.StartedRaid:
                     notification = e.Data.ParseJsonTo<StartRaidNotification>([]);
 
                     if (FikaGlobals.IsInRaid)
@@ -121,21 +121,21 @@ namespace Fika.Core.Networking.Websocket
                     }
                     HandleNotification(notification);
                     break;
-                case EFikaNotifications.SentItem:
+                case EFikaNotification.SentItem:
                     notification = e.Data.ParseJsonTo<ReceivedSentItemNotification>([]);
                     HandleNotification(notification);
                     break;
-                case EFikaNotifications.PushNotification:
+                case EFikaNotification.PushNotification:
                     notification = e.Data.ParseJsonTo<PushNotification>([]);
                     HandleNotification(notification);
                     break;
-                case EFikaNotifications.KeepAlive:
+                case EFikaNotification.KeepAlive:
                     break;
-                case EFikaNotifications.OpenAdminSettings:
+                case EFikaNotification.OpenAdminSettings:
                     notification = e.Data.ParseJsonTo<OpenAdminMenuNotification>([]);
                     HandleAdminMenu(notification);
                     break;
-                case EFikaNotifications.ShutdownClient:
+                case EFikaNotification.ShutdownClient:
                     notification = e.Data.ParseJsonTo<ShutdownClientNotification>([]);
                     HandleShutdown(notification);
                     break;

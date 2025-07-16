@@ -4,7 +4,7 @@ namespace Fika.Core.Networking.Websocket.Headless
 {
     public class StartRaid
     {
-        public EFikaHeadlessWSMessageTypes Type;
+        public EFikaHeadlessWSMessageType Type;
 
         public StartHeadlessRequest StartHeadlessRequest;
     }
