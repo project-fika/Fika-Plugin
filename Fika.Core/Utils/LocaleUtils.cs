@@ -1,4 +1,5 @@
 ﻿using EFT;
+using System.Collections.Generic;
 
 namespace Fika.Core.Utils
 {
@@ -7,88 +8,33 @@ namespace Fika.Core.Utils
     /// </summary>
     public static class LocaleUtils
     {
+        private static readonly Dictionary<WildSpawnType, string> _bossNames = new()
+        {
+            { WildSpawnType.bossBoar, "Kaban" },
+            { WildSpawnType.bossBully, "Reshala" },
+            { WildSpawnType.bossGluhar, "Glukhar" },
+            { WildSpawnType.bossKilla, "Killa" },
+            { WildSpawnType.bossKnight, "Knight" },
+            { WildSpawnType.bossKojaniy, "Shturman" },
+            { WildSpawnType.bossSanitar, "Sanitar" },
+            { WildSpawnType.bossTagilla, "Tagilla" },
+            { WildSpawnType.bossZryachiy, "Zryachiy" },
+            { WildSpawnType.followerBigPipe, "Big Pipe" },
+            { WildSpawnType.followerBirdEye, "Bird Eye" },
+            { WildSpawnType.sectantPriest, "Cultist Priest" },
+            { WildSpawnType.bossKolontay, "Kollontay" },
+            { WildSpawnType.bossPartisan, "Partisan" },
+        };
+
         /// <summary>
         /// Used to determine whether this player was a boss
         /// </summary>
-        /// <param name="wildSpawnType"></param>
-        /// <returns>true if it's a boss, false if not</returns>
+        /// <param name="wildSpawnType">The <see cref="WildSpawnType"/> to check</param>
+        /// <param name="name">The name if it was a boss</param>
+        /// <returns><see langword="true"/> if it's a boss, <see langword="false"/> if not</returns>
         public static bool IsBoss(WildSpawnType wildSpawnType, out string name)
         {
-            name = string.Empty;
-            switch (wildSpawnType)
-            {
-                case WildSpawnType.bossBoar:
-                    {
-                        name = "Kaban";
-                        break;
-                    }
-                case WildSpawnType.bossBully:
-                    {
-                        name = "Reshala";
-                        break;
-                    }
-                case WildSpawnType.bossGluhar:
-                    {
-                        name = "Glukhar";
-                        break;
-                    }
-                case WildSpawnType.bossKilla:
-                    {
-                        name = "Killa";
-                        break;
-                    }
-                case WildSpawnType.bossKnight:
-                    {
-                        name = "Knight";
-                        break;
-                    }
-                case WildSpawnType.bossKojaniy:
-                    {
-                        name = "Shturman";
-                        break;
-                    }
-                case WildSpawnType.bossSanitar:
-                    {
-                        name = "Sanitar";
-                        break;
-                    }
-                case WildSpawnType.bossTagilla:
-                    {
-                        name = "Tagilla";
-                        break;
-                    }
-                case WildSpawnType.bossZryachiy:
-                    {
-                        name = "Zryachiy";
-                        break;
-                    }
-                case WildSpawnType.followerBigPipe:
-                    {
-                        name = "Big Pipe";
-                        break;
-                    }
-                case WildSpawnType.followerBirdEye:
-                    {
-                        name = "Bird Eye";
-                        break;
-                    }
-                case WildSpawnType.sectantPriest:
-                    {
-                        name = "Cultist Priest";
-                        break;
-                    }
-                case WildSpawnType.bossKolontay:
-                    {
-                        name = "Kollontay";
-                        break;
-                    }
-                case WildSpawnType.bossPartisan:
-                    {
-                        name = "Partisan";
-                        break;
-                    }
-            }
-            return !string.IsNullOrEmpty(name);
+            return _bossNames.TryGetValue(wildSpawnType, out name);
         }
 
         public const string RECEIVED_SHARED_QUEST_PROGRESS = "F_Client_ReceivedSharedQuestProgress";
